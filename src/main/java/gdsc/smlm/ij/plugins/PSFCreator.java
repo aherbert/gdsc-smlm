@@ -160,7 +160,9 @@ public class PSFCreator implements PlugInFilter
 	private final static String TITLE_SPOT_PSF = "Spot PSF";
 
 	private final static String[] MODE = { "Stack Alignment", "Gaussian Fitting" };
+	private final static int MODE_FITTING = 1;
 	private final static String[] ALIGNMENT_MODE = { "2D Projections", "3D" };
+	private final static int ALIGNMENT_MODE_2D = 0;
 	private static String[] PSF_TYPE = { "Spot", "Astigmatism", "Double Helix" };
 	@SuppressWarnings("unused")
 	private static final int PSF_TYPE_SPOT = 0;
@@ -485,7 +487,7 @@ public class PSFCreator implements PlugInFilter
 	 */
 	public void run(ImageProcessor ip)
 	{
-		if (settings.getMode() == 1)
+		if (settings.getMode() == MODE_FITTING)
 		{
 			runUsingFitting();
 		}
@@ -1736,6 +1738,7 @@ public class PSFCreator implements PlugInFilter
 	private BasePoint[] getSpots(float offset)
 	{
 		float z = imp.getStackSize() / 2;
+		//float z = (imp.getStackSize() - 1) / 2.0f; // Interpolate between slices
 		Roi roi = imp.getRoi();
 		if (roi != null && roi.getType() == Roi.POINT)
 		{
@@ -1771,7 +1774,7 @@ public class PSFCreator implements PlugInFilter
 	 */
 	private BasePoint[] checkSpotOverlap(BasePoint[] roiPoints)
 	{
-		return getNonOverlappingSpots(roiPoints, findSpotOverlap(roiPoints, null));
+		return getNonBadSpots(roiPoints, findSpotOverlap(roiPoints, null));
 	}
 
 	/**
@@ -1829,7 +1832,7 @@ public class PSFCreator implements PlugInFilter
 		return bad;
 	}
 
-	private BasePoint[] getNonOverlappingSpots(BasePoint[] roiPoints, boolean[] bad)
+	private BasePoint[] getNonBadSpots(BasePoint[] roiPoints, boolean[] bad)
 	{
 		int ok = 0;
 		for (int i = 0, n = bad.length; i < n; i++)
@@ -2741,7 +2744,19 @@ public class PSFCreator implements PlugInFilter
 			ExtractedPSF combined = combine(psfs);
 			combined.createProjections();
 
-			// Align each to the combined projection
+			// Get the current combined z-centre. 
+			// This is used to get the centre of mass for repositioning. 
+			zSelector.setPSF(combined);
+			if (settings.getInteractiveMode())
+			{
+				zSelector.analyse();
+				//zSelector.guessZCentre();
+				double dz = zSelector.run("Update combined PSF z-centre", true, false, false, null);
+				if (dz < 0)
+					return;
+			}
+
+			// Align each to the combined PSF
 			float[][] translation = align(combined, psfs);
 
 			// Find the new centre using the old centre plus the alignment shift
@@ -2887,7 +2902,7 @@ public class PSFCreator implements PlugInFilter
 					bad[i] = true;
 			ok = bad.length - count(bad);
 
-			BasePoint[] newCentres = getNonOverlappingSpots(centres, bad);
+			BasePoint[] newCentres = getNonBadSpots(centres, bad);
 
 			// Find the change in centres
 			double[] rmsd = new double[2];
@@ -2902,18 +2917,6 @@ public class PSFCreator implements PlugInFilter
 				rmsd[j] = Math.sqrt(rmsd[j] / ok);
 
 			Utils.showStatus(String.format("[%d] Checking combined PSF", iter + 1));
-
-			// Get the current combined z-centre. 
-			// This is used to get the centre of mass for repositioning. 
-			zSelector.setPSF(combined);
-			zSelector.analyse();
-			zSelector.guessZCentre();
-			if (settings.getInteractiveMode())
-			{
-				double dz = zSelector.run(true, false, false, null);
-				if (dz < 0)
-					return;
-			}
 
 			// Compute CoM shift using the current z-centre and z-window
 			double[] shift = combined.getCentreOfMassXYShift(zSelector.getCentreSlice());
@@ -3001,9 +3004,8 @@ public class PSFCreator implements PlugInFilter
 		Utils.showStatus("Analysing PSF");
 		zSelector.setPSF(finalPSF);
 		zSelector.analyse();
-		//zSelector.zCentre = finalPSF.psf.length / 2.0;
-		zSelector.guessZCentre();
-		double dz = zSelector.run(true, true, true, null);
+		//zSelector.guessZCentre(); // No need to guess the centre
+		double dz = zSelector.run("Finalise PSF", true, true, true, null);
 		if (dz < 0)
 			return;
 
@@ -3012,7 +3014,7 @@ public class PSFCreator implements PlugInFilter
 		if (settings.getCropToZCentre())
 		{
 			finalPSF = finalPSF.cropToZCentre(zCentre);
-			zCentre = finalPSF.relativeCentre;
+			zCentre = finalPSF.stackZCentre;
 		}
 
 		// When click ok the background is subtracted from the PSF
@@ -3138,6 +3140,16 @@ public class PSFCreator implements PlugInFilter
 		return Maths.clip(0, w / 2 - 1, (int) Math.round(w * settings.getComBorder()));
 	}
 
+	/**
+	 * Extract the stack for each centre and try and guess the z-centre based on the type of PSF. Relocate the XY centre
+	 * using the centre-of-mass around the pixels close to the z-centre slice.
+	 *
+	 * @param image
+	 *            the image
+	 * @param centres
+	 *            the centres
+	 * @return the new centres
+	 */
 	private BasePoint[] relocateCentres(float[][] image, BasePoint[] centres)
 	{
 		int w = imp.getWidth();
@@ -3149,7 +3161,7 @@ public class PSFCreator implements PlugInFilter
 		// This can be reused as a buffer
 		float[][] psf = new float[image.length][];
 
-		double mean = 0;
+		//double mean = 0;
 
 		for (int i = 0; i < centres.length; i++)
 		{
@@ -3178,11 +3190,8 @@ public class PSFCreator implements PlugInFilter
 
 			if (settings.getInteractiveMode())
 			{
-				imp.setSlice(zSelector.getCentreSlice());
-				imp.updateAndDraw();
-
 				// Ask user for z-centre confirmation
-				double dz = zSelector.run(true, false, false, Integer.toString(i + 1));
+				double dz = zSelector.run("Confirm PSF z-centre", true, false, false, Integer.toString(i + 1));
 				if (dz == -1)
 				{
 					resetImp();
@@ -3215,7 +3224,7 @@ public class PSFCreator implements PlugInFilter
 					rounder.toString(centres[i].getY()), rounder.toString(centres[i].getZ()), rounder.toString(dx),
 					rounder.toString(dy), rounder.toString(dz));
 			centres[i] = centres[i].shift(dx, dy, dz);
-			mean += centres[i].getZ();
+			//mean += centres[i].getZ();
 		}
 
 		if (settings.getInteractiveMode())
@@ -3240,10 +3249,10 @@ public class PSFCreator implements PlugInFilter
 				centres = Arrays.copyOf(centres, size);
 		}
 
-		// z-centres should be relative to the combined stack, not absolute
-		mean /= centres.length;
-		for (int i = 0; i < centres.length; i++)
-			centres[i] = new BasePoint(centres[i].getX(), centres[i].getY(), (float) (centres[i].getZ() - mean));
+		//// z-centres should be relative to the combined stack, not absolute
+		//mean /= centres.length;
+		//for (int i = 0; i < centres.length; i++)
+		//	centres[i] = new BasePoint(centres[i].getX(), centres[i].getY(), (float) (centres[i].getZ() - mean));
 
 		return centres;
 	}
@@ -3302,7 +3311,7 @@ public class PSFCreator implements PlugInFilter
 		public void setPSF(ExtractedPSF psf)
 		{
 			this.psf = psf;
-			zCentre = psf.centre.getZ();
+			zCentre = psf.stackZCentre;
 
 			// Reset
 			bIndex = -1;
@@ -3645,7 +3654,7 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 
-		public double run(boolean plotBackground, boolean plotEdgeWindow, boolean cropOption, String id)
+		public double run(String title, boolean plotBackground, boolean plotEdgeWindow, boolean cropOption, String id)
 		{
 			hasId = !TextUtils.isNullOrEmpty(id);
 			this.plotBackground = plotBackground;
@@ -3660,7 +3669,12 @@ public class PSFCreator implements PlugInFilter
 			// Show a dialog to collect processing options and 
 			// find background interactively
 			NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-			gd.addMessage("Configure the PSF.\nCurrent Z-centre = " + Utils.rounded(1 + zCentre));
+			gd.addMessage(title);
+			if (hasId)
+			{
+				gd.addSlider("Z_radius", 0, imp.getStackSize() / 2, settings.getAlignmentZRadius());
+			}
+			gd.addMessage("Current Z-centre = " + Utils.rounded(1 + zCentre));
 			String label = "z-centre";
 			if (hasId)
 				label += "_" + id;
@@ -3713,6 +3727,11 @@ public class PSFCreator implements PlugInFilter
 				for (int i = 0; i < 4; i++)
 					psfOut[i].killRoi();
 				psfOut[0].setOverlay(null);
+				if (zRadius != 0)
+				{
+					psfOut[1].setOverlay(null);
+					psfOut[2].setOverlay(null);
+				}
 			}
 
 			removeCentreOnPlots();
@@ -3736,11 +3755,14 @@ public class PSFCreator implements PlugInFilter
 				drawIntensityPlot(true, wo);
 			wo.tile();
 			drawPSFCentre();
+			drawCentreOnPlots();
 			drawCoMBorder();
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
+			if (hasId)
+				settings.setAlignmentZRadius(gd.getNextNumber());
 			zCentre = gd.getNextNumber() - 1;
 			settings.setComWindow((int) gd.getNextNumber());
 			settings.setComBorder(gd.getNextNumber());
@@ -3956,6 +3978,27 @@ public class PSFCreator implements PlugInFilter
 				double max = plot.scaleYtoPxl(rangeB[1]);
 
 				pw.getImagePlus().setRoi(new Line(x, min, x, max));
+
+				if (zRadius != 0)
+				{
+					double lx = plot.scaleXtoPxl(slice - zRadius);
+					double ux = plot.scaleXtoPxl(slice + zRadius);
+					Overlay o = new Overlay();
+					Line l = new Line(lx, min, lx, max);
+					l.setStrokeColor(Color.red);
+					o.add(l);
+					l = new Line(ux, min, ux, max);
+					l.setStrokeColor(Color.red);
+					o.add(l);
+					pw.getImagePlus().setOverlay(o);
+				}
+				else
+				{
+					if (pw.getImagePlus().getOverlay()!=null)
+					{
+						pw.getImagePlus().setOverlay(null);
+					}
+				}
 			}
 		}
 
@@ -4002,11 +4045,22 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 
-		private int psfZCentre = -1;
+		private int psfZCentre = -1, zRadius = 0;
+
+		private int getZRadius()
+		{
+			if (hasId)
+			{
+				return (int) settings.getAlignmentZRadius();
+				//return (int) Math.max(settings.getRadius(), settings.getAlignmentZRadius());
+			}
+			return 0;
+		}
 
 		private void drawPSFCentre()
 		{
 			psfZCentre = getCentreSlice();
+			zRadius = getZRadius();
 
 			// Select the z-centre
 			psfOut[0].setSlice(psfZCentre);
@@ -4025,11 +4079,30 @@ public class PSFCreator implements PlugInFilter
 			int border = getCoMXYBorder(psf.maxx, psf.maxy);
 			psfOut[0].setRoi(border, border, psf.maxx - 2 * border, psf.maxy - 2 * border);
 
-			// Mark projections
-			// X-projection
+			// Mark XY projections
+			// X-projection (dimension X is Z)
 			psfOut[1].setRoi(new Line(psfZCentre, 0, psfZCentre, psfOut[1].getHeight()));
-			// Y-projection
+			// Y-projection (dimension Y is Z)
 			psfOut[2].setRoi(new Line(0, psfZCentre, psfOut[2].getWidth(), psfZCentre));
+
+			if (zRadius != 0)
+			{
+				int lz = psfZCentre - zRadius;
+				int uz = psfZCentre + zRadius;
+
+				// X-projection (dimension X is Z)
+				psfOut[1].setOverlay(new Roi(lz, 0, uz - lz, psfOut[1].getHeight()), Color.red, 1, null);
+				// Y-projection (dimension Y is Z)
+				psfOut[2].setOverlay(new Roi(0, lz, psfOut[1].getWidth(), uz - lz), Color.red, 1, null);
+			}
+			else
+			{
+				if (psfOut[1].getOverlay()!=null)
+				{
+					psfOut[1].setOverlay(null);
+					psfOut[2].setOverlay(null);
+				}
+			}
 		}
 
 		private void updatePSFCentre()
@@ -4044,7 +4117,7 @@ public class PSFCreator implements PlugInFilter
 						try
 						{
 							// Continue while the parameter is changing
-							while (psfZCentre != getCentreSlice())
+							while (psfZCentre != getCentreSlice() || zRadius != getZRadius())
 							{
 								drawPSFCentre();
 								drawCentreOnPlots();
@@ -4452,7 +4525,7 @@ public class PSFCreator implements PlugInFilter
 
 		// These are ignored for reset
 		gd.addChoice("Alignment_mode", ALIGNMENT_MODE, settings.getAlignmentMode());
-		gd.addSlider("Alignment_z_radius", 0, imp.getStackSize() / 2, settings.getAlignmentZRadius());
+		gd.addSlider("Z_radius", 0, imp.getStackSize() / 2, settings.getAlignmentZRadius());
 		gd.addChoice("PSF_type", PSF_TYPE, settings.getPsfType());
 		gd.addNumericField("nm_per_pixel", cw.getNmPerPixel(), 2, 6, "nm");
 		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0, 6, "nm");
@@ -4465,7 +4538,7 @@ public class PSFCreator implements PlugInFilter
 		tf.add(gd.addAndGetSlider("Smoothing", 0.1, 0.5, settings.getSmoothing()));
 		tf.add(gd.addAndGetSlider("CoM_z_window", 0, 8, settings.getComWindow()));
 		tf.add(gd.addAndGetSlider("CoM_border", 0, 0.5, settings.getComBorder()));
-		tf.add(gd.addAndGetSlider("PSF_magnification", 1, 8, settings.getAlignmentMagnification()));
+		tf.add(gd.addAndGetSlider("Alignment_magnification", 1, 8, settings.getAlignmentMagnification()));
 		cb.add(gd.addAndGetCheckbox("Smooth_stack_signal", settings.getSmoothStackSignal()));
 		tf.add(gd.addAndGetSlider("Max_iterations", 1, 20, settings.getMaxIterations()));
 		if (settings.getInteractiveMode())
@@ -4956,6 +5029,11 @@ public class PSFCreator implements PlugInFilter
 		 * The relative centre. This is just used as a relative position when combining PSFs.
 		 */
 		int relativeCentre;
+		/**
+		 * The centre of the stack. Used to crop the image around the centre for alignment.
+		 * (Note that the centre in XY is the middle pixel).
+		 */
+		int stackZCentre;
 		final float[][] psf;
 		final int maxx, maxy;
 		float background;
@@ -4976,7 +5054,7 @@ public class PSFCreator implements PlugInFilter
 		 * Crop to Z centre.
 		 *
 		 * @param zCentre
-		 *            the z centre (1-based index
+		 *            the z centre (1-based index)
 		 */
 		public ExtractedPSF cropToZCentre(int zCentre)
 		{
@@ -4990,7 +5068,7 @@ public class PSFCreator implements PlugInFilter
 			float[][] psf = Arrays.copyOfRange(this.psf, from, to);
 			int zShift = -from;
 			ExtractedPSF p = new ExtractedPSF(psf, maxx, centre.shift(0, 0, -zShift), magnification);
-			p.relativeCentre = zCentre + zShift + 1; // Back to 1-based index
+			p.stackZCentre = zCentre + zShift + 1; // Back to 1-based index
 			return p;
 		}
 
@@ -5341,7 +5419,7 @@ public class PSFCreator implements PlugInFilter
 			IJTrackProgress progress = new IJTrackProgress();
 			FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
 			FloatStackTrivalueProvider fval = new FloatStackTrivalueProvider(psf, maxx, maxy);
-			
+
 			// We can enlarge by interpolation between the start and end
 			// by evenly sampling each spline node
 
@@ -5352,8 +5430,8 @@ public class PSFCreator implements PlugInFilter
 				double[] xval = SimpleArrayUtils.newArray(maxx, 0, 1.0);
 				double[] yval = SimpleArrayUtils.newArray(maxy, 0, 1.0);
 				double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
-				
-    			//@formatter:off
+
+				//@formatter:off
     			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
     					.setXValue(xval) 
     					.setYValue(yval) 
@@ -5392,7 +5470,7 @@ public class PSFCreator implements PlugInFilter
 	}
 
 	/**
-	 * Align the PSFs with the combined PSF using the Image2DAligner class.
+	 * Align the PSFs with the combined PSF.
 	 *
 	 * @param combined
 	 *            the combined
@@ -5401,6 +5479,81 @@ public class PSFCreator implements PlugInFilter
 	 * @return The XYZ translations for each PSF
 	 */
 	private float[][] align(ExtractedPSF combined, final ExtractedPSF[] psfs)
+	{
+		if (settings.getAlignmentMode() == ALIGNMENT_MODE_2D)
+			return align2D(combined, psfs);
+
+		return align3D(combined, psfs);
+	}
+
+	/**
+	 * Align the PSFs with the combined PSF using the Image2DAligner class to align the 2D max intensity projections.
+	 * The final alignment shift is the average of the shift from two projection alignments for each dimension.
+	 *
+	 * @param combined
+	 *            the combined
+	 * @param psfs
+	 *            the psfs
+	 * @return The XYZ translations for each PSF
+	 */
+	private float[][] align2D(ExtractedPSF combined, final ExtractedPSF[] psfs)
+	{
+		// TODO: Use the alignment settings.
+		// Extract each PSF around the current z-centre.
+		// The z-radius should never be smaller than the XY radius
+		int zRadius = (int) Math.max(settings.getAlignmentZRadius(), settings.getRadius());
+
+		int n = psfs.length * 3;
+		List<Future<?>> futures = new TurboList<Future<?>>(n);
+
+		final Image2DAligner[] align = new Image2DAligner[3];
+		for (int i = 0; i < 3; i++)
+		{
+			align[i] = new Image2DAligner();
+			FloatProcessor fp1 = combined.getProjection(i);
+			align[i].setReference(fp1); // No need to set the bounds as the PSF will be smaller
+		}
+
+		final float[][] results = new float[psfs.length][3];
+
+		for (int j = 0; j < psfs.length; j++)
+		{
+			final int jj = j;
+			for (int i = 0; i < 3; i++)
+			{
+				final int ii = i;
+				futures.add(threadPool.submit(new Runnable()
+				{
+					public void run()
+					{
+						ExtractedPSF psf = psfs[jj];
+						double[] result = align[ii].copy().align(psf.getProjection(ii), 10);
+						// We just average the shift from each projection. There should be
+						// two shifts for each dimension
+						results[jj][Projection.getXDimension(ii)] -= result[0] / 2;
+						results[jj][Projection.getYDimension(ii)] -= result[1] / 2;
+						//psfs[index].show(TITLE + index);
+					}
+				}));
+			}
+		}
+
+		Utils.waitForCompletion(futures);
+
+		return results;
+	}
+
+	/**
+	 * Align the PSFs with the combined PSF using the Image2DAligner class to align the 2D max intensity projections.
+	 * The final alignment shift is the average of the shift from two projection alignments for each dimension.
+	 *
+	 * @param combined
+	 *            the combined
+	 * @param psfs
+	 *            the psfs
+	 * @return The XYZ translations for each PSF
+	 */
+	private float[][] align3D(ExtractedPSF combined, final ExtractedPSF[] psfs)
 	{
 		// TODO: Use the alignment settings.
 		// Extract each PSF around the current z-centre.
