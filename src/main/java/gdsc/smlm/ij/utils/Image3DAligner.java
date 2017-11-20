@@ -688,6 +688,33 @@ public class Image3DAligner implements Cloneable
 	/**
 	 * Align the image with the reference with sub-pixel accuracy. Compute the translation required to move the target
 	 * image onto the reference image for maximum correlation.
+	 * <p>
+	 * Refinement uses a default sub-pixel accuracy of 1e-2;
+	 *
+	 * @param image
+	 *            the image
+	 * @param refinements
+	 *            the refinements for sub-pixel accuracy
+	 * @param error
+	 *            the error for sub-pixel accuracy (i.e. stop when improvements are less than this error)
+	 * @return [x,y,z,value]
+	 * @throws IllegalArgumentException
+	 *             If any dimension is less than 2, or if larger than the initialised reference
+	 */
+	public double[] align(ImageStack image, int refinements)
+	{
+		check3D(image);
+		int w = image.getWidth(), h = image.getHeight(), d = image.getSize();
+		if (w > nc || h > nr || d > ns)
+			throw new IllegalArgumentException("Image is larger than the initialised reference");
+
+		target = createDHT(image, target);
+		return align(target, refinements, 1e-2);
+	}
+	
+	/**
+	 * Align the image with the reference with sub-pixel accuracy. Compute the translation required to move the target
+	 * image onto the reference image for maximum correlation.
 	 *
 	 * @param image
 	 *            the image
