@@ -5314,11 +5314,13 @@ public class PSFCreator implements PlugInFilter
 			stackZCentre = (icz - lz) * magnification + iz;
 
 			// Interpolate: NxNxN points per voxel
-
 			// Visit each voxel that can be interpolated.
+			// Decrement the range counters for convenience.
 			rangez--;
 			rangey--;
 			rangex--;
+			
+			// pz,py,pz == pixel position pointers in the output PSF
 			
 			for (int z = 0, pz = 0; z < rangez; z++, pz += magnification)
 			{
