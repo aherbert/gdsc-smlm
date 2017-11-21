@@ -37,11 +37,11 @@ import gdsc.core.ij.AlignImagesFFT.WindowMethod;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
+import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction.Size;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
-import gdsc.core.math.interpolation.IndexedCubicSplinePosition;
 import gdsc.core.utils.DoubleData;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.ImageWindow;
@@ -106,8 +106,6 @@ import gdsc.smlm.results.procedures.HeightResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import gdsc.smlm.utils.Tensor2D;
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -5162,68 +5160,98 @@ public class PSFCreator implements PlugInFilter
 			this.centre = centre;
 			this.magnification = magnification;
 
-			// Build using tri-cubic interpolation.
+			// Build using tricubic interpolation.
 
-			// Create the ranges we want to interpolate. 
-			// Ensure the size is odd so there is a definite centre pixel.
-			maxx = 2 * boxRadius * magnification + 1;
-			maxy = maxx;
-			double[] y0 = new double[maxx];
-			double[] x0 = new double[maxx];
+			// Account for the centre of the XY pixel being 0.5 by convention (e.g. floating point ROIs).
+			// The centre of the Z pixel is 0 (to support a user selected integer z-centre)
+			double cx = centre.getX() - 0.5;
+			double cy = centre.getY() - 0.5;
+			double cz = centre.getZ();
+			int icz = (int) cz;
+
+			// We want to sample NxNxN points per voxel (N=magnification).
+			// Create the sample points
 			double pc = 1.0 / magnification; // Pixel centre in scaled image
-			for (int i = 0, j = -maxx / 2; i < maxx; i++, j++)
+			CubicSplinePosition[] sx = createCubicSplinePosition(cx, pc);
+			CubicSplinePosition[] sy = createCubicSplinePosition(cy, pc);
+			CubicSplinePosition[] sz = createCubicSplinePosition(cz, pc);
+
+			// Create the interpolation tables
+			double[][] tables = new double[magnification * magnification * magnification][];
+			for (int z = 0, i = 0; z < magnification; z++)
+				for (int y = 0; y < magnification; y++)
+					for (int x = 0; x < magnification; x++)
+					{
+						tables[i++] = CustomTricubicFunction.computePowerTable(sx[x], sy[y], sz[z]);
+					}
+
+			// Find where centre is within the sample points
+			int ix = findCentre(sx, cx);
+			int iy = findCentre(sy, cy);
+			int iz = findCentre(sz, cz);
+			// Find the start interpolation point. The end point will be controlled by loop termination.
+			// This ensures the PSFs are the same X/Y size.
+			int startx = (ix - magnification * boxRadius) % magnification;
+			int starty = (iy - magnification * boxRadius) % magnification;
+			// Always use a start z of 0 as we can handle the psf stacks to be different sizes.
+			//int startz = (zRadius == 0) ? 0 : (iz - magnification * zRadius) % magnification;
+
+			// Find the first and last voxels where we can interpolate. 
+			// Correct interpolation needs values at this voxel and the next but we pad by duplication
+			// if the range overlaps the XY edge. This should not happen if the user selects good XY centres.
+			int lx = (int) cx - boxRadius;
+			int ux = (int) cx + boxRadius;
+			int ly = (int) cy - boxRadius;
+			int uy = (int) cy + boxRadius;
+			// Note: we use the full range of the stack.
+			int lz, uz;
+			if (zRadius == 0)
 			{
-				double delta = pc * j;
-				x0[i] = centre.getX() + delta;
-				y0[i] = centre.getY() + delta;
+				lz = 0;
+				uz = image.length - 1;
+			}
+			else
+			{
+				lz = Math.max(0, (int) cz - zRadius);
+				uz = Math.min(image.length - 1, (int) cz + zRadius);
 			}
 
 			// Extract the data for interpolation. 
-			// Account for the centre of the pixel being 0.5.
-			int lx = (int) Math.floor(x0[0] - 0.5);
-			int ly = (int) Math.floor(y0[0] - 0.5);
-			// To interpolate up to we need to have the value after.
-			int ux = (int) Math.ceil(x0[maxx - 1] + 0.5);
-			int uy = (int) Math.ceil(y0[maxx - 1] + 0.5);
-
-			int rangex = ux - lx + 1;
-			int rangey = uy - ly + 1;
+			// For correct interpolation we need an extra +1 after the upper limit on each axis.
+			int rangex = ux - lx + 2;
+			int rangey = uy - ly + 2;
+			// Clip z as we do not pad the stack. 
+			// This allows +1 after only if uz is clipped by the z-radius.
+			int rangez = Math.min(image.length, uz - lz + 2);
 
 			// Build an interpolating function
-			// We pad with an extra pixel (or a duplicate pixel if at the bounds)
-			double[] xval = new double[rangex];
-			double[] yval = new double[rangey];
-			double[] zval = new double[image.length + 2];
-			int[] xi = new int[xval.length];
-			int[] yi = new int[yval.length];
-			for (int i = 0; i < xval.length; i++)
+			// We pad with duplicate pixels if at the bounds
+			int[] xi = new int[rangex];
+			int[] yi = new int[rangey];
+			for (int i = 0; i < xi.length; i++)
 			{
-				xval[i] = lx + i + 0.5;
 				// Keep within data bounds for the indices
-				xi[i] = Maths.clip(0, w - 1, (int) xval[i]);
+				xi[i] = Maths.clip(0, w - 1, lx + i);
 			}
-			for (int i = 0; i < yval.length; i++)
+			for (int i = 0; i < yi.length; i++)
 			{
-				yval[i] = ly + i + 0.5;
 				// Keep within data bounds for the indices
-				yi[i] = Maths.clip(0, h - 1, (int) yval[i]);
+				yi[i] = Maths.clip(0, h - 1, ly + i);
 			}
 
 			// Extract to a stack to extract the background
-			float[][] fval = new float[zval.length][rangex * rangey];
+			float[][] fval = new float[rangez][rangex * rangey];
 
-			for (int z = 0; z < zval.length; z++)
+			for (int z = 0; z < rangez; z++)
 			{
-				zval[z] = z - 1;
-
-				// Keep within data bounds for the indices
-				float[] data = image[Maths.clip(0, image.length - 1, z - 1)];
+				// Note: rangez is already clipped to the image size
+				float[] data = image[lz + z];
 				float[] slice = fval[z];
 
-				for (int y = 0, i = 0; y < yval.length; y++)
+				for (int y = 0, i = 0; y < yi.length; y++)
 				{
 					final int index = w * yi[y];
-					for (int x = 0; x < xval.length; x++, i++)
+					for (int x = 0; x < xi.length; x++, i++)
 					{
 						slice[i] = data[index + xi[x]];
 					}
@@ -5232,9 +5260,8 @@ public class PSFCreator implements PlugInFilter
 
 			int window = (int) Math.round(settings.getAnalysisWindow());
 			background = getBackground(fval, rangex, rangey, window);
-			int maxSlice = zval.length;
-			double[] sum = new double[maxSlice];
-			for (int z = 0; z < zval.length; z++)
+			double[] sum = new double[rangez];
+			for (int z = 0; z < rangez; z++)
 			{
 				float[] slice = fval[z];
 				double s = 0;
@@ -5260,7 +5287,7 @@ public class PSFCreator implements PlugInFilter
 
 				// Compute normalisation and apply.
 				SimpleArrayUtils.multiply(ssum, 1.0 / Maths.max(ssum));
-				for (int z = 0; z < maxSlice; z++)
+				for (int z = 0; z < rangez; z++)
 				{
 					if (sum[z] != 0)
 						SimpleArrayUtils.multiply(fval[z], ssum[z] / sum[z]);
@@ -5269,96 +5296,92 @@ public class PSFCreator implements PlugInFilter
 			else
 			{
 				final double norm = 1.0 / Maths.max(sum);
-				for (int z = 0; z < maxSlice; z++)
+				for (int z = 0; z < rangez; z++)
 				{
 					SimpleArrayUtils.multiply(fval[z], norm);
 				}
 			}
 
-			//@formatter:off
-			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
-					.setXValue(xval) 
-					.setYValue(yval) 
-					.setZValue(zval)
-					.setFValue(new FloatStackTrivalueProvider(fval, rangex, rangey))
-					.setSinglePrecision(true) // to save memory
-					.interpolate();
-			//@formatter:on
+			FloatStackTrivalueProvider value = new FloatStackTrivalueProvider(fval, rangex, rangey);
 
-			// Interpolate
+			// The range x and y is controled to put the PSF in the middle of the slice
+			maxx = maxy = boxRadius * magnification + 1;
+			// The output z-stack interpolates all points for each voxel so the middle may not be in the centre of the stack
+			int maxz = (rangez - 1) * magnification;
+			psf = new float[maxz][maxx * maxx];
 
-			// Zoom the z-range too
-			TDoubleArrayList list = new TDoubleArrayList(image.length * magnification);
-			// The centre is a shift relative to the centre of the combined PSF in the 
-			// original scale
-			int zint = (int) Math.floor(centre.getZ());
-			// The centre is relative to the combined stack so for interpolation
-			// just get an offset from the stack centre
-			double cz = (image.length - 1) / 2.0 + centre.getZ() - zint;
-			// Set the relative centre after scaling
-			stackZCentre = zint * magnification;
-			list.add(cz);
-			for (int i = 1;; i++)
+			// Copmute the centre of the stack: (icz - lz) == number of slices before the centre slice
+			stackZCentre = (icz - lz) * magnification + iz;
+
+			// Interpolate: NxNxN points per voxel
+
+			// Visit each voxel that can be interpolated.
+			rangez--;
+			rangey--;
+			rangex--;
+			
+			for (int z = 0, pz = 0; z < rangez; z++, pz += magnification)
 			{
-				double z = cz + i * pc;
-				// Check if possible to interpolate
-				if (z >= image.length)
-					break;
-				list.add(z);
-			}
-			for (int i = 1;; i++)
-			{
-				double z = cz - i * pc;
-				// Check if possible to interpolate
-				if (z < 0)
-					break;
-				list.add(z);
-			}
-			double[] z0 = list.toArray();
-			Arrays.sort(z0);
-			//relativeCentre = Arrays.binarySearch(z0, cz);
-
-			psf = new float[z0.length][maxx * maxx];
-
-			// Pre-compute spline positions
-			// Cache tables of interpolation x,y,z.
-			// We can do this as we evenly sample an integer grid at a given magnification
-			// so the x,y,z offsets repeat on the interval of the magnification
-			TIntObjectHashMap<double[]> tables = new TIntObjectHashMap<double[]>(Maths.pow3(magnification));
-
-			IndexedCubicSplinePosition[] sx = new IndexedCubicSplinePosition[maxx];
-			IndexedCubicSplinePosition[] sy = new IndexedCubicSplinePosition[maxx];
-			for (int i = 0; i < maxx; i++)
-			{
-				sx[i] = f.getXSplinePosition(x0[i]);
-				sy[i] = f.getYSplinePosition(y0[i]);
-			}
-
-			for (int z = 0; z < z0.length; z++)
-			{
-				IndexedCubicSplinePosition sz = f.getZSplinePosition(z0[z]);
-				float[] data = psf[z];
-				int iz = z % magnification;
-				for (int y = 0, i = 0; y < maxx; y++)
+				// We use pointers to the position in the interpolation tables so that the initial edge is
+				// treated differently. This makes the X/Y dimension the same for all PSFs
+				for (int y = 0, yy = starty, py = 0; y < rangey; y++, py += (magnification - yy), yy = 0)
 				{
-					int iy = y % magnification;
-					for (int x = 0; x < maxx; x++, i++)
+					for (int x = 0, xx = startx, px = 0; x < rangex; x++, px += (magnification - xx), xx = 0)
 					{
-						int ix = x % magnification;
-						int index = ix + magnification * (iy + magnification * iz);
-						double[] table = tables.get(index);
-						if (table == null)
+						// Build the interpolator
+						CustomTricubicFunction f = CustomTricubicInterpolator.create(value, x, y, z);
+
+						// Sample NxNxN. 
+						// The initial edge is handled by the position indices (pz,py,px).
+						// The final edge is handled by the bounds of the PSF (psf.length, maxy, maxx).
+						for (int zzz = 0, ppz = pz; ppz < psf.length; zzz++, ppz++)
 						{
-							table = CustomTricubicFunction.computePowerTable(sx[x], sy[y], sz);
-							tables.put(index, table);
+							float[] data = psf[ppz];
+							for (int yyy = yy, ppy = py; ppy < maxy; yyy++, ppy++)
+							{
+								for (int xxx = xx, ppx = px; ppx < maxx; ppx++)
+								{
+									double[] table = tables[xxx + magnification * (yyy + magnification * zzz)];
+									data[maxx * ppy + ppx] = (float) f.value(table);
+								}
+							}
 						}
-						data[i] = (float) f.value(sx[x].index, sy[y].index, sz.index, table);
-						//data[i] = (float) f.value(sx[x], sy[y], sz);
 					}
 				}
 			}
+		}
 
-			//System.out.printf("Map size = %d\n", tables.size());
+		/**
+		 * Creates the cubic spline position sampling 'magnification' points within the range [0-1] from the given
+		 * centre.
+		 *
+		 * @param centre
+		 *            the centre
+		 * @param pc
+		 *            the pixel change (1/magnification)
+		 * @return the cubic spline position
+		 */
+		private CubicSplinePosition[] createCubicSplinePosition(double centre, double pc)
+		{
+			CubicSplinePosition[] c = new CubicSplinePosition[magnification];
+			// Find the first position in the range [0-1]
+			int j = 0;
+			while (centre + j * pc >= 0)
+				j--;
+			for (int i = 0; i < c.length; i++)
+			{
+				j++;
+				c[i] = new CubicSplinePosition(centre + j * pc);
+			}
+			return c;
+		}
+
+		private int findCentre(CubicSplinePosition[] sx, double centre)
+		{
+			for (int i = 0; i < sx.length; i++)
+				if (sx[i].getX() == centre)
+					return i;
+			throw new IllegalStateException();
 		}
 
 		void createProjections()
@@ -5532,38 +5555,18 @@ public class PSFCreator implements PlugInFilter
 			FloatStackTrivalueProvider fval = new FloatStackTrivalueProvider(psf, maxx, maxy);
 
 			// We can enlarge by interpolation between the start and end
-			// by evenly sampling each spline node
+			// by evenly sampling each spline node.
+			// Do this dynamically. It is slower than creating the entire interpolating function
+			// but uses much less memory.
+			Utils.showStatus("Enlarging ... interpolating");
 
-			try
-			{
-				Utils.showStatus("Enlarging ... creating spline");
-				// The scales are actually arbitrary
-				double[] xval = SimpleArrayUtils.newArray(maxx, 0, 1.0);
-				double[] yval = SimpleArrayUtils.newArray(maxy, 0, 1.0);
-				double[] zval = SimpleArrayUtils.newArray(psf.length, 0, 1.0);
-
-				//@formatter:off
-    			CustomTricubicInterpolatingFunction f = new CustomTricubicInterpolator.Builder()
-    					.setXValue(xval) 
-    					.setYValue(yval) 
-    					.setZValue(zval)
-    					.setFValue(fval)
-    					.setProgress(progress)
-    					.setExecutorService(threadPool)
-    					.interpolate();
-    			//@formatter:on
-
-				Utils.showStatus("Enlarging ... interpolating");
-
-				f.sample(n, p, progress);
-			}
-			catch (OutOfMemoryError e)
-			{
-				// Do this dynamically
-				MemoryPeakResults.runGC();
-				Utils.showStatus("Enlarging ... interpolating");
-				CustomTricubicInterpolator.sample(fval, n, p, progress);
-			}
+			//@formatter:off
+			new CustomTricubicInterpolator.Builder()
+					.setExecutorService(threadPool)
+					.setProgress(progress)
+					.build()
+					.sample(fval, n, p);
+			//@formatter:on
 
 			IJ.showStatus("");
 
