@@ -4033,15 +4033,21 @@ public class PSFCreator implements PlugInFilter
 
 				if (zRadius != 0)
 				{
-					double lx = plot.scaleXtoPxl(slice - zRadius);
-					double ux = plot.scaleXtoPxl(slice + zRadius);
 					Overlay o = new Overlay();
-					Line l = new Line(lx, min, lx, max);
-					l.setStrokeColor(Color.red);
-					o.add(l);
-					l = new Line(ux, min, ux, max);
-					l.setStrokeColor(Color.red);
-					o.add(l);
+					if (slice - zRadius >= 0)
+					{
+						double lx = plot.scaleXtoPxl(slice - zRadius);
+						Line l = new Line(lx, min, lx, max);
+						l.setStrokeColor(Color.red);
+						o.add(l);
+					}
+					if (slice + zRadius <= psf.psf.length)
+					{
+						double ux = plot.scaleXtoPxl(slice + zRadius);
+						Line l = new Line(ux, min, ux, max);
+						l.setStrokeColor(Color.red);
+						o.add(l);
+					}
 					pw.getImagePlus().setOverlay(o);
 				}
 				else
@@ -5220,12 +5226,18 @@ public class PSFCreator implements PlugInFilter
 			int iz = findCentre(sz, cz);
 
 			// Find the first and last voxels where we can interpolate. 
-			// Correct interpolation needs values at this voxel and the next but we pad by duplication
-			// if the range overlaps the XY edge. This should not happen if the user selects good XY centres.
+			// For correct interpolation we need an extra +1 after the upper limit on each axis.
+			// Note: Cubic interpolation actually requires -1 and +2 around interpolation point 
+			// 0 but for simplicity we allow the gradient to evaluate to zero at the bounds thus
+			// requiring a range of 0 to 1 for each point. The bounds should not be important
+			// if the PSF reduces to nothing at the edge.
+			// Note we do not clip the XY positions as we pad by duplication
+			// if the range overlaps the XY edge. This should not happen if the user selects 
+			// good XY centres.
 			int lx = (int) cx - boxRadius;
-			int ux = (int) cx + boxRadius;
+			int ux = (int) cx + boxRadius + 1;
 			int ly = (int) cy - boxRadius;
-			int uy = (int) cy + boxRadius;
+			int uy = (int) cy + boxRadius + 1;
 			// Note: we use the full range of the stack.
 			int lz, uz;
 			if (zRadius == 0)
@@ -5236,20 +5248,15 @@ public class PSFCreator implements PlugInFilter
 			else
 			{
 				lz = Math.max(0, (int) cz - zRadius);
-				uz = Math.min(image.length - 1, (int) cz + zRadius);
+				uz = Math.min(image.length - 1, (int) cz + zRadius + 1);
 			}
 
 			// Extract the data for interpolation. 
-			// For correct interpolation we need an extra +1 after the upper limit on each axis.
-			// Note: Cubic interpolation actually requires -1 and +2 around interpolation point 
-			// 0 but for simplicity we allow the gradient to evaluate to zero at the bounds thus
-			// requiring a range of 0 to 1 for each point. The bounds should not be important
-			// if the PSF reduces to nothing at the edge.
-			int rangex = ux - lx + 2;
-			int rangey = uy - ly + 2;
+			int rangex = ux - lx + 1;
+			int rangey = uy - ly + 1;
 			// Clip z as we do not pad the stack. 
 			// This allows +1 after only if uz is clipped by the z-radius.
-			int rangez = Math.min(image.length, uz - lz + 2);
+			int rangez = Math.min(image.length, uz - lz + 1);
 
 			// Build an interpolating function
 			// We pad with duplicate pixels if at the bounds
