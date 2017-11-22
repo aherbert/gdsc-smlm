@@ -2847,8 +2847,8 @@ public class PSFCreator implements PlugInFilter
 					o.add(createRoi(cx, cy, Color.GREEN));
 					Roi roi = new Roi(cx - box, cy - box, 2 * box, 2 * box);
 					o.add(roi);
-					// The centre is relative to the combined PSF so use as an offset
-					imp.setSlice(Maths.clip(1, n, centres[j].getZint() + 1 + n / 2));
+					// The centre is absolute within the original stack
+					imp.setSlice(Maths.clip(1, n, (int) Math.round(centres[j].getZ())));
 					Rectangle r = ic.getSrcRect();
 					int x = centres[j].getXint();
 					int y = centres[j].getYint();
@@ -4537,7 +4537,7 @@ public class PSFCreator implements PlugInFilter
 			after = Math.max(after, psfs[i].psf.length - psfs[i].stackZCentre);
 		}
 
-		int totalDepth = before + after + 1;
+		int totalDepth = before + after;
 		float[][] psf = new float[totalDepth][first.psf[0].length];
 		int size = first.maxx;
 		int[] count = new int[totalDepth];
@@ -4558,8 +4558,11 @@ public class PSFCreator implements PlugInFilter
 		{
 			float[] to = psf[j];
 			int c = count[j];
-			for (int k = 0; k < to.length; k++)
-				to[k] /= c;
+			if (c != 0)
+			{
+				for (int k = 0; k < to.length; k++)
+					to[k] /= c;
+			}
 		}
 		BasePoint centre = new BasePoint(size / 2f, size / 2f, before);
 		ExtractedPSF combined = new ExtractedPSF(psf, size, centre, first.magnification);
@@ -4729,7 +4732,7 @@ public class PSFCreator implements PlugInFilter
 			limits[0][zz] = l[0];
 			limits[1][zz] = l[1];
 			//float[] l2 = Maths.limits(data);
-			//System.out.printf("%f - %f vs %f - %f\n", l[0],l[1],l2[0],l2[1]);
+			//System.out.printf("%f - %f vs %f - %f\n", l[0], l[1], l2[0], l2[1]);
 		}
 		return limits;
 	}
@@ -5189,12 +5192,6 @@ public class PSFCreator implements PlugInFilter
 			int ix = findCentre(sx, cx);
 			int iy = findCentre(sy, cy);
 			int iz = findCentre(sz, cz);
-			// Find the start interpolation point. The end point will be controlled by loop termination.
-			// This ensures the PSFs are the same X/Y size.
-			int startx = (ix - magnification * boxRadius) % magnification;
-			int starty = (iy - magnification * boxRadius) % magnification;
-			// Always use a start z of 0 as we can handle the psf stacks to be different sizes.
-			//int startz = (zRadius == 0) ? 0 : (iz - magnification * zRadius) % magnification;
 
 			// Find the first and last voxels where we can interpolate. 
 			// Correct interpolation needs values at this voxel and the next but we pad by duplication
@@ -5218,6 +5215,10 @@ public class PSFCreator implements PlugInFilter
 
 			// Extract the data for interpolation. 
 			// For correct interpolation we need an extra +1 after the upper limit on each axis.
+			// Note: Cubic interpolation actually requires -1 and +2 around interpolation point 
+			// 0 but for simplicity we allow the gradient to evaluate to zero at the bounds thus
+			// requiring a range of 0 to 1 for each point. The bounds should not be important
+			// if the PSF reduces to nothing at the edge.
 			int rangex = ux - lx + 2;
 			int rangey = uy - ly + 2;
 			// Clip z as we do not pad the stack. 
@@ -5305,28 +5306,29 @@ public class PSFCreator implements PlugInFilter
 			FloatStackTrivalueProvider value = new FloatStackTrivalueProvider(fval, rangex, rangey);
 
 			// The range x and y is controled to put the PSF in the middle of the slice
-			maxx = maxy = boxRadius * magnification + 1;
+			maxx = maxy = 2 * boxRadius * magnification + 1;
 			// The output z-stack interpolates all points for each voxel so the middle may not be in the centre of the stack
 			int maxz = (rangez - 1) * magnification;
-			psf = new float[maxz][maxx * maxx];
+			psf = new float[maxz][maxx * maxy];
 
-			// Copmute the centre of the stack: (icz - lz) == number of slices before the centre slice
+			// Compute the centre of the stack: (icz - lz) == number of slices before the centre slice
 			stackZCentre = (icz - lz) * magnification + iz;
 
 			// Interpolate: NxNxN points per voxel
+			final int n = magnification;
 
 			// Visit each voxel that can be interpolated.
 			rangez--;
 			rangey--;
 			rangex--;
-			
-			for (int z = 0, pz = 0; z < rangez; z++, pz += magnification)
+
+			for (int z = 0, pz = 0; z < rangez; z++, pz += n)
 			{
 				// We use pointers to the position in the interpolation tables so that the initial edge is
 				// treated differently. This makes the X/Y dimension the same for all PSFs
-				for (int y = 0, yy = starty, py = 0; y < rangey; y++, py += (magnification - yy), yy = 0)
+				for (int y = 0, yy = iy, py = 0; y < rangey; y++, py += (n - yy), yy = 0)
 				{
-					for (int x = 0, xx = startx, px = 0; x < rangex; x++, px += (magnification - xx), xx = 0)
+					for (int x = 0, xx = ix, px = 0; x < rangex; x++, px += (n - xx), xx = 0)
 					{
 						// Build the interpolator
 						CustomTricubicFunction f = CustomTricubicInterpolator.create(value, x, y, z);
@@ -5334,15 +5336,19 @@ public class PSFCreator implements PlugInFilter
 						// Sample NxNxN. 
 						// The initial edge is handled by the position indices (pz,py,px).
 						// The final edge is handled by the bounds of the PSF (psf.length, maxy, maxx).
-						for (int zzz = 0, ppz = pz; ppz < psf.length; zzz++, ppz++)
+						for (int zzz = 0, ppz = pz; zzz < n && ppz < psf.length; zzz++, ppz++)
 						{
 							float[] data = psf[ppz];
-							for (int yyy = yy, ppy = py; ppy < maxy; yyy++, ppy++)
+							for (int yyy = yy, ppy = py; yyy < n && ppy < maxy; yyy++, ppy++)
 							{
-								for (int xxx = xx, ppx = px; ppx < maxx; ppx++)
+								for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++)
 								{
-									double[] table = tables[xxx + magnification * (yyy + magnification * zzz)];
+									double[] table = tables[xxx + n * (yyy + n * zzz)];
 									data[maxx * ppy + ppx] = (float) f.value(table);
+									if (Float.isNaN(data[maxx * ppy + ppx]))
+									{
+										System.out.printf("%d,%d,%d\n", x, y, z);
+									}
 								}
 							}
 						}
@@ -5365,6 +5371,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			CubicSplinePosition[] c = new CubicSplinePosition[magnification];
 			// Find the first position in the range [0-1]
+			centre -= Math.floor(centre);
 			int j = 0;
 			while (centre + j * pc >= 0)
 				j--;
@@ -5378,6 +5385,7 @@ public class PSFCreator implements PlugInFilter
 
 		private int findCentre(CubicSplinePosition[] sx, double centre)
 		{
+			centre -= Math.floor(centre);
 			for (int i = 0; i < sx.length; i++)
 				if (sx[i].getX() == centre)
 					return i;
@@ -5392,9 +5400,9 @@ public class PSFCreator implements PlugInFilter
 
 		ImagePlus[] show(String title)
 		{
-			// The centre is relative to the combined PSF in the original scale so use as an offset
-			int n = psf.length;
-			int slice = centre.getZint() * magnification + 1 + n / 2;
+			int slice = (stackZCentre != -1) ? stackZCentre :
+			// The centre is in the original scale so magnify
+					centre.getZint() * magnification + 1;
 			return show(title, slice);
 		}
 
@@ -5570,15 +5578,17 @@ public class PSFCreator implements PlugInFilter
 
 			IJ.showStatus("");
 
-			int mag = magnification * n;
-
 			// Enlarge the centre.  
 			BasePoint newCentre = new BasePoint(
 					// XY pixels are centred at 0.5.
-					mag * (centre.getX() - 0.5f) + 0.5f, mag * (centre.getY() - 0.5f) + 0.5f,
+					n * (centre.getX() - 0.5f) + 0.5f, n * (centre.getY() - 0.5f) + 0.5f,
 					// Z stack at 0
-					mag * centre.getZ());
-			return new ExtractedPSF(p.value, p.x.length, newCentre, mag);
+					n * centre.getZ());
+			ExtractedPSF psf = new ExtractedPSF(p.value, p.x.length, newCentre, n);
+			// We will have enlarged all the slices before the centre n times
+			if (stackZCentre != -1)
+				psf.stackZCentre = (this.stackZCentre - 1) * n + 1;
+			return psf;
 		}
 
 		public int[] getDimensions()
