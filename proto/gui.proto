@@ -435,6 +435,7 @@ message PSFCreatorSettings
 	bool crop_to_z_centre = 33;
 	int32 alignment_mode = 34;
 	double alignment_z_radius = 35;
+	bool update_roi = 36;
 }
 
 // Contains settings for the Camera Model Manager plugin
