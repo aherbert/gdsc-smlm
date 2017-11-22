@@ -142,7 +142,7 @@ public class CubicSplineManager implements PlugIn
 		final int maxz = image.getSize();
 		final float[][] psf = new float[maxz][];
 		for (int z = 0; z < maxz; z++)
-			psf[z] = ImageConverter.getData(image.getPixels(z + 1), maxx, maxy, null, null);
+			psf[z] = ImageConverter.getData(image.getPixels(z + 1), null);
 
 		// We reduce by a factor of 3
 		final int maxi = (maxx - 1) / 3;
