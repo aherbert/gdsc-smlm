@@ -3009,16 +3009,6 @@ public class PSFCreator implements PlugInFilter
 			psfs = extractPSFs(image, centres);
 		}
 
-		// Update ROI
-		float[] ox = new float[centres.length];
-		float[] oy = new float[centres.length];
-		for (int i = 0; i < centres.length; i++)
-		{
-			ox[i] = centres[i].getX();
-			oy[i] = centres[i].getY();
-		}
-		imp.setRoi(new PointRoi(ox, oy));
-
 		// Combine all
 		ExtractedPSF combined = combine(psfs);
 
@@ -3028,6 +3018,18 @@ public class PSFCreator implements PlugInFilter
 		combined = cropSelector.run();
 		if (combined == null)
 			return;
+		
+		if (settings.getUpdateRoi())
+		{
+			float[] ox = new float[centres.length];
+			float[] oy = new float[centres.length];
+			for (int i = 0; i < centres.length; i++)
+			{
+				ox[i] = centres[i].getX();
+				oy[i] = centres[i].getY();
+			}
+			imp.setRoi(new PointRoi(ox, oy));
+		}
 
 		// For an image PSF we can just enlarge the PSF and window.
 		// For a CSpline then we already have the 3D cubic spline function.
@@ -4291,6 +4293,7 @@ public class PSFCreator implements PlugInFilter
 					return true;
 				}
 			});
+			gd.addCheckbox("Update_ROI", settings.getUpdateRoi());
 
 			gd.addDialogListener(this);
 			if (Utils.isShowGenericDialog())
@@ -4364,6 +4367,7 @@ public class PSFCreator implements PlugInFilter
 			settings.setCropStart((int) gd.getNextNumber());
 			settings.setCropEnd((int) gd.getNextNumber());
 			settings.setOutputType(gd.getNextChoiceIndex());
+			settings.setUpdateRoi(gd.getNextBoolean());
 
 			update();
 			return true;
@@ -5487,7 +5491,7 @@ public class PSFCreator implements PlugInFilter
 			ImageStack stack = new ImageStack(maxx, maxy, max - min + 1);
 			for (int i = min, j = 1; i <= max; i++, j++)
 			{
-				stack.setPixels(psf[i], j);
+				stack.setPixels(psf[i].clone(), j);
 			}
 			return stack;
 		}
@@ -5636,8 +5640,7 @@ public class PSFCreator implements PlugInFilter
 		for (int i = 0; i < 3; i++)
 		{
 			align[i] = new Image2DAligner();
-			FloatProcessor fp1 = combined.getProjection(i, true);
-			align[i].setReference(fp1); // No need to set the bounds as the PSF will be smaller
+			align[i].setReference(combined.getProjection(i, true).duplicate()); // No need to set the bounds as the PSF will be smaller
 		}
 
 		final float[][] results = new float[psfs.length][3];
@@ -5653,7 +5656,7 @@ public class PSFCreator implements PlugInFilter
 					public void run()
 					{
 						ExtractedPSF psf = psfs[jj];
-						double[] result = align[ii].copy().align(psf.getProjection(ii, true), 10);
+						double[] result = align[ii].copy().align(psf.getProjection(ii, true).duplicate(), 10);
 						// We just average the shift from each projection. There should be
 						// two shifts for each dimension
 						results[jj][Projection.getXDimension(ii)] -= result[0] / 2;
@@ -5701,12 +5704,19 @@ public class PSFCreator implements PlugInFilter
 					ExtractedPSF psf = psfs[jj];
 					double[] result = align.copy().align(psf.getImageStack(true), 10);
 					for (int i = 0; i < 3; i++)
-						results[jj][i] = (float) result[i];
+						results[jj][i] = (float) -result[i];
 				}
 			}));
 		}
 
 		Utils.waitForCompletion(futures);
+
+		//// Debug
+		//float[][] results2 = align2D(combined, psfs);
+		//for (int j = 0; j < psfs.length; j++)
+		//{
+		//	System.out.printf("%d %s vs %s (3D)\n", j, Arrays.toString(results2[j]), Arrays.toString(results[j]));
+		//}
 
 		return results;
 	}
@@ -5771,6 +5781,8 @@ public class PSFCreator implements PlugInFilter
 	private BasePoint[] updateUsingCentreOfMassXYShift(double[] shift, double shiftd, ExtractedPSF combined,
 			BasePoint[] centres)
 	{
+		// The shift is the centre of mass of the image minus the pixel centre.
+
 		float dx = (float) shift[0];
 		float dy = (float) shift[1];
 		float dz = 0;
