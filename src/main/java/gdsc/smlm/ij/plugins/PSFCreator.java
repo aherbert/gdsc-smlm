@@ -5485,9 +5485,9 @@ public class PSFCreator implements PlugInFilter
 				max = psf.length - 1;
 			}
 			ImageStack stack = new ImageStack(maxx, maxy, max - min + 1);
-			for (int i = min; i <= max; i++)
+			for (int i = min, j = 1; i <= max; i++, j++)
 			{
-				stack.setPixels(psf[i], i + 1);
+				stack.setPixels(psf[i], j);
 			}
 			return stack;
 		}
@@ -5584,7 +5584,8 @@ public class PSFCreator implements PlugInFilter
 					n * (centre.getX() - 0.5f) + 0.5f, n * (centre.getY() - 0.5f) + 0.5f,
 					// Z stack at 0
 					n * centre.getZ());
-			ExtractedPSF psf = new ExtractedPSF(p.value, p.x.length, newCentre, n);
+			// Enlarge the current magnification
+			ExtractedPSF psf = new ExtractedPSF(p.value, p.x.length, newCentre, n * magnification);
 			// We will have enlarged all the slices before the centre n times
 			if (stackZCentre != -1)
 				psf.stackZCentre = (this.stackZCentre - 1) * n + 1;
