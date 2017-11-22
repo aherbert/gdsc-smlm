@@ -230,6 +230,10 @@ public class GUIProtosHelper
 		builder.setComBorder(0.40); // Right in the middle of a spot
 		builder.setAlignmentMode(0); // Projections
 		builder.setAlignmentZRadius(0); // All of the z-stack
+		builder.setSubPixelPrecision(0.01);
+		builder.setRmsdXyThreshold(0.01);
+		builder.setRmsdZThreshold(0.05);
+		builder.setComShiftThreshold(0.01);
 		defaultPSFCreatorSettings = builder.build();
 	}
 	

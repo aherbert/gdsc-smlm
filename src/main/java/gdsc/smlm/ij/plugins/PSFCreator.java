@@ -2994,8 +2994,9 @@ public class PSFCreator implements PlugInFilter
 			}
 			else
 			{
-				// Sensible convergence on minimal shift
-				converged = rmsd[0] < 0.01 && rmsd[1] < 0.05 && shiftd < 0.001;
+				// Check convergence thresholds
+				converged = rmsd[0] < settings.getRmsdXyThreshold() && rmsd[1] < settings.getRmsdZThreshold() &&
+						shiftd < settings.getComShiftThreshold();
 			}
 
 			// For the next round we move to the non-overlapping spots
@@ -3018,7 +3019,7 @@ public class PSFCreator implements PlugInFilter
 		combined = cropSelector.run();
 		if (combined == null)
 			return;
-		
+
 		if (settings.getUpdateRoi())
 		{
 			float[] ox = new float[centres.length];
@@ -4603,6 +4604,13 @@ public class PSFCreator implements PlugInFilter
 		tf.add(gd.addAndGetSlider("Max_iterations", 1, 20, settings.getMaxIterations()));
 		if (settings.getInteractiveMode())
 			cb.add(gd.addAndGetCheckbox("Check_alignments", settings.getCheckAlignments()));
+		tf.add(gd.addAndGetNumericField("Sub-pixel_precision", settings.getSubPixelPrecision(), -2));
+		if (!settings.getInteractiveMode())
+		{
+			tf.add(gd.addAndGetNumericField("RMSD_XY_threshold", settings.getRmsdXyThreshold(), -2));
+			tf.add(gd.addAndGetNumericField("RMSD_Z_threshold", settings.getRmsdZThreshold(), -2));
+			tf.add(gd.addAndGetNumericField("CoM_shift_threshold", settings.getComShiftThreshold(), -2));
+		}
 
 		if (Utils.isShowGenericDialog())
 		{
@@ -4610,6 +4618,7 @@ public class PSFCreator implements PlugInFilter
 			{
 				public void actionPerformed(ActionEvent e)
 				{
+					boolean interactive = PSFCreator.this.settings.getInteractiveMode();
 					PSFCreatorSettings defaults = GUIProtosHelper.defaultPSFCreatorSettings;
 					int t = 0, c = 0;
 					tf.get(t++).setText(Double.toString(defaults.getAnalysisWindow()));
@@ -4619,8 +4628,15 @@ public class PSFCreator implements PlugInFilter
 					tf.get(t++).setText(Integer.toString(defaults.getAlignmentMagnification()));
 					cb.get(c++).setState(defaults.getSmoothStackSignal());
 					tf.get(t++).setText(Integer.toString(defaults.getMaxIterations()));
-					if (PSFCreator.this.settings.getInteractiveMode())
+					if (interactive)
 						cb.get(c++).setState(defaults.getCheckAlignments());
+					tf.get(t++).setText(Double.toString(defaults.getSubPixelPrecision()));
+					if (!interactive)
+					{
+						tf.get(t++).setText(Double.toString(defaults.getRmsdXyThreshold()));
+						tf.get(t++).setText(Double.toString(defaults.getRmsdZThreshold()));
+						tf.get(t++).setText(Double.toString(defaults.getComShiftThreshold()));
+					}
 
 					// Reset later options too
 					PSFCreator.this.settings.setPsfMagnification(defaults.getPsfMagnification());
@@ -4657,7 +4673,13 @@ public class PSFCreator implements PlugInFilter
 			checkAlignments = gd.getNextBoolean();
 			settings.setCheckAlignments(checkAlignments);
 		}
-		//settings.setPsfMagnification((int) gd.getNextNumber());
+		settings.setSubPixelPrecision(gd.getNextNumber());
+		if (!settings.getInteractiveMode())
+		{
+			settings.setRmsdXyThreshold(gd.getNextNumber());
+			settings.setRmsdZThreshold(gd.getNextNumber());
+			settings.setComShiftThreshold(gd.getNextNumber());
+		}
 
 		gd.collectOptions();
 
@@ -5517,8 +5539,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			return new BasePoint(
 					// Centre in X,Y,Z refer to the position extracted from the image
-					centre.getX() + translation[0] / magnification, centre.getY() + translation[1] / magnification,
-					centre.getZ() + translation[2] / magnification);
+					centre.getX() + translation[0], centre.getY() + translation[1], centre.getZ() + translation[2]);
 		}
 
 		/**
@@ -5554,6 +5575,13 @@ public class PSFCreator implements PlugInFilter
 				// Account for magnification
 				shift[i] /= magnification;
 			}
+
+			if (settings.getSubPixelPrecision() > 0)
+			{
+				for (int i = 0; i < d.length; i++)
+					shift[i] = Maths.round(shift[i], settings.getSubPixelPrecision());
+			}
+
 			return shift;
 		}
 
@@ -5613,9 +5641,28 @@ public class PSFCreator implements PlugInFilter
 	 */
 	private float[][] align(ExtractedPSF combined, final ExtractedPSF[] psfs)
 	{
-		if (settings.getAlignmentMode() == ALIGNMENT_MODE_2D)
-			return align2D(combined, psfs);
-		return align3D(combined, psfs);
+		float[][] result = (settings.getAlignmentMode() == ALIGNMENT_MODE_2D) ? align2D(combined, psfs)
+				: align3D(combined, psfs);
+
+		// Scale to the original image size
+		int n = combined.magnification;
+		for (int j = 0; j < result.length; j++)
+		{
+			for (int i = 0; i < 3; i++)
+				result[j][i] /= n;
+		}
+
+		if (settings.getSubPixelPrecision() > 0)
+		{
+			double factor = settings.getSubPixelPrecision();
+			for (int j = 0; j < result.length; j++)
+			{
+				for (int i = 0; i < 3; i++)
+					result[j][i] = (float) Maths.round(result[j][i], factor);
+			}
+		}
+
+		return result;
 	}
 
 	/**

@@ -22273,6 +22273,26 @@ public final class GUIProtos {
      * <code>bool update_roi = 36;</code>
      */
     boolean getUpdateRoi();
+
+    /**
+     * <code>double sub_pixel_precision = 37;</code>
+     */
+    double getSubPixelPrecision();
+
+    /**
+     * <code>double rmsd_xy_threshold = 38;</code>
+     */
+    double getRmsdXyThreshold();
+
+    /**
+     * <code>double rmsd_z_threshold = 39;</code>
+     */
+    double getRmsdZThreshold();
+
+    /**
+     * <code>double com_shift_threshold = 40;</code>
+     */
+    double getComShiftThreshold();
   }
   /**
    * <pre>
@@ -22323,6 +22343,10 @@ public final class GUIProtos {
       alignmentMode_ = 0;
       alignmentZRadius_ = 0D;
       updateRoi_ = false;
+      subPixelPrecision_ = 0D;
+      rmsdXyThreshold_ = 0D;
+      rmsdZThreshold_ = 0D;
+      comShiftThreshold_ = 0D;
     }
 
     @java.lang.Override
@@ -22554,6 +22578,26 @@ public final class GUIProtos {
             case 288: {
 
               updateRoi_ = input.readBool();
+              break;
+            }
+            case 297: {
+
+              subPixelPrecision_ = input.readDouble();
+              break;
+            }
+            case 305: {
+
+              rmsdXyThreshold_ = input.readDouble();
+              break;
+            }
+            case 313: {
+
+              rmsdZThreshold_ = input.readDouble();
+              break;
+            }
+            case 321: {
+
+              comShiftThreshold_ = input.readDouble();
               break;
             }
           }
@@ -22976,6 +23020,42 @@ public final class GUIProtos {
       return updateRoi_;
     }
 
+    public static final int SUB_PIXEL_PRECISION_FIELD_NUMBER = 37;
+    private double subPixelPrecision_;
+    /**
+     * <code>double sub_pixel_precision = 37;</code>
+     */
+    public double getSubPixelPrecision() {
+      return subPixelPrecision_;
+    }
+
+    public static final int RMSD_XY_THRESHOLD_FIELD_NUMBER = 38;
+    private double rmsdXyThreshold_;
+    /**
+     * <code>double rmsd_xy_threshold = 38;</code>
+     */
+    public double getRmsdXyThreshold() {
+      return rmsdXyThreshold_;
+    }
+
+    public static final int RMSD_Z_THRESHOLD_FIELD_NUMBER = 39;
+    private double rmsdZThreshold_;
+    /**
+     * <code>double rmsd_z_threshold = 39;</code>
+     */
+    public double getRmsdZThreshold() {
+      return rmsdZThreshold_;
+    }
+
+    public static final int COM_SHIFT_THRESHOLD_FIELD_NUMBER = 40;
+    private double comShiftThreshold_;
+    /**
+     * <code>double com_shift_threshold = 40;</code>
+     */
+    public double getComShiftThreshold() {
+      return comShiftThreshold_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -23095,6 +23175,18 @@ public final class GUIProtos {
       }
       if (updateRoi_ != false) {
         output.writeBool(36, updateRoi_);
+      }
+      if (subPixelPrecision_ != 0D) {
+        output.writeDouble(37, subPixelPrecision_);
+      }
+      if (rmsdXyThreshold_ != 0D) {
+        output.writeDouble(38, rmsdXyThreshold_);
+      }
+      if (rmsdZThreshold_ != 0D) {
+        output.writeDouble(39, rmsdZThreshold_);
+      }
+      if (comShiftThreshold_ != 0D) {
+        output.writeDouble(40, comShiftThreshold_);
       }
     }
 
@@ -23246,6 +23338,22 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(36, updateRoi_);
       }
+      if (subPixelPrecision_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(37, subPixelPrecision_);
+      }
+      if (rmsdXyThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(38, rmsdXyThreshold_);
+      }
+      if (rmsdZThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(39, rmsdZThreshold_);
+      }
+      if (comShiftThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(40, comShiftThreshold_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -23359,6 +23467,22 @@ public final class GUIProtos {
               other.getAlignmentZRadius()));
       result = result && (getUpdateRoi()
           == other.getUpdateRoi());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSubPixelPrecision())
+          == java.lang.Double.doubleToLongBits(
+              other.getSubPixelPrecision()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getRmsdXyThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getRmsdXyThreshold()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getRmsdZThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getRmsdZThreshold()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getComShiftThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getComShiftThreshold()));
       return result;
     }
 
@@ -23462,6 +23586,18 @@ public final class GUIProtos {
       hash = (37 * hash) + UPDATE_ROI_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getUpdateRoi());
+      hash = (37 * hash) + SUB_PIXEL_PRECISION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSubPixelPrecision()));
+      hash = (37 * hash) + RMSD_XY_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getRmsdXyThreshold()));
+      hash = (37 * hash) + RMSD_Z_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getRmsdZThreshold()));
+      hash = (37 * hash) + COM_SHIFT_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getComShiftThreshold()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23679,6 +23815,14 @@ public final class GUIProtos {
 
         updateRoi_ = false;
 
+        subPixelPrecision_ = 0D;
+
+        rmsdXyThreshold_ = 0D;
+
+        rmsdZThreshold_ = 0D;
+
+        comShiftThreshold_ = 0D;
+
         return this;
       }
 
@@ -23749,6 +23893,10 @@ public final class GUIProtos {
         result.alignmentMode_ = alignmentMode_;
         result.alignmentZRadius_ = alignmentZRadius_;
         result.updateRoi_ = updateRoi_;
+        result.subPixelPrecision_ = subPixelPrecision_;
+        result.rmsdXyThreshold_ = rmsdXyThreshold_;
+        result.rmsdZThreshold_ = rmsdZThreshold_;
+        result.comShiftThreshold_ = comShiftThreshold_;
         onBuilt();
         return result;
       }
@@ -23898,6 +24046,18 @@ public final class GUIProtos {
         }
         if (other.getUpdateRoi() != false) {
           setUpdateRoi(other.getUpdateRoi());
+        }
+        if (other.getSubPixelPrecision() != 0D) {
+          setSubPixelPrecision(other.getSubPixelPrecision());
+        }
+        if (other.getRmsdXyThreshold() != 0D) {
+          setRmsdXyThreshold(other.getRmsdXyThreshold());
+        }
+        if (other.getRmsdZThreshold() != 0D) {
+          setRmsdZThreshold(other.getRmsdZThreshold());
+        }
+        if (other.getComShiftThreshold() != 0D) {
+          setComShiftThreshold(other.getComShiftThreshold());
         }
         onChanged();
         return this;
@@ -25209,6 +25369,110 @@ public final class GUIProtos {
       public Builder clearUpdateRoi() {
         
         updateRoi_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double subPixelPrecision_ ;
+      /**
+       * <code>double sub_pixel_precision = 37;</code>
+       */
+      public double getSubPixelPrecision() {
+        return subPixelPrecision_;
+      }
+      /**
+       * <code>double sub_pixel_precision = 37;</code>
+       */
+      public Builder setSubPixelPrecision(double value) {
+        
+        subPixelPrecision_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sub_pixel_precision = 37;</code>
+       */
+      public Builder clearSubPixelPrecision() {
+        
+        subPixelPrecision_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double rmsdXyThreshold_ ;
+      /**
+       * <code>double rmsd_xy_threshold = 38;</code>
+       */
+      public double getRmsdXyThreshold() {
+        return rmsdXyThreshold_;
+      }
+      /**
+       * <code>double rmsd_xy_threshold = 38;</code>
+       */
+      public Builder setRmsdXyThreshold(double value) {
+        
+        rmsdXyThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double rmsd_xy_threshold = 38;</code>
+       */
+      public Builder clearRmsdXyThreshold() {
+        
+        rmsdXyThreshold_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double rmsdZThreshold_ ;
+      /**
+       * <code>double rmsd_z_threshold = 39;</code>
+       */
+      public double getRmsdZThreshold() {
+        return rmsdZThreshold_;
+      }
+      /**
+       * <code>double rmsd_z_threshold = 39;</code>
+       */
+      public Builder setRmsdZThreshold(double value) {
+        
+        rmsdZThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double rmsd_z_threshold = 39;</code>
+       */
+      public Builder clearRmsdZThreshold() {
+        
+        rmsdZThreshold_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double comShiftThreshold_ ;
+      /**
+       * <code>double com_shift_threshold = 40;</code>
+       */
+      public double getComShiftThreshold() {
+        return comShiftThreshold_;
+      }
+      /**
+       * <code>double com_shift_threshold = 40;</code>
+       */
+      public Builder setComShiftThreshold(double value) {
+        
+        comShiftThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double com_shift_threshold = 40;</code>
+       */
+      public Builder clearComShiftThreshold() {
+        
+        comShiftThreshold_ = 0D;
         onChanged();
         return this;
       }
@@ -27237,7 +27501,7 @@ public final class GUIProtos {
       "\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022" +
       "\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022" +
       "\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"" +
-      "\315\007\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
+      "\274\010\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006" +
       "radius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024" +
       "\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_setti" +
       "ngs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEng" +
@@ -27261,16 +27525,19 @@ public final class GUIProtos {
       "t_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030\n" +
       "\020crop_to_z_centre\030! \001(\010\022\026\n\016alignment_mod" +
       "e\030\" \001(\005\022\032\n\022alignment_z_radius\030# \001(\001\022\022\n\nu" +
-      "pdate_roi\030$ \001(\010\"q\n\032CameraModelManagerSet",
-      "tings\022\016\n\006option\030\001 \001(\005\022\020\n\010origin_x\030\002 \001(\005\022" +
-      "\020\n\010origin_y\030\003 \001(\005\022\r\n\005image\030\004 \001(\t\022\020\n\010sele" +
-      "cted\030\005 \001(\t\"\227\001\n\032CubicSplineManagerSetting" +
-      "s\022\016\n\006option\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rm" +
-      "agnification\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_s" +
-      "hift\030\005 \001(\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007" +
-      " \001(\001*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020" +
-      "\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPL" +
-      "ATE\020\002B\013B\tGUIProtosb\006proto3"
+      "pdate_roi\030$ \001(\010\022\033\n\023sub_pixel_precision\030%",
+      " \001(\001\022\031\n\021rmsd_xy_threshold\030& \001(\001\022\030\n\020rmsd_" +
+      "z_threshold\030\' \001(\001\022\033\n\023com_shift_threshold" +
+      "\030( \001(\001\"q\n\032CameraModelManagerSettings\022\016\n\006" +
+      "option\030\001 \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin" +
+      "_y\030\003 \001(\005\022\r\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(" +
+      "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
+      "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
+      "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014T" +
+      "emplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESO",
+      "URCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\t" +
+      "GUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -27365,7 +27632,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFCreatorSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFCreatorSettings_descriptor,
-        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "AlignmentMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", "AlignmentMode", "AlignmentZRadius", "UpdateRoi", });
+        new java.lang.String[] { "Mode", "Radius", "InteractiveMode", "NmPerSlice", "FitEngineSettings", "Psf", "AmplitudeFraction", "StartBackgroundFrames", "EndBackgroundFrames", "Magnification", "Smoothing", "CentreEachSlice", "ComCutOff", "InterpolationMethod", "PsfType", "Calibration", "AnalysisWindow", "ComWindow", "AlignmentMagnification", "MaxIterations", "CheckAlignments", "PsfMagnification", "Window", "SmoothStackSignal", "SinglePrecision", "CropBorder", "CropStart", "CropEnd", "PsfZMagnification", "ComBorder", "OutputType", "SplineFilename", "CropToZCentre", "AlignmentMode", "AlignmentZRadius", "UpdateRoi", "SubPixelPrecision", "RmsdXyThreshold", "RmsdZThreshold", "ComShiftThreshold", });
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(13);
     internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable = new
