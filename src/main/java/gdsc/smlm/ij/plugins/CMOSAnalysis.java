@@ -724,7 +724,8 @@ public class CMOSAnalysis implements PlugIn
 				if (width != source.getWidth() || height != source.getHeight())
 				{
 					error = true;
-					IJ.error(TITLE, "Image width/hieght mismatch in image series: " + sd.path.getPath());
+					IJ.error(TITLE, "Image width/height mismatch in image series: " + sd.path.getPath() + String.format(
+							"\n \nExpected %dx%d, Found %dx%d", width, height, source.getWidth(), source.getHeight()));
 					break;
 				}
 			}
@@ -809,7 +810,9 @@ public class CMOSAnalysis implements PlugIn
 						Utils.rounded(s.getStandardDeviation()), Utils.rounded(statsVariance.getMean()),
 						Utils.rounded(statsVariance.getStandardDeviation()));
 			}
+			progressBar.show(1);
 		}
+		progressBar.show(1);
 
 		Utils.setShowStatus(true);
 		Utils.setShowProgress(true);
