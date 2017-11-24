@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +18,11 @@ import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
+import ij.io.FileInfo;
+import ij.io.ImageReader;
 import ij.io.Opener;
+import ij.io.TiffDecoder;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -44,39 +49,390 @@ import ij.io.Opener;
  */
 public class SeriesImageSource extends ImageSource
 {
+	/** The buffer limit for reading TIFF images into memory. Default = 30MB */
+	private int bufferLimit = 31457280;
+
 	private class NextSource
 	{
 		final InputStream is;
+		final FileInfo[] info;
 		final int image;
 
-		public NextSource(InputStream is, int image)
+		public NextSource(InputStream is, FileInfo[] info, int image)
 		{
 			this.is = is;
+			this.info = info;
 			this.image = image;
 		}
 
 		public NextSource()
 		{
-			this(null, -1);
+			this(null, null, -1);
+		}
+	}
+
+	private abstract class Image
+	{
+		int width, height, size;
+
+		Image(int width, int height, int size)
+		{
+			this.width = width;
+			this.height = height;
+			this.size = size;
+		}
+
+		int getWidth()
+		{
+			return width;
+		}
+
+		int getHeight()
+		{
+			return height;
+		}
+
+		int getSize()
+		{
+			return size;
+		}
+
+		abstract Object getFrame(int i);
+
+		public void close()
+		{
+
+		}
+	}
+
+	private class ArrayImage extends Image
+	{
+		final Object[] imageArray;
+
+		ArrayImage()
+		{
+			super(0, 0, 0);
+			imageArray = null;
+		}
+
+		ArrayImage(ImagePlus imp)
+		{
+			super(imp.getWidth(), imp.getHeight(), imp.getStackSize());
+			this.imageArray = imp.getImageStack().getImageArray();
+		}
+
+		@Override
+		Object getFrame(int i)
+		{
+			return imageArray[i];
+		}
+	}
+
+	/**
+	 * Special class adapted from ij.io.Opener.openTiffStack(...) and ij.io.FileOpener to handle large contiguous TIFF
+	 * images.
+	 */
+	private class TiffImage extends Image
+	{
+		final FileInfo[] info;
+		FileInfo fi; // Pointer to the file info used by the ImageReader
+		boolean contiguous;
+		final long bytesPerFrame;
+		ImageReader reader = null;
+		InputStream is = null;
+		/**
+		 * Flag indicating that no errors reading the image have occurred
+		 */
+		boolean canRead = true;
+		/**
+		 * The number of frames that have been read from the input stream
+		 */
+		int frameCount = 0;
+
+		TiffImage(FileInfo[] info)
+		{
+			super(info[0].width, info[0].height, 0);
+			this.info = info;
+			fi = info[0];
+
+			// Only support certain types
+			if (isSupported(fi.fileType))
+			{
+				// Determine the number of images
+				if (info.length > 1)
+				{
+					if (allSameSizeAndType(info))
+						size = info.length;
+				}
+				else
+				{
+					size = fi.nImages;
+					contiguous = true;
+				}
+				bytesPerFrame = getBytesPerFrame(fi.fileType);
+				reader = new ImageReader(fi);
+			}
+			else
+			{
+				canRead = false;
+				bytesPerFrame = 0;
+			}
+		}
+
+		private boolean isSupported(int fileType)
+		{
+			switch (fileType)
+			{
+				// Greyscale images as we just want the raw pixels with no color model
+				case FileInfo.GRAY8:
+				case FileInfo.GRAY16_SIGNED:
+				case FileInfo.GRAY16_UNSIGNED:
+				case FileInfo.GRAY12_UNSIGNED:
+				case FileInfo.GRAY32_INT:
+				case FileInfo.GRAY32_UNSIGNED:
+				case FileInfo.GRAY32_FLOAT:
+				case FileInfo.GRAY24_UNSIGNED:
+				case FileInfo.GRAY64_FLOAT:
+					return true;
+				default:
+					return false;
+			}
+		}
+
+		private int getBytesPerFrame(int fileType)
+		{
+			switch (fileType)
+			{
+				case FileInfo.GRAY8:
+					return width * height;
+				case FileInfo.GRAY16_SIGNED:
+				case FileInfo.GRAY16_UNSIGNED:
+					return 2 * width * height;
+				case FileInfo.GRAY32_INT:
+				case FileInfo.GRAY32_UNSIGNED:
+				case FileInfo.GRAY32_FLOAT:
+					return 4 * width * height;
+				case FileInfo.GRAY64_FLOAT:
+					return 8 * width * height;
+				case FileInfo.GRAY24_UNSIGNED:
+					return 3 * width * height;
+				case FileInfo.GRAY12_UNSIGNED:
+					return (int) (width * height * 1.5);
+				default:
+					return 0;
+			}
+		}
+
+		/**
+		 * Check the file info are all the same size and type and have just 1 image
+		 * 
+		 * @param info
+		 * @return True if all the same size and type
+		 */
+		boolean allSameSizeAndType(FileInfo[] info)
+		{
+			boolean ok = info[0].nImages == 1;
+			long startingOffset = info[0].getOffset();
+			long size = info[0].width * info[0].height * info[0].getBytesPerPixel();
+			for (int i = 1; i < info.length && ok; i++)
+			{
+				ok &= info[i].fileType == info[0].fileType && info[i].width == info[0].width &&
+						info[i].height == info[0].height && info[i].nImages == 1;
+				contiguous &= info[i].getOffset() == startingOffset + i * size;
+			}
+			if (ok)
+			{
+				// We can read using only the first FileInfo object if this is contiguous
+				if (contiguous)
+					info[0].gapBetweenImages = 0;
+			}
+			return ok;
+		}
+
+		@Override
+		Object getFrame(int i)
+		{
+			if (i < frameCount)
+			{
+				// Non-sequential access has poor support as we close the file, re-open and 
+				// skip to the given frame
+				close();
+			}
+
+			if (!openInputStream())
+				return null;
+
+			try
+			{
+				// Skip ahead
+				long skip;
+
+				if (contiguous)
+				{
+					// Read using the first FileInfo object
+
+					if (i == 0)
+					{
+						// The first frame we know the exact offset
+						skip = fi.getOffset();
+					}
+					else if (i == frameCount)
+					{
+						// If sequential reading just skip the gap between frames
+						skip = fi.gapBetweenImages;
+					}
+					else
+					{
+						// Skipping ahead
+						int nFrames = i - frameCount;
+						skip = (bytesPerFrame + fi.gapBetweenImages) * nFrames;
+
+						// Ensure we skip to the start position if nothing has been read
+						if (frameCount == 0)
+							skip += fi.getOffset();
+					}
+				}
+				else
+				{
+					// Adapted from ij.io.Opener.openTiffStack(...)
+
+					// Each image is described by a separate FileInfo object
+					if (i == 0)
+					{
+						// The first frame we know the exact offset
+						skip = fi.getOffset();
+					}
+					else
+					{
+						// Skipping ahead from the current file location
+						// (including the bytes that were read last time) 
+						skip = info[i].getOffset() - (info[frameCount - 1].getOffset() + bytesPerFrame);
+						if (skip < 0L)
+							throw new IllegalStateException("Bad TIFF offset " + skip);
+						fi.stripOffsets = info[i].stripOffsets;
+						fi.stripLengths = info[i].stripLengths;
+					}
+				}
+
+				// Store the number of frames that have been read
+				frameCount = i + 1;
+
+				return reader.readPixels(is, skip);
+			}
+			catch (Exception e)
+			{
+				System.out.println(e.toString());
+				canRead = false;
+			}
+
+			return null;
+		}
+
+		private boolean openInputStream()
+		{
+			if (is == null && canRead)
+			{
+				try
+				{
+					is = createInputStream(fi);
+				}
+				catch (Exception e)
+				{
+					System.out.println(e.toString());
+				}
+				finally
+				{
+					if (is == null)
+					{
+						canRead = false;
+					}
+				}
+			}
+			return canRead;
+		}
+
+		/** Returns an InputStream for the image described by this FileInfo. */
+		public InputStream createInputStream(FileInfo fi) throws IOException
+		{
+			// Close the old input
+			close();
+
+			InputStream is = null;
+			if (fi.directory.length() > 0 && !fi.directory.endsWith(Prefs.separator))
+				fi.directory += Prefs.separator;
+			File f = new File(fi.directory + fi.fileName);
+			if (f == null || !f.exists() || f.isDirectory() || !validateFileInfo(f, fi))
+				is = null;
+			else
+				is = new FileInputStream(f);
+			return is;
+		}
+
+		/**
+		 * Adapted from ij.io.FileOpener.validateFileInfo
+		 */
+		boolean validateFileInfo(File f, FileInfo fi)
+		{
+			long offset = fi.getOffset();
+			long length = 0;
+			if (fi.width <= 0 || fi.height <= 0)
+			{
+				return false;
+			}
+			if (offset >= 0 && offset < 1000L)
+				return true;
+			if (offset < 0L)
+			{
+				return false;
+			}
+			if (fi.fileType == FileInfo.BITMAP || fi.compression != FileInfo.COMPRESSION_NONE)
+				return true;
+			length = f.length();
+			long size = fi.width * fi.height * fi.getBytesPerPixel();
+			size = fi.nImages > 1 ? size : size / 4;
+			if (fi.height == 1)
+				size = 0; // allows plugins to read info of unknown length at end of file
+			if (offset + size > length)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public void close()
+		{
+			if (is != null)
+			{
+				try
+				{
+					is.close();
+				}
+				catch (IOException e)
+				{
+					// Ignore
+				}
+				// Reset
+				is = null;
+				frameCount = 0;
+			}
 		}
 	}
 
 	private class NextImage
 	{
-		final Object[] imageArray;
-		final int imageSize;
-		final int image;
+		final Image image;
+		final int imageId;
 
-		public NextImage(Object[] imageArray, int imageSize, int image)
+		public NextImage(Image image, int imageId)
 		{
-			this.imageArray = imageArray;
-			this.imageSize = imageSize;
 			this.image = image;
+			this.imageId = imageId;
 		}
 
 		public NextImage()
 		{
-			this(null, 0, -1);
+			this(null, -1);
 		}
 	}
 
@@ -101,32 +457,57 @@ public class SeriesImageSource extends ImageSource
 				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
 				{
 					InputStream is = null;
+					FileInfo[] info = null;
 					// For a TIFF series ImageJ can open as input stream. We support this by using this
 					// thread to read the file from disk sequentially and cache into memory. The images
 					// can then be opened by multiple threads without IO contention.
 					if (isTiffSeries)
 					{
 						final String path = images.get(currentImage);
+						FileInputStream fis = null;
 						try
 						{
 							//System.out.println("Reading " + images.get(currentImage));
 
-							FileInputStream fis = new FileInputStream(path);
-							byte[] buf = new byte[fis.available()];
-							int read = fis.read(buf);
-							fis.close();
-							is = new ByteArrayInputStream(buf, 0, read);
+							fis = new FileInputStream(path);
+							// Don't buffer massive images into memory
+							if (fis.getChannel().size() <= bufferLimit)
+							{
+								byte[] buf = new byte[fis.available()];
+								int read = fis.read(buf);
+								is = new ByteArrayInputStream(buf, 0, read);
+							}
+							else
+							{
+								// This is a big image. We support reading the TIFF sequentially.
+								TiffDecoder td = new TiffDecoder(fis, path);
+								info = td.getTiffInfo();
+							}
 						}
-						catch (Exception e)
+						catch (Throwable e)
 						{
 							// TODO - handle appropriately
 							// At the moment if we ignore this then the ImageWorker will open the file
 							// rather than process from the memory stream.
 							System.out.println(e.toString());
 						}
+						finally
+						{
+							if (fis != null)
+							{
+								try
+								{
+									fis.close();
+								}
+								catch (IOException e)
+								{
+									// Ignore
+								}
+							}
+						}
 					}
 
-					sourceQueue.put(new NextSource(is, currentImage));
+					sourceQueue.put(new NextSource(is, info, currentImage));
 				}
 			}
 			catch (InterruptedException e)
@@ -193,8 +574,13 @@ public class SeriesImageSource extends ImageSource
 							IJ.log("Opening " + images.get(currentImage));
 						}
 					}
-					ImagePlus imp;
-					if (nextSource.is != null)
+					Image image = null;
+					ImagePlus imp = null;
+					if (nextSource.info != null)
+					{
+						image = new TiffImage(nextSource.info);
+					}
+					else if (nextSource.is != null)
 					{
 						//System.out.println(id + ": Processing " + images.get(currentImage));
 						imp = opener.openTiff(nextSource.is, images.get(currentImage));
@@ -208,18 +594,25 @@ public class SeriesImageSource extends ImageSource
 
 					//System.out.println(id + ": Opened " + images.get(currentImage));
 
-					Object[] imageArray = null;
-					int currentImageSize = 0;
-					if (imp != null)
+					if (image == null)
 					{
-						imageArray = imp.getImageStack().getImageArray();
-						currentImageSize = imp.getStackSize();
-
-						// Initialise dimensions on the first valid image
-						if (width == 0)
-							setDimensions(imp.getWidth(), imp.getHeight(), currentImageSize);
+						if (imp != null)
+						{
+							image = new ArrayImage(imp);
+						}
+						else
+						{
+							image = new ArrayImage();
+						}
 					}
-					imageQueue.put(new NextImage(imageArray, currentImageSize, currentImage));
+
+					// Initialise dimensions on the first valid image
+					if (width == 0 && image.getSize() != 0)
+					{
+						setDimensions(image.getWidth(), image.getHeight(), image.getSize());
+					}
+
+					imageQueue.put(new NextImage(image, currentImage));
 				}
 			}
 			catch (Exception e)
@@ -245,23 +638,19 @@ public class SeriesImageSource extends ImageSource
 
 	// Used for sequential read
 	@XStreamOmitField
-	private Object[] imageArray = null;
+	private Image image = null;
 	@XStreamOmitField
-	private int nextImage;
+	private int nextImageId;
 	@XStreamOmitField
 	private NextImage[] nextImages;
 	@XStreamOmitField
 	private int currentSlice;
-	@XStreamOmitField
-	private int currentImageSize;
 
 	// Used for frame-based read
 	@XStreamOmitField
-	private Object[] lastImageArray = null;
+	private Image lastImage = null;
 	@XStreamOmitField
-	private int lastImage;
-	@XStreamOmitField
-	private int lastImageSize;
+	private int lastImageId;
 
 	@XStreamOmitField
 	private boolean logProgress = false;
@@ -459,16 +848,16 @@ public class SeriesImageSource extends ImageSource
 	public void close()
 	{
 		setDimensions(0, 0, 0);
-		imageArray = lastImageArray = null;
-		nextImage = currentSlice = currentImageSize = lastImage = lastImageSize = 0;
+		image = lastImage = null;
+		nextImageId = currentSlice = lastImageId = 0;
 		closeQueue();
 	}
 
-	private Object[] getNextImage()
+	private Image getNextImage()
 	{
-		imageArray = null;
-		currentSlice = currentImageSize = 0;
-		if (nextImage < nextImages.length)
+		image = null;
+		currentSlice = 0;
+		if (nextImageId < nextImages.length)
 		{
 			try
 			{
@@ -476,27 +865,25 @@ public class SeriesImageSource extends ImageSource
 				{
 					// Images may be out of order due to multiple thread processing.
 					// Check if we have processed the next image we need.
-					NextImage next = nextImages[nextImage];
+					NextImage next = nextImages[nextImageId];
 					if (next != null)
 					{
 						// Clear memory
-						nextImages[nextImage] = null;
+						nextImages[nextImageId] = null;
 
-						nextImage++;
+						nextImageId++;
 
 						// Check if there is image data. It may be null if the image was invalid
-						if (next.imageArray != null)
+						if (next.image != null)
 						{
-							imageArray = next.imageArray;
-							currentImageSize = next.imageSize;
+							image = next.image;
 
 							//System.out.println("Found image: " + images.get(next.image));
 
 							// Fill cache
-							lastImageArray = imageArray;
-							lastImageSize = currentImageSize;
-							lastImage = next.image;
-							return imageArray;
+							lastImage = image;
+							lastImageId = next.imageId;
+							return image;
 						}
 						else
 						{
@@ -519,10 +906,10 @@ public class SeriesImageSource extends ImageSource
 					if (next != null)
 					{
 						// -1 is used when the worker has finished
-						if (next.image != -1)
+						if (next.imageId != -1)
 						{
 							// Valid image so store it
-							nextImages[next.image] = next;
+							nextImages[next.imageId] = next;
 						}
 
 						continue;
@@ -537,7 +924,7 @@ public class SeriesImageSource extends ImageSource
 
 			}
 		}
-		return imageArray;
+		return image;
 	}
 
 	private boolean workersRunning()
@@ -580,16 +967,17 @@ public class SeriesImageSource extends ImageSource
 	protected float[] nextFrame(Rectangle bounds)
 	{
 		// Rolling access
-		if (imageArray != null)
+		if (image != null)
 		{
 			// Check if all frames have been accessed in the current image
-			if (currentSlice >= currentImageSize)
+			if (currentSlice >= image.size)
 			{
+				image.close();
 				// If no more images then return null
 				if (getNextImage() == null)
 					return null;
 			}
-			return ImageConverter.getData(imageArray[currentSlice++], width, height, bounds, null);
+			return ImageConverter.getData(image.getFrame(currentSlice++), width, height, bounds, null);
 		}
 		return null;
 	}
@@ -606,30 +994,72 @@ public class SeriesImageSource extends ImageSource
 			return null;
 
 		// Calculate the required image and slice
-		int image = (frame - 1) / maxz;
+		int id = (frame - 1) / maxz;
 		int slice = (frame - 1) % maxz;
 
 		// Return from the cache if it exists
-		if (image != lastImage || lastImageArray == null)
+		if (id != lastImageId || lastImage == null)
 		{
-			lastImageArray = null;
-			lastImageSize = 0;
-			if (image < images.size())
+			lastImage = null;
+			if (id < images.size())
 			{
-				ImagePlus imp = IJ.openImage(images.get(image++));
-				if (imp != null)
+				String path = images.get(id);
+				if (isTiffSeries)
 				{
-					lastImageArray = imp.getImageStack().getImageArray();
-					lastImageSize = imp.getStackSize();
+					// Open using specialised TIFF reader
+					FileInputStream fis = null;
+					try
+					{
+						fis = new FileInputStream(path);
+						TiffDecoder td = new TiffDecoder(fis, path);
+						FileInfo[] info = td.getTiffInfo();
+
+						lastImage = new TiffImage(info);
+						if (lastImage.getSize() == 0)
+						{
+							// Not supported - Fall back to IJ objects
+							ImagePlus imp = IJ.openImage(path);
+							if (imp != null)
+							{
+								lastImage = new ArrayImage(imp);
+							}
+						}
+					}
+					catch (Throwable e)
+					{
+						System.out.println(e.toString());
+					}
+					finally
+					{
+						if (fis != null)
+						{
+							try
+							{
+								fis.close();
+							}
+							catch (IOException e)
+							{
+								// Ignore
+							}
+						}
+					}
+				}
+				else
+				{
+					ImagePlus imp = IJ.openImage(path);
+					if (imp != null)
+					{
+						lastImage = new ArrayImage(imp);
+					}
 				}
 			}
 		}
-		lastImage = image;
-		if (lastImageArray != null)
+		lastImageId = id;
+		if (lastImage != null)
 		{
-			if (slice < lastImageSize)
+			if (slice < lastImage.size)
 			{
-				return ImageConverter.getData(lastImageArray[slice], width, height, bounds, null);
+				return ImageConverter.getData(lastImage.getFrame(slice), width, height, bounds, null);
 			}
 		}
 		return null;
@@ -694,5 +1124,26 @@ public class SeriesImageSource extends ImageSource
 	public void setNumberOfThreads(int numberOfThreads)
 	{
 		this.numberOfThreads = Math.max(1, numberOfThreads);
+	}
+
+	/**
+	 * Gets the buffer limit for reading TIFF images into memory.
+	 *
+	 * @return the buffer limit
+	 */
+	public int getBufferLimit()
+	{
+		return bufferLimit;
+	}
+
+	/**
+	 * Sets the buffer limit for reading TIFF images into memory.
+	 *
+	 * @param bufferLimit
+	 *            the new buffer limit
+	 */
+	public void setBufferLimit(int bufferLimit)
+	{
+		this.bufferLimit = bufferLimit;
 	}
 }
