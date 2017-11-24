@@ -228,7 +228,7 @@ public class GUIProtosHelper
 		builder.setWindow(3);
 		builder.setSmoothStackSignal(true);
 		builder.setComBorder(0.40); // Right in the middle of a spot
-		builder.setAlignmentMode(0); // Projections
+		builder.setAlignmentMode(0); // 2D Projections (3D cross correlation has normalisations stability issues)
 		builder.setAlignmentZRadius(0); // All of the z-stack
 		builder.setSubPixelPrecision(0.01);
 		builder.setRmsdXyThreshold(0.01);

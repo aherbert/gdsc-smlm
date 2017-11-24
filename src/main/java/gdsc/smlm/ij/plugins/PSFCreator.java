@@ -2776,6 +2776,9 @@ public class PSFCreator implements PlugInFilter
 		boolean converged = false;
 		for (int iter = 0; !converged && iter < settings.getMaxIterations(); iter++)
 		{
+			if (Utils.isInterrupted())
+				return;
+			
 			// Combine all PSFs
 			Utils.showStatus(String.format("[%d] Aligning PSFs", iter + 1));
 			ExtractedPSF combined = combine(psfs);
@@ -2807,6 +2810,8 @@ public class PSFCreator implements PlugInFilter
 
 			// Align each to the combined PSF
 			float[][] translation = align(combined, psfs);
+			if (Utils.isInterrupted())
+				return;
 
 			// Find the new centre using the old centre plus the alignment shift
 			for (int j = 0; j < psfs.length; j++)
@@ -3213,8 +3218,6 @@ public class PSFCreator implements PlugInFilter
 		// This can be reused as a buffer
 		float[][] psf = new float[image.length][];
 
-		//double mean = 0;
-
 		for (int i = 0; i < centres.length; i++)
 		{
 			// Extract stack
@@ -3272,11 +3275,20 @@ public class PSFCreator implements PlugInFilter
 			float dx = (float) (com[0] + bounds.x - centres[i].getX());
 			float dy = (float) (com[1] + bounds.y - centres[i].getY());
 			float dz = (float) (zSelector.zCentre - centres[i].getZ());
+			BasePoint newCentre = centres[i].shift(dx, dy, dz);
+			if (settings.getSubPixelPrecision() > 0)
+			{
+				newCentre = new BasePoint((float) Maths.round(newCentre.getX(), settings.getSubPixelPrecision()),
+						(float) Maths.round(newCentre.getY(), settings.getSubPixelPrecision()),
+						(float) Maths.round(newCentre.getZ(), settings.getSubPixelPrecision()));
+				dx = newCentre.getX() - centres[i].getX();
+				dy = newCentre.getY() - centres[i].getY();
+				dz = newCentre.getZ() - centres[i].getZ();
+			}			
 			Utils.log("Centre %d : %s,%s,%s updated by %s,%s,%s", i + 1, rounder.toString(centres[i].getX()),
 					rounder.toString(centres[i].getY()), rounder.toString(centres[i].getZ()), rounder.toString(dx),
 					rounder.toString(dy), rounder.toString(dz));
-			centres[i] = centres[i].shift(dx, dy, dz);
-			//mean += centres[i].getZ();
+			centres[i] = newCentre;
 		}
 
 		if (settings.getInteractiveMode())
@@ -3300,11 +3312,6 @@ public class PSFCreator implements PlugInFilter
 			if (size < centres.length)
 				centres = Arrays.copyOf(centres, size);
 		}
-
-		//// z-centres should be relative to the combined stack, not absolute
-		//mean /= centres.length;
-		//for (int i = 0; i < centres.length; i++)
-		//	centres[i] = new BasePoint(centres[i].getX(), centres[i].getY(), (float) (centres[i].getZ() - mean));
 
 		return centres;
 	}
