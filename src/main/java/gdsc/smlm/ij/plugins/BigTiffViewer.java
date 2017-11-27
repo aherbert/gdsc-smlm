@@ -57,17 +57,20 @@ public class BigTiffViewer implements PlugIn
 
 		SeriesImageSource source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
 		source.setBufferLimit(0); // No memory buffer
+		source.setLogProgress(true);
 
 		if (!source.isTiffSeries)
 		{
 			IJ.error(TITLE, "Not a TIFF image");
 			return;
 		}
+		Utils.showStatus("Opening TIFF ...");
 		if (!source.open())
 		{
 			IJ.error(TITLE, "Cannot open the image");
 			return;
 		}
+		Utils.showStatus("");
 
 		// Q. Can we create a virtual stack?
 		new TiffSeriesVirtualStack(source).show();
@@ -93,7 +96,7 @@ public class BigTiffViewer implements PlugIn
 			if (!source.isValid(1))
 				throw new IllegalArgumentException("Source has no frames");
 			this.source = source;
-			Object pixels = source.get(1);
+			Object pixels = source.getRaw(1);
 			if (pixels == null)
 				throw new IllegalArgumentException("Source has no first frame");
 			setBitDepth(Utils.getBitDepth(pixels));

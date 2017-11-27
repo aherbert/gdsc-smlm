@@ -130,6 +130,8 @@ public class SeriesImageSource extends ImageSource
 	/**
 	 * Special class adapted from ij.io.Opener.openTiffStack(...) and ij.io.FileOpener to handle large contiguous TIFF
 	 * images.
+	 * <p>
+	 * The methods that manipulate the internal state are synchronized to prevent multiple threads causing read errors.
 	 */
 	private class TiffImage extends Image
 	{
@@ -257,7 +259,7 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		@Override
-		Object getFrame(int i)
+		synchronized Object getFrame(int i)
 		{
 			if (i < frameCount)
 			{
@@ -303,21 +305,17 @@ public class SeriesImageSource extends ImageSource
 				{
 					// Adapted from ij.io.Opener.openTiffStack(...)
 
-					// Each image is described by a separate FileInfo object
-					if (i == 0)
+					// Each image offset is described by a separate FileInfo object
+					skip = info[i].getOffset();
+					fi.stripOffsets = info[i].stripOffsets;
+					fi.stripLengths = info[i].stripLengths;
+
+					if (frameCount != 0)
 					{
-						// The first frame we know the exact offset
-						skip = fi.getOffset();
-					}
-					else
-					{
-						// Skipping ahead from the current file location
-						// (including the bytes that were read last time) 
-						skip = info[i].getOffset() - (info[frameCount - 1].getOffset() + bytesPerFrame);
+						// We must subtract the current file location.
+						skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
 						if (skip < 0L)
 							throw new IllegalStateException("Bad TIFF offset " + skip);
-						fi.stripOffsets = info[i].stripOffsets;
-						fi.stripLengths = info[i].stripLengths;
 					}
 				}
 
@@ -407,7 +405,7 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		@Override
-		public void close()
+		synchronized public void close()
 		{
 			if (is != null)
 			{
@@ -488,6 +486,15 @@ public class SeriesImageSource extends ImageSource
 							{
 								// This is a big image. We support reading the TIFF sequentially.
 								TiffDecoder td = new TiffDecoder(fis, path);
+								if (logProgress)
+								{
+									long time = System.currentTimeMillis();
+									if (time - lastTime > 500)
+									{
+										lastTime = time;
+										IJ.log("Reading TIFF info " + path);
+									}
+								}
 								info = td.getTiffInfo();
 							}
 						}
