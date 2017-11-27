@@ -46,6 +46,8 @@ public class TiffSeriesViewer implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+		
+		boolean extraOptions = Utils.isExtraOptions();
 
 		String dir = Utils.getDirectory("Select image series ...", inputDirectory);
 		if (TextUtils.isNullOrEmpty(dir))
@@ -62,7 +64,7 @@ public class TiffSeriesViewer implements PlugIn
 
 		SeriesImageSource source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
 		source.setBufferLimit(0); // No memory buffer
-		source.setLogProgress(true);
+		source.setLogProgress(extraOptions);
 
 		if (!source.isTiffSeries)
 		{
