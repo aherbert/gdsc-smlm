@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import java.awt.Rectangle;
-
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /*----------------------------------------------------------------------------- 
@@ -94,10 +92,10 @@ public class MemoryImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
 	 */
 	@Override
-	protected float[] nextFrame(Rectangle bounds)
+	protected float[] nextRawFrame()
 	{
 		if (counter < data.length)
-			return getFrame(++counter, bounds);
+			return getRawFrame(++counter);
 		return null;
 	}
 
@@ -107,27 +105,11 @@ public class MemoryImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
 	 */
 	@Override
-	protected float[] getFrame(int frame, Rectangle bounds)
+	protected float[] getRawFrame(int frame)
 	{
 		if (frame > 0 && frame <= data.length)
 		{
-			if (checkBounds(bounds))
-			{
-				final float[] pixels = data[frame - 1];
-				float[] pixels2 = new float[bounds.width * bounds.height];
-				for (int ys = bounds.y; ys < bounds.y + bounds.height; ys++)
-				{
-					int offset1 = (ys - bounds.y) * bounds.width;
-					int offset2 = ys * width + bounds.x;
-					for (int xs = 0; xs < bounds.width; xs++)
-						pixels2[offset1++] = pixels[offset2++];
-				}
-				return pixels2;
-			}
-			else
-			{
-				return data[frame - 1];
-			}
+			return data[frame - 1];
 		}
 		return null;
 	}

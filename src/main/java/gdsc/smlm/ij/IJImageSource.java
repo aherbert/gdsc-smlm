@@ -1,12 +1,9 @@
 package gdsc.smlm.ij;
 
-import java.awt.Rectangle;
-
 import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
@@ -53,7 +50,7 @@ public class IJImageSource extends ImageSource
 	{
 		super(name);
 	}
-	
+
 	/**
 	 * Create a new image source using the path to the image file
 	 * 
@@ -100,7 +97,7 @@ public class IJImageSource extends ImageSource
 		if (singleFrame > 0)
 			frames = 1 + this.extraFrames;
 		else
-			frames = imp.getStackSize();			
+			frames = imp.getStackSize();
 		slice = 0;
 		FileInfo info = imp.getOriginalFileInfo();
 		if (info != null)
@@ -166,7 +163,7 @@ public class IJImageSource extends ImageSource
 		xOrigin = x;
 		yOrigin = y;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -237,33 +234,31 @@ public class IJImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
 	 */
 	@Override
-	protected float[] nextFrame(Rectangle bounds)
+	protected Object nextRawFrame()
 	{
 		++slice;
 		if (singleFrame > 0)
 		{
 			// Return frames from the starting frame until the extra frames limit is reached
-			return (slice - 1 <= extraFrames) ? get(singleFrame + slice - 1, bounds) : null;
+			return (slice - 1 <= extraFrames) ? get(singleFrame + slice - 1) : null;
 		}
-		return get(slice, bounds);
+		return get(slice);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
 	 */
 	@Override
-	protected float[] getFrame(int frame, Rectangle bounds)
+	protected Object getRawFrame(int frame)
 	{
 		if (imageArray != null)
 		{
 			if (frame > 0 && frame <= imageArray.length)
 			{
-				return ImageConverter.getData(imageArray[frame - 1], width, height, bounds, null);
+				return imageArray[frame - 1];
 			}
 		}
 		else if (imageStack != null)
@@ -271,7 +266,7 @@ public class IJImageSource extends ImageSource
 			// This is a virtual stack so access the image processor through the virtual stack object
 			if (frame > 0 && frame <= imageStack.getSize())
 			{
-				return ImageConverter.getData(imageStack.getPixels(frame), width, height, bounds, null);
+				return imageStack.getPixels(frame);
 			}
 		}
 		return null;

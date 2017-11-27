@@ -155,15 +155,18 @@ public class AggregatedImageSource extends ImageSource
 		imageSource.close();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Overridden to allow the crop to be done before aggregation
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#next(java.awt.Rectangle)
 	 */
 	@Override
-	protected float[] nextFrame(Rectangle bounds)
+	public float[] next(Rectangle bounds)
 	{
-		// Aggregate frames consecutive frames
+		if (!checkBounds(bounds))
+			bounds = null;
+
+		// Aggregate consecutive frames
 		float[] image = imageSource.next(bounds);
 		if (image != null)
 		{
@@ -185,20 +188,27 @@ public class AggregatedImageSource extends ImageSource
 			setFrameNumber(start, end);
 			//System.out.printf("Aggregated %d-%d\n", start, end);
 		}
+		else
+		{
+			setFrameNumber(0, 0);
+		}
 		return image;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Overridden to allow the crop to be done before aggregation
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#get(int, java.awt.Rectangle)
 	 */
 	@Override
-	protected float[] getFrame(int frame, Rectangle bounds)
+	public float[] get(int frame, Rectangle bounds)
 	{
 		if (frame < 1)
 			return null;
 
+		if (!checkBounds(bounds))
+			bounds = null;
+		
 		// Calculate if the cache is invalid
 		if (frame != lastFrame || lastImage == null)
 		{
@@ -218,6 +228,86 @@ public class AggregatedImageSource extends ImageSource
 			while (collated < aggregate && imageSource.isValid(++nextFrame))
 			{
 				float[] image2 = imageSource.get(nextFrame, bounds);
+				if (image2 != null)
+				{
+					lastEndFrame = imageSource.getEndFrameNumber();
+					for (int i = 0; i < image.length; i++)
+						image[i] += image2[i];
+					collated++;
+				}
+			}
+			// Cache the image
+			lastImage = image;
+			lastFrame = frame;
+		}
+		// Ensure that the frame number is recorded
+		setFrameNumber(lastStartFrame, lastEndFrame);
+		return lastImage;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
+	 */
+	@Override
+	protected Object nextRawFrame()
+	{
+		// Aggregate frames consecutive frames
+		float[] image = imageSource.next();
+		if (image != null)
+		{
+			// Ensure the original image is not updated by creating a copy
+			image = Arrays.copyOf(image, image.length);
+
+			final int start = imageSource.getStartFrameNumber();
+			int end = imageSource.getEndFrameNumber();
+			for (int n = 1; n < aggregate; n++)
+			{
+				float[] image2 = imageSource.next();
+				if (image2 == null)
+					break;
+				end = imageSource.getEndFrameNumber();
+				for (int i = 0; i < image.length; i++)
+					image[i] += image2[i];
+			}
+			// Ensure that the frame number is recorded
+			setFrameNumber(start, end);
+			//System.out.printf("Aggregated %d-%d\n", start, end);
+		}
+		return image;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
+	 */
+	@Override
+	protected Object getRawFrame(int frame)
+	{
+		if (frame < 1)
+			return null;
+
+		// Calculate if the cache is invalid
+		if (frame != lastFrame || lastImage == null)
+		{
+			// Try and get the desired frame
+			float[] image = imageSource.get(frame);
+			if (image == null)
+				return null;
+			lastStartFrame = imageSource.getStartFrameNumber();
+			lastEndFrame = imageSource.getEndFrameNumber();
+
+			// Ensure the original image is not updated by creating a copy
+			image = Arrays.copyOf(image, image.length);
+
+			// Go forwards until the desired number of frames have been collated
+			int collated = 1;
+			int nextFrame = frame;
+			while (collated < aggregate && imageSource.isValid(++nextFrame))
+			{
+				float[] image2 = imageSource.get(nextFrame);
 				if (image2 != null)
 				{
 					lastEndFrame = imageSource.getEndFrameNumber();

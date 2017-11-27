@@ -14,7 +14,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
-import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
@@ -615,10 +614,22 @@ public class SeriesImageSource extends ImageSource
 						}
 					}
 
-					// Initialise dimensions on the first valid image
-					if (width == 0 && image.getSize() != 0)
+					if (image.getSize() != 0)
 					{
-						setDimensions(image.getWidth(), image.getHeight(), image.getSize());
+						if (width == 0)
+						{
+							// Initialise dimensions on the first valid image
+							setDimensions(image.getWidth(), image.getHeight(), image.getSize());
+						}
+						else
+						{
+							// Check dimensions
+							if (image.getWidth() != getWidth() || image.getHeight() != getHeight())
+							{
+								// Return no image data
+								image = new ArrayImage();
+							}
+						}
 					}
 
 					imageQueue.put(new NextImage(image, currentImage));
@@ -991,10 +1002,10 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
 	 */
 	@Override
-	protected float[] nextFrame(Rectangle bounds)
+	protected Object nextRawFrame()
 	{
 		// Rolling access
 		if (image != null)
@@ -1007,7 +1018,7 @@ public class SeriesImageSource extends ImageSource
 				if (getNextImage() == null)
 					return null;
 			}
-			return ImageConverter.getData(image.getFrame(currentSlice++), width, height, bounds, null);
+			return image.getFrame(currentSlice++);
 		}
 		return null;
 	}
@@ -1015,10 +1026,10 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
 	 */
 	@Override
-	protected float[] getFrame(int frame, Rectangle bounds)
+	protected Object getRawFrame(int frame)
 	{
 		if (maxz == 0 || frame < 1)
 			return null;
@@ -1030,6 +1041,9 @@ public class SeriesImageSource extends ImageSource
 		// Return from the cache if it exists
 		if (id != lastImageId || lastImage == null)
 		{
+			if (lastImage != null)
+				lastImage.close();
+
 			// Used to cache the TIFF info
 			lastImage = null;
 			if (id < images.size())
@@ -1108,7 +1122,7 @@ public class SeriesImageSource extends ImageSource
 		{
 			if (slice < lastImage.size)
 			{
-				return ImageConverter.getData(lastImage.getFrame(slice), width, height, bounds, null);
+				return lastImage.getFrame(slice);
 			}
 		}
 		return null;
