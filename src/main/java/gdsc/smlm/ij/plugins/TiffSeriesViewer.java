@@ -23,6 +23,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.VirtualStack;
+import ij.io.FileInfo;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -30,9 +31,9 @@ import ij.process.ImageProcessor;
 /**
  * Reads a TIFF image using the series image source and presents it using a read-only virtual stack image.
  */
-public class BigTiffViewer implements PlugIn
+public class TiffSeriesViewer implements PlugIn
 {
-	private static final String TITLE = "Big Tiff Viewer";
+	private static final String TITLE = "Tiff Series Viewer";
 	private static String inputDirectory = "";
 
 	/*
@@ -44,9 +45,10 @@ public class BigTiffViewer implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		inputDirectory = IJ.getDirectory("Select image series ...");
-		if (TextUtils.isNullOrEmpty(inputDirectory))
+		String dir = Utils.getDirectory("Select image series ...", inputDirectory);
+		if (TextUtils.isNullOrEmpty(dir))
 			return;
+		inputDirectory = dir;
 
 		SeriesOpener series = new SeriesOpener(inputDirectory);
 		if (series.getNumberOfImages() == 0)
@@ -109,7 +111,11 @@ public class BigTiffViewer implements PlugIn
 		 */
 		public ImagePlus show()
 		{
-			return Utils.display(source.getName(), this);
+			ImagePlus imp = Utils.display(source.getName(), this);
+			// So the FileSaver can save the stack make sure the FileInfo is not null
+			FileInfo fi = new FileInfo();
+			imp.setFileInfo(fi);
+			return imp;
 		}
 
 		/**
