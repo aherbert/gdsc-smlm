@@ -19,9 +19,11 @@ import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.ij.SeriesImageSource;
+import gdsc.smlm.ij.settings.Constants;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Prefs;
 import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.plugin.PlugIn;
@@ -34,7 +36,7 @@ import ij.process.ImageProcessor;
 public class TiffSeriesViewer implements PlugIn
 {
 	private static final String TITLE = "Tiff Series Viewer";
-	private static String inputDirectory = "";
+	private static String inputDirectory = Prefs.get(Constants.tiffSeriesDirectory, "");
 
 	/*
 	 * (non-Javadoc)
@@ -49,6 +51,7 @@ public class TiffSeriesViewer implements PlugIn
 		if (TextUtils.isNullOrEmpty(dir))
 			return;
 		inputDirectory = dir;
+		Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
 
 		SeriesOpener series = new SeriesOpener(inputDirectory);
 		if (series.getNumberOfImages() == 0)

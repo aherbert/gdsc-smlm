@@ -58,4 +58,6 @@ public class Constants
 	public static final String inputGain = "gdsc.smlm.gain";
 	public static final String inputExposureTime = "gdsc.smlm.exposureTime";
 	public static final String inputNoise = "gdsc.smlm.noise";
+	
+	public static final String tiffSeriesDirectory = "gdsc.smlm.tiffSeriesDirectory";
 }
