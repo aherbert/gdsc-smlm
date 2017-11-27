@@ -179,6 +179,14 @@ public class SeriesImageSource extends ImageSource
 			}
 		}
 
+		TiffImage()
+		{
+			super(0, 0, 0);
+			info = null;
+			bytesPerFrame = 0;
+			canRead = false;
+		}
+
 		private boolean isSupported(int fileType)
 		{
 			switch (fileType)
@@ -576,6 +584,7 @@ public class SeriesImageSource extends ImageSource
 					}
 					Image image = null;
 					ImagePlus imp = null;
+					// The TIFF info is used when a very large TIFF image
 					if (nextSource.info != null)
 					{
 						image = new TiffImage(nextSource.info);
@@ -632,6 +641,12 @@ public class SeriesImageSource extends ImageSource
 
 	private ArrayList<String> images;
 	public final boolean isTiffSeries;
+
+	/**
+	 * Used to cache the TIFF info for non-sequential reading
+	 */
+	@XStreamOmitField
+	private TiffImage[] tiffImages;
 
 	@XStreamOmitField
 	private int maxz;
@@ -748,6 +763,9 @@ public class SeriesImageSource extends ImageSource
 
 		// Create the queue for loading the images
 		createQueue();
+
+		if (isTiffSeries && (tiffImages == null || tiffImages.length != images.size()))
+			tiffImages = new TiffImage[images.size()];
 
 		return getNextImage() != null;
 	}
@@ -883,6 +901,12 @@ public class SeriesImageSource extends ImageSource
 							// Fill cache
 							lastImage = image;
 							lastImageId = next.imageId;
+							// The cache is used for non-sequential reading. To prevent 
+							// memory usage during sequential reading only cache the first 
+							// one as this is generated when the source is opened and it is 
+							// unclear if the source is to be used non-sequentially. 
+							if (isTiffSeries && lastImageId == 0 && image instanceof TiffImage)
+								storeTiffImage(lastImageId, (TiffImage) image);
 							return image;
 						}
 						else
@@ -925,6 +949,12 @@ public class SeriesImageSource extends ImageSource
 			}
 		}
 		return image;
+	}
+
+	private void storeTiffImage(int imageId, TiffImage image)
+	{
+		// This could be made optional to save memory
+		tiffImages[imageId] = (TiffImage) image;
 	}
 
 	private boolean workersRunning()
@@ -1000,22 +1030,55 @@ public class SeriesImageSource extends ImageSource
 		// Return from the cache if it exists
 		if (id != lastImageId || lastImage == null)
 		{
+			// Used to cache the TIFF info
 			lastImage = null;
 			if (id < images.size())
 			{
 				String path = images.get(id);
 				if (isTiffSeries)
 				{
-					// Open using specialised TIFF reader
-					FileInputStream fis = null;
+					// Check the cache
+					TiffImage tiffImage = tiffImages[id];
+					if (tiffImage == null)
+					{
+						// Open using specialised TIFF reader for better non-sequential support
+						FileInputStream fis = null;
+						try
+						{
+							fis = new FileInputStream(path);
+							TiffDecoder td = new TiffDecoder(fis, path);
+							FileInfo[] info = td.getTiffInfo();
+							tiffImage = new TiffImage(info);
+
+							storeTiffImage(id, tiffImage);
+						}
+						catch (Throwable e)
+						{
+							System.out.println(e.toString());
+							// Prevent reading again. Skip the storeTiffImage(...) method 
+							// as that may be optional and we don't want to repeat the error.
+							tiffImages[id] = new TiffImage();
+						}
+						finally
+						{
+							if (fis != null)
+							{
+								try
+								{
+									fis.close();
+								}
+								catch (IOException e)
+								{
+									// Ignore
+								}
+							}
+						}
+					}
+
+					lastImage = tiffImage;
 					try
 					{
-						fis = new FileInputStream(path);
-						TiffDecoder td = new TiffDecoder(fis, path);
-						FileInfo[] info = td.getTiffInfo();
-
-						lastImage = new TiffImage(info);
-						if (lastImage.getSize() == 0)
+						if (lastImage == null || lastImage.getSize() == 0)
 						{
 							// Not supported - Fall back to IJ objects
 							ImagePlus imp = IJ.openImage(path);
@@ -1028,20 +1091,6 @@ public class SeriesImageSource extends ImageSource
 					catch (Throwable e)
 					{
 						System.out.println(e.toString());
-					}
-					finally
-					{
-						if (fis != null)
-						{
-							try
-							{
-								fis.close();
-							}
-							catch (IOException e)
-							{
-								// Ignore
-							}
-						}
 					}
 				}
 				else
