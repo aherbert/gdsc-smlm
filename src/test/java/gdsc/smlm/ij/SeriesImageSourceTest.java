@@ -21,11 +21,23 @@ public class SeriesImageSourceTest
 	@Test
 	public void canReadBigTIFFSequentially() throws IOException
 	{
+		canReadBigTIFFSequentially(false);
+	}
+
+	@Test
+	public void canReadBigTIFFSequentiallyInMemory() throws IOException
+	{
+		canReadBigTIFFSequentially(true);
+	}
+
+	private void canReadBigTIFFSequentially(boolean inMemory) throws IOException
+	{
 		int n = 2;
 		String[] filenames = createFilenames(n);
 		ImageStack[] stacks = createSeries(filenames);
 		SeriesImageSource source = new SeriesImageSource("Test", filenames);
-		source.setBufferLimit(0); // To force big tiff reading functionality
+		if (!inMemory)
+			source.setBufferLimit(0); // To force standard reading functionality
 		source.open();
 		Assert.assertEquals(w, source.getWidth());
 		Assert.assertEquals(h, source.getHeight());
@@ -44,11 +56,23 @@ public class SeriesImageSourceTest
 	@Test
 	public void canReadBigTIFFNonSequentially() throws IOException
 	{
+		canReadBigTIFFNonSequentially(false);
+	}
+
+	@Test
+	public void canReadBigTIFFNonSequentiallyInMemory() throws IOException
+	{
+		canReadBigTIFFNonSequentially(true);
+	}
+	
+	private void canReadBigTIFFNonSequentially(boolean inMemory) throws IOException
+	{
 		int n = 2;
 		String[] filenames = createFilenames(n);
 		ImageStack[] stacks = createSeries(filenames);
 		SeriesImageSource source = new SeriesImageSource("Test", filenames);
-		source.setBufferLimit(0); // To force big tiff reading functionality
+		if (!inMemory)
+			source.setBufferLimit(0); // To force standard reading functionality
 		source.open();
 		Assert.assertEquals(w, source.getWidth());
 		Assert.assertEquals(h, source.getHeight());
