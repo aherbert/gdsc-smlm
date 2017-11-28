@@ -424,7 +424,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return flags;
 	}
 
-	private String getName(String[] imageList)
+	static String getName(String[] imageList)
 	{
 		String name = imageList[0];
 		// Remove directory

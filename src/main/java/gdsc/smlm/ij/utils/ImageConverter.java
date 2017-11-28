@@ -56,12 +56,12 @@ public class ImageConverter
 
 	/**
 	 * Get the data from the image as a float array (include cropping to the ROI). Data is duplicated if the
-	 * input already a float array.
+	 * input is already a float array.
 	 * <p>
 	 * Allows reuse of an existing buffer if provided. This will not be truncated if it is larger than the
 	 * ImageProcessor ROI bounds. If smaller then a new buffer will be created.
 	 * <p>
-	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned. 
+	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned.
 	 * 
 	 * @param oPixels
 	 * @param width
@@ -159,7 +159,7 @@ public class ImageConverter
 		}
 		return null;
 	}
-	
+
 	private static boolean incorrectSize(int length, int width, int height)
 	{
 		return length != width * height;
@@ -171,7 +171,6 @@ public class ImageConverter
 			buffer = new float[size];
 		return buffer;
 	}
-	
 
 	/**
 	 * Get the data from the image processor as a double array (include cropping to the ROI). Data is duplicated if the
@@ -194,12 +193,12 @@ public class ImageConverter
 
 	/**
 	 * Get the data from the image as a double array (include cropping to the ROI). Data is duplicated if the
-	 * input already a double array.
+	 * input is already a double array.
 	 * <p>
 	 * Allows reuse of an existing buffer if provided. This will not be truncated if it is larger than the
 	 * ImageProcessor ROI bounds. If smaller then a new buffer will be created.
 	 * <p>
-	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned. 
+	 * If the object pixels array is incorrect size (it should be width*height) then null will be returned.
 	 * 
 	 * @param oPixels
 	 * @param width
@@ -304,5 +303,59 @@ public class ImageConverter
 		if (buffer == null || buffer.length < size)
 			buffer = new double[size];
 		return buffer;
+	}
+
+	/**
+	 * Get the data from the image pixels as a float array. Data is not duplicated if the
+	 * input is already a float array unless a buffer is provided.
+	 * <p>
+	 * Allows reuse of an existing buffer if provided. This will not be truncated if it is larger than the
+	 * pixels array. If smaller then a new buffer will be created.
+	 *
+	 * @param oPixels
+	 *            the pixels
+	 * @param buffer
+	 *            the buffer
+	 * @return The float array data
+	 */
+	public static float[] getData(final Object oPixels, float[] buffer)
+	{
+		if (oPixels == null)
+			return null;
+
+		if (oPixels instanceof float[])
+		{
+			float[] pixels = (float[]) oPixels;
+			if (buffer == null)
+				return pixels;
+			float[] pixels2 = allocate(buffer, pixels.length);
+			System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
+			return pixels2;
+		}
+		else if (oPixels instanceof short[])
+		{
+			short[] pixels = (short[]) oPixels;
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i] & 0xffff;
+			return pixels2;
+		}
+		else if (oPixels instanceof byte[])
+		{
+			byte[] pixels = (byte[]) oPixels;
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = pixels[i] & 0xff;
+			return pixels2;
+		}
+		else if (oPixels instanceof int[])
+		{
+			// The default processing
+			int[] pixels = (int[]) oPixels;
+			ImageProcessor ip = new ColorProcessor(pixels.length, 1, pixels);
+			FloatProcessor fp = ip.toFloat(0, null);
+			return (float[]) fp.getPixels();
+		}
+		return null;
 	}
 }

@@ -412,7 +412,7 @@ message PSFCreatorSettings
 	double com_cut_off = 13;
 	int32 interpolation_method = 14;
 
-	// For the Projection mode
+	// For the alignment mode
 	
 	int32 psfType = 15;
 	Calibration calibration = 16;
@@ -435,6 +435,11 @@ message PSFCreatorSettings
 	bool crop_to_z_centre = 33;
 	int32 alignment_mode = 34;
 	double alignment_z_radius = 35;
+	bool update_roi = 36;
+	double sub_pixel_precision = 37;
+	double rmsd_xy_threshold = 38;
+	double rmsd_z_threshold = 39;
+	double com_shift_threshold = 40;
 }
 
 // Contains settings for the Camera Model Manager plugin

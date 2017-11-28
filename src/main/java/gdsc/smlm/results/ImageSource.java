@@ -7,6 +7,8 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import gdsc.smlm.ij.utils.ImageConverter;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -190,23 +192,43 @@ public abstract class ImageSource
 	 */
 	public float[] next(Rectangle bounds)
 	{
+		if (!checkBounds(bounds))
+			bounds = null;
 		startFrame = endFrame = (startFrame + 1);
-		float[] data = nextFrame(bounds);
+		Object pixels = nextRawFrame();
+		if (pixels != null)
+		{
+			return ImageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
+		}
+		startFrame = endFrame = 0;
+		return null;
+	}
+
+	/**
+	 * Get the next frame of raw pixels. Return null if the frame is not available and set the current frame to
+	 * zero. The data is is packed in yx order: index = y * width + x;
+	 * <p>
+	 * Provides serial access to the data after a successful call to {@link #openSource()}
+	 * 
+	 * @return the next frame (or null if at the end)
+	 */
+	public Object nextRaw()
+	{
+		startFrame = endFrame = (startFrame + 1);
+		Object data = nextRawFrame();
 		if (data == null)
 			startFrame = endFrame = 0;
 		return data;
 	}
 
 	/**
-	 * Get the next frame. The data is is packed in yx order: index = y * width + x;
+	 * Get the next frame of raw pixels. The data is is packed in yx order: index = y * width + x;
 	 * <p>
 	 * Must be implemented by sub-classes.
-	 * 
-	 * @param bounds
-	 *            The bounding limits of the frame to extract
+	 *
 	 * @return the next frame (or null if at the end)
 	 */
-	protected abstract float[] nextFrame(Rectangle bounds);
+	protected abstract Object nextRawFrame();
 
 	/**
 	 * Get a specific frame from the results. Return null if the frame is not available and set the current frame to
@@ -240,23 +262,47 @@ public abstract class ImageSource
 	 */
 	public float[] get(int frame, Rectangle bounds)
 	{
+		if (!checkBounds(bounds))
+			bounds = null;
 		startFrame = endFrame = frame;
-		float[] data = getFrame(frame, bounds);
+		Object pixels = getRawFrame(frame);
+		if (pixels != null)
+		{
+			return ImageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
+		}
+		startFrame = endFrame = 0;
+		return null;
+	}
+
+	/**
+	 * Get a specific frame of raw pixels from the results. Return null if the frame is not available and set the
+	 * current frame to zero.
+	 * <p>
+	 * Provides random access to the data after a successful call to {@link #openSource()}. This operation may be
+	 * significantly slower than using {@link #next()} to read all the data.
+	 * 
+	 * @param frame
+	 * @return the frame (or null)
+	 */
+	public Object getRaw(int frame)
+	{
+		startFrame = endFrame = frame;
+		Object data = getRawFrame(frame);
 		if (data == null)
 			startFrame = endFrame = 0;
 		return data;
 	}
 
 	/**
-	 * Get a specific frame from the results. Return null if the frame is not available.
+	 * Get a specific frame of raw pixels from the results. Return null if the frame is not available.
 	 * <p>
 	 * Must be implemented by sub-classes.
-	 * 
+	 *
 	 * @param frame
-	 * @param bounds
+	 *            the frame
 	 * @return The frame data
 	 */
-	protected abstract float[] getFrame(int frame, Rectangle bounds);
+	protected abstract Object getRawFrame(int frame);
 
 	/**
 	 * Get the name of the results source
@@ -321,7 +367,7 @@ public abstract class ImageSource
 	public String toString()
 	{
 		// Over-ride this to produce a nicer output description of the results source
-		return String.format("%s [%d,%d:%dx%dx%d]", name, xOrigin, yOrigin, width, height, frames);
+		return String.format("%s [%d,%d:%dx%dx%d]", name, xOrigin, yOrigin, getWidth(), getHeight(), frames);
 	}
 
 	/**
@@ -367,16 +413,17 @@ public abstract class ImageSource
 
 	/**
 	 * Check if the bounds fit inside the image.
-	 * 
+	 *
 	 * @param bounds
-	 * @throws RuntimeException
-	 *             if the bounds do not fit in the image
+	 *            the bounds
 	 * @return True if the bounds are not null and are within the image, false if null or the bounds fit the image
 	 *         exactly
+	 * @throws RuntimeException
+	 *             if the bounds do not fit in the image
 	 */
 	public boolean checkBounds(Rectangle bounds)
 	{
-		return checkBounds(width, height, bounds);
+		return checkBounds(getWidth(), getHeight(), bounds);
 	}
 
 	/**

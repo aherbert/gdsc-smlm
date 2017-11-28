@@ -302,7 +302,7 @@ public class CameraModelManager implements PlugIn
 		ImagePlus imp = WindowManager.getImage(image);
 		if (imp == null)
 		{
-			IJ.log("Failed to find image: " + image);
+			IJ.error(TITLE, "Failed to find image: " + image);
 			return;
 		}
 
@@ -320,13 +320,21 @@ public class CameraModelManager implements PlugIn
 
 		if (cameraModel == null)
 		{
-			IJ.log("Failed to find camera data for model: " + name);
+			IJ.error(TITLE, "Failed to find camera data for model: " + name);
 			return;
 		}
 
 		// Crop the model if appropriate
-		cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), pluginSettings.getOriginX(),
-				pluginSettings.getOriginY(), false);
+		try
+		{
+			cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(),
+					pluginSettings.getOriginX(), pluginSettings.getOriginY(), false);
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return;
+		}
 		Rectangle bounds = cameraModel.getBounds();
 		pluginSettings.setOriginX(bounds.x);
 		pluginSettings.setOriginY(bounds.y);
@@ -363,7 +371,7 @@ public class CameraModelManager implements PlugIn
 		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 		if (resource == null)
 		{
-			IJ.log("Failed to find camera data for model: " + name);
+			IJ.error(TITLE, "Failed to find camera data for model: " + name);
 			return;
 		}
 
@@ -436,7 +444,7 @@ public class CameraModelManager implements PlugIn
 		CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
 		if (resource == null)
 		{
-			IJ.log("Failed to find camera data for model: " + name);
+			IJ.error(TITLE, "Failed to find camera data for model: " + name);
 			return;
 		}
 		// Try and load the resource. 
@@ -446,7 +454,7 @@ public class CameraModelManager implements PlugIn
 		IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 		if (imp == null)
 		{
-			IJ.log("Failed to load camera data for model: " + name);
+			IJ.error(TITLE, "Failed to load camera data for model: " + name);
 			return;
 		}
 		Utils.log("Camera model: %s\n%s", name, resource);

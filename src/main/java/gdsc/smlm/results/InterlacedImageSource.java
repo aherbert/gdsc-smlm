@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import java.awt.Rectangle;
-
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /*----------------------------------------------------------------------------- 
@@ -84,7 +82,7 @@ public class InterlacedImageSource extends ImageSource
 	{
 		return imageSource.getYOrigin();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -168,21 +166,21 @@ public class InterlacedImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#nextFrame(java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
 	 */
 	@Override
-	protected float[] nextFrame(Rectangle bounds)
+	protected Object nextRawFrame()
 	{
 		// Skip frames until at the start of the next block
 		while (counter < 0)
 		{
-			if (imageSource.next(bounds) == null)
+			if (imageSource.nextRaw() == null)
 				return null;
 			counter++;
 		}
 
 		// Read the next frame in the current block
-		final float[] image = imageSource.next(bounds);
+		final Object pixels = imageSource.nextRaw();
 
 		// Check if this is the final frame in the current block
 		if (++counter >= size)
@@ -192,16 +190,16 @@ public class InterlacedImageSource extends ImageSource
 		// Set the frame to the last one read from the source
 		setFrameNumber(imageSource.getStartFrameNumber(), imageSource.getEndFrameNumber());
 		//System.out.printf("Interlaced %d-%d\n", getStartFrameNumber(), getEndFrameNumber());
-		return image;
+		return pixels;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#getFrame(int, java.awt.Rectangle)
+	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
 	 */
 	@Override
-	protected float[] getFrame(int frame, Rectangle bounds)
+	protected Object getRawFrame(int frame)
 	{
 		if (frame < 1)
 			return null;
@@ -219,7 +217,10 @@ public class InterlacedImageSource extends ImageSource
 		{
 			return null;
 		}
-		return imageSource.get(frame, bounds);
+		Object pixels = imageSource.getRaw(frame);
+		// Set the frame to the last one read from the source
+		setFrameNumber(imageSource.getStartFrameNumber(), imageSource.getEndFrameNumber());
+		return pixels;		
 	}
 
 	/**

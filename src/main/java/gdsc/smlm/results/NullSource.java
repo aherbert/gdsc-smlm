@@ -1,7 +1,5 @@
 package gdsc.smlm.results;
 
-import java.awt.Rectangle;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -43,13 +41,13 @@ public class NullSource extends ImageSource
 	}
 
 	@Override
-	protected float[] nextFrame(Rectangle bounds)
+	protected float[] nextRawFrame()
 	{
 		return null;
 	}
 
 	@Override
-	protected float[] getFrame(int frame, Rectangle bounds)
+	protected float[] getRawFrame(int frame)
 	{
 		return null;
 	}
