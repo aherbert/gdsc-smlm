@@ -630,11 +630,24 @@ public class SeriesImageSource extends ImageSource
 							}
 							try
 							{
-								//td.enableDebugging();
+								td.enableDebugging();
 								// This should set info[0].inputStream to our 
 								// custom random access stream 
 								info = td.getTiffInfo();
-								//System.out.println(info[0].debugInfo);
+								//								if (info != null)
+								//								{
+								//									System.out.println(info[0].debugInfo);
+								//									FileOpener fo = new FileOpener(info[0]);
+								//									Properties p = fo.decodeDescriptionString(info[0]);
+								//									System.out.println(p);
+								//									double ox = 0, oy = 0;
+								//									if (p.containsKey("xorigin"))
+								//										ox = Double.parseDouble(p.getProperty("xorigin"));
+								//									if (p.containsKey("yorigin"))
+								//										oy = Double.parseDouble(p.getProperty("yorigin"));
+								//									// Should the origin be converted by the units?
+								//									setOrigin((int)ox, (int)oy);
+								//								}
 							}
 							catch (IOException e)
 							{
@@ -1332,7 +1345,7 @@ public class SeriesImageSource extends ImageSource
 		}
 		return null;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

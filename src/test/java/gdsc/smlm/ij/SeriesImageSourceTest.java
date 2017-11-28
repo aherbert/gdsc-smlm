@@ -13,6 +13,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.measure.Calibration;
 
 public class SeriesImageSourceTest
 {
@@ -126,7 +127,12 @@ public class SeriesImageSourceTest
 				stack.addSlice(null, SimpleArrayUtils.newArray(length, index, 1f));
 				index += length;
 			}
-			IJ.saveAsTiff(new ImagePlus(null, stack), filenames[i]);
+			ImagePlus imp = new ImagePlus(null, stack);
+			// Add a calibration with origin
+			Calibration c = imp.getCalibration();
+			c.xOrigin = 4;
+			c.yOrigin = 5;
+			IJ.saveAsTiff(imp, filenames[i]);
 			stacks[i] = stack;
 		}
 		return stacks;
