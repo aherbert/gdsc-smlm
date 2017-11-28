@@ -218,9 +218,9 @@ public class CMOSAnalysis implements PlugIn
 
 	private class ImageJob
 	{
-		float[] data;
+		Object data;
 
-		ImageJob(float[] data)
+		ImageJob(Object data)
 		{
 			this.data = data;
 		}
@@ -234,6 +234,7 @@ public class CMOSAnalysis implements PlugIn
 		volatile boolean finished = false;
 		final BlockingQueue<ImageJob> jobs;
 		final ArrayMoment moment;
+		int bitDepth = 0;
 
 		public ImageWorker(BlockingQueue<ImageJob> jobs, ArrayMoment moment)
 		{
@@ -280,7 +281,18 @@ public class CMOSAnalysis implements PlugIn
 				return;
 			}
 			showProgress();
-			moment.add(job.data);
+			Object pixels = job.data;
+			if (bitDepth == 0)
+				bitDepth = Utils.getBitDepth(pixels);
+			// Most likely first
+			if (bitDepth == 16)
+				moment.addUnsigned((short[]) pixels);
+			else if (bitDepth == 32)
+				moment.add((float[]) pixels);
+			else if (bitDepth == 8)
+				moment.addUnsigned((byte[]) pixels);
+			else 
+				throw new IllegalStateException("Unsupported bit depth");
 		}
 	}
 
@@ -745,8 +757,8 @@ public class CMOSAnalysis implements PlugIn
 				futures.add(executor.submit(worker));
 			}
 
-			// Process the data
-			for (float[] pixels = source.next(); pixels != null; pixels = source.next())
+			// Process the raw pixel data
+			for (Object pixels = source.nextRaw(); pixels != null; pixels = source.nextRaw())
 			{
 				put(jobs, new ImageJob(pixels));
 			}
