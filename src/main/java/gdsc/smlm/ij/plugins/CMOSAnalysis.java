@@ -747,6 +747,7 @@ public class CMOSAnalysis implements PlugIn
 			progress = 0;
 			progressBar.show(0);
 
+			// TODO - Get the pixels type and use an IntegerArrayMoment if possible
 			ArrayMoment moment = (rollingAlgorithm) ? new RollingArrayMoment() : new SimpleArrayMoment();
 
 			final BlockingQueue<ImageJob> jobs = new ArrayBlockingQueue<ImageJob>(nThreads * 2);
