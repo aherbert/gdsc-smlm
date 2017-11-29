@@ -346,7 +346,10 @@ public class SeriesImageSource extends ImageSource
 				// Store the number of frames that have been read
 				frameCount = i + 1;
 
-				return reader.readPixels(is, skip);
+				long t = System.nanoTime();
+				Object pixels = reader.readPixels(is, skip);
+				System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
+				return pixels;
 			}
 			catch (Exception e)
 			{
@@ -634,7 +637,7 @@ public class SeriesImageSource extends ImageSource
 							}
 							try
 							{
-								td.enableDebugging();
+								//td.enableDebugging();
 								// This should set info[0].inputStream to our 
 								// custom random access stream 
 								info = td.getTiffInfo();
@@ -807,9 +810,6 @@ public class SeriesImageSource extends ImageSource
 						break;
 
 					// Open the image
-					Opener opener = new Opener();
-					opener.setSilentMode(true);
-					Utils.setShowProgress(false);
 					if (logProgress)
 					{
 						long time = System.currentTimeMillis();
@@ -829,9 +829,14 @@ public class SeriesImageSource extends ImageSource
 					else
 					{
 						//System.out.println(id + ": Opening " + images.get(currentImage));
+						boolean showProgress = Utils.isShowProgress();
+						Utils.setShowProgress(false);
+						Opener opener = new Opener();
+						opener.setSilentMode(true);
 						imp = opener.openImage(images.get(currentImage));
+						if (showProgress)
+							Utils.setShowProgress(true);
 					}
-					Utils.setShowProgress(true);
 
 					//System.out.println(id + ": Opened " + images.get(currentImage));
 
@@ -1005,12 +1010,25 @@ public class SeriesImageSource extends ImageSource
 		if (images.isEmpty())
 			return false;
 
-		// Create the queue for loading the images
-		createQueue();
-
 		if (isTiffSeries && (tiffImages == null || tiffImages.length != images.size()))
+		{
 			tiffImages = new TiffImage[images.size()];
+			
+			// TODO
+			// We can open all the TiffInfo objects to get the actual size.
+			// However if the Tiffs contains more than 1 IFD this will be slow.
+			
+			// Create a custom TiffDecoder to process only the first 2 IFDs.
+			// Get the first offset and then if there is another IFD.
+			// Guess the number of images using the first offset + image size + gap between images.
+			
+			// Or only support non-sequential access if the TIFF has been created with only 
+			// 1 IFD and is contiguous.
+		}
 
+		// Create the queue for loading the images sequentially
+		createQueue();
+		
 		return getNextImage() != null;
 	}
 
@@ -1109,14 +1127,14 @@ public class SeriesImageSource extends ImageSource
 	 */
 	public void close()
 	{
-		setDimensions(0, 0, 0);
+		closeQueue();
+		//setDimensions(0, 0, 0);
 		if (image != null)
 			image.close();
 		if (lastImage != null)
 			lastImage.close();
 		image = lastImage = null;
 		nextImageId = currentSlice = lastImageId = 0;
-		closeQueue();
 	}
 
 	private Image getNextImage()
