@@ -884,12 +884,13 @@ public class CMOSAnalysis implements PlugIn
 				data[2 * n] = moment.getFirstMoment();
 				data[2 * n + 1] = moment.getVariance();
 
+				Utils.log("Processed %d frames", moment.getN());
+				
 				// Reset
 				futures.clear();
 				workers.clear();
 
-				// TODO - optionally save
-				ImageStack stack = new ImageStack(source.getWidth(), source.getHeight());
+				ImageStack stack = new ImageStack(width, height);
 				stack.addSlice("Mean", SimpleArrayUtils.toFloat(data[2 * n]));
 				stack.addSlice("Variance", SimpleArrayUtils.toFloat(data[2 * n + 1]));
 				IJ.save(new ImagePlus("PerPixel", stack), file.getPath());
