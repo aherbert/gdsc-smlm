@@ -20,7 +20,7 @@ import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.engine.DataEstimator;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -167,7 +167,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 		{
 			IJ.showProgress(i, size);
 			final ImageProcessor ip = stack.getProcessor(slice);
-			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
+			buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
 			final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
 			de.setFraction(fraction);
 			de.setHistogramSize(histogramSize);
@@ -258,7 +258,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 		int i = 0;
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
 		Rectangle bounds = ip.getRoi();
-		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+		float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
 		final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
 		de.setFraction(fraction);
 		de.setHistogramSize(histogramSize);

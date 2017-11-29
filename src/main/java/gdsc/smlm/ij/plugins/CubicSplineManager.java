@@ -39,7 +39,7 @@ import gdsc.smlm.function.cspline.CubicSplineData;
 import gdsc.smlm.function.cspline.CubicSplineFunction;
 import gdsc.smlm.function.cspline.SingleCubicSplineFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
 import ij.ImagePlus;
@@ -142,7 +142,7 @@ public class CubicSplineManager implements PlugIn
 		final int maxz = image.getSize();
 		final float[][] psf = new float[maxz][];
 		for (int z = 0; z < maxz; z++)
-			psf[z] = ImageConverter.getData(image.getPixels(z + 1), null);
+			psf[z] = IJImageConverter.getData(image.getPixels(z + 1), null);
 
 		// We reduce by a factor of 3
 		final int maxi = (maxx - 1) / 3;

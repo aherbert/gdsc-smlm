@@ -73,7 +73,7 @@ import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
@@ -547,7 +547,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Extract the data
 			final int maxx = stack.getWidth();
 			final int maxy = stack.getHeight();
-			data = ImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
+			data = IJImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
 
 			// Smooth the image and identify spots with a filter
 			Spot[] spots = spotFilter.rank(data, maxx, maxy);

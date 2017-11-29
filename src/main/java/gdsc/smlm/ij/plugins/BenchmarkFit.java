@@ -28,7 +28,7 @@ import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -201,7 +201,7 @@ public class BenchmarkFit implements PlugIn
 			showProgress();
 
 			// Extract the data
-			data = ImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
+			data = IJImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
 					data);
 
 			final int size = region.height;

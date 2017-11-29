@@ -7,7 +7,7 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.utils.ImageConverter;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -27,6 +27,9 @@ import gdsc.smlm.ij.utils.ImageConverter;
  */
 public abstract class ImageSource
 {
+	@XStreamOmitField
+	private static final ImageConverter IMAGE_CONVERTER = new ImageConverter();
+
 	private String name;
 	@XStreamOmitField
 	private int startFrame;
@@ -37,6 +40,11 @@ public abstract class ImageSource
 	protected int width;
 	protected int height;
 	protected int frames;
+	/**
+	 * The instance that does the conversion. This can be manipulated for different RGB colour conversions.
+	 */
+	@XStreamOmitField
+	private ImageConverter imageConverter = IMAGE_CONVERTER;
 
 	/**
 	 * Create the image source
@@ -55,6 +63,9 @@ public abstract class ImageSource
 	public boolean open()
 	{
 		startFrame = endFrame = 0;
+		// In the event of creation by reflection this may be null
+		if (imageConverter == null)
+			imageConverter = IMAGE_CONVERTER;
 		return openSource();
 	}
 
@@ -198,7 +209,7 @@ public abstract class ImageSource
 		Object pixels = nextRawFrame();
 		if (pixels != null)
 		{
-			return ImageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
+			return imageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
 		}
 		startFrame = endFrame = 0;
 		return null;
@@ -268,7 +279,7 @@ public abstract class ImageSource
 		Object pixels = getRawFrame(frame);
 		if (pixels != null)
 		{
-			return ImageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
+			return imageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
 		}
 		startFrame = endFrame = 0;
 		return null;
@@ -448,5 +459,26 @@ public abstract class ImageSource
 			return bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height;
 		}
 		return false;
+	}
+
+	/**
+	 * Gets the image converter.
+	 *
+	 * @return the image converter
+	 */
+	public ImageConverter getImageConverter()
+	{
+		return imageConverter;
+	}
+
+	/**
+	 * Sets the image converter. If null then the default converter will be used.
+	 *
+	 * @param imageConverter
+	 *            the new image converter
+	 */
+	public void setImageConverter(ImageConverter imageConverter)
+	{
+		this.imageConverter = (imageConverter == null) ? IMAGE_CONVERTER : imageConverter;
 	}
 }

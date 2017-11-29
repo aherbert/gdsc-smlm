@@ -39,7 +39,7 @@ import gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.Constants;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import ij.IJ;
 import ij.ImagePlus;
@@ -363,7 +363,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		Rectangle bounds = ip.getRoi();
 
 		// Crop to the ROI
-		float[] data = ImageConverter.getData(ip);
+		float[] data = IJImageConverter.getData(ip);
 
 		int width = bounds.width;
 		int height = bounds.height;
@@ -441,7 +441,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		Rectangle bounds = ip.getRoi();
 
 		// Crop to the ROI
-		float[] data = ImageConverter.getData(ip);
+		float[] data = IJImageConverter.getData(ip);
 
 		int width = bounds.width;
 		int height = bounds.height;

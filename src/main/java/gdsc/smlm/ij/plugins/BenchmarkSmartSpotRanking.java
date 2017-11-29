@@ -41,7 +41,7 @@ import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
@@ -298,7 +298,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			if (requireSNR)
 			{
 				tSnr = System.nanoTime();
-				data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
+				data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 				final int maxx = stack.getWidth();
 				final int maxy = stack.getHeight();
 				final ImageExtractor ie = new ImageExtractor(data, maxx, maxy);

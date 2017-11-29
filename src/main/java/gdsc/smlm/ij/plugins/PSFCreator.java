@@ -95,7 +95,7 @@ import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.Image2DAligner;
 import gdsc.smlm.ij.utils.Image3DAligner;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.results.Counter;
@@ -1881,7 +1881,7 @@ public class PSFCreator implements PlugInFilter
 		ImageStack newStack = new ImageStack(width, height, stack.getSize());
 		for (int slice = 1; slice <= stack.getSize(); slice++)
 		{
-			newStack.setPixels(ImageConverter.getData(stack.getPixels(slice), width, height, null, null), slice);
+			newStack.setPixels(IJImageConverter.getData(stack.getPixels(slice), width, height, null, null), slice);
 		}
 		return newStack;
 	}
@@ -3226,7 +3226,7 @@ public class PSFCreator implements PlugInFilter
 			Rectangle bounds = ie.getBoxRegionBounds(x, y, boxRadius);
 			for (int z = 0; z < image.length; z++)
 			{
-				psf[z] = ImageConverter.getData(image[z], w, h, bounds, psf[z]);
+				psf[z] = IJImageConverter.getData(image[z], w, h, bounds, psf[z]);
 			}
 
 			if (settings.getInteractiveMode())

@@ -23,7 +23,7 @@ import gdsc.smlm.data.config.PSFProtos.ImagePSF;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.settings.ImagePSFHelper;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -260,7 +260,7 @@ public class PSFCombiner implements PlugIn
 				IJ.showProgress(progress += increment);
 
 				// Get the data and adjust using the weight
-				float[] psfData = ImageConverter.getData(psfStack.getProcessor(n));
+				float[] psfData = IJImageConverter.getData(psfStack.getProcessor(n));
 				for (int i = 0; i < psfData.length; i++)
 					psfData[i] *= weight;
 

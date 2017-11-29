@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.MedianWindowDLLFloat;
 import gdsc.core.utils.MedianWindowFloat;
@@ -220,7 +220,7 @@ public class MedianFilter implements PlugInFilter
 		{
 			showProgressSingle();
 
-			float[] data = imageStack[n - 1] = ImageConverter.getData(inputStack.getProcessor(n));
+			float[] data = imageStack[n - 1] = IJImageConverter.getData(inputStack.getProcessor(n));
 			double sum = 0;
 			for (float f : data)
 				sum += f;
@@ -489,7 +489,7 @@ public class MedianFilter implements PlugInFilter
 		{
 			showProgressSingle();
 
-			final float[] data = ImageConverter.getData(inputStack.getProcessor(n));
+			final float[] data = IJImageConverter.getData(inputStack.getProcessor(n));
 			final float[] filter = imageStack[n - 1];
 			final float b = bias;
 			for (int i = 0; i < data.length; i++)

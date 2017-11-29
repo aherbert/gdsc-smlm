@@ -291,7 +291,7 @@ public class CMOSAnalysis implements PlugIn
 				moment.add((float[]) pixels);
 			else if (bitDepth == 8)
 				moment.addUnsigned((byte[]) pixels);
-			else 
+			else
 				throw new IllegalStateException("Unsupported bit depth");
 		}
 	}
@@ -747,8 +747,16 @@ public class CMOSAnalysis implements PlugIn
 			progress = 0;
 			progressBar.show(0);
 
-			// TODO - Get the pixels type and use an IntegerArrayMoment if possible
-			ArrayMoment moment = (rollingAlgorithm) ? new RollingArrayMoment() : new SimpleArrayMoment();
+			ArrayMoment moment;
+			if (rollingAlgorithm)
+			{
+				moment = new RollingArrayMoment();
+			}
+			else
+			{
+				// TODO - Get the pixels type and use an IntegerArrayMoment if possible
+				moment = new SimpleArrayMoment();
+			}
 
 			final BlockingQueue<ImageJob> jobs = new ArrayBlockingQueue<ImageJob>(nThreads * 2);
 			for (int i = 0; i < nThreads; i++)
@@ -763,6 +771,7 @@ public class CMOSAnalysis implements PlugIn
 			{
 				put(jobs, new ImageJob(pixels));
 			}
+			source.close();
 			// Finish all the worker threads by passing in a null job
 			for (int i = 0; i < nThreads; i++)
 			{
@@ -843,7 +852,7 @@ public class CMOSAnalysis implements PlugIn
 
 		// TODO - better loop structure with data a double[][] packed as 2 arrays per subdir:
 		// data[2*n][] and data[2*n+1][]
-		
+
 		// Ignore first as this is the 0 exposure image
 		for (int i = 0; i < pixelGain.length; i++)
 		{

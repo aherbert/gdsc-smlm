@@ -76,7 +76,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.PerPixelCameraModel;
 import gdsc.smlm.results.AggregatedImageSource;
@@ -3051,7 +3051,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				noise = FitWorker.estimateNoise(data, source.getWidth(), source.getHeight(), config.getNoiseMethod());
 
 				// Crop the data to the region
-				data = ImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
+				data = IJImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
 			}
 
 			if (showProcessedFrames)

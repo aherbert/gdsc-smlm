@@ -17,7 +17,7 @@ import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.model.camera.NullCameraModel;
@@ -243,7 +243,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		{
 			IJ.showProgress(i, size);
 			final ImageProcessor ip = stack.getProcessor(slice);
-			buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
+			buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, buffer);
 			cameraModel.removeBiasAndGain(bounds, buffer);
 			final NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 			ne.preserveResiduals = preserveResiduals;
@@ -310,7 +310,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		int i = 0;
 		result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
 		Rectangle bounds = ip.getRoi();
-		float[] buffer = ImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
+		float[] buffer = IJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
 		cameraModel.removeBiasAndGain(bounds, buffer);
 		NoiseEstimator ne = new NoiseEstimator(buffer, bounds.width, bounds.height);
 		ne.preserveResiduals = true;

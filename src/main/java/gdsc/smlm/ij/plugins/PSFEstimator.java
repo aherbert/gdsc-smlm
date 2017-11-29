@@ -23,7 +23,7 @@ import gdsc.smlm.engine.FitJob;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
@@ -625,7 +625,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 			ImageProcessor ip = stack.getProcessor(slice);
 			ip.setRoi(roi); // stack processor does not set the bounds required by ImageConverter
-			FitJob job = new FitJob(slice, ImageConverter.getData(ip), roi);
+			FitJob job = new FitJob(slice, IJImageConverter.getData(ip), roi);
 			engine.run(job);
 
 			if (sampleSizeReached() || Utils.isInterrupted())

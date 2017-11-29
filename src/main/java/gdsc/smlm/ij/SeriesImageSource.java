@@ -526,12 +526,16 @@ public class SeriesImageSource extends ImageSource
 		@Override
 		public int read(byte[] b, int off, int len) throws IOException
 		{
-			if (p < length && len > 0)
+			if (p < length)
 			{
-				int size = (p + len <= length) ? len : length - p;
-				System.arraycopy(bytes, p, b, off, size);
-				p += size;
-				return size;
+				if (len > 0)
+				{
+					int size = (p + len <= length) ? len : length - p;
+					System.arraycopy(bytes, p, b, off, size);
+					p += size;
+					return size;
+				}
+				throw new IOException("No length specified");
 			}
 			return -1;
 		}

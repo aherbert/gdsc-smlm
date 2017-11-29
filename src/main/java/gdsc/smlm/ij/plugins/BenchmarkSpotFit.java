@@ -77,7 +77,7 @@ import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.ij.utils.ImageConverter;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.SynchronizedPeakResults;
@@ -686,7 +686,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			showProgress();
 
 			// Extract the data
-			data = ImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
+			data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
 
 			FilterCandidates candidates = filterCandidates.get(frame);
 			int totalCandidates = candidates.spots.length;
