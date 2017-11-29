@@ -22,8 +22,10 @@ import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TestUtils;
 import org.apache.commons.math3.util.MathArrays;
 
+import gdsc.core.data.IntegerType;
 import gdsc.core.ij.Utils;
 import gdsc.core.math.ArrayMoment;
+import gdsc.core.math.IntegerArrayMoment;
 import gdsc.core.math.RollingArrayMoment;
 import gdsc.core.math.SimpleArrayMoment;
 import gdsc.core.utils.DoubleData;
@@ -34,6 +36,7 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.ij.SeriesImageSource;
+import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.model.camera.PerPixelCameraModel;
 import ij.IJ;
 import ij.ImagePlus;
@@ -263,8 +266,12 @@ public class CMOSAnalysis implements PlugIn
 			}
 			catch (InterruptedException e)
 			{
-				System.out.println(e.toString());
-				throw new RuntimeException(e);
+				if (!finished)
+				{
+					// This is not expected
+					System.out.println(e.toString());
+					throw new RuntimeException(e);
+				}
 			}
 			finally
 			{
@@ -298,10 +305,11 @@ public class CMOSAnalysis implements PlugIn
 
 	private static final String TITLE = "sCMOS Analysis";
 
-	private static String directory = "";
+	private static String directory = Prefs.get(Constants.sCMOSAnalysisDirectory, "");
 	private static String modelDirectory = null;
 	private static String modelName = null;
 	private static boolean rollingAlgorithm = false;
+	private static boolean reuseProcessedData = true;
 
 	// The simulation can default roughly to the values displayed 
 	// in the Huang sCMOS paper supplementary figure 1:
@@ -410,6 +418,7 @@ public class CMOSAnalysis implements PlugIn
 		if (TextUtils.isNullOrEmpty(dir))
 			return;
 		directory = dir;
+		Prefs.set(Constants.sCMOSAnalysisDirectory, dir);
 
 		boolean simulate = "simulate".equals(arg);
 		if (simulate || extraOptions)
@@ -676,7 +685,11 @@ public class CMOSAnalysis implements PlugIn
 		//@formatter:on
 
 		gd.addNumericField("nThreads", getLastNThreads(), 0);
+		gd.addMessage(TextUtils.wrap(
+				"A rolling algorithm can handle any size of data but is slower. Otherwise the camera is assumed to produce a maximum of 16-bit unsigned data.",
+				80));
 		gd.addCheckbox("Rolling_algorithm", rollingAlgorithm);
+		gd.addCheckbox("Re-use_processed_data", reuseProcessedData);
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -703,7 +716,7 @@ public class CMOSAnalysis implements PlugIn
 		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
 		TurboList<ImageWorker> workers = new TurboList<ImageWorker>(nThreads);
 
-		double[][][] data = new double[subDirs.size()][2][];
+		double[][] data = new double[subDirs.size() * 2][];
 		double[] pixelOffset = null, pixelVariance = null;
 		Statistics statsOffset = null, statsVariance = null;
 
@@ -716,122 +729,196 @@ public class CMOSAnalysis implements PlugIn
 			SubDir sd = subDirs.getf(n);
 			statusLine.setText("Analysing " + sd.name);
 
-			// Open the series
-			SeriesImageSource source = new SeriesImageSource(sd.name, sd.path.getPath());
-			//source.setLogProgress(true);
-			if (!source.open())
+			// Option to reuse data
+			File file = new File(directory, "perPixel" + sd.name + ".tif");
+			boolean found = false;
+			if (reuseProcessedData && file.exists())
 			{
-				error = true;
-				IJ.error(TITLE, "Failed to open image series: " + sd.path.getPath());
-				break;
+				ImagePlus imp = IJ.openImage(file.getPath());
+				if (imp != null && imp.getStackSize() == 2 && imp.getBitDepth() == 32)
+				{
+					if (n == 0)
+					{
+						width = imp.getWidth();
+						height = imp.getHeight();
+					}
+					else
+					{
+						if (width != imp.getWidth() || height != imp.getHeight())
+						{
+							error = true;
+							IJ.error(TITLE,
+									"Image width/height mismatch in image series: " + file.getPath() +
+											String.format("\n \nExpected %dx%d, Found %dx%d", width, height,
+													imp.getWidth(), imp.getHeight()));
+							break;
+						}
+					}
+
+					ImageStack stack = imp.getImageStack();
+					data[2 * n] = SimpleArrayUtils.toDouble((float[]) stack.getPixels(1));
+					data[2 * n + 1] = SimpleArrayUtils.toDouble((float[]) stack.getPixels(2));
+					found = true;
+				}
 			}
 
-			if (n == 0)
+			if (!found)
 			{
-				width = source.getWidth();
-				height = source.getHeight();
-			}
-			else
-			{
-				if (width != source.getWidth() || height != source.getHeight())
+				// Open the series
+				SeriesImageSource source = new SeriesImageSource(sd.name, sd.path.getPath());
+				source.setLogProgress(true);
+				if (!source.open())
 				{
 					error = true;
-					IJ.error(TITLE, "Image width/height mismatch in image series: " + sd.path.getPath() + String.format(
-							"\n \nExpected %dx%d, Found %dx%d", width, height, source.getWidth(), source.getHeight()));
+					IJ.error(TITLE, "Failed to open image series: " + sd.path.getPath());
 					break;
 				}
-			}
 
-			totalProgress = source.getFrames() + 1; // So the bar remains at 99% when workers have finished
-			stepProgress = Utils.getProgressInterval(totalProgress);
-			progress = 0;
-			progressBar.show(0);
-
-			ArrayMoment moment;
-			if (rollingAlgorithm)
-			{
-				moment = new RollingArrayMoment();
-			}
-			else
-			{
-				// TODO - Get the pixels type and use an IntegerArrayMoment if possible
-				moment = new SimpleArrayMoment();
-			}
-
-			final BlockingQueue<ImageJob> jobs = new ArrayBlockingQueue<ImageJob>(nThreads * 2);
-			for (int i = 0; i < nThreads; i++)
-			{
-				final ImageWorker worker = new ImageWorker(jobs, moment);
-				workers.add(worker);
-				futures.add(executor.submit(worker));
-			}
-
-			// Process the raw pixel data
-			for (Object pixels = source.nextRaw(); pixels != null; pixels = source.nextRaw())
-			{
-				put(jobs, new ImageJob(pixels));
-			}
-			source.close();
-			// Finish all the worker threads by passing in a null job
-			for (int i = 0; i < nThreads; i++)
-			{
-				put(jobs, new ImageJob(null));
-			}
-
-			// Wait for all to finish
-			for (int t = futures.size(); t-- > 0;)
-			{
-				try
+				if (n == 0)
 				{
-					// The future .get() method will block until completed
-					futures.get(t).get();
+					width = source.getWidth();
+					height = source.getHeight();
 				}
-				catch (Exception e)
+				else
 				{
-					// This should not happen. 
-					e.printStackTrace();
+					if (width != source.getWidth() || height != source.getHeight())
+					{
+						error = true;
+						IJ.error(TITLE,
+								"Image width/height mismatch in image series: " + sd.path.getPath() +
+										String.format("\n \nExpected %dx%d, Found %dx%d", width, height,
+												source.getWidth(), source.getHeight()));
+						break;
+					}
 				}
+
+				totalProgress = source.getFrames() + 1; // So the bar remains at 99% when workers have finished
+				stepProgress = Utils.getProgressInterval(totalProgress);
+				progress = 0;
+				progressBar.show(0);
+
+				ArrayMoment moment;
+				if (rollingAlgorithm)
+				{
+					moment = new RollingArrayMoment();
+				}
+				else
+				{
+					// We assume 16-bit camera at the maximum
+					if (IntegerArrayMoment.isValid(IntegerType.UNSIGNED_16, source.getFrames()))
+						moment = new IntegerArrayMoment();
+					else
+						moment = new SimpleArrayMoment();
+				}
+
+				final BlockingQueue<ImageJob> jobs = new ArrayBlockingQueue<ImageJob>(nThreads * 2);
+				for (int i = 0; i < nThreads; i++)
+				{
+					final ImageWorker worker = new ImageWorker(jobs, moment);
+					workers.add(worker);
+					futures.add(executor.submit(worker));
+				}
+
+				// Process the raw pixel data
+				long lastTime = 0;
+				for (Object pixels = source.nextRaw(); pixels != null; pixels = source.nextRaw())
+				{
+					long time = System.currentTimeMillis();
+					if (time - lastTime > 150)
+					{
+						if (Utils.isInterrupted())
+						{
+							error = true;
+							break;
+						}
+						lastTime = time;
+						statusLine.setText("Analysing " + sd.name + " Frame " + source.getStartFrameNumber());
+					}
+					put(jobs, new ImageJob(pixels));
+				}
+				source.close();
+
+				if (error)
+				{
+					// Kill the workers
+					for (int t = futures.size(); t-- > 0;)
+					{
+						try
+						{
+							workers.get(t).finished = true;
+							futures.get(t).cancel(true);
+						}
+						catch (Exception e)
+						{
+							// This should not happen. 
+							e.printStackTrace();
+						}
+					}
+					break;
+				}
+
+				// Finish all the worker threads by passing in a null job
+				for (int i = 0; i < nThreads; i++)
+				{
+					put(jobs, new ImageJob(null));
+				}
+
+				// Wait for all to finish
+				for (int t = futures.size(); t-- > 0;)
+				{
+					try
+					{
+						// The future .get() method will block until completed
+						futures.get(t).get();
+					}
+					catch (Exception e)
+					{
+						// This should not happen. 
+						e.printStackTrace();
+					}
+				}
+
+				// Create the final aggregate statistics
+				for (ImageWorker w : workers)
+					moment.add(w.moment);
+				data[2 * n] = moment.getFirstMoment();
+				data[2 * n + 1] = moment.getVariance();
+
+				// Reset
+				futures.clear();
+				workers.clear();
+
+				// TODO - optionally save
+				ImageStack stack = new ImageStack(source.getWidth(), source.getHeight());
+				stack.addSlice("Mean", SimpleArrayUtils.toFloat(data[2 * n]));
+				stack.addSlice("Variance", SimpleArrayUtils.toFloat(data[2 * n + 1]));
+				IJ.save(new ImagePlus("PerPixel", stack), file.getPath());
 			}
 
-			// Create the final aggregate statistics
-			for (ImageWorker w : workers)
-				moment.add(w.moment);
-			data[n][0] = moment.getFirstMoment();
-			data[n][1] = moment.getVariance();
-
-			// Reset
-			futures.clear();
-			workers.clear();
-
-			Statistics s = new Statistics(data[n][0]);
+			Statistics s = new Statistics(data[2 * n]);
 
 			if (n != 0)
 			{
 				// Compute mean ADU
 				Statistics signal = new Statistics();
-				double[] mean = data[n][0];
+				double[] mean = data[2 * n];
 				for (int i = 0; i < pixelOffset.length; i++)
 					signal.add(mean[i] - pixelOffset[i]);
 				Utils.log("%s Mean = %s +/- %s. Signal = %s +/- %s ADU", sd.name, Utils.rounded(s.getMean()),
 						Utils.rounded(s.getStandardDeviation()), Utils.rounded(signal.getMean()),
 						Utils.rounded(signal.getStandardDeviation()));
-
-				// TODO - optionally save
-				ImageStack stack = new ImageStack(source.getWidth(), source.getHeight());
-				stack.addSlice("Mean", SimpleArrayUtils.toFloat(data[n][0]));
-				stack.addSlice("Variance", SimpleArrayUtils.toFloat(data[n][1]));
-				IJ.save(new ImagePlus("PerPixel", stack), new File(directory, "perPixel" + sd.name + ".tif").getPath());
 			}
 			else
 			{
-				pixelOffset = data[0][0];
-				pixelVariance = data[0][1];
+				pixelOffset = data[0];
+				pixelVariance = data[1];
 				statsOffset = s;
 				statsVariance = new Statistics(pixelVariance);
 				Utils.log("%s Offset = %s +/- %s. Variance = %s +/- %s", sd.name, Utils.rounded(s.getMean()),
 						Utils.rounded(s.getStandardDeviation()), Utils.rounded(statsVariance.getMean()),
 						Utils.rounded(statsVariance.getStandardDeviation()));
 			}
+
 			progressBar.show(1);
 		}
 		progressBar.show(1);
@@ -840,34 +927,54 @@ public class CMOSAnalysis implements PlugIn
 		Utils.setShowProgress(true);
 		IJ.showProgress(1);
 
-		executor.shutdown();
-
 		if (error)
+		{
+			executor.shutdownNow();
+			statusLine.setText(TITLE + " cancelled");
 			return;
+		}
+
+		executor.shutdown();
 
 		// Compute the gain
 		statusLine.setText("Computing gain");
 
 		double[] pixelGain = new double[pixelOffset.length];
-
-		// TODO - better loop structure with data a double[][] packed as 2 arrays per subdir:
-		// data[2*n][] and data[2*n+1][]
+		double[] bibiT = new double[pixelGain.length];
+		double[] biaiT = new double[pixelGain.length];
 
 		// Ignore first as this is the 0 exposure image
-		for (int i = 0; i < pixelGain.length; i++)
+		for (int n = 1; n < nSubDirs; n++)
 		{
 			// Use equation 2.5 from the Huang et al paper.
-			double bibiT = 0;
-			double biaiT = 0;
-			for (int n = 1; n < nSubDirs; n++)
+			double[] b = data[2 * n];
+			double[] a = data[2 * n + 1];
+			for (int i = 0; i < pixelGain.length; i++)
 			{
-				double bi = data[n][0][i] - pixelOffset[i];
-				double ai = data[n][1][i] - pixelVariance[i];
-				bibiT += bi * bi;
-				biaiT += bi * ai;
+				double bi = b[i] - pixelOffset[i];
+				double ai = a[i] - pixelVariance[i];
+				bibiT[i] += bi * bi;
+				biaiT[i] += bi * ai;
 			}
-			pixelGain[i] = biaiT / bibiT;
 		}
+		for (int i = 0; i < pixelGain.length; i++)
+			pixelGain[i] = biaiT[i] / bibiT[i];
+
+		//for (int i = 0; i < pixelGain.length; i++)
+		//{
+		//	// Use equation 2.5 from the Huang et al paper.
+		//	double bibiT = 0;
+		//	double biaiT = 0;
+		//	// Ignore first as this is the 0 exposure image
+		//	for (int n = 1; n < nSubDirs; n++)
+		//	{
+		//		double bi = data[2*n][i] - pixelOffset[i];
+		//		double ai = data[2*n+1][i] - pixelVariance[i];
+		//		bibiT += bi * bi;
+		//		biaiT += bi * ai;
+		//	}
+		//	pixelGain[i] = biaiT / bibiT;
+		//}
 
 		Statistics statsGain = new Statistics(pixelGain);
 		Utils.log("Gain Mean = %s +/- %s", Utils.rounded(statsGain.getMean()),
