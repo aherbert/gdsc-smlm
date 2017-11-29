@@ -60,4 +60,5 @@ public class Constants
 	public static final String inputNoise = "gdsc.smlm.noise";
 	
 	public static final String tiffSeriesDirectory = "gdsc.smlm.tiffSeriesDirectory";
+	public static final String sCMOSAnalysisDirectory = "gdsc.smlm.sCMOSAnalysisDirectory";
 }
