@@ -346,9 +346,9 @@ public class SeriesImageSource extends ImageSource
 				// Store the number of frames that have been read
 				frameCount = i + 1;
 
-				long t = System.nanoTime();
+				//long t = System.nanoTime();
 				Object pixels = reader.readPixels(is, skip);
-				System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
+				//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 				return pixels;
 			}
 			catch (Exception e)

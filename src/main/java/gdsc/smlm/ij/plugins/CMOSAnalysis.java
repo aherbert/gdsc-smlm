@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.JLabel;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -728,6 +729,7 @@ public class CMOSAnalysis implements PlugIn
 		{
 			SubDir sd = subDirs.getf(n);
 			statusLine.setText("Analysing " + sd.name);
+			StopWatch sw = StopWatch.createStarted();
 
 			// Option to reuse data
 			File file = new File(directory, "perPixel" + sd.name + ".tif");
@@ -884,7 +886,7 @@ public class CMOSAnalysis implements PlugIn
 				data[2 * n] = moment.getFirstMoment();
 				data[2 * n + 1] = moment.getVariance();
 
-				Utils.log("Processed %d frames", moment.getN());
+				Utils.log("Processed %d frames. Time = %s", moment.getN(), sw.toString());
 				
 				// Reset
 				futures.clear();
