@@ -841,6 +841,9 @@ public class CMOSAnalysis implements PlugIn
 
 		double[] pixelGain = new double[pixelOffset.length];
 
+		// TODO - better loop structure with data a double[][] packed as 2 arrays per subdir:
+		// data[2*n][] and data[2*n+1][]
+		
 		// Ignore first as this is the 0 exposure image
 		for (int i = 0; i < pixelGain.length; i++)
 		{
