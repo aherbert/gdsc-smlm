@@ -1,6 +1,5 @@
 package gdsc.smlm.ij;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,11 +13,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.core.ij.SeriesOpener;
-import gdsc.core.ij.Utils;
 import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
+import ij.io.CustomTiffDecoder;
 import ij.io.FileInfo;
 import ij.io.ImageReader;
 import ij.io.Opener;
@@ -39,14 +38,11 @@ import ij.io.TiffDecoder;
  *---------------------------------------------------------------------------*/
 
 /**
- * Represent a series of image files as a results source. Supports all greyscale images. Only processes channel 0 of
- * 32-bit colour images.
+ * Represent a series of TIFF image files as a results source. Supports all greyscale images. Only processes channel 0
+ * of 32-bit colour images.
  * <p>
  * Assumes that the width,height,depth dimensions of each file are the same. The depth for the last image can be less
  * (i.e. the last of the series) but the {@link #getFrames()} method will return an incorrect value.
- * <p>
- * Support for the {@link #get(int)} and {@link #get(int, Rectangle)} methods is only provided for TIFF images if the
- * images are stacks.
  */
 public class SeriesImageSource extends ImageSource
 {
@@ -100,7 +96,7 @@ public class SeriesImageSource extends ImageSource
 
 		abstract Object getFrame(int i);
 
-		public void close()
+		public void close(boolean freeMemory)
 		{
 
 		}
@@ -288,7 +284,7 @@ public class SeriesImageSource extends ImageSource
 			if (i < frameCount)
 			{
 				// Non-sequential access has poor support as we just start from the beginning again
-				close();
+				close(false);
 			}
 
 			if (!openInputStream())
@@ -432,13 +428,21 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		@Override
-		synchronized public void close()
+		synchronized public void close(boolean freeMemory)
 		{
 			// Reset
 			frameCount = 0;
 
 			if (inMemory)
 			{
+				if (freeMemory)
+				{
+					// This is done when sequentially reading so we clear the memory
+					inMemory = false;
+					ras = null;
+					return;
+				}
+				
 				// No actual file is open, just move to the start
 				try
 				{
@@ -481,18 +485,6 @@ public class SeriesImageSource extends ImageSource
 		public NextImage()
 		{
 			this(null, -1);
-		}
-	}
-
-	/**
-	 * Extend the TiffDecoder to allow it to accept a RandomAccessStream as an argument
-	 */
-	private class CustomTiffDecoder extends TiffDecoder
-	{
-		public CustomTiffDecoder(RandomAccessStream in, String name)
-		{
-			super("", name);
-			this.in = in;
 		}
 	}
 
@@ -612,55 +604,53 @@ public class SeriesImageSource extends ImageSource
 					FileInfo[] info = null;
 					boolean[] inMemory = new boolean[1];
 					RandomAccessStream ras = null;
+
 					// For a TIFF series ImageJ can open as input stream. We support this by using this
 					// thread to read the file from disk sequentially and cache into memory. The images
 					// can then be opened by multiple threads without IO contention.
-					if (isTiffSeries)
+					final String path = images.get(currentImage);
+					//System.out.println("Reading " + images.get(currentImage));
+
+					// This may contain a custom RandomAccessStream that wraps an in-memory RandomAccessFile 
+					ras = createRandomAccessStream(path, inMemory);
+
+					if (ras != null)
 					{
-						final String path = images.get(currentImage);
-						//System.out.println("Reading " + images.get(currentImage));
-
-						// This may contain a custom RandomAccessStream that wraps an in-memory RandomAccessFile 
-						ras = createRandomAccessStream(path, inMemory);
-
-						if (ras != null)
+						TiffDecoder td = new CustomTiffDecoder(ras, path);
+						if (logProgress)
 						{
-							TiffDecoder td = new CustomTiffDecoder(ras, path);
-							if (logProgress)
+							long time = System.currentTimeMillis();
+							if (time - lastTime > 500)
 							{
-								long time = System.currentTimeMillis();
-								if (time - lastTime > 500)
-								{
-									lastTime = time;
-									IJ.log("Reading TIFF info " + path);
-								}
+								lastTime = time;
+								IJ.log("Reading TIFF info " + path);
 							}
-							try
-							{
-								//td.enableDebugging();
-								// This should set info[0].inputStream to our 
-								// custom random access stream 
-								info = td.getTiffInfo();
-								//								if (info != null)
-								//								{
-								//									System.out.println(info[0].debugInfo);
-								//									FileOpener fo = new FileOpener(info[0]);
-								//									Properties p = fo.decodeDescriptionString(info[0]);
-								//									System.out.println(p);
-								//									double ox = 0, oy = 0;
-								//									if (p.containsKey("xorigin"))
-								//										ox = Double.parseDouble(p.getProperty("xorigin"));
-								//									if (p.containsKey("yorigin"))
-								//										oy = Double.parseDouble(p.getProperty("yorigin"));
-								//									// Should the origin be converted by the units?
-								//									setOrigin((int)ox, (int)oy);
-								//								}
-							}
-							catch (IOException e)
-							{
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+						}
+						try
+						{
+							//td.enableDebugging();
+							// This will close the random access stream.
+							// If it is a custom in-memory object then the close call is ignored. 
+							info = td.getTiffInfo();
+							//								if (info != null)
+							//								{
+							//									System.out.println(info[0].debugInfo);
+							//									FileOpener fo = new FileOpener(info[0]);
+							//									Properties p = fo.decodeDescriptionString(info[0]);
+							//									System.out.println(p);
+							//									double ox = 0, oy = 0;
+							//									if (p.containsKey("xorigin"))
+							//										ox = Double.parseDouble(p.getProperty("xorigin"));
+							//									if (p.containsKey("yorigin"))
+							//										oy = Double.parseDouble(p.getProperty("yorigin"));
+							//									// Should the origin be converted by the units?
+							//									setOrigin((int)ox, (int)oy);
+							//								}
+						}
+						catch (IOException e)
+						{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 
@@ -819,45 +809,26 @@ public class SeriesImageSource extends ImageSource
 							IJ.log("Opening " + images.get(currentImage));
 						}
 					}
+					
+					// Only support TIFF images with pre-read FileInfo
 					Image image = null;
-					ImagePlus imp = null;
-					// The TIFF info is used when a very large TIFF image
 					if (nextSource.info != null)
 					{
 						image = new TiffImage(nextSource.info, nextSource.ras);
 					}
 					else
 					{
-						//System.out.println(id + ": Opening " + images.get(currentImage));
-						boolean showProgress = Utils.isShowProgress();
-						Utils.setShowProgress(false);
-						Opener opener = new Opener();
-						opener.setSilentMode(true);
-						imp = opener.openImage(images.get(currentImage));
-						if (showProgress)
-							Utils.setShowProgress(true);
+						image = new ArrayImage();
 					}
 
 					//System.out.println(id + ": Opened " + images.get(currentImage));
-
-					if (image == null)
-					{
-						if (imp != null)
-						{
-							image = new ArrayImage(imp);
-						}
-						else
-						{
-							image = new ArrayImage();
-						}
-					}
 
 					if (image.getSize() != 0)
 					{
 						if (width == 0)
 						{
 							// Initialise dimensions on the first valid image
-							setDimensions(image.getWidth(), image.getHeight(), image.getSize());
+							setDimensions(image.getWidth(), image.getHeight());
 						}
 						else
 						{
@@ -889,16 +860,22 @@ public class SeriesImageSource extends ImageSource
 	}
 
 	private ArrayList<String> images;
+	/**
+	 * Flag indicating if the image series contains only TIFF images. No other formats are currently supported.
+	 */
 	public final boolean isTiffSeries;
+
+	/**
+	 * Contains the cumulative size of the TIFF image series
+	 */
+	@XStreamOmitField
+	private int[] imageSize;
 
 	/**
 	 * Used to cache the TIFF info for non-sequential reading
 	 */
 	@XStreamOmitField
 	private TiffImage[] tiffImages;
-
-	@XStreamOmitField
-	private int maxz;
 
 	// Used for sequential read
 	@XStreamOmitField
@@ -948,15 +925,19 @@ public class SeriesImageSource extends ImageSource
 	public SeriesImageSource(String name, SeriesOpener series)
 	{
 		super(name);
-		images = new ArrayList<String>();
 		if (series != null)
 		{
-			for (String imageName : series.getImageList())
+			String[] names = series.getImageList();
+			for (int i = 0; i < names.length; i++)
 			{
-				images.add(new File(series.getPath(), imageName).getPath());
+				names[i] = new File(series.getPath(), names[i]).getPath();
 			}
+			isTiffSeries = isTiffSeries(names);
 		}
-		isTiffSeries = isTiffSeries();
+		else
+		{
+			isTiffSeries = false;
+		}
 	}
 
 	/**
@@ -982,18 +963,74 @@ public class SeriesImageSource extends ImageSource
 	public SeriesImageSource(String name, String[] filenames)
 	{
 		super(name);
-		images = new ArrayList<String>();
-		images.addAll(Arrays.asList(filenames));
-		isTiffSeries = isTiffSeries();
+		isTiffSeries = isTiffSeries(filenames);
 	}
 
-	private boolean isTiffSeries()
+	private boolean isTiffSeries(String[] filenames)
 	{
+		// Create this as it is needed for XStream serialisation
+		images = new ArrayList<String>();
+
 		Opener opener = new Opener();
-		for (String path : images)
-			if (opener.getFileType(path) != Opener.TIFF)
+		for (int i = 0; i < filenames.length; i++)
+		{
+			int fileType = opener.getFileType(filenames[i]);
+			if (fileType != Opener.TIFF)
+				// Only support TIFF images
 				return false;
+		}
+
+		// All images are TIFF so store the filenames
+		for (int i = 0; i < filenames.length; i++)
+		{
+			images.add(filenames[i]);
+		}
+
 		return true;
+	}
+
+	/**
+	 * Initialise the TIFF image sizes and data structures.
+	 */
+	private void initialise()
+	{
+		if (imageSize == null)
+		{
+			// All images are TIFF. Get the size of each and count the total frames.
+			imageSize = new int[images.size()];
+			tiffImages = new TiffImage[images.size()];
+			frames = 0;
+
+			for (int i = 0; i < imageSize.length; i++)
+			{
+				String path = images.get(i);
+
+				RandomAccessStream ras = null;
+				try
+				{
+					ras = new RandomAccessStream(new RandomAccessFile(new File(path), "r"));
+					CustomTiffDecoder td = new CustomTiffDecoder(ras, path);
+
+					frames += td.getNumberOfImages();
+					imageSize[i] = frames;
+
+					//System.out.printf("%s = %d\n", path, imageSize[i]);
+				}
+				catch (Throwable e)
+				{
+					if (ras != null)
+					{
+						try
+						{
+							ras.close();
+						}
+						catch (IOException e1)
+						{
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/*
@@ -1004,31 +1041,21 @@ public class SeriesImageSource extends ImageSource
 	@Override
 	public boolean openSource()
 	{
-		// reset
-		close();
-
-		if (images.isEmpty())
+		// We now require a tiff series. 
+		// Object deserialisation of old data may have non tiff images so check. 
+		if (!isTiffSeries || images.isEmpty())
 			return false;
 
-		if (isTiffSeries && (tiffImages == null || tiffImages.length != images.size()))
-		{
-			tiffImages = new TiffImage[images.size()];
-			
-			// TODO
-			// We can open all the TiffInfo objects to get the actual size.
-			// However if the Tiffs contains more than 1 IFD this will be slow.
-			
-			// Create a custom TiffDecoder to process only the first 2 IFDs.
-			// Get the first offset and then if there is another IFD.
-			// Guess the number of images using the first offset + image size + gap between images.
-			
-			// Or only support non-sequential access if the TIFF has been created with only 
-			// 1 IFD and is contiguous.
-		}
+		initialise();
+		if (frames == 0)
+			return false;
+
+		// Reset sequential reading
+		close();
 
 		// Create the queue for loading the images sequentially
 		createQueue();
-		
+
 		return getNextImage() != null;
 	}
 
@@ -1130,9 +1157,9 @@ public class SeriesImageSource extends ImageSource
 		closeQueue();
 		//setDimensions(0, 0, 0);
 		if (image != null)
-			image.close();
+			image.close(true);
 		if (lastImage != null)
-			lastImage.close();
+			lastImage.close(true);
 		image = lastImage = null;
 		nextImageId = currentSlice = lastImageId = 0;
 	}
@@ -1171,7 +1198,7 @@ public class SeriesImageSource extends ImageSource
 							// memory usage during sequential reading only cache the first 
 							// one as this is generated when the source is opened and it is 
 							// unclear if the source is to be used non-sequentially. 
-							if (isTiffSeries && lastImageId == 0 && image instanceof TiffImage)
+							if (lastImageId == 0 && image instanceof TiffImage)
 								storeTiffImage(lastImageId, (TiffImage) image);
 							return image;
 						}
@@ -1245,13 +1272,10 @@ public class SeriesImageSource extends ImageSource
 		yOrigin = y;
 	}
 
-	private void setDimensions(int maxx, int maxy, int maxz)
+	private void setDimensions(int maxx, int maxy)
 	{
 		width = maxx;
 		height = maxy;
-		this.maxz = maxz;
-		// This will be wrong if the stacks are different sizes or images are missing
-		frames = maxz * images.size();
 	}
 
 	/*
@@ -1268,7 +1292,7 @@ public class SeriesImageSource extends ImageSource
 			// Check if all frames have been accessed in the current image
 			if (currentSlice >= image.size)
 			{
-				image.close();
+				image.close(true);
 				// If no more images then return null
 				if (getNextImage() == null)
 					return null;
@@ -1286,18 +1310,21 @@ public class SeriesImageSource extends ImageSource
 	@Override
 	protected Object getRawFrame(int frame)
 	{
-		if (maxz == 0 || frame < 1)
+		if (imageSize == null || !isValid(frame))
 			return null;
 
 		// Calculate the required image and slice
-		int id = (frame - 1) / maxz;
-		int slice = (frame - 1) % maxz;
+		int id = Arrays.binarySearch(imageSize, frame);
+		if (id < 0)
+			id = -(id + 1);
+		// Note that frame is 1-based index and the slice is 0-based.
+		int slice = (id == 0) ? frame - 1 : frame - imageSize[id - 1] - 1;
 
 		// Return from the cache if it exists
 		if (id != lastImageId || lastImage == null)
 		{
 			if (lastImage != null)
-				lastImage.close();
+				lastImage.close(true);
 
 			// Used to cache the TIFF info
 			lastImage = null;
@@ -1313,7 +1340,7 @@ public class SeriesImageSource extends ImageSource
 						// Open using specialised TIFF reader for better non-sequential support
 						try
 						{
-							TiffDecoder td = new CustomTiffDecoder(
+							CustomTiffDecoder td = new CustomTiffDecoder(
 									new RandomAccessStream(new RandomAccessFile(new File(path), "r")), path);
 							FileInfo[] info = td.getTiffInfo();
 							tiffImage = new TiffImage(info, null);
