@@ -442,7 +442,7 @@ public class SeriesImageSource extends ImageSource
 					ras = null;
 					return;
 				}
-				
+
 				// No actual file is open, just move to the start
 				try
 				{
@@ -632,20 +632,21 @@ public class SeriesImageSource extends ImageSource
 							// This will close the random access stream.
 							// If it is a custom in-memory object then the close call is ignored. 
 							info = td.getTiffInfo();
-							//								if (info != null)
-							//								{
-							//									System.out.println(info[0].debugInfo);
-							//									FileOpener fo = new FileOpener(info[0]);
-							//									Properties p = fo.decodeDescriptionString(info[0]);
-							//									System.out.println(p);
-							//									double ox = 0, oy = 0;
-							//									if (p.containsKey("xorigin"))
-							//										ox = Double.parseDouble(p.getProperty("xorigin"));
-							//									if (p.containsKey("yorigin"))
-							//										oy = Double.parseDouble(p.getProperty("yorigin"));
-							//									// Should the origin be converted by the units?
-							//									setOrigin((int)ox, (int)oy);
-							//								}
+							//if (info != null)
+							//{
+							//	System.out.println(info[0].debugInfo);
+							//	System.out.println(info[0].info);
+							//	FileOpener fo = new FileOpener(info[0]);
+							//	Properties p = fo.decodeDescriptionString(info[0]);
+							//	System.out.println(p);
+							//	//double ox = 0, oy = 0;
+							//	//if (p.containsKey("xorigin"))
+							//	//	ox = Double.parseDouble(p.getProperty("xorigin"));
+							//	//if (p.containsKey("yorigin"))
+							//	//	oy = Double.parseDouble(p.getProperty("yorigin"));
+							//	//// Should the origin be converted by the units?
+							//	//setOrigin((int)ox, (int)oy);
+							//}
 						}
 						catch (IOException e)
 						{
@@ -809,7 +810,7 @@ public class SeriesImageSource extends ImageSource
 							IJ.log("Opening " + images.get(currentImage));
 						}
 					}
-					
+
 					// Only support TIFF images with pre-read FileInfo
 					Image image = null;
 					if (nextSource.info != null)
