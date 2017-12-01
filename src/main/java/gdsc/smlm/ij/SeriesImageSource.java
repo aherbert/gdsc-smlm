@@ -1348,11 +1348,13 @@ public class SeriesImageSource extends ImageSource
 					// sequential reading if all images fit into memory.
 					long size = getSize(file);
 
+					//System.out.printf("%s = %d bytes\n", path, size);
+					
 					ras = new RandomAccessStream(new RandomAccessFile(file, "r"));
 					CustomTiffDecoder td = new CustomTiffDecoder(ras, path);
 
 					int n = td.getNumberOfImages();
-					System.out.printf("%s = %d\n", path, n);
+					System.out.printf("%s = %d  (%d bytes)\n", path, n, size);
 					if (n <= 0)
 					{
 						// No TIFF images. This will break the non-sequential support
