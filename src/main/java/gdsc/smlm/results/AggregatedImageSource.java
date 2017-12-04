@@ -185,7 +185,7 @@ public class AggregatedImageSource extends ImageSource
 	{
 		if (!checkBounds(bounds))
 			bounds = null;
-		
+
 		if (sequentialReadStatus == SequentialReadStatus.READY)
 		{
 			if (initialiseSequentialRead())
@@ -383,5 +383,27 @@ public class AggregatedImageSource extends ImageSource
 	public String toString()
 	{
 		return String.format("%s (Aggregate %d images)", imageSource.toString(), aggregate);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#setReadHint(gdsc.smlm.results.ImageSource.ReadHint)
+	 */
+	@Override
+	public void setReadHint(ReadHint readHint)
+	{
+		imageSource.setReadHint(readHint);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#getReadHint()
+	 */
+	@Override
+	public ReadHint getReadHint()
+	{
+		return imageSource.getReadHint();
 	}
 }

@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -17,12 +16,13 @@ import gdsc.smlm.results.ImageSource;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
-import ij.io.CustomTiffDecoder;
+import ij.io.ByteArraySeekableStream;
+import ij.io.FastTiffDecoder;
 import ij.io.FileInfo;
+import ij.io.FileSeekableStream;
 import ij.io.ImageReader;
 import ij.io.Opener;
-import ij.io.RandomAccessStream;
-import ij.io.TiffDecoder;
+import ij.io.SeekableStream;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -125,10 +125,9 @@ public class SeriesImageSource extends ImageSource
 		ImageReader reader = null;
 		InputStream is = null;
 		/**
-		 * A reference to a stream with an underlying ByteArrayRandomAccessFile. This is effectively the file contents
-		 * held in memory.
+		 * A reference to a seekable stream which may be buffered in memory.
 		 */
-		RandomAccessStream ras = null;
+		SeekableStream ss = null;
 		boolean inMemory = false;
 		/**
 		 * Flag indicating that no errors reading the image have occurred
@@ -139,7 +138,7 @@ public class SeriesImageSource extends ImageSource
 		 */
 		int frameCount = 0;
 
-		TiffImage(FileInfo[] info, RandomAccessStream ras, boolean inMemory)
+		TiffImage(FileInfo[] info, SeekableStream ss)
 		{
 			super(info[0].width, info[0].height, 0);
 			this.info = info;
@@ -148,18 +147,18 @@ public class SeriesImageSource extends ImageSource
 			// Only support certain types
 			if (isSupported(fi.fileType))
 			{
-				// We use the opened RandomAccessStream.
+				// We use the opened SeekableStream.
 				// This may be in-memory data or may be from a random access file.
-				if (ras != null)
+				if (ss != null)
 				{
 					try
 					{
-						ras.seek(0);
-						this.ras = ras;
-						is = ras;
+						ss.seek(0);
+						this.ss = ss;
+						is = ss;
 
 						// Store if the stream contains in-memory data						
-						this.inMemory = inMemory;
+						this.inMemory = ss instanceof ByteArraySeekableStream;
 					}
 					catch (IOException e)
 					{
@@ -484,12 +483,12 @@ public class SeriesImageSource extends ImageSource
 			// Reset
 			frameCount = 0;
 
-			if (ras != null && !freeResources)
+			if (ss != null && !freeResources)
 			{
 				// We can seek to the start
 				try
 				{
-					ras.seek(0);
+					ss.seek(0);
 					return;
 				}
 				catch (IOException e)
@@ -500,7 +499,7 @@ public class SeriesImageSource extends ImageSource
 
 			// This is done when sequentially reading so we clear the memory
 			inMemory = false;
-			ras = null;
+			ss = null;
 
 			if (is != null)
 			{
@@ -515,99 +514,6 @@ public class SeriesImageSource extends ImageSource
 				// Reset
 				is = null;
 			}
-		}
-	}
-
-	/**
-	 * Extend RandomAccessFile to use a byte buffer held in memory. The source file is not manipulated but used to allow
-	 * construction.
-	 */
-	public class ByteArrayRandomAccessFile extends RandomAccessFile
-	{
-		int p = 0;
-		byte[] bytes;
-		final int length;
-
-		public ByteArrayRandomAccessFile(byte[] bytes, File file) throws IOException
-		{
-			super(file, "r");
-			this.bytes = bytes;
-			length = bytes.length;
-
-			// Close the file again!
-			super.close();
-		}
-
-		// Override the methods that are not final
-
-		@Override
-		public int read() throws IOException
-		{
-			if (p < length)
-				return bytes[p++] & 0xff;
-			return -1;
-		}
-
-		@Override
-		public int read(byte[] b, int off, int len) throws IOException
-		{
-			if (p < length)
-			{
-				if (len > 0)
-				{
-					int size = (p + len <= length) ? len : length - p;
-					System.arraycopy(bytes, p, b, off, size);
-					p += size;
-					return size;
-				}
-				throw new IOException("No length specified");
-			}
-			return -1;
-		}
-
-		@Override
-		public void write(byte[] b) throws IOException
-		{
-			throw new IOException("Not supported");
-		}
-
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException
-		{
-			throw new IOException("Not supported");
-		}
-
-		@Override
-		public long getFilePointer() throws IOException
-		{
-			return p;
-		}
-
-		@Override
-		public void seek(long pos) throws IOException
-		{
-			if (pos < 0)
-				throw new IOException("Negative position");
-			// Allow seek to the end
-			p = (pos > length) ? length : (int) pos;
-		}
-
-		@Override
-		public long length() throws IOException
-		{
-			return length;
-		}
-
-		@Override
-		public void setLength(long newLength) throws IOException
-		{
-			throw new IOException("Not supported");
-		}
-
-		@Override
-		public void close() throws IOException
-		{
-			// Do nothing
 		}
 	}
 
@@ -636,8 +542,8 @@ public class SeriesImageSource extends ImageSource
 					final String path = images.get(currentImage);
 					//System.out.println("Reading " + path);
 
-					RandomAccessStream ras = createRandomAccessStream(path);
-					if (ras == null)
+					SeekableStream ss = createSeekableStream(path);
+					if (ss == null)
 					{
 						error = true;
 						break;
@@ -658,13 +564,13 @@ public class SeriesImageSource extends ImageSource
 					TiffImage image = imageData[currentImage].tiffImage;
 					if (image == null)
 					{
-						FileInfo[] info = getTiffInfo(ras, path);
+						FileInfo[] info = getTiffInfo(ss, path);
 						if (info == null)
 						{
 							error = true;
 							break;
 						}
-						image = new TiffImage(info, null, false);
+						image = new TiffImage(info, null);
 						storeTiffImage(currentImage, image);
 					}
 
@@ -866,26 +772,14 @@ public class SeriesImageSource extends ImageSource
 					final String path = images.get(currentImage);
 					//System.out.println("Reading " + path);
 
-					File file = new File(path);
-
-					RandomAccessStream ras = null;
-					try
-					{
-						ras = new RandomAccessStream(new ByteArrayRandomAccessFile(nextSource.buffer, file));
-					}
-					catch (IOException e)
-					{
-						System.out.println(e.toString());
-						error = true;
-						break;
-					}
+					SeekableStream ss = new ByteArraySeekableStream(nextSource.buffer);
 
 					// Re-use the cache of the file info
 					FileInfo[] info = null;
 					TiffImage image = imageData[currentImage].tiffImage;
 					if (image == null)
 					{
-						info = getTiffInfo(ras, path);
+						info = getTiffInfo(ss, path);
 						if (info == null)
 						{
 							error = true;
@@ -893,7 +787,7 @@ public class SeriesImageSource extends ImageSource
 						}
 
 						// Create as in-memory
-						image = new TiffImage(info, ras, true);
+						image = new TiffImage(info, ss);
 
 						// Check dimensions
 						// Check it is the expected size
@@ -911,8 +805,8 @@ public class SeriesImageSource extends ImageSource
 						// Update to be in-memory. This will be used when reading the TIFF.
 						// It will subsequently be closed to free-memory.
 						image.inMemory = true;
-						image.ras = ras;
-						image.is = ras;
+						image.ss = ss;
+						image.is = ss;
 					}
 
 					//nextSource.setFileInfo(info);
@@ -1031,17 +925,17 @@ public class SeriesImageSource extends ImageSource
 	//				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
 	//				{
 	//					FileInfo[] info = null;
-	//					RandomAccessStream ras = null;
+	//					SeekableStream ss = null;
 	//
 	//					final String path = images.get(currentImage);
 	//					//System.out.println("Reading " + images.get(currentImage));
 	//
-	//					// This may contain a custom RandomAccessStream that wraps an in-memory RandomAccessFile 
-	//					ras = createRandomAccessStream(path);
+	//					// This may contain a custom SeekableStream that wraps an in-memory RandomAccessFile 
+	//					ss = createSeekableStream(path);
 	//
-	//					if (ras != null)
+	//					if (ss != null)
 	//					{
-	//						TiffDecoder td = new CustomTiffDecoder(ras, path);
+	//						TiffDecoder td = new CustomTiffDecoder(ss, path);
 	//						if (logProgress)
 	//						{
 	//							long time = System.currentTimeMillis();
@@ -1054,7 +948,7 @@ public class SeriesImageSource extends ImageSource
 	//						try
 	//						{
 	//							//td.enableDebugging();
-	//							// This will close the random access stream.
+	//							// This will close the seekable stream.
 	//							// If it is a custom in-memory object then the close call is ignored. 
 	//							info = td.getTiffInfo();
 	//							//if (info != null)
@@ -1084,7 +978,7 @@ public class SeriesImageSource extends ImageSource
 	//						}
 	//					}
 	//
-	//					sourceQueue.put(new NextSource(info, (inMemory[0]) ? ras : null, currentImage));
+	//					sourceQueue.put(new NextSource(info, (inMemory[0]) ? ss : null, currentImage));
 	//				}
 	//			}
 	//			catch (FileNotFoundException e)
@@ -1119,34 +1013,29 @@ public class SeriesImageSource extends ImageSource
 	//	}
 
 	/**
-	 * Creates the random access stream.
+	 * Creates the seekable stream.
 	 *
 	 * @param path
 	 *            the path
-	 * @param inMemory
-	 *            the in memory
 	 * @param size
 	 *            the size of the file
-	 * @return the random access stream
+	 * @return the seekable stream
 	 */
-	private RandomAccessStream createRandomAccessStream(String path, boolean[] inMemory, long size)
+	private SeekableStream createSeekableStream(String path, long size)
 	{
 		File file = new File(path);
 
 		// Don't buffer massive images into memory
 		if (belowBufferLimit(size))
 		{
-			RandomAccessStream ras = readBytes(file, size);
-			if (ras != null)
-			{
-				inMemory[0] = true;
-				return ras;
-			}
+			SeekableStream ss = readByteArraySeekableStream(file, size);
+			if (ss != null)
+				return ss;
 		}
 
 		try
 		{
-			return new RandomAccessStream(new RandomAccessFile(file, "r"));
+			return new FileSeekableStream(file);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -1160,18 +1049,17 @@ public class SeriesImageSource extends ImageSource
 	}
 
 	/**
-	 * Creates the random access stream.
+	 * Creates the seekable stream.
 	 *
 	 * @param path
 	 *            the path
-	 * @return the random access stream
+	 * @return the seekable stream
 	 */
-	private RandomAccessStream createRandomAccessStream(String path)
+	private SeekableStream createSeekableStream(String path)
 	{
-		File file = new File(path);
 		try
 		{
-			return new RandomAccessStream(new RandomAccessFile(file, "r"));
+			return new FileSeekableStream(path);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -1184,13 +1072,13 @@ public class SeriesImageSource extends ImageSource
 		return null;
 	}
 
-	private FileInfo[] getTiffInfo(RandomAccessStream ras, String path)
+	private FileInfo[] getTiffInfo(SeekableStream ss, String path)
 	{
-		TiffDecoder td = new CustomTiffDecoder(ras, path);
+		FastTiffDecoder td = new FastTiffDecoder(ss, path);
 		try
 		{
 			//td.enableDebugging();
-			// This will close the random access stream.
+			// This will close the seekable stream.
 			FileInfo[] info = td.getTiffInfo();
 			//if (info != null)
 			//{
@@ -1221,7 +1109,7 @@ public class SeriesImageSource extends ImageSource
 			try
 			{
 				// Close this if the TIFF decoder errored
-				ras.close();
+				ss.close();
 			}
 			catch (IOException ex)
 			{
@@ -1247,7 +1135,7 @@ public class SeriesImageSource extends ImageSource
 		return 0;
 	}
 
-	private RandomAccessStream readBytes(File file, long size)
+	private SeekableStream readByteArraySeekableStream(File file, long size)
 	{
 		FileInputStream fis = openStream(file);
 		if (fis != null)
@@ -1257,7 +1145,7 @@ public class SeriesImageSource extends ImageSource
 				byte[] buf = new byte[(int) size];
 				int read = fis.read(buf);
 				if (read == size)
-					return new RandomAccessStream(new ByteArrayRandomAccessFile(buf, file));
+					return new ByteArraySeekableStream(buf);
 			}
 			catch (IOException e)
 			{
@@ -1337,7 +1225,7 @@ public class SeriesImageSource extends ImageSource
 	//					Image image = null;
 	//					if (nextSource.info != null)
 	//					{
-	//						image = new TiffImage(nextSource.info, nextSource.ras, nextSource.ras != null);
+	//						image = new TiffImage(nextSource.info, nextSource.ss, nextSource.ss != null);
 	//					}
 	//					else
 	//					{
@@ -1577,20 +1465,23 @@ public class SeriesImageSource extends ImageSource
 	 */
 	private void initialise()
 	{
-		if (imageSize == null)
+		if (imageData == null)
 		{
 			// All images are TIFF. Get the size of each and count the total frames.
-			imageSize = new int[images.size()];
 			imageData = new ImageData[images.size()];
+			imageSize = new int[images.size()];
 			String[] names = new String[images.size()];
 			frames = 0;
 			int ok = 0;
+
+			// We can guess for sequential read
+			boolean guess = getReadHint() == ReadHint.SEQUENTIAL;
 
 			for (int i = 0; i < names.length; i++)
 			{
 				String path = images.get(i);
 
-				RandomAccessStream ras = null;
+				SeekableStream ss = null;
 				try
 				{
 					File file = new File(path);
@@ -1602,16 +1493,30 @@ public class SeriesImageSource extends ImageSource
 
 					//System.out.printf("%s = %d bytes\n", path, size);
 
-					ras = new RandomAccessStream(new RandomAccessFile(file, "r"));
-					CustomTiffDecoder td = new CustomTiffDecoder(ras, path);
+					ss = createSeekableStream(path);
+					FastTiffDecoder td = new FastTiffDecoder(ss, path);
 
-					int n = td.getNumberOfImages();
-					System.out.printf("%s = %d  (%d bytes)\n", path, n, size);
-					if (n <= 0)
+					int n;
+					if (guess)
 					{
-						// No TIFF images. This will break the non-sequential support
-						// using the cumulative size array so remove the image. 
-						continue;
+						// TODO:
+						// After we have guessed a few images we can see if any other
+						// files are the same size and guess from those. This will be fast
+						// for thousands of images.
+						
+						n = td.guessNumberOfImages();
+						System.out.printf("%s ~ %d (%d bytes)\n", path, n, size);
+					}
+					else
+					{
+						n = td.getNumberOfImages();
+						System.out.printf("%s = %d (%d bytes)\n", path, n, size);
+						if (n <= 0)
+						{
+							// No TIFF images. This will break the non-sequential support
+							// using the cumulative size array so remove the image. 
+							continue;
+						}
 					}
 
 					frames += n;
@@ -1625,11 +1530,11 @@ public class SeriesImageSource extends ImageSource
 				}
 				finally
 				{
-					if (ras != null)
+					if (ss != null)
 					{
 						try
 						{
-							ras.close();
+							ss.close();
 						}
 						catch (IOException e1)
 						{
@@ -1645,6 +1550,10 @@ public class SeriesImageSource extends ImageSource
 				images.clear();
 				images.addAll(Arrays.asList(names));
 			}
+			
+			// No support for non-sequential access
+			if (guess)
+				imageSize = null;
 		}
 	}
 
@@ -1659,7 +1568,7 @@ public class SeriesImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ImageSource#openSource()
 	 */
 	@Override
-	public boolean openSource()
+	protected boolean openSource()
 	{
 		// We now require a tiff series. 
 		// Object deserialisation of old data may have non tiff images so check. 
@@ -1675,11 +1584,16 @@ public class SeriesImageSource extends ImageSource
 		close();
 
 		// Open the first TIFF image
-		Object pixels = getRawFrame(1);
-		if (pixels != null)
+		lastImage = openImage(0, images.get(0));
+		lastImageId = 0;
+		if (lastImage != null && lastImage.size > 0)
 		{
-			setDimensions(imageData[0].tiffImage.width, imageData[0].tiffImage.height);
-			return true;
+			Object pixels = lastImage.getFrame(0);
+			if (pixels != null)
+			{
+				setDimensions(imageData[0].tiffImage.width, imageData[0].tiffImage.height);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -1689,14 +1603,14 @@ public class SeriesImageSource extends ImageSource
 	 * 
 	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
-	public void closeSource()
+	protected void closeSource()
 	{
 		if (threads != null)
 			closeQueue();
 		//setDimensions(0, 0, 0);
 		//if (image != null)
 		//	image.close(true);
-		
+
 		if (lastImage != null)
 			lastImage.close(true);
 		//image = 
@@ -1869,7 +1783,7 @@ public class SeriesImageSource extends ImageSource
 				readQueue.close(false);
 			}
 			rawFramesQueue.close(false);
-			
+
 			// Join the threads and then set all to null
 			for (Thread thread : threads)
 			{
@@ -2021,40 +1935,7 @@ public class SeriesImageSource extends ImageSource
 					TiffImage tiffImage = imageData[id].tiffImage;
 					if (tiffImage == null)
 					{
-						// Open using specialised TIFF reader for better non-sequential support
-						RandomAccessStream ras = null;
-						try
-						{
-							boolean[] inMemory = new boolean[1];
-							ras = createRandomAccessStream(path, inMemory, imageData[id].fileSize);
-							CustomTiffDecoder td = new CustomTiffDecoder(ras, path);
-							FileInfo[] info = td.getTiffInfo();
-
-							// Store the opened stream as we will use it
-							tiffImage = new TiffImage(info, ras, inMemory[0]);
-
-							storeTiffImage(id, tiffImage);
-						}
-						catch (Throwable e)
-						{
-							System.out.println(e.toString());
-
-							// Close resources
-							if (ras != null)
-							{
-								try
-								{
-									ras.close();
-								}
-								catch (IOException ioe)
-								{
-								}
-							}
-
-							// Prevent reading again. Skip the storeTiffImage(...) method 
-							// as that may be optional and we don't want to repeat the error.
-							imageData[id].tiffImage = new TiffImage();
-						}
+						tiffImage = openImage(id, path);
 					}
 
 					lastImage = tiffImage;
@@ -2087,6 +1968,45 @@ public class SeriesImageSource extends ImageSource
 			}
 		}
 		return null;
+	}
+
+	private TiffImage openImage(int id, String path)
+	{
+		// Open using specialised TIFF reader for better non-sequential support
+		SeekableStream ss = null;
+		TiffImage tiffImage = null;
+		try
+		{
+			ss = createSeekableStream(path, imageData[id].fileSize);
+			FastTiffDecoder td = new FastTiffDecoder(ss, path);
+			FileInfo[] info = td.getTiffInfo();
+
+			// Store the opened stream as we will use it
+			tiffImage = new TiffImage(info, ss);
+
+			storeTiffImage(id, tiffImage);
+		}
+		catch (Throwable e)
+		{
+			System.out.println(e.toString());
+
+			// Close resources
+			if (ss != null)
+			{
+				try
+				{
+					ss.close();
+				}
+				catch (IOException ioe)
+				{
+				}
+			}
+
+			// Prevent reading again. Skip the storeTiffImage(...) method 
+			// as that may be optional and we don't want to repeat the error.
+			imageData[id].tiffImage = new TiffImage();
+		}
+		return tiffImage;
 	}
 
 	/*

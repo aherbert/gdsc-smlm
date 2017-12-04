@@ -171,7 +171,7 @@ public class InterlacedImageSource extends ImageSource
 		if (imageSource.initialiseSequentialRead())
 		{
 			imageSource.sequentialReadStatus = SequentialReadStatus.RUNNING;
-			
+
 			// Assume frame start at 1 and set the initial skip		
 			final int initialSkip = (start - 1);
 			counter = -initialSkip;
@@ -182,7 +182,7 @@ public class InterlacedImageSource extends ImageSource
 			imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
 			return false;
 		}
-		
+
 	}
 
 	/*
@@ -288,5 +288,27 @@ public class InterlacedImageSource extends ImageSource
 	public int getSkip()
 	{
 		return skip;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#setReadHint(gdsc.smlm.results.ImageSource.ReadHint)
+	 */
+	@Override
+	public void setReadHint(ReadHint readHint)
+	{
+		imageSource.setReadHint(readHint);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#getReadHint()
+	 */
+	@Override
+	public ReadHint getReadHint()
+	{
+		return imageSource.getReadHint();
 	}
 }

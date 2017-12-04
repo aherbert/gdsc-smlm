@@ -63,6 +63,23 @@ public abstract class ImageSource
 	SequentialReadStatus sequentialReadStatus;
 
 	/**
+	 * The hints for how the source will be used. This allows the source to optimise the opening process to prepare the
+	 * image.
+	 */
+	public enum ReadHint
+	{
+		/** The source will be used only in sequential mode. */
+		SEQUENTIAL,
+		/** The source will be used only in non-sequential mode. */
+		NONSEQUENTIAL,
+		/** The source will be used in sequential and non-sequential mode. */
+		BOTH;
+	}
+
+	@XStreamOmitField
+	private ReadHint readHint = ReadHint.SEQUENTIAL;
+
+	/**
 	 * Create the image source
 	 * 
 	 * @param name
@@ -109,7 +126,7 @@ public abstract class ImageSource
 	 * Closes the source
 	 */
 	protected abstract void closeSource();
-	
+
 	/**
 	 * Gets the x origin of the image frame. This may be non-zero to specify a crop of an image frame.
 	 * <p>
@@ -544,5 +561,26 @@ public abstract class ImageSource
 	public SequentialReadStatus getSequentialReadStatus()
 	{
 		return sequentialReadStatus;
+	}
+
+	/**
+	 * Gets the read hint for how the source will be used.
+	 *
+	 * @return the read hint
+	 */
+	public ReadHint getReadHint()
+	{
+		return readHint;
+	}
+
+	/**
+	 * Sets the read hint for how the source will be used.
+	 *
+	 * @param readHint
+	 *            the new read hint
+	 */
+	public void setReadHint(ReadHint readHint)
+	{
+		this.readHint = readHint;
 	}
 }
