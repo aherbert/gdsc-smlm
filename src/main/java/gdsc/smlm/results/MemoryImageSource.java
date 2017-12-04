@@ -78,7 +78,7 @@ public class MemoryImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
-	public void closeSource()
+	protected void closeSource()
 	{
 		// Free the memory
 		if (freeMemoryOnClose)

@@ -35,7 +35,7 @@ public class NullSource extends ImageSource
 	}
 
 	@Override
-	public void closeSource()
+	protected void closeSource()
 	{
 		// Nothing to do
 	}

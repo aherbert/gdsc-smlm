@@ -155,7 +155,7 @@ public class InterlacedImageSource extends ImageSource
 	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
-	public void closeSource()
+	protected void closeSource()
 	{
 		imageSource.closeSource();
 	}
