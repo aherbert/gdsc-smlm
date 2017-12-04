@@ -576,8 +576,12 @@ public class SeriesImageSource extends ImageSource
 
 					// Check dimensions
 					// Check it is the expected size
-					if (image.getWidth() != getWidth() || image.getHeight() != getHeight() ||
-							image.getSize() != getImageSize(currentImage))
+					if (image.getWidth() != getWidth() || image.getHeight() != getHeight())
+					{
+						error = true;
+						break;
+					}
+					if (imageSize != null && image.getSize() != getImageSize(currentImage))
 					{
 						error = true;
 						break;
@@ -791,8 +795,12 @@ public class SeriesImageSource extends ImageSource
 
 						// Check dimensions
 						// Check it is the expected size
-						if (image.getWidth() != getWidth() || image.getHeight() != getHeight() ||
-								image.getSize() != getImageSize(currentImage))
+						if (image.getWidth() != getWidth() || image.getHeight() != getHeight())
+						{
+							error = true;
+							break;
+						}
+						if (imageSize != null && image.getSize() != getImageSize(currentImage))
 						{
 							error = true;
 							break;
@@ -1503,7 +1511,7 @@ public class SeriesImageSource extends ImageSource
 						// After we have guessed a few images we can see if any other
 						// files are the same size and guess from those. This will be fast
 						// for thousands of images.
-						
+
 						n = td.guessNumberOfImages();
 						System.out.printf("%s ~ %d (%d bytes)\n", path, n, size);
 					}
@@ -1550,7 +1558,7 @@ public class SeriesImageSource extends ImageSource
 				images.clear();
 				images.addAll(Arrays.asList(names));
 			}
-			
+
 			// No support for non-sequential access
 			if (guess)
 				imageSize = null;

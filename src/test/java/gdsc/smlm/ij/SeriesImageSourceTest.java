@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.Random;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.smlm.results.ImageSource.ReadHint;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -39,6 +40,7 @@ public class SeriesImageSourceTest
 		SeriesImageSource source = new SeriesImageSource("Test", filenames);
 		if (!inMemory)
 			source.setBufferLimit(0); // To force standard reading functionality
+		source.setReadHint(ReadHint.SEQUENTIAL);
 		source.open();
 		Assert.assertEquals(w, source.getWidth());
 		Assert.assertEquals(h, source.getHeight());
@@ -76,6 +78,7 @@ public class SeriesImageSourceTest
 		SeriesImageSource source = new SeriesImageSource("Test", filenames);
 		if (!inMemory)
 			source.setBufferLimit(0); // To force standard reading functionality
+		source.setReadHint(ReadHint.NONSEQUENTIAL);
 		source.open();
 		Assert.assertEquals(w, source.getWidth());
 		Assert.assertEquals(h, source.getHeight());
