@@ -20,6 +20,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.settings.Constants;
+import gdsc.smlm.results.ImageSource.ReadHint;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -65,6 +66,7 @@ public class TiffSeriesViewer implements PlugIn
 		SeriesImageSource source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
 		source.setBufferLimit(0); // No memory buffer
 		source.setLogProgress(extraOptions);
+		source.setReadHint(ReadHint.NONSEQUENTIAL);
 
 		if (!source.isTiffSeries)
 		{
