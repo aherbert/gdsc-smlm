@@ -82,7 +82,7 @@ public class TiffSeriesViewer implements PlugIn
 		Utils.showStatus("");
 
 		// Q. Can we create a virtual stack?
-		new TiffSeriesVirtualStack(source).show();
+		//new TiffSeriesVirtualStack(source).show();
 	}
 
 	/**

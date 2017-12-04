@@ -314,6 +314,7 @@ public class SeriesImageSource extends ImageSource
 			catch (Exception e)
 			{
 				System.out.println(e.toString());
+				e.printStackTrace();
 				canRead = false;
 			}
 
@@ -394,6 +395,7 @@ public class SeriesImageSource extends ImageSource
 			catch (Exception e)
 			{
 				System.out.println(e.toString());
+				e.printStackTrace();
 				canRead = false;
 			}
 
@@ -411,6 +413,7 @@ public class SeriesImageSource extends ImageSource
 				catch (Exception e)
 				{
 					System.out.println(e.toString());
+					e.printStackTrace();
 				}
 				finally
 				{
@@ -632,6 +635,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				// This is from the queue put method, possibly an interrupt on the queue or thread? 
 				System.out.println(e.toString());
+				e.printStackTrace();
 				error = true;
 			}
 
@@ -717,6 +721,7 @@ public class SeriesImageSource extends ImageSource
 					catch (IOException e)
 					{
 						System.out.println(e.toString());
+						e.printStackTrace();
 						error = true;
 						break;
 					}
@@ -737,6 +742,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				// This is from the queue put method, possibly an interrupt on the queue or thread? 
 				System.out.println(e.toString());
+				e.printStackTrace();
 				error = true;
 			}
 
@@ -829,6 +835,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				// This is from the queue put method, possibly an interrupt on the queue or thread? 
 				System.out.println(e.toString());
+				e.printStackTrace();
 				error = true;
 			}
 
@@ -903,6 +910,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				// This is from the queue put method, possibly an interrupt on the queue or thread? 
 				System.out.println(e.toString());
+				e.printStackTrace();
 				error = true;
 			}
 
@@ -1000,7 +1008,7 @@ public class SeriesImageSource extends ImageSource
 	//			catch (InterruptedException e)
 	//			{
 	//				// This is from the queue put method, possibly an interrupt on the queue or thread? 
-	//				System.out.println(e.toString());
+	//				System.out.println(e.toString()); e.printStackTrace();
 	//			}
 	//
 	//			// Add jobs to shutdown all the workers
@@ -1013,7 +1021,7 @@ public class SeriesImageSource extends ImageSource
 	//			{
 	//				// This is from the queue put method, possibly an interrupt on the queue or thread? 
 	//				// TODO - How should this be handled?
-	//				System.out.println(e.toString());
+	//				System.out.println(e.toString()); e.printStackTrace();
 	//			}
 	//
 	//			run = false;
@@ -1160,6 +1168,7 @@ public class SeriesImageSource extends ImageSource
 				// At the moment if we ignore this then the ImageWorker will open the file
 				// rather than process from the memory stream.
 				System.out.println(e.toString());
+				e.printStackTrace();
 			}
 			finally
 			{
@@ -1535,6 +1544,9 @@ public class SeriesImageSource extends ImageSource
 				}
 				catch (Throwable e)
 				{
+					if (guess)
+						// This is an utested method so log the error
+						e.printStackTrace();
 				}
 				finally
 				{
@@ -1962,7 +1974,7 @@ public class SeriesImageSource extends ImageSource
 					//}
 					//catch (Throwable e)
 					//{
-					//	System.out.println(e.toString());
+					//	System.out.println(e.toString()); e.printStackTrace();
 					//}
 				}
 			}
@@ -1997,6 +2009,7 @@ public class SeriesImageSource extends ImageSource
 		catch (Throwable e)
 		{
 			System.out.println(e.toString());
+			e.printStackTrace();
 
 			// Close resources
 			if (ss != null)
