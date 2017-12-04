@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
@@ -85,6 +83,10 @@ public class SeriesImageSource extends ImageSource
 		}
 	}
 
+	/**
+	 * Support all images ImageJ can read using a fixed image array
+	 */
+	@SuppressWarnings("unused")
 	private class ArrayImage extends Image
 	{
 		final Object[] imageArray;
@@ -632,7 +634,7 @@ public class SeriesImageSource extends ImageSource
 				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
 				{
 					final String path = images.get(currentImage);
-					//System.out.println("Reading " + images.get(currentImage));
+					//System.out.println("Reading " + path);
 
 					RandomAccessStream ras = createRandomAccessStream(path);
 					if (ras == null)
@@ -666,8 +668,10 @@ public class SeriesImageSource extends ImageSource
 						storeTiffImage(currentImage, image);
 					}
 
+					// Check dimensions
 					// Check it is the expected size
-					if (image.size != getImageSize(currentImage))
+					if (image.getWidth() != getWidth() || image.getHeight() != getHeight() ||
+							image.getSize() != getImageSize(currentImage))
 					{
 						error = true;
 						break;
@@ -703,7 +707,8 @@ public class SeriesImageSource extends ImageSource
 							}
 
 							// This will block until the queue has capacity or is closed
-							rawFrames.put(pixels);
+							if (!rawFramesQueue.putAndConfirm(pixels))
+								break;
 						}
 					}
 					finally
@@ -720,18 +725,17 @@ public class SeriesImageSource extends ImageSource
 				error = true;
 			}
 
-			rawFrames.close(error);
+			rawFramesQueue.close(error);
 
 			run = false;
 		}
-
 	}
 
 	private class NextSource
 	{
 		final byte[] buffer;
 		final int imageId;
-		FileInfo[] info;
+		//FileInfo[] info;
 		Image image;
 
 		public NextSource(byte[] buffer, int imageId)
@@ -740,19 +744,272 @@ public class SeriesImageSource extends ImageSource
 			this.imageId = imageId;
 		}
 
-		public void setFileInfo(FileInfo[] info)
-		{
-			this.info = info;
-		}
+		//public void setFileInfo(FileInfo[] info)
+		//{
+		//	this.info = info;
+		//}
 
 		public void setImage(Image image)
 		{
-
+			this.image = image;
 		}
 
-		public NextSource()
+		//public NextSource()
+		//{
+		//	this(null, -1);
+		//}
+	}
+
+	/**
+	 * Read source image files into memory.
+	 */
+	private class BufferWorker extends BaseWorker
+	{
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
 		{
-			this(null, -1);
+			boolean error = false;
+			try
+			{
+				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
+				{
+					final String path = images.get(currentImage);
+					//System.out.println("Reading " + path);
+
+					File file = new File(path);
+					FileInputStream fis = openStream(file);
+					if (fis == null)
+					{
+						error = true;
+						break;
+					}
+
+					try
+					{
+						// We already know they fit into memory (i.e. the size is not zero)
+						int size = (int) imageData[currentImage].fileSize;
+						byte[] buf = new byte[size];
+						int read = fis.read(buf);
+						if (read != size)
+						{
+							error = true;
+							break;
+						}
+
+						// This may be closed upon error
+						if (!decodeQueue.putAndConfirm(new NextSource(buf, currentImage)))
+							break;
+					}
+					catch (IOException e)
+					{
+						System.out.println(e.toString());
+						error = true;
+						break;
+					}
+					finally
+					{
+						try
+						{
+							fis.close();
+						}
+						catch (IOException e)
+						{
+							// Ignore
+						}
+					}
+				}
+			}
+			catch (InterruptedException e)
+			{
+				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+				System.out.println(e.toString());
+				error = true;
+			}
+
+			if (error)
+				closeWorkflowQueues();
+			else
+				decodeQueue.close(false);
+
+			run = false;
+		}
+	}
+
+	/**
+	 * Read source image files into memory.
+	 */
+	private class DecodeWorker extends BaseWorker
+	{
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			boolean error = false;
+			try
+			{
+				while (run)
+				{
+					NextSource nextSource = decodeQueue.take();
+					if (nextSource == null || !run)
+						break;
+					final int currentImage = nextSource.imageId;
+					if (currentImage == -1)
+						break;
+
+					final String path = images.get(currentImage);
+					//System.out.println("Reading " + path);
+
+					File file = new File(path);
+
+					RandomAccessStream ras = null;
+					try
+					{
+						ras = new RandomAccessStream(new ByteArrayRandomAccessFile(nextSource.buffer, file));
+					}
+					catch (IOException e)
+					{
+						System.out.println(e.toString());
+						error = true;
+						break;
+					}
+
+					// Re-use the cache of the file info
+					FileInfo[] info = null;
+					TiffImage image = imageData[currentImage].tiffImage;
+					if (image == null)
+					{
+						info = getTiffInfo(ras, path);
+						if (info == null)
+						{
+							error = true;
+							break;
+						}
+
+						// Create as in-memory
+						image = new TiffImage(info, ras, true);
+
+						// Check dimensions
+						// Check it is the expected size
+						if (image.getWidth() != getWidth() || image.getHeight() != getHeight() ||
+								image.getSize() != getImageSize(currentImage))
+						{
+							error = true;
+							break;
+						}
+
+						storeTiffImage(currentImage, image);
+					}
+					else
+					{
+						// Update to be in-memory. This will be used when reading the TIFF.
+						// It will subsequently be closed to free-memory.
+						image.inMemory = true;
+						image.ras = ras;
+						image.is = ras;
+					}
+
+					//nextSource.setFileInfo(info);
+					nextSource.setImage(image);
+
+					// This may be closed upon error
+					if (!readQueue.putAndConfirm(nextSource))
+						break;
+				}
+			}
+			catch (InterruptedException e)
+			{
+				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+				System.out.println(e.toString());
+				error = true;
+			}
+
+			if (error)
+				closeWorkflowQueues();
+			else
+				readQueue.close(false);
+
+			run = false;
+		}
+	}
+
+	/**
+	 * Read source image files into memory.
+	 */
+	private class ReadWorker extends BaseWorker
+	{
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Runnable#run()
+		 */
+		public void run()
+		{
+			boolean error = false;
+			try
+			{
+				while (run)
+				{
+					NextSource nextSource = readQueue.take();
+					if (nextSource == null || !run)
+						break;
+					final int currentImage = nextSource.imageId;
+					if (currentImage == -1)
+						break;
+
+					// It is assumed we are reading a TIFF series
+					TiffImage image = (TiffImage) nextSource.image;
+
+					image.reset();
+					if (!image.openInputStream())
+					{
+						error = true;
+						break;
+					}
+
+					try
+					{
+						// Read all the frames sequentially
+						for (int i = 0; i < image.size; i++)
+						{
+							Object pixels = image.nextFrame();
+							if (pixels == null)
+							{
+								error = true;
+								break;
+							}
+
+							// This may be closed upon error
+							if (!rawFramesQueue.putAndConfirm(pixels))
+								break;
+						}
+					}
+					finally
+					{
+						// Close the image
+						image.close(true);
+					}
+				}
+			}
+			catch (InterruptedException e)
+			{
+				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+				System.out.println(e.toString());
+				error = true;
+			}
+
+			if (error)
+				closeWorkflowQueues();
+			else
+				rawFramesQueue.close(false);
+
+			run = false;
 		}
 	}
 
@@ -1159,21 +1416,15 @@ public class SeriesImageSource extends ImageSource
 	@XStreamOmitField
 	private ImageData[] imageData;
 
-	// Used for sequential read
-	@XStreamOmitField
-	private Image image = null;
-	@XStreamOmitField
-	private int nextImageId;
-	@XStreamOmitField
-	private NextSource[] nextImages;
-	@XStreamOmitField
-	private int currentSlice;
-	@XStreamOmitField
-	private byte sequentialReadStatus;
-	
-	private static final byte CLOSED = 0;
-	private static final byte OPEN = 1;
-	private static final byte RUNNING = 2;
+	//	// Used for sequential read
+	//	@XStreamOmitField
+	//	private Image image = null;
+	//	@XStreamOmitField
+	//	private int nextImageId;
+	//	@XStreamOmitField
+	//	private NextSource[] nextImages;
+	//	@XStreamOmitField
+	//	private int currentSlice;
 
 	// Used for frame-based read
 	@XStreamOmitField
@@ -1186,11 +1437,7 @@ public class SeriesImageSource extends ImageSource
 	@XStreamOmitField
 	private long lastTime = 0;
 	private int numberOfThreads = 1;
-
-	//	@XStreamOmitField
-	//	private ArrayBlockingQueue<NextSource> sourceQueue;
-	//	@XStreamOmitField
-	//	private ArrayBlockingQueue<NextImage> imageQueue;
+	private int numberOfImages = 1;
 
 	// Used to process the files into images
 	@XStreamOmitField
@@ -1198,11 +1445,16 @@ public class SeriesImageSource extends ImageSource
 	@XStreamOmitField
 	private ArrayList<Thread> threads = null;
 
-	/**
-	 * Used for sequential reading to queue the raw frames
-	 */
+	/** The queue for in-memory buffered images awaiting TIFF decoding. */
 	@XStreamOmitField
-	private CloseableBlockingQueue<Object> rawFrames = null;
+	private CloseableBlockingQueue<NextSource> decodeQueue;
+	/** The queue for in-memory buffered images awaiting TIFF reading. */
+	@XStreamOmitField
+	private CloseableBlockingQueue<NextSource> readQueue;
+
+	/** Used for sequential reading to queue the raw frames */
+	@XStreamOmitField
+	private CloseableBlockingQueue<Object> rawFramesQueue = null;
 
 	/**
 	 * Create a new image source using the given image series
@@ -1349,7 +1601,7 @@ public class SeriesImageSource extends ImageSource
 					long size = getSize(file);
 
 					//System.out.printf("%s = %d bytes\n", path, size);
-					
+
 					ras = new RandomAccessStream(new RandomAccessFile(file, "r"));
 					CustomTiffDecoder td = new CustomTiffDecoder(ras, path);
 
@@ -1427,8 +1679,6 @@ public class SeriesImageSource extends ImageSource
 		if (pixels != null)
 		{
 			setDimensions(imageData[0].tiffImage.width, imageData[0].tiffImage.height);
-			// Special flag for sequential reading
-			sequentialReadStatus = OPEN;
 			return true;
 		}
 		return false;
@@ -1437,20 +1687,22 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#close()
+	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
-	public void close()
+	public void closeSource()
 	{
 		if (threads != null)
 			closeQueue();
 		//setDimensions(0, 0, 0);
-		if (image != null)
-			image.close(true);
+		//if (image != null)
+		//	image.close(true);
+		
 		if (lastImage != null)
 			lastImage.close(true);
-		image = lastImage = null;
-		nextImageId = currentSlice = lastImageId = 0;
-		sequentialReadStatus = CLOSED;
+		//image = 
+		lastImage = null;
+		//nextImageId = currentSlice = 
+		lastImageId = 0;
 	}
 
 	//	private Image getNextImage()
@@ -1531,6 +1783,14 @@ public class SeriesImageSource extends ImageSource
 	//			}
 	//		}
 	//		return image;
+	//
+	//    	private boolean workersRunning()
+	//    	{
+	//    		for (BaseWorker worker : workers)
+	//    			if (worker.run)
+	//    				return true;
+	//    		return false;
+	//    	}
 	//	}
 
 	/**
@@ -1544,39 +1804,27 @@ public class SeriesImageSource extends ImageSource
 	 */
 	private synchronized void createQueue()
 	{
-		if (sequentialReadStatus != OPEN)
-			return;
-		sequentialReadStatus = RUNNING;
-			
 		// Q. What size is optimal?
-		rawFrames = new CloseableBlockingQueue<Object>(Runtime.getRuntime().availableProcessors() * 2);
+		rawFramesQueue = new CloseableBlockingQueue<Object>(Runtime.getRuntime().availableProcessors() * 2);
 
-		if (false && belowBufferLimit() && images.size() > 1)
+		if (belowBufferLimit() && images.size() > 1)
 		{
 			// A list of images that may have been read
-			nextImages = new NextSource[images.size()];
-			final int nThreads = numberOfThreads;
+			//nextImages = new NextSource[images.size()];
 
-			//			// A blocking queue is used so that the threads do not read too many images in advance
-			//			sourceQueue = new ArrayBlockingQueue<NextSource>(nThreads);
-			//
-			//			// Start a thread to queue up the images
-			//			sourceWorker = new SourceWorker();
-			//			sourceThread = new Thread(sourceWorker);
-			//			sourceThread.start();
-			//
-			//			// A blocking queue is used so that the threads do not read too many images in advance
-			//			imageQueue = new ArrayBlockingQueue<NextImage>(nThreads + 2);
-			//			workers = new ArrayList<BaseWorker>(nThreads);
-			//			threads = new ArrayList<Thread>(nThreads);
-			//			for (int i = 0; i < nThreads; i++)
-			//			{
-			//				ImageWorker worker = new ImageWorker(i + 1);
-			//				workers.add(worker);
-			//				Thread thread = new Thread(worker);
-			//				threads.add(thread);
-			//				thread.start();
-			//			}
+			// For now just support a single thread for reading the 
+			// raw byte data, decoding and read the TIFF. We can control 
+			// the number of images buffered into memory.
+			final int nImages = numberOfImages;
+
+			decodeQueue = new CloseableBlockingQueue<NextSource>(nImages);
+			readQueue = new CloseableBlockingQueue<NextSource>(nImages);
+
+			workers = new ArrayList<BaseWorker>(3);
+			threads = new ArrayList<Thread>(3);
+			startWorker(new BufferWorker());
+			startWorker(new DecodeWorker());
+			startWorker(new ReadWorker());
 		}
 		else
 		{
@@ -1614,16 +1862,14 @@ public class SeriesImageSource extends ImageSource
 			for (BaseWorker worker : workers)
 				worker.run = false;
 
-			//			// Prevent processing more source images
-			//			sourceQueue.clear();
-			//
-			//			// Ensure any images already waiting on a blocked queue can be added 
-			//			imageQueue.clear();
-			//
-			//			// Send shutdown signals to anything for another source to process
-			//			for (int i = 0; i < workers.size(); i++)
-			//				sourceQueue.offer(new NextSource());
-
+			// Close the queues. This will wake any thread waiting for them to have capacity.
+			if (decodeQueue != null)
+			{
+				decodeQueue.close(false);
+				readQueue.close(false);
+			}
+			rawFramesQueue.close(false);
+			
 			// Join the threads and then set all to null
 			for (Thread thread : threads)
 			{
@@ -1644,27 +1890,33 @@ public class SeriesImageSource extends ImageSource
 			workers.clear();
 			workers = null;
 
-			// Do not set this to null as it is used in nextRawFrame()
-			rawFrames.close(false);
+			if (decodeQueue != null)
+			{
+				decodeQueue.close(false);
+				readQueue.close(false);
+				decodeQueue = null;
+				readQueue = null;
+			}
 
-			//sourceThread = null;
-			//imageQueue = null;
-			//sourceQueue = null;
+			// Do not set this to null as it is used in nextRawFrame()
+			rawFramesQueue.close(false);
 		}
+	}
+
+	/**
+	 * Close the queues for the in-memory workflow. This should be called on error as it shuts all the queues.
+	 */
+	private void closeWorkflowQueues()
+	{
+		decodeQueue.close(true);
+		readQueue.close(true);
+		rawFramesQueue.close(true);
 	}
 
 	private void storeTiffImage(int imageId, TiffImage image)
 	{
 		// This could be made optional to save memory
 		imageData[imageId].tiffImage = image;
-	}
-
-	private boolean workersRunning()
-	{
-		for (BaseWorker worker : workers)
-			if (worker.run)
-				return true;
-		return false;
 	}
 
 	/**
@@ -1690,21 +1942,28 @@ public class SeriesImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.ImageSource#initialiseSequentialReading()
+	 */
+	@Override
+	protected boolean initialiseSequentialRead()
+	{
+		// This should only be called once by the image source each time the series is opened.
+		createQueue();
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
 	 */
 	@Override
 	protected Object nextRawFrame()
 	{
-		if (sequentialReadStatus == OPEN)
-			createQueue();
-
-		if (sequentialReadStatus != RUNNING)
-			return null;
-
 		try
 		{
 			// We can take if closed
-			Object pixels = rawFrames.take();
+			Object pixels = rawFramesQueue.take();
 			if (pixels != null)
 			{
 				return pixels;
@@ -1722,9 +1981,7 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		// We are here because the pixels were null so shut down sequential reading 
-		sequentialReadStatus = CLOSED;
-		rawFrames.close(true);
-		rawFrames = null;
+		rawFramesQueue.close(true);
 
 		return null;
 	}
@@ -1876,18 +2133,22 @@ public class SeriesImageSource extends ImageSource
 
 	/**
 	 * @return The number of background threads to use for opening images
+	 * @deprecated Currently only 1 thread is used for opening images
 	 */
+	@Deprecated
 	public int getNumberOfThreads()
 	{
 		return numberOfThreads;
 	}
 
 	/**
-	 * Set the number of background threads to use for opening images
-	 * 
+	 * Set the number of background threads to use for opening images.
+	 *
 	 * @param numberOfThreads
 	 *            The number of background threads to use for opening images
+	 * @deprecated Currently only 1 thread is used for opening images
 	 */
+	@Deprecated
 	public void setNumberOfThreads(int numberOfThreads)
 	{
 		this.numberOfThreads = Math.max(1, numberOfThreads);
@@ -1912,5 +2173,26 @@ public class SeriesImageSource extends ImageSource
 	public void setBufferLimit(int bufferLimit)
 	{
 		this.bufferLimit = bufferLimit;
+	}
+
+	/**
+	 * Gets the number of images to buffer into memory.
+	 *
+	 * @return the number of images
+	 */
+	public int getNumberOfImages()
+	{
+		return numberOfImages;
+	}
+
+	/**
+	 * Sets the number of images to buffer into memory.
+	 *
+	 * @param numberOfImages
+	 *            the new number of images
+	 */
+	public void setNumberOfImages(int numberOfImages)
+	{
+		this.numberOfImages = Math.max(1, numberOfImages);
 	}
 }

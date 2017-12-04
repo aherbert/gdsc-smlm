@@ -200,17 +200,16 @@ public class IJImageSource extends ImageSource
 			}
 			return initialise(imp);
 		}
-		slice = 0;
 		return true;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#close()
+	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
-	public void close()
+	public void closeSource()
 	{
 		imageArray = null;
 		imageStack = null;
@@ -234,6 +233,18 @@ public class IJImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.ImageSource#initialiseSequentialRead()
+	 */
+	@Override
+	protected boolean initialiseSequentialRead()
+	{
+		slice = 0;
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
 	 */
 	@Override
@@ -248,7 +259,9 @@ public class IJImageSource extends ImageSource
 		return get(slice);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
 	 */
 	@Override

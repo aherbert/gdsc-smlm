@@ -146,21 +146,43 @@ public class InterlacedImageSource extends ImageSource
 	@Override
 	protected boolean openSource()
 	{
-		// Assume frame start at 1 and set the intial skip		
-		final int initialSkip = (start - 1);
-		counter = -initialSkip;
 		return imageSource.openSource();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#close()
+	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
-	public void close()
+	public void closeSource()
 	{
-		imageSource.close();
+		imageSource.closeSource();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#initialiseSequentialRead()
+	 */
+	@Override
+	protected boolean initialiseSequentialRead()
+	{
+		if (imageSource.initialiseSequentialRead())
+		{
+			imageSource.sequentialReadStatus = SequentialReadStatus.RUNNING;
+			
+			// Assume frame start at 1 and set the initial skip		
+			final int initialSkip = (start - 1);
+			counter = -initialSkip;
+			return true;
+		}
+		else
+		{
+			imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
+			return false;
+		}
+		
 	}
 
 	/*
@@ -220,7 +242,7 @@ public class InterlacedImageSource extends ImageSource
 		Object pixels = imageSource.getRaw(frame);
 		// Set the frame to the last one read from the source
 		setFrameNumber(imageSource.getStartFrameNumber(), imageSource.getEndFrameNumber());
-		return pixels;		
+		return pixels;
 	}
 
 	/**

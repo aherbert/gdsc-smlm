@@ -69,21 +69,32 @@ public class MemoryImageSource extends ImageSource
 	@Override
 	protected boolean openSource()
 	{
-		counter = 0;
 		return true;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#close()
+	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
-	public void close()
+	public void closeSource()
 	{
 		// Free the memory
 		if (freeMemoryOnClose)
 			data = new float[0][0];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#initialseSequentialReading()
+	 */
+	@Override
+	protected boolean initialiseSequentialRead()
+	{
+		counter = 0;
+		return true;
 	}
 
 	/*

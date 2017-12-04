@@ -147,12 +147,32 @@ public class AggregatedImageSource extends ImageSource
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.ResultsSource#close()
+	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
-	public void close()
+	public void closeSource()
 	{
-		imageSource.close();
+		imageSource.closeSource();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.ImageSource#initialiseSequentialRead()
+	 */
+	@Override
+	protected boolean initialiseSequentialRead()
+	{
+		if (imageSource.initialiseSequentialRead())
+		{
+			imageSource.sequentialReadStatus = SequentialReadStatus.RUNNING;
+			return true;
+		}
+		else
+		{
+			imageSource.sequentialReadStatus = SequentialReadStatus.CLOSED;
+			return false;
+		}
 	}
 
 	/**
@@ -165,6 +185,16 @@ public class AggregatedImageSource extends ImageSource
 	{
 		if (!checkBounds(bounds))
 			bounds = null;
+		
+		if (sequentialReadStatus == SequentialReadStatus.READY)
+		{
+			if (initialiseSequentialRead())
+				sequentialReadStatus = SequentialReadStatus.RUNNING;
+			else
+				sequentialReadStatus = SequentialReadStatus.CLOSED;
+		}
+		if (sequentialReadStatus != SequentialReadStatus.RUNNING)
+			return null;
 
 		// Aggregate consecutive frames
 		float[] image = imageSource.next(bounds);
@@ -191,6 +221,7 @@ public class AggregatedImageSource extends ImageSource
 		else
 		{
 			setFrameNumber(0, 0);
+			sequentialReadStatus = SequentialReadStatus.CLOSED;
 		}
 		return image;
 	}
@@ -208,7 +239,7 @@ public class AggregatedImageSource extends ImageSource
 
 		if (!checkBounds(bounds))
 			bounds = null;
-		
+
 		// Calculate if the cache is invalid
 		if (frame != lastFrame || lastImage == null)
 		{

@@ -52,6 +52,8 @@ public class SeriesImageSourceTest
 				Assert.assertArrayEquals(e, o, 0);
 			}
 		}
+		Assert.assertNull(source.next());
+		source.close();
 	}
 
 	@Test

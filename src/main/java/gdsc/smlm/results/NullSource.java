@@ -35,9 +35,15 @@ public class NullSource extends ImageSource
 	}
 
 	@Override
-	public void close()
+	public void closeSource()
 	{
 		// Nothing to do
+	}
+
+	@Override
+	protected boolean initialiseSequentialRead()
+	{
+		return false;
 	}
 
 	@Override

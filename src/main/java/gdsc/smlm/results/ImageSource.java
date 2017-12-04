@@ -47,6 +47,22 @@ public abstract class ImageSource
 	private ImageConverter imageConverter = IMAGE_CONVERTER;
 
 	/**
+	 * The status flag for sequential reading using the {@link ImageSource#next()} methods.
+	 */
+	public enum SequentialReadStatus
+	{
+		/** Sequential reading is closed (no more data). */
+		CLOSED,
+		/** The image is open for sequential reading but no data has been read. */
+		READY,
+		/** Sequential reading is running (more data is available). */
+		RUNNING;
+	}
+
+	@XStreamOmitField
+	SequentialReadStatus sequentialReadStatus;
+
+	/**
 	 * Create the image source
 	 * 
 	 * @param name
@@ -66,7 +82,13 @@ public abstract class ImageSource
 		// In the event of creation by reflection this may be null
 		if (imageConverter == null)
 			imageConverter = IMAGE_CONVERTER;
-		return openSource();
+		if (openSource())
+		{
+			// Special flag for sequential reading
+			sequentialReadStatus = SequentialReadStatus.READY;
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -77,8 +99,17 @@ public abstract class ImageSource
 	/**
 	 * Closes the source
 	 */
-	public abstract void close();
+	public void close()
+	{
+		sequentialReadStatus = SequentialReadStatus.CLOSED;
+		closeSource();
+	}
 
+	/**
+	 * Closes the source
+	 */
+	protected abstract void closeSource();
+	
 	/**
 	 * Gets the x origin of the image frame. This may be non-zero to specify a crop of an image frame.
 	 * <p>
@@ -185,7 +216,12 @@ public abstract class ImageSource
 	 */
 	public float[] next()
 	{
-		return next(null);
+		Object pixels = nextRaw();
+		if (pixels != null)
+		{
+			return imageConverter.getData(pixels, getWidth(), getHeight(), null, null);
+		}
+		return null;
 	}
 
 	/**
@@ -205,13 +241,11 @@ public abstract class ImageSource
 	{
 		if (!checkBounds(bounds))
 			bounds = null;
-		startFrame = endFrame = (startFrame + 1);
-		Object pixels = nextRawFrame();
+		Object pixels = nextRaw();
 		if (pixels != null)
 		{
 			return imageConverter.getData(pixels, getWidth(), getHeight(), bounds, null);
 		}
-		startFrame = endFrame = 0;
 		return null;
 	}
 
@@ -225,12 +259,32 @@ public abstract class ImageSource
 	 */
 	public Object nextRaw()
 	{
+		if (sequentialReadStatus == SequentialReadStatus.READY)
+		{
+			if (initialiseSequentialRead())
+				sequentialReadStatus = SequentialReadStatus.RUNNING;
+			else
+				sequentialReadStatus = SequentialReadStatus.CLOSED;
+		}
+		if (sequentialReadStatus != SequentialReadStatus.RUNNING)
+			return null;
+
 		startFrame = endFrame = (startFrame + 1);
 		Object data = nextRawFrame();
 		if (data == null)
+		{
 			startFrame = endFrame = 0;
+			sequentialReadStatus = SequentialReadStatus.CLOSED;
+		}
 		return data;
 	}
+
+	/**
+	 * Initialise for sequential read.
+	 *
+	 * @return true, if successful
+	 */
+	protected abstract boolean initialiseSequentialRead();
 
 	/**
 	 * Get the next frame of raw pixels. The data is is packed in yx order: index = y * width + x;
@@ -480,5 +534,15 @@ public abstract class ImageSource
 	public void setImageConverter(ImageConverter imageConverter)
 	{
 		this.imageConverter = (imageConverter == null) ? IMAGE_CONVERTER : imageConverter;
+	}
+
+	/**
+	 * Gets the sequential read status.
+	 *
+	 * @return the sequential read status
+	 */
+	public SequentialReadStatus getSequentialReadStatus()
+	{
+		return sequentialReadStatus;
 	}
 }
