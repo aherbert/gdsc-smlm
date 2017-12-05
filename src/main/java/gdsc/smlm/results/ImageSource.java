@@ -172,6 +172,16 @@ public abstract class ImageSource
 	{
 		return height;
 	}
+	
+	/**
+	 * Gets the bounds. This just uses the X and Y origin and the width and height.
+	 *
+	 * @return the bounds
+	 */
+	public Rectangle getBounds()
+	{
+		return new Rectangle(getXOrigin(), getYOrigin(), getWidth(), getHeight());
+	}
 
 	/**
 	 * Get the number of frames that can be extracted from the image source with calls to {@link #next()}

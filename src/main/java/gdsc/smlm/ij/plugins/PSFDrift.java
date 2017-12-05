@@ -52,6 +52,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.ImagePSFModel;
@@ -495,7 +496,7 @@ public class PSFDrift implements PlugIn
 		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
 				SettingsManager.readCalibration(0), PSFProtosHelper.defaultOneAxisGaussian2DPSF);
 		config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
-		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(), PeakFit.FLAG_NO_SAVE))
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), PeakFit.FLAG_NO_SAVE))
 			return;
 		fitConfig = config.getFitConfiguration();
 
@@ -1316,7 +1317,7 @@ public class PSFDrift implements PlugIn
 			double max = plot.scaleYtoPxl(maxY);
 
 			pw.getImagePlus().setRoi(new Line(x, min, x, max));
-			
+
 			imp.setSlice(centre);
 			imp.resetDisplayRange();
 			imp.updateAndDraw();

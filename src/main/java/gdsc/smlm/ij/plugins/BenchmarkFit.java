@@ -26,6 +26,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJImageConverter;
@@ -201,8 +202,8 @@ public class BenchmarkFit implements PlugIn
 			showProgress();
 
 			// Extract the data
-			data = IJImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
-					data);
+			data = IJImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(),
+					region, data);
 
 			final int size = region.height;
 			final int totalFrames = benchmarkParameters.frames;
@@ -602,7 +603,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.setExposureTime(1000);
 		fitConfig.setCalibration(calibration.getCalibration());
 
-		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(), 0))
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), 0))
 			return false;
 
 		if (showHistograms)

@@ -301,7 +301,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		if (!PeakFit.configureDataFilter(config, 0))
 			return false;
-		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(), 0))
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), 0))
 			return false;
 
 		// Extra parameters are needed for interlaced data
@@ -813,29 +813,29 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 	public void add(PeakResult result)
 	{
-		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-				result.getParameters(), result.getParameterDeviations());
+		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+				result.getNoise(), result.getParameters(), result.getParameterDeviations());
 	}
 
 	public synchronized void addAll(PeakResult[] results)
 	{
 		for (PeakResult result : results)
-			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-					result.getParameters(), result.getParameterDeviations());
+			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+					result.getNoise(), result.getParameters(), result.getParameterDeviations());
 	}
 
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)
-			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-					result.getParameters(), result.getParameterDeviations());
+			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+					result.getNoise(), result.getParameters(), result.getParameterDeviations());
 	}
 
 	public void addAll(PeakResultStore results)
 	{
 		addAll(results.toArray());
 	}
-	
+
 	public int size()
 	{
 		return (int) sampleNew[X].getN();

@@ -72,6 +72,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
 import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
@@ -1221,7 +1222,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setCameraType(simulationParameters.cameraType);
 			fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
 		}
-		if (!PeakFit.configureFitSolver(config, imp.getWidth(), imp.getHeight(),
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp),
 				(extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
 

@@ -327,8 +327,17 @@ public class CameraModelManager implements PlugIn
 		// Crop the model if appropriate
 		try
 		{
-			cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(),
-					pluginSettings.getOriginX(), pluginSettings.getOriginY(), false);
+			Rectangle bounds;
+			try
+			{
+				bounds = IJImageSource.getBounds(imp);
+			}
+			catch (IllegalArgumentException e)
+			{
+				bounds = new Rectangle(pluginSettings.getOriginX(), pluginSettings.getOriginY(), imp.getWidth(),
+						imp.getHeight());
+			}
+			cameraModel = PeakFit.cropCameraModel(cameraModel, bounds, false);
 		}
 		catch (IllegalArgumentException e)
 		{

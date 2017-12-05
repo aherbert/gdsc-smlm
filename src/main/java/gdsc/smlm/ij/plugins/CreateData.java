@@ -2082,6 +2082,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		cal.setUnit(unit);
 		cal.pixelHeight = cal.pixelWidth = unitPerPixel;
+		Rectangle bounds = cameraModel.getBounds();
+		if (bounds != null)
+		{
+			cal.xOrigin = -bounds.x;
+			cal.yOrigin = -bounds.y;
+		}
 		imp.setCalibration(cal);
 
 		imp.setDimensions(1, 1, newStack.getSize());
@@ -2092,9 +2098,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		IJImageSource imageSource = new IJImageSource(imp);
 		// Shift simulation image source to correct location
-		Rectangle bounds = cameraModel.getBounds();
-		if (bounds != null)
-			imageSource.setOrigin(bounds.x, bounds.y);
 		results.setSource(imageSource);
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
 		// Bounds are relative to the image source
@@ -5615,13 +5618,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					IJ.error(TITLE, "Unknown camera model for name: " + cal.getCameraModelName());
 					return null;
 				}
+				
+				
+				
+				
 				int ox = 0, oy = 0;
 				if (lastCameraBounds != null)
 				{
 					ox = lastCameraBounds.x;
 					oy = lastCameraBounds.y;
 				}
-				cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), ox, oy, false);
+				cameraModel = PeakFit.cropCameraModel(cameraModel, 
+						new Rectangle(ox, oy, imp.getWidth(), imp.getHeight()), false);
 				modelBounds = cameraModel.getBounds();
 
 				IJImageSource imageSource = (IJImageSource) results.getSource();

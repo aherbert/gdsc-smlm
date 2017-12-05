@@ -32,6 +32,7 @@ import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.io.ExtendedFileInfo;
 import ij.io.FileInfo;
+import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -186,6 +187,12 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 					imp.setProperty("Info", efi.extendedMetaData);
 				else if (efi.info != null)
 					imp.setProperty("Info", efi.info);
+			}
+			if (source.getXOrigin() != 0 || source.getYOrigin() != 0)
+			{
+				Calibration cal = imp.getLocalCalibration();
+				cal.xOrigin = -source.getXOrigin();
+				cal.yOrigin = -source.getYOrigin();
 			}
 			return imp;
 		}

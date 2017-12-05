@@ -90,6 +90,7 @@ import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.filters.BlockMeanFilter;
 import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -1911,7 +1912,7 @@ public class PSFCreator implements PlugInFilter
 			if (settings.getInteractiveMode())
 			{
 				// This assumes the LVM does not need the calibration
-				PeakFit.configureFitSolver(config, 0, 0, 0);
+				PeakFit.configureFitSolver(config, null, 0);
 			}
 		}
 
@@ -2730,7 +2731,7 @@ public class PSFCreator implements PlugInFilter
 				IJ.error(TITLE, "No camera model");
 				return;
 			}
-			cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), 0, 0, true);
+			cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), true);
 		}
 		else
 		{
@@ -2778,7 +2779,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			if (Utils.isInterrupted())
 				return;
-			
+
 			// Combine all PSFs
 			Utils.showStatus(String.format("[%d] Aligning PSFs", iter + 1));
 			ExtractedPSF combined = combine(psfs);
@@ -3284,7 +3285,7 @@ public class PSFCreator implements PlugInFilter
 				dx = newCentre.getX() - centres[i].getX();
 				dy = newCentre.getY() - centres[i].getY();
 				dz = newCentre.getZ() - centres[i].getZ();
-			}			
+			}
 			Utils.log("Centre %d : %s,%s,%s updated by %s,%s,%s", i + 1, rounder.toString(centres[i].getX()),
 					rounder.toString(centres[i].getY()), rounder.toString(centres[i].getZ()), rounder.toString(dx),
 					rounder.toString(dy), rounder.toString(dz));

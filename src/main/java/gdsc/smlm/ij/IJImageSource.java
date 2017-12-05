@@ -1,5 +1,7 @@
 package gdsc.smlm.ij;
 
+import java.awt.Rectangle;
+
 import org.apache.commons.math3.util.FastMath;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -10,6 +12,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.io.FileInfo;
+import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 
 /*----------------------------------------------------------------------------- 
@@ -102,7 +105,54 @@ public class IJImageSource extends ImageSource
 		FileInfo info = imp.getOriginalFileInfo();
 		if (info != null)
 			path = info.directory + info.fileName;
+		int[] origin = getOrigin(imp);
+		setOrigin(origin[0], origin[1]);
 		return true;
+	}
+
+	/**
+	 * Gets the origin from the Image calibration.
+	 *
+	 * @param imp
+	 *            the imp
+	 * @return the origin
+	 * @throws IllegalArgumentException
+	 *             If the origin is not in integer pixel units
+	 */
+	public static int[] getOrigin(ImagePlus imp) throws IllegalArgumentException
+	{
+		Calibration cal = imp.getLocalCalibration();
+		if (cal != null)
+		{
+			if (cal.xOrigin != 0 || cal.yOrigin != 0)
+			{
+				// Origin must be in integer pixels
+				double ox = Math.round(cal.xOrigin);
+				double oy = Math.round(cal.yOrigin);
+				if (ox != cal.xOrigin || oy != cal.yOrigin)
+					throw new IllegalArgumentException("Origin must be in integer pixels");
+				// ImageJ has a negative origin to indicate 0,0 of the image
+				// is greater than the actual origin. The ImageSource convention is 
+				// to have the origin represent the shift of the 0,0 pixel from the origin.
+				return new int[] { (int) -ox, (int) -oy };
+			}
+		}
+		return new int[2];
+	}
+
+	/**
+	 * Gets the bounds from the Image calibration.
+	 *
+	 * @param imp
+	 *            the imp
+	 * @return the bounds
+	 * @throws IllegalArgumentException
+	 *             If the origin is not in integer pixel units
+	 */
+	public static Rectangle getBounds(ImagePlus imp) throws IllegalArgumentException
+	{
+		int[] origin = getOrigin(imp);
+		return new Rectangle(origin[0], origin[1], imp.getWidth(), imp.getHeight());
 	}
 
 	/**

@@ -16,6 +16,7 @@ import gdsc.core.utils.Statistics;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.model.camera.CameraModel;
@@ -60,7 +61,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	private static int algorithm = NoiseEstimatorMethod.ALL_PIXELS_VALUE;
 	private static int algorithm2 = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES_VALUE;
 	private static int lowestPixelsRange = 6;
-	private static int ox = 0, oy = 0;
 	private CalibrationWriter calibration;
 	private CameraModel cameraModel;
 
@@ -165,11 +165,11 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 				{
 					throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
 				}
-				cameraModel = PeakFit.cropCameraModel(cameraModel, imp.getWidth(), imp.getHeight(), ox, oy, false);
+				cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), false);
 				// Store for next time
 				Rectangle bounds = cameraModel.getBounds();
-				ox = bounds.x;
-				oy = bounds.y;
+				int ox = bounds.x;
+				int oy = bounds.y;
 				// Reset origin for filtering
 				if (ox != 0 || oy != 0)
 				{
