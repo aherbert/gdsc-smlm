@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Font;
+import java.io.File;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -17,6 +18,7 @@ import java.awt.Font;
 
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
+import gdsc.core.logging.TrackProgress;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.ij.SeriesImageSource;
 import gdsc.smlm.ij.settings.Constants;
@@ -26,6 +28,9 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.VirtualStack;
+import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
+import ij.io.ExtendedFileInfo;
 import ij.io.FileInfo;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
@@ -34,10 +39,14 @@ import ij.process.ImageProcessor;
 /**
  * Reads a TIFF image using the series image source and presents it using a read-only virtual stack image.
  */
-public class TiffSeriesViewer implements PlugIn
+public class TiffSeriesViewer implements PlugIn, TrackProgress
 {
 	private static final String TITLE = "Tiff Series Viewer";
+	private static final String[] MODE = { "Directory", "File" };
+	private static int inputMode = (int) Prefs.get(Constants.tiffSeriesMode, 0);
 	private static String inputDirectory = Prefs.get(Constants.tiffSeriesDirectory, "");
+	private static String inputFile = Prefs.get(Constants.tiffSeriesFile, "");
+	private static boolean logProgress = Prefs.getBoolean(Constants.tiffSeriesLogProgress, false);
 
 	/*
 	 * (non-Javadoc)
@@ -47,25 +56,70 @@ public class TiffSeriesViewer implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
-		boolean extraOptions = Utils.isExtraOptions();
 
-		String dir = Utils.getDirectory("Select image series ...", inputDirectory);
-		if (TextUtils.isNullOrEmpty(dir))
-			return;
-		inputDirectory = dir;
-		Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
-
-		SeriesOpener series = new SeriesOpener(inputDirectory);
-		if (series.getNumberOfImages() == 0)
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addChoice("Mode", MODE, inputMode, new OptionListener<Integer>()
 		{
-			IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
+			public boolean collectOptions(Integer value)
+			{
+				inputMode = value;
+				return collectOptions(inputMode);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(inputMode);
+			}
+
+			private boolean collectOptions(int mode)
+			{
+				if (mode == 0)
+				{
+					String dir = Utils.getDirectory("Select image series ...", inputDirectory);
+					if (TextUtils.isNullOrEmpty(dir))
+						return false;
+					inputDirectory = dir;
+				}
+				else
+				{
+					String file = Utils.getFilename("Select image ...", inputFile);
+					if (TextUtils.isNullOrEmpty(file))
+						return false;
+					inputFile = file;
+				}
+				return true;
+			}
+		});
+		gd.addCheckbox("Log_progress", logProgress);
+		gd.showDialog();
+		if (gd.wasCanceled())
 			return;
+
+		inputMode = gd.getNextChoiceIndex();
+		logProgress = gd.getNextBoolean();
+
+		Prefs.set(Constants.tiffSeriesMode, inputMode);
+		Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
+		Prefs.set(Constants.tiffSeriesFile, inputFile);
+
+		SeriesImageSource source;
+		if (inputMode == 0)
+		{
+			SeriesOpener series = new SeriesOpener(inputDirectory);
+			if (series.getNumberOfImages() == 0)
+			{
+				IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
+				return;
+			}
+			source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
+		}
+		else
+		{
+			File file = new File(inputFile);
+			source = new SeriesImageSource(file.getName(), new String[] { inputFile });
 		}
 
-		SeriesImageSource source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
 		source.setBufferLimit(0); // No memory buffer
-		source.setLogProgress(extraOptions);
 		source.setReadHint(ReadHint.NONSEQUENTIAL);
 
 		if (!source.isTiffSeries)
@@ -74,6 +128,7 @@ public class TiffSeriesViewer implements PlugIn
 			return;
 		}
 		Utils.showStatus("Opening TIFF ...");
+		source.setTrackProgress(this);
 		if (!source.open())
 		{
 			IJ.error(TITLE, "Cannot open the image");
@@ -82,7 +137,7 @@ public class TiffSeriesViewer implements PlugIn
 		Utils.showStatus("");
 
 		// Q. Can we create a virtual stack?
-		//new TiffSeriesVirtualStack(source).show();
+		new TiffSeriesVirtualStack(source).show();
 	}
 
 	/**
@@ -122,6 +177,16 @@ public class TiffSeriesViewer implements PlugIn
 			// So the FileSaver can save the stack make sure the FileInfo is not null
 			FileInfo fi = new FileInfo();
 			imp.setFileInfo(fi);
+			// Get metadata from the source
+			ExtendedFileInfo[] fileInfo = source.getFileInfo(0);
+			if (fileInfo != null && fileInfo[0] != null)
+			{
+				ExtendedFileInfo efi = fileInfo[0];
+				if (efi.extendedMetaData != null)
+					imp.setProperty("Info", efi.extendedMetaData);
+				else if (efi.info != null)
+					imp.setProperty("Info", efi.info);
+			}
 			return imp;
 		}
 
@@ -263,5 +328,37 @@ public class TiffSeriesViewer implements PlugIn
 			// Don't sort
 			return this;
 		}
+	}
+
+	public void progress(double fraction)
+	{
+		IJ.showProgress(fraction);
+	}
+
+	public void progress(long position, long total)
+	{
+		IJ.showProgress((double) position / total);
+	}
+
+	public void incrementProgress(double fraction)
+	{
+		// Ignore
+	}
+
+	public void log(String format, Object... args)
+	{
+		if (logProgress)
+			Utils.log(format, args);
+	}
+
+	public void status(String format, Object... args)
+	{
+		IJ.showStatus(String.format(format, args));
+	}
+
+	public boolean isEnded()
+	{
+		// Ignore
+		return false;
 	}
 }
