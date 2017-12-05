@@ -28,6 +28,7 @@ import javax.swing.JFileChooser;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.IJLogger;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
@@ -316,12 +317,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 
 			SeriesImageSource seriesImageSource = new SeriesImageSource(getName(series.getImageList()), series);
-			seriesImageSource.setLogProgress(true);
-			if (extraOptions)
-			{
-				numberOfThreads = Math.max(1, series.getNumberOfThreads());
-				seriesImageSource.setNumberOfThreads(numberOfThreads);
-			}
+			seriesImageSource.setTrackProgress(new IJTrackProgress());
+			//if (extraOptions)
+			//{
+			//	numberOfThreads = Math.max(1, series.getNumberOfThreads());
+			//	seriesImageSource.setNumberOfThreads(numberOfThreads);
+			//}
 			imageSource = seriesImageSource;
 
 			plugin_flags |= NO_IMAGE_REQUIRED;
