@@ -59,6 +59,9 @@ public class Constants
 	public static final String inputExposureTime = "gdsc.smlm.exposureTime";
 	public static final String inputNoise = "gdsc.smlm.noise";
 	
+	public static final String tiffSeriesMode = "gdsc.smlm.tiffSeriesMode";
 	public static final String tiffSeriesDirectory = "gdsc.smlm.tiffSeriesDirectory";
+	public static final String tiffSeriesFile = "gdsc.smlm.tiffSeriesFile";
+	public static final String tiffSeriesLogProgress = "gdsc.smlm.tiffSeriesLogProgress";
 	public static final String sCMOSAnalysisDirectory = "gdsc.smlm.sCMOSAnalysisDirectory";
 }
