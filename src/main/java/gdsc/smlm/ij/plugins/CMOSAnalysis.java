@@ -25,6 +25,7 @@ import org.apache.commons.math3.util.MathArrays;
 
 import gdsc.core.data.IntegerType;
 import gdsc.core.ij.Utils;
+import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.ArrayMoment;
 import gdsc.core.math.IntegerArrayMoment;
 import gdsc.core.math.RollingArrayMoment;
@@ -712,6 +713,39 @@ public class CMOSAnalysis implements PlugIn
 		JLabel statusLine = Utils.getStatusLine();
 		progressBar = Utils.getProgressBar();
 
+		TrackProgress trackProgress = new TrackProgress()
+		{
+			public void progress(double fraction)
+			{
+				progressBar.show(fraction);
+			}
+
+			public void progress(long position, long total)
+			{
+				progressBar.show((double) position / total);
+			}
+
+			public void incrementProgress(double fraction)
+			{
+
+			}
+
+			public void log(String format, Object... args)
+			{
+
+			}
+
+			public void status(String format, Object... args)
+			{
+
+			}
+
+			public boolean isEnded()
+			{
+				return false;
+			}
+		};
+
 		// Create thread pool and workers
 		ExecutorService executor = Executors.newFixedThreadPool(getThreads());
 		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
@@ -768,7 +802,7 @@ public class CMOSAnalysis implements PlugIn
 			{
 				// Open the series
 				SeriesImageSource source = new SeriesImageSource(sd.name, sd.path.getPath());
-				source.setLogProgress(true);
+				source.setTrackProgress(trackProgress);
 				if (!source.open())
 				{
 					error = true;
@@ -887,7 +921,7 @@ public class CMOSAnalysis implements PlugIn
 				data[2 * n + 1] = moment.getVariance();
 
 				Utils.log("Processed %d frames. Time = %s", moment.getN(), sw.toString());
-				
+
 				// Reset
 				futures.clear();
 				workers.clear();
