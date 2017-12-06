@@ -353,8 +353,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		public IdPeakResult(int id, int uniqueId, PeakResult result)
 		{
-			super(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-					result.getParameters(), null);
+			super(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+					result.getNoise(), result.getParameters(), null);
 			this.id = id;
 			this.uniqueId = uniqueId;
 		}
@@ -7443,6 +7443,36 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#isProgress()
+	 */
+	public boolean isProgress()
+	{
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#isLogging()
+	 */
+	public boolean isLog()
+	{
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.core.logging.TrackProgress#isStatus()
+	 */
+	public boolean isStatus()
+	{
+		return true;
+	}
+	
 	/**
 	 * Updates the given configuration using the latest settings used in benchmarking spot filters, fitting and
 	 * filtering.

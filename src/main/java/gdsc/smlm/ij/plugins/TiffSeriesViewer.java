@@ -368,4 +368,19 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		// Ignore
 		return false;
 	}
+	
+	public boolean isProgress()
+	{
+		return true;
+	}
+
+	public boolean isLog()
+	{
+		return logProgress;
+	}
+
+	public boolean isStatus()
+	{
+		return true;
+	}
 }

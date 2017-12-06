@@ -744,6 +744,21 @@ public class CMOSAnalysis implements PlugIn
 			{
 				return false;
 			}
+
+			public boolean isProgress()
+			{
+				return true;
+			}
+
+			public boolean isLog()
+			{
+				return false;
+			}
+
+			public boolean isStatus()
+			{
+				return false;
+			}
 		};
 
 		// Create thread pool and workers
