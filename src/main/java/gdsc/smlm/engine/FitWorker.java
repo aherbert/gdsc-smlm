@@ -413,6 +413,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Remove the bias and gain. This is done for all solvers except:
 		// - the legacy MLE solvers which model camera amplification
 		// - the basic LVM solver without a camera calibration
+		
+		// Note: Assume that the camera model has been correctly initialised to be 
+		// relative to the global origin.
 		if (isFitCameraCounts)
 		{
 			cameraModel.removeBias(cc.dataBounds, data);

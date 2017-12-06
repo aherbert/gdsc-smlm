@@ -603,7 +603,7 @@ public class BenchmarkFit implements PlugIn
 		calibration.setExposureTime(1000);
 		fitConfig.setCalibration(calibration.getCalibration());
 
-		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), 0))
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, 0))
 			return false;
 
 		if (showHistograms)

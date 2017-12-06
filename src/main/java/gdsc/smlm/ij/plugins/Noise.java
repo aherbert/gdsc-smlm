@@ -165,7 +165,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 				{
 					throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
 				}
-				cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), false);
+				cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), null, false);
 				// Store for next time
 				Rectangle bounds = cameraModel.getBounds();
 				int ox = bounds.x;

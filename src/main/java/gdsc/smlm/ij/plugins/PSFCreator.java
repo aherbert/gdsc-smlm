@@ -1912,7 +1912,7 @@ public class PSFCreator implements PlugInFilter
 			if (settings.getInteractiveMode())
 			{
 				// This assumes the LVM does not need the calibration
-				PeakFit.configureFitSolver(config, null, 0);
+				PeakFit.configureFitSolver(config, null, null, 0);
 			}
 		}
 
@@ -2731,7 +2731,7 @@ public class PSFCreator implements PlugInFilter
 				IJ.error(TITLE, "No camera model");
 				return;
 			}
-			cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), true);
+			cameraModel = PeakFit.cropCameraModel(cameraModel, IJImageSource.getBounds(imp), null, true);
 		}
 		else
 		{

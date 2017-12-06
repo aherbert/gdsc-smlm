@@ -1222,7 +1222,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setCameraType(simulationParameters.cameraType);
 			fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
 		}
-		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp),
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null,
 				(extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
 

@@ -5618,18 +5618,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					IJ.error(TITLE, "Unknown camera model for name: " + cal.getCameraModelName());
 					return null;
 				}
-				
-				
-				
-				
+
 				int ox = 0, oy = 0;
 				if (lastCameraBounds != null)
 				{
 					ox = lastCameraBounds.x;
 					oy = lastCameraBounds.y;
 				}
-				cameraModel = PeakFit.cropCameraModel(cameraModel, 
-						new Rectangle(ox, oy, imp.getWidth(), imp.getHeight()), false);
+				cameraModel = PeakFit.cropCameraModel(cameraModel,
+						new Rectangle(ox, oy, imp.getWidth(), imp.getHeight()), null, false);
 				modelBounds = cameraModel.getBounds();
 
 				IJImageSource imageSource = (IJImageSource) results.getSource();

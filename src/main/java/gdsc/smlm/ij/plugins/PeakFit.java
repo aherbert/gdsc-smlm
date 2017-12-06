@@ -2155,7 +2155,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Second dialog for solver dependent parameters
 		if (!maximaIdentification)
 		{
-			if (!configureFitSolver(config, source.getBounds(), flags))
+			if (!configureFitSolver(config, source.getBounds(), bounds, flags))
 				return false;
 		}
 
@@ -2435,16 +2435,24 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Show a dialog to configure the fit solver. The updated settings are saved to the settings file. An error
 	 * message is shown if the dialog is cancelled or the configuration is invalid.
+	 * <p>
+	 * The bounds are used to validate the camera model. The camera model must be large enough to cover the source
+	 * bounds. If larger then it will be cropped. Optionally an internal region of the input image can be specifed. This
+	 * is relative to the width and height of the input image. If no camera model is present then the bounds can be
+	 * null.
 	 *
 	 * @param config
 	 *            the config
 	 * @param sourceBounds
 	 *            the source image bounds (used to validate the camera model dimensions)
+	 * @param bounds
+	 *            the crop bounds (relative to the input image, used to validate the camera model dimensions)
 	 * @param flags
 	 *            the flags
 	 * @return True if the configuration succeeded
 	 */
-	public static boolean configureFitSolver(FitEngineConfiguration config, Rectangle sourceBounds, int flags)
+	public static boolean configureFitSolver(FitEngineConfiguration config, Rectangle sourceBounds, Rectangle bounds,
+			int flags)
 	{
 		boolean extraOptions = BitFlags.anySet(flags, FLAG_EXTRA_OPTIONS);
 		boolean ignoreCalibration = BitFlags.anySet(flags, FLAG_IGNORE_CALIBRATION);
@@ -2657,7 +2665,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (calibration.isSCMOS())
 			{
 				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-				if (!checkCameraModel(fitConfig, sourceBounds, null, false))
+				if (!checkCameraModel(fitConfig, sourceBounds, bounds, false))
 					return false;
 			}
 
@@ -2715,10 +2723,23 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle sourceBounds, Rectangle bounds,
+	/**
+	 * Check the camera model covers the region of the source.
+	 *
+	 * @param fitConfig
+	 *            the fit config
+	 * @param sourceBounds
+	 *            the source bounds of the input image
+	 * @param cropBounds
+	 *            the crop bounds (relative to the input image)
+	 * @param initialise
+	 *            the initialise flag
+	 * @return true, if successful
+	 */
+	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle sourceBounds, Rectangle cropBounds,
 			boolean initialise)
 	{
-		if (fitConfig.getCalibrationWriter().isSCMOS() && bounds != null)
+		if (fitConfig.getCalibrationWriter().isSCMOS() && sourceBounds != null)
 		{
 			CameraModel cameraModel = fitConfig.getCameraModel();
 			if (cameraModel == null)
@@ -2727,23 +2748,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 						"No camera model for camera type: " + fitConfig.getCalibrationWriter().getCameraType());
 			}
 
-			cameraModel = cropCameraModel(cameraModel, sourceBounds, true);
-
-			// Crop for efficiency
-			if (bounds != null)
-			{
-				// Make relative, i.e. the bounds inside the image are relative to the 
-				// camera model bounds which have just been verified to fit the width/height.
-				Rectangle r = cameraModel.getBounds();
-				if (r.x != 0 || r.y != 0)
-				{
-					bounds = (Rectangle) bounds.clone();
-					bounds.x += r.x;
-					bounds.y += r.y;
-				}
-
-				cameraModel = cameraModel.crop(bounds, false);
-			}
+			// The camera model origin must be reset to the be relative to the source bounds origin
+			cameraModel = cropCameraModel(cameraModel, sourceBounds, cropBounds, true);
 
 			if (initialise && cameraModel instanceof PerPixelCameraModel)
 			{
@@ -2755,24 +2761,67 @@ public class PeakFit implements PlugInFilter, ItemListener
 	}
 
 	/**
-	 * Crop a camera model for processing data from an image frame of the given bounds. The camera model
-	 * bounds will be checked to verify that the image fits within the model. If the model is larger then a crop will be
-	 * made using a dialog to select the crop. Optionally the model origin is set to 0,0.
+	 * Combine the source bounds with an internal crop bounds to create the region required from the camera model.
+	 *
+	 * @param sourceBounds
+	 *            the source bounds
+	 * @param cropBounds
+	 *            the crop bounds
+	 * @return the rectangle
+	 */
+	public static Rectangle combineBounds(Rectangle sourceBounds, Rectangle cropBounds)
+	{
+		if (sourceBounds == null)
+			throw new NullPointerException("No source bounds");
+		if (cropBounds == null)
+			return sourceBounds;
+
+		// Check the crop is inside the source
+		if (!new Rectangle(sourceBounds.width, sourceBounds.height).contains(cropBounds))
+			throw new IllegalArgumentException("Crop bounds does not fit within the source width x height");
+
+		// Make relative
+		if (sourceBounds.x != 0 || sourceBounds.y != 0)
+		{
+			cropBounds = (Rectangle) cropBounds.clone();
+			cropBounds.x += sourceBounds.x;
+			cropBounds.y += sourceBounds.y;
+		}
+
+		return cropBounds;
+	}
+
+	/**
+	 * Crop a camera model for processing data from a cropped image frame of the given bounds. The target bounds are
+	 * created by combining the crop with the source bounds. The camera model bounds will be checked to verify that the
+	 * target fits within the model.
 	 * <p>
-	 * This method can be used to prepare a camera model for processing images frames of width x height.
+	 * If the model is smaller then an error is thrown.
+	 * <p>
+	 * If the model is larger then a crop will be made using a dialog to select the crop.
+	 * <p>
+	 * If the model is the same size then no crop is made, even if the origin is incorrect.
+	 * <p>
+	 * Optionally the model can be updated so that the origin is relative to the source bounds. If no crop is used the
+	 * origin will be 0,0. Otherwise it will be equal to the crop origin.
+	 * <p>
+	 * This method can be used to prepare a camera model for processing images frames of crop width x height.
 	 *
 	 * @param cameraModel
 	 *            the camera model
 	 * @param sourceBounds
 	 *            the source bounds
+	 * @param cropBounds
+	 *            the crop bounds (relative to the input image). If null then the full width x height of the source is
+	 *            used.
 	 * @param resetOrigin
-	 *            the reset origin
+	 *            the reset origin flag (to set the output camera model origin to match the source bounds)
 	 * @return the camera model
 	 * @throws IllegalArgumentException
 	 *             If the model is null or the crop cannot be done
 	 */
-	public static CameraModel cropCameraModel(CameraModel cameraModel, Rectangle sourceBounds, boolean resetOrigin)
-			throws IllegalArgumentException
+	public static CameraModel cropCameraModel(CameraModel cameraModel, Rectangle sourceBounds, Rectangle cropBounds,
+			boolean resetOrigin) throws IllegalArgumentException
 	{
 		if (cameraModel == null)
 		{
@@ -2781,6 +2830,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 		Rectangle modelBounds = cameraModel.getBounds();
 		if (modelBounds == null || sourceBounds == null)
 			return cameraModel;
+
+		// Combine the source bounds with the crop
+		sourceBounds = combineBounds(sourceBounds, cropBounds);
+
 		int width = sourceBounds.width;
 		int height = sourceBounds.height;
 		if (modelBounds.width < width || modelBounds.height < height)
@@ -2812,17 +2865,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 			oy = (int) gd2.getNextNumber();
 
 			Rectangle bounds = new Rectangle(ox, oy, width, height);
-			cameraModel = cameraModel.crop(bounds, resetOrigin); // Reset origin for fast filtering
+			cameraModel = cameraModel.crop(bounds, false);
 			modelBounds = cameraModel.getBounds();
 			if (modelBounds.width != bounds.width || modelBounds.height != bounds.height)
 				throw new IllegalArgumentException("Failed to crop camera model using bounds: " + bounds);
 		}
-		else if (resetOrigin && (modelBounds.x != 0 || modelBounds.y != 0))
+
+		if (resetOrigin)
 		{
-			// Reset origin for fast filtering
+			// Reset origin to the source origin
 			cameraModel = cameraModel.copy();
-			cameraModel.setOrigin(0, 0);
+			if (cropBounds == null)
+				cameraModel.setOrigin(0, 0);
+			else
+				cameraModel.setOrigin(cropBounds.x, cropBounds.y);
 		}
+
 		return cameraModel;
 	}
 

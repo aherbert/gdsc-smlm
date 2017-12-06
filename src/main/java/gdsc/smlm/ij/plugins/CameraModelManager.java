@@ -337,7 +337,7 @@ public class CameraModelManager implements PlugIn
 				bounds = new Rectangle(pluginSettings.getOriginX(), pluginSettings.getOriginY(), imp.getWidth(),
 						imp.getHeight());
 			}
-			cameraModel = PeakFit.cropCameraModel(cameraModel, bounds, false);
+			cameraModel = PeakFit.cropCameraModel(cameraModel, bounds, null, false);
 		}
 		catch (IllegalArgumentException e)
 		{

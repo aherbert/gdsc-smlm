@@ -301,7 +301,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 			return false;
 		if (!PeakFit.configureDataFilter(config, 0))
 			return false;
-		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), 0))
+		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, 0))
 			return false;
 
 		// Extra parameters are needed for interlaced data
