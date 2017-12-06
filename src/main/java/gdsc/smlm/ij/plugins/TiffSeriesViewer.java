@@ -1,6 +1,10 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Choice;
 import java.awt.Font;
+import java.awt.Label;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 
 /*----------------------------------------------------------------------------- 
@@ -49,6 +53,8 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	private static String inputFile = Prefs.get(Constants.tiffSeriesFile, "");
 	private static boolean logProgress = Prefs.getBoolean(Constants.tiffSeriesLogProgress, false);
 
+	private Label label;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -88,9 +94,25 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 						return false;
 					inputFile = file;
 				}
+				updateLabel();
 				return true;
 			}
 		});
+		gd.addMessage("");
+		label = gd.getLastLabel();
+		if (Utils.isShowGenericDialog())
+		{
+			final Choice choice = gd.getLastChoice();
+			choice.addItemListener(new ItemListener()
+			{
+				public void itemStateChanged(ItemEvent e)
+				{
+					inputMode = choice.getSelectedIndex();
+					updateLabel();
+				}
+			});
+			updateLabel();
+		}
 		gd.addCheckbox("Log_progress", logProgress);
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -102,6 +124,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		Prefs.set(Constants.tiffSeriesMode, inputMode);
 		Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
 		Prefs.set(Constants.tiffSeriesFile, inputFile);
+		Prefs.set(Constants.tiffSeriesLogProgress, logProgress);
 
 		SeriesImageSource source;
 		if (inputMode == 0)
@@ -139,6 +162,14 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 
 		// Q. Can we create a virtual stack?
 		new TiffSeriesVirtualStack(source).show();
+	}
+
+	private void updateLabel()
+	{
+		if (inputMode == 0)
+			label.setText(inputDirectory);
+		else
+			label.setText(inputFile);
 	}
 
 	/**
@@ -368,7 +399,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		// Ignore
 		return false;
 	}
-	
+
 	public boolean isProgress()
 	{
 		return true;
