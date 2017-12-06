@@ -9,8 +9,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import gdsc.core.data.DataException;
 import gdsc.core.generics.CloseableBlockingQueue;
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.logging.NullTrackProgress;
@@ -79,7 +82,7 @@ public class SeriesImageSource extends ImageSource
 			return size;
 		}
 
-		abstract Object getFrame(int i);
+		abstract Object getFrame(int i) throws Exception;
 
 		public void close(boolean freeMemory)
 		{
@@ -108,7 +111,7 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		@Override
-		Object getFrame(int i)
+		Object getFrame(int i) throws Exception
 		{
 			return imageArray[i];
 		}
@@ -268,65 +271,62 @@ public class SeriesImageSource extends ImageSource
 			return ok;
 		}
 
-		Object nextFrame()
+		Object nextFrame() throws Exception
 		{
-			try
-			{
-				// Skip ahead
-				long skip;
+			// Skip ahead
+			long skip;
 
-				if (contiguous)
+			if (contiguous)
+			{
+				// If sequential reading just skip the gap between frames
+				if (frameCount == 0)
 				{
-					// If sequential reading just skip the gap between frames
-					if (frameCount == 0)
-					{
-						// The first frame we know the exact offset
-						skip = fi.getOffset();
-					}
-					else
-					{
-						// If sequential reading just skip the gap between frames
-						skip = fi.gapBetweenImages;
-					}
+					// The first frame we know the exact offset
+					skip = fi.getOffset();
 				}
 				else
 				{
-					// Adapted from ij.io.Opener.openTiffStack(...)
+					// If sequential reading just skip the gap between frames
+					skip = fi.gapBetweenImages;
+				}
+			}
+			else
+			{
+				// Adapted from ij.io.Opener.openTiffStack(...)
 
-					// Each image offset is described by a separate ExtendedFileInfo object
-					skip = info[frameCount].getOffset();
-					fi.stripOffsets = info[frameCount].stripOffsets;
-					fi.stripLengths = info[frameCount].stripLengths;
+				// Each image offset is described by a separate ExtendedFileInfo object
+				skip = info[frameCount].getOffset();
+				fi.stripOffsets = info[frameCount].stripOffsets;
+				fi.stripLengths = info[frameCount].stripLengths;
 
-					if (frameCount != 0)
+				if (frameCount != 0)
+				{
+					// We must subtract the current file location.
+					skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
+					if (skip < 0L)
 					{
-						// We must subtract the current file location.
-						skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
-						if (skip < 0L)
-							throw new IllegalStateException("Bad TIFF offset " + skip);
+						canRead = false;
+						throw new IllegalStateException("Bad TIFF offset " + skip);
 					}
 				}
-
-				// Store the number of frames that have been read
-				frameCount++;
-
-				//long t = System.nanoTime();
-				Object pixels = reader.readPixels(is, skip);
-				//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
-				return pixels;
 			}
-			catch (Exception e)
+
+			// Store the number of frames that have been read
+			frameCount++;
+
+			//long t = System.nanoTime();
+			Object pixels = reader.readPixels(is, skip);
+			//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
+			if (pixels == null)
 			{
-				System.out.println(e.toString());
-				e.printStackTrace();
 				canRead = false;
+				throw new DataException("Unable to read pixels");
 			}
-
-			return null;
+			return pixels;
 		}
 
 		@Override
-		synchronized Object getFrame(int i)
+		synchronized Object getFrame(int i) throws Exception
 		{
 			if (i < frameCount)
 			{
@@ -337,87 +337,78 @@ public class SeriesImageSource extends ImageSource
 			}
 
 			if (!openInputStream())
-				return null;
+				throw new IllegalStateException("Cannot read the TIFF image");
 
-			try
+			// Skip ahead
+			long skip;
+
+			if (contiguous)
 			{
+				// Read using the first ExtendedFileInfo object
 
-				// Skip ahead
-				long skip;
-
-				if (contiguous)
+				if (i == 0)
 				{
-					// Read using the first ExtendedFileInfo object
-
-					if (i == 0)
-					{
-						// The first frame we know the exact offset
-						skip = fi.getOffset();
-					}
-					else if (i == frameCount)
-					{
-						// If sequential reading just skip the gap between frames
-						skip = fi.gapBetweenImages;
-					}
-					else
-					{
-						// Skipping ahead
-						int nFrames = i - frameCount;
-						skip = (bytesPerFrame + fi.gapBetweenImages) * nFrames;
-
-						// Ensure we skip to the start position if nothing has been read
-						if (frameCount == 0)
-							skip += fi.getOffset();
-					}
+					// The first frame we know the exact offset
+					skip = fi.getOffset();
+				}
+				else if (i == frameCount)
+				{
+					// If sequential reading just skip the gap between frames
+					skip = fi.gapBetweenImages;
 				}
 				else
 				{
-					// Adapted from ij.io.Opener.openTiffStack(...)
+					// Skipping ahead
+					int nFrames = i - frameCount;
+					skip = (bytesPerFrame + fi.gapBetweenImages) * nFrames;
 
-					// Each image offset is described by a separate ExtendedFileInfo object
-					skip = info[i].getOffset();
-					fi.stripOffsets = info[i].stripOffsets;
-					fi.stripLengths = info[i].stripLengths;
+					// Ensure we skip to the start position if nothing has been read
+					if (frameCount == 0)
+						skip += fi.getOffset();
+				}
+			}
+			else
+			{
+				// Adapted from ij.io.Opener.openTiffStack(...)
 
-					if (frameCount != 0)
+				// Each image offset is described by a separate ExtendedFileInfo object
+				skip = info[i].getOffset();
+				fi.stripOffsets = info[i].stripOffsets;
+				fi.stripLengths = info[i].stripLengths;
+
+				if (frameCount != 0)
+				{
+					// We must subtract the current file location.
+					skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
+					if (skip < 0L)
 					{
-						// We must subtract the current file location.
-						skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
-						if (skip < 0L)
-							throw new IllegalStateException("Bad TIFF offset " + skip);
+						canRead = false;
+						throw new IllegalStateException("Bad TIFF offset " + skip);
 					}
 				}
-
-				// Store the number of frames that have been read
-				frameCount = i + 1;
-
-				//long t = System.nanoTime();
-				Object pixels = reader.readPixels(is, skip);
-				//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
-				return pixels;
 			}
-			catch (Exception e)
+
+			// Store the number of frames that have been read
+			frameCount = i + 1;
+
+			//long t = System.nanoTime();
+			Object pixels = reader.readPixels(is, skip);
+			//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
+			if (pixels == null)
 			{
-				System.out.println(e.toString());
-				e.printStackTrace();
 				canRead = false;
+				throw new DataException("Unable to read pixels");
 			}
-
-			return null;
+			return pixels;
 		}
 
-		public boolean openInputStream()
+		public boolean openInputStream() throws IOException
 		{
-			if (is == null && canRead)
+			if (canRead && is == null)
 			{
 				try
 				{
 					is = createInputStream(fi);
-				}
-				catch (Exception e)
-				{
-					System.out.println(e.toString());
-					e.printStackTrace();
 				}
 				finally
 				{
@@ -541,32 +532,31 @@ public class SeriesImageSource extends ImageSource
 		 */
 		public void run()
 		{
-			boolean error = false;
+			SeekableStream ss = null;
+
+			// All exceptions are caught so that the queue can be shutdown correctly
 			try
 			{
 				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
 				{
 					final String path = images.get(currentImage);
-					//System.out.println("Reading " + path);
-
-					SeekableStream ss = createSeekableStream(path);
-					if (ss == null)
-					{
-						error = true;
-						break;
-					}
-
-					trackProgress.log("Reading TIFF info %s", path);
 
 					// Check the cache to avoid a re-read. This will always be the case
 					// for the first image as that is opened in openSource().
 					TiffImage image = imageData[currentImage].tiffImage;
 					if (image == null)
 					{
+						trackProgress.log("Reading TIFF info %s", path);
+
+						ss = createSeekableStream(path);
+						// This will throw if there is an error and the seekable stream 
+						// is closed in the finally block. Otherwise the method will close
+						// the stream.
 						ExtendedFileInfo[] info = getTiffInfo(ss, path);
+						ss = null;
 						if (info == null)
 						{
-							error = true;
+							setError(new DataException("No TIFF file info"));
 							break;
 						}
 						image = new TiffImage(info, null);
@@ -577,35 +567,27 @@ public class SeriesImageSource extends ImageSource
 					// Check it is the expected size
 					if (image.getWidth() != getWidth() || image.getHeight() != getHeight())
 					{
-						error = true;
+						setError(new DataException("Dimension mismatch"));
 						break;
 					}
 					if (imageSize != null && image.getSize() != getImageSize(currentImage))
 					{
-						error = true;
+						setError(new DataException("Unexpected image size"));
 						break;
 					}
 
 					trackProgress.log("Reading TIFF %s", path);
 
 					image.reset();
-					if (!image.openInputStream())
-					{
-						error = true;
-						break;
-					}
+					image.openInputStream();
 
 					try
 					{
 						// Read all the frames sequentially
 						for (int i = 0; i < image.size; i++)
 						{
+							// This should throw if no pixels can be read
 							Object pixels = image.nextFrame();
-							if (pixels == null)
-							{
-								error = true;
-								break;
-							}
 
 							// This will block until the queue has capacity or is closed
 							if (!rawFramesQueue.putAndConfirm(pixels))
@@ -614,20 +596,26 @@ public class SeriesImageSource extends ImageSource
 					}
 					finally
 					{
-						// Close the image
+						// Close the image and free resources
 						image.close(true);
 					}
 				}
 			}
-			catch (InterruptedException e)
+			catch (DataException e)
 			{
-				// This is from the queue put method, possibly an interrupt on the queue or thread? 
-				System.out.println(e.toString());
-				e.printStackTrace();
-				error = true;
+				setError(e);
+			}
+			catch (Exception e)
+			{
+				setError(new DataException(e));
+			}
+			finally
+			{
+				closeInputStream(ss);
 			}
 
-			rawFramesQueue.close(error);
+			// Close and clear if an error occurred
+			rawFramesQueue.close((error != null));
 
 			run = false;
 		}
@@ -674,67 +662,58 @@ public class SeriesImageSource extends ImageSource
 		 */
 		public void run()
 		{
-			boolean error = false;
+			FileInputStream fis = null;
+
+			// All exceptions are caught so that the queue can be shutdown correctly
 			try
 			{
 				for (int currentImage = 0; run && currentImage < images.size(); currentImage++)
 				{
 					final String path = images.get(currentImage);
-					//System.out.println("Reading " + path);
+
+					trackProgress.log("Reading TIFF into memory %s", path);
 
 					File file = new File(path);
-					FileInputStream fis = openStream(file);
-					if (fis == null)
+					fis = openStream(file);
+
+					// We already know they fit into memory (i.e. the size is not zero)
+					int size = (int) imageData[currentImage].fileSize;
+					byte[] buf = new byte[size];
+					int read = fis.read(buf);
+					if (read != size)
 					{
-						error = true;
+						setError(new DataException("Cannot buffer file into memory"));
 						break;
 					}
-
 					try
 					{
-						// We already know they fit into memory (i.e. the size is not zero)
-						int size = (int) imageData[currentImage].fileSize;
-						byte[] buf = new byte[size];
-						int read = fis.read(buf);
-						if (read != size)
-						{
-							error = true;
-							break;
-						}
-
-						// This may be closed upon error
-						if (!decodeQueue.putAndConfirm(new NextSource(buf, currentImage)))
-							break;
-					}
-					catch (IOException e)
-					{
-						System.out.println(e.toString());
-						e.printStackTrace();
-						error = true;
-						break;
+						fis.close();
 					}
 					finally
 					{
-						try
-						{
-							fis.close();
-						}
-						catch (IOException e)
-						{
-							// Ignore
-						}
+						// Prevent another close attempt
+						fis = null;
 					}
+
+					// This may be closed upon error
+					if (!decodeQueue.putAndConfirm(new NextSource(buf, currentImage)))
+						break;
 				}
 			}
-			catch (InterruptedException e)
+			catch (DataException e)
 			{
-				// This is from the queue put method, possibly an interrupt on the queue or thread? 
-				System.out.println(e.toString());
-				e.printStackTrace();
-				error = true;
+				setError(e);
+			}
+			catch (Exception e)
+			{
+				setError(new DataException(e));
+			}
+			finally
+			{
+				closeInputStream(fis);
 			}
 
-			if (error)
+			if (error != null)
 				closeWorkflowQueues();
 			else
 				decodeQueue.close(false);
@@ -755,7 +734,6 @@ public class SeriesImageSource extends ImageSource
 		 */
 		public void run()
 		{
-			boolean error = false;
 			try
 			{
 				while (run)
@@ -767,9 +745,6 @@ public class SeriesImageSource extends ImageSource
 					if (currentImage == -1)
 						break;
 
-					final String path = images.get(currentImage);
-					//System.out.println("Reading " + path);
-
 					SeekableStream ss = new ByteArraySeekableStream(nextSource.buffer);
 
 					// Re-use the cache of the file info
@@ -777,10 +752,13 @@ public class SeriesImageSource extends ImageSource
 					TiffImage image = imageData[currentImage].tiffImage;
 					if (image == null)
 					{
+						final String path = images.get(currentImage);
+						trackProgress.log("Reading TIFF info %s", path);
+
 						info = getTiffInfo(ss, path);
 						if (info == null)
 						{
-							error = true;
+							setError(new DataException("No TIFF file info"));
 							break;
 						}
 
@@ -791,12 +769,12 @@ public class SeriesImageSource extends ImageSource
 						// Check it is the expected size
 						if (image.getWidth() != getWidth() || image.getHeight() != getHeight())
 						{
-							error = true;
+							setError(new DataException("Dimension mismatch"));
 							break;
 						}
 						if (imageSize != null && image.getSize() != getImageSize(currentImage))
 						{
-							error = true;
+							setError(new DataException("Unexpected image size"));
 							break;
 						}
 
@@ -819,15 +797,17 @@ public class SeriesImageSource extends ImageSource
 						break;
 				}
 			}
-			catch (InterruptedException e)
+			catch (DataException e)
 			{
-				// This is from the queue put method, possibly an interrupt on the queue or thread? 
-				System.out.println(e.toString());
-				e.printStackTrace();
-				error = true;
+				setError(e);
 			}
+			catch (Exception e)
+			{
+				setError(new DataException(e));
+			}
+			// no finally as there is nothing to close
 
-			if (error)
+			if (error != null)
 				closeWorkflowQueues();
 			else
 				readQueue.close(false);
@@ -848,7 +828,6 @@ public class SeriesImageSource extends ImageSource
 		 */
 		public void run()
 		{
-			boolean error = false;
 			try
 			{
 				while (run)
@@ -864,23 +843,15 @@ public class SeriesImageSource extends ImageSource
 					TiffImage image = (TiffImage) nextSource.image;
 
 					image.reset();
-					if (!image.openInputStream())
-					{
-						error = true;
-						break;
-					}
+					image.openInputStream();
 
 					try
 					{
 						// Read all the frames sequentially
 						for (int i = 0; i < image.size; i++)
 						{
+							// This should throw if no pixels can be read
 							Object pixels = image.nextFrame();
-							if (pixels == null)
-							{
-								error = true;
-								break;
-							}
 
 							// This may be closed upon error
 							if (!rawFramesQueue.putAndConfirm(pixels))
@@ -894,15 +865,17 @@ public class SeriesImageSource extends ImageSource
 					}
 				}
 			}
-			catch (InterruptedException e)
+			catch (DataException e)
 			{
-				// This is from the queue put method, possibly an interrupt on the queue or thread? 
-				System.out.println(e.toString());
-				e.printStackTrace();
-				error = true;
+				setError(e);
 			}
+			catch (Exception e)
+			{
+				setError(new DataException(e));
+			}
+			// no finally as there is nothing to close
 
-			if (error)
+			if (error != null)
 				closeWorkflowQueues();
 			else
 				rawFramesQueue.close(false);
@@ -1025,7 +998,7 @@ public class SeriesImageSource extends ImageSource
 	 *            the size of the file
 	 * @return the seekable stream
 	 */
-	private SeekableStream createSeekableStream(String path, long size)
+	private SeekableStream createSeekableStream(String path, long size) throws FileNotFoundException, SecurityException
 	{
 		File file = new File(path);
 
@@ -1037,19 +1010,7 @@ public class SeriesImageSource extends ImageSource
 				return ss;
 		}
 
-		try
-		{
-			return new FileSeekableStream(file);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		catch (SecurityException e)
-		{
-		}
-
-		return null;
+		return createSeekableStream(path);
 	}
 
 	/**
@@ -1059,69 +1020,61 @@ public class SeriesImageSource extends ImageSource
 	 *            the path
 	 * @return the seekable stream
 	 */
-	private SeekableStream createSeekableStream(String path)
+	private SeekableStream createSeekableStream(String path) throws FileNotFoundException, SecurityException
 	{
-		try
-		{
-			return new FileSeekableStream(path);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		catch (SecurityException e)
-		{
-		}
-
-		return null;
+		return new FileSeekableStream(path);
 	}
 
-	private ExtendedFileInfo[] getTiffInfo(SeekableStream ss, String path)
+	/**
+	 * Close the input stream.
+	 *
+	 * @param is
+	 *            the input stream
+	 */
+	private void closeInputStream(InputStream is)
+	{
+		if (is != null)
+		{
+			try
+			{
+				is.close();
+			}
+			catch (IOException e)
+			{
+				// Ignore
+			}
+		}
+	}
+
+	private ExtendedFileInfo[] getTiffInfo(SeekableStream ss, String path) throws IOException
 	{
 		FastTiffDecoder td = new FastTiffDecoder(ss, path);
 		td.setTrackProgress(trackProgress);
-		try
-		{
-			//td.enableDebugging();
-			// This will close the seekable stream.
-			ExtendedFileInfo[] info = td.getTiffInfo();
-			//if (info != null)
-			//{
-			//	System.out.println(info[0].debugInfo);
-			//
-			//	// This contains OME TIFF metadata as serialised JSON when using 
-			//	// MicroManager to save the TIFF
-			//	if (info[0].summaryMetaData != null)
-			//		System.out.println(info[0].summaryMetaData.substring(0, Math.min(1000, info[0].summaryMetaData.length())));
-			//	//	
-			//	//	ij.io.FileOpener fo = new ij.io.FileOpener(info[0]);
-			//	//	java.util.Properties p = fo.decodeDescriptionString(info[0]);
-			//	//	System.out.println(p);
-			//	//	//double ox = 0, oy = 0;
-			//	//	//if (p.containsKey("xorigin"))
-			//	//	//	ox = Double.parseDouble(p.getProperty("xorigin"));
-			//	//	//if (p.containsKey("yorigin"))
-			//	//	//	oy = Double.parseDouble(p.getProperty("yorigin"));
-			//	//	//// Should the origin be converted by the units?
-			//	//	//setOrigin((int)ox, (int)oy);
-			//}
-			return info;
-		}
-		catch (IOException e)
-		{
-			// This is from the TIFF decoder
-			e.printStackTrace();
 
-			try
-			{
-				// Close this if the TIFF decoder errored
-				ss.close();
-			}
-			catch (IOException ex)
-			{
-			}
-		}
-		return null;
+		//td.enableDebugging();
+		// This will close the seekable stream.
+		ExtendedFileInfo[] info = td.getTiffInfo();
+		//if (info != null)
+		//{
+		//	System.out.println(info[0].debugInfo);
+		//
+		//	// This contains OME TIFF metadata as serialised JSON when using 
+		//	// MicroManager to save the TIFF
+		//	if (info[0].summaryMetaData != null)
+		//		System.out.println(info[0].summaryMetaData.substring(0, Math.min(1000, info[0].summaryMetaData.length())));
+		//	//	
+		//	//	ij.io.FileOpener fo = new ij.io.FileOpener(info[0]);
+		//	//	java.util.Properties p = fo.decodeDescriptionString(info[0]);
+		//	//	System.out.println(p);
+		//	//	//double ox = 0, oy = 0;
+		//	//	//if (p.containsKey("xorigin"))
+		//	//	//	ox = Double.parseDouble(p.getProperty("xorigin"));
+		//	//	//if (p.containsKey("yorigin"))
+		//	//	//	oy = Double.parseDouble(p.getProperty("yorigin"));
+		//	//	//// Should the origin be converted by the units?
+		//	//	//setOrigin((int)ox, (int)oy);
+		//}
+		return info;
 	}
 
 	private boolean belowBufferLimit(long size)
@@ -1143,52 +1096,41 @@ public class SeriesImageSource extends ImageSource
 
 	private SeekableStream readByteArraySeekableStream(File file, long size)
 	{
-		FileInputStream fis = openStream(file);
-		if (fis != null)
+		FileInputStream fis = null;
+		try
 		{
-			try
+			fis = openStream(file);
+			if (fis != null)
 			{
 				byte[] buf = new byte[(int) size];
 				int read = fis.read(buf);
 				if (read == size)
 					return new ByteArraySeekableStream(buf);
 			}
-			catch (IOException e)
-			{
-				// At the moment if we ignore this then the ImageWorker will open the file
-				// rather than process from the memory stream.
-				System.out.println(e.toString());
-				e.printStackTrace();
-			}
-			finally
-			{
-				try
-				{
-					fis.close();
-				}
-				catch (IOException e)
-				{
-					// Ignore
-				}
-			}
+		}
+		catch (IOException e)
+		{
+			// This exception is not bubbled up. 
+			// At the moment if we ignore this then the ImageWorker will open the file
+			// rather than process from the memory stream.
+			e.printStackTrace();
+		}
+		finally
+		{
+			closeInputStream(fis);
 		}
 		return null;
 	}
 
-	private static FileInputStream openStream(File file)
+	private static FileInputStream openStream(File file) throws FileNotFoundException, SecurityException
 	{
-		try
-		{
-			return new FileInputStream(file);
-		}
-		catch (FileNotFoundException e)
-		{
-		}
-		catch (SecurityException e)
-		{
-		}
-		return null;
+		return new FileInputStream(file);
 	}
+
+	// Note:
+	// This legacy code is left as it provides a way to have synchronised queues around entire images
+	// and not at the level of each pixel frame. Depending on performance of the single-frame method
+	// this architecture may be reinstated.
 
 	//	private class ImageWorker extends BaseWorker
 	//	{
@@ -1351,6 +1293,13 @@ public class SeriesImageSource extends ImageSource
 	/** Used for sequential reading to queue the raw frames */
 	@XStreamOmitField
 	private CloseableBlockingQueue<Object> rawFramesQueue = null;
+
+	/**
+	 * The first error that occurred during sequential reading. This is stored, the queue is shutdown and then this can
+	 * be thrown in the next() method.
+	 */
+	@XStreamOmitField
+	private DataException error = null;
 
 	/**
 	 * Create a new image source using the given image series
@@ -1534,7 +1483,7 @@ public class SeriesImageSource extends ImageSource
 				catch (Throwable e)
 				{
 					if (estimate)
-						// This is an utested method so log the error
+						// This is an untested method so log the error
 						e.printStackTrace();
 				}
 				finally
@@ -1601,9 +1550,10 @@ public class SeriesImageSource extends ImageSource
 		lastImageId = 0;
 		if (lastImage != null && lastImage.size > 0)
 		{
-			Object pixels = lastImage.getFrame(0);
-			if (pixels != null)
+			try
 			{
+				// Ignore the pixels returned. This will throw if they are null.
+				lastImage.getFrame(0);
 				setDimensions(imageData[0].tiffImage.width, imageData[0].tiffImage.height);
 
 				// Attempt to get the origin if a MicroManager image
@@ -1612,6 +1562,13 @@ public class SeriesImageSource extends ImageSource
 					setOrigin(roi.x, roi.y);
 
 				return true;
+			}
+			catch (Exception e)
+			{
+				// Q. Should the problem be reported. Currently if the exception is 
+				// not bubbled up then the source is not opened.
+				if (trackProgress.isLog())
+					trackProgress.log("Failed to open: %s", ExceptionUtils.getStackTrace(e));
 			}
 		}
 		return false;
@@ -1882,16 +1839,26 @@ public class SeriesImageSource extends ImageSource
 	{
 		// This should only be called once by the image source each time the series is opened.
 		createQueue();
+		// Reset the sequential read error
+		error = null;
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
+	private void setError(DataException e)
+	{
+		if (error != null)
+			System.err.println("Encountered a second error during sequential read!");
+		error = e;
+	}
+
+	/**
+	 * {@inheritDoc}
 	 * 
-	 * @see gdsc.smlm.results.ImageSource#nextRawFrame()
+	 * @throws DataException
+	 *             If there was an error duing the sequential read
 	 */
 	@Override
-	protected Object nextRawFrame()
+	protected Object nextRawFrame() throws DataException
 	{
 		try
 		{
@@ -1901,6 +1868,8 @@ public class SeriesImageSource extends ImageSource
 			{
 				return pixels;
 			}
+			if (error != null)
+				throw error;
 		}
 		catch (IllegalStateException e)
 		{
@@ -1983,7 +1952,17 @@ public class SeriesImageSource extends ImageSource
 		{
 			if (slice < lastImage.size)
 			{
-				return lastImage.getFrame(slice);
+				try
+				{
+					return lastImage.getFrame(slice);
+				}
+				catch (Exception e)
+				{
+					// Q. Should the problem be reported. Currently if the exception is 
+					// not bubbled up then the frame will be null.
+					if (trackProgress.isLog())
+						trackProgress.log("Failed to open frame %d: %s", frame, ExceptionUtils.getStackTrace(e));
+				}
 			}
 		}
 		return null;
@@ -1994,26 +1973,26 @@ public class SeriesImageSource extends ImageSource
 		TiffImage tiffImage = null;
 
 		// Open using specialised TIFF reader for better non-sequential support
-		SeekableStream ss = createSeekableStream(path, imageData[id].fileSize);
-		if (ss != null)
+		SeekableStream ss = null;
+		try
 		{
+			ss = createSeekableStream(path, imageData[id].fileSize);
 			ExtendedFileInfo[] info = getTiffInfo(ss, path);
-			try
-			{
-				ss.close();
-			}
-			catch (IOException ioe)
-			{
-			}
 
 			if (info != null)
 			{
-
-				// Store the opened stream as we will use it
-				tiffImage = new TiffImage(info, ss);
+				// A byte array seekable stream will ignore the close() method so we can re-use it 
+				tiffImage = new TiffImage(info, (ss instanceof ByteArraySeekableStream) ? ss : null);
 
 				storeTiffImage(id, tiffImage);
 			}
+		}
+		catch (IOException ioe)
+		{
+		}
+		finally
+		{
+			closeInputStream(ss);
 		}
 
 		if (tiffImage == null)
