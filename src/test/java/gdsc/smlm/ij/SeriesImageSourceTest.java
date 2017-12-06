@@ -1,6 +1,9 @@
 package gdsc.smlm.ij;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -11,9 +14,10 @@ import org.junit.Test;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.results.ImageSource.ReadHint;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.io.FileInfo;
+import ij.io.TiffEncoder;
 import ij.measure.Calibration;
 
 public class SeriesImageSourceTest
@@ -23,20 +27,32 @@ public class SeriesImageSourceTest
 	@Test
 	public void canReadBigTIFFSequentially() throws IOException
 	{
-		canReadBigTIFFSequentially(false);
+		canReadBigTIFFSequentially(false, true);
 	}
 
 	@Test
 	public void canReadBigTIFFSequentiallyInMemory() throws IOException
 	{
-		canReadBigTIFFSequentially(true);
+		canReadBigTIFFSequentially(true, true);
 	}
 
-	private void canReadBigTIFFSequentially(boolean inMemory) throws IOException
+	@Test
+	public void canReadBigTIFFSequentiallyBE() throws IOException
+	{
+		canReadBigTIFFSequentially(false, false);
+	}
+
+	@Test
+	public void canReadBigTIFFSequentiallyInMemoryBE() throws IOException
+	{
+		canReadBigTIFFSequentially(true, false);
+	}
+	
+	private void canReadBigTIFFSequentially(boolean inMemory, boolean intelByteOrder) throws IOException
 	{
 		int n = 2;
 		String[] filenames = createFilenames(n);
-		ImageStack[] stacks = createSeries(filenames);
+		ImageStack[] stacks = createSeries(filenames, intelByteOrder);
 		SeriesImageSource source = new SeriesImageSource("Test", filenames);
 		if (!inMemory)
 			source.setBufferLimit(0); // To force standard reading functionality
@@ -61,20 +77,32 @@ public class SeriesImageSourceTest
 	@Test
 	public void canReadBigTIFFNonSequentially() throws IOException
 	{
-		canReadBigTIFFNonSequentially(false);
+		canReadBigTIFFNonSequentially(false, true);
 	}
 
 	@Test
 	public void canReadBigTIFFNonSequentiallyInMemory() throws IOException
 	{
-		canReadBigTIFFNonSequentially(true);
+		canReadBigTIFFNonSequentially(true, true);
 	}
-	
-	private void canReadBigTIFFNonSequentially(boolean inMemory) throws IOException
+
+	@Test
+	public void canReadBigTIFFNonSequentiallyBE() throws IOException
+	{
+		canReadBigTIFFNonSequentially(false, false);
+	}
+
+	@Test
+	public void canReadBigTIFFNonSequentiallyInMemoryBE() throws IOException
+	{
+		canReadBigTIFFNonSequentially(true, false);
+	}
+
+	private void canReadBigTIFFNonSequentially(boolean inMemory, boolean intelByteOrder) throws IOException
 	{
 		int n = 2;
 		String[] filenames = createFilenames(n);
-		ImageStack[] stacks = createSeries(filenames);
+		ImageStack[] stacks = createSeries(filenames, intelByteOrder);
 		SeriesImageSource source = new SeriesImageSource("Test", filenames);
 		if (!inMemory)
 			source.setBufferLimit(0); // To force standard reading functionality
@@ -118,7 +146,7 @@ public class SeriesImageSourceTest
 		return filenames;
 	}
 
-	private ImageStack[] createSeries(String[] filenames)
+	private ImageStack[] createSeries(String[] filenames, boolean intelByteOrder) throws IOException
 	{
 		int n = filenames.length;
 		ImageStack[] stacks = new ImageStack[n];
@@ -137,9 +165,37 @@ public class SeriesImageSourceTest
 			Calibration c = imp.getCalibration();
 			c.xOrigin = 4;
 			c.yOrigin = 5;
-			IJ.saveAsTiff(imp, filenames[i]);
+			saveAsTiff(imp, filenames[i], intelByteOrder);
 			stacks[i] = stack;
 		}
 		return stacks;
+	}
+
+	private void saveAsTiff(ImagePlus imp, String path, boolean intelByteOrder) throws IOException
+	{
+		// IJ.saveAsTiff(imp, path);		
+
+		FileInfo fi = imp.getFileInfo();
+		fi.nImages = imp.getStackSize();
+		ij.Prefs.intelByteOrder = intelByteOrder;
+		DataOutputStream out = null;
+		try
+		{
+			TiffEncoder file = new TiffEncoder(fi);
+			out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
+			file.write(out);
+			out.close();
+		}
+		finally
+		{
+			if (out != null)
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
+				}
+		}
 	}
 }

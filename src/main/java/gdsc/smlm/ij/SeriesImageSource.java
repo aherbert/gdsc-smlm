@@ -1048,7 +1048,7 @@ public class SeriesImageSource extends ImageSource
 
 	private ExtendedFileInfo[] getTiffInfo(SeekableStream ss, String path) throws IOException
 	{
-		FastTiffDecoder td = new FastTiffDecoder(ss, path);
+		FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 		td.setTrackProgress(trackProgress);
 
 		//td.enableDebugging();
@@ -1455,7 +1455,7 @@ public class SeriesImageSource extends ImageSource
 					//System.out.printf("%s = %d bytes\n", path, size);
 
 					ss = createSeekableStream(path);
-					FastTiffDecoder td = new FastTiffDecoder(ss, path);
+					FastTiffDecoder td = FastTiffDecoder.create(ss, path);
 
 					NumberOfImages nImages = td.getNumberOfImages(estimate);
 					if (nImages.exact)
