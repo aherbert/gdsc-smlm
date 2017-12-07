@@ -371,7 +371,7 @@ public class SeriesImageSource extends ImageSource
 			if (indexMap.getNChannels() > 1)
 				return false;
 
-			// XXX: Assume this is stage positions
+			// Assume this is stage positions
 			if (indexMap.getNPositions() > 1)
 				return false;
 
@@ -1167,7 +1167,6 @@ public class SeriesImageSource extends ImageSource
 	//						}
 	//						catch (IOException e)
 	//						{
-	//							// TODO Auto-generated catch block
 	//							e.printStackTrace();
 	//						}
 	//					}
@@ -1198,8 +1197,8 @@ public class SeriesImageSource extends ImageSource
 	//			catch (InterruptedException e)
 	//			{
 	//				// This is from the queue put method, possibly an interrupt on the queue or thread? 
-	//				// TODO - How should this be handled?
-	//				System.out.println(e.toString()); e.printStackTrace();
+	//				// Q - How should this be handled?
+	//				e.printStackTrace();
 	//			}
 	//
 	//			run = false;
@@ -1424,7 +1423,7 @@ public class SeriesImageSource extends ImageSource
 	//			}
 	//			catch (Exception e)
 	//			{
-	//				// TODO - handle appropriately 
+	//				// handle appropriately 
 	//				System.out.println(id + ": " + e.toString());
 	//			}
 	//			finally
