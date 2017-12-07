@@ -58,6 +58,9 @@ public class SeriesImageSource extends ImageSource
 	/** The buffer limit for reading TIFF images into memory. Default = 30MB */
 	private int bufferLimit = 31457280;
 
+	/** The buffer limit for sequential reading of TIFF images. Default = 50MB */
+	private long sequentialReadBufferLimit = 52428800L;
+
 	private abstract class Image
 	{
 		int width, height, size;
@@ -437,9 +440,9 @@ public class SeriesImageSource extends ImageSource
 			// Store the number of frames that have been read
 			frameCount++;
 
-			//long t = System.nanoTime();
+			// t = System.nanoTime();
 			Object pixels = reader.readPixels(is, skip);
-			//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
+			//.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 			if (pixels == null)
 			{
 				canRead = false;
@@ -1920,7 +1923,16 @@ public class SeriesImageSource extends ImageSource
 	private synchronized void createQueue()
 	{
 		// Q. What size is optimal?
-		rawFramesQueue = new CloseableBlockingQueue<Object>(Runtime.getRuntime().availableProcessors() * 2);
+		long bytesPerFrame = 1024 * 1024 * 2; // A typical unsigned short image 
+		// We should have successfully opened the first image and so find the pixel size
+		if (imageData != null && imageData[0] != null && imageData[0].tiffImage != null &&
+				imageData[0].tiffImage.bytesPerFrame > 0)
+		{
+			bytesPerFrame = imageData[0].tiffImage.bytesPerFrame;
+		}
+		// Now create a queue to hold n images in memory
+		int n = Math.max(2, (int) Math.ceil(sequentialReadBufferLimit / (double) bytesPerFrame));
+		rawFramesQueue = new CloseableBlockingQueue<Object>(n);
 
 		if (belowBufferLimit() && images.size() > 1)
 		{
@@ -2319,6 +2331,29 @@ public class SeriesImageSource extends ImageSource
 	public void setBufferLimit(int bufferLimit)
 	{
 		this.bufferLimit = bufferLimit;
+	}
+
+	/**
+	 * Gets the buffer limit for sequential reading of a TIFF series. Reading will pause when the output queue is full
+	 * of images totalling this limit.
+	 *
+	 * @return the series buffer limit
+	 */
+	public long getSequentialReadBufferLimit()
+	{
+		return sequentialReadBufferLimit;
+	}
+
+	/**
+	 * Sets the buffer limit for sequential reading of a TIFF series. Reading will pause when the output queue is full
+	 * of images totalling this limit.
+	 * 
+	 * @param sequentialReadBufferLimit
+	 *            the new sequential read buffer limit
+	 */
+	public void setSequentialReadBufferLimit(long sequentialReadBufferLimit)
+	{
+		this.sequentialReadBufferLimit = sequentialReadBufferLimit;
 	}
 
 	/**
