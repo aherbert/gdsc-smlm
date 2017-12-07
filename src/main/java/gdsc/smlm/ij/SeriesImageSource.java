@@ -25,7 +25,7 @@ import ij.Prefs;
 import ij.io.ByteArraySeekableStream;
 import ij.io.ExtendedFileInfo;
 import ij.io.FastTiffDecoder;
-import ij.io.FastTiffDecoder.IndexMapEntry;
+import ij.io.FastTiffDecoder.IndexMap;
 import ij.io.FastTiffDecoder.NumberOfImages;
 import ij.io.FileInfo;
 import ij.io.FileSeekableStream;
@@ -127,11 +127,11 @@ public class SeriesImageSource extends ImageSource
 	 */
 	private class TiffImage extends Image
 	{
-		final IndexMapEntry[] indexMap;
+		final IndexMap indexMap;
 		final ExtendedFileInfo[] info;
-		ExtendedFileInfo fi; // Pointer to the file info used by the ImageReader
-		boolean contiguous;
+		final ExtendedFileInfo fi; // Pointer to the file info used by the ImageReader
 		final long bytesPerFrame;
+		boolean contiguous;
 		ImageReader reader = null;
 		// The input stream to read the pixel data.
 		InputStream is = null;
@@ -191,8 +191,16 @@ public class SeriesImageSource extends ImageSource
 					size = fi.nImages;
 					contiguous = true;
 				}
-				bytesPerFrame = getBytesPerFrame(fi.fileType);
-				reader = new ImageReader(fi);
+				if (size != 0)
+				{
+					bytesPerFrame = getBytesPerFrame(fi.fileType);
+					reader = new ImageReader(fi);
+				}
+				else
+				{
+					canRead = false;
+					bytesPerFrame = 0;
+				}
 			}
 			else
 			{
@@ -206,16 +214,18 @@ public class SeriesImageSource extends ImageSource
 			super(0, 0, 0);
 			indexMap = null;
 			info = null;
+			fi = null;
 			bytesPerFrame = 0;
 			canRead = false;
 		}
 
-		TiffImage(IndexMapEntry[] indexMap, ExtendedFileInfo fi, SeekableStream ss)
+		TiffImage(IndexMap indexMap, ExtendedFileInfo fi, SeekableStream ss)
 		{
 			super(fi.width, fi.height, 0);
 			this.indexMap = indexMap;
-			this.info = new ExtendedFileInfo[indexMap.length];
+			this.info = new ExtendedFileInfo[indexMap.size];
 			info[0] = fi;
+			this.fi = fi;
 
 			// Only support certain types
 			if (isSupported(fi.fileType))
@@ -238,10 +248,27 @@ public class SeriesImageSource extends ImageSource
 					}
 				}
 
-				// Set the number of images
-				size = indexMap.length;
-				bytesPerFrame = getBytesPerFrame(fi.fileType);
-				reader = new ImageReader(fi);
+				// Determine number of images
+				if (indexMap.size > 1)
+				{
+					if (singlePlane())
+						size = indexMap.size;
+				}
+				else
+				{
+					size = indexMap.size;
+					contiguous = true;
+				}
+				if (size != 0)
+				{
+					bytesPerFrame = getBytesPerFrame(fi.fileType);
+					reader = new ImageReader(fi);
+				}
+				else
+				{
+					canRead = false;
+					bytesPerFrame = 0;
+				}
 			}
 			else
 			{
@@ -330,6 +357,31 @@ public class SeriesImageSource extends ImageSource
 		{
 			return info.fileType == fi.fileType && info.width == fi.width && info.height == fi.height &&
 					info.nImages == 1;
+		}
+
+		/**
+		 * Check if the index map has only a single plane. This is all we support at the moment.
+		 *
+		 * @param indexMap2
+		 *            the index map 2
+		 * @return true, if successful
+		 */
+		private boolean singlePlane()
+		{
+			if (indexMap.getNChannels() > 1)
+				return false;
+
+			// XXX: Assume this is stage positions
+			if (indexMap.getNPositions() > 1)
+				return false;
+
+			// Only 1 of the following can be above 1
+			int z = indexMap.getNSlices();
+			int t = indexMap.getNFrames();
+			if (t > 1 && z > 1)
+				return false;
+
+			return true;
 		}
 
 		// TODO - Update this to use a buffered channel for faster read performance
@@ -1728,10 +1780,10 @@ public class SeriesImageSource extends ImageSource
 			{
 				// Ignore the pixels returned. This will throw if they are null.
 				lastImage.getFrame(0);
-				setDimensions(imageData[0].tiffImage.width, imageData[0].tiffImage.height);
+				setDimensions(lastImage.width, lastImage.height);
 
 				// Attempt to get the origin if a MicroManager image
-				Rectangle roi = FastTiffDecoder.getOrigin(imageData[0].tiffImage.info[0]);
+				Rectangle roi = FastTiffDecoder.getOrigin(((TiffImage) lastImage).info[0]);
 				if (roi != null && roi.width == getWidth() && roi.height == getHeight())
 					setOrigin(roi.x, roi.y);
 
@@ -2156,10 +2208,10 @@ public class SeriesImageSource extends ImageSource
 			td.setTrackProgress(trackProgress);
 
 			// Try and use the index map
-			IndexMapEntry[] indexMap = td.getIndexMap();
+			IndexMap indexMap = td.getIndexMap();
 
 			// Check the image map is the correct size (only if we have sizes)
-			if (indexMap != null && (imageSize == null || indexMap.length == getImageSize(id)))
+			if (indexMap != null && (imageSize == null || indexMap.size == getImageSize(id)))
 			{
 				// We need the first IFD to define the image pixel type and width/height
 				ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0);
@@ -2168,14 +2220,14 @@ public class SeriesImageSource extends ImageSource
 			}
 			else
 			{
+				// Reset after reading the index map
+				td.reset();
 				// Read all the IFDs
 				ExtendedFileInfo[] info = td.getTiffInfo();
 				if (info != null)
 				{
 					// A byte array seekable stream will ignore the close() method so we can re-use it 
 					tiffImage = new TiffImage(info, (ss instanceof ByteArraySeekableStream) ? ss : null);
-
-					storeTiffImage(id, tiffImage);
 				}
 			}
 		}
@@ -2192,6 +2244,10 @@ public class SeriesImageSource extends ImageSource
 			// Prevent reading again. Skip the storeTiffImage(...) method 
 			// as that may be optional and we don't want to repeat the error.
 			imageData[id].tiffImage = new TiffImage();
+		}
+		else
+		{
+			storeTiffImage(id, tiffImage);
 		}
 
 		return tiffImage;
