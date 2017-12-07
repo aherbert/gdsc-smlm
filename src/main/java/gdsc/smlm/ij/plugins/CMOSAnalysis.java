@@ -3,7 +3,6 @@ package gdsc.smlm.ij.plugins;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Collections;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +23,7 @@ import org.apache.commons.math3.stat.inference.TestUtils;
 import org.apache.commons.math3.util.MathArrays;
 
 import gdsc.core.data.IntegerType;
+import gdsc.core.generics.CloseableBlockingQueue;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
 import gdsc.core.math.ArrayMoment;
@@ -221,27 +221,17 @@ public class CMOSAnalysis implements PlugIn
 		}
 	}
 
-	private class ImageJob
-	{
-		Object data;
-
-		ImageJob(Object data)
-		{
-			this.data = data;
-		}
-	}
-
 	/**
 	 * Used to allow multi-threading of the scoring the filters
 	 */
 	private class ImageWorker implements Runnable
 	{
 		volatile boolean finished = false;
-		final BlockingQueue<ImageJob> jobs;
+		final BlockingQueue<Object> jobs;
 		final ArrayMoment moment;
 		int bitDepth = 0;
 
-		public ImageWorker(BlockingQueue<ImageJob> jobs, ArrayMoment moment)
+		public ImageWorker(BlockingQueue<Object> jobs, ArrayMoment moment)
 		{
 			this.jobs = jobs;
 			this.moment = moment.newInstance();
@@ -258,12 +248,12 @@ public class CMOSAnalysis implements PlugIn
 			{
 				while (true)
 				{
-					ImageJob job = jobs.take();
-					if (job == null || job.data == null)
+					Object pixels = jobs.take();
+					if (pixels == null)
 						break;
 					if (!finished)
 						// Only run jobs when not finished. This allows the queue to be emptied.
-						run(job);
+						run(pixels);
 				}
 			}
 			catch (InterruptedException e)
@@ -282,7 +272,7 @@ public class CMOSAnalysis implements PlugIn
 			}
 		}
 
-		private void run(ImageJob job)
+		private void run(Object pixels)
 		{
 			if (Utils.isInterrupted())
 			{
@@ -290,7 +280,6 @@ public class CMOSAnalysis implements PlugIn
 				return;
 			}
 			showProgress();
-			Object pixels = job.data;
 			if (bitDepth == 0)
 				bitDepth = Utils.getBitDepth(pixels);
 			// Most likely first
@@ -761,8 +750,13 @@ public class CMOSAnalysis implements PlugIn
 			}
 		};
 
-		// Create thread pool and workers
-		ExecutorService executor = Executors.newFixedThreadPool(getThreads());
+		// Create thread pool and workers. The system is likely to be IO limited 
+		// so reduce the computation threads to allow the reading thread in the 
+		// SeriesImageSource to run.
+		// If the images are small enough to fit into memory then 3 threads are used, 
+		// otherwise it is 1.
+		int nThreads = Math.max(1, getThreads() - 3);
+		ExecutorService executor = Executors.newFixedThreadPool(nThreads);
 		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
 		TurboList<ImageWorker> workers = new TurboList<ImageWorker>(nThreads);
 
@@ -862,7 +856,7 @@ public class CMOSAnalysis implements PlugIn
 						moment = new SimpleArrayMoment();
 				}
 
-				final BlockingQueue<ImageJob> jobs = new ArrayBlockingQueue<ImageJob>(nThreads * 2);
+				final CloseableBlockingQueue<Object> jobs = new CloseableBlockingQueue<Object>(nThreads * 2);
 				for (int i = 0; i < nThreads; i++)
 				{
 					final ImageWorker worker = new ImageWorker(jobs, moment);
@@ -885,13 +879,14 @@ public class CMOSAnalysis implements PlugIn
 						lastTime = time;
 						statusLine.setText("Analysing " + sd.name + " Frame " + source.getStartFrameNumber());
 					}
-					put(jobs, new ImageJob(pixels));
+					put(jobs, pixels);
 				}
 				source.close();
 
 				if (error)
 				{
 					// Kill the workers
+					jobs.close(true);
 					for (int t = futures.size(); t-- > 0;)
 					{
 						try
@@ -909,10 +904,7 @@ public class CMOSAnalysis implements PlugIn
 				}
 
 				// Finish all the worker threads by passing in a null job
-				for (int i = 0; i < nThreads; i++)
-				{
-					put(jobs, new ImageJob(null));
-				}
+				jobs.close(false);
 
 				// Wait for all to finish
 				for (int t = futures.size(); t-- > 0;)
