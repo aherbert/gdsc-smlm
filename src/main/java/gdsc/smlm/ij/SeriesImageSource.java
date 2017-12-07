@@ -27,6 +27,8 @@ import ij.io.ExtendedFileInfo;
 import ij.io.FastTiffDecoder;
 import ij.io.FastTiffDecoder.IndexMap;
 import ij.io.FastTiffDecoder.NumberOfImages;
+import ij.io.FastTiffDecoderBE;
+import ij.io.FastTiffDecoderLE;
 import ij.io.FileInfo;
 import ij.io.FileSeekableStream;
 import ij.io.ImageReader;
@@ -1622,10 +1624,15 @@ public class SeriesImageSource extends ImageSource
 		// First check it is a possible TIFF:
 		// Little-endian = II + 42 magic number
 		// Big-endian = MM + 42 magic number
-		boolean litteEndian = (b0 == 73 && b1 == 73 && b2 == 42 && b3 == 0);
+		boolean littleEndian = (b0 == 73 && b1 == 73 && b2 == 42 && b3 == 0);
 		boolean bigEndian = (b0 == 77 && b1 == 77 && b2 == 0 && b3 == 42);
-		if (!(litteEndian || bigEndian))
+		if (!(littleEndian || bigEndian))
 			return Opener.UNKNOWN;
+
+		// Check for OME-TIFF header
+		// https://micro-manager.org/wiki/Micro-Manager_File_Formats
+		if (read > 35 && isOMETIFF(buf, littleEndian))
+			return Opener.TIFF;
 
 		// Rules out unsupported TIFF types
 
@@ -1639,10 +1646,47 @@ public class SeriesImageSource extends ImageSource
 			return Opener.UNKNOWN; // The LSM Reader plugin opens these files
 
 		// This is only for little endian
-		if (litteEndian && name.endsWith(".flex"))
+		if (littleEndian && name.endsWith(".flex"))
 			return Opener.UNKNOWN;
 
 		return Opener.TIFF;
+	}
+
+	private boolean isOMETIFF(byte[] buf, boolean littleEndian)
+	{
+		int b8 = buf[8] & 255;
+		int b9 = buf[9] & 255;
+		int b10 = buf[10] & 255;
+		int b11 = buf[11] & 255;
+		int indexMapOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b8, b9, b10, b11)
+				: FastTiffDecoderBE.toInt(b8, b9, b10, b11);
+		if (indexMapOffsetHeader != 54773648)
+			return false;
+		int b16 = buf[16] & 255;
+		int b17 = buf[17] & 255;
+		int b18 = buf[18] & 255;
+		int b19 = buf[19] & 255;
+		int displaySettingsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b16, b17, b18, b19)
+				: FastTiffDecoderBE.toInt(b16, b17, b18, b19);
+		if (displaySettingsOffsetHeader != 483765892)
+			return false;
+		int b24 = buf[24] & 255;
+		int b25 = buf[25] & 255;
+		int b26 = buf[26] & 255;
+		int b27 = buf[27] & 255;
+		int commentsOffsetHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b24, b25, b26, b27)
+				: FastTiffDecoderBE.toInt(b24, b25, b26, b27);
+		if (commentsOffsetHeader != 99384722)
+			return false;
+		int b32 = buf[32] & 255;
+		int b33 = buf[33] & 255;
+		int b34 = buf[34] & 255;
+		int b35 = buf[35] & 255;
+		int summaryMetadataHeader = (littleEndian) ? FastTiffDecoderLE.toInt(b32, b33, b34, b35)
+				: FastTiffDecoderBE.toInt(b32, b33, b34, b35);
+		if (summaryMetadataHeader != 2355492)
+			return false;
+		return true;
 	}
 
 	/**
