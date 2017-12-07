@@ -423,13 +423,15 @@ public class SeriesImageSource extends ImageSource
 				// Adapted from ij.io.Opener.openTiffStack(...)
 
 				// Each image offset is described by a separate ExtendedFileInfo object
-				skip = info[frameCount].getOffset();
-				fi.stripOffsets = info[frameCount].stripOffsets;
-				fi.stripLengths = info[frameCount].stripLengths;
+				ExtendedFileInfo fi = getInfo(frameCount); 
+				skip = fi.getOffset();
+				fi.stripOffsets = fi.stripOffsets;
+				fi.stripLengths = fi.stripLengths;
 
 				if (frameCount != 0)
 				{
 					// We must subtract the current file location.
+					// Assume the previous one is there as this is a sequential read
 					skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
 					if (skip < 0L)
 					{
@@ -531,7 +533,7 @@ public class SeriesImageSource extends ImageSource
 			return pixels;
 		}
 
-		private FileInfo getInfo(int i) throws NullPointerException, IOException
+		private ExtendedFileInfo getInfo(int i) throws NullPointerException, IOException
 		{
 			if (info[i] != null)
 				return info[i];
@@ -771,7 +773,15 @@ public class SeriesImageSource extends ImageSource
 						// Also re-read if the image was opened using an index map as 
 						// the tiff info may be incomplete.
 						// This will always be the case
-						// for the first image as that is opened in openSource().						
+						// for the first image as that is opened in openSource().
+						
+						// TODO - Check if this is necessary
+						// Reading the info can be done by the TiffImage dynamically
+						// using a dedicated Tiff decoder.
+						// Test which is faster when processing a big stack. 
+						// Dynamically reading will not experience a big pause when
+						// all IFDs are read on a large image (e.g. 5000 frames).						
+						
 						trackProgress.log("Reading TIFF info %s", path);
 						image.readTiffInfo(null);
 					}
@@ -1640,7 +1650,6 @@ public class SeriesImageSource extends ImageSource
 		if (read > 131 && buf[128] == 68 && buf[129] == 73 && buf[130] == 67 && buf[131] == 77)
 			return Opener.TIFF_AND_DICOM;
 
-		// Big-endian TIFF ("MM")
 		String name = file.getName();
 		if (name.endsWith(".lsm"))
 			return Opener.UNKNOWN; // The LSM Reader plugin opens these files
