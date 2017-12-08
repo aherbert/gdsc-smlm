@@ -264,14 +264,12 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			{
 				for (int i = 1; i <= size; i += nImages)
 				{
+					if (Utils.isInterrupted())
+						break;
 					if (i > next)
 					{
 						progressBar.show(i, size);
 						next += step;
-					}
-					if (Utils.isInterrupted())
-					{
-						break;
 					}
 					String path = String.format(format, i);
 					//System.out.println(path);
