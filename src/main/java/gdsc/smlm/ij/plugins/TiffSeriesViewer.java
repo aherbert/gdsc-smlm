@@ -5,7 +5,13 @@ import java.awt.Font;
 import java.awt.Label;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -30,12 +36,15 @@ import gdsc.smlm.results.ImageSource.ReadHint;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.Prefs;
 import ij.VirtualStack;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
+import ij.gui.ProgressBar;
 import ij.io.ExtendedFileInfo;
 import ij.io.FileInfo;
+import ij.io.TiffEncoder;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
@@ -52,6 +61,10 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	private static String inputDirectory = Prefs.get(Constants.tiffSeriesDirectory, "");
 	private static String inputFile = Prefs.get(Constants.tiffSeriesFile, "");
 	private static boolean logProgress = Prefs.getBoolean(Constants.tiffSeriesLogProgress, false);
+	private static final String[] OUTPUT_MODE = { "Image", "Files" };
+	private static int outputMode = (int) Prefs.get(Constants.tiffSeriesOutputMode, 0);
+	private static int nImages = (int) Prefs.get(Constants.tiffSeriesOutputNImages, 1);
+	private static String outputDirectory = Prefs.get(Constants.tiffSeriesOutputDirectory, "");
 
 	private Label label;
 
@@ -64,32 +77,55 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Mode", MODE, inputMode, new OptionListener<Integer>()
 		{
 			public boolean collectOptions(Integer value)
 			{
 				inputMode = value;
-				return collectOptions(inputMode);
+				return collectOptions(false);
 			}
 
 			public boolean collectOptions()
 			{
-				return collectOptions(inputMode);
+				return collectOptions(true);
 			}
 
-			private boolean collectOptions(int mode)
+			private boolean collectOptions(boolean silent)
 			{
-				if (mode == 0)
+				// This has limited silent support to fake running in a macro
+				if (inputMode == 0)
 				{
-					String dir = Utils.getDirectory("Select image series ...", inputDirectory);
+					String dir = null;
+					String title = "Select image series ...";
+					if (silent)
+					{
+						String macroOptions = Macro.getOptions();
+						if (macroOptions != null)
+							dir = Macro.getValue(macroOptions, title, null);
+					}
+					else
+					{
+						dir = Utils.getDirectory(title, inputDirectory);
+					}
 					if (TextUtils.isNullOrEmpty(dir))
 						return false;
 					inputDirectory = dir;
 				}
 				else
 				{
-					String file = Utils.getFilename("Select image ...", inputFile);
+					String file = null;
+					String title = "Select image ...";
+					if (silent)
+					{
+						String macroOptions = Macro.getOptions();
+						if (macroOptions != null)
+							file = Macro.getValue(macroOptions, title, null);
+					}
+					else
+					{
+						file = Utils.getFilename(title, inputFile);
+					}
 					if (TextUtils.isNullOrEmpty(file))
 						return false;
 					inputFile = file;
@@ -114,17 +150,56 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			updateLabel();
 		}
 		gd.addCheckbox("Log_progress", logProgress);
+		gd.addChoice("Output_mode", OUTPUT_MODE, outputMode, new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				outputMode = value;
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				if (outputMode == 0)
+				{
+					// Nothing to do
+					return false;
+				}
+				else
+				{
+					ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
+					egd.addNumericField("Slices_per_image", nImages, 0);
+					egd.addDirectoryField("Output_directory", outputDirectory);
+					egd.setSilent(silent);
+					egd.showDialog(true, gd);
+					if (egd.wasCanceled())
+						return false;
+					nImages = (int) egd.getNextNumber();
+					outputDirectory = egd.getNextString();
+					return true;
+				}
+			}
+		});
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 
 		inputMode = gd.getNextChoiceIndex();
 		logProgress = gd.getNextBoolean();
+		outputMode = gd.getNextChoiceIndex();
 
 		Prefs.set(Constants.tiffSeriesMode, inputMode);
 		Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
 		Prefs.set(Constants.tiffSeriesFile, inputFile);
 		Prefs.set(Constants.tiffSeriesLogProgress, logProgress);
+		Prefs.set(Constants.tiffSeriesOutputMode, outputMode);
+		Prefs.set(Constants.tiffSeriesOutputNImages, nImages);
+		Prefs.set(Constants.tiffSeriesOutputDirectory, outputDirectory);
 
 		SeriesImageSource source;
 		if (inputMode == 0)
@@ -160,8 +235,98 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		}
 		Utils.showStatus("");
 
-		// Q. Can we create a virtual stack?
-		new TiffSeriesVirtualStack(source).show();
+		// Create a virtual stack
+		TiffSeriesVirtualStack stack = new TiffSeriesVirtualStack(source);
+		if (outputMode == 0)
+		{
+			stack.show();
+		}
+		else
+		{
+			int nImages = Math.max(1, TiffSeriesViewer.nImages);
+			ImagePlus imp = stack.createImp();
+			// The calibration only has the offset so ignore for speed.
+			//Calibration cal = imp.getCalibration();
+			int size = stack.getSize();
+
+			// Create the format string
+			int digits = String.format("%d", size).length();
+			String format = new File(outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif").getPath();
+
+			IJ.showStatus("Saving image ...");
+			Utils.setShowStatus(false);
+			Utils.setShowProgress(false);
+			ProgressBar progressBar = Utils.getProgressBar();
+			progressBar.show(0);
+			int step = Utils.getProgressInterval(size);
+			int next = step;
+			try
+			{
+				for (int i = 1; i <= size; i += nImages)
+				{
+					if (i > next)
+					{
+						progressBar.show(i, size);
+						next += step;
+					}
+					if (Utils.isInterrupted())
+					{
+						break;
+					}
+					String path = String.format(format, i);
+					//System.out.println(path);
+					ImageStack out = new ImageStack(source.getWidth(), source.getHeight());
+					for (int j = 0, k = i; j < nImages && k <= size; j++, k++)
+					{
+						out.addSlice(null, stack.getPixels(k));
+					}
+					ImagePlus outImp = new ImagePlus(path, out);
+					//outImp.setCalibration(cal);
+					saveAsTiff(outImp, path);
+				}
+			}
+			catch (IOException e)
+			{
+				IJ.log(ExceptionUtils.getStackTrace(e));
+				IJ.error(TITLE, "Failed to save image: " + e.getMessage());
+				IJ.showStatus("Failed to save image");
+				return;
+			}
+			finally
+			{
+				Utils.setShowStatus(true);
+				Utils.setShowProgress(true);
+				progressBar.show(1);
+			}
+			IJ.showStatus("Saved image");
+		}
+	}
+
+	private void saveAsTiff(ImagePlus imp, String path) throws IOException
+	{
+		IJ.saveAsTiff(imp, path);
+
+		FileInfo fi = imp.getFileInfo();
+		fi.nImages = imp.getStackSize();
+		DataOutputStream out = null;
+		try
+		{
+			TiffEncoder file = new TiffEncoder(fi);
+			out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
+			file.write(out);
+			out.close();
+		}
+		finally
+		{
+			if (out != null)
+				try
+				{
+					out.close();
+				}
+				catch (IOException e)
+				{
+				}
+		}
 	}
 
 	private void updateLabel()
@@ -199,6 +364,18 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		}
 
 		/**
+		 * Wrap the series in a ImagePlus object.
+		 *
+		 * @return the image plus
+		 */
+		public ImagePlus createImp()
+		{
+			ImagePlus imp = new ImagePlus(source.getName(), this);
+			addInfo(imp);
+			return imp;
+		}
+
+		/**
 		 * Show the series in a ImagePlus object.
 		 *
 		 * @return the image plus
@@ -206,9 +383,17 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		public ImagePlus show()
 		{
 			ImagePlus imp = Utils.display(source.getName(), this);
+			addInfo(imp);
+			return imp;
+		}
+
+		private void addInfo(ImagePlus imp)
+		{
 			// So the FileSaver can save the stack make sure the FileInfo is not null
-			FileInfo fi = new FileInfo();
-			imp.setFileInfo(fi);
+			//FileInfo fi = new FileInfo();
+			//imp.setFileInfo(fi);
+			imp.getFileInfo();
+
 			// Get metadata from the source
 			ExtendedFileInfo[] fileInfo = source.getFileInfo(0);
 			if (fileInfo != null && fileInfo[0] != null)
@@ -225,7 +410,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 				cal.xOrigin = -source.getXOrigin();
 				cal.yOrigin = -source.getYOrigin();
 			}
-			return imp;
 		}
 
 		/**
