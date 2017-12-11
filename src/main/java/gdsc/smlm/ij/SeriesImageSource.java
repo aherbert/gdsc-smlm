@@ -29,7 +29,7 @@ import ij.io.FastTiffDecoder.NumberOfImages;
 import ij.io.FastTiffDecoderBE;
 import ij.io.FastTiffDecoderLE;
 import ij.io.FileSeekableStream;
-import ij.io.ImageReader;
+import ij.io.FastImageReader;
 import ij.io.Opener;
 import ij.io.SeekableStream;
 
@@ -132,10 +132,10 @@ public class SeriesImageSource extends ImageSource
 	{
 		final IndexMap indexMap;
 		final ExtendedFileInfo[] info;
-		final ExtendedFileInfo fi; // Pointer to the file info used by the ImageReader
+		final ExtendedFileInfo fi; // Pointer to the file info used by the FastImageReader
 		final long bytesPerFrame;
 		boolean contiguous;
-		ImageReader reader = null;
+		FastImageReader reader = null;
 		/**
 		 * A reference to a seekable stream which may be buffered in memory.
 		 */
@@ -194,7 +194,7 @@ public class SeriesImageSource extends ImageSource
 				if (size != 0)
 				{
 					bytesPerFrame = getBytesPerFrame(fi.fileType);
-					reader = new ImageReader(fi);
+					reader = new FastImageReader(fi);
 				}
 				else
 				{
@@ -261,7 +261,7 @@ public class SeriesImageSource extends ImageSource
 				if (size != 0)
 				{
 					bytesPerFrame = getBytesPerFrame(fi.fileType);
-					reader = new ImageReader(fi);
+					reader = new FastImageReader(fi);
 				}
 				else
 				{
@@ -440,11 +440,14 @@ public class SeriesImageSource extends ImageSource
 			ss.skip(skip);
 			Object pixels = reader.readPixels(ss, 0);
 			//.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
-			if (pixels == null)
-			{
-				canRead = false;
-				throw new DataException("Unable to read pixels");
-			}
+
+			// The reader now throws exceptions. Ignore setting the canRead flag. 
+			// The sequential series will just shutdown.
+			//if (pixels == null)
+			//{
+			//	canRead = false;
+			//	throw new DataException("Unable to read pixels");
+			//}
 			return pixels;
 		}
 
@@ -484,16 +487,22 @@ public class SeriesImageSource extends ImageSource
 			// Store the number of frames that have been read
 			frameCount = i + 1;
 
-			//long t = System.nanoTime();
-			ss.seek(offset);
-			Object pixels = reader.readPixels(ss, 0);
-			//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
-			if (pixels == null)
+			try
 			{
-				canRead = false;
-				throw new DataException("Unable to read pixels");
+				//long t = System.nanoTime();
+				ss.seek(offset);
+				Object pixels = reader.readPixels(ss, 0);
+				//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
+				return pixels;
 			}
-			return pixels;
+			catch (IOException e)
+			{
+				// The reader now throws exceptions. We could set the canRead flag to prevent further IO.
+				// However do not do this so that an image can be scrolled up to the point at which 
+				// it cannot be read (e.g. in the case of TIFF file truncation during sequential writing). 
+				//canRead = false;
+				throw e;
+			}
 		}
 
 		private ExtendedFileInfo getInfo(int i) throws NullPointerException, IOException
@@ -860,8 +869,7 @@ public class SeriesImageSource extends ImageSource
 					// We already know they fit into memory (i.e. the size is not zero)
 					int size = (int) imageData[currentImage].fileSize;
 					byte[] buf = new byte[size];
-					int read = fs.readFully(buf);
-					if (read != size)
+					if (fs.readBytes(buf) != size)
 					{
 						setError(new DataException("Cannot buffer file into memory"));
 						break;
@@ -1266,8 +1274,7 @@ public class SeriesImageSource extends ImageSource
 			if (fs != null)
 			{
 				byte[] buf = new byte[(int) size];
-				int read = fs.readFully(buf);
-				if (read == size)
+				if (fs.readBytes(buf) == size)
 					return new ByteArraySeekableStream(buf);
 			}
 		}
