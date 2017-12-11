@@ -865,6 +865,7 @@ public class SeriesImageSource extends ImageSource
 
 					trackProgress.log("Reading TIFF into memory %s", path);
 
+					//long start = System.nanoTime();
 					File file = new File(path);
 					fs = new FileSeekableStream(file);
 
@@ -885,6 +886,7 @@ public class SeriesImageSource extends ImageSource
 						// Prevent another close attempt
 						fs = null;
 					}
+					//System.out.printf("Read %d\n", (System.nanoTime() - start) / 1000000);
 
 					// This may be closed upon error
 					if (!decodeQueue.putAndConfirm(new NextSource(buf, currentImage)))
