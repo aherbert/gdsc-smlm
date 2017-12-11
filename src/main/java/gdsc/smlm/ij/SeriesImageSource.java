@@ -2144,34 +2144,31 @@ public class SeriesImageSource extends ImageSource
 			if (id < images.size())
 			{
 				String path = images.get(id);
-				if (isTiffSeries)
+				// Check the cache
+				TiffImage tiffImage = imageData[id].tiffImage;
+				if (tiffImage == null)
 				{
-					// Check the cache
-					TiffImage tiffImage = imageData[id].tiffImage;
-					if (tiffImage == null)
-					{
-						tiffImage = openImage(id, path);
-					}
-
-					lastImage = tiffImage;
-
-					//try
-					//{
-					//	if (lastImage == null || lastImage.getSize() == 0)
-					//	{
-					//		// Not supported - Fall back to IJ objects
-					//		ImagePlus imp = IJ.openImage(path);
-					//		if (imp != null)
-					//		{
-					//			lastImage = new ArrayImage(imp);
-					//		}
-					//	}
-					//}
-					//catch (Throwable e)
-					//{
-					//	System.out.println(e.toString()); e.printStackTrace();
-					//}
+					tiffImage = openImage(id, path);
 				}
+
+				lastImage = tiffImage;
+
+				//try
+				//{
+				//	if (lastImage == null || lastImage.getSize() == 0)
+				//	{
+				//		// Not supported - Fall back to IJ objects
+				//		ImagePlus imp = IJ.openImage(path);
+				//		if (imp != null)
+				//		{
+				//			lastImage = new ArrayImage(imp);
+				//		}
+				//	}
+				//}
+				//catch (Throwable e)
+				//{
+				//	System.out.println(e.toString()); e.printStackTrace();
+				//}
 			}
 		}
 		lastImageId = id;
