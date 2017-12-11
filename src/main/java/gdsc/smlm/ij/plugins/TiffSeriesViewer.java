@@ -319,7 +319,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 
 	private void saveAsTiff(ImagePlus imp, String path) throws IOException
 	{
-		IJ.saveAsTiff(imp, path);
+		//IJ.saveAsTiff(imp, path);
 
 		FileInfo fi = imp.getFileInfo();
 		fi.nImages = imp.getStackSize();
