@@ -438,7 +438,7 @@ public class SeriesImageSource extends ImageSource
 
 			// t = System.nanoTime();
 			ss.skip(skip);
-			Object pixels = reader.readPixels(ss, 0);
+			Object pixels = readPixels();
 			//.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 
 			// The reader now throws exceptions. Ignore setting the canRead flag. 
@@ -449,6 +449,13 @@ public class SeriesImageSource extends ImageSource
 			//	throw new DataException("Unable to read pixels");
 			//}
 			return pixels;
+		}
+
+		private Object readPixels() throws IOException
+		{
+			if (inMemory)
+				return reader.readPixels((ByteArraySeekableStream) ss, 0);
+			return reader.readPixels(ss, 0);
 		}
 
 		@Override
@@ -491,7 +498,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				//long t = System.nanoTime();
 				ss.seek(offset);
-				Object pixels = reader.readPixels(ss, 0);
+				Object pixels = readPixels();
 				//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 				return pixels;
 			}
@@ -560,9 +567,14 @@ public class SeriesImageSource extends ImageSource
 		{
 			if (canRead && ss == null)
 			{
+				if (inMemory)
+					throw new IllegalStateException("No input file required for in-memory image");
+
 				try
 				{
-					ss = createInputStream(fi);
+					File f = getFile();
+					if (validateFileInfo(f, fi))
+						ss = new FileSeekableStream(f);
 				}
 				finally
 				{
@@ -573,18 +585,6 @@ public class SeriesImageSource extends ImageSource
 				}
 			}
 			return canRead;
-		}
-
-		/** Returns an InputStream for the image described by this ExtendedFileInfo. */
-		public SeekableStream createInputStream(ExtendedFileInfo fi) throws IOException
-		{
-			if (inMemory)
-				throw new IllegalStateException("No input file for in-memory image");
-
-			File f = getFile();
-			if (validateFileInfo(f, fi))
-				return new FileSeekableStream(f);
-			return null;
 		}
 
 		public File getFile()
@@ -642,6 +642,8 @@ public class SeriesImageSource extends ImageSource
 		@Override
 		synchronized public void close(boolean freeResources)
 		{
+			frameCount = 0;
+
 			// This is done when sequentially reading so we clear the memory
 			inMemory = false;
 
@@ -988,6 +990,7 @@ public class SeriesImageSource extends ImageSource
 					{
 						// Update to be in-memory. This will be used when reading the TIFF.
 						// It will subsequently be closed to free-memory.
+						image.close(true);
 						image.inMemory = true;
 						image.ss = ss;
 						image.td = null;
