@@ -1576,10 +1576,10 @@ public class SeriesImageSource extends ImageSource
 		if (!(littleEndian || bigEndian))
 			return Opener.UNKNOWN;
 
-		// Check for OME-TIFF header
+		// Check for OME-TIFF header. This is actually slower than a few endsWith(...) checks.
 		// https://micro-manager.org/wiki/Micro-Manager_File_Formats
-		if (read > 35 && isOMETIFF(buf, littleEndian))
-			return Opener.TIFF;
+		//if (read > 35 && isOMETIFF(buf, littleEndian))
+		//	return Opener.TIFF;
 
 		// Rules out unsupported TIFF types
 
@@ -1598,6 +1598,7 @@ public class SeriesImageSource extends ImageSource
 		return Opener.TIFF;
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isOMETIFF(byte[] buf, boolean littleEndian)
 	{
 		int b8 = buf[8] & 255;
