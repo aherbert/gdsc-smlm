@@ -21,7 +21,6 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.logging.TrackProgress;
 import gdsc.smlm.results.ImageSource;
 import ij.ImagePlus;
-import ij.Prefs;
 import ij.io.ByteArraySeekableStream;
 import ij.io.ExtendedFileInfo;
 import ij.io.FastTiffDecoder;
@@ -137,8 +136,6 @@ public class SeriesImageSource extends ImageSource
 		final long bytesPerFrame;
 		boolean contiguous;
 		ImageReader reader = null;
-		// The input stream to read the pixel data.
-		InputStream is = null;
 		/**
 		 * A reference to a seekable stream which may be buffered in memory.
 		 */
@@ -174,7 +171,6 @@ public class SeriesImageSource extends ImageSource
 					{
 						ss.seek(0);
 						this.ss = ss;
-						is = ss;
 
 						// Store if the stream contains in-memory data						
 						this.inMemory = ss instanceof ByteArraySeekableStream;
@@ -242,7 +238,6 @@ public class SeriesImageSource extends ImageSource
 					{
 						ss.seek(0);
 						this.ss = ss;
-						is = ss;
 
 						// Store if the stream contains in-memory data						
 						this.inMemory = ss instanceof ByteArraySeekableStream;
@@ -372,17 +367,15 @@ public class SeriesImageSource extends ImageSource
 		 */
 		private boolean singlePlane()
 		{
-			if (indexMap.getNChannels() > 1)
+			if (!indexMap.isSingleChannel())
 				return false;
 
 			// Assume this is stage positions
-			if (indexMap.getNPositions() > 1)
+			if (!indexMap.isSinglePosition())
 				return false;
 
 			// Only 1 of the following can be above 1
-			int z = indexMap.getNSlices();
-			int t = indexMap.getNFrames();
-			if (t > 1 && z > 1)
+			if (!indexMap.isSingleFrame() && !indexMap.isSingleSlice())
 				return false;
 
 			return true;
@@ -444,7 +437,8 @@ public class SeriesImageSource extends ImageSource
 			frameCount++;
 
 			// t = System.nanoTime();
-			Object pixels = reader.readPixels(is, skip);
+			ss.skip(skip);
+			Object pixels = reader.readPixels(ss, 0);
 			//.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 			if (pixels == null)
 			{
@@ -457,43 +451,23 @@ public class SeriesImageSource extends ImageSource
 		@Override
 		synchronized Object getFrame(int i) throws Exception
 		{
-			if (i < frameCount)
-			{
-				// Close will either seek to the start or free resources of a standard input stream.
-				// Non-sequential access has poor support for a standard input stream as we just 
-				// have to re-open the file from the beginning again.
-				close(false);
-			}
-
 			if (!openInputStream())
 				throw new IllegalStateException("Cannot read the TIFF image");
 
 			// Skip ahead
-			long skip;
+			long offset;
 
 			if (contiguous)
 			{
 				// Read using the first ExtendedFileInfo object
 
-				if (i == 0)
-				{
-					// The first frame we know the exact offset
-					skip = fi.getOffset();
-				}
-				else if (i == frameCount)
-				{
-					// If sequential reading just skip the gap between frames
-					skip = fi.gapBetweenImages;
-				}
-				else
-				{
-					// Skipping ahead
-					int nFrames = i - frameCount;
-					skip = (bytesPerFrame + fi.gapBetweenImages) * nFrames;
+				// The first frame we know the exact offset
+				offset = fi.getOffset();
 
-					// Ensure we skip to the start position if nothing has been read
-					if (frameCount == 0)
-						skip += fi.getOffset();
+				if (i != 0)
+				{
+					// Skip ahead
+					offset += (bytesPerFrame + fi.gapBetweenImages) * i;
 				}
 			}
 			else
@@ -502,27 +476,17 @@ public class SeriesImageSource extends ImageSource
 
 				// Each image offset is described by a separate ExtendedFileInfo object
 				// We may have to read it first.
-				skip = getInfo(i).getOffset();
+				offset = getInfo(i).getOffset();
 				fi.stripOffsets = info[i].stripOffsets;
 				fi.stripLengths = info[i].stripLengths;
-
-				if (frameCount != 0)
-				{
-					// We must subtract the current file location.
-					skip -= (info[frameCount - 1].getOffset() + bytesPerFrame);
-					if (skip < 0L)
-					{
-						canRead = false;
-						throw new IllegalStateException("Bad TIFF offset " + skip);
-					}
-				}
 			}
 
 			// Store the number of frames that have been read
 			frameCount = i + 1;
 
 			//long t = System.nanoTime();
-			Object pixels = reader.readPixels(is, skip);
+			ss.seek(offset);
+			Object pixels = reader.readPixels(ss, 0);
 			//System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 			if (pixels == null)
 			{
@@ -585,15 +549,15 @@ public class SeriesImageSource extends ImageSource
 
 		public boolean openInputStream() throws IOException
 		{
-			if (canRead && is == null)
+			if (canRead && ss == null)
 			{
 				try
 				{
-					is = createInputStream(fi);
+					ss = createInputStream(fi);
 				}
 				finally
 				{
-					if (is == null)
+					if (ss == null)
 					{
 						canRead = false;
 					}
@@ -603,20 +567,15 @@ public class SeriesImageSource extends ImageSource
 		}
 
 		/** Returns an InputStream for the image described by this ExtendedFileInfo. */
-		public FileInputStream createInputStream(ExtendedFileInfo fi) throws IOException
+		public SeekableStream createInputStream(ExtendedFileInfo fi) throws IOException
 		{
 			if (inMemory)
 				throw new IllegalStateException("No input file for in-memory image");
 
-			FileInputStream is = null;
-			if (fi.directory.length() > 0 && !fi.directory.endsWith(Prefs.separator))
-				fi.directory += Prefs.separator;
-			File f = new File(fi.directory + fi.fileName);
-			if (f == null || !f.exists() || f.isDirectory() || !validateFileInfo(f, fi))
-				is = null;
-			else
-				is = new FileInputStream(f);
-			return is;
+			File f = getFile();
+			if (validateFileInfo(f, fi))
+				return new FileSeekableStream(f);
+			return null;
 		}
 
 		public File getFile()
@@ -657,66 +616,53 @@ public class SeriesImageSource extends ImageSource
 			return true;
 		}
 
-		public void reset()
+		/**
+		 * Reset for sequential reading.
+		 * 
+		 * @throws IOException
+		 */
+		public void reset() throws IOException
 		{
-			if (frameCount != 0)
-				close(false);
+			frameCount = 0;
+			if (ss != null)
+				ss.seek(0);
+			else
+				openInputStream();
 		}
 
 		@Override
 		synchronized public void close(boolean freeResources)
 		{
-			// Reset
-			frameCount = 0;
-
-			if (ss != null && !freeResources)
-			{
-				// We can seek to the start
-				try
-				{
-					ss.seek(0);
-					return;
-				}
-				catch (IOException e)
-				{
-					// Fall through to close the resources
-				}
-			}
-
 			// This is done when sequentially reading so we clear the memory
 			inMemory = false;
-			ss = null;
 
 			// The dedicated tiff decoder is used for reading IFDs
-			if (freeResources)
-			{
-				if (td != null)
-				{
-					try
-					{
-						td.close();
-					}
-					catch (IOException e)
-					{
-						// Ignore
-					}
-					// Reset
-					td = null;
-				}
-			}
-
-			if (is != null)
+			if (td != null)
 			{
 				try
 				{
-					is.close();
+					td.close();
 				}
 				catch (IOException e)
 				{
 					// Ignore
 				}
 				// Reset
-				is = null;
+				td = null;
+			}
+
+			if (ss != null)
+			{
+				try
+				{
+					ss.close();
+				}
+				catch (IOException e)
+				{
+					// Ignore
+				}
+				// Reset
+				ss = null;
 			}
 		}
 	}
@@ -815,7 +761,6 @@ public class SeriesImageSource extends ImageSource
 					trackProgress.log("Reading TIFF %s", path);
 
 					image.reset();
-					image.openInputStream();
 
 					try
 					{
@@ -898,7 +843,7 @@ public class SeriesImageSource extends ImageSource
 		 */
 		public void run()
 		{
-			FileInputStream fis = null;
+			FileSeekableStream fs = null;
 
 			// All exceptions are caught so that the queue can be shutdown correctly
 			try
@@ -910,12 +855,12 @@ public class SeriesImageSource extends ImageSource
 					trackProgress.log("Reading TIFF into memory %s", path);
 
 					File file = new File(path);
-					fis = openStream(file);
+					fs = new FileSeekableStream(file);
 
 					// We already know they fit into memory (i.e. the size is not zero)
 					int size = (int) imageData[currentImage].fileSize;
 					byte[] buf = new byte[size];
-					int read = fis.read(buf);
+					int read = fs.readFully(buf);
 					if (read != size)
 					{
 						setError(new DataException("Cannot buffer file into memory"));
@@ -923,12 +868,12 @@ public class SeriesImageSource extends ImageSource
 					}
 					try
 					{
-						fis.close();
+						fs.close();
 					}
 					finally
 					{
 						// Prevent another close attempt
-						fis = null;
+						fs = null;
 					}
 
 					// This may be closed upon error
@@ -946,7 +891,7 @@ public class SeriesImageSource extends ImageSource
 			}
 			finally
 			{
-				closeInputStream(fis);
+				closeInputStream(fs);
 			}
 
 			if (error != null)
@@ -1037,7 +982,7 @@ public class SeriesImageSource extends ImageSource
 						// It will subsequently be closed to free-memory.
 						image.inMemory = true;
 						image.ss = ss;
-						image.is = ss;
+						image.td = null;
 					}
 
 					//nextSource.setFileInfo(info);
@@ -1094,7 +1039,6 @@ public class SeriesImageSource extends ImageSource
 					TiffImage image = (TiffImage) nextSource.image;
 
 					image.reset();
-					image.openInputStream();
 
 					try
 					{
@@ -1315,14 +1259,14 @@ public class SeriesImageSource extends ImageSource
 
 	private SeekableStream readByteArraySeekableStream(File file, long size)
 	{
-		FileInputStream fis = null;
+		FileSeekableStream fs = null;
 		try
 		{
-			fis = openStream(file);
-			if (fis != null)
+			fs = new FileSeekableStream(file);
+			if (fs != null)
 			{
 				byte[] buf = new byte[(int) size];
-				int read = fis.read(buf);
+				int read = fs.readFully(buf);
 				if (read == size)
 					return new ByteArraySeekableStream(buf);
 			}
@@ -1336,14 +1280,9 @@ public class SeriesImageSource extends ImageSource
 		}
 		finally
 		{
-			closeInputStream(fis);
+			closeInputStream(fs);
 		}
 		return null;
-	}
-
-	private static FileInputStream openStream(File file) throws FileNotFoundException, SecurityException
-	{
-		return new FileInputStream(file);
 	}
 
 	// Note:
