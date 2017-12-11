@@ -66,7 +66,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	private static int nImages = (int) Prefs.get(Constants.tiffSeriesOutputNImages, 1);
 	private static String outputDirectory = Prefs.get(Constants.tiffSeriesOutputDirectory, "");
 
-	private Label label;
+	private Label label, label2;
 
 	/*
 	 * (non-Javadoc)
@@ -181,10 +181,27 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 						return false;
 					nImages = (int) egd.getNextNumber();
 					outputDirectory = egd.getNextString();
+					updateLabel2();				
 					return true;
 				}
 			}
 		});
+		gd.addMessage("");
+		label2 = gd.getLastLabel();
+		if (Utils.isShowGenericDialog())
+		{
+			final Choice choice = gd.getLastChoice();
+			choice.addItemListener(new ItemListener()
+			{
+				public void itemStateChanged(ItemEvent e)
+				{
+					outputMode = choice.getSelectedIndex();
+					updateLabel2();
+				}
+			});
+			updateLabel2();
+		}
+		
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -335,6 +352,14 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			label.setText(inputFile);
 	}
 
+	private void updateLabel2()
+	{
+		if (outputMode == 0)
+			label2.setText("");
+		else
+			label2.setText(String.format("Slices per image = %d : %s", nImages, outputDirectory));
+	}
+	
 	/**
 	 * Override methods in the ij.VirtualStack class to provide the pixels from a TIFF series. The stack cannot be
 	 * modified.
