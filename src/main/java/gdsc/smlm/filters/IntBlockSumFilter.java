@@ -22,6 +22,8 @@ package gdsc.smlm.filters;
  * <p>
  * Note: Due to lack of small dimension checking the routines will fail if maxx or maxy are less than 2. All routines
  * are OK for 3x3 images and larger.
+ * <p>
+ * This algorithm does not mirror edge pixels in contrast to the BlockSumFilter.
  */
 public class IntBlockSumFilter extends BaseFilter
 {
@@ -230,7 +232,7 @@ public class IntBlockSumFilter extends BaseFilter
 	private int[] initialise(int[] data, final int maxx, final int maxy, final int n, boolean internal)
 	{
 		int size = data.length;
-		createFloatBuffer(size);
+		createIntBuffer(size);
 		return data;
 	}
 
@@ -241,7 +243,7 @@ public class IntBlockSumFilter extends BaseFilter
 	 *            the size
 	 * @return the int buffer
 	 */
-	private int[] createFloatBuffer(int size)
+	private int[] createIntBuffer(int size)
 	{
 		if (buffer == null || buffer.length < size)
 		{
@@ -307,7 +309,7 @@ public class IntBlockSumFilter extends BaseFilter
 			extractRow(inData, y, width, n, row);
 
 			// Initialise rolling sum
-			int sum = (n + 1) * row[0];
+			int sum = n * row[0] + row[n];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
 			{
@@ -338,7 +340,7 @@ public class IntBlockSumFilter extends BaseFilter
 			extractRow(inData, y, width, n, row);
 
 			// Initialise rolling sum
-			int sum = (n + 1) * row[0];
+			int sum = n * row[0] + row[n];
 			int endIndex = n + 1;
 			for (int i = 0; i < n; i++)
 			{
@@ -391,7 +393,7 @@ public class IntBlockSumFilter extends BaseFilter
 			extractRow1(inData, y, width, row);
 
 			// Initialise rolling sum
-			int sum = 2 * row[0] + row[2];
+			int sum = row[0] + row[1] + row[2];
 			int endIndex = 3;
 
 			int centreIndex = y;
@@ -418,7 +420,7 @@ public class IntBlockSumFilter extends BaseFilter
 			extractRow1(inData, y, width, row);
 
 			// Initialise rolling sum
-			int sum = 2 * row[0] + row[2];
+			int sum = row[0] + row[1] + row[2];
 			int endIndex = 3;
 
 			int centreIndex = y;
@@ -450,8 +452,11 @@ public class IntBlockSumFilter extends BaseFilter
 		// Pad ends
 		for (int i = 0; i < n; i++)
 		{
-			row[i] = inData[index];
-			row[i + n + width] = inData[index + width - 1];
+			row[i] = 0;
+			row[i + n + width] = 0;
+			// This will mirror the edge pixel.
+			//row[i] = inData[index];
+			//row[i + n + width] = inData[index + width - 1];
 		}
 
 		// Fill in data
@@ -463,8 +468,11 @@ public class IntBlockSumFilter extends BaseFilter
 		final int index = y * width;
 
 		// Pad ends
-		row[0] = inData[index];
-		row[1 + width] = inData[index + width - 1];
+		row[0] = 0;
+		row[1 + width] = 0;
+		// This will mirror the edge pixel.
+		//row[0] = inData[index];
+		//row[1 + width] = inData[index + width - 1];
 
 		// Fill in data
 		System.arraycopy(inData, index, row, 1, width);

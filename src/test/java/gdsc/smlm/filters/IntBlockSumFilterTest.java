@@ -1,12 +1,10 @@
 package gdsc.smlm.filters;
 
-import java.util.ArrayList;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-public class IntBlockFilterTest
+public class IntBlockSumFilterTest
 {
 	private gdsc.core.utils.Random rand;
 
@@ -46,16 +44,20 @@ public class IntBlockFilterTest
 				{
 					int yyy = y + yy - n;
 					if (yyy < 0)
-						yyy = 0;
+						//yyy = 0;
+						continue;
 					if (yyy >= maxy)
-						yyy = maxy - 1;
+						//yyy = maxy - 1;
+						continue;
 					for (int xx = 0; xx < size; xx++)
 					{
 						int xxx = x + xx - n;
 						if (xxx < 0)
-							xxx = 0;
+							//xxx = 0;
+							continue;
 						if (xxx >= maxx)
-							xxx = maxx - 1;
+							//xxx = maxx - 1;
+							continue;
 						int index = yyy * maxx + xxx;
 						sum += data[index];
 					}
@@ -184,6 +186,4 @@ public class IntBlockFilterTest
 
 		return data;
 	}
-
-	static ArrayList<int[]> dataSet = null;
 }
