@@ -5,6 +5,7 @@ import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Label;
 import java.awt.Rectangle;
+import java.awt.Scrollbar;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -23,12 +24,13 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtosHelper;
-import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 
@@ -52,6 +54,7 @@ import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FakePerPixelCameraModel;
+import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
@@ -64,6 +67,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageRoi;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
@@ -74,6 +78,9 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import ij.process.LUT;
+import ij.process.LUTHelper;
+import ij.process.LUTHelper.LutColour;
 
 /**
  * Runs the candidate maxima identification on the image and provides a preview using an overlay
@@ -105,6 +112,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private static boolean multipleMatches = false;
 	private static boolean showTP = true;
 	private static boolean showFP = true;
+	private static int topN = 0;
 
 	private int currentSlice = 0;
 	private MaximaSpotFilter filter = null;
@@ -119,6 +127,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private TextField textSmooth2;
 	private TextField textSearch;
 	private TextField textBorder;
+
+	// For adjusting the Top_N slider
+	private Scrollbar sb;
 
 	private boolean refreshing = false;
 	private NonBlockingExtendedGenericDialog gd;
@@ -182,6 +193,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		gd.addSlider("Smoothing_2", 2.5, 4.5, config.getDataFilterParameterValue(1, defaultSmooth));
 		PeakFit.addSearchOptions(gd, provider);
 		PeakFit.addBorderOptions(gd, provider);
+		//gd.addNumericField("Top_N", topN, 0);
+		gd.addSlider("Top_N", 0, 100, topN);
+		sb = gd.getLastScrollbar();
 
 		// Find if this image was created with ground truth data
 		if (imp.getID() == CreateData.getImageId())
@@ -201,7 +215,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			}
 		}
 
-		if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless()))
+		if (Utils.isShowGenericDialog())
 		{
 			// Listen for changes in the dialog options
 			gd.addOptionCollectedListener(this);
@@ -278,6 +292,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 1);
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
+		topN = (int) gd.getNextNumber();
 
 		if (label != null)
 		{
@@ -304,6 +319,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		label.setText(message);
 	}
 
+	private Calibration lastCalibration = null;
+	private FitEngineSettings lastFitEngineSettings = null;
+	private PSF lastPSF = null;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -316,40 +335,55 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		Rectangle bounds = ip.getRoi();
 
-		// Set a camera model.
-		// We have to set the camera type too to avoid configuration errors.
-		CameraModel cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
-		if (cameraModel == null)
-		{
-			cameraModel = new FakePerPixelCameraModel(0, 1, 1);
-			fitConfig.setCameraType(CameraType.EMCCD);
-		}			
-		else
-		{
-			fitConfig.setCameraType(CameraType.SCMOS);
-		}
-		fitConfig.setCameraModel(cameraModel);
+		// Only do this if the settings changed
+		Calibration calibration = fitConfig.getCalibration();
+		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
+		PSF psf = fitConfig.getPSF();
 
-		// Configure a jury filter
-		if (config.getDataFilterType() == DataFilterType.JURY)
+		if (!calibration.equals(lastCalibration))
 		{
-			if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE))
-				return;
+			// Set a camera model.
+			// We have to set the camera type too to avoid configuration errors.
+			CameraModel cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
+			if (cameraModel == null)
+			{
+				cameraModel = new FakePerPixelCameraModel(0, 1, 1);
+				fitConfig.setCameraType(CameraType.EMCCD);
+			}
+			else
+			{
+				fitConfig.setCameraType(CameraType.SCMOS);
+			}
+			fitConfig.setCameraModel(cameraModel);
 		}
 
-		try
+		if (!fitEngineSettings.equals(lastFitEngineSettings) || !psf.equals(lastPSF))
 		{
-			filter = config.createSpotFilter();
+			// Configure a jury filter
+			if (config.getDataFilterType() == DataFilterType.JURY)
+			{
+				if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE))
+					return;
+			}
+
+			try
+			{
+				filter = config.createSpotFilter();
+			}
+			catch (Exception e)
+			{
+				filter = null;
+				this.imp.setOverlay(o);
+				throw new RuntimeException(e); // Required for ImageJ to disable the preview
+				//Utils.log("ERROR: " + e.getMessage());			
+				//return;
+			}
+			Utils.log(filter.getDescription());
 		}
-		catch (Exception e)
-		{
-			filter = null;
-			this.imp.setOverlay(o);
-			throw new RuntimeException(e); // Required for ImageJ to disable the preview
-			//Utils.log("ERROR: " + e.getMessage());			
-			//return;
-		}
-		Utils.log(filter.getDescription());
+
+		lastCalibration = calibration;
+		lastFitEngineSettings = fitEngineSettings;
+		lastPSF = psf;
 
 		// Note: 
 		// Do not support origin selection when there is a width/height mismatch 
@@ -359,7 +393,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 		// Instead just warn if the roi cannot be extracted from the selected model 
 		// or there is a mismatch
-		Rectangle modelBounds = cameraModel.getBounds();
+		Rectangle modelBounds = fitConfig.getCameraModel().getBounds();
 		if (modelBounds != null)
 		{
 			if (!modelBounds.contains(bounds))
@@ -417,6 +451,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		Spot[] spots = filter.rank(data, width, height);
 		data = filter.getPreprocessedData();
 
+		int size = spots.length;
+		sb.setMaximum(size);
+
 		fp = new FloatProcessor(width, height, data);
 		FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
 		out.copyBits(ip, 0, 0, Blitter.COPY);
@@ -434,8 +471,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			// Get results for frame
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, imp.getCurrentSlice());
 
-			Coordinate[] predicted = new Coordinate[spots.length];
-			for (int i = 0; i < spots.length; i++)
+			Coordinate[] predicted = new Coordinate[size];
+			for (int i = 0; i < size; i++)
 			{
 				predicted[i] = new BasePoint(spots[i].x + bounds.x, spots[i].y + bounds.y);
 			}
@@ -583,16 +620,49 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		}
 		else
 		{
-			float[] x = new float[spots.length];
-			float[] y = new float[x.length];
-			for (int i = 0; i < spots.length; i++)
+			//float[] x = new float[size];
+			//float[] y = new float[x.length];
+			//for (int i = 0; i < size; i++)
+			//{
+			//	x[i] = spots[i].x + bounds.x + 0.5f;
+			//	y[i] = spots[i].y + bounds.y + 0.5f;
+			//}
+			//PointRoi roi = new PointRoi(x, y);
+			//// Add options to configure colour and labels
+			//o.add(roi);
+
+			final LUT lut = LUTHelper.createLUT(LutColour.FIRE_LIGHT);
+			final Counter j = new Counter(size);
+			// These are copied by the ROI
+			float[] x = new float[1];
+			float[] y = new float[1];
+			// Plot the intensity
+			double[] intensity = new double[size];
+			double[] rank = SimpleArrayUtils.newArray(size, 1, 1.0);
+			int top = (topN > 0) ? topN : size;
+			for (int i = 0; i < size; i++)
 			{
-				x[i] = spots[i].x + bounds.x + 0.5f;
-				y[i] = spots[i].y + bounds.y + 0.5f;
+				intensity[i] = spots[i].intensity;
+				if (i < top)
+				{
+					x[0] = spots[i].x + bounds.x + 0.5f;
+					y[0] = spots[i].y + bounds.y + 0.5f;
+					Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
+					addRoi(0, o, x, y, 1, c, 2, 1);
+				}
 			}
-			PointRoi roi = new PointRoi(x, y);
-			// Add options to configure colour and labels
-			o.add(roi);
+
+			String title = TITLE + " Intensity";
+			Plot plot = new Plot(title, "Rank", "Intensity");
+			plot.setColor(Color.blue);
+			plot.addPoints(rank, intensity, Plot.LINE);
+			if (topN > 0 && topN < size)
+			{
+				plot.setColor(Color.magenta);
+				plot.drawLine(topN, 0, topN, intensity[topN - 1]);
+			}
+			plot.setColor(Color.black);
+			Utils.display(title, plot);
 		}
 
 		imp.setOverlay(o);
@@ -606,6 +676,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour, int pointType)
 	{
+		addRoi(frame, o, x, y, n, colour, pointType, 0);
+	}
+
+	public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour, int pointType, int size)
+	{
 		if (n == 0)
 			return;
 		PointRoi roi = new PointRoi(x, y, n);
@@ -614,6 +689,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		roi.setStrokeColor(colour);
 		if (frame != 0)
 			roi.setPosition(frame);
+		if (size != 0)
+			roi.setSize(size);
 		o.add(roi);
 	}
 
@@ -749,6 +826,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	public void optionCollected(OptionCollectedEvent e)
 	{
 		// Just run on the current processor
-		run(imp.getProcessor());
+		if (preview)
+			run(imp.getProcessor());
 	}
 }
