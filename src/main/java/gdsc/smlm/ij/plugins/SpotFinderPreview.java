@@ -643,7 +643,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			int[] count = spotFilterHelper.countNeighbours(spots, width, height, neighbourRadius);
 
 			// Show as histogram the totals...
-			int id = Utils.showHistogram(TITLE, new StoredData(count), "Neighbours", 1, 0, 0);
+			int id = Utils.showHistogram(TITLE, new StoredData(count), "Neighbours", 1, 0, 0,
+					"Radius = " + neighbourRadius);
 			if (Utils.isNewWindow())
 				wo.add(id);
 
