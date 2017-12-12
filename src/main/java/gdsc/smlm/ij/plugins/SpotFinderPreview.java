@@ -23,6 +23,7 @@ import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.RampedScore;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -50,11 +51,11 @@ import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
+import gdsc.smlm.filters.SpotFilterHelper;
 import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FakePerPixelCameraModel;
-import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
@@ -69,7 +70,6 @@ import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
-import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.WindowOrganiser;
@@ -114,6 +114,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private static boolean showFP = true;
 	private static int topN = 100;
 	private static int select = 1;
+	private static int neighbourRadius = 4;
 
 	private int currentSlice = 0;
 	private MaximaSpotFilter filter = null;
@@ -134,6 +135,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	private boolean refreshing = false;
 	private NonBlockingExtendedGenericDialog gd;
+
+	private SpotFilterHelper spotFilterHelper = new SpotFilterHelper();
 
 	/*
 	 * (non-Javadoc)
@@ -199,6 +202,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		topNScrollBar = gd.getLastScrollbar();
 		gd.addSlider("Select", 0, 100, select);
 		selectScrollBar = gd.getLastScrollbar();
+		gd.addSlider("Neigbour_radius", 0, 10, neighbourRadius);
 
 		// Find if this image was created with ground truth data
 		if (imp.getID() == CreateData.getImageId())
@@ -297,6 +301,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		config.setBorder(gd.getNextNumber());
 		topN = (int) gd.getNextNumber();
 		select = (int) gd.getNextNumber();
+		neighbourRadius = (int) gd.getNextNumber();
 
 		if (label != null)
 		{
@@ -560,10 +565,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
 
-			PlotWindow pw = Utils.display(title, plot);
 			WindowOrganiser windowOrganiser = new WindowOrganiser();
-			if (Utils.isNewWindow())
-				windowOrganiser.add(pw);
+			Utils.display(title, plot, 0, windowOrganiser);
 
 			title = TITLE + " Precision-Recall";
 			plot = new Plot2(title, "Recall", "Precision");
@@ -573,9 +576,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			plot.drawLine(recall[recall.length - 1], precision[recall.length - 1], recall[recall.length - 1], 0);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
-			PlotWindow pw2 = Utils.display(title, plot);
-			if (Utils.isNewWindow())
-				windowOrganiser.add(pw2);
+			Utils.display(title, plot, 0, windowOrganiser);
 
 			windowOrganiser.tile();
 
@@ -636,8 +637,19 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			//// Add options to configure colour and labels
 			//o.add(roi);
 
+			WindowOrganiser wo = new WindowOrganiser();
+
+			// Option to show the number of neighbours within a set pixel box radius
+			int[] count = spotFilterHelper.countNeighbours(spots, width, height, neighbourRadius);
+
+			// Show as histogram the totals...
+			int id = Utils.showHistogram(TITLE, new StoredData(count), "Neighbours", 1, 0, 0);
+			if (Utils.isNewWindow())
+				wo.add(id);
+
+			// TODO - Draw n=0, n=1 on the image overlay
+
 			final LUT lut = LUTHelper.createLUT(LutColour.FIRE_LIGHT);
-			final Counter j = new Counter(size);
 			// These are copied by the ROI
 			float[] x = new float[1];
 			float[] y = new float[1];
@@ -645,6 +657,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			double[] intensity = new double[size];
 			double[] rank = SimpleArrayUtils.newArray(size, 1, 1.0);
 			int top = (topN > 0) ? topN : size;
+			int size_1 = size - 1;
 			for (int i = 0; i < size; i++)
 			{
 				intensity[i] = spots[i].intensity;
@@ -652,11 +665,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				{
 					x[0] = spots[i].x + bounds.x + 0.5f;
 					y[0] = spots[i].y + bounds.y + 0.5f;
-					Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
+					Color c = LUTHelper.getColour(lut, size_1 - i, size);
 					addRoi(0, o, x, y, 1, c, 2, 1);
 				}
 			}
-			
+
 			String title = TITLE + " Intensity";
 			Plot plot = new Plot(title, "Rank", "Intensity");
 			plot.setColor(Color.blue);
@@ -673,12 +686,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				plot.drawLine(select, 0, select, in);
 				x[0] = spots[select].x + bounds.x + 0.5f;
 				y[0] = spots[select].y + bounds.y + 0.5f;
-				Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
+				Color c = LUTHelper.getColour(lut, size_1 - select, size);
 				addRoi(0, o, x, y, 1, c, 3, 3);
 				plot.setColor(Color.black);
-				plot.addLabel(0, 0, "Selected spot intensity = "+ Utils.rounded(in));
+				plot.addLabel(0, 0, "Selected spot intensity = " + Utils.rounded(in));
 			}
-			Utils.display(title, plot);
+
+			Utils.display(title, plot, 0, wo);
+
+			wo.tile();
 		}
 
 		imp.setOverlay(o);
