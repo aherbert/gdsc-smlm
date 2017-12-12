@@ -669,13 +669,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			if (select > 0 && select < size)
 			{
 				plot.setColor(Color.yellow);
-				plot.drawLine(select, 0, select, intensity[select - 1]);
+				double in = intensity[select - 1];
+				plot.drawLine(select, 0, select, in);
 				x[0] = spots[select].x + bounds.x + 0.5f;
 				y[0] = spots[select].y + bounds.y + 0.5f;
 				Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
 				addRoi(0, o, x, y, 1, c, 3, 3);
+				plot.setColor(Color.black);
+				plot.addLabel(0, 0, "Selected spot intensity = "+ Utils.rounded(in));
 			}
-			plot.setColor(Color.black);
 			Utils.display(title, plot);
 		}
 
