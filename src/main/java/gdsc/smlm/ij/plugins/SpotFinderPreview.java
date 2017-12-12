@@ -112,7 +112,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private static boolean multipleMatches = false;
 	private static boolean showTP = true;
 	private static boolean showFP = true;
-	private static int topN = 0;
+	private static int topN = 100;
+	private static int select = 1;
 
 	private int currentSlice = 0;
 	private MaximaSpotFilter filter = null;
@@ -128,8 +129,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	private TextField textSearch;
 	private TextField textBorder;
 
-	// For adjusting the Top_N slider
-	private Scrollbar sb;
+	// For adjusting the selction sliders
+	private Scrollbar topNScrollBar, selectScrollBar;
 
 	private boolean refreshing = false;
 	private NonBlockingExtendedGenericDialog gd;
@@ -195,7 +196,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		PeakFit.addBorderOptions(gd, provider);
 		//gd.addNumericField("Top_N", topN, 0);
 		gd.addSlider("Top_N", 0, 100, topN);
-		sb = gd.getLastScrollbar();
+		topNScrollBar = gd.getLastScrollbar();
+		gd.addSlider("Select", 0, 100, select);
+		selectScrollBar = gd.getLastScrollbar();
 
 		// Find if this image was created with ground truth data
 		if (imp.getID() == CreateData.getImageId())
@@ -293,6 +296,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		config.setSearch(gd.getNextNumber());
 		config.setBorder(gd.getNextNumber());
 		topN = (int) gd.getNextNumber();
+		select = (int) gd.getNextNumber();
 
 		if (label != null)
 		{
@@ -452,7 +456,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		data = filter.getPreprocessedData();
 
 		int size = spots.length;
-		sb.setMaximum(size);
+		topNScrollBar.setMaximum(size);
+		selectScrollBar.setMaximum(size);
 
 		fp = new FloatProcessor(width, height, data);
 		FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
@@ -651,7 +656,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 					addRoi(0, o, x, y, 1, c, 2, 1);
 				}
 			}
-
+			
 			String title = TITLE + " Intensity";
 			Plot plot = new Plot(title, "Rank", "Intensity");
 			plot.setColor(Color.blue);
@@ -660,6 +665,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			{
 				plot.setColor(Color.magenta);
 				plot.drawLine(topN, 0, topN, intensity[topN - 1]);
+			}
+			if (select > 0 && select < size)
+			{
+				plot.setColor(Color.yellow);
+				plot.drawLine(select, 0, select, intensity[select - 1]);
+				x[0] = spots[select].x + bounds.x + 0.5f;
+				y[0] = spots[select].y + bounds.y + 0.5f;
+				Color c = LUTHelper.getColour(lut, j.decrementAndGet(), size);
+				addRoi(0, o, x, y, 1, c, 3, 3);
 			}
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
