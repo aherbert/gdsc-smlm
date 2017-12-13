@@ -133,9 +133,19 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	{
 		// Keep class variables for the parameters we are fitting 
 		final FitConfiguration fitConfig = config.getFitConfiguration();
-		initialPeakStdDev0 = fitConfig.getInitialXSD();
-		initialPeakStdDev1 = fitConfig.getInitialYSD();
-		initialPeakAngle = fitConfig.getInitialAngle();
+		initialPeakStdDev0 = 1;
+		initialPeakStdDev1 = 1;
+		initialPeakAngle = 0;
+		try
+		{
+			initialPeakStdDev0 = fitConfig.getInitialXSD();
+			initialPeakStdDev1 = fitConfig.getInitialYSD();
+			initialPeakAngle = fitConfig.getInitialAngle();
+		}
+		catch (IllegalStateException e)
+		{
+			// Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF 
+		}
 
 		if (!extraOptions)
 		{
