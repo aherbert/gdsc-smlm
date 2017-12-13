@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import gdsc.core.ij.Utils;
@@ -90,7 +91,11 @@ public class FailCountManager implements PlugIn
 		public FailCountData(int id, boolean[] results)
 		{
 			this.id = id;
-			this.results = results;
+			// Find the last success
+			int end = results.length - 1;
+			while (end > 0 && !results[end])
+				end--;
+			this.results = Arrays.copyOf(results, end + 1);
 		}
 	}
 
@@ -282,7 +287,8 @@ public class FailCountManager implements PlugIn
 		try
 		{
 			br = new BufferedReader(new FileReader(filename));
-			String line;
+			// Ignore the first line
+			String line = br.readLine();
 			BooleanArray array = new BooleanArray(100);
 			int lastId = 0;
 			int lastCandidate = 0;
@@ -297,7 +303,7 @@ public class FailCountManager implements PlugIn
 					throw new IOException("ID must be strictly positive");
 				int candidate = Integer.parseInt(data[1]);
 				if (candidate < 1)
-					throw new IOException("ID must be strictly positive");
+					throw new IOException("Candidate must be strictly positive");
 				boolean ok = guessStatus(data[2]);
 
 				if (lastId != id)
@@ -307,6 +313,8 @@ public class FailCountManager implements PlugIn
 						failCountData.add(new FailCountData(lastId, array.toArray()));
 						array.clear();
 					}
+					if (candidate != 1)
+						throw new IOException("Candidate must start at 1");
 					lastId = id;
 					lastCandidate = candidate - 1; // Ensure continuous
 				}
@@ -353,9 +361,11 @@ public class FailCountManager implements PlugIn
 	/**
 	 * Guess the pass/fail status.
 	 *
-	 * @param string the string
+	 * @param string
+	 *            the string
 	 * @return true, if successful
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private boolean guessStatus(String string) throws IOException
 	{
@@ -404,16 +414,14 @@ public class FailCountManager implements PlugIn
 		try
 		{
 			bw = new BufferedWriter(new FileWriter(filename));
+			bw.write("ID,Candidate,Status");
+			bw.newLine();
 			for (int i = 0; i < failCountData.size(); i++)
 			{
 				FailCountData d = failCountData.get(i);
 				String prefix = d.id + ",";
 				boolean[] pass = d.results;
-				// Find the last success
-				int end = pass.length;
-				while (end > 0 && !pass[end - 1])
-					end--;
-				for (int j = 0; j <= end; j++)
+				for (int j = 0; j < pass.length; j++)
 				{
 					bw.write(prefix);
 					bw.write(Integer.toString(j + 1));
