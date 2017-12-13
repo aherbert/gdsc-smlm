@@ -3130,8 +3130,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			// Get the frame number from the source to allow for interlaced and aggregated data
 			engine.run(createJob(source.getStartFrameNumber(), source.getEndFrameNumber(), data, bounds, noise));
 
-			if (escapePressed())
-				shutdown = true;
+			shutdown = escapePressed();
 		}
 
 		engine.end(shutdown);
