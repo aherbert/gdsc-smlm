@@ -234,22 +234,28 @@ public class Configuration implements PlugIn, ItemListener
 		try
 		{
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-			Parameters.isAboveZero("Gain", calibration.getCountPerPhoton());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-			Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+			if (fitConfig.getPSF().getParametersCount() > 1)
+			{
+				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+			}
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
 			Parameters.isPositive("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
-			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-			Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-			Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
-			Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-			Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
-			Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+			
+			if (!fitConfig.isSmartFilter())
+			{
+				Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+				Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
+				Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
+				Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+				Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
+				Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+			}
 		}
 		catch (IllegalArgumentException e)
 		{
