@@ -59,6 +59,8 @@ public class FailCountManager implements PlugIn
 		CREATE_DATA { public String getName() { return "Create Data"; } },
 		LOAD_DATA { public String getName() { return "Load Data"; } },
 		SAVE_DATA { public String getName() { return "Save Data"; } },
+		PLOT_DATA { public String getName() { return "Plot Data"; } },
+		ANALYSE_DATA { public String getName() { return "Analyse Data"; } },
 		;
 
 		public String getShortName()
@@ -133,6 +135,12 @@ public class FailCountManager implements PlugIn
 			case SAVE_DATA:
 				saveData();
 				break;
+			case PLOT_DATA:
+				plotData();
+				break;
+			case ANALYSE_DATA:
+				analyseData();
+				break;				
 			default:
 				throw new IllegalStateException("Unknown option: " + option);
 		}
@@ -449,5 +457,25 @@ public class FailCountManager implements PlugIn
 				{
 				}
 		}
+	}
+
+	private void plotData()
+	{
+		// TODO
+		// Pick a slice and show an interactive plot of:
+		// Pass count verses candidate
+		// Consecutive fail count verses candidate
+		// Rolling fail count verses candidate (the window can be configurable)
+		
+	}
+
+	private void analyseData()
+	{
+		// TODO Auto-generated method stub
+		// Score each of a set of standard fail counters against each frame using how 
+		// close they are to the target.
+		// Show a table of results for each frame and combined.
+		// Save the best fail counter to the current fit configuration.
+		
 	}
 }
