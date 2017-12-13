@@ -90,6 +90,7 @@ import gdsc.smlm.ga.ToleranceChecker;
 import gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
 import gdsc.smlm.ij.results.ResultsImageSampler;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.ConsecutiveFailCounter;
 import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -4925,8 +4926,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		//multiPathFilter.setDebugFile("/tmp/fractionScoreSubset.txt");
 
 		// Note: We always use the subset method since fail counts have been accumulated when we read in the results.
-		return multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual, allAssignments, scoreStore,
-				coordinateStore);
+		return multiPathFilter.fractionScoreSubset(resultsList, ConsecutiveFailCounter.create(failCount), nActual,
+				allAssignments, scoreStore, coordinateStore);
 	}
 
 	private MultiPathFilter createMPF(DirectFilter filter, DirectFilter minFilter)
@@ -4950,7 +4951,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		final MultiPathFilter multiPathFilter = createMPF(filter, minimalFilter);
 
 		ArrayList<FractionalAssignment[]> allAssignments = new ArrayList<FractionalAssignment[]>(resultsList.length);
-		multiPathFilter.fractionScoreSubset(resultsList, failCount, nActual, allAssignments, null, coordinateStore);
+		multiPathFilter.fractionScoreSubset(resultsList, ConsecutiveFailCounter.create(failCount), nActual,
+				allAssignments, null, coordinateStore);
 		return allAssignments;
 	}
 
@@ -6890,7 +6892,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			ga_subset = true;
 
 			ga_resultsListToScore = createMPF((DirectFilter) weakest, minimalFilter).filterSubset(ga_resultsList,
-					failCount, true);
+					ConsecutiveFailCounter.create(failCount), true);
 
 			//MultiPathFilter.resetValidationFlag(ga_resultsListToScore);			
 
@@ -6963,8 +6965,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		final MultiPathFilter multiPathFilter = new MultiPathFilter(filter, minFilter, residualsThreshold);
 
-		final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
-				nActual, null, null, coordinateStore);
+		final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore,
+				ConsecutiveFailCounter.create(failCount), nActual, null, null, coordinateStore);
 
 		final double score = getScore(r);
 		final double criteria = getCriteria(r);
@@ -7144,8 +7146,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			//System.out.println(Arrays.toString(parameters));
 
 			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
-			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
-					nActual, null, null, createCoordinateStore(duplicateDistance));
+			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore,
+					ConsecutiveFailCounter.create(failCount), nActual, null, null,
+					createCoordinateStore(duplicateDistance));
 
 			final StringBuilder text = createResult(ss_filter, r,
 					buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
@@ -7211,8 +7214,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			double residualsThreshold = parameters[1];
 			double duplicateDistance = parameters[2];
 			final MultiPathFilter multiPathFilter = new MultiPathFilter(ss_filter, minimalFilter, residualsThreshold);
-			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore, failCount,
-					nActual, null, null, createCoordinateStore(duplicateDistance));
+			final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(ga_resultsListToScore,
+					ConsecutiveFailCounter.create(failCount), nActual, null, null,
+					createCoordinateStore(duplicateDistance));
 
 			final StringBuilder text = createResult(ss_filter, r,
 					buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
@@ -7472,7 +7476,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	{
 		return true;
 	}
-	
+
 	/**
 	 * Updates the given configuration using the latest settings used in benchmarking spot filters, fitting and
 	 * filtering.
@@ -7971,7 +7975,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private PreprocessedPeakResult[] filterResults(final MultiPathFilter multiPathFilter)
 	{
-		return multiPathFilter.filter(resultsList, failCount, true, coordinateStore);
+		return multiPathFilter.filter(resultsList, ConsecutiveFailCounter.create(failCount), true, coordinateStore);
 	}
 
 	private CoordinateStore createCoordinateStore()

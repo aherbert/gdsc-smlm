@@ -32,6 +32,8 @@ import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.results.ConsecutiveFailCounter;
+import gdsc.smlm.results.FailCounter;
 
 /**
  * Specifies the configuration for the fit engine
@@ -345,6 +347,18 @@ public class FitEngineConfiguration implements Cloneable
 		fitEngineSettings.setFailuresLimit(failuresLimit);
 	}
 
+	/**
+	 * Gets the fail counter.
+	 *
+	 * @return the fail counter
+	 */
+	public FailCounter getFailCounter()
+	{
+		// TODO - Make this more configurable 
+		
+		return ConsecutiveFailCounter.create(getFailuresLimit());
+	}
+	
 	/**
 	 * @return the includeNeighbours
 	 */

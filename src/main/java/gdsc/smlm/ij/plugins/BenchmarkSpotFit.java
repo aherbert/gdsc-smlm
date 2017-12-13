@@ -80,6 +80,7 @@ import gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.NullFailCounter;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
@@ -1747,7 +1748,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		MultiPathFitResults[] multiResults = multiPathResults.toArray(new MultiPathFitResults[multiPathResults.size()]);
 		// Filter with no filter
 		MultiPathFilter mpf = new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
-		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, Integer.MAX_VALUE,
+		FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults, NullFailCounter.INSTANCE,
 				this.results.size(), assignments, scoreStore, CoordinateStoreFactory.create(0, 0, imp.getWidth(),
 						imp.getHeight(), config.convertUsingHWHMax(config.getDuplicateDistanceParameter())));
 		double nPredicted = fractionResult.getTP() + fractionResult.getFP();

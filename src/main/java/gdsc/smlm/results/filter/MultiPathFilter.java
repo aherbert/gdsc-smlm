@@ -13,6 +13,8 @@ import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.results.ConsecutiveFailCounter;
+import gdsc.smlm.results.FailCounter;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
 // TODO: Auto-generated Javadoc
@@ -404,7 +406,7 @@ public class MultiPathFilter implements Cloneable
 		if (obj == this)
 		{
 			return true;
-		}		
+		}
 		//if (!MultiPathFilter.class.isAssignableFrom(obj.getClass()))
 		if (!(obj instanceof MultiPathFilter))
 		{
@@ -994,8 +996,8 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
 	 * @param store
@@ -1004,12 +1006,13 @@ public class MultiPathFilter implements Cloneable
 	 *            the coordinate store (can be null)
 	 * @return the results
 	 */
-	public void select(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
+	public void select(final IMultiPathFitResults multiPathResults, FailCounter failCounter, boolean setup,
 			SelectedResultStore store, CoordinateStore coordinateStore)
 	{
 		if (setup)
 			setup();
 
+		failCounter = replaceIfNull(failCounter);
 		if (store == null)
 			store = new SimpleSelectedResultStore(multiPathResults.getTotalCandidates());
 		coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
@@ -1030,7 +1033,7 @@ public class MultiPathFilter implements Cloneable
 		// Note - this could be made iterative. Any pass through the data may store estimates 
 		// using the SelectedResultStore and used to determine if 
 
-		int failCount = 0;
+		failCounter.reset();
 		final int total = multiPathResults.getNumberOfResults();
 		//while (multiPathResults.begin())
 		//{
@@ -1046,7 +1049,7 @@ public class MultiPathFilter implements Cloneable
 			//	continue;
 			//}
 
-			final boolean evaluateFit = failCount <= failures;
+			final boolean evaluateFit = failCounter.isOK();
 			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
 				//				if (out != null)
@@ -1163,19 +1166,19 @@ public class MultiPathFilter implements Cloneable
 					if (newResult)
 					{
 						// More results were accepted so reset the fail count
-						failCount = 0;
+						failCounter.pass();
 					}
 					else
 					{
 						// Nothing was accepted, increment fail count
-						failCount++;
+						failCounter.fail();
 					}
 				}
 			}
 			else
 			{
 				// This was rejected, increment fail count
-				failCount++;
+				failCounter.fail();
 			}
 
 			multiPathResults.complete(c);
@@ -1215,6 +1218,20 @@ public class MultiPathFilter implements Cloneable
 		//				}
 		//			}
 		//		}
+	}
+
+	private static final FailCounter defaultFailCounter = ConsecutiveFailCounter.create(0);
+
+	/**
+	 * Replace the fail counter with a default if null. The default allows no failures.
+	 *
+	 * @param failCounter
+	 *            the fail counter
+	 * @return the fail counter
+	 */
+	public static FailCounter replaceIfNull(FailCounter failCounter)
+	{
+		return (failCounter == null) ? defaultFailCounter.newCounter() : failCounter;
 	}
 
 	@XStreamOmitField
@@ -1643,8 +1660,8 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param results
 	 *            the results
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param subset
 	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
 	 *            current candidate)
@@ -1652,12 +1669,13 @@ public class MultiPathFilter implements Cloneable
 	 *            the coordinate store (can be null)
 	 * @return the filtered results
 	 */
-	final public PreprocessedPeakResult[] filter(final MultiPathFitResults[] results, final int failures,
+	final public PreprocessedPeakResult[] filter(final MultiPathFitResults[] results, FailCounter failCounter,
 			boolean subset, CoordinateStore coordinateStore)
 	{
 		setup();
 		final SimpleSelectedResultStore store = new SimpleSelectedResultStore();
 
+		failCounter = replaceIfNull(failCounter);
 		coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
 
 		final ArrayList<PreprocessedPeakResult> list = new ArrayList<PreprocessedPeakResult>(results.length);
@@ -1678,7 +1696,7 @@ public class MultiPathFilter implements Cloneable
 			//				}
 			//			}
 
-			int failCount = 0;
+			failCounter.reset();
 			int lastId = -1;
 			final int length = multiPathResults.getNumberOfResults();
 			store.resize(multiPathResults.getTotalCandidates());
@@ -1690,11 +1708,11 @@ public class MultiPathFilter implements Cloneable
 				// Include the number of failures before this result from the larger set
 				if (subset)
 				{
-					failCount += (multiPathResult.candidateId - (lastId + 1));
+					incrementFailures(failCounter, lastId, multiPathResult);
 					lastId = multiPathResult.candidateId;
 				}
 
-				final boolean evaluateFit = failCount <= failures;
+				final boolean evaluateFit = failCounter.isOK();
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
 					//					if (out != null)
@@ -1790,19 +1808,19 @@ public class MultiPathFilter implements Cloneable
 						if (newResult)
 						{
 							// More results were accepted so reset the fail count
-							failCount = 0;
+							failCounter.pass();
 						}
 						else
 						{
 							// Nothing was accepted, increment fail count
-							failCount++;
+							failCounter.fail();
 						}
 					}
 				}
 				else
 				{
 					// This was rejected, increment fail count
-					failCount++;
+					failCounter.fail();
 				}
 
 				multiPathResults.complete(c);
@@ -1845,6 +1863,23 @@ public class MultiPathFilter implements Cloneable
 	}
 
 	/**
+	 * Increment the failures assuming that all the candidates between the current id and the last id failed.
+	 *
+	 * @param failCounter
+	 *            the fail counter
+	 * @param lastId
+	 *            the last id
+	 * @param multiPathResult
+	 *            the multi path result
+	 */
+	private void incrementFailures(FailCounter failCounter, int lastId, final MultiPathFitResult multiPathResult)
+	{
+		int n = multiPathResult.candidateId - (lastId + 1);
+		if (n > 0)
+			failCounter.fail(n);
+	}
+
+	/**
 	 * Create a subset of multi-path results, i.e. all those that pass the filter.
 	 * <p>
 	 * The number of consecutive rejections are counted per frame. When the configured number of failures is reached all
@@ -1859,22 +1894,24 @@ public class MultiPathFilter implements Cloneable
 	 * 
 	 * @param results
 	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param subset
 	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
 	 *            current candidate)
 	 * @return the filtered results
 	 */
-	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, final int failures, boolean subset)
+	public MultiPathFitResults[] filterSubset(final MultiPathFitResults[] results, FailCounter failCounter,
+			boolean subset)
 	{
 		final MultiPathFitResults[] newResults = new MultiPathFitResults[results.length];
 		int size = 0;
 
 		setup();
+		failCounter = replaceIfNull(failCounter);
 		for (int i = 0; i < results.length; i++)
 		{
-			final MultiPathFitResult[] newMultiPathResults = filter(results[i], failures, false, subset);
+			final MultiPathFitResult[] newMultiPathResults = filter(results[i], failCounter, false, subset);
 			if (newMultiPathResults != null)
 				newResults[size++] = new MultiPathFitResults(results[i].frame, newMultiPathResults,
 						results[i].totalCandidates, results[i].nActual);
@@ -1954,16 +1991,17 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param subset
 	 *            True if a subset (the candidate Id will be used to determine the number of failed fits before the
 	 *            current candidate)
 	 * @return the filtered results
 	 */
-	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean subset)
+	public MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final FailCounter failCounter,
+			boolean subset)
 	{
-		return filter(multiPathResults, failures, true, subset);
+		return filter(multiPathResults, replaceIfNull(failCounter), true, subset);
 	}
 
 	/**
@@ -1977,8 +2015,8 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param multiPathResults
 	 *            the multi path results
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param setup
 	 *            Set to true to run the {@link #setup()} method
 	 * @param subset
@@ -1986,13 +2024,13 @@ public class MultiPathFilter implements Cloneable
 	 *            current candidate)
 	 * @return the filtered results
 	 */
-	private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final int failures, boolean setup,
-			boolean subset)
+	private MultiPathFitResult[] filter(final IMultiPathFitResults multiPathResults, final FailCounter failCounter,
+			boolean setup, boolean subset)
 	{
 		if (setup)
 			setup();
 
-		int failCount = 0;
+		failCounter.reset();
 		int lastId = -1;
 		int size = 0;
 		final MultiPathFitResult[] newMultiPathResults = new MultiPathFitResult[multiPathResults.getNumberOfResults()];
@@ -2006,11 +2044,11 @@ public class MultiPathFilter implements Cloneable
 			// Include the number of failures before this result from the larger set
 			if (subset)
 			{
-				failCount += (multiPathResult.candidateId - (lastId + 1));
+				incrementFailures(failCounter, lastId, multiPathResult);
 				lastId = multiPathResult.candidateId;
 			}
 
-			final boolean evaluateFit = failCount <= failures;
+			final boolean evaluateFit = failCounter.isOK();
 			if (evaluateFit || store.isValid(multiPathResult.candidateId))
 			{
 				// Evaluate the result. 
@@ -2053,19 +2091,19 @@ public class MultiPathFilter implements Cloneable
 					if (isNewResult(result))
 					{
 						// More results were accepted so reset the fail count
-						failCount = 0;
+						failCounter.pass();
 					}
 					else
 					{
 						// Nothing was accepted, increment fail count
-						failCount++;
+						failCounter.fail();
 					}
 				}
 			}
 			else
 			{
 				// This was rejected, increment fail count
-				failCount++;
+				failCounter.fail();
 			}
 
 			multiPathResults.complete(c);
@@ -2121,16 +2159,16 @@ public class MultiPathFilter implements Cloneable
 	 * 
 	 * @param results
 	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param n
 	 *            The number of actual results
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n)
+	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results,
+			final FailCounter failCounter, final int n)
 	{
-		return fractionScore(results, failures, n, false, null, null, null);
+		return fractionScore(results, replaceIfNull(failCounter), n, false, null, null, null);
 	}
 
 	/**
@@ -2148,16 +2186,16 @@ public class MultiPathFilter implements Cloneable
 	 * 
 	 * @param results
 	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param n
 	 *            The number of actual results
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
-			final int n)
+	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results,
+			final FailCounter failCounter, final int n)
 	{
-		return fractionScore(results, failures, n, true, null, null, null);
+		return fractionScore(results, replaceIfNull(failCounter), n, true, null, null, null);
 	}
 
 	/**
@@ -2174,8 +2212,8 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param results
 	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param n
 	 *            The number of actual results
 	 * @param assignments
@@ -2186,11 +2224,11 @@ public class MultiPathFilter implements Cloneable
 	 *            the coordinate store (can be null)
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore,
-			CoordinateStore coordinateStore)
+	public FractionClassificationResult fractionScore(final MultiPathFitResults[] results,
+			final FailCounter failCounter, final int n, List<FractionalAssignment[]> assignments,
+			FractionScoreStore scoreStore, CoordinateStore coordinateStore)
 	{
-		return fractionScore(results, failures, n, false, assignments, scoreStore, coordinateStore);
+		return fractionScore(results, replaceIfNull(failCounter), n, false, assignments, scoreStore, coordinateStore);
 	}
 
 	/**
@@ -2210,8 +2248,8 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param results
 	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param n
 	 *            The number of actual results
 	 * @param assignments
@@ -2222,11 +2260,11 @@ public class MultiPathFilter implements Cloneable
 	 *            the coordinate store (can be null)
 	 * @return the score
 	 */
-	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results, final int failures,
-			final int n, List<FractionalAssignment[]> assignments, FractionScoreStore scoreStore,
-			CoordinateStore coordinateStore)
+	public FractionClassificationResult fractionScoreSubset(final MultiPathFitResults[] results,
+			final FailCounter failCounter, final int n, List<FractionalAssignment[]> assignments,
+			FractionScoreStore scoreStore, CoordinateStore coordinateStore)
 	{
-		return fractionScore(results, failures, n, true, assignments, scoreStore, coordinateStore);
+		return fractionScore(results, replaceIfNull(failCounter), n, true, assignments, scoreStore, coordinateStore);
 	}
 
 	String debugFilename;
@@ -2263,8 +2301,8 @@ public class MultiPathFilter implements Cloneable
 	 *
 	 * @param results
 	 *            a set of results to analyse
-	 * @param failures
-	 *            the number of failures to allow per frame before all peaks are rejected
+	 * @param failCounter
+	 *            the counter to track the failures to allow per frame before all peaks are rejected
 	 * @param n
 	 *            The number of actual results
 	 * @param subset
@@ -2278,9 +2316,9 @@ public class MultiPathFilter implements Cloneable
 	 *            the coordinate store (can be null)
 	 * @return the score
 	 */
-	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results, final int failures,
-			final int n, final boolean subset, List<FractionalAssignment[]> allAssignments,
-			FractionScoreStore scoreStore, CoordinateStore coordinateStore)
+	private FractionClassificationResult fractionScore(final MultiPathFitResults[] results,
+			final FailCounter failCounter, final int n, final boolean subset,
+			List<FractionalAssignment[]> allAssignments, FractionScoreStore scoreStore, CoordinateStore coordinateStore)
 	{
 		final double[] score = new double[4];
 		final ArrayList<FractionalAssignment> assignments = new ArrayList<FractionalAssignment>();
@@ -2310,7 +2348,7 @@ public class MultiPathFilter implements Cloneable
 			//			}
 
 			// Reset fail count for new frames
-			int failCount = 0;
+			failCounter.reset();
 			int lastId = -1;
 			final int length = multiPathResults.multiPathFitResults.length;
 			int nPredicted = 0;
@@ -2323,11 +2361,11 @@ public class MultiPathFilter implements Cloneable
 				// Include the number of failures before this result from the larger set
 				if (subset)
 				{
-					failCount += (multiPathResult.candidateId - (lastId + 1));
+					incrementFailures(failCounter, lastId, multiPathResult);
 					lastId = multiPathResult.candidateId;
 				}
 
-				final boolean evaluateFit = failCount <= failures;
+				final boolean evaluateFit = failCounter.isOK();
 				if (evaluateFit || store.isValid(multiPathResult.candidateId))
 				{
 					//					if (out != null)
@@ -2396,10 +2434,11 @@ public class MultiPathFilter implements Cloneable
 								else
 								{
 									// TODO - Check for duplicates
-									if (result[i].isNotDuplicate() ||
-											!coordinateStore.contains(result[i].getX(), result[i].getY(), result[i].getZ()))
+									if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(),
+											result[i].getY(), result[i].getZ()))
 									{
-										coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
+										coordinateStore.addToQueue(result[i].getX(), result[i].getY(),
+												result[i].getZ());
 										scoreStore.add(result[i].getUniqueId());
 										final FractionalAssignment[] a = result[i].getAssignments(nPredicted++);
 										if (a != null && a.length > 0)
@@ -2421,19 +2460,19 @@ public class MultiPathFilter implements Cloneable
 						if (newResult)
 						{
 							// More results were accepted so reset the fail count
-							failCount = 0;
+							failCounter.pass();
 						}
 						else
 						{
 							// Nothing was accepted, increment fail count
-							failCount++;
+							failCounter.fail();
 						}
 					}
 				}
 				else
 				{
 					// This was rejected, increment fail count
-					failCount++;
+					failCounter.fail();
 				}
 			}
 

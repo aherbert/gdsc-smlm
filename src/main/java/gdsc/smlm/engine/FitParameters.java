@@ -1,9 +1,9 @@
 package gdsc.smlm.engine;
 
+import java.util.List;
+
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.results.filter.MultiPathFilter;
-
-import java.util.List;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -20,6 +20,8 @@ import java.util.List;
 
 /**
  * Specifies additional parameters for the job.
+ * <p>
+ * Can be used to collect additional information during fitting.
  */
 public class FitParameters
 {
@@ -70,11 +72,13 @@ public class FitParameters
 	public float background = Float.NaN;
 	/**
 	 * Only maxima within the distance threshold to these coordinates will be included in the results.
+	 * 
 	 * @deprecated Filtering is no longer supported
 	 */
 	public List<float[]> filter = null;
 	/**
 	 * The distance threshold to use when checking if fitted peaks match the desired results.
+	 * 
 	 * @deprecated Filtering is no longer supported
 	 */
 	public float distanceThreshold = 1;
@@ -103,4 +107,12 @@ public class FitParameters
 	 * @return The duplicate distance
 	 */
 	public double duplicateDistance = 0;
+
+	/**
+	 * The pass array.
+	 * <p>
+	 * If this is not null then it will be initialised to the length of the candidate list and used to store the
+	 * pass/fail flag for each candidate up to the point that fitting was halted.
+	 */
+	public boolean[] pass = null;
 }

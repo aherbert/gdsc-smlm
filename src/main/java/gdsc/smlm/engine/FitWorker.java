@@ -57,6 +57,7 @@ import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.ExtendedPeakResult;
+import gdsc.smlm.results.FailCounter;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
 import gdsc.smlm.results.PeakResult;
@@ -289,6 +290,63 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 	}
 
+	/**
+	 * Allow recording the pass/fail events sent to the FailCounter from the MultiPathFilter
+	 */
+	private class RecordingFailCounter implements FailCounter
+	{
+		final boolean[] pass;
+		final FailCounter failCounter;
+
+		RecordingFailCounter(boolean[] pass, FailCounter failCounter)
+		{
+			this.pass = pass;
+			this.failCounter = failCounter;
+		}
+
+		public String getDescription()
+		{
+			return failCounter.getDescription();
+		}
+
+		public void pass()
+		{
+			// We record that this candidate generated new fit results
+			pass[dynamicMultiPathFitResult.candidateId] = true;
+			failCounter.pass();			
+		}
+
+		public void pass(int n)
+		{
+			throw new IllegalStateException("Cannot record multiple passes");
+		}
+
+		public void fail()
+		{
+			failCounter.fail();
+		}
+
+		public void fail(int n)
+		{
+			throw new IllegalStateException("Cannot record multiple fails");
+		}
+
+		public boolean isOK()
+		{
+			return failCounter.isOK();
+		}
+
+		public FailCounter newCounter()
+		{
+			throw new IllegalStateException("Cannot record to a new instance");
+		}
+
+		public void reset()
+		{
+			failCounter.reset();
+		}
+	}
+
 	private Estimate[] estimates = new Estimate[0], estimates2 = null;
 	private boolean[] isValid = null;
 
@@ -413,7 +471,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Remove the bias and gain. This is done for all solvers except:
 		// - the legacy MLE solvers which model camera amplification
 		// - the basic LVM solver without a camera calibration
-		
+
 		// Note: Assume that the camera model has been correctly initialised to be 
 		// relative to the global origin.
 		if (isFitCameraCounts)
@@ -589,7 +647,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				TextUtils.write(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
 			}
 
-			filter.select(multiPathResults, config.getFailuresLimit(), true, store, coordinateStore);
+			FailCounter failCounter = config.getFailCounter();
+			if (!benchmarking && params != null && params.pass != null)
+			{
+				// We want to store the pass/fail for consecutive candidates
+				params.pass = new boolean[candidates.getLength()];
+				failCounter = new RecordingFailCounter(params.pass, failCounter);
+				filter.select(multiPathResults, failCounter, true, store, coordinateStore);
+			}
+			else
+			{
+				filter.select(multiPathResults, failCounter, true, store, coordinateStore);
+			}
 
 			// Note: We go deeper into the candidate list than max candidate
 			// for any candidate where we have a good fit result as an estimate.

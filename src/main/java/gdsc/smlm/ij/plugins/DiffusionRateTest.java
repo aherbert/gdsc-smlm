@@ -1044,8 +1044,8 @@ public class DiffusionRateTest implements PlugIn
 		{
 			if (p.id != id)
 			{
-				x.reset();
-				y.reset();
+				x.clear();
+				y.clear();
 			}
 			id = p.id;
 			x.add(p.x);
