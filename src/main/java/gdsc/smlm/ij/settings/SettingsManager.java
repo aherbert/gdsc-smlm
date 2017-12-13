@@ -38,6 +38,7 @@ import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
+import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
@@ -936,6 +937,19 @@ public class SettingsManager
 	public static CubicSplineManagerSettings readCubicSplineManagerSettings(int flags)
 	{
 		return new ConfigurationReader<CubicSplineManagerSettings>(GUIProtosHelper.defaultCubicSplineManagerSettings)
+				.read(flags);
+	}
+
+	/**
+	 * Read the FailCountManagerSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the FailCountManagerSettings
+	 */
+	public static FailCountManagerSettings readFailCountManagerSettings(int flags)
+	{
+		return new ConfigurationReader<FailCountManagerSettings>(GUIProtosHelper.defaultFailCountManagerSettings)
 				.read(flags);
 	}
 

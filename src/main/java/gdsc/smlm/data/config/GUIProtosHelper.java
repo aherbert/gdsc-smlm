@@ -253,4 +253,15 @@ public class GUIProtosHelper
 		builder.setScale(2);
 		defaultCubicSplineManagerSettings = builder.build();
 	}
+	
+	/** The default FailCountManagerSettings */
+	public static final FailCountManagerSettings defaultFailCountManagerSettings;
+	static
+	{
+		FailCountManagerSettings.Builder builder = FailCountManagerSettings.newBuilder();
+		builder.setMaxFrames(100);
+		builder.setFailCountLimit(50);
+		builder.setTargetPassFraction(0.9);
+		defaultFailCountManagerSettings = builder.build();
+	}
 }

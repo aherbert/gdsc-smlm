@@ -27282,6 +27282,847 @@ public final class GUIProtos {
 
   }
 
+  public interface FailCountManagerSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.FailCountManagerSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    int getOption();
+
+    /**
+     * <code>int32 max_frames = 2;</code>
+     */
+    int getMaxFrames();
+
+    /**
+     * <code>int32 fail_count_limit = 3;</code>
+     */
+    int getFailCountLimit();
+
+    /**
+     * <code>bool save_after_fitting = 4;</code>
+     */
+    boolean getSaveAfterFitting();
+
+    /**
+     * <code>double target_pass_fraction = 5;</code>
+     */
+    double getTargetPassFraction();
+
+    /**
+     * <code>string filename = 6;</code>
+     */
+    java.lang.String getFilename();
+    /**
+     * <code>string filename = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getFilenameBytes();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Fail Count Manager plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.FailCountManagerSettings}
+   */
+  public  static final class FailCountManagerSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.FailCountManagerSettings)
+      FailCountManagerSettingsOrBuilder {
+    // Use FailCountManagerSettings.newBuilder() to construct.
+    private FailCountManagerSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FailCountManagerSettings() {
+      option_ = 0;
+      maxFrames_ = 0;
+      failCountLimit_ = 0;
+      saveAfterFitting_ = false;
+      targetPassFraction_ = 0D;
+      filename_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private FailCountManagerSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              option_ = input.readInt32();
+              break;
+            }
+            case 16: {
+
+              maxFrames_ = input.readInt32();
+              break;
+            }
+            case 24: {
+
+              failCountLimit_ = input.readInt32();
+              break;
+            }
+            case 32: {
+
+              saveAfterFitting_ = input.readBool();
+              break;
+            }
+            case 41: {
+
+              targetPassFraction_ = input.readDouble();
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filename_ = s;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.class, gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.Builder.class);
+    }
+
+    public static final int OPTION_FIELD_NUMBER = 1;
+    private int option_;
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    public int getOption() {
+      return option_;
+    }
+
+    public static final int MAX_FRAMES_FIELD_NUMBER = 2;
+    private int maxFrames_;
+    /**
+     * <code>int32 max_frames = 2;</code>
+     */
+    public int getMaxFrames() {
+      return maxFrames_;
+    }
+
+    public static final int FAIL_COUNT_LIMIT_FIELD_NUMBER = 3;
+    private int failCountLimit_;
+    /**
+     * <code>int32 fail_count_limit = 3;</code>
+     */
+    public int getFailCountLimit() {
+      return failCountLimit_;
+    }
+
+    public static final int SAVE_AFTER_FITTING_FIELD_NUMBER = 4;
+    private boolean saveAfterFitting_;
+    /**
+     * <code>bool save_after_fitting = 4;</code>
+     */
+    public boolean getSaveAfterFitting() {
+      return saveAfterFitting_;
+    }
+
+    public static final int TARGET_PASS_FRACTION_FIELD_NUMBER = 5;
+    private double targetPassFraction_;
+    /**
+     * <code>double target_pass_fraction = 5;</code>
+     */
+    public double getTargetPassFraction() {
+      return targetPassFraction_;
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 6;
+    private volatile java.lang.Object filename_;
+    /**
+     * <code>string filename = 6;</code>
+     */
+    public java.lang.String getFilename() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string filename = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFilenameBytes() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (option_ != 0) {
+        output.writeInt32(1, option_);
+      }
+      if (maxFrames_ != 0) {
+        output.writeInt32(2, maxFrames_);
+      }
+      if (failCountLimit_ != 0) {
+        output.writeInt32(3, failCountLimit_);
+      }
+      if (saveAfterFitting_ != false) {
+        output.writeBool(4, saveAfterFitting_);
+      }
+      if (targetPassFraction_ != 0D) {
+        output.writeDouble(5, targetPassFraction_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, filename_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (option_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, option_);
+      }
+      if (maxFrames_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, maxFrames_);
+      }
+      if (failCountLimit_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, failCountLimit_);
+      }
+      if (saveAfterFitting_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, saveAfterFitting_);
+      }
+      if (targetPassFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, targetPassFraction_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, filename_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings other = (gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) obj;
+
+      boolean result = true;
+      result = result && (getOption()
+          == other.getOption());
+      result = result && (getMaxFrames()
+          == other.getMaxFrames());
+      result = result && (getFailCountLimit()
+          == other.getFailCountLimit());
+      result = result && (getSaveAfterFitting()
+          == other.getSaveAfterFitting());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getTargetPassFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getTargetPassFraction()));
+      result = result && getFilename()
+          .equals(other.getFilename());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getOption();
+      hash = (37 * hash) + MAX_FRAMES_FIELD_NUMBER;
+      hash = (53 * hash) + getMaxFrames();
+      hash = (37 * hash) + FAIL_COUNT_LIMIT_FIELD_NUMBER;
+      hash = (53 * hash) + getFailCountLimit();
+      hash = (37 * hash) + SAVE_AFTER_FITTING_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveAfterFitting());
+      hash = (37 * hash) + TARGET_PASS_FRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getTargetPassFraction()));
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFilename().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Fail Count Manager plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.FailCountManagerSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.FailCountManagerSettings)
+        gdsc.smlm.data.config.GUIProtos.FailCountManagerSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.class, gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        option_ = 0;
+
+        maxFrames_ = 0;
+
+        failCountLimit_ = 0;
+
+        saveAfterFitting_ = false;
+
+        targetPassFraction_ = 0D;
+
+        filename_ = "";
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings build() {
+        gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings result = new gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings(this);
+        result.option_ = option_;
+        result.maxFrames_ = maxFrames_;
+        result.failCountLimit_ = failCountLimit_;
+        result.saveAfterFitting_ = saveAfterFitting_;
+        result.targetPassFraction_ = targetPassFraction_;
+        result.filename_ = filename_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings.getDefaultInstance()) return this;
+        if (other.getOption() != 0) {
+          setOption(other.getOption());
+        }
+        if (other.getMaxFrames() != 0) {
+          setMaxFrames(other.getMaxFrames());
+        }
+        if (other.getFailCountLimit() != 0) {
+          setFailCountLimit(other.getFailCountLimit());
+        }
+        if (other.getSaveAfterFitting() != false) {
+          setSaveAfterFitting(other.getSaveAfterFitting());
+        }
+        if (other.getTargetPassFraction() != 0D) {
+          setTargetPassFraction(other.getTargetPassFraction());
+        }
+        if (!other.getFilename().isEmpty()) {
+          filename_ = other.filename_;
+          onChanged();
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int option_ ;
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public int getOption() {
+        return option_;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder setOption(int value) {
+        
+        option_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder clearOption() {
+        
+        option_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int maxFrames_ ;
+      /**
+       * <code>int32 max_frames = 2;</code>
+       */
+      public int getMaxFrames() {
+        return maxFrames_;
+      }
+      /**
+       * <code>int32 max_frames = 2;</code>
+       */
+      public Builder setMaxFrames(int value) {
+        
+        maxFrames_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 max_frames = 2;</code>
+       */
+      public Builder clearMaxFrames() {
+        
+        maxFrames_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int failCountLimit_ ;
+      /**
+       * <code>int32 fail_count_limit = 3;</code>
+       */
+      public int getFailCountLimit() {
+        return failCountLimit_;
+      }
+      /**
+       * <code>int32 fail_count_limit = 3;</code>
+       */
+      public Builder setFailCountLimit(int value) {
+        
+        failCountLimit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 fail_count_limit = 3;</code>
+       */
+      public Builder clearFailCountLimit() {
+        
+        failCountLimit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveAfterFitting_ ;
+      /**
+       * <code>bool save_after_fitting = 4;</code>
+       */
+      public boolean getSaveAfterFitting() {
+        return saveAfterFitting_;
+      }
+      /**
+       * <code>bool save_after_fitting = 4;</code>
+       */
+      public Builder setSaveAfterFitting(boolean value) {
+        
+        saveAfterFitting_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_after_fitting = 4;</code>
+       */
+      public Builder clearSaveAfterFitting() {
+        
+        saveAfterFitting_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double targetPassFraction_ ;
+      /**
+       * <code>double target_pass_fraction = 5;</code>
+       */
+      public double getTargetPassFraction() {
+        return targetPassFraction_;
+      }
+      /**
+       * <code>double target_pass_fraction = 5;</code>
+       */
+      public Builder setTargetPassFraction(double value) {
+        
+        targetPassFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double target_pass_fraction = 5;</code>
+       */
+      public Builder clearTargetPassFraction() {
+        
+        targetPassFraction_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object filename_ = "";
+      /**
+       * <code>string filename = 6;</code>
+       */
+      public java.lang.String getFilename() {
+        java.lang.Object ref = filename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string filename = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFilenameBytes() {
+        java.lang.Object ref = filename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string filename = 6;</code>
+       */
+      public Builder setFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filename = 6;</code>
+       */
+      public Builder clearFilename() {
+        
+        filename_ = getDefaultInstance().getFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filename = 6;</code>
+       */
+      public Builder setFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.FailCountManagerSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.FailCountManagerSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FailCountManagerSettings>
+        PARSER = new com.google.protobuf.AbstractParser<FailCountManagerSettings>() {
+      public FailCountManagerSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new FailCountManagerSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FailCountManagerSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FailCountManagerSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -27357,6 +28198,11 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -27534,10 +28380,14 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001*O\n\014T" +
-      "emplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESO",
-      "URCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\t" +
-      "GUIProtosb\006proto3"
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\244\001\n\030" +
+      "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
+      "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
+      "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
+      "rget_pass_fraction\030\005 \001(\001\022\020\n\010filename\030\006 \001" +
+      "(\t*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022" +
+      "\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLAT" +
+      "E\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -27645,6 +28495,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor,
         new java.lang.String[] { "Option", "Selected", "Magnification", "Scale", "XShift", "YShift", "ZShift", });
+    internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor =
+      getDescriptor().getMessageTypes().get(15);
+    internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

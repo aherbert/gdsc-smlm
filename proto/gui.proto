@@ -463,3 +463,15 @@ message CubicSplineManagerSettings
 	double y_shift = 6;
 	double z_shift = 7;
 }
+
+
+// Contains settings for the Fail Count Manager plugin
+message FailCountManagerSettings
+{
+	int32 option = 1;
+	int32 max_frames = 2;
+	int32 fail_count_limit = 3;
+	bool save_after_fitting = 4;
+	double target_pass_fraction = 5;
+	string filename = 6;
+}
