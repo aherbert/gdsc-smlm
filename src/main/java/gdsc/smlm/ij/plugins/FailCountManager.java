@@ -178,7 +178,7 @@ public class FailCountManager implements PlugIn
 		boolean shutdown = false;
 		int slice = 0;
 		TurboList<ParameterisedFitJob> jobs = new TurboList<ParameterisedFitJob>(totalFrames);
-		while (!shutdown)
+		while (!shutdown && slice < totalFrames)
 		{
 			float[] data = source.next();
 			if (data == null)
@@ -416,7 +416,6 @@ public class FailCountManager implements PlugIn
 				for (int j = 0; j <= end; j++)
 				{
 					bw.write(prefix);
-					bw.write(',');
 					bw.write(Integer.toString(j + 1));
 					bw.write(',');
 					if (pass[j])
