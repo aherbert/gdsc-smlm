@@ -53,6 +53,7 @@ import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.filters.SpotFilterHelper;
 import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
+import gdsc.smlm.ij.plugins.PeakFit.RelativeParameterProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FakePerPixelCameraModel;
@@ -195,6 +196,32 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal());
 		gd.addSlider("Smoothing_2", 2.5, 4.5, config.getDataFilterParameterValue(1, defaultSmooth));
+		PeakFit.addRelativeParameterOptions(gd, new RelativeParameterProvider(2.5, 4.5, "Smoothing_2", provider)
+		{
+			@Override
+			void setAbsolute(boolean absolute)
+			{
+				FitEngineConfiguration c = fitEngineConfigurationProvider.getFitEngineConfiguration();
+				DataFilterMethod m = c.getDataFilterMethod(1, defaultDataFilterMethod);
+				double smooth = c.getDataFilterParameterValue(1, defaultSmooth);
+				c.setDataFilter(m, smooth, absolute, 1);
+			}
+
+			@Override
+			boolean isAbsolute()
+			{
+				return fitEngineConfigurationProvider.getFitEngineConfiguration().getDataFilterParameterAbsolute(1,
+						false);
+			}
+
+			@Override
+			double getValue()
+			{
+				return fitEngineConfigurationProvider.getFitEngineConfiguration().getDataFilterParameterValue(1,
+						defaultSmooth);
+			}
+		});
+
 		PeakFit.addSearchOptions(gd, provider);
 		PeakFit.addBorderOptions(gd, provider);
 		//gd.addNumericField("Top_N", topN, 0);
@@ -349,8 +376,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
 		PSF psf = fitConfig.getPSF();
 
+		boolean newCameraModel = false;
 		if (!calibration.equals(lastCalibration))
 		{
+			newCameraModel = true;
 			// Set a camera model.
 			// We have to set the camera type too to avoid configuration errors.
 			CameraModel cameraModel = CameraModelManager.load(fitConfig.getCameraModelName());
@@ -366,7 +395,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			fitConfig.setCameraModel(cameraModel);
 		}
 
-		if (!fitEngineSettings.equals(lastFitEngineSettings) || !psf.equals(lastPSF))
+		if (newCameraModel || !fitEngineSettings.equals(lastFitEngineSettings) || !psf.equals(lastPSF))
 		{
 			// Configure a jury filter
 			if (config.getDataFilterType() == DataFilterType.JURY)
