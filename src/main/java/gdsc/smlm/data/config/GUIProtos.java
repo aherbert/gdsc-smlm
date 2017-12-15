@@ -27320,6 +27320,16 @@ public final class GUIProtos {
      */
     com.google.protobuf.ByteString
         getFilenameBytes();
+
+    /**
+     * <code>int32 plot_item = 7;</code>
+     */
+    int getPlotItem();
+
+    /**
+     * <code>int32 plot_rolling_window = 8;</code>
+     */
+    int getPlotRollingWindow();
   }
   /**
    * <pre>
@@ -27343,6 +27353,8 @@ public final class GUIProtos {
       saveAfterFitting_ = false;
       targetPassFraction_ = 0D;
       filename_ = "";
+      plotItem_ = 0;
+      plotRollingWindow_ = 0;
     }
 
     @java.lang.Override
@@ -27399,6 +27411,16 @@ public final class GUIProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               filename_ = s;
+              break;
+            }
+            case 56: {
+
+              plotItem_ = input.readInt32();
+              break;
+            }
+            case 64: {
+
+              plotRollingWindow_ = input.readInt32();
               break;
             }
           }
@@ -27503,6 +27525,24 @@ public final class GUIProtos {
       }
     }
 
+    public static final int PLOT_ITEM_FIELD_NUMBER = 7;
+    private int plotItem_;
+    /**
+     * <code>int32 plot_item = 7;</code>
+     */
+    public int getPlotItem() {
+      return plotItem_;
+    }
+
+    public static final int PLOT_ROLLING_WINDOW_FIELD_NUMBER = 8;
+    private int plotRollingWindow_;
+    /**
+     * <code>int32 plot_rolling_window = 8;</code>
+     */
+    public int getPlotRollingWindow() {
+      return plotRollingWindow_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -27532,6 +27572,12 @@ public final class GUIProtos {
       }
       if (!getFilenameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, filename_);
+      }
+      if (plotItem_ != 0) {
+        output.writeInt32(7, plotItem_);
+      }
+      if (plotRollingWindow_ != 0) {
+        output.writeInt32(8, plotRollingWindow_);
       }
     }
 
@@ -27563,6 +27609,14 @@ public final class GUIProtos {
       if (!getFilenameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, filename_);
       }
+      if (plotItem_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, plotItem_);
+      }
+      if (plotRollingWindow_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, plotRollingWindow_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -27593,6 +27647,10 @@ public final class GUIProtos {
               other.getTargetPassFraction()));
       result = result && getFilename()
           .equals(other.getFilename());
+      result = result && (getPlotItem()
+          == other.getPlotItem());
+      result = result && (getPlotRollingWindow()
+          == other.getPlotRollingWindow());
       return result;
     }
 
@@ -27617,6 +27675,10 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getTargetPassFraction()));
       hash = (37 * hash) + FILENAME_FIELD_NUMBER;
       hash = (53 * hash) + getFilename().hashCode();
+      hash = (37 * hash) + PLOT_ITEM_FIELD_NUMBER;
+      hash = (53 * hash) + getPlotItem();
+      hash = (37 * hash) + PLOT_ROLLING_WINDOW_FIELD_NUMBER;
+      hash = (53 * hash) + getPlotRollingWindow();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27762,6 +27824,10 @@ public final class GUIProtos {
 
         filename_ = "";
 
+        plotItem_ = 0;
+
+        plotRollingWindow_ = 0;
+
         return this;
       }
 
@@ -27790,6 +27856,8 @@ public final class GUIProtos {
         result.saveAfterFitting_ = saveAfterFitting_;
         result.targetPassFraction_ = targetPassFraction_;
         result.filename_ = filename_;
+        result.plotItem_ = plotItem_;
+        result.plotRollingWindow_ = plotRollingWindow_;
         onBuilt();
         return result;
       }
@@ -27849,6 +27917,12 @@ public final class GUIProtos {
         if (!other.getFilename().isEmpty()) {
           filename_ = other.filename_;
           onChanged();
+        }
+        if (other.getPlotItem() != 0) {
+          setPlotItem(other.getPlotItem());
+        }
+        if (other.getPlotRollingWindow() != 0) {
+          setPlotRollingWindow(other.getPlotRollingWindow());
         }
         onChanged();
         return this;
@@ -28071,6 +28145,58 @@ public final class GUIProtos {
   checkByteStringIsUtf8(value);
         
         filename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int plotItem_ ;
+      /**
+       * <code>int32 plot_item = 7;</code>
+       */
+      public int getPlotItem() {
+        return plotItem_;
+      }
+      /**
+       * <code>int32 plot_item = 7;</code>
+       */
+      public Builder setPlotItem(int value) {
+        
+        plotItem_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 plot_item = 7;</code>
+       */
+      public Builder clearPlotItem() {
+        
+        plotItem_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int plotRollingWindow_ ;
+      /**
+       * <code>int32 plot_rolling_window = 8;</code>
+       */
+      public int getPlotRollingWindow() {
+        return plotRollingWindow_;
+      }
+      /**
+       * <code>int32 plot_rolling_window = 8;</code>
+       */
+      public Builder setPlotRollingWindow(int value) {
+        
+        plotRollingWindow_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 plot_rolling_window = 8;</code>
+       */
+      public Builder clearPlotRollingWindow() {
+        
+        plotRollingWindow_ = 0;
         onChanged();
         return this;
       }
@@ -28380,14 +28506,15 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\244\001\n\030" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\324\001\n\030" +
       "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
       "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
       "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
       "rget_pass_fraction\030\005 \001(\001\022\020\n\010filename\030\006 \001" +
-      "(\t*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022" +
-      "\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLAT" +
-      "E\020\002B\013B\tGUIProtosb\006proto3"
+      "(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rolling_wi" +
+      "ndow\030\010 \001(\005*O\n\014TemplateType\022\023\n\017INLINE_TEM" +
+      "PLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM" +
+      "_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -28500,7 +28627,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", });
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

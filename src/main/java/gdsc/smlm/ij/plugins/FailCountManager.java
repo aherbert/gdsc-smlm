@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import java.awt.AWTEvent;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,8 +10,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import gdsc.core.generics.ConcurrentMonoStack;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.BooleanArray;
+import gdsc.core.utils.BooleanRollingArray;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 
@@ -38,12 +42,19 @@ import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.ConsecutiveFailCounter;
 import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.RollingWindowFailCounter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.GenericDialog;
+import ij.gui.NonBlockingExtendedGenericDialog;
+import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
 
 /**
  * This plugin handles generation and analysis of fail counts to optimise the stopping criteria for a sequential
@@ -90,14 +101,89 @@ public class FailCountManager implements PlugIn
 		/** The results (pass/fail). */
 		private boolean[] results;
 
+		private int maxFailCount = -1;
+
+		// These are for plotting so we use float not int
+		private float[] candidate = null;
+		private float[] consFailCount = null;
+		private float[] passCount = null;
+
 		public FailCountData(int id, boolean[] results)
 		{
 			this.id = id;
-			// Find the last success
-			int end = results.length - 1;
-			while (end > 0 && !results[end])
-				end--;
-			this.results = Arrays.copyOf(results, end + 1);
+			this.results = results;
+		}
+
+		public int getMaxFailCount()
+		{
+			if (maxFailCount == -1)
+			{
+				int consFail = 0;
+				int max = 0;
+				for (int i = 0; i < results.length; i++)
+				{
+					if (results[i])
+					{
+						consFail = 0;
+					}
+					else
+					{
+						consFail++;
+						if (max < consFail)
+							max = consFail;
+					}
+				}
+				maxFailCount = max;
+			}
+			return maxFailCount;
+		}
+
+		public void createData()
+		{
+			if (candidate == null)
+				initialiseData();
+		}
+
+		private synchronized void initialiseData()
+		{
+			if (candidate != null)
+				return;
+			int pass = 0;
+			int consFail = 0;
+
+			int size = results.length;
+			candidate = new float[size];
+			passCount = new float[size];
+			consFailCount = new float[size];
+			for (int i = 0; i < size; i++)
+			{
+				if (results[i])
+				{
+					pass++;
+					consFail = 0;
+				}
+				else
+				{
+					consFail++;
+					// Only set this when non-zero
+					consFailCount[i] = consFail;
+				}
+				candidate[i] = i + 1;
+				passCount[i] = pass;
+			}
+		}
+
+		public float[] getRollingFailCount(int rollingWindow)
+		{
+			BooleanRollingArray win = new BooleanRollingArray(rollingWindow);
+			int size = results.length;
+			float[] rollingFailCount = new float[size];
+			for (int i = 0; i < size; i++)
+			{
+				win.add(!results[i]);
+				rollingFailCount[i] = win.getTrueCount();
+			}
+			return rollingFailCount;
 		}
 	}
 
@@ -140,7 +226,7 @@ public class FailCountManager implements PlugIn
 				break;
 			case ANALYSE_DATA:
 				analyseData();
-				break;				
+				break;
 			default:
 				throw new IllegalStateException("Unknown option: " + option);
 		}
@@ -175,6 +261,7 @@ public class FailCountManager implements PlugIn
 
 		ImageSource source = new IJImageSource(imp);
 		PeakFit peakFit = new PeakFit(fitConfig, ResultsSettings.getDefaultInstance());
+		peakFit.setResultsSuffix("(FailCountAnalysis)");
 		if (!peakFit.initialise(source, null, false))
 		{
 			IJ.error(TITLE, "Failed to initialise the fit engine");
@@ -199,7 +286,7 @@ public class FailCountManager implements PlugIn
 
 			if (slice++ % step == 0)
 			{
-				if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+				if (Utils.showStatus("Fitting slice: " + slice + " / " + totalFrames))
 					IJ.showProgress(slice, totalFrames);
 			}
 
@@ -210,6 +297,7 @@ public class FailCountManager implements PlugIn
 			shutdown = escapePressed();
 		}
 
+		Utils.showStatus("Extracting fail count data");
 		engine.end(shutdown);
 		IJ.showProgress(1);
 		source.close();
@@ -222,10 +310,20 @@ public class FailCountManager implements PlugIn
 			if (job.getStatus() == Status.FINISHED)
 			{
 				FitParameters fitParams = job.getFitParameters();
-				failCountData.add(new FailCountData(job.getSlice(), fitParams.pass));
+
+				// Find the last success
+				boolean[] results = fitParams.pass;
+				int end = results.length - 1;
+				while (end > 0 && !results[end])
+					end--;
+				// Add on the configured fail count limit
+				end = Math.min(end + 1 + settings.getFailCountLimit(), results.length);
+				results = Arrays.copyOf(results, end);
+				failCountData.add(new FailCountData(job.getSlice(), results));
 			}
 		}
 		FailCountManager.failCountData = failCountData;
+		Utils.showStatus("");
 
 		// Save for the future
 		if (settings.getSaveAfterFitting())
@@ -459,14 +557,156 @@ public class FailCountManager implements PlugIn
 		}
 	}
 
+	private static class PlotData
+	{
+		final int item;
+		final int rollingWindow;
+
+		PlotData(int item, int rollingWindow)
+		{
+			this.item = item;
+			this.rollingWindow = rollingWindow;
+		}
+
+		/**
+		 * Test if this equals the other object.
+		 *
+		 * @param that
+		 *            the other object
+		 * @return true, if successful
+		 */
+		public boolean equals(PlotData that)
+		{
+			return that != null && this.item == that.item && this.rollingWindow == that.rollingWindow;
+		}
+
+		/**
+		 * Checks if is a new item.
+		 *
+		 * @param that
+		 *            the other object
+		 * @return true, if is new item
+		 */
+		public boolean isNewItem(PlotData that)
+		{
+			if (that == null)
+				return true;
+			return this.item != that.item;
+		}
+	}
+
+	private class PlotWorker implements Runnable
+	{
+		final ConcurrentMonoStack<PlotData> stack;
+		final TurboList<FailCountData> failCountData;
+		PlotData lastPlotData = null;
+
+		PlotWorker(ConcurrentMonoStack<PlotData> stack, TurboList<FailCountData> failCountData)
+		{
+			this.stack = stack;
+			this.failCountData = failCountData;
+		}
+
+		public void run()
+		{
+			while (!Thread.interrupted())
+			{
+				try
+				{
+					PlotData plotData = stack.pop();
+					if (plotData == null)
+						break;
+					if (plotData.equals(lastPlotData))
+						continue;
+					run(plotData);
+				}
+				catch (InterruptedException e)
+				{
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+
+		private void run(PlotData plotData)
+		{
+			boolean isNewItem = plotData.isNewItem(lastPlotData);
+
+			lastPlotData = plotData;
+
+			int item = plotData.item - 1; // 0-based index
+			if (item < 0 || item >= failCountData.size())
+				return;
+			FailCountData data = failCountData.get(item);
+
+			// Show a plot of:
+			// Pass count verses candidate
+			// Consecutive fail count verses candidate
+			// Rolling fail count verses candidate (the window can be configurable)
+			data.createData();
+			WindowOrganiser wo = new WindowOrganiser();
+			if (isNewItem)
+			{
+				display(wo, "Pass Count", data.candidate, data.passCount);
+				display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount);
+			}
+			// Assume this is always different
+			display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow));
+			wo.tile();
+		}
+
+		private void display(WindowOrganiser wo, String string, float[] x, float[] y)
+		{
+			String title = TITLE + " " + string;
+			Plot plot = new Plot(title, "Candidate", string);
+			double max = Maths.max(y);
+			plot.setLimits(x[0], x[x.length - 1], 0, max * 1.05);
+			plot.addPoints(x, y, Plot.LINE);
+			plot.addLabel(0, 0, "Max = " + max);
+			Utils.display(title, plot, 0, wo);
+		}
+	}
+
+	/**
+	 * Show an interactive plot of the fail count data.
+	 */
 	private void plotData()
 	{
-		// TODO
-		// Pick a slice and show an interactive plot of:
-		// Pass count verses candidate
-		// Consecutive fail count verses candidate
-		// Rolling fail count verses candidate (the window can be configurable)
-		
+		TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+		if (failCountData.isEmpty())
+		{
+			IJ.error(TITLE, "No fail count data in memory");
+			return;
+		}
+
+		// Find max fail count size
+		int max = 1;
+		for (int i = 0; i < failCountData.size(); i++)
+		{
+			max = Math.max(max, failCountData.getf(i).getMaxFailCount());
+		}
+
+		final ConcurrentMonoStack<PlotData> stack = new ConcurrentMonoStack<PlotData>();
+		new Thread(new PlotWorker(stack, failCountData)).start();
+
+		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+		gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
+		gd.addSlider("Rolling_window", 1, max, settings.getPlotRollingWindow());
+		gd.addDialogListener(new DialogListener()
+		{
+			public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+			{
+				int item = (int) gd.getNextNumber();
+				int rollingWindow = (int) gd.getNextNumber();
+				settings.setPlotItem(item);
+				settings.setPlotRollingWindow(rollingWindow);
+				stack.insert(new PlotData(item, rollingWindow));
+				return true;
+			}
+		});
+
+		gd.showDialog();
+
+		stack.close(gd.wasCanceled());
 	}
 
 	private void analyseData()
@@ -476,6 +716,6 @@ public class FailCountManager implements PlugIn
 		// close they are to the target.
 		// Show a table of results for each frame and combined.
 		// Save the best fail counter to the current fit configuration.
-		
+
 	}
 }
