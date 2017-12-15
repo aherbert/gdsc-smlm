@@ -1,4 +1,4 @@
-package gdsc.smlm.results;
+package gdsc.smlm.results.count;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,45 +14,26 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 /**
- * A fail counter that always returns OK. Failures are ignored.
+ * Base class for fail counters
  */
-public class NullFailCounter implements FailCounter
+public abstract class BaseFailCounter implements FailCounter
 {
-	/** An instance */
-	public static final NullFailCounter INSTANCE = new NullFailCounter();
+	private String description;
 
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.results.FailCounter#getDescription()
+	 */
 	public String getDescription()
 	{
-		return "ignoreAllFailures";
-	}
-	
-	public void pass()
-	{
+		if (description == null)
+			description = generateDescription();
+		return description;
 	}
 
-	public void pass(int n)
-	{
-	}
-
-	public void fail()
-	{
-	}
-
-	public void fail(int n)
-	{
-	}
-
-	public boolean isOK()
-	{
-		return true;
-	}
-
-	public FailCounter newCounter()
-	{
-		return this; // This doesn't matter
-	}
-
-	public void reset()
-	{
-	}
+	/**
+	 * Generate the description.
+	 *
+	 * @return the description
+	 */
+	protected abstract String generateDescription();
 }

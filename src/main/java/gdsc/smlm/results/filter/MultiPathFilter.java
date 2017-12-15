@@ -13,8 +13,8 @@ import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.match.FractionalAssignment;
 import gdsc.core.match.RankedScoreCalculator;
 import gdsc.core.utils.NotImplementedException;
-import gdsc.smlm.results.ConsecutiveFailCounter;
-import gdsc.smlm.results.FailCounter;
+import gdsc.smlm.results.count.ConsecutiveFailCounter;
+import gdsc.smlm.results.count.FailCounter;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
 // TODO: Auto-generated Javadoc

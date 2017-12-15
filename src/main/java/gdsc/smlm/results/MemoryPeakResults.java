@@ -20,6 +20,7 @@ import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
+import gdsc.smlm.results.count.FrameCounter;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;

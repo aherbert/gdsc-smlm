@@ -32,8 +32,8 @@ import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.model.camera.CameraModel;
-import gdsc.smlm.results.ConsecutiveFailCounter;
-import gdsc.smlm.results.FailCounter;
+import gdsc.smlm.results.count.ConsecutiveFailCounter;
+import gdsc.smlm.results.count.FailCounter;
 
 /**
  * Specifies the configuration for the fit engine

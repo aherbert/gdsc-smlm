@@ -1,4 +1,4 @@
-package gdsc.smlm.results;
+package gdsc.smlm.results.count;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software

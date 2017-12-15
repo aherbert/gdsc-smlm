@@ -1,6 +1,4 @@
-package gdsc.smlm.results;
-
-import gdsc.core.utils.BooleanRollingArray;
+package gdsc.smlm.results.count;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -16,50 +14,42 @@ import gdsc.core.utils.BooleanRollingArray;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stop evaluating when a number of failures occurs within a window.
+ * Stop evaluating when a number of consecutive failures occurs.
  */
-public class RollingWindowFailCounter extends BaseFailCounter
+public class ConsecutiveFailCounter extends BaseFailCounter
 {
-	private final BooleanRollingArray rollingArray;
+	/** The fail count. */
+	private int failCount = 0;
 
 	/** The number of allowed failures. */
 	private final int allowedFailures;
 
 	/**
-	 * Instantiates a new rolling window fail counter.
+	 * Instantiates a new consecutive fail counter.
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
-	 * @param window
-	 *            the window size
 	 */
-	private RollingWindowFailCounter(int allowedFailures, int window)
+	private ConsecutiveFailCounter(int allowedFailures)
 	{
 		this.allowedFailures = allowedFailures;
-		rollingArray = new BooleanRollingArray(window);
 	}
 
 	@Override
 	protected String generateDescription()
 	{
-		return "rollingFailures=" + allowedFailures + "/" + getWindow();
+		return "consecutiveFailures=" + allowedFailures;
 	}
 
 	/**
-	 * Instantiates a new rolling window fail counter.
+	 * Instantiates a new consecutive fail counter.
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
-	 * @param window
-	 *            the window size
-	 * @throws IllegalArgumentException
-	 *             If the window is not strictly positive
 	 */
-	public static RollingWindowFailCounter create(int allowedFailures, int window) throws IllegalArgumentException
+	public static ConsecutiveFailCounter create(int allowedFailures)
 	{
-		if (window < 1)
-			throw new IllegalArgumentException("Window must be strictly positive");
-		return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
+		return new ConsecutiveFailCounter(Math.max(0, allowedFailures));
 	}
 
 	/*
@@ -69,7 +59,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 */
 	public void pass()
 	{
-		rollingArray.add(false);
+		failCount = 0;
 	}
 
 	/*
@@ -79,9 +69,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 */
 	public void pass(int n)
 	{
-		if (n < 0)
-			throw new IllegalArgumentException("Number of passes must be positive");
-		rollingArray.add(false, n);
+		failCount = 0;
 	}
 
 	/*
@@ -91,7 +79,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 */
 	public void fail()
 	{
-		rollingArray.add(true);
+		failCount++;
 	}
 
 	/*
@@ -103,7 +91,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	{
 		if (n < 0)
 			throw new IllegalArgumentException("Number of fails must be positive");
-		rollingArray.add(true, n);
+		failCount += n;
 	}
 
 	/*
@@ -113,7 +101,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 */
 	public boolean isOK()
 	{
-		return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
+		return failCount <= allowedFailures;
 	}
 
 	/*
@@ -123,7 +111,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 */
 	public FailCounter newCounter()
 	{
-		return new RollingWindowFailCounter(allowedFailures, getWindow());
+		return new ConsecutiveFailCounter(allowedFailures);
 	}
 
 	/*
@@ -133,38 +121,17 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 */
 	public void reset()
 	{
-		rollingArray.clear();
+		failCount = 0;
 	}
 
 	/**
-	 * Gets the window size.
-	 *
-	 * @return the window size
-	 */
-	public int getWindow()
-	{
-		return rollingArray.getCapacity();
-	}
-
-	/**
-	 * Gets the fail count within the current window.
+	 * Gets the fail count.
 	 *
 	 * @return the fail count
 	 */
 	public int getFailCount()
 	{
-		return rollingArray.getTrueCount();
-	}
-
-	/**
-	 * Gets the current window size. This may be smaller than the window size if not enough pass/fail events have been
-	 * registered.
-	 *
-	 * @return the current window size
-	 */
-	public int getCurrentWindowSize()
-	{
-		return rollingArray.getCount();
+		return failCount;
 	}
 
 	/**

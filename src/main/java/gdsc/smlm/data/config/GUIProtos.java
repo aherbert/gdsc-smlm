@@ -27330,6 +27330,16 @@ public final class GUIProtos {
      * <code>int32 plot_rolling_window = 8;</code>
      */
     int getPlotRollingWindow();
+
+    /**
+     * <code>int32 plot_pass_weight = 9;</code>
+     */
+    int getPlotPassWeight();
+
+    /**
+     * <code>double plot_reset_fraction = 10;</code>
+     */
+    double getPlotResetFraction();
   }
   /**
    * <pre>
@@ -27355,6 +27365,8 @@ public final class GUIProtos {
       filename_ = "";
       plotItem_ = 0;
       plotRollingWindow_ = 0;
+      plotPassWeight_ = 0;
+      plotResetFraction_ = 0D;
     }
 
     @java.lang.Override
@@ -27421,6 +27433,16 @@ public final class GUIProtos {
             case 64: {
 
               plotRollingWindow_ = input.readInt32();
+              break;
+            }
+            case 72: {
+
+              plotPassWeight_ = input.readInt32();
+              break;
+            }
+            case 81: {
+
+              plotResetFraction_ = input.readDouble();
               break;
             }
           }
@@ -27543,6 +27565,24 @@ public final class GUIProtos {
       return plotRollingWindow_;
     }
 
+    public static final int PLOT_PASS_WEIGHT_FIELD_NUMBER = 9;
+    private int plotPassWeight_;
+    /**
+     * <code>int32 plot_pass_weight = 9;</code>
+     */
+    public int getPlotPassWeight() {
+      return plotPassWeight_;
+    }
+
+    public static final int PLOT_RESET_FRACTION_FIELD_NUMBER = 10;
+    private double plotResetFraction_;
+    /**
+     * <code>double plot_reset_fraction = 10;</code>
+     */
+    public double getPlotResetFraction() {
+      return plotResetFraction_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -27578,6 +27618,12 @@ public final class GUIProtos {
       }
       if (plotRollingWindow_ != 0) {
         output.writeInt32(8, plotRollingWindow_);
+      }
+      if (plotPassWeight_ != 0) {
+        output.writeInt32(9, plotPassWeight_);
+      }
+      if (plotResetFraction_ != 0D) {
+        output.writeDouble(10, plotResetFraction_);
       }
     }
 
@@ -27617,6 +27663,14 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, plotRollingWindow_);
       }
+      if (plotPassWeight_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, plotPassWeight_);
+      }
+      if (plotResetFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(10, plotResetFraction_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -27651,6 +27705,12 @@ public final class GUIProtos {
           == other.getPlotItem());
       result = result && (getPlotRollingWindow()
           == other.getPlotRollingWindow());
+      result = result && (getPlotPassWeight()
+          == other.getPlotPassWeight());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPlotResetFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getPlotResetFraction()));
       return result;
     }
 
@@ -27679,6 +27739,11 @@ public final class GUIProtos {
       hash = (53 * hash) + getPlotItem();
       hash = (37 * hash) + PLOT_ROLLING_WINDOW_FIELD_NUMBER;
       hash = (53 * hash) + getPlotRollingWindow();
+      hash = (37 * hash) + PLOT_PASS_WEIGHT_FIELD_NUMBER;
+      hash = (53 * hash) + getPlotPassWeight();
+      hash = (37 * hash) + PLOT_RESET_FRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPlotResetFraction()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27828,6 +27893,10 @@ public final class GUIProtos {
 
         plotRollingWindow_ = 0;
 
+        plotPassWeight_ = 0;
+
+        plotResetFraction_ = 0D;
+
         return this;
       }
 
@@ -27858,6 +27927,8 @@ public final class GUIProtos {
         result.filename_ = filename_;
         result.plotItem_ = plotItem_;
         result.plotRollingWindow_ = plotRollingWindow_;
+        result.plotPassWeight_ = plotPassWeight_;
+        result.plotResetFraction_ = plotResetFraction_;
         onBuilt();
         return result;
       }
@@ -27923,6 +27994,12 @@ public final class GUIProtos {
         }
         if (other.getPlotRollingWindow() != 0) {
           setPlotRollingWindow(other.getPlotRollingWindow());
+        }
+        if (other.getPlotPassWeight() != 0) {
+          setPlotPassWeight(other.getPlotPassWeight());
+        }
+        if (other.getPlotResetFraction() != 0D) {
+          setPlotResetFraction(other.getPlotResetFraction());
         }
         onChanged();
         return this;
@@ -28197,6 +28274,58 @@ public final class GUIProtos {
       public Builder clearPlotRollingWindow() {
         
         plotRollingWindow_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int plotPassWeight_ ;
+      /**
+       * <code>int32 plot_pass_weight = 9;</code>
+       */
+      public int getPlotPassWeight() {
+        return plotPassWeight_;
+      }
+      /**
+       * <code>int32 plot_pass_weight = 9;</code>
+       */
+      public Builder setPlotPassWeight(int value) {
+        
+        plotPassWeight_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 plot_pass_weight = 9;</code>
+       */
+      public Builder clearPlotPassWeight() {
+        
+        plotPassWeight_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double plotResetFraction_ ;
+      /**
+       * <code>double plot_reset_fraction = 10;</code>
+       */
+      public double getPlotResetFraction() {
+        return plotResetFraction_;
+      }
+      /**
+       * <code>double plot_reset_fraction = 10;</code>
+       */
+      public Builder setPlotResetFraction(double value) {
+        
+        plotResetFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double plot_reset_fraction = 10;</code>
+       */
+      public Builder clearPlotResetFraction() {
+        
+        plotResetFraction_ = 0D;
         onChanged();
         return this;
       }
@@ -28506,15 +28635,17 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\324\001\n\030" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\213\002\n\030" +
       "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
       "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
       "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
       "rget_pass_fraction\030\005 \001(\001\022\020\n\010filename\030\006 \001" +
       "(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rolling_wi" +
-      "ndow\030\010 \001(\005*O\n\014TemplateType\022\023\n\017INLINE_TEM" +
-      "PLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM" +
-      "_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "ndow\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\033\n\023" +
+      "plot_reset_fraction\030\n \001(\001*O\n\014TemplateTyp" +
+      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
+      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb" +
+      "\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -28627,7 +28758,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", });
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotResetFraction", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

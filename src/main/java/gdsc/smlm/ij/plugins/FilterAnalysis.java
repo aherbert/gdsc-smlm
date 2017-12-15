@@ -33,10 +33,10 @@ import gdsc.core.utils.UnicodeReader;
 
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import gdsc.smlm.results.Counter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsReader;
+import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;

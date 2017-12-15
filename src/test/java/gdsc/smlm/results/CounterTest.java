@@ -3,6 +3,8 @@ package gdsc.smlm.results;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.smlm.results.count.Counter;
+
 public class CounterTest
 {
 	@Test

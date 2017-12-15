@@ -476,4 +476,6 @@ message FailCountManagerSettings
 	string filename = 6;
 	int32 plot_item = 7;
 	int32 plot_rolling_window = 8;
+	int32 plot_pass_weight = 9;
+	double plot_reset_fraction = 10;
 }

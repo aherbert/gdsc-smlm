@@ -10,10 +10,10 @@ import gdsc.core.match.ClassificationResult;
 import gdsc.core.match.FractionClassificationResult;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.ga.Chromosome;
-import gdsc.smlm.results.Counter;
-import gdsc.smlm.results.FrameCounter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.count.Counter;
+import gdsc.smlm.results.count.FrameCounter;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /*----------------------------------------------------------------------------- 
