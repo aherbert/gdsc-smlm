@@ -63,6 +63,7 @@ import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import ij.gui.GenericDialog;
@@ -195,7 +196,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		PeakFit.addDataFilterOptions(gd, provider);
 		gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal());
-		gd.addSlider("Smoothing_2", 2.5, 4.5, config.getDataFilterParameterValue(1, defaultSmooth));
+		//gd.addSlider("Smoothing_2", 2.5, 4.5, config.getDataFilterParameterValue(1, defaultSmooth));
 		PeakFit.addRelativeParameterOptions(gd, new RelativeParameterProvider(2.5, 4.5, "Smoothing_2", provider)
 		{
 			@Override
@@ -339,6 +340,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			showFP = gd.getNextBoolean();
 		}
 		preview = gd.getNextBoolean();
+		
+		((ExtendedGenericDialog)gd).collectOptions();
+		
 		boolean result = !gd.invalidNumber();
 		if (!preview)
 		{
@@ -862,8 +866,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		if (config.getDataFiltersCount() > 1)
 		{
 			textDataFilterMethod2
-					.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(1).ordinal()]);
-			textSmooth2.setText("" + config.getDataFilterParameterValue(1));
+					.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal()]);
+			textSmooth2.setText("" + config.getDataFilterParameterValue(1, defaultSmooth));
+			// XXX - What about the Abolute/Relative flag?
 		}
 		textSearch.setText("" + config.getSearch());
 		textBorder.setText("" + config.getBorder());
