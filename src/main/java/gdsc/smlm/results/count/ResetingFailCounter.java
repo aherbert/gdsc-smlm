@@ -14,44 +14,38 @@ package gdsc.smlm.results.count;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stop evaluating when a number of cumulative failures occurs. The counting is weighted so that fails increment and
- * passes decrement different amounts.
+ * Stop evaluating when a number of cumulative failures occurs. The failures count is reset to a fraction of the current
+ * value for each pass.
  */
-public class WeightedFailCounter extends BaseFailCounter
+public class ResetingFailCounter extends BaseFailCounter
 {
-	/** The fail count. Use a long to avoid overflow errors. */
-	private long failCount = 0L;
+	/** The fail count. */
+	private int failCount = 0;
 
 	/** The number of allowed failures. */
 	private final int allowedFailures;
 
-	/** The amount to increment for a fail. */
-	private final int failIncrement;
-
-	/** The amount to decrement for a pass. */
-	private final int passDecrement;
+	/** The fraction of the current failures count to reset to for a pass. */
+	private final double resetFraction;
 
 	/**
 	 * Instantiates a new weighted fail counter.
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
-	 * @param failIncrement
-	 *            the fail increment
-	 * @param passDecrement
-	 *            the pass decrement
+	 * @param resetFraction
+	 *            the reset fraction
 	 */
-	private WeightedFailCounter(int allowedFailures, int failIncrement, int passDecrement)
+	private ResetingFailCounter(int allowedFailures, double resetFraction)
 	{
 		this.allowedFailures = allowedFailures;
-		this.failIncrement = failIncrement;
-		this.passDecrement = passDecrement;
+		this.resetFraction = resetFraction;
 	}
 
 	@Override
 	protected String generateDescription()
 	{
-		return String.format("weightedFailures=%d;fail+%d;pass-%d", allowedFailures, failIncrement, passDecrement);
+		return String.format("allowedFailures=%d;resetFraction=%f", allowedFailures, resetFraction);
 	}
 
 	/**
@@ -59,16 +53,15 @@ public class WeightedFailCounter extends BaseFailCounter
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
-	 * @param failIncrement
-	 *            the amount to increment for a fail (set to 1 if below 1)
-	 * @param passDecrement
-	 *            the amount to decrement for a pass (set to 0 if below 0)
+	 * @param resetFraction
+	 *            The fraction of the current failures count to reset to for a pass.
 	 * @return the weighted fail counter
 	 */
-	public static WeightedFailCounter create(int allowedFailures, int failIncrement, int passDecrement)
+	public static ResetingFailCounter create(int allowedFailures, double resetFraction)
 	{
-		return new WeightedFailCounter(Math.max(0, allowedFailures), Math.max(1, failIncrement),
-				Math.max(0, passDecrement));
+		if (!(resetFraction >= 0 && resetFraction <= 1))
+			throw new IllegalArgumentException("Reset must be in the range 0-1");
+		return new ResetingFailCounter(Math.max(0, allowedFailures), resetFraction);
 	}
 
 	/*
@@ -78,9 +71,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 */
 	public void pass()
 	{
-		failCount -= passDecrement;
-		if (failCount < 0L)
-			failCount = 0L;
+		failCount = (int) (failCount * resetFraction);
 	}
 
 	/*
@@ -92,9 +83,12 @@ public class WeightedFailCounter extends BaseFailCounter
 	{
 		if (n < 0)
 			throw new IllegalArgumentException("Number of passes must be positive");
-		failCount -= n * passDecrement;
-		if (failCount < 0L)
-			failCount = 0L;
+		while (n-- > 0)
+		{
+			pass();
+			if (failCount == 0)
+				break;
+		}
 	}
 
 	/*
@@ -104,9 +98,9 @@ public class WeightedFailCounter extends BaseFailCounter
 	 */
 	public void fail()
 	{
-		failCount += failIncrement;
-		if (failCount < 0L)
+		if (failCount == Integer.MAX_VALUE)
 			throw new IllegalStateException("Unable to increment");
+		failCount++;
 	}
 
 	/*
@@ -118,9 +112,9 @@ public class WeightedFailCounter extends BaseFailCounter
 	{
 		if (n < 0)
 			throw new IllegalArgumentException("Number of fails must be positive");
-		failCount += n * failIncrement;
-		if (failCount < 0L)
+		if (Integer.MAX_VALUE - n < failCount)
 			throw new IllegalStateException("Unable to increment");
+		failCount += n;
 	}
 
 	/*
@@ -140,7 +134,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 */
 	public FailCounter newCounter()
 	{
-		return new WeightedFailCounter(allowedFailures, failIncrement, passDecrement);
+		return new ResetingFailCounter(allowedFailures, resetFraction);
 	}
 
 	/*
@@ -150,7 +144,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 */
 	public void reset()
 	{
-		failCount = 0L;
+		failCount = 0;
 	}
 
 	/**
@@ -174,22 +168,13 @@ public class WeightedFailCounter extends BaseFailCounter
 	}
 
 	/**
-	 * Gets the amount to increment for a fail.
+	 * Gets the fraction of the current failures count to reset to for a pass.
 	 *
-	 * @return the fail increment
+	 * @return the reset fraction
 	 */
-	public int getFailIncrement()
+	public double getResetFraction()
 	{
-		return failIncrement;
+		return resetFraction;
 	}
 
-	/**
-	 * Gets the amount to decrement for a pass
-	 *
-	 * @return the pass decrement
-	 */
-	public int getPassDecrement()
-	{
-		return passDecrement;
-	}
 }
