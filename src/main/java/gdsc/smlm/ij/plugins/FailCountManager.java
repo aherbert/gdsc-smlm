@@ -649,8 +649,16 @@ public class FailCountManager implements PlugIn
 				display(wo, "Pass Count", data.candidate, data.passCount);
 				display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount);
 			}
-			// Assume this is always different
+
+			// TODO - only rebuild if changed
 			display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow));
+			
+			// TODO - 
+			// Add resetting fail count
+			// Add weighted fail count
+			// Only rebuild if changed.
+			
+			
 			wo.tile();
 		}
 
