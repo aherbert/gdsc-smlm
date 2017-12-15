@@ -417,8 +417,8 @@ public class SeriesImageSource extends ImageSource
 				// Each image offset is described by a separate ExtendedFileInfo object
 				ExtendedFileInfo fi = getInfo(frameCount);
 				skip = fi.getOffset();
-				fi.stripOffsets = fi.stripOffsets;
-				fi.stripLengths = fi.stripLengths;
+				this.fi.stripOffsets = fi.stripOffsets;
+				this.fi.stripLengths = fi.stripLengths;
 
 				if (frameCount != 0)
 				{
