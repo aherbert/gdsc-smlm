@@ -477,5 +477,6 @@ message FailCountManagerSettings
 	int32 plot_item = 7;
 	int32 plot_rolling_window = 8;
 	int32 plot_pass_weight = 9;
-	double plot_reset_fraction = 10;
+	int32 plot_fail_weight = 10;
+	double plot_reset_fraction = 11;
 }

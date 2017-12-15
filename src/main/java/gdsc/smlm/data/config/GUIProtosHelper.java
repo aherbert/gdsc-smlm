@@ -264,6 +264,7 @@ public class GUIProtosHelper
 		builder.setTargetPassFraction(0.9);
 		builder.setPlotRollingWindow(10);
 		builder.setPlotPassWeight(2);
+		builder.setPlotFailWeight(1);
 		builder.setPlotResetFraction(0.5);
 		defaultFailCountManagerSettings = builder.build();
 	}
