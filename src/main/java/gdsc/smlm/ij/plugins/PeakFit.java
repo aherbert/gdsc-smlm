@@ -1355,7 +1355,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Used for relative parameters
 	 */
-	private static abstract class RelativeParameterProvider
+	static abstract class RelativeParameterProvider
 	{
 		double min, max;
 		String name;
@@ -1382,7 +1382,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		}
 	}
 
-	private static void addRelativeParameterOptions(final ExtendedGenericDialog gd, final RelativeParameterProvider rp)
+	static void addRelativeParameterOptions(final ExtendedGenericDialog gd, final RelativeParameterProvider rp)
 	{
 		final String label = rp.getDialogName();
 		gd.addSlider(label, rp.min, rp.max, rp.getValue(), new OptionListener<Double>()
