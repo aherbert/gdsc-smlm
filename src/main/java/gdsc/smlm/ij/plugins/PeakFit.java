@@ -149,6 +149,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private Logger logger = null;
 
 	private ImageSource source = null;
+	private String resultsSuffix = null;
 	private PeakResultsList results;
 	private long time, runTime;
 	private FitEngineConfiguration config = null;
@@ -579,6 +580,17 @@ public class PeakFit implements PlugInFilter, ItemListener
 	}
 
 	/**
+	 * Sets the results suffix.
+	 *
+	 * @param resultsSuffix
+	 *            the new results suffix
+	 */
+	public void setResultsSuffix(String resultsSuffix)
+	{
+		this.resultsSuffix = resultsSuffix;
+	}
+
+	/**
 	 * Set-up the fitting using all the configured properties. Prepare the output results.
 	 */
 	public boolean initialiseFitting()
@@ -590,12 +602,16 @@ public class PeakFit implements PlugInFilter, ItemListener
 		updateFitConfiguration(config);
 
 		results.setSource(source);
+		String name = source.getName();
+		if (!TextUtils.isNullOrEmpty(resultsSuffix))
+			name += " " + resultsSuffix;
 		if (maximaIdentification)
-			results.setName(source.getName() + " (Maxima)");
+			name += " (Maxima)";
 		else if (fitMaxima)
-			results.setName(source.getName() + " (" + getSolverName() + " Fit Maxima)");
+			name += " (" + getSolverName() + " Fit Maxima)";
 		else
-			results.setName(source.getName() + " (" + getSolverName() + ")");
+			name += " (" + getSolverName() + ")";
+		results.setName(name);
 		results.setBounds(bounds);
 
 		//Calibration cal = calibration.clone();
