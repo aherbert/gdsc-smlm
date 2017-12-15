@@ -20,7 +20,9 @@ public abstract class BaseFailCounter implements FailCounter
 {
 	private String description;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.FailCounter#getDescription()
 	 */
 	public String getDescription()
@@ -36,4 +38,18 @@ public abstract class BaseFailCounter implements FailCounter
 	 * @return the description
 	 */
 	protected abstract String generateDescription();
+
+	/**
+	 * Check the number is positive.
+	 *
+	 * @param c
+	 *            the number
+	 * @throws IllegalStateException
+	 *             if not positive
+	 */
+	protected static void checkPositive(int c) throws IllegalStateException
+	{
+		if (c < 0)
+			throw new IllegalStateException("Negative count: " + c);
+	}
 }
