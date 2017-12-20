@@ -116,7 +116,7 @@ public class GUIProtosHelper
 	/** The default LoadLocalisationsSettings */
 	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings = LoadLocalisationsSettings
 			.getDefaultInstance();
-	
+
 	/** The default ClusteringSettings */
 	public static final ClusteringSettings defaultClusteringSettings;
 	static
@@ -144,7 +144,7 @@ public class GUIProtosHelper
 		builder.setJumpDistance(1);
 		defaultClusteringSettings = builder.build();
 	}
-	
+
 	/** The default OpticsSettings */
 	public static final OpticsSettings defaultOpticsSettings;
 	static
@@ -176,7 +176,7 @@ public class GUIProtosHelper
 		b.setPlotShowSelection(true);
 		defaultOpticsSettings = builder.build();
 	}
-	
+
 	/** The default ConfigurationTemplateSettings */
 	public static final ConfigurationTemplateSettings defaultConfigurationTemplateSettings;
 	static
@@ -187,7 +187,7 @@ public class GUIProtosHelper
 		builder.setConfigurationDirectory(System.getProperty("user.home") + File.separator + "gdsc.smlm");
 		defaultConfigurationTemplateSettings = builder.build();
 	}
-	
+
 	/** The default NucleusMaskSettings */
 	public static final NucleusMaskSettings defaultNucleusMaskSettings;
 	static
@@ -202,7 +202,7 @@ public class GUIProtosHelper
 		builder.setDiameter(2);
 		defaultNucleusMaskSettings = builder.build();
 	}
-	
+
 	/** The default PSFCreatorSettings */
 	public static final PSFCreatorSettings defaultPSFCreatorSettings;
 	static
@@ -236,14 +236,14 @@ public class GUIProtosHelper
 		builder.setComShiftThreshold(0.01);
 		defaultPSFCreatorSettings = builder.build();
 	}
-	
+
 	/** The default CameraModelManagerSettings */
 	public static final CameraModelManagerSettings defaultCameraModelManagerSettings;
 	static
 	{
 		defaultCameraModelManagerSettings = CameraModelManagerSettings.getDefaultInstance();
 	}
-	
+
 	/** The default CubicSplineManagerSettings */
 	public static final CubicSplineManagerSettings defaultCubicSplineManagerSettings;
 	static
@@ -253,7 +253,7 @@ public class GUIProtosHelper
 		builder.setScale(2);
 		defaultCubicSplineManagerSettings = builder.build();
 	}
-	
+
 	/** The default FailCountManagerSettings */
 	public static final FailCountManagerSettings defaultFailCountManagerSettings;
 	static
@@ -266,6 +266,7 @@ public class GUIProtosHelper
 		builder.setPlotPassWeight(2);
 		builder.setPlotFailWeight(1);
 		builder.setPlotResetFraction(0.5);
+		builder.setPlotFixedXAxis(true);
 		defaultFailCountManagerSettings = builder.build();
 	}
 }

@@ -590,10 +590,12 @@ public class FailCountManager implements PlugIn
 		final int passWeight;
 		final int failWeight;
 		final double resetFraction;
+		final boolean fixedXAxis;
 
-		PlotData(int item, int rollingWindow, int passWeight, int failWeight, double resetFraction)
+		PlotData(int item, boolean fixedXAxis, int rollingWindow, int passWeight, int failWeight, double resetFraction)
 		{
 			this.item = item;
+			this.fixedXAxis = fixedXAxis;
 			this.rollingWindow = rollingWindow;
 			this.passWeight = passWeight;
 			this.failWeight = failWeight;
@@ -612,6 +614,7 @@ public class FailCountManager implements PlugIn
 			//@formatter:off
 			return that != null && 
 					this.item == that.item && 
+					this.fixedXAxis == that.fixedXAxis && 
 					this.rollingWindow == that.rollingWindow &&
 					this.passWeight == that.passWeight &&
 					this.failWeight == that.failWeight &&
@@ -640,16 +643,22 @@ public class FailCountManager implements PlugIn
 		final ConcurrentMonoStack<PlotData> stack;
 		final TurboList<FailCountData> failCountData;
 		PlotData lastPlotData = null;
+		int maxSize = 0;
 
 		PlotWorker(ConcurrentMonoStack<PlotData> stack, TurboList<FailCountData> failCountData)
 		{
 			this.stack = stack;
 			this.failCountData = failCountData;
+			for (int i = 0; i < failCountData.size(); i++)
+			{
+				maxSize = Math.max(maxSize, failCountData.getf(i).results.length);
+			}
 		}
 
 		public void run()
 		{
-			while (!Thread.interrupted())
+			//while (!Thread.interrupted())
+			while (true)
 			{
 				try
 				{
@@ -659,61 +668,62 @@ public class FailCountManager implements PlugIn
 					if (plotData.equals(lastPlotData))
 						continue;
 					run(plotData);
+					lastPlotData = plotData;
 				}
 				catch (InterruptedException e)
 				{
-					Thread.currentThread().interrupt();
+					//Thread.currentThread().interrupt();
+					break;
 				}
 			}
 		}
 
 		private void run(PlotData plotData)
 		{
-			boolean isNewItem = plotData.isNewItem(lastPlotData);
+			boolean isNew = plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
 			int item = plotData.item - 1; // 0-based index
 			if (item < 0 || item >= failCountData.size())
-			{
-				lastPlotData = plotData;
 				return;
-			}
 			FailCountData data = failCountData.get(item);
 
 			data.createData();
 			WindowOrganiser wo = new WindowOrganiser();
-			if (isNewItem)
+			if (isNew)
 			{
-				display(wo, "Pass Count", data.candidate, data.passCount);
-				display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount);
+				display(wo, "Pass Count", data.candidate, data.passCount, plotData.fixedXAxis);
+				display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount, plotData.fixedXAxis);
 			}
 
 			// Only rebuild if changed
-			if (isNewItem || plotData.rollingWindow != lastPlotData.rollingWindow)
+			if (isNew || plotData.rollingWindow != lastPlotData.rollingWindow)
 			{
-				display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow));
+				display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow),
+						plotData.fixedXAxis);
 			}
-			if (isNewItem || plotData.passWeight != lastPlotData.passWeight ||
+			if (isNew || plotData.passWeight != lastPlotData.passWeight ||
 					plotData.failWeight != lastPlotData.failWeight)
 			{
 				display(wo, "Weighted Fail Count", data.candidate,
-						data.getWeightedFailCount(plotData.passWeight, plotData.failWeight));
+						data.getWeightedFailCount(plotData.passWeight, plotData.failWeight), plotData.fixedXAxis);
 			}
-			if (isNewItem || plotData.resetFraction != lastPlotData.resetFraction)
+			if (isNew || plotData.resetFraction != lastPlotData.resetFraction)
 			{
-				display(wo, "Resetting Fail Count", data.candidate, data.getResettingFailCount(plotData.resetFraction));
+				display(wo, "Resetting Fail Count", data.candidate, data.getResettingFailCount(plotData.resetFraction),
+						plotData.fixedXAxis);
 			}
 
 			wo.tile();
-			lastPlotData = plotData;
 		}
 
-		private void display(WindowOrganiser wo, String string, float[] x, float[] y)
+		private void display(WindowOrganiser wo, String string, float[] x, float[] y, boolean fixedXAxis)
 		{
 			String title = TITLE + " " + string;
 			Plot plot = new Plot(title, "Candidate", string);
-			double max = Maths.max(y);
-			plot.setLimits(x[0], x[x.length - 1], 0, max * 1.05);
+			double maxx = (fixedXAxis) ? maxSize : x[x.length - 1];
+			double maxy = Maths.max(y);
+			plot.setLimits(x[0], maxx, 0, maxy * 1.05);
 			plot.addPoints(x, y, Plot.LINE);
-			plot.addLabel(0, 0, "Max = " + max);
+			plot.addLabel(0, 0, "Max = " + maxy);
 			Utils.display(title, plot, 0, wo);
 		}
 	}
@@ -742,15 +752,20 @@ public class FailCountManager implements PlugIn
 
 		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
+		gd.addCheckbox("Fixed_x_axis", settings.getPlotFixedXAxis());
+		gd.addMessage("Rolling Window Fail Count");
 		gd.addSlider("Rolling_window", 1, max, settings.getPlotRollingWindow());
+		gd.addMessage("Weighted Fail Count");
 		gd.addSlider("Pass_weight", 1, 20, settings.getPlotPassWeight());
 		gd.addSlider("Fail_weight", 1, 20, settings.getPlotFailWeight());
+		gd.addMessage("Resetting Fail Count");
 		gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
 		gd.addDialogListener(new DialogListener()
 		{
 			public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 			{
 				int item = (int) gd.getNextNumber();
+				boolean fixedXAxis = gd.getNextBoolean();
 				int rollingWindow = (int) gd.getNextNumber();
 				int passWeight = (int) gd.getNextNumber();
 				int failWeight = (int) gd.getNextNumber();
@@ -760,7 +775,7 @@ public class FailCountManager implements PlugIn
 				settings.setPlotPassWeight(passWeight);
 				settings.setPlotFailWeight(failWeight);
 				settings.setPlotResetFraction(resetFraction);
-				stack.insert(new PlotData(item, rollingWindow, passWeight, failWeight, resetFraction));
+				stack.insert(new PlotData(item, fixedXAxis, rollingWindow, passWeight, failWeight, resetFraction));
 				return true;
 			}
 		});

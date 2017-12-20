@@ -27345,6 +27345,11 @@ public final class GUIProtos {
      * <code>double plot_reset_fraction = 11;</code>
      */
     double getPlotResetFraction();
+
+    /**
+     * <code>bool plot_fixed_x_axis = 12;</code>
+     */
+    boolean getPlotFixedXAxis();
   }
   /**
    * <pre>
@@ -27373,6 +27378,7 @@ public final class GUIProtos {
       plotPassWeight_ = 0;
       plotFailWeight_ = 0;
       plotResetFraction_ = 0D;
+      plotFixedXAxis_ = false;
     }
 
     @java.lang.Override
@@ -27454,6 +27460,11 @@ public final class GUIProtos {
             case 89: {
 
               plotResetFraction_ = input.readDouble();
+              break;
+            }
+            case 96: {
+
+              plotFixedXAxis_ = input.readBool();
               break;
             }
           }
@@ -27603,6 +27614,15 @@ public final class GUIProtos {
       return plotResetFraction_;
     }
 
+    public static final int PLOT_FIXED_X_AXIS_FIELD_NUMBER = 12;
+    private boolean plotFixedXAxis_;
+    /**
+     * <code>bool plot_fixed_x_axis = 12;</code>
+     */
+    public boolean getPlotFixedXAxis() {
+      return plotFixedXAxis_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -27647,6 +27667,9 @@ public final class GUIProtos {
       }
       if (plotResetFraction_ != 0D) {
         output.writeDouble(11, plotResetFraction_);
+      }
+      if (plotFixedXAxis_ != false) {
+        output.writeBool(12, plotFixedXAxis_);
       }
     }
 
@@ -27698,6 +27721,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, plotResetFraction_);
       }
+      if (plotFixedXAxis_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(12, plotFixedXAxis_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -27740,6 +27767,8 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getPlotResetFraction())
           == java.lang.Double.doubleToLongBits(
               other.getPlotResetFraction()));
+      result = result && (getPlotFixedXAxis()
+          == other.getPlotFixedXAxis());
       return result;
     }
 
@@ -27775,6 +27804,9 @@ public final class GUIProtos {
       hash = (37 * hash) + PLOT_RESET_FRACTION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPlotResetFraction()));
+      hash = (37 * hash) + PLOT_FIXED_X_AXIS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPlotFixedXAxis());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27930,6 +27962,8 @@ public final class GUIProtos {
 
         plotResetFraction_ = 0D;
 
+        plotFixedXAxis_ = false;
+
         return this;
       }
 
@@ -27963,6 +27997,7 @@ public final class GUIProtos {
         result.plotPassWeight_ = plotPassWeight_;
         result.plotFailWeight_ = plotFailWeight_;
         result.plotResetFraction_ = plotResetFraction_;
+        result.plotFixedXAxis_ = plotFixedXAxis_;
         onBuilt();
         return result;
       }
@@ -28037,6 +28072,9 @@ public final class GUIProtos {
         }
         if (other.getPlotResetFraction() != 0D) {
           setPlotResetFraction(other.getPlotResetFraction());
+        }
+        if (other.getPlotFixedXAxis() != false) {
+          setPlotFixedXAxis(other.getPlotFixedXAxis());
         }
         onChanged();
         return this;
@@ -28392,6 +28430,32 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private boolean plotFixedXAxis_ ;
+      /**
+       * <code>bool plot_fixed_x_axis = 12;</code>
+       */
+      public boolean getPlotFixedXAxis() {
+        return plotFixedXAxis_;
+      }
+      /**
+       * <code>bool plot_fixed_x_axis = 12;</code>
+       */
+      public Builder setPlotFixedXAxis(boolean value) {
+        
+        plotFixedXAxis_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool plot_fixed_x_axis = 12;</code>
+       */
+      public Builder clearPlotFixedXAxis() {
+        
+        plotFixedXAxis_ = false;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -28698,7 +28762,7 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\245\002\n\030" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\300\002\n\030" +
       "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
       "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
       "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
@@ -28706,9 +28770,10 @@ public final class GUIProtos {
       "(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rolling_wi" +
       "ndow\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020" +
       "plot_fail_weight\030\n \001(\005\022\033\n\023plot_reset_fra" +
-      "ction\030\013 \001(\001*O\n\014TemplateType\022\023\n\017INLINE_TE" +
-      "MPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTO" +
-      "M_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "ction\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010*O" +
+      "\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021R" +
+      "ESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B" +
+      "\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -28821,7 +28886,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", });
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

@@ -479,4 +479,5 @@ message FailCountManagerSettings
 	int32 plot_pass_weight = 9;
 	int32 plot_fail_weight = 10;
 	double plot_reset_fraction = 11;
+	bool plot_fixed_x_axis = 12;
 }
