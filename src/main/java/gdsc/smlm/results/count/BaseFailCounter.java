@@ -52,4 +52,17 @@ public abstract class BaseFailCounter implements FailCounter
 		if (c < 0)
 			throw new IllegalStateException("Negative count: " + c);
 	}
+	
+	/**
+	 * Adds the result.
+	 *
+	 * @param pass Set to true if a pass
+	 */
+	public void addResult(boolean pass)
+	{
+		if (pass)
+			pass();
+		else
+			fail();
+	}
 }

@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import gdsc.core.generics.ConcurrentMonoStack;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.BooleanArray;
-import gdsc.core.utils.BooleanRollingArray;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
@@ -43,8 +42,9 @@ import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ImageSource;
-import gdsc.smlm.results.count.ConsecutiveFailCounter;
+import gdsc.smlm.results.count.ResettingFailCounter;
 import gdsc.smlm.results.count.RollingWindowFailCounter;
+import gdsc.smlm.results.count.WeightedFailCounter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -175,15 +175,41 @@ public class FailCountManager implements PlugIn
 
 		public float[] getRollingFailCount(int rollingWindow)
 		{
-			BooleanRollingArray win = new BooleanRollingArray(rollingWindow);
+			RollingWindowFailCounter c = RollingWindowFailCounter.create(Integer.MAX_VALUE, rollingWindow);
 			int size = results.length;
-			float[] rollingFailCount = new float[size];
+			float[] failCount = new float[size];
 			for (int i = 0; i < size; i++)
 			{
-				win.add(!results[i]);
-				rollingFailCount[i] = win.getTrueCount();
+				c.addResult(results[i]);
+				failCount[i] = c.getFailCount();
 			}
-			return rollingFailCount;
+			return failCount;
+		}
+
+		public float[] getWeightedFailCount(int passWeight, int failWeight)
+		{
+			WeightedFailCounter c = WeightedFailCounter.create(Integer.MAX_VALUE, failWeight, passWeight);
+			int size = results.length;
+			float[] failCount = new float[size];
+			for (int i = 0; i < size; i++)
+			{
+				c.addResult(results[i]);
+				failCount[i] = c.getFailCount();
+			}
+			return failCount;
+		}
+
+		public float[] getResettingFailCount(double resetFraction)
+		{
+			ResettingFailCounter c = ResettingFailCounter.create(Integer.MAX_VALUE, resetFraction);
+			int size = results.length;
+			float[] failCount = new float[size];
+			for (int i = 0; i < size; i++)
+			{
+				c.addResult(results[i]);
+				failCount[i] = c.getFailCount();
+			}
+			return failCount;
 		}
 	}
 
@@ -561,11 +587,17 @@ public class FailCountManager implements PlugIn
 	{
 		final int item;
 		final int rollingWindow;
+		final int passWeight;
+		final int failWeight;
+		final double resetFraction;
 
-		PlotData(int item, int rollingWindow)
+		PlotData(int item, int rollingWindow, int passWeight, int failWeight, double resetFraction)
 		{
 			this.item = item;
 			this.rollingWindow = rollingWindow;
+			this.passWeight = passWeight;
+			this.failWeight = failWeight;
+			this.resetFraction = resetFraction;
 		}
 
 		/**
@@ -577,7 +609,15 @@ public class FailCountManager implements PlugIn
 		 */
 		public boolean equals(PlotData that)
 		{
-			return that != null && this.item == that.item && this.rollingWindow == that.rollingWindow;
+			//@formatter:off
+			return that != null && 
+					this.item == that.item && 
+					this.rollingWindow == that.rollingWindow &&
+					this.passWeight == that.passWeight &&
+					this.failWeight == that.failWeight &&
+					this.resetFraction == that.resetFraction
+					;
+			//@formatter:on
 		}
 
 		/**
@@ -630,18 +670,14 @@ public class FailCountManager implements PlugIn
 		private void run(PlotData plotData)
 		{
 			boolean isNewItem = plotData.isNewItem(lastPlotData);
-
-			lastPlotData = plotData;
-
 			int item = plotData.item - 1; // 0-based index
 			if (item < 0 || item >= failCountData.size())
+			{
+				lastPlotData = plotData;
 				return;
+			}
 			FailCountData data = failCountData.get(item);
 
-			// Show a plot of:
-			// Pass count verses candidate
-			// Consecutive fail count verses candidate
-			// Rolling fail count verses candidate (the window can be configurable)
 			data.createData();
 			WindowOrganiser wo = new WindowOrganiser();
 			if (isNewItem)
@@ -650,16 +686,24 @@ public class FailCountManager implements PlugIn
 				display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount);
 			}
 
-			// TODO - only rebuild if changed
-			display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow));
-			
-			// TODO - 
-			// Add resetting fail count
-			// Add weighted fail count
-			// Only rebuild if changed.
-			
-			
+			// Only rebuild if changed
+			if (isNewItem || plotData.rollingWindow != lastPlotData.rollingWindow)
+			{
+				display(wo, "Rolling Fail Count", data.candidate, data.getRollingFailCount(plotData.rollingWindow));
+			}
+			if (isNewItem || plotData.passWeight != lastPlotData.passWeight ||
+					plotData.failWeight != lastPlotData.failWeight)
+			{
+				display(wo, "Weighted Fail Count", data.candidate,
+						data.getWeightedFailCount(plotData.passWeight, plotData.failWeight));
+			}
+			if (isNewItem || plotData.resetFraction != lastPlotData.resetFraction)
+			{
+				display(wo, "Resetting Fail Count", data.candidate, data.getResettingFailCount(plotData.resetFraction));
+			}
+
 			wo.tile();
+			lastPlotData = plotData;
 		}
 
 		private void display(WindowOrganiser wo, String string, float[] x, float[] y)
@@ -699,15 +743,24 @@ public class FailCountManager implements PlugIn
 		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
 		gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
 		gd.addSlider("Rolling_window", 1, max, settings.getPlotRollingWindow());
+		gd.addSlider("Pass_weight", 1, 20, settings.getPlotPassWeight());
+		gd.addSlider("Fail_weight", 1, 20, settings.getPlotFailWeight());
+		gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
 		gd.addDialogListener(new DialogListener()
 		{
 			public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 			{
 				int item = (int) gd.getNextNumber();
 				int rollingWindow = (int) gd.getNextNumber();
+				int passWeight = (int) gd.getNextNumber();
+				int failWeight = (int) gd.getNextNumber();
+				double resetFraction = gd.getNextNumber();
 				settings.setPlotItem(item);
 				settings.setPlotRollingWindow(rollingWindow);
-				stack.insert(new PlotData(item, rollingWindow));
+				settings.setPlotPassWeight(passWeight);
+				settings.setPlotFailWeight(failWeight);
+				settings.setPlotResetFraction(resetFraction);
+				stack.insert(new PlotData(item, rollingWindow, passWeight, failWeight, resetFraction));
 				return true;
 			}
 		});

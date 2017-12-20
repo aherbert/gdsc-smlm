@@ -1,5 +1,6 @@
 package gdsc.smlm.results.count;
 
+// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -14,7 +15,7 @@ package gdsc.smlm.results.count;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for the evaluation of whether to stop a sequential analysis
+ * Interface for the evaluation of whether to stop a sequential analysis.
  */
 public interface FailCounter
 {
@@ -34,6 +35,8 @@ public interface FailCounter
 	 * Called when the n most recent events passed.
 	 * <p>
 	 * This method can be used when a series of events are known to pass.
+	 *
+	 * @param n the n
 	 */
 	public void pass(int n);
 
@@ -48,6 +51,8 @@ public interface FailCounter
 	 * calling this method.
 	 * <p>
 	 * This method can be used when a series of events are known to fail.
+	 *
+	 * @param n the n
 	 */
 	public void fail(int n);
 

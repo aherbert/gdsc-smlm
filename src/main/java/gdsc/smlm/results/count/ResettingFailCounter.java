@@ -17,7 +17,7 @@ package gdsc.smlm.results.count;
  * Stop evaluating when a number of cumulative failures occurs. The failures count is reset to a fraction of the current
  * value for each pass.
  */
-public class ResetingFailCounter extends BaseFailCounter
+public class ResettingFailCounter extends BaseFailCounter
 {
 	/** The fail count. */
 	private int failCount = 0;
@@ -36,7 +36,7 @@ public class ResetingFailCounter extends BaseFailCounter
 	 * @param resetFraction
 	 *            the reset fraction
 	 */
-	private ResetingFailCounter(int allowedFailures, double resetFraction)
+	private ResettingFailCounter(int allowedFailures, double resetFraction)
 	{
 		this.allowedFailures = allowedFailures;
 		this.resetFraction = resetFraction;
@@ -57,11 +57,11 @@ public class ResetingFailCounter extends BaseFailCounter
 	 *            The fraction of the current failures count to reset to for a pass.
 	 * @return the weighted fail counter
 	 */
-	public static ResetingFailCounter create(int allowedFailures, double resetFraction)
+	public static ResettingFailCounter create(int allowedFailures, double resetFraction)
 	{
 		if (!(resetFraction >= 0 && resetFraction <= 1))
 			throw new IllegalArgumentException("Reset must be in the range 0-1");
-		return new ResetingFailCounter(Math.max(0, allowedFailures), resetFraction);
+		return new ResettingFailCounter(Math.max(0, allowedFailures), resetFraction);
 	}
 
 	/*
@@ -134,7 +134,7 @@ public class ResetingFailCounter extends BaseFailCounter
 	 */
 	public FailCounter newCounter()
 	{
-		return new ResetingFailCounter(allowedFailures, resetFraction);
+		return new ResettingFailCounter(allowedFailures, resetFraction);
 	}
 
 	/*
@@ -176,5 +176,4 @@ public class ResetingFailCounter extends BaseFailCounter
 	{
 		return resetFraction;
 	}
-
 }
