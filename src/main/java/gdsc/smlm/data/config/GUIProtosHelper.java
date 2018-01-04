@@ -267,6 +267,7 @@ public class GUIProtosHelper
 		builder.setPlotFailWeight(1);
 		builder.setPlotResetFraction(0.5);
 		builder.setPlotFixedXAxis(true);
+		builder.setTableTopN(1);
 		defaultFailCountManagerSettings = builder.build();
 	}
 }

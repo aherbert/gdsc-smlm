@@ -27350,6 +27350,11 @@ public final class GUIProtos {
      * <code>bool plot_fixed_x_axis = 12;</code>
      */
     boolean getPlotFixedXAxis();
+
+    /**
+     * <code>int32 table_top_n = 13;</code>
+     */
+    int getTableTopN();
   }
   /**
    * <pre>
@@ -27379,6 +27384,7 @@ public final class GUIProtos {
       plotFailWeight_ = 0;
       plotResetFraction_ = 0D;
       plotFixedXAxis_ = false;
+      tableTopN_ = 0;
     }
 
     @java.lang.Override
@@ -27465,6 +27471,11 @@ public final class GUIProtos {
             case 96: {
 
               plotFixedXAxis_ = input.readBool();
+              break;
+            }
+            case 104: {
+
+              tableTopN_ = input.readInt32();
               break;
             }
           }
@@ -27623,6 +27634,15 @@ public final class GUIProtos {
       return plotFixedXAxis_;
     }
 
+    public static final int TABLE_TOP_N_FIELD_NUMBER = 13;
+    private int tableTopN_;
+    /**
+     * <code>int32 table_top_n = 13;</code>
+     */
+    public int getTableTopN() {
+      return tableTopN_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -27670,6 +27690,9 @@ public final class GUIProtos {
       }
       if (plotFixedXAxis_ != false) {
         output.writeBool(12, plotFixedXAxis_);
+      }
+      if (tableTopN_ != 0) {
+        output.writeInt32(13, tableTopN_);
       }
     }
 
@@ -27725,6 +27748,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(12, plotFixedXAxis_);
       }
+      if (tableTopN_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(13, tableTopN_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -27769,6 +27796,8 @@ public final class GUIProtos {
               other.getPlotResetFraction()));
       result = result && (getPlotFixedXAxis()
           == other.getPlotFixedXAxis());
+      result = result && (getTableTopN()
+          == other.getTableTopN());
       return result;
     }
 
@@ -27807,6 +27836,8 @@ public final class GUIProtos {
       hash = (37 * hash) + PLOT_FIXED_X_AXIS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getPlotFixedXAxis());
+      hash = (37 * hash) + TABLE_TOP_N_FIELD_NUMBER;
+      hash = (53 * hash) + getTableTopN();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27964,6 +27995,8 @@ public final class GUIProtos {
 
         plotFixedXAxis_ = false;
 
+        tableTopN_ = 0;
+
         return this;
       }
 
@@ -27998,6 +28031,7 @@ public final class GUIProtos {
         result.plotFailWeight_ = plotFailWeight_;
         result.plotResetFraction_ = plotResetFraction_;
         result.plotFixedXAxis_ = plotFixedXAxis_;
+        result.tableTopN_ = tableTopN_;
         onBuilt();
         return result;
       }
@@ -28075,6 +28109,9 @@ public final class GUIProtos {
         }
         if (other.getPlotFixedXAxis() != false) {
           setPlotFixedXAxis(other.getPlotFixedXAxis());
+        }
+        if (other.getTableTopN() != 0) {
+          setTableTopN(other.getTableTopN());
         }
         onChanged();
         return this;
@@ -28456,6 +28493,32 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private int tableTopN_ ;
+      /**
+       * <code>int32 table_top_n = 13;</code>
+       */
+      public int getTableTopN() {
+        return tableTopN_;
+      }
+      /**
+       * <code>int32 table_top_n = 13;</code>
+       */
+      public Builder setTableTopN(int value) {
+        
+        tableTopN_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 table_top_n = 13;</code>
+       */
+      public Builder clearTableTopN() {
+        
+        tableTopN_ = 0;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -28762,7 +28825,7 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\300\002\n\030" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\325\002\n\030" +
       "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
       "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
       "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
@@ -28770,10 +28833,11 @@ public final class GUIProtos {
       "(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rolling_wi" +
       "ndow\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020" +
       "plot_fail_weight\030\n \001(\005\022\033\n\023plot_reset_fra" +
-      "ction\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010*O" +
-      "\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021R" +
-      "ESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B" +
-      "\013B\tGUIProtosb\006proto3"
+      "ction\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010\022\023" +
+      "\n\013table_top_n\030\r \001(\005*O\n\014TemplateType\022\023\n\017I" +
+      "NLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022" +
+      "\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto",
+      "3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -28886,7 +28950,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", });
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

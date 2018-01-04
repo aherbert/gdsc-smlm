@@ -8,12 +8,21 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
+import ags.utils.dataStructures.trees.secondGenKD.IntResultHeap;
 import gdsc.core.generics.ConcurrentMonoStack;
+import gdsc.core.ij.BufferedTextWindow;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.logging.Ticker;
 import gdsc.core.utils.BooleanArray;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 
@@ -42,11 +51,15 @@ import gdsc.smlm.engine.ParameterisedFitJob;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.count.ConsecutiveFailCounter;
+import gdsc.smlm.results.count.FailCounter;
 import gdsc.smlm.results.count.ResettingFailCounter;
 import gdsc.smlm.results.count.RollingWindowFailCounter;
 import gdsc.smlm.results.count.WeightedFailCounter;
+import gnu.trove.list.array.TByteArrayList;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
@@ -55,6 +68,7 @@ import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
+import ij.text.TextWindow;
 
 /**
  * This plugin handles generation and analysis of fail counts to optimise the stopping criteria for a sequential
@@ -101,12 +115,17 @@ public class FailCountManager implements PlugIn
 		/** The results (pass/fail). */
 		private boolean[] results;
 
-		private int maxFailCount = -1;
+		private int maxConsFailCount = -1;
 
 		// These are for plotting so we use float not int
 		private float[] candidate = null;
 		private float[] consFailCount = null;
 		private float[] passCount = null;
+
+		/** The number of results to process before a fail counter is not OK. Used to score a fail counter */
+		private int target;
+		private float targetPassCount;
+		private double maxScore;
 
 		public FailCountData(int id, boolean[] results)
 		{
@@ -114,9 +133,9 @@ public class FailCountManager implements PlugIn
 			this.results = results;
 		}
 
-		public int getMaxFailCount()
+		public int getMaxConsecutiveFailCount()
 		{
-			if (maxFailCount == -1)
+			if (maxConsFailCount == -1)
 			{
 				int consFail = 0;
 				int max = 0;
@@ -133,9 +152,20 @@ public class FailCountManager implements PlugIn
 							max = consFail;
 					}
 				}
-				maxFailCount = max;
+				maxConsFailCount = max;
 			}
-			return maxFailCount;
+			return maxConsFailCount;
+		}
+
+		public int getPassCount()
+		{
+			createData();
+			return (int) passCount[passCount.length - 1];
+		}
+
+		public int getFailCount()
+		{
+			return results.length - getPassCount();
 		}
 
 		public void createData()
@@ -211,9 +241,85 @@ public class FailCountManager implements PlugIn
 			}
 			return failCount;
 		}
+
+		public void initialiseAnalysis(double targetPassFraction)
+		{
+			initialiseData();
+			targetPassCount = (float) Math.round(passCount[passCount.length - 1] * targetPassFraction);
+			int size = results.length;
+			target = 1;
+			while (target <= size)
+			{
+				if (passCount[target - 1] >= targetPassCount)
+					break;
+				target++;
+			}
+			maxScore = score(size);
+		}
+
+		public double score(FailCounter counter)
+		{
+			int size = results.length;
+			int i = 0;
+			while (i < size)
+			{
+				if (results[i])
+					counter.pass();
+				else
+					counter.fail();
+				i++;
+				if (!counter.isOK())
+					return score(i);
+			}
+			return maxScore;
+		}
+
+		public double score(int n)
+		{
+			if (n == target)
+				return 0; // Perfect
+			if (n < target)
+			{
+				// Penalise stopping too early.
+				float remaining = (targetPassCount - passCount[n - 1]) / targetPassCount;
+				// This has a score from 0 to 1.
+				//return remaining * remaining;
+				return remaining;
+			}
+			else
+			{
+				// Penalise running too long.
+				// Overrun will be above 0.
+				float overrun = ((float) (n - target)) / target;
+
+				// This has a score from 0 to Infinity.
+				//return overrun * overrun;
+				return overrun;
+
+				// This has a score from 0 to Infinity but does not heavily penalise large overrun
+				//if (overrun < 1)
+				//	 // So the gradient is 1 at x=1, f(x)=0.5*x^2, f'(x)=x
+				//	return overrun * overrun / 2.0;
+				//else
+				//	return overrun;
+
+				// This has a score from 0 to 1. This equally weights under/overrun.
+				// However very long overrun is not penalised due to the exponential.
+				//  0	0
+				//	0.5	0.3934693403
+				//	1	0.6321205588
+				//	2	0.8646647168
+				//	3	0.9502129316
+				//	4	0.9816843611
+				//	5	0.993262053
+				//	10	0.9999546001
+				//return 1.0 - FastMath.exp(-overrun);
+			}
+		}
 	}
 
 	private static TurboList<FailCountData> failCountData = new TurboList<FailCountData>(1);
+	private static TextWindow resultsWindow = null;
 
 	private FailCountManagerSettings.Builder settings;
 
@@ -741,11 +847,7 @@ public class FailCountManager implements PlugIn
 		}
 
 		// Find max fail count size
-		int max = 1;
-		for (int i = 0; i < failCountData.size(); i++)
-		{
-			max = Math.max(max, failCountData.getf(i).getMaxFailCount());
-		}
+		final int max = getMaxConsecutiveFailCount(failCountData);
 
 		final ConcurrentMonoStack<PlotData> stack = new ConcurrentMonoStack<PlotData>();
 		new Thread(new PlotWorker(stack, failCountData)).start();
@@ -754,7 +856,7 @@ public class FailCountManager implements PlugIn
 		gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
 		gd.addCheckbox("Fixed_x_axis", settings.getPlotFixedXAxis());
 		gd.addMessage("Rolling Window Fail Count");
-		gd.addSlider("Rolling_window", 1, max, settings.getPlotRollingWindow());
+		gd.addSlider("Rolling_window", 1, 3 * max, settings.getPlotRollingWindow());
 		gd.addMessage("Weighted Fail Count");
 		gd.addSlider("Pass_weight", 1, 20, settings.getPlotPassWeight());
 		gd.addSlider("Fail_weight", 1, 20, settings.getPlotFailWeight());
@@ -780,18 +882,253 @@ public class FailCountManager implements PlugIn
 			}
 		});
 
+		gd.hideCancelButton();
+		gd.setOKLabel("Close");
 		gd.showDialog();
 
 		stack.close(gd.wasCanceled());
 	}
 
+	private int getMaxConsecutiveFailCount(TurboList<FailCountData> failCountData)
+	{
+		int max = 1;
+		for (int i = 0; i < failCountData.size(); i++)
+		{
+			max = Math.max(max, failCountData.getf(i).getMaxConsecutiveFailCount());
+		}
+		return max;
+	}
+
+	private int getMaxFailCount(TurboList<FailCountData> failCountData)
+	{
+		int max = 1;
+		for (int i = 0; i < failCountData.size(); i++)
+		{
+			max = Math.max(max, failCountData.getf(i).getFailCount());
+		}
+		return max;
+	}
+
+	private int getMaxPassCount(TurboList<FailCountData> failCountData)
+	{
+		int max = 1;
+		for (int i = 0; i < failCountData.size(); i++)
+		{
+			max = Math.max(max, failCountData.getf(i).getPassCount());
+		}
+		return max;
+	}
+
 	private void analyseData()
 	{
-		// TODO Auto-generated method stub
+		TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+		if (failCountData.isEmpty())
+		{
+			IJ.error(TITLE, "No fail count data in memory");
+			return;
+		}
+
+		if (!showAnalysisDialog())
+			return;
+
+		final int maxCons = getMaxConsecutiveFailCount(failCountData);
+		final int maxFail = getMaxFailCount(failCountData);
+		final int maxPass = getMaxPassCount(failCountData);
+
+		// Create a set of fail counters
+		final TurboList<FailCounter> counters = new TurboList<FailCounter>();
+		TByteArrayList type = new TByteArrayList();
+		for (int i = 0; i <= maxCons; i++)
+		{
+			counters.add(ConsecutiveFailCounter.create(i));
+		}
+		type.fill(0, counters.size(), (byte) 0);
+
+		// TODO - how should the ranges be constructed for complex counters?
+		// Ideally this would be a search to optimise the best parameters
+		// for each counter as any enumeration may be way off the mark..
+		for (int i = 0; i <= maxFail; i++)
+		{
+			//			// Note that 0 failures in a window, or n-1 failures in window n can be scored 
+			//			// using the consecutive fail counter.
+			//			// TODO - allow to be configurable
+			//			if (i > 0)
+			//			{
+			//				int max = i + Math.min(maxPass, 2 * maxCons);
+			//				for (int j = i + 2; j <= max; j++)
+			//				{
+			//					counters.add(RollingWindowFailCounter.create(i, j));
+			//				}
+			//				type.fill(type.size(), counters.size(), (byte) 1);
+			//			}
+
+			// TODO - allow to be configurable
+			for (int w = 0; w <= 5; w++)
+			{
+				counters.add(WeightedFailCounter.create(i, 1, w));
+			}
+			type.fill(type.size(), counters.size(), (byte) 2);
+			// TODO - allow to be configurable
+			for (double f = 0.05; f <= 0.95; f += 0.05)
+			{
+				counters.add(ResettingFailCounter.create(i, f));
+			}
+			type.fill(type.size(), counters.size(), (byte) 3);
+			if (counters.size() > 200000)
+			{
+				GenericDialog gd = new GenericDialog(TITLE);
+				gd.addMessage("Too many counters to analyse: " + counters.size());
+				gd.enableYesNoCancel(" Continue ", " Quit ");
+				gd.hideCancelButton();
+				gd.showDialog();
+				if (!gd.wasOKed())
+					return;
+				break;
+			}
+		}
+		counters.trimToSize();
+
 		// Score each of a set of standard fail counters against each frame using how 
 		// close they are to the target.
-		// Show a table of results for each frame and combined.
-		// Save the best fail counter to the current fit configuration.
+		final double[] score = new double[counters.size()];
+		final double targetPassFraction = settings.getTargetPassFraction();
 
+		int nThreads = Prefs.getThreads();
+		ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+		TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
+
+		final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), failCountData.size(), nThreads > 1);
+		IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
+		for (int i = 0; i < failCountData.size(); i++)
+		{
+			final FailCountData data = failCountData.getf(i);
+			futures.add(executor.submit(new Runnable()
+			{
+				public void run()
+				{
+					if (IJ.escapePressed())
+						return;
+
+					// TODO - Ideally this plugin should be run on benchmark data with ground truth.
+					// The target could be to ensure all all the correct results are fit 
+					// and false positives are excluded from incrementing the pass counter.
+					// This could be done by saving the results from a benchmarking scoring
+					// plugin to memory as the current dataset.
+					data.initialiseAnalysis(targetPassFraction);
+
+					// Score in blocks and then do a synchronized write to the combined score
+					Thread t = Thread.currentThread();
+					double[] s = new double[8192];
+					int i = 0;
+					while (i < counters.size())
+					{
+						if (t.isInterrupted())
+							break;
+						int block = Math.min(8192, counters.size() - i);
+						for (int j = 0; j < block; j++)
+						{
+							FailCounter counter = counters.getf(i + j).newCounter();
+							s[j] = data.score(counter);
+						}
+						// Write to the combined score
+						synchronized (score)
+						{
+							for (int j = 0; j < block; j++)
+							{
+								score[i + j] += s[j];
+							}
+						}
+						i += block;
+					}
+					ticker.tick();
+				}
+			}));
+		}
+
+		Utils.waitForCompletion(futures);
+		executor.shutdown();
+		IJ.showProgress(1);
+		if (IJ.escapePressed())
+		{
+			IJ.showStatus("");
+			IJ.error(TITLE, "Cancelled analysis");
+			return;
+		}
+		IJ.showStatus("Summarising results ...");
+
+		// TODO - check if the top filter is at the bounds of the range
+		int minIndex = SimpleArrayUtils.findMinIndex(score);
+		Utils.log(TITLE + " Analysis : Best counter = %s (Score = %f)", counters.getf(minIndex).getDescription(),
+				score[minIndex]);
+
+		// Show a table of results for the top N for each type
+		int topN = Math.min(settings.getTableTopN(), score.length);
+		if (topN > 0)
+		{
+			byte[] types = type.toArray();
+			createTable();
+			for (byte b = 0; b <= 3; b++)
+			{
+				int[] indices;
+				// Use a heap to avoid a full sort
+				IntResultHeap heap = new IntResultHeap(topN);
+				for (int i = 0; i < score.length; i++)
+					if (types[i] == b)
+						heap.addValue(score[i], i);
+				if (heap.getSize() == 0)
+					continue;
+				indices = heap.getData();
+				// Ensure sorted
+				Sort.sortAscending(indices, score);
+
+				StringBuilder sb = new StringBuilder();
+				BufferedTextWindow tw = new BufferedTextWindow(resultsWindow);
+				for (int i = 0; i < topN; i++)
+				{
+					sb.setLength(0);
+					int j = indices[i];
+					sb.append(i + 1).append('\t');
+					sb.append(counters.getf(j).getDescription()).append('\t');
+					sb.append(score[j]);
+					tw.append(sb.toString());
+				}
+				tw.flush();
+			}
+		}
+
+		// TODO - Save the best fail counter to the current fit configuration.
+
+		IJ.showStatus("");
+	}
+
+	private void createTable()
+	{
+		if (resultsWindow == null || !resultsWindow.isShowing())
+		{
+			resultsWindow = new TextWindow(TITLE + " Analysis Results", "Rank\tFail Counter\tScore", "", 600, 400);
+		}
+	}
+
+	private boolean showAnalysisDialog()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage(TextUtils.wrap("Analysis a set of fail counters on the current pass/fail data.", 80));
+		gd.addSlider("Target_pass_fraction", 0.1, 1, settings.getTargetPassFraction());
+		gd.addSliderIncludeDefault("Table_top_n", 0, 100, settings.getTableTopN());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		settings.setTargetPassFraction(gd.getNextNumber());
+		settings.setTableTopN((int) gd.getNextNumber());
+		try
+		{
+			Parameters.isAboveZero("Target pass fraction", settings.getTargetPassFraction());
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+		return true;
 	}
 }
