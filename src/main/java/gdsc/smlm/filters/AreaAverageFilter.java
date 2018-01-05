@@ -30,8 +30,11 @@ package gdsc.smlm.filters;
  */
 public class AreaAverageFilter extends BaseWeightedFilter
 {
-	private BlockSumFilter sumFilter = new BlockSumFilter();
-	private BlockMeanFilter blockMeanFilter = new BlockMeanFilter();
+	// Use duplicate filters to support efficient caching of the weights
+	private BlockSumFilter sumFilter1 = new BlockSumFilter();
+	private BlockSumFilter sumFilter2 = new BlockSumFilter();
+	private BlockMeanFilter blockMeanFilter1 = new BlockMeanFilter();
+	private BlockMeanFilter blockMeanFilter2 = new BlockMeanFilter();
 
 	private boolean simpleInterpolation = false;
 
@@ -64,7 +67,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		if (n == n1)
 		{
 			// There is no edge
-			blockMeanFilter.rollingBlockFilterInternal(data, maxx, maxy, n);
+			blockMeanFilter1.rollingBlockFilterInternal(data, maxx, maxy, n);
 			return;
 		}
 
@@ -77,10 +80,10 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		else
 		{
 			sum1 = data.clone();
-			sumFilter.rollingBlockFilter(sum1, maxx, maxy, n);
+			sumFilter1.rollingBlockFilter(sum1, maxx, maxy, n);
 		}
 		final float[] sum2 = data.clone();
-		sumFilter.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
+		sumFilter2.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
 
 		// Get the average by adding the inner sum to the weighted edge pixels.  
 		final double area = (2 * w + 1) * (2 * w + 1);
@@ -136,7 +139,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		if (n == n1 || (maxx < n1 && maxy < n1))
 		{
 			// There is no edge
-			blockMeanFilter.rollingBlockFilter(data, maxx, maxy, n);
+			blockMeanFilter1.rollingBlockFilter(data, maxx, maxy, n);
 			return;
 		}
 
@@ -149,10 +152,10 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		else
 		{
 			sum1 = data.clone();
-			sumFilter.rollingBlockFilter(sum1, maxx, maxy, n);
+			sumFilter1.rollingBlockFilter(sum1, maxx, maxy, n);
 		}
 		final float[] sum2 = data.clone();
-		sumFilter.rollingBlockFilter(sum2, maxx, maxy, n1);
+		sumFilter2.rollingBlockFilter(sum2, maxx, maxy, n1);
 
 		// Get the average by adding the inner sum to the weighted edge pixels.  
 		final double area = (2 * w + 1) * (2 * w + 1);
@@ -208,7 +211,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		if (n == n1)
 		{
 			// There is no edge
-			blockMeanFilter.rollingBlockFilterInternal(data, maxx, maxy, n);
+			blockMeanFilter1.rollingBlockFilterInternal(data, maxx, maxy, n);
 			return;
 		}
 
@@ -221,10 +224,10 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		else
 		{
 			av1 = data.clone();
-			blockMeanFilter.rollingBlockFilter(av1, maxx, maxy, n);
+			blockMeanFilter1.rollingBlockFilter(av1, maxx, maxy, n);
 		}
 		final float[] av2 = data.clone();
-		blockMeanFilter.rollingBlockFilterInternal(av2, maxx, maxy, n1);
+		blockMeanFilter2.rollingBlockFilterInternal(av2, maxx, maxy, n1);
 
 		// Get the average by weighting the two
 		final float outerWeight;
@@ -279,7 +282,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		if (n == n1 || (maxx < n1 && maxy < n1))
 		{
 			// There is no edge
-			blockMeanFilter.rollingBlockFilter(data, maxx, maxy, n);
+			blockMeanFilter1.rollingBlockFilter(data, maxx, maxy, n);
 			return;
 		}
 
@@ -292,10 +295,10 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		else
 		{
 			av1 = data.clone();
-			blockMeanFilter.rollingBlockFilter(av1, maxx, maxy, n);
+			blockMeanFilter1.rollingBlockFilter(av1, maxx, maxy, n);
 		}
 		final float[] av2 = data.clone();
-		blockMeanFilter.rollingBlockFilter(av2, maxx, maxy, n1);
+		blockMeanFilter2.rollingBlockFilter(av2, maxx, maxy, n1);
 
 		// Get the average by weighting the two
 		final float outerWeight;
@@ -329,8 +332,10 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	public AreaAverageFilter clone()
 	{
 		AreaAverageFilter o = (AreaAverageFilter) super.clone();
-		o.sumFilter = sumFilter.clone();
-		o.blockMeanFilter = blockMeanFilter.clone();
+		o.sumFilter1 = sumFilter1.clone();
+		o.sumFilter2 = sumFilter2.clone();
+		o.blockMeanFilter1 = blockMeanFilter1.clone();
+		o.blockMeanFilter2 = blockMeanFilter2.clone();
 		return o;
 	}
 
@@ -362,7 +367,9 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	@Override
 	protected void newWeights()
 	{
-		sumFilter.setWeights(weights, weightWidth, weightHeight);
-		blockMeanFilter.setWeights(weights, weightWidth, weightHeight);
+		sumFilter1.setWeights(weights, weightWidth, weightHeight);
+		sumFilter2.setWeights(weights, weightWidth, weightHeight);
+		blockMeanFilter1.setWeights(weights, weightWidth, weightHeight);
+		blockMeanFilter2.setWeights(weights, weightWidth, weightHeight);
 	}
 }

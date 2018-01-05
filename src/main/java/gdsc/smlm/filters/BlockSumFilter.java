@@ -15,8 +15,6 @@ package gdsc.smlm.filters;
 
 /**
  * Computes the sum using a square block mask.
- * <p>
- * Adapted from ij.plugin.filter.RankFilters
  */
 public class BlockSumFilter extends BlockFilter
 {
@@ -28,7 +26,21 @@ public class BlockSumFilter extends BlockFilter
 	@Override
 	protected Normaliser computeWeightedNormaliser(float n)
 	{
-		return NonNormaliser.INSTANCE;
+		float[] divisor = weights.clone();
+
+		// Use a mean filter to get the mean of the weights in the region
+		BlockMeanFilter sum = new BlockMeanFilter();
+		if ((int) n == n)
+		{
+			sum.rollingBlockFilter(divisor, weightWidth, weightHeight, (int) n);
+			//sum.blockFilter(divisor, weightWidth, weightHeight, (int) n);
+		}
+		else
+		{
+			sum.stripedBlockFilter(divisor, weightWidth, weightHeight, n);
+			//sum.blockFilter(divisor, weightWidth, weightHeight, n);
+		}
+		return new PerPixelNormaliser(divisor);
 	}
 
 	/*

@@ -148,7 +148,11 @@ public class AverageDataProcessor extends DataProcessor
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
 
-			if (iSmooth > 1)
+			// ADH 05-Jan-2017:
+			// This was changed from 1 to 0. Previously if the iSmooth was 1 then 
+			// it would fall through to the striped block filter using a weight of 1.
+			// This can be done using the rolling block algorithm instead.
+			if (iSmooth > 0)
 			{
 				// Integer smoothing is faster using a rolling block algorithm
 				if (smooth <= getBorder())

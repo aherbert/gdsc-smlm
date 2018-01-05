@@ -15,8 +15,6 @@ package gdsc.smlm.filters;
 
 /**
  * Computes the mean using a square block mask.
- * <p>
- * Adapted from ij.plugin.filter.RankFilters
  */
 public class BlockMeanFilter extends BlockFilter
 {

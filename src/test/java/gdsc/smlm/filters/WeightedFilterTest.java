@@ -63,16 +63,23 @@ public abstract class WeightedFilterTest
 							float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
 							try
 							{
-								Assert.assertArrayEquals(e, o, 0.1f);
+								assertArrayEquals(e, o, 1e-4f);
 							}
 							catch (AssertionError ex)
 							{
 								String msg = String.format("%s : [%dx%d] @ %.1f [internal=%b]", filter2.name, width,
-										height, boxSize, internal);
+										height, boxSize - offset, internal);
 								throw new AssertionError(msg, ex);
 							}
 						}
 			}
+	}
+
+	private void assertArrayEquals(float[] e, float[] o, float f)
+	{
+		// TODO Auto-generated method stub
+		for (int i=0; i<e.length; i++)
+			Assert.assertEquals(e[i], o[i], Math.abs(e[i]) * f);
 	}
 
 	private float[] getOffsets(DataFilter filter1)
