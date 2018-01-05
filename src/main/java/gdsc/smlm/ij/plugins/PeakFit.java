@@ -241,7 +241,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private void init(FitEngineConfiguration config, ResultsSettings resultsSettings)
 	{
 		this.config = (config != null) ? config : new FitEngineConfiguration();
-		fitConfig = config.getFitConfiguration();
+		fitConfig = this.config.getFitConfiguration();
 		this.resultsSettings = (resultsSettings != null) ? ResultsSettings.newBuilder(resultsSettings)
 				: ResultsSettings.newBuilder();
 	}
