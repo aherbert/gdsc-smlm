@@ -152,7 +152,10 @@ public class FitProtosHelper
 		rp.setAbsolute(true);
 		builder.setDuplicateDistance(rp.build());
 
-		builder.setFailuresLimit(3);
+		// This used to be: builder.setFailuresLimit(3);
+		// The new pass rate parameter should be more adaptable to different image sizes. 
+		builder.setFailuresLimit(-1);
+		builder.setPassRate(0.2);
 		
 		defaultFitEngineSettings = builder.build();
 	}

@@ -377,6 +377,16 @@ public class FitEngineConfiguration implements Cloneable
 		fitEngineSettings.setPassRate(passRate);
 	}
 
+	/**
+	 * Reset the fail counter. This disables stopping criteria so that all candidates will be fit.
+	 */
+	public void resetFailCounter()
+	{
+		failCounter = null;
+		fitEngineSettings.setFailuresLimit(-1);
+		fitEngineSettings.setPassRate(0);
+	}	
+	
 	private FailCounter failCounter;
 
 	/**

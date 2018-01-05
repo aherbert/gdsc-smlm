@@ -393,7 +393,7 @@ public class FailCountManager implements PlugIn
 
 		FitEngineConfiguration fitConfig = c.getFitEngineConfiguration();
 		// Update stopping criteria.
-		// XXX - Ensure this disables all advanced stopping criteria.  
+		fitConfig.resetFailCounter();
 		fitConfig.setFailuresLimit(settings.getFailCountLimit());
 
 		ImageSource source = new IJImageSource(imp);
