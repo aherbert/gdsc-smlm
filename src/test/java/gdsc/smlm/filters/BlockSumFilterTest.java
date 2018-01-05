@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
+import gdsc.core.utils.Maths;
 import gdsc.smlm.TestSettings;
 
 public class BlockSumFilterTest
@@ -39,10 +40,10 @@ public class BlockSumFilterTest
 	 * @param boxSize
 	 *            the box size
 	 */
-	public static void sum(float[] data, int maxx, int maxy, float boxSize)
+	public static float[] sum(float[] data, int maxx, int maxy, float boxSize)
 	{
 		if (boxSize <= 0)
-			return;
+			return data;
 
 		int n = (int) Math.ceil(boxSize);
 		int size = 2 * n + 1;
@@ -80,6 +81,7 @@ public class BlockSumFilterTest
 			}
 		}
 		System.arraycopy(out, 0, data, 0, out.length);
+		return data;
 	}
 
 	/**
@@ -107,6 +109,7 @@ public class BlockSumFilterTest
 		Arrays.fill(weight, 1);
 		if (boxSize != n)
 			weight[0] = weight[weight.length - 1] = boxSize - (n - 1);
+		double area = Maths.pow2(2 * boxSize + 1);
 
 		float[] out = new float[data.length];
 
@@ -114,7 +117,7 @@ public class BlockSumFilterTest
 		{
 			for (int x = 0; x < maxx; x++)
 			{
-				double sum = 0;
+				double sum = 0, sumw = 0;
 				for (int yy = 0; yy < size; yy++)
 				{
 					int yyy = y + yy - n;
@@ -132,9 +135,11 @@ public class BlockSumFilterTest
 						int index = yyy * maxx + xxx;
 						double w2 = w[index] * weight[yy] * weight[xx];
 						sum += data[index] * w2;
+						sumw += w2;
 					}
 				}
-				out[y * maxx + x] = (float) (sum);
+				// The sum should not be effected by the weights.
+				out[y * maxx + x] = (float) (sum / (sumw / area));
 			}
 		}
 		System.arraycopy(out, 0, data, 0, out.length);
@@ -182,8 +187,8 @@ public class BlockSumFilterTest
 		}
 	}
 
-	private void sumIsCorrect(float[] data, int width, int height, float boxSize, boolean internal, BlockSumDataFilter filter)
-			throws ArrayComparisonFailure
+	private void sumIsCorrect(float[] data, int width, int height, float boxSize, boolean internal,
+			BlockSumDataFilter filter) throws ArrayComparisonFailure
 	{
 		float[] data1 = data.clone();
 		float[] data2 = data.clone();
@@ -212,10 +217,10 @@ public class BlockSumFilterTest
 		weightedSum(data1, w, width, height, boxSize);
 
 		//// Check the weights do not alter the image sum
-		//double u1 = Maths.sum(data) / data.length;
-		//double u2 = Maths.sum(data1) / data.length;
+		//double u1 = gdsc.core.utils.Maths.sum(sum(data.clone(), width, height, boxSize));
+		//double u2 = gdsc.core.utils.Maths.sum(data1);
 		//System.out.printf("[%dx%d] @ %.1f : %g => %g  (%g)\n", width, height, boxSize, u1, u2,
-		//		DoubleEquality.relativeError(u1, u2));
+		//		gdsc.core.utils.DoubleEquality.relativeError(u1, u2));
 
 		if (internal)
 		{
