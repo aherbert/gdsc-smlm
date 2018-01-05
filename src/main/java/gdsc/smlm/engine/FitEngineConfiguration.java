@@ -32,8 +32,11 @@ import gdsc.smlm.filters.MedianDataProcessor;
 import gdsc.smlm.filters.SingleSpotFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.model.camera.CameraModel;
+import gdsc.smlm.results.count.CombinedAndFailCounter;
 import gdsc.smlm.results.count.ConsecutiveFailCounter;
 import gdsc.smlm.results.count.FailCounter;
+import gdsc.smlm.results.count.NullFailCounter;
+import gdsc.smlm.results.count.PassRateFailCounter;
 
 /**
  * Specifies the configuration for the fit engine
@@ -344,8 +347,37 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void setFailuresLimit(int failuresLimit)
 	{
+		if (failuresLimit != getFailuresLimit())
+			failCounter = null;
 		fitEngineSettings.setFailuresLimit(failuresLimit);
 	}
+
+	/**
+	 * Gets the pass rate. If the fraction of accepted fits falls below this threshold then stop fitting of the
+	 * remaining candidates.
+	 *
+	 * @return the pass rate
+	 */
+	public double getPassRate()
+	{
+		return fitEngineSettings.getPassRate();
+	}
+
+	/**
+	 * Sets the pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below this threshold
+	 * then stop fitting of the remaining candidates. Set to zero to disable.
+	 *
+	 * @param passRate
+	 *            the new pass rate
+	 */
+	public void setPassRate(double passRate)
+	{
+		if (passRate != getPassRate())
+			failCounter = null;
+		fitEngineSettings.setPassRate(passRate);
+	}
+
+	private FailCounter failCounter;
 
 	/**
 	 * Gets the fail counter.
@@ -354,11 +386,25 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public FailCounter getFailCounter()
 	{
-		// TODO - Make this more configurable 
-		
-		return ConsecutiveFailCounter.create(getFailuresLimit());
+		// TODO - Make this more configurable. This could be done by allowing the fail counter
+		// to be serialised to a string and this can be passed in. Or the fail counter could be
+		// manually passed in. Either would allow more complex fail counters to be used.
+		if (failCounter == null)
+		{
+			int failuresLimit = getFailuresLimit();
+			FailCounter f1 = (failuresLimit >= 1) ? ConsecutiveFailCounter.create(failuresLimit) : null;
+			double passRate = getPassRate();
+			// TODO - the allowed counts could be an input 
+			FailCounter f2 = (passRate > 0) ? PassRateFailCounter.create(5, passRate) : null;
+
+			// All fail counters must pass to continue fitting
+			failCounter = CombinedAndFailCounter.join(f1, f2);
+			if (failCounter == null)
+				failCounter = NullFailCounter.INSTANCE;
+		}
+		return failCounter.newCounter();
 	}
-	
+
 	/**
 	 * @return the includeNeighbours
 	 */

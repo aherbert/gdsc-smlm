@@ -49,6 +49,7 @@ public class Configuration implements PlugIn, ItemListener
 	private TextField textFitting;
 	private Choice textFitSolver;
 	private TextField textFailuresLimit;
+	private TextField textPassRate;
 	private Checkbox textIncludeNeighbours;
 	private TextField textNeighbourHeightThreshold;
 	private TextField textResidualsThreshold;
@@ -122,6 +123,7 @@ public class Configuration implements PlugIn, ItemListener
 		// Parameters specific to each Fit solver are collected in a second dialog 
 
 		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
+		gd.addNumericField("Pass_rate", config.getPassRate(), 2);
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
@@ -165,6 +167,7 @@ public class Configuration implements PlugIn, ItemListener
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
 			textFailuresLimit = numerics.get(n++);
+			textPassRate= numerics.get(n++);
 			textIncludeNeighbours = checkboxes.get(b++);
 			textNeighbourHeightThreshold = numerics.get(n++);
 			textResidualsThreshold = numerics.get(n++);
@@ -213,6 +216,7 @@ public class Configuration implements PlugIn, ItemListener
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 
 		config.setFailuresLimit((int) gd.getNextNumber());
+		config.setPassRate(gd.getNextNumber());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
@@ -242,7 +246,8 @@ public class Configuration implements PlugIn, ItemListener
 			}
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
-			Parameters.isPositive("Failures limit", config.getFailuresLimit());
+			// Can be negative to disable
+			//Parameters.isPositive("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
@@ -470,6 +475,7 @@ public class Configuration implements PlugIn, ItemListener
 		textFitting.setText("" + config.getFitting());
 		textFitSolver.select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
 		textFailuresLimit.setText("" + config.getFailuresLimit());
+		textPassRate.setText("" + config.getPassRate());
 		textIncludeNeighbours.setState(config.isIncludeNeighbours());
 		textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
 		textResidualsThreshold.setText("" + config.getResidualsThreshold());

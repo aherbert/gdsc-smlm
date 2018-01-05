@@ -199,6 +199,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		// Parameters specific to each Fit solver are collected in a second dialog 
 
 		gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
+		gd.addNumericField("Pass_rate", config.getPassRate(), 2);
 		gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 		gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 		gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
@@ -251,6 +252,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 		config.setFailuresLimit((int) gd.getNextNumber());
+		config.setPassRate(gd.getNextNumber());
 		config.setIncludeNeighbours(gd.getNextBoolean());
 		config.setNeighbourHeightThreshold(gd.getNextNumber());
 		config.setResidualsThreshold(gd.getNextNumber());
@@ -282,7 +284,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 				Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
 			Parameters.isAboveZero("Search width", config.getSearch());
 			Parameters.isAboveZero("Fitting width", config.getFitting());
-			Parameters.isPositive("Failures limit", config.getFailuresLimit());
+			// Can be negative to disable
+			//Parameters.isPositive("Failures limit", config.getFailuresLimit());
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());

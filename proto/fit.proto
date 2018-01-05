@@ -256,6 +256,11 @@ message FitEngineSettings {
 	// The distance to categorise localisations as duplicates and ignore them.
 	RelativeParameter duplicate_distance = 10;
 	
-	// The number of consecutive failures to allow before stopping fitting of the remaining candidates
+	// The number of consecutive failures to allow before stopping fitting of the remaining candidates.
+	// Set to negative to disable.
 	int32 failures_limit = 11;
+	
+	// The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+	// this threshold then stop fitting of the remaining candidates. Set to zero to disable.
+	double pass_rate = 12;
 }

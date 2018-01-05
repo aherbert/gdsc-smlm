@@ -8386,12 +8386,23 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+     * The number of consecutive failures to allow before stopping fitting of the remaining candidates.
+     * Set to negative to disable.
      * </pre>
      *
      * <code>int32 failures_limit = 11;</code>
      */
     int getFailuresLimit();
+
+    /**
+     * <pre>
+     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+     * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
+     * </pre>
+     *
+     * <code>double pass_rate = 12;</code>
+     */
+    double getPassRate();
   }
   /**
    * <pre>
@@ -8416,6 +8427,7 @@ public final class FitProtos {
       neighbourHeightThreshold_ = 0D;
       residualsThreshold_ = 0D;
       failuresLimit_ = 0;
+      passRate_ = 0D;
     }
 
     @java.lang.Override
@@ -8545,6 +8557,11 @@ public final class FitProtos {
             case 88: {
 
               failuresLimit_ = input.readInt32();
+              break;
+            }
+            case 97: {
+
+              passRate_ = input.readDouble();
               break;
             }
           }
@@ -8835,13 +8852,28 @@ public final class FitProtos {
     private int failuresLimit_;
     /**
      * <pre>
-     * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+     * The number of consecutive failures to allow before stopping fitting of the remaining candidates.
+     * Set to negative to disable.
      * </pre>
      *
      * <code>int32 failures_limit = 11;</code>
      */
     public int getFailuresLimit() {
       return failuresLimit_;
+    }
+
+    public static final int PASS_RATE_FIELD_NUMBER = 12;
+    private double passRate_;
+    /**
+     * <pre>
+     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+     * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
+     * </pre>
+     *
+     * <code>double pass_rate = 12;</code>
+     */
+    public double getPassRate() {
+      return passRate_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -8888,6 +8920,9 @@ public final class FitProtos {
       }
       if (failuresLimit_ != 0) {
         output.writeInt32(11, failuresLimit_);
+      }
+      if (passRate_ != 0D) {
+        output.writeDouble(12, passRate_);
       }
     }
 
@@ -8939,6 +8974,10 @@ public final class FitProtos {
       if (failuresLimit_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(11, failuresLimit_);
+      }
+      if (passRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(12, passRate_);
       }
       memoizedSize = size;
       return size;
@@ -8999,6 +9038,10 @@ public final class FitProtos {
       }
       result = result && (getFailuresLimit()
           == other.getFailuresLimit());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPassRate())
+          == java.lang.Double.doubleToLongBits(
+              other.getPassRate()));
       return result;
     }
 
@@ -9046,6 +9089,9 @@ public final class FitProtos {
       }
       hash = (37 * hash) + FAILURES_LIMIT_FIELD_NUMBER;
       hash = (53 * hash) + getFailuresLimit();
+      hash = (37 * hash) + PASS_RATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPassRate()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -9227,6 +9273,8 @@ public final class FitProtos {
         }
         failuresLimit_ = 0;
 
+        passRate_ = 0D;
+
         return this;
       }
 
@@ -9284,6 +9332,7 @@ public final class FitProtos {
           result.duplicateDistance_ = duplicateDistanceBuilder_.build();
         }
         result.failuresLimit_ = failuresLimit_;
+        result.passRate_ = passRate_;
         onBuilt();
         return result;
       }
@@ -9357,6 +9406,9 @@ public final class FitProtos {
         }
         if (other.getFailuresLimit() != 0) {
           setFailuresLimit(other.getFailuresLimit());
+        }
+        if (other.getPassRate() != 0D) {
+          setPassRate(other.getPassRate());
         }
         onChanged();
         return this;
@@ -10483,7 +10535,8 @@ public final class FitProtos {
       private int failuresLimit_ ;
       /**
        * <pre>
-       * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+       * The number of consecutive failures to allow before stopping fitting of the remaining candidates.
+       * Set to negative to disable.
        * </pre>
        *
        * <code>int32 failures_limit = 11;</code>
@@ -10493,7 +10546,8 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+       * The number of consecutive failures to allow before stopping fitting of the remaining candidates.
+       * Set to negative to disable.
        * </pre>
        *
        * <code>int32 failures_limit = 11;</code>
@@ -10506,7 +10560,8 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The number of consecutive failures to allow before stopping fitting of the remaining candidates
+       * The number of consecutive failures to allow before stopping fitting of the remaining candidates.
+       * Set to negative to disable.
        * </pre>
        *
        * <code>int32 failures_limit = 11;</code>
@@ -10514,6 +10569,47 @@ public final class FitProtos {
       public Builder clearFailuresLimit() {
         
         failuresLimit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double passRate_ ;
+      /**
+       * <pre>
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+       * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
+       * </pre>
+       *
+       * <code>double pass_rate = 12;</code>
+       */
+      public double getPassRate() {
+        return passRate_;
+      }
+      /**
+       * <pre>
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+       * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
+       * </pre>
+       *
+       * <code>double pass_rate = 12;</code>
+       */
+      public Builder setPassRate(double value) {
+        
+        passRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+       * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
+       * </pre>
+       *
+       * <code>double pass_rate = 12;</code>
+       */
+      public Builder clearPassRate() {
+        
+        passRate_ = 0D;
         onChanged();
         return this;
       }
@@ -10646,7 +10742,7 @@ public final class FitProtos {
       "rameter\"\216\001\n\022DataFilterSettings\022?\n\020data_f" +
       "ilter_type\030\001 \001(\0162%.gdsc.smlm.data.config" +
       ".DataFilterType\0227\n\014data_filters\030\002 \003(\0132!." +
-      "gdsc.smlm.data.config.DataFilter\"\303\004\n\021Fit" +
+      "gdsc.smlm.data.config.DataFilter\"\326\004\n\021Fit" +
       "EngineSettings\0228\n\014fit_settings\030\001 \001(\0132\".g" +
       "dsc.smlm.data.config.FitSettings\022A\n\014nois" +
       "e_method\030\002 \001(\0162+.gdsc.smlm.data.config.N",
@@ -10661,27 +10757,27 @@ public final class FitProtos {
       "shold\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001" +
       "\022D\n\022duplicate_distance\030\n \001(\0132(.gdsc.smlm",
       ".data.config.RelativeParameter\022\026\n\016failur" +
-      "es_limit\030\013 \001(\005*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000" +
-      "\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010" +
-      "FAST_MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001" +
-      "\n\014SearchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006PO" +
-      "WELL\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t" +
-      "\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025" +
-      "CONJUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020Lin" +
-      "eSearchMethod\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022\n\016P" +
-      "ARTIAL_IGNORE\020\002*6\n\016DataFilterType\022\n\n\006SIN",
-      "GLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y\n\020DataF" +
-      "ilterMethod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n" +
-      "\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN" +
-      "\020\004*\263\002\n\024NoiseEstimatorMethod\022\016\n\nALL_PIXEL" +
-      "S\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n!RESIDUALS_LEAS" +
-      "T_MEDIAN_OF_SQUARES\020\002\022&\n\"RESIDUALS_LEAST" +
-      "_TRIMMED_OF_SQUARES\020\003\022#\n\037RESIDUALS_LEAST" +
-      "_MEAN_OF_SQUARES\020\004\022+\n\'QUICK_RESIDUALS_LE" +
-      "AST_MEDIAN_OF_SQUARES\020\005\022,\n(QUICK_RESIDUA" +
-      "LS_LEAST_TRIMMED_OF_SQUARES\020\006\022)\n%QUICK_R",
-      "ESIDUALS_LEAST_MEAN_OF_SQUARES\020\007B\013B\tFitP" +
-      "rotosb\006proto3"
+      "es_limit\030\013 \001(\005\022\021\n\tpass_rate\030\014 \001(\001*e\n\tFit" +
+      "Solver\022\013\n\007LVM_LSE\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_" +
+      "WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRA" +
+      "CKING_FAST_MLE\020\005*\231\001\n\014SearchMethod\022\022\n\016POW" +
+      "ELL_BOUNDED\020\000\022\n\n\006POWELL\020\001\022\022\n\016POWELL_ADAP" +
+      "TER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGAT" +
+      "E_GRADIENT_FR\020\005\022\031\n\025CONJUGATE_GRADIENT_PR" +
+      "\020\006\022\010\n\004BFGS\020\007*<\n\020LineSearchMethod\022\010\n\004NONE" +
+      "\020\000\022\n\n\006IGNORE\020\001\022\022\n\016PARTIAL_IGNORE\020\002*6\n\016Da",
+      "taFilterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001" +
+      "\022\010\n\004JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000" +
+      "\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010G" +
+      "AUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimator" +
+      "Method\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020" +
+      "\001\022%\n!RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002" +
+      "\022&\n\"RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003" +
+      "\022#\n\037RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n" +
+      "\'QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES" +
+      "\020\005\022,\n(QUICK_RESIDUALS_LEAST_TRIMMED_OF_S",
+      "QUARES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_O" +
+      "F_SQUARES\020\007B\013B\tFitProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -10736,7 +10832,7 @@ public final class FitProtos {
     internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor,
-        new java.lang.String[] { "FitSettings", "NoiseMethod", "DataFilterSettings", "Search", "Border", "Fitting", "IncludeNeighbours", "NeighbourHeightThreshold", "ResidualsThreshold", "DuplicateDistance", "FailuresLimit", });
+        new java.lang.String[] { "FitSettings", "NoiseMethod", "DataFilterSettings", "Search", "Border", "Fitting", "IncludeNeighbours", "NeighbourHeightThreshold", "ResidualsThreshold", "DuplicateDistance", "FailuresLimit", "PassRate", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

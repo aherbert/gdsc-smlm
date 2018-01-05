@@ -200,6 +200,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private Choice textFitSolver;
 	private Checkbox textFitBackground;
 	private TextField textFailuresLimit;
+	private TextField textPassRate;
 	private Checkbox textIncludeNeighbours;
 	private TextField textNeighbourHeightThreshold;
 	private TextField textResidualsThreshold;
@@ -853,6 +854,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			// Parameters specific to each Fit solver are collected in a second dialog 
 
 			gd.addNumericField("Fail_limit", config.getFailuresLimit(), 0);
+			gd.addNumericField("Pass_rate", config.getPassRate(), 2);
 			gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
 			gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 			gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
@@ -935,6 +937,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				if (extraOptions)
 					textFitBackground = checkboxes.get(b++);
 				textFailuresLimit = numerics.get(n++);
+				textPassRate= numerics.get(n++);
 				textIncludeNeighbours = checkboxes.get(b++);
 				textNeighbourHeightThreshold = numerics.get(n++);
 				textResidualsThreshold = numerics.get(n++);
@@ -2041,6 +2044,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (extraOptions)
 				fitConfig.setBackgroundFitting(gd.getNextBoolean());
 			config.setFailuresLimit((int) gd.getNextNumber());
+			config.setPassRate(gd.getNextNumber());
 			config.setIncludeNeighbours(gd.getNextBoolean());
 			config.setNeighbourHeightThreshold(gd.getNextNumber());
 			config.setResidualsThreshold(gd.getNextNumber());
@@ -2103,7 +2107,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 			Parameters.isPositive("Integrate frames", integrateFrames);
 			if (!maximaIdentification)
 			{
-				Parameters.isPositive("Failures limit", config.getFailuresLimit());
+				// This can be negative to disable, i.e. fit everything
+				//Parameters.isPositive("Failures limit", config.getFailuresLimit());
 				Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 				Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 				Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
@@ -3539,6 +3544,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (extraOptions)
 				textFitBackground.setState(fitConfig.isBackgroundFitting());
 			textFailuresLimit.setText("" + config.getFailuresLimit());
+			textPassRate.setText("" + config.getPassRate());
 			textIncludeNeighbours.setState(config.isIncludeNeighbours());
 			textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
 			textResidualsThreshold.setText("" + config.getResidualsThreshold());
