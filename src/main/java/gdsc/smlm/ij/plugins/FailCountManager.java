@@ -54,6 +54,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.count.ConsecutiveFailCounter;
 import gdsc.smlm.results.count.FailCounter;
+import gdsc.smlm.results.count.PassRateFailCounter;
 import gdsc.smlm.results.count.ResettingFailCounter;
 import gdsc.smlm.results.count.RollingWindowFailCounter;
 import gdsc.smlm.results.count.WeightedFailCounter;
@@ -122,6 +123,7 @@ public class FailCountManager implements PlugIn
 		private float[] candidate = null;
 		private float[] consFailCount = null;
 		private float[] passCount = null;
+		private float[] passRate = null;
 
 		/** The number of results to process before a fail counter is not OK. Used to score a fail counter */
 		private int target;
@@ -185,6 +187,7 @@ public class FailCountManager implements PlugIn
 			int size = results.length;
 			candidate = new float[size];
 			passCount = new float[size];
+			passRate = new float[size];
 			consFailCount = new float[size];
 			for (int i = 0; i < size; i++)
 			{
@@ -201,6 +204,7 @@ public class FailCountManager implements PlugIn
 				}
 				candidate[i] = i + 1;
 				passCount[i] = pass;
+				passRate[i] = (float) pass / (i + 1);
 			}
 		}
 
@@ -798,6 +802,7 @@ public class FailCountManager implements PlugIn
 			if (isNew)
 			{
 				display(wo, "Pass Count", data.candidate, data.passCount, plotData.fixedXAxis);
+				display(wo, "Pass Rate", data.candidate, data.passRate, plotData.fixedXAxis);
 				display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount, plotData.fixedXAxis);
 			}
 
@@ -944,7 +949,7 @@ public class FailCountManager implements PlugIn
 		{
 			counters.add(ConsecutiveFailCounter.create(i));
 		}
-		type.fill(0, counters.size(), (byte) 0);
+		fill(type, counters, 0);
 
 		// The other counters are user configured.
 		// Ideally this would be a search to optimise the best parameters
@@ -973,7 +978,7 @@ public class FailCountManager implements PlugIn
 					throw new IllegalStateException();
 			}
 		}
-		type.fill(type.size(), counters.size(), (byte) 1);
+		fill(type, counters, 1);
 
 		max = Math.min(maxFail, settings.getWeightedCounterMaxAllowedFailures());
 		for (int fail = Maths.min(maxFail, settings.getWeightedCounterMinAllowedFailures()); fail <= max; fail++)
@@ -995,7 +1000,7 @@ public class FailCountManager implements PlugIn
 					throw new IllegalStateException();
 			}
 		}
-		type.fill(type.size(), counters.size(), (byte) 2);
+		fill(type, counters, 2);
 
 		max = Math.min(maxFail, settings.getResettingCounterMaxAllowedFailures());
 		for (int fail = Maths.min(maxFail, settings.getResettingCounterMinAllowedFailures()); fail <= max; fail++)
@@ -1017,7 +1022,29 @@ public class FailCountManager implements PlugIn
 					throw new IllegalStateException();
 			}
 		}
-		type.fill(type.size(), counters.size(), (byte) 3);
+		fill(type, counters, 3);
+
+		for (int count = settings.getPassRateCounterMinAllowedCounts(); count <= settings
+				.getPassRateCounterMaxAllowedCounts(); count++)
+		{
+			for (double f = settings.getPassRateCounterMinPassRate(); f <= settings
+					.getPassRateCounterMaxPassRate(); f += settings.getPassRateCounterIncPassRate())
+			{
+				counters.add(PassRateFailCounter.create(count, f));
+			}
+			switch (checkCounters(counters))
+			{
+				case ANALYSE:
+					break;
+				case CONTINUE:
+					break;
+				case RETURN:
+					return;
+				default:
+					throw new IllegalStateException();
+			}
+		}
+		fill(type, counters, 4);
 
 		counters.trimToSize();
 
@@ -1099,8 +1126,9 @@ public class FailCountManager implements PlugIn
 		if (topN > 0)
 		{
 			byte[] types = type.toArray();
+			byte maxType = types[types.length - 1];
 			createTable();
-			for (byte b = 0; b <= 3; b++)
+			for (byte b = 0; b <= maxType; b++)
 			{
 				int[] indices;
 				// Use a heap to avoid a full sort
@@ -1132,6 +1160,13 @@ public class FailCountManager implements PlugIn
 		// TODO - Save the best fail counter to the current fit configuration.
 
 		IJ.showStatus("");
+	}
+
+	private void fill(TByteArrayList type, TurboList<FailCounter> counters, int b)
+	{
+		int n = counters.size() - type.size();
+		Utils.log("Type %d = %d", b, n);
+		type.fill(type.size(), counters.size(), (byte)b);
 	}
 
 	private enum CounterStatus
@@ -1194,6 +1229,11 @@ public class FailCountManager implements PlugIn
 		gd.addNumericField("Resetting_counter_min_pass_decrement", settings.getResettingCounterMinResetFraction(), 2);
 		gd.addNumericField("Resetting_counter_max_pass_decrement", settings.getResettingCounterMaxResetFraction(), 2);
 		gd.addNumericField("Resetting_counter_inc_pass_decrement", settings.getResettingCounterIncResetFraction(), 2);
+		gd.addNumericField("Pass_rate_counter_min_allowed_failures", settings.getPassRateCounterMinAllowedCounts(), 0);
+		gd.addNumericField("Pass_rate_counter_max_allowed_failures", settings.getPassRateCounterMaxAllowedCounts(), 0);
+		gd.addNumericField("Pass_rate_counter_min_pass_rate", settings.getPassRateCounterMinPassRate(), 3);
+		gd.addNumericField("Pass_rate_counter_max_pass_rate", settings.getPassRateCounterMaxPassRate(), 3);
+		gd.addNumericField("Pass_rate_counter_inc_pass_rate", settings.getPassRateCounterIncPassRate(), 3);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -1212,11 +1252,17 @@ public class FailCountManager implements PlugIn
 		settings.setResettingCounterMinResetFraction(gd.getNextNumber());
 		settings.setResettingCounterMaxResetFraction(gd.getNextNumber());
 		settings.setResettingCounterIncResetFraction(gd.getNextNumber());
+		settings.setPassRateCounterMinAllowedCounts((int) gd.getNextNumber());
+		settings.setPassRateCounterMaxAllowedCounts((int) gd.getNextNumber());
+		settings.setPassRateCounterMinPassRate(gd.getNextNumber());
+		settings.setPassRateCounterMaxPassRate(gd.getNextNumber());
+		settings.setPassRateCounterIncPassRate(gd.getNextNumber());
 		try
 		{
 			Parameters.isAboveZero("Target pass fraction", settings.getTargetPassFraction());
 			Parameters.isAboveZero("Resetting counter inc pass decrement",
 					settings.getResettingCounterIncResetFraction());
+			Parameters.isAboveZero("Pass rate counter inc pass rate", settings.getPassRateCounterIncPassRate());
 		}
 		catch (IllegalArgumentException e)
 		{

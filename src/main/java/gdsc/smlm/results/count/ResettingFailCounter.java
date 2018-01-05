@@ -29,7 +29,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	private final double resetFraction;
 
 	/**
-	 * Instantiates a new weighted fail counter.
+	 * Instantiates a new resetting fail counter.
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
@@ -49,13 +49,13 @@ public class ResettingFailCounter extends BaseFailCounter
 	}
 
 	/**
-	 * Instantiates a new weighted fail counter.
+	 * Instantiates a new resetting fail counter.
 	 *
 	 * @param allowedFailures
 	 *            the number of allowed failures
 	 * @param resetFraction
 	 *            The fraction of the current failures count to reset to for a pass.
-	 * @return the weighted fail counter
+	 * @return the resetting fail counter
 	 */
 	public static ResettingFailCounter create(int allowedFailures, double resetFraction)
 	{

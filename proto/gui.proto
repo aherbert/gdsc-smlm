@@ -494,4 +494,9 @@ message FailCountManagerSettings
 	double resetting_counter_min_reset_fraction = 24;
 	double resetting_counter_max_reset_fraction = 25;
 	double resetting_counter_inc_reset_fraction = 26;
+	int32 pass_rate_counter_min_allowed_counts = 27;
+	int32 pass_rate_counter_max_allowed_counts = 28;
+	double pass_rate_counter_min_pass_rate = 29;
+	double pass_rate_counter_max_pass_rate = 30;
+	double pass_rate_counter_inc_pass_rate = 31;
 }

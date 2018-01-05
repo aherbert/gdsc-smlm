@@ -281,6 +281,11 @@ public class GUIProtosHelper
 		builder.setResettingCounterMinResetFraction(0.5);
 		builder.setResettingCounterMaxResetFraction(0.95);
 		builder.setResettingCounterIncResetFraction(0.05);
+		builder.setPassRateCounterMinAllowedCounts(0);
+		builder.setPassRateCounterMaxAllowedCounts(5);
+		builder.setPassRateCounterMinPassRate(0.05);
+		builder.setPassRateCounterMaxPassRate(0.2);
+		builder.setPassRateCounterIncPassRate(0.01);
 		defaultFailCountManagerSettings = builder.build();
 	}
 }

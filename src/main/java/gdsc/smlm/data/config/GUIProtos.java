@@ -27420,6 +27420,31 @@ public final class GUIProtos {
      * <code>double resetting_counter_inc_reset_fraction = 26;</code>
      */
     double getResettingCounterIncResetFraction();
+
+    /**
+     * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
+     */
+    int getPassRateCounterMinAllowedCounts();
+
+    /**
+     * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
+     */
+    int getPassRateCounterMaxAllowedCounts();
+
+    /**
+     * <code>double pass_rate_counter_min_pass_rate = 29;</code>
+     */
+    double getPassRateCounterMinPassRate();
+
+    /**
+     * <code>double pass_rate_counter_max_pass_rate = 30;</code>
+     */
+    double getPassRateCounterMaxPassRate();
+
+    /**
+     * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
+     */
+    double getPassRateCounterIncPassRate();
   }
   /**
    * <pre>
@@ -27463,6 +27488,11 @@ public final class GUIProtos {
       resettingCounterMinResetFraction_ = 0D;
       resettingCounterMaxResetFraction_ = 0D;
       resettingCounterIncResetFraction_ = 0D;
+      passRateCounterMinAllowedCounts_ = 0;
+      passRateCounterMaxAllowedCounts_ = 0;
+      passRateCounterMinPassRate_ = 0D;
+      passRateCounterMaxPassRate_ = 0D;
+      passRateCounterIncPassRate_ = 0D;
     }
 
     @java.lang.Override
@@ -27619,6 +27649,31 @@ public final class GUIProtos {
             case 209: {
 
               resettingCounterIncResetFraction_ = input.readDouble();
+              break;
+            }
+            case 216: {
+
+              passRateCounterMinAllowedCounts_ = input.readInt32();
+              break;
+            }
+            case 224: {
+
+              passRateCounterMaxAllowedCounts_ = input.readInt32();
+              break;
+            }
+            case 233: {
+
+              passRateCounterMinPassRate_ = input.readDouble();
+              break;
+            }
+            case 241: {
+
+              passRateCounterMaxPassRate_ = input.readDouble();
+              break;
+            }
+            case 249: {
+
+              passRateCounterIncPassRate_ = input.readDouble();
               break;
             }
           }
@@ -27903,6 +27958,51 @@ public final class GUIProtos {
       return resettingCounterIncResetFraction_;
     }
 
+    public static final int PASS_RATE_COUNTER_MIN_ALLOWED_COUNTS_FIELD_NUMBER = 27;
+    private int passRateCounterMinAllowedCounts_;
+    /**
+     * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
+     */
+    public int getPassRateCounterMinAllowedCounts() {
+      return passRateCounterMinAllowedCounts_;
+    }
+
+    public static final int PASS_RATE_COUNTER_MAX_ALLOWED_COUNTS_FIELD_NUMBER = 28;
+    private int passRateCounterMaxAllowedCounts_;
+    /**
+     * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
+     */
+    public int getPassRateCounterMaxAllowedCounts() {
+      return passRateCounterMaxAllowedCounts_;
+    }
+
+    public static final int PASS_RATE_COUNTER_MIN_PASS_RATE_FIELD_NUMBER = 29;
+    private double passRateCounterMinPassRate_;
+    /**
+     * <code>double pass_rate_counter_min_pass_rate = 29;</code>
+     */
+    public double getPassRateCounterMinPassRate() {
+      return passRateCounterMinPassRate_;
+    }
+
+    public static final int PASS_RATE_COUNTER_MAX_PASS_RATE_FIELD_NUMBER = 30;
+    private double passRateCounterMaxPassRate_;
+    /**
+     * <code>double pass_rate_counter_max_pass_rate = 30;</code>
+     */
+    public double getPassRateCounterMaxPassRate() {
+      return passRateCounterMaxPassRate_;
+    }
+
+    public static final int PASS_RATE_COUNTER_INC_PASS_RATE_FIELD_NUMBER = 31;
+    private double passRateCounterIncPassRate_;
+    /**
+     * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
+     */
+    public double getPassRateCounterIncPassRate() {
+      return passRateCounterIncPassRate_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -27992,6 +28092,21 @@ public final class GUIProtos {
       }
       if (resettingCounterIncResetFraction_ != 0D) {
         output.writeDouble(26, resettingCounterIncResetFraction_);
+      }
+      if (passRateCounterMinAllowedCounts_ != 0) {
+        output.writeInt32(27, passRateCounterMinAllowedCounts_);
+      }
+      if (passRateCounterMaxAllowedCounts_ != 0) {
+        output.writeInt32(28, passRateCounterMaxAllowedCounts_);
+      }
+      if (passRateCounterMinPassRate_ != 0D) {
+        output.writeDouble(29, passRateCounterMinPassRate_);
+      }
+      if (passRateCounterMaxPassRate_ != 0D) {
+        output.writeDouble(30, passRateCounterMaxPassRate_);
+      }
+      if (passRateCounterIncPassRate_ != 0D) {
+        output.writeDouble(31, passRateCounterIncPassRate_);
       }
     }
 
@@ -28103,6 +28218,26 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(26, resettingCounterIncResetFraction_);
       }
+      if (passRateCounterMinAllowedCounts_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(27, passRateCounterMinAllowedCounts_);
+      }
+      if (passRateCounterMaxAllowedCounts_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(28, passRateCounterMaxAllowedCounts_);
+      }
+      if (passRateCounterMinPassRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(29, passRateCounterMinPassRate_);
+      }
+      if (passRateCounterMaxPassRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(30, passRateCounterMaxPassRate_);
+      }
+      if (passRateCounterIncPassRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(31, passRateCounterIncPassRate_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -28181,6 +28316,22 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getResettingCounterIncResetFraction())
           == java.lang.Double.doubleToLongBits(
               other.getResettingCounterIncResetFraction()));
+      result = result && (getPassRateCounterMinAllowedCounts()
+          == other.getPassRateCounterMinAllowedCounts());
+      result = result && (getPassRateCounterMaxAllowedCounts()
+          == other.getPassRateCounterMaxAllowedCounts());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPassRateCounterMinPassRate())
+          == java.lang.Double.doubleToLongBits(
+              other.getPassRateCounterMinPassRate()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPassRateCounterMaxPassRate())
+          == java.lang.Double.doubleToLongBits(
+              other.getPassRateCounterMaxPassRate()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPassRateCounterIncPassRate())
+          == java.lang.Double.doubleToLongBits(
+              other.getPassRateCounterIncPassRate()));
       return result;
     }
 
@@ -28250,6 +28401,19 @@ public final class GUIProtos {
       hash = (37 * hash) + RESETTING_COUNTER_INC_RESET_FRACTION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getResettingCounterIncResetFraction()));
+      hash = (37 * hash) + PASS_RATE_COUNTER_MIN_ALLOWED_COUNTS_FIELD_NUMBER;
+      hash = (53 * hash) + getPassRateCounterMinAllowedCounts();
+      hash = (37 * hash) + PASS_RATE_COUNTER_MAX_ALLOWED_COUNTS_FIELD_NUMBER;
+      hash = (53 * hash) + getPassRateCounterMaxAllowedCounts();
+      hash = (37 * hash) + PASS_RATE_COUNTER_MIN_PASS_RATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPassRateCounterMinPassRate()));
+      hash = (37 * hash) + PASS_RATE_COUNTER_MAX_PASS_RATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPassRateCounterMaxPassRate()));
+      hash = (37 * hash) + PASS_RATE_COUNTER_INC_PASS_RATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPassRateCounterIncPassRate()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -28435,6 +28599,16 @@ public final class GUIProtos {
 
         resettingCounterIncResetFraction_ = 0D;
 
+        passRateCounterMinAllowedCounts_ = 0;
+
+        passRateCounterMaxAllowedCounts_ = 0;
+
+        passRateCounterMinPassRate_ = 0D;
+
+        passRateCounterMaxPassRate_ = 0D;
+
+        passRateCounterIncPassRate_ = 0D;
+
         return this;
       }
 
@@ -28483,6 +28657,11 @@ public final class GUIProtos {
         result.resettingCounterMinResetFraction_ = resettingCounterMinResetFraction_;
         result.resettingCounterMaxResetFraction_ = resettingCounterMaxResetFraction_;
         result.resettingCounterIncResetFraction_ = resettingCounterIncResetFraction_;
+        result.passRateCounterMinAllowedCounts_ = passRateCounterMinAllowedCounts_;
+        result.passRateCounterMaxAllowedCounts_ = passRateCounterMaxAllowedCounts_;
+        result.passRateCounterMinPassRate_ = passRateCounterMinPassRate_;
+        result.passRateCounterMaxPassRate_ = passRateCounterMaxPassRate_;
+        result.passRateCounterIncPassRate_ = passRateCounterIncPassRate_;
         onBuilt();
         return result;
       }
@@ -28602,6 +28781,21 @@ public final class GUIProtos {
         }
         if (other.getResettingCounterIncResetFraction() != 0D) {
           setResettingCounterIncResetFraction(other.getResettingCounterIncResetFraction());
+        }
+        if (other.getPassRateCounterMinAllowedCounts() != 0) {
+          setPassRateCounterMinAllowedCounts(other.getPassRateCounterMinAllowedCounts());
+        }
+        if (other.getPassRateCounterMaxAllowedCounts() != 0) {
+          setPassRateCounterMaxAllowedCounts(other.getPassRateCounterMaxAllowedCounts());
+        }
+        if (other.getPassRateCounterMinPassRate() != 0D) {
+          setPassRateCounterMinPassRate(other.getPassRateCounterMinPassRate());
+        }
+        if (other.getPassRateCounterMaxPassRate() != 0D) {
+          setPassRateCounterMaxPassRate(other.getPassRateCounterMaxPassRate());
+        }
+        if (other.getPassRateCounterIncPassRate() != 0D) {
+          setPassRateCounterIncPassRate(other.getPassRateCounterIncPassRate());
         }
         onChanged();
         return this;
@@ -29347,6 +29541,136 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private int passRateCounterMinAllowedCounts_ ;
+      /**
+       * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
+       */
+      public int getPassRateCounterMinAllowedCounts() {
+        return passRateCounterMinAllowedCounts_;
+      }
+      /**
+       * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
+       */
+      public Builder setPassRateCounterMinAllowedCounts(int value) {
+        
+        passRateCounterMinAllowedCounts_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 pass_rate_counter_min_allowed_counts = 27;</code>
+       */
+      public Builder clearPassRateCounterMinAllowedCounts() {
+        
+        passRateCounterMinAllowedCounts_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int passRateCounterMaxAllowedCounts_ ;
+      /**
+       * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
+       */
+      public int getPassRateCounterMaxAllowedCounts() {
+        return passRateCounterMaxAllowedCounts_;
+      }
+      /**
+       * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
+       */
+      public Builder setPassRateCounterMaxAllowedCounts(int value) {
+        
+        passRateCounterMaxAllowedCounts_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 pass_rate_counter_max_allowed_counts = 28;</code>
+       */
+      public Builder clearPassRateCounterMaxAllowedCounts() {
+        
+        passRateCounterMaxAllowedCounts_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double passRateCounterMinPassRate_ ;
+      /**
+       * <code>double pass_rate_counter_min_pass_rate = 29;</code>
+       */
+      public double getPassRateCounterMinPassRate() {
+        return passRateCounterMinPassRate_;
+      }
+      /**
+       * <code>double pass_rate_counter_min_pass_rate = 29;</code>
+       */
+      public Builder setPassRateCounterMinPassRate(double value) {
+        
+        passRateCounterMinPassRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double pass_rate_counter_min_pass_rate = 29;</code>
+       */
+      public Builder clearPassRateCounterMinPassRate() {
+        
+        passRateCounterMinPassRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double passRateCounterMaxPassRate_ ;
+      /**
+       * <code>double pass_rate_counter_max_pass_rate = 30;</code>
+       */
+      public double getPassRateCounterMaxPassRate() {
+        return passRateCounterMaxPassRate_;
+      }
+      /**
+       * <code>double pass_rate_counter_max_pass_rate = 30;</code>
+       */
+      public Builder setPassRateCounterMaxPassRate(double value) {
+        
+        passRateCounterMaxPassRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double pass_rate_counter_max_pass_rate = 30;</code>
+       */
+      public Builder clearPassRateCounterMaxPassRate() {
+        
+        passRateCounterMaxPassRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double passRateCounterIncPassRate_ ;
+      /**
+       * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
+       */
+      public double getPassRateCounterIncPassRate() {
+        return passRateCounterIncPassRate_;
+      }
+      /**
+       * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
+       */
+      public Builder setPassRateCounterIncPassRate(double value) {
+        
+        passRateCounterIncPassRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double pass_rate_counter_inc_pass_rate = 31;</code>
+       */
+      public Builder clearPassRateCounterIncPassRate() {
+        
+        passRateCounterIncPassRate_ = 0D;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -29653,7 +29977,7 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\233\007\n\030" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030" +
       "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
       "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
       "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
@@ -29677,9 +30001,14 @@ public final class GUIProtos {
       "nter_min_reset_fraction\030\030 \001(\001\022,\n$resetti",
       "ng_counter_max_reset_fraction\030\031 \001(\001\022,\n$r" +
       "esetting_counter_inc_reset_fraction\030\032 \001(" +
-      "\001*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025" +
-      "\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE" +
-      "\020\002B\013B\tGUIProtosb\006proto3"
+      "\001\022,\n$pass_rate_counter_min_allowed_count" +
+      "s\030\033 \001(\005\022,\n$pass_rate_counter_max_allowed" +
+      "_counts\030\034 \001(\005\022\'\n\037pass_rate_counter_min_p" +
+      "ass_rate\030\035 \001(\001\022\'\n\037pass_rate_counter_max_" +
+      "pass_rate\030\036 \001(\001\022\'\n\037pass_rate_counter_inc" +
+      "_pass_rate\030\037 \001(\001*O\n\014TemplateType\022\023\n\017INLI" +
+      "NE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017" +
+      "CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -29792,7 +30121,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", "RollingCounterMinAllowedFailures", "RollingCounterMaxAllowedFailures", "RollingCounterMinWindow", "RollingCounterMaxWindow", "WeightedCounterMinAllowedFailures", "WeightedCounterMaxAllowedFailures", "WeightedCounterMinPassDecrement", "WeightedCounterMaxPassDecrement", "ResettingCounterMinAllowedFailures", "ResettingCounterMaxAllowedFailures", "ResettingCounterMinResetFraction", "ResettingCounterMaxResetFraction", "ResettingCounterIncResetFraction", });
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", "RollingCounterMinAllowedFailures", "RollingCounterMaxAllowedFailures", "RollingCounterMinWindow", "RollingCounterMaxWindow", "WeightedCounterMinAllowedFailures", "WeightedCounterMaxAllowedFailures", "WeightedCounterMinPassDecrement", "WeightedCounterMaxPassDecrement", "ResettingCounterMinAllowedFailures", "ResettingCounterMaxAllowedFailures", "ResettingCounterMinResetFraction", "ResettingCounterMaxResetFraction", "ResettingCounterIncResetFraction", "PassRateCounterMinAllowedCounts", "PassRateCounterMaxAllowedCounts", "PassRateCounterMinPassRate", "PassRateCounterMaxPassRate", "PassRateCounterIncPassRate", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
