@@ -59,6 +59,8 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	{
 		if (window < 1)
 			throw new IllegalArgumentException("Window must be strictly positive");
+		if (allowedFailures >= window)
+			throw new IllegalArgumentException("Allowed failures must be less than window size");
 		return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
 	}
 
