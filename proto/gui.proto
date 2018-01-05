@@ -481,4 +481,17 @@ message FailCountManagerSettings
 	double plot_reset_fraction = 11;
 	bool plot_fixed_x_axis = 12;
 	int32 table_top_n = 13;
+	int32 rolling_counter_min_allowed_failures = 14;
+	int32 rolling_counter_max_allowed_failures = 15;
+	int32 rolling_counter_min_window = 16;
+	int32 rolling_counter_max_window = 17;
+	int32 weighted_counter_min_allowed_failures = 18;
+	int32 weighted_counter_max_allowed_failures = 19;
+	int32 weighted_counter_min_pass_decrement = 20;
+	int32 weighted_counter_max_pass_decrement = 21;
+	int32 resetting_counter_min_allowed_failures = 22;
+	int32 resetting_counter_max_allowed_failures = 23;
+	double resetting_counter_min_reset_fraction = 24;
+	double resetting_counter_max_reset_fraction = 25;
+	double resetting_counter_inc_reset_fraction = 26;
 }

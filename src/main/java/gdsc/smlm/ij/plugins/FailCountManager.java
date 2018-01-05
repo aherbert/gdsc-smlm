@@ -20,6 +20,7 @@ import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
 import gdsc.core.utils.BooleanArray;
+import gdsc.core.utils.BooleanRollingArray;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
@@ -205,13 +206,13 @@ public class FailCountManager implements PlugIn
 
 		public float[] getRollingFailCount(int rollingWindow)
 		{
-			RollingWindowFailCounter c = RollingWindowFailCounter.create(Integer.MAX_VALUE, rollingWindow);
+			BooleanRollingArray c = new BooleanRollingArray(rollingWindow);
 			int size = results.length;
 			float[] failCount = new float[size];
 			for (int i = 0; i < size; i++)
 			{
-				c.addResult(results[i]);
-				failCount[i] = c.getFailCount();
+				c.add(results[i]);
+				failCount[i] = c.getFalseCount();
 			}
 			return failCount;
 		}
@@ -909,6 +910,7 @@ public class FailCountManager implements PlugIn
 		return max;
 	}
 
+	@SuppressWarnings("unused")
 	private int getMaxPassCount(TurboList<FailCountData> failCountData)
 	{
 		int max = 1;
@@ -933,7 +935,7 @@ public class FailCountManager implements PlugIn
 
 		final int maxCons = getMaxConsecutiveFailCount(failCountData);
 		final int maxFail = getMaxFailCount(failCountData);
-		final int maxPass = getMaxPassCount(failCountData);
+		//final int maxPass = getMaxPassCount(failCountData);
 
 		// Create a set of fail counters
 		final TurboList<FailCounter> counters = new TurboList<FailCounter>();
@@ -944,48 +946,79 @@ public class FailCountManager implements PlugIn
 		}
 		type.fill(0, counters.size(), (byte) 0);
 
-		// TODO - how should the ranges be constructed for complex counters?
+		// The other counters are user configured.
 		// Ideally this would be a search to optimise the best parameters
-		// for each counter as any enumeration may be way off the mark..
-		for (int i = 0; i <= maxFail; i++)
-		{
-			//			// Note that 0 failures in a window, or n-1 failures in window n can be scored 
-			//			// using the consecutive fail counter.
-			//			// TODO - allow to be configurable
-			//			if (i > 0)
-			//			{
-			//				int max = i + Math.min(maxPass, 2 * maxCons);
-			//				for (int j = i + 2; j <= max; j++)
-			//				{
-			//					counters.add(RollingWindowFailCounter.create(i, j));
-			//				}
-			//				type.fill(type.size(), counters.size(), (byte) 1);
-			//			}
+		// for each counter as any enumeration may be way off the mark.
 
-			// TODO - allow to be configurable
-			for (int w = 0; w <= 5; w++)
+		// Note that 0 failures in a window can be scored using the consecutive fail counter.
+		int max = Math.min(maxFail, settings.getRollingCounterMaxAllowedFailures());
+		for (int fail = Maths.min(maxFail,
+				Math.max(1, settings.getRollingCounterMinAllowedFailures())); fail <= max; fail++)
+		{
+			// Note that n-1 failures in window n can be scored using the consecutive fail counter.
+			for (int window = Math.max(fail + 2, settings.getRollingCounterMinWindow()); window <= settings
+					.getRollingCounterMaxWindow(); window++)
 			{
-				counters.add(WeightedFailCounter.create(i, 1, w));
+				counters.add(RollingWindowFailCounter.create(fail, window));
 			}
-			type.fill(type.size(), counters.size(), (byte) 2);
-			// TODO - allow to be configurable
-			for (double f = 0.05; f <= 0.95; f += 0.05)
+			switch (checkCounters(counters))
 			{
-				counters.add(ResettingFailCounter.create(i, f));
-			}
-			type.fill(type.size(), counters.size(), (byte) 3);
-			if (counters.size() > 200000)
-			{
-				GenericDialog gd = new GenericDialog(TITLE);
-				gd.addMessage("Too many counters to analyse: " + counters.size());
-				gd.enableYesNoCancel(" Continue ", " Quit ");
-				gd.hideCancelButton();
-				gd.showDialog();
-				if (!gd.wasOKed())
+				case ANALYSE:
+					break;
+				case CONTINUE:
+					break;
+				case RETURN:
 					return;
-				break;
+				default:
+					throw new IllegalStateException();
 			}
 		}
+		type.fill(type.size(), counters.size(), (byte) 1);
+
+		max = Math.min(maxFail, settings.getWeightedCounterMaxAllowedFailures());
+		for (int fail = Maths.min(maxFail, settings.getWeightedCounterMinAllowedFailures()); fail <= max; fail++)
+		{
+			for (int w = settings.getWeightedCounterMinPassDecrement(); w <= settings
+					.getWeightedCounterMaxPassDecrement(); w++)
+			{
+				counters.add(WeightedFailCounter.create(fail, 1, w));
+			}
+			switch (checkCounters(counters))
+			{
+				case ANALYSE:
+					break;
+				case CONTINUE:
+					break;
+				case RETURN:
+					return;
+				default:
+					throw new IllegalStateException();
+			}
+		}
+		type.fill(type.size(), counters.size(), (byte) 2);
+
+		max = Math.min(maxFail, settings.getResettingCounterMaxAllowedFailures());
+		for (int fail = Maths.min(maxFail, settings.getResettingCounterMinAllowedFailures()); fail <= max; fail++)
+		{
+			for (double f = settings.getResettingCounterMinResetFraction(); f <= settings
+					.getResettingCounterMaxResetFraction(); f += settings.getResettingCounterIncResetFraction())
+			{
+				counters.add(ResettingFailCounter.create(fail, f));
+			}
+			switch (checkCounters(counters))
+			{
+				case ANALYSE:
+					break;
+				case CONTINUE:
+					break;
+				case RETURN:
+					return;
+				default:
+					throw new IllegalStateException();
+			}
+		}
+		type.fill(type.size(), counters.size(), (byte) 3);
+
 		counters.trimToSize();
 
 		// Score each of a set of standard fail counters against each frame using how 
@@ -1101,6 +1134,37 @@ public class FailCountManager implements PlugIn
 		IJ.showStatus("");
 	}
 
+	private enum CounterStatus
+	{
+		CONTINUE, ANALYSE, RETURN;
+	}
+
+	private static int maxCounters = 200000;
+
+	private CounterStatus checkCounters(TurboList<FailCounter> counters)
+	{
+		if (counters.size() > maxCounters)
+		{
+			GenericDialog gd = new GenericDialog(TITLE);
+			gd.addMessage("Too many counters to analyse: " + counters.size());
+			gd.addNumericField("Max_counters", maxCounters, 0);
+			gd.enableYesNoCancel(" Analyse ", " Continue ");
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return CounterStatus.RETURN;
+			if (gd.wasOKed())
+				return CounterStatus.ANALYSE;
+			int newMaxCounters = (int) gd.getNextNumber();
+			if (newMaxCounters <= maxCounters)
+			{
+				IJ.error(TITLE, "The max counters has not been increased, unable to continue");
+				return CounterStatus.RETURN;
+			}
+			maxCounters = newMaxCounters;
+		}
+		return CounterStatus.CONTINUE;
+	}
+
 	private void createTable()
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
@@ -1115,14 +1179,44 @@ public class FailCountManager implements PlugIn
 		gd.addMessage(TextUtils.wrap("Analysis a set of fail counters on the current pass/fail data.", 80));
 		gd.addSlider("Target_pass_fraction", 0.1, 1, settings.getTargetPassFraction());
 		gd.addSliderIncludeDefault("Table_top_n", 0, 100, settings.getTableTopN());
+		gd.addNumericField("Rolling_counter_min_allowed_failures", settings.getRollingCounterMinAllowedFailures(), 0);
+		gd.addNumericField("Rolling_counter_max_allowed_failures", settings.getRollingCounterMaxAllowedFailures(), 0);
+		gd.addNumericField("Rolling_counter_min_window", settings.getRollingCounterMinWindow(), 0);
+		gd.addNumericField("Rolling_counter_max_window", settings.getRollingCounterMaxWindow(), 0);
+		gd.addNumericField("Weighted_counter_min_allowed_failures", settings.getWeightedCounterMinAllowedFailures(), 0);
+		gd.addNumericField("Weighted_counter_max_allowed_failures", settings.getWeightedCounterMaxAllowedFailures(), 0);
+		gd.addNumericField("Weighted_counter_min_pass_decrement", settings.getWeightedCounterMinPassDecrement(), 0);
+		gd.addNumericField("Weighted_counter_max_pass_decrement", settings.getWeightedCounterMaxPassDecrement(), 0);
+		gd.addNumericField("Resetting_counter_min_allowed_failures", settings.getResettingCounterMinAllowedFailures(),
+				0);
+		gd.addNumericField("Resetting_counter_max_allowed_failures", settings.getResettingCounterMaxAllowedFailures(),
+				0);
+		gd.addNumericField("Resetting_counter_min_pass_decrement", settings.getResettingCounterMinResetFraction(), 2);
+		gd.addNumericField("Resetting_counter_max_pass_decrement", settings.getResettingCounterMaxResetFraction(), 2);
+		gd.addNumericField("Resetting_counter_inc_pass_decrement", settings.getResettingCounterIncResetFraction(), 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
 		settings.setTargetPassFraction(gd.getNextNumber());
 		settings.setTableTopN((int) gd.getNextNumber());
+		settings.setRollingCounterMinAllowedFailures((int) gd.getNextNumber());
+		settings.setRollingCounterMaxAllowedFailures((int) gd.getNextNumber());
+		settings.setRollingCounterMinWindow((int) gd.getNextNumber());
+		settings.setRollingCounterMaxWindow((int) gd.getNextNumber());
+		settings.setWeightedCounterMinAllowedFailures((int) gd.getNextNumber());
+		settings.setWeightedCounterMaxAllowedFailures((int) gd.getNextNumber());
+		settings.setWeightedCounterMinPassDecrement((int) gd.getNextNumber());
+		settings.setWeightedCounterMaxPassDecrement((int) gd.getNextNumber());
+		settings.setResettingCounterMinAllowedFailures((int) gd.getNextNumber());
+		settings.setResettingCounterMaxAllowedFailures((int) gd.getNextNumber());
+		settings.setResettingCounterMinResetFraction(gd.getNextNumber());
+		settings.setResettingCounterMaxResetFraction(gd.getNextNumber());
+		settings.setResettingCounterIncResetFraction(gd.getNextNumber());
 		try
 		{
 			Parameters.isAboveZero("Target pass fraction", settings.getTargetPassFraction());
+			Parameters.isAboveZero("Resetting counter inc pass decrement",
+					settings.getResettingCounterIncResetFraction());
 		}
 		catch (IllegalArgumentException e)
 		{

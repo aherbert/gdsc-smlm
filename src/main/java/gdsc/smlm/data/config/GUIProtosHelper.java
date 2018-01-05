@@ -268,6 +268,19 @@ public class GUIProtosHelper
 		builder.setPlotResetFraction(0.5);
 		builder.setPlotFixedXAxis(true);
 		builder.setTableTopN(1);
+		builder.setRollingCounterMinAllowedFailures(1);
+		builder.setRollingCounterMaxAllowedFailures(100);
+		builder.setRollingCounterMinWindow(2);
+		builder.setRollingCounterMaxWindow(200);
+		builder.setWeightedCounterMinAllowedFailures(1);
+		builder.setWeightedCounterMaxAllowedFailures(200);
+		builder.setWeightedCounterMinPassDecrement(1);
+		builder.setWeightedCounterMaxPassDecrement(10);
+		builder.setResettingCounterMinAllowedFailures(1);
+		builder.setResettingCounterMaxAllowedFailures(200);
+		builder.setResettingCounterMinResetFraction(0.5);
+		builder.setResettingCounterMaxResetFraction(0.95);
+		builder.setResettingCounterIncResetFraction(0.05);
 		defaultFailCountManagerSettings = builder.build();
 	}
 }

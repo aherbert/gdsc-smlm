@@ -27355,6 +27355,71 @@ public final class GUIProtos {
      * <code>int32 table_top_n = 13;</code>
      */
     int getTableTopN();
+
+    /**
+     * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
+     */
+    int getRollingCounterMinAllowedFailures();
+
+    /**
+     * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
+     */
+    int getRollingCounterMaxAllowedFailures();
+
+    /**
+     * <code>int32 rolling_counter_min_window = 16;</code>
+     */
+    int getRollingCounterMinWindow();
+
+    /**
+     * <code>int32 rolling_counter_max_window = 17;</code>
+     */
+    int getRollingCounterMaxWindow();
+
+    /**
+     * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
+     */
+    int getWeightedCounterMinAllowedFailures();
+
+    /**
+     * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
+     */
+    int getWeightedCounterMaxAllowedFailures();
+
+    /**
+     * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
+     */
+    int getWeightedCounterMinPassDecrement();
+
+    /**
+     * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
+     */
+    int getWeightedCounterMaxPassDecrement();
+
+    /**
+     * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
+     */
+    int getResettingCounterMinAllowedFailures();
+
+    /**
+     * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
+     */
+    int getResettingCounterMaxAllowedFailures();
+
+    /**
+     * <code>double resetting_counter_min_reset_fraction = 24;</code>
+     */
+    double getResettingCounterMinResetFraction();
+
+    /**
+     * <code>double resetting_counter_max_reset_fraction = 25;</code>
+     */
+    double getResettingCounterMaxResetFraction();
+
+    /**
+     * <code>double resetting_counter_inc_reset_fraction = 26;</code>
+     */
+    double getResettingCounterIncResetFraction();
   }
   /**
    * <pre>
@@ -27385,6 +27450,19 @@ public final class GUIProtos {
       plotResetFraction_ = 0D;
       plotFixedXAxis_ = false;
       tableTopN_ = 0;
+      rollingCounterMinAllowedFailures_ = 0;
+      rollingCounterMaxAllowedFailures_ = 0;
+      rollingCounterMinWindow_ = 0;
+      rollingCounterMaxWindow_ = 0;
+      weightedCounterMinAllowedFailures_ = 0;
+      weightedCounterMaxAllowedFailures_ = 0;
+      weightedCounterMinPassDecrement_ = 0;
+      weightedCounterMaxPassDecrement_ = 0;
+      resettingCounterMinAllowedFailures_ = 0;
+      resettingCounterMaxAllowedFailures_ = 0;
+      resettingCounterMinResetFraction_ = 0D;
+      resettingCounterMaxResetFraction_ = 0D;
+      resettingCounterIncResetFraction_ = 0D;
     }
 
     @java.lang.Override
@@ -27476,6 +27554,71 @@ public final class GUIProtos {
             case 104: {
 
               tableTopN_ = input.readInt32();
+              break;
+            }
+            case 112: {
+
+              rollingCounterMinAllowedFailures_ = input.readInt32();
+              break;
+            }
+            case 120: {
+
+              rollingCounterMaxAllowedFailures_ = input.readInt32();
+              break;
+            }
+            case 128: {
+
+              rollingCounterMinWindow_ = input.readInt32();
+              break;
+            }
+            case 136: {
+
+              rollingCounterMaxWindow_ = input.readInt32();
+              break;
+            }
+            case 144: {
+
+              weightedCounterMinAllowedFailures_ = input.readInt32();
+              break;
+            }
+            case 152: {
+
+              weightedCounterMaxAllowedFailures_ = input.readInt32();
+              break;
+            }
+            case 160: {
+
+              weightedCounterMinPassDecrement_ = input.readInt32();
+              break;
+            }
+            case 168: {
+
+              weightedCounterMaxPassDecrement_ = input.readInt32();
+              break;
+            }
+            case 176: {
+
+              resettingCounterMinAllowedFailures_ = input.readInt32();
+              break;
+            }
+            case 184: {
+
+              resettingCounterMaxAllowedFailures_ = input.readInt32();
+              break;
+            }
+            case 193: {
+
+              resettingCounterMinResetFraction_ = input.readDouble();
+              break;
+            }
+            case 201: {
+
+              resettingCounterMaxResetFraction_ = input.readDouble();
+              break;
+            }
+            case 209: {
+
+              resettingCounterIncResetFraction_ = input.readDouble();
               break;
             }
           }
@@ -27643,6 +27786,123 @@ public final class GUIProtos {
       return tableTopN_;
     }
 
+    public static final int ROLLING_COUNTER_MIN_ALLOWED_FAILURES_FIELD_NUMBER = 14;
+    private int rollingCounterMinAllowedFailures_;
+    /**
+     * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
+     */
+    public int getRollingCounterMinAllowedFailures() {
+      return rollingCounterMinAllowedFailures_;
+    }
+
+    public static final int ROLLING_COUNTER_MAX_ALLOWED_FAILURES_FIELD_NUMBER = 15;
+    private int rollingCounterMaxAllowedFailures_;
+    /**
+     * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
+     */
+    public int getRollingCounterMaxAllowedFailures() {
+      return rollingCounterMaxAllowedFailures_;
+    }
+
+    public static final int ROLLING_COUNTER_MIN_WINDOW_FIELD_NUMBER = 16;
+    private int rollingCounterMinWindow_;
+    /**
+     * <code>int32 rolling_counter_min_window = 16;</code>
+     */
+    public int getRollingCounterMinWindow() {
+      return rollingCounterMinWindow_;
+    }
+
+    public static final int ROLLING_COUNTER_MAX_WINDOW_FIELD_NUMBER = 17;
+    private int rollingCounterMaxWindow_;
+    /**
+     * <code>int32 rolling_counter_max_window = 17;</code>
+     */
+    public int getRollingCounterMaxWindow() {
+      return rollingCounterMaxWindow_;
+    }
+
+    public static final int WEIGHTED_COUNTER_MIN_ALLOWED_FAILURES_FIELD_NUMBER = 18;
+    private int weightedCounterMinAllowedFailures_;
+    /**
+     * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
+     */
+    public int getWeightedCounterMinAllowedFailures() {
+      return weightedCounterMinAllowedFailures_;
+    }
+
+    public static final int WEIGHTED_COUNTER_MAX_ALLOWED_FAILURES_FIELD_NUMBER = 19;
+    private int weightedCounterMaxAllowedFailures_;
+    /**
+     * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
+     */
+    public int getWeightedCounterMaxAllowedFailures() {
+      return weightedCounterMaxAllowedFailures_;
+    }
+
+    public static final int WEIGHTED_COUNTER_MIN_PASS_DECREMENT_FIELD_NUMBER = 20;
+    private int weightedCounterMinPassDecrement_;
+    /**
+     * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
+     */
+    public int getWeightedCounterMinPassDecrement() {
+      return weightedCounterMinPassDecrement_;
+    }
+
+    public static final int WEIGHTED_COUNTER_MAX_PASS_DECREMENT_FIELD_NUMBER = 21;
+    private int weightedCounterMaxPassDecrement_;
+    /**
+     * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
+     */
+    public int getWeightedCounterMaxPassDecrement() {
+      return weightedCounterMaxPassDecrement_;
+    }
+
+    public static final int RESETTING_COUNTER_MIN_ALLOWED_FAILURES_FIELD_NUMBER = 22;
+    private int resettingCounterMinAllowedFailures_;
+    /**
+     * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
+     */
+    public int getResettingCounterMinAllowedFailures() {
+      return resettingCounterMinAllowedFailures_;
+    }
+
+    public static final int RESETTING_COUNTER_MAX_ALLOWED_FAILURES_FIELD_NUMBER = 23;
+    private int resettingCounterMaxAllowedFailures_;
+    /**
+     * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
+     */
+    public int getResettingCounterMaxAllowedFailures() {
+      return resettingCounterMaxAllowedFailures_;
+    }
+
+    public static final int RESETTING_COUNTER_MIN_RESET_FRACTION_FIELD_NUMBER = 24;
+    private double resettingCounterMinResetFraction_;
+    /**
+     * <code>double resetting_counter_min_reset_fraction = 24;</code>
+     */
+    public double getResettingCounterMinResetFraction() {
+      return resettingCounterMinResetFraction_;
+    }
+
+    public static final int RESETTING_COUNTER_MAX_RESET_FRACTION_FIELD_NUMBER = 25;
+    private double resettingCounterMaxResetFraction_;
+    /**
+     * <code>double resetting_counter_max_reset_fraction = 25;</code>
+     */
+    public double getResettingCounterMaxResetFraction() {
+      return resettingCounterMaxResetFraction_;
+    }
+
+    public static final int RESETTING_COUNTER_INC_RESET_FRACTION_FIELD_NUMBER = 26;
+    private double resettingCounterIncResetFraction_;
+    /**
+     * <code>double resetting_counter_inc_reset_fraction = 26;</code>
+     */
+    public double getResettingCounterIncResetFraction() {
+      return resettingCounterIncResetFraction_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -27693,6 +27953,45 @@ public final class GUIProtos {
       }
       if (tableTopN_ != 0) {
         output.writeInt32(13, tableTopN_);
+      }
+      if (rollingCounterMinAllowedFailures_ != 0) {
+        output.writeInt32(14, rollingCounterMinAllowedFailures_);
+      }
+      if (rollingCounterMaxAllowedFailures_ != 0) {
+        output.writeInt32(15, rollingCounterMaxAllowedFailures_);
+      }
+      if (rollingCounterMinWindow_ != 0) {
+        output.writeInt32(16, rollingCounterMinWindow_);
+      }
+      if (rollingCounterMaxWindow_ != 0) {
+        output.writeInt32(17, rollingCounterMaxWindow_);
+      }
+      if (weightedCounterMinAllowedFailures_ != 0) {
+        output.writeInt32(18, weightedCounterMinAllowedFailures_);
+      }
+      if (weightedCounterMaxAllowedFailures_ != 0) {
+        output.writeInt32(19, weightedCounterMaxAllowedFailures_);
+      }
+      if (weightedCounterMinPassDecrement_ != 0) {
+        output.writeInt32(20, weightedCounterMinPassDecrement_);
+      }
+      if (weightedCounterMaxPassDecrement_ != 0) {
+        output.writeInt32(21, weightedCounterMaxPassDecrement_);
+      }
+      if (resettingCounterMinAllowedFailures_ != 0) {
+        output.writeInt32(22, resettingCounterMinAllowedFailures_);
+      }
+      if (resettingCounterMaxAllowedFailures_ != 0) {
+        output.writeInt32(23, resettingCounterMaxAllowedFailures_);
+      }
+      if (resettingCounterMinResetFraction_ != 0D) {
+        output.writeDouble(24, resettingCounterMinResetFraction_);
+      }
+      if (resettingCounterMaxResetFraction_ != 0D) {
+        output.writeDouble(25, resettingCounterMaxResetFraction_);
+      }
+      if (resettingCounterIncResetFraction_ != 0D) {
+        output.writeDouble(26, resettingCounterIncResetFraction_);
       }
     }
 
@@ -27752,6 +28051,58 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(13, tableTopN_);
       }
+      if (rollingCounterMinAllowedFailures_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(14, rollingCounterMinAllowedFailures_);
+      }
+      if (rollingCounterMaxAllowedFailures_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(15, rollingCounterMaxAllowedFailures_);
+      }
+      if (rollingCounterMinWindow_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(16, rollingCounterMinWindow_);
+      }
+      if (rollingCounterMaxWindow_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(17, rollingCounterMaxWindow_);
+      }
+      if (weightedCounterMinAllowedFailures_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(18, weightedCounterMinAllowedFailures_);
+      }
+      if (weightedCounterMaxAllowedFailures_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(19, weightedCounterMaxAllowedFailures_);
+      }
+      if (weightedCounterMinPassDecrement_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(20, weightedCounterMinPassDecrement_);
+      }
+      if (weightedCounterMaxPassDecrement_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(21, weightedCounterMaxPassDecrement_);
+      }
+      if (resettingCounterMinAllowedFailures_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(22, resettingCounterMinAllowedFailures_);
+      }
+      if (resettingCounterMaxAllowedFailures_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(23, resettingCounterMaxAllowedFailures_);
+      }
+      if (resettingCounterMinResetFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(24, resettingCounterMinResetFraction_);
+      }
+      if (resettingCounterMaxResetFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(25, resettingCounterMaxResetFraction_);
+      }
+      if (resettingCounterIncResetFraction_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(26, resettingCounterIncResetFraction_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -27798,6 +28149,38 @@ public final class GUIProtos {
           == other.getPlotFixedXAxis());
       result = result && (getTableTopN()
           == other.getTableTopN());
+      result = result && (getRollingCounterMinAllowedFailures()
+          == other.getRollingCounterMinAllowedFailures());
+      result = result && (getRollingCounterMaxAllowedFailures()
+          == other.getRollingCounterMaxAllowedFailures());
+      result = result && (getRollingCounterMinWindow()
+          == other.getRollingCounterMinWindow());
+      result = result && (getRollingCounterMaxWindow()
+          == other.getRollingCounterMaxWindow());
+      result = result && (getWeightedCounterMinAllowedFailures()
+          == other.getWeightedCounterMinAllowedFailures());
+      result = result && (getWeightedCounterMaxAllowedFailures()
+          == other.getWeightedCounterMaxAllowedFailures());
+      result = result && (getWeightedCounterMinPassDecrement()
+          == other.getWeightedCounterMinPassDecrement());
+      result = result && (getWeightedCounterMaxPassDecrement()
+          == other.getWeightedCounterMaxPassDecrement());
+      result = result && (getResettingCounterMinAllowedFailures()
+          == other.getResettingCounterMinAllowedFailures());
+      result = result && (getResettingCounterMaxAllowedFailures()
+          == other.getResettingCounterMaxAllowedFailures());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getResettingCounterMinResetFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getResettingCounterMinResetFraction()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getResettingCounterMaxResetFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getResettingCounterMaxResetFraction()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getResettingCounterIncResetFraction())
+          == java.lang.Double.doubleToLongBits(
+              other.getResettingCounterIncResetFraction()));
       return result;
     }
 
@@ -27838,6 +28221,35 @@ public final class GUIProtos {
           getPlotFixedXAxis());
       hash = (37 * hash) + TABLE_TOP_N_FIELD_NUMBER;
       hash = (53 * hash) + getTableTopN();
+      hash = (37 * hash) + ROLLING_COUNTER_MIN_ALLOWED_FAILURES_FIELD_NUMBER;
+      hash = (53 * hash) + getRollingCounterMinAllowedFailures();
+      hash = (37 * hash) + ROLLING_COUNTER_MAX_ALLOWED_FAILURES_FIELD_NUMBER;
+      hash = (53 * hash) + getRollingCounterMaxAllowedFailures();
+      hash = (37 * hash) + ROLLING_COUNTER_MIN_WINDOW_FIELD_NUMBER;
+      hash = (53 * hash) + getRollingCounterMinWindow();
+      hash = (37 * hash) + ROLLING_COUNTER_MAX_WINDOW_FIELD_NUMBER;
+      hash = (53 * hash) + getRollingCounterMaxWindow();
+      hash = (37 * hash) + WEIGHTED_COUNTER_MIN_ALLOWED_FAILURES_FIELD_NUMBER;
+      hash = (53 * hash) + getWeightedCounterMinAllowedFailures();
+      hash = (37 * hash) + WEIGHTED_COUNTER_MAX_ALLOWED_FAILURES_FIELD_NUMBER;
+      hash = (53 * hash) + getWeightedCounterMaxAllowedFailures();
+      hash = (37 * hash) + WEIGHTED_COUNTER_MIN_PASS_DECREMENT_FIELD_NUMBER;
+      hash = (53 * hash) + getWeightedCounterMinPassDecrement();
+      hash = (37 * hash) + WEIGHTED_COUNTER_MAX_PASS_DECREMENT_FIELD_NUMBER;
+      hash = (53 * hash) + getWeightedCounterMaxPassDecrement();
+      hash = (37 * hash) + RESETTING_COUNTER_MIN_ALLOWED_FAILURES_FIELD_NUMBER;
+      hash = (53 * hash) + getResettingCounterMinAllowedFailures();
+      hash = (37 * hash) + RESETTING_COUNTER_MAX_ALLOWED_FAILURES_FIELD_NUMBER;
+      hash = (53 * hash) + getResettingCounterMaxAllowedFailures();
+      hash = (37 * hash) + RESETTING_COUNTER_MIN_RESET_FRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getResettingCounterMinResetFraction()));
+      hash = (37 * hash) + RESETTING_COUNTER_MAX_RESET_FRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getResettingCounterMaxResetFraction()));
+      hash = (37 * hash) + RESETTING_COUNTER_INC_RESET_FRACTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getResettingCounterIncResetFraction()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27997,6 +28409,32 @@ public final class GUIProtos {
 
         tableTopN_ = 0;
 
+        rollingCounterMinAllowedFailures_ = 0;
+
+        rollingCounterMaxAllowedFailures_ = 0;
+
+        rollingCounterMinWindow_ = 0;
+
+        rollingCounterMaxWindow_ = 0;
+
+        weightedCounterMinAllowedFailures_ = 0;
+
+        weightedCounterMaxAllowedFailures_ = 0;
+
+        weightedCounterMinPassDecrement_ = 0;
+
+        weightedCounterMaxPassDecrement_ = 0;
+
+        resettingCounterMinAllowedFailures_ = 0;
+
+        resettingCounterMaxAllowedFailures_ = 0;
+
+        resettingCounterMinResetFraction_ = 0D;
+
+        resettingCounterMaxResetFraction_ = 0D;
+
+        resettingCounterIncResetFraction_ = 0D;
+
         return this;
       }
 
@@ -28032,6 +28470,19 @@ public final class GUIProtos {
         result.plotResetFraction_ = plotResetFraction_;
         result.plotFixedXAxis_ = plotFixedXAxis_;
         result.tableTopN_ = tableTopN_;
+        result.rollingCounterMinAllowedFailures_ = rollingCounterMinAllowedFailures_;
+        result.rollingCounterMaxAllowedFailures_ = rollingCounterMaxAllowedFailures_;
+        result.rollingCounterMinWindow_ = rollingCounterMinWindow_;
+        result.rollingCounterMaxWindow_ = rollingCounterMaxWindow_;
+        result.weightedCounterMinAllowedFailures_ = weightedCounterMinAllowedFailures_;
+        result.weightedCounterMaxAllowedFailures_ = weightedCounterMaxAllowedFailures_;
+        result.weightedCounterMinPassDecrement_ = weightedCounterMinPassDecrement_;
+        result.weightedCounterMaxPassDecrement_ = weightedCounterMaxPassDecrement_;
+        result.resettingCounterMinAllowedFailures_ = resettingCounterMinAllowedFailures_;
+        result.resettingCounterMaxAllowedFailures_ = resettingCounterMaxAllowedFailures_;
+        result.resettingCounterMinResetFraction_ = resettingCounterMinResetFraction_;
+        result.resettingCounterMaxResetFraction_ = resettingCounterMaxResetFraction_;
+        result.resettingCounterIncResetFraction_ = resettingCounterIncResetFraction_;
         onBuilt();
         return result;
       }
@@ -28112,6 +28563,45 @@ public final class GUIProtos {
         }
         if (other.getTableTopN() != 0) {
           setTableTopN(other.getTableTopN());
+        }
+        if (other.getRollingCounterMinAllowedFailures() != 0) {
+          setRollingCounterMinAllowedFailures(other.getRollingCounterMinAllowedFailures());
+        }
+        if (other.getRollingCounterMaxAllowedFailures() != 0) {
+          setRollingCounterMaxAllowedFailures(other.getRollingCounterMaxAllowedFailures());
+        }
+        if (other.getRollingCounterMinWindow() != 0) {
+          setRollingCounterMinWindow(other.getRollingCounterMinWindow());
+        }
+        if (other.getRollingCounterMaxWindow() != 0) {
+          setRollingCounterMaxWindow(other.getRollingCounterMaxWindow());
+        }
+        if (other.getWeightedCounterMinAllowedFailures() != 0) {
+          setWeightedCounterMinAllowedFailures(other.getWeightedCounterMinAllowedFailures());
+        }
+        if (other.getWeightedCounterMaxAllowedFailures() != 0) {
+          setWeightedCounterMaxAllowedFailures(other.getWeightedCounterMaxAllowedFailures());
+        }
+        if (other.getWeightedCounterMinPassDecrement() != 0) {
+          setWeightedCounterMinPassDecrement(other.getWeightedCounterMinPassDecrement());
+        }
+        if (other.getWeightedCounterMaxPassDecrement() != 0) {
+          setWeightedCounterMaxPassDecrement(other.getWeightedCounterMaxPassDecrement());
+        }
+        if (other.getResettingCounterMinAllowedFailures() != 0) {
+          setResettingCounterMinAllowedFailures(other.getResettingCounterMinAllowedFailures());
+        }
+        if (other.getResettingCounterMaxAllowedFailures() != 0) {
+          setResettingCounterMaxAllowedFailures(other.getResettingCounterMaxAllowedFailures());
+        }
+        if (other.getResettingCounterMinResetFraction() != 0D) {
+          setResettingCounterMinResetFraction(other.getResettingCounterMinResetFraction());
+        }
+        if (other.getResettingCounterMaxResetFraction() != 0D) {
+          setResettingCounterMaxResetFraction(other.getResettingCounterMaxResetFraction());
+        }
+        if (other.getResettingCounterIncResetFraction() != 0D) {
+          setResettingCounterIncResetFraction(other.getResettingCounterIncResetFraction());
         }
         onChanged();
         return this;
@@ -28519,6 +29009,344 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private int rollingCounterMinAllowedFailures_ ;
+      /**
+       * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
+       */
+      public int getRollingCounterMinAllowedFailures() {
+        return rollingCounterMinAllowedFailures_;
+      }
+      /**
+       * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
+       */
+      public Builder setRollingCounterMinAllowedFailures(int value) {
+        
+        rollingCounterMinAllowedFailures_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 rolling_counter_min_allowed_failures = 14;</code>
+       */
+      public Builder clearRollingCounterMinAllowedFailures() {
+        
+        rollingCounterMinAllowedFailures_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int rollingCounterMaxAllowedFailures_ ;
+      /**
+       * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
+       */
+      public int getRollingCounterMaxAllowedFailures() {
+        return rollingCounterMaxAllowedFailures_;
+      }
+      /**
+       * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
+       */
+      public Builder setRollingCounterMaxAllowedFailures(int value) {
+        
+        rollingCounterMaxAllowedFailures_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 rolling_counter_max_allowed_failures = 15;</code>
+       */
+      public Builder clearRollingCounterMaxAllowedFailures() {
+        
+        rollingCounterMaxAllowedFailures_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int rollingCounterMinWindow_ ;
+      /**
+       * <code>int32 rolling_counter_min_window = 16;</code>
+       */
+      public int getRollingCounterMinWindow() {
+        return rollingCounterMinWindow_;
+      }
+      /**
+       * <code>int32 rolling_counter_min_window = 16;</code>
+       */
+      public Builder setRollingCounterMinWindow(int value) {
+        
+        rollingCounterMinWindow_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 rolling_counter_min_window = 16;</code>
+       */
+      public Builder clearRollingCounterMinWindow() {
+        
+        rollingCounterMinWindow_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int rollingCounterMaxWindow_ ;
+      /**
+       * <code>int32 rolling_counter_max_window = 17;</code>
+       */
+      public int getRollingCounterMaxWindow() {
+        return rollingCounterMaxWindow_;
+      }
+      /**
+       * <code>int32 rolling_counter_max_window = 17;</code>
+       */
+      public Builder setRollingCounterMaxWindow(int value) {
+        
+        rollingCounterMaxWindow_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 rolling_counter_max_window = 17;</code>
+       */
+      public Builder clearRollingCounterMaxWindow() {
+        
+        rollingCounterMaxWindow_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int weightedCounterMinAllowedFailures_ ;
+      /**
+       * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
+       */
+      public int getWeightedCounterMinAllowedFailures() {
+        return weightedCounterMinAllowedFailures_;
+      }
+      /**
+       * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
+       */
+      public Builder setWeightedCounterMinAllowedFailures(int value) {
+        
+        weightedCounterMinAllowedFailures_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 weighted_counter_min_allowed_failures = 18;</code>
+       */
+      public Builder clearWeightedCounterMinAllowedFailures() {
+        
+        weightedCounterMinAllowedFailures_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int weightedCounterMaxAllowedFailures_ ;
+      /**
+       * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
+       */
+      public int getWeightedCounterMaxAllowedFailures() {
+        return weightedCounterMaxAllowedFailures_;
+      }
+      /**
+       * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
+       */
+      public Builder setWeightedCounterMaxAllowedFailures(int value) {
+        
+        weightedCounterMaxAllowedFailures_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 weighted_counter_max_allowed_failures = 19;</code>
+       */
+      public Builder clearWeightedCounterMaxAllowedFailures() {
+        
+        weightedCounterMaxAllowedFailures_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int weightedCounterMinPassDecrement_ ;
+      /**
+       * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
+       */
+      public int getWeightedCounterMinPassDecrement() {
+        return weightedCounterMinPassDecrement_;
+      }
+      /**
+       * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
+       */
+      public Builder setWeightedCounterMinPassDecrement(int value) {
+        
+        weightedCounterMinPassDecrement_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 weighted_counter_min_pass_decrement = 20;</code>
+       */
+      public Builder clearWeightedCounterMinPassDecrement() {
+        
+        weightedCounterMinPassDecrement_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int weightedCounterMaxPassDecrement_ ;
+      /**
+       * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
+       */
+      public int getWeightedCounterMaxPassDecrement() {
+        return weightedCounterMaxPassDecrement_;
+      }
+      /**
+       * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
+       */
+      public Builder setWeightedCounterMaxPassDecrement(int value) {
+        
+        weightedCounterMaxPassDecrement_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 weighted_counter_max_pass_decrement = 21;</code>
+       */
+      public Builder clearWeightedCounterMaxPassDecrement() {
+        
+        weightedCounterMaxPassDecrement_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int resettingCounterMinAllowedFailures_ ;
+      /**
+       * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
+       */
+      public int getResettingCounterMinAllowedFailures() {
+        return resettingCounterMinAllowedFailures_;
+      }
+      /**
+       * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
+       */
+      public Builder setResettingCounterMinAllowedFailures(int value) {
+        
+        resettingCounterMinAllowedFailures_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 resetting_counter_min_allowed_failures = 22;</code>
+       */
+      public Builder clearResettingCounterMinAllowedFailures() {
+        
+        resettingCounterMinAllowedFailures_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int resettingCounterMaxAllowedFailures_ ;
+      /**
+       * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
+       */
+      public int getResettingCounterMaxAllowedFailures() {
+        return resettingCounterMaxAllowedFailures_;
+      }
+      /**
+       * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
+       */
+      public Builder setResettingCounterMaxAllowedFailures(int value) {
+        
+        resettingCounterMaxAllowedFailures_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 resetting_counter_max_allowed_failures = 23;</code>
+       */
+      public Builder clearResettingCounterMaxAllowedFailures() {
+        
+        resettingCounterMaxAllowedFailures_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double resettingCounterMinResetFraction_ ;
+      /**
+       * <code>double resetting_counter_min_reset_fraction = 24;</code>
+       */
+      public double getResettingCounterMinResetFraction() {
+        return resettingCounterMinResetFraction_;
+      }
+      /**
+       * <code>double resetting_counter_min_reset_fraction = 24;</code>
+       */
+      public Builder setResettingCounterMinResetFraction(double value) {
+        
+        resettingCounterMinResetFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double resetting_counter_min_reset_fraction = 24;</code>
+       */
+      public Builder clearResettingCounterMinResetFraction() {
+        
+        resettingCounterMinResetFraction_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double resettingCounterMaxResetFraction_ ;
+      /**
+       * <code>double resetting_counter_max_reset_fraction = 25;</code>
+       */
+      public double getResettingCounterMaxResetFraction() {
+        return resettingCounterMaxResetFraction_;
+      }
+      /**
+       * <code>double resetting_counter_max_reset_fraction = 25;</code>
+       */
+      public Builder setResettingCounterMaxResetFraction(double value) {
+        
+        resettingCounterMaxResetFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double resetting_counter_max_reset_fraction = 25;</code>
+       */
+      public Builder clearResettingCounterMaxResetFraction() {
+        
+        resettingCounterMaxResetFraction_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double resettingCounterIncResetFraction_ ;
+      /**
+       * <code>double resetting_counter_inc_reset_fraction = 26;</code>
+       */
+      public double getResettingCounterIncResetFraction() {
+        return resettingCounterIncResetFraction_;
+      }
+      /**
+       * <code>double resetting_counter_inc_reset_fraction = 26;</code>
+       */
+      public Builder setResettingCounterIncResetFraction(double value) {
+        
+        resettingCounterIncResetFraction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double resetting_counter_inc_reset_fraction = 26;</code>
+       */
+      public Builder clearResettingCounterIncResetFraction() {
+        
+        resettingCounterIncResetFraction_ = 0D;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -28825,7 +29653,7 @@ public final class GUIProtos {
       "\t\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006opti" +
       "on\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificat" +
       "ion\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(" +
-      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\325\002\n\030" +
+      "\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\233\007\n\030" +
       "FailCountManagerSettings\022\016\n\006option\030\001 \001(\005",
       "\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit" +
       "\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024ta" +
@@ -28834,10 +29662,24 @@ public final class GUIProtos {
       "ndow\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020" +
       "plot_fail_weight\030\n \001(\005\022\033\n\023plot_reset_fra" +
       "ction\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010\022\023" +
-      "\n\013table_top_n\030\r \001(\005*O\n\014TemplateType\022\023\n\017I" +
-      "NLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022" +
-      "\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto",
-      "3"
+      "\n\013table_top_n\030\r \001(\005\022,\n$rolling_counter_m" +
+      "in_allowed_failures\030\016 \001(\005\022,\n$rolling_cou" +
+      "nter_max_allowed_failures\030\017 \001(\005\022\"\n\032rolli",
+      "ng_counter_min_window\030\020 \001(\005\022\"\n\032rolling_c" +
+      "ounter_max_window\030\021 \001(\005\022-\n%weighted_coun" +
+      "ter_min_allowed_failures\030\022 \001(\005\022-\n%weight" +
+      "ed_counter_max_allowed_failures\030\023 \001(\005\022+\n" +
+      "#weighted_counter_min_pass_decrement\030\024 \001" +
+      "(\005\022+\n#weighted_counter_max_pass_decremen" +
+      "t\030\025 \001(\005\022.\n&resetting_counter_min_allowed" +
+      "_failures\030\026 \001(\005\022.\n&resetting_counter_max" +
+      "_allowed_failures\030\027 \001(\005\022,\n$resetting_cou" +
+      "nter_min_reset_fraction\030\030 \001(\001\022,\n$resetti",
+      "ng_counter_max_reset_fraction\030\031 \001(\001\022,\n$r" +
+      "esetting_counter_inc_reset_fraction\030\032 \001(" +
+      "\001*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025" +
+      "\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE" +
+      "\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -28950,7 +29792,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", });
+        new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", "RollingCounterMinAllowedFailures", "RollingCounterMaxAllowedFailures", "RollingCounterMinWindow", "RollingCounterMaxWindow", "WeightedCounterMinAllowedFailures", "WeightedCounterMaxAllowedFailures", "WeightedCounterMinPassDecrement", "WeightedCounterMaxPassDecrement", "ResettingCounterMinAllowedFailures", "ResettingCounterMaxAllowedFailures", "ResettingCounterMinResetFraction", "ResettingCounterMaxResetFraction", "ResettingCounterIncResetFraction", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

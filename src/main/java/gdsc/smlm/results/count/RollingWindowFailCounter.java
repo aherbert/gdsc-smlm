@@ -20,6 +20,7 @@ import gdsc.core.utils.BooleanRollingArray;
  */
 public class RollingWindowFailCounter extends BaseFailCounter
 {
+	/** The rolling array stores true for a failure. */
 	private final BooleanRollingArray rollingArray;
 
 	/** The number of allowed failures. */
@@ -53,14 +54,14 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * @param window
 	 *            the window size
 	 * @throws IllegalArgumentException
-	 *             If the window is not strictly positive
+	 *             If the window is not strictly positive, or the window is smaller that the allowed failures 
 	 */
 	public static RollingWindowFailCounter create(int allowedFailures, int window) throws IllegalArgumentException
 	{
 		if (window < 1)
 			throw new IllegalArgumentException("Window must be strictly positive");
-		if (allowedFailures >= window)
-			throw new IllegalArgumentException("Allowed failures must be less than window size");
+		if (window < allowedFailures)
+			throw new IllegalArgumentException("Window must be larger than the allowed failures");
 		return new RollingWindowFailCounter(Math.max(0, allowedFailures), window);
 	}
 
