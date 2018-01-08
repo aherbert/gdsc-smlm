@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import gdsc.smlm.data.NamedObject;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -16,7 +18,7 @@ package gdsc.smlm.results.filter;
 /**
  * Define the type of parameter
  */
-public enum ParameterType
+public enum ParameterType implements NamedObject
 {
 	//@formatter:off
 	SIGNAL("Signal"),
@@ -47,8 +49,8 @@ public enum ParameterType
 	
 	//@formatter:on
 
-	public final String name;
-	public final String shortName;
+	private final String name;
+	private final String shortName;
 
 	private ParameterType(String name)
 	{
@@ -63,6 +65,26 @@ public enum ParameterType
 
 	@Override
 	public String toString()
+	{
+		return shortName;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.data.NamedObject#getName()
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.data.NamedObject#getShortName()
+	 */
+	public String getShortName()
 	{
 		return shortName;
 	}

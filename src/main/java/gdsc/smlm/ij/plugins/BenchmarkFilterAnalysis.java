@@ -4786,10 +4786,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	private String getDialogName(String prefix, Filter filter, int index)
 	{
 		ParameterType type = filter.getParameterType(index);
-		String parameterName = prefix + type.shortName.replace(" ", "_");
-		if (type.name == type.shortName) // A pointer compare is OK here as the constructor will use the same string
+		String parameterName = prefix + type.getShortName().replace(" ", "_");
+		if (type.getName() == type.getShortName()) // A pointer compare is OK here as the constructor will use the same string
 			return parameterName;
-		return parameterName + " (" + type.name + ")";
+		return parameterName + " (" + type.getName() + ")";
 	}
 
 	private double getCriteria(FractionClassificationResult s)
