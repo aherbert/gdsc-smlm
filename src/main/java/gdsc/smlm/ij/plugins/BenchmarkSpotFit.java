@@ -289,7 +289,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			return defaultValue;
 
 		// Assume these are roughly the same
-		if (type == ParameterType.PRECISION2)
+		if (type == ParameterType.PRECISION2 || type == ParameterType.PRECISION_CRLB)
 			type = ParameterType.PRECISION;
 
 		for (int j = 0; j < filterCriteria.length; j++)
