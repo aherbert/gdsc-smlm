@@ -167,6 +167,37 @@ public class PSFHelper
 		return defaultValue;
 	}
 
+
+	/**
+	 * Gets the Gaussian 2D x-width for the PSF parameters.
+	 *
+	 * @param psf
+	 *            the psf
+	 * @return the Gaussian 2D x-width for the PSF parameters.
+	 * @throws ConfigurationException
+	 *             if the psf is null, or not a one-axis Gaussian 2D function
+	 */
+	public static double getGaussian2DWx(PSFOrBuilder psf) throws ConfigurationException
+	{
+		if (psf == null)
+			throw new ConfigurationException("psf is null");
+		switch (psf.getPsfType())
+		{
+			case ONE_AXIS_GAUSSIAN_2D:
+				return getParameterValue(psf, INDEX_SX, 1);
+			case ASTIGMATIC_GAUSSIAN_2D:
+			case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
+			case TWO_AXIS_GAUSSIAN_2D:
+				// These are not supported 
+				throw new ConfigurationException("Gaussian2D psf is not a one-axis Gaussian");
+			case CUSTOM:
+			case UNRECOGNIZED:
+			default:
+				break;
+		}
+		throw new ConfigurationException("psf is not Gaussian2D");
+	}
+	
 	/**
 	 * Gets the Gaussian 2D angle index for the PeakResult parameters.
 	 * <p>
