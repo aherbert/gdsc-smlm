@@ -19,6 +19,7 @@ import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.function.Erf;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -446,7 +447,7 @@ public class Gaussian2DPeakResultHelper
 	public static final int PIXEL_AMPLITUDE = 0x00000020;
 
 	/** Dummy Gaussian 2D parameters */
-	private static final float[] PARAMS = new float[7];
+	private static final float[] PARAMS = new float[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 
 	/** The index of the Sx parameter in the PeakResult parameters array. */
 	public static final int INDEX_SX = PeakResult.STANDARD_PARAMETERS;
