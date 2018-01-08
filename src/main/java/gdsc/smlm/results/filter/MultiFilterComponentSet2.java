@@ -32,7 +32,7 @@ public class MultiFilterComponentSet2 extends MultiFilterComponentSet
 		//@formatter:off
 		if (component0.fail(peak)) return component0.getType();
 		if (component1.fail(peak)) return component1.getType();
-		//@formatter:oon
+		//@formatter:on
 		return 0;
 	}
 }

@@ -1,12 +1,9 @@
 package gdsc.smlm.results.filter;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
@@ -24,6 +21,7 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold and width range
@@ -73,16 +71,9 @@ public class ANRFilter2 extends DirectFilter
 				Gaussian2DPeakResultHelper.AMPLITUDE);
 
 		// Set the width limit
-		lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			double s = Double.parseDouble(match.group(1));
-			lowerSigmaThreshold = (float) (s * minWidth);
-			upperSigmaThreshold = (float) (s * maxWidth);
-		}
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		lowerSigmaThreshold = (float) (s * minWidth);
+		upperSigmaThreshold = (float) (s * maxWidth);
 	}
 
 	@Override
@@ -111,9 +102,7 @@ public class ANRFilter2 extends DirectFilter
 	public boolean accept(PeakResult peak)
 	{
 		float sd = calculator.getStandardDeviation(peak.getParameters());
-		return ANRFilter.getANR(calculator, peak) >= this.anr &&
-				sd <= upperSigmaThreshold &&
-				sd >= lowerSigmaThreshold;
+		return ANRFilter.getANR(calculator, peak) >= this.anr && sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
 	}
 
 	@Override

@@ -1,9 +1,14 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.results.MemoryPeakResults;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2013 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -13,48 +18,52 @@ package gdsc.smlm.results.filter;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 /**
- * Filter results using a signal threshold
+ * Filter results using a precision threshold. Calculates the precision using the Cramér-Rao lower bound (CRLB) of the
+ * variance of estimators of the fit parameter. The variance for the fitted X and Y position is averaged to produce a
+ * localisation precision.
  */
-public class SignalFilter extends DirectFilter implements IMultiFilter
+public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 {
-	public static final double DEFAULT_INCREMENT = 5;
-	public static final double DEFAULT_RANGE = 30;
-
 	@XStreamAsAttribute
-	final double signal;
+	final double precision;
 	@XStreamOmitField
-	float signalThreshold;
+	float variance;
 
-	public SignalFilter(double signal)
+	public PrecisionCRLBFilter(double precision)
 	{
-		this.signal = Math.max(0, signal);
+		this.precision = Math.max(0, precision);
 	}
 
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		// Set the signal limit using the gain
-		signalThreshold = (float) (signal * peakResults.getGain());
+		// Add the 2-fold scale factor here:
+		// (varX + varY)/2 < precision^2
+		// (varX + varY) < precision^2 * 2
+		variance = Filter.getUpperSquaredLimit(precision) * 2f;
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return peak.getSignal() >= signalThreshold;
+		// Use the estimated parameter deviations for the peak
+		if (peak.hasParameterDeviations())
+		{
+			float vx = peak.getParameterDeviation(PeakResult.X);
+			float vy = peak.getParameterDeviation(PeakResult.Y);
+			return (vx * vx + vy * vy) <= variance;
+		}
+		return true;
 	}
 
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		if (peak.getSignal() < signal)
-			return V_PHOTONS;
+		if (peak.getLocationVarianceCRLB() > variance)
+			return V_LOCATION_VARIANCE_CRLB;
 		return 0;
 	}
 
@@ -66,7 +75,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using a lower signal threshold. The threshold is applied in photons (i.e. the signal is divided by the calibrated gain).";
+		return "Filter results using an upper precision threshold (uses fitted parameter variance).";
 	}
 
 	/*
@@ -88,7 +97,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	@Override
 	protected double getParameterValueInternal(int index)
 	{
-		return signal;
+		return precision;
 	}
 
 	/*
@@ -100,7 +109,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	public double getParameterIncrement(int index)
 	{
 		checkIndex(index);
-		return SignalFilter.DEFAULT_INCREMENT;
+		return PrecisionFilter.DEFAULT_INCREMENT;
 	}
 
 	/*
@@ -112,7 +121,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return ParameterType.SIGNAL;
+		return ParameterType.PRECISION_CRLB;
 	}
 
 	/*
@@ -124,7 +133,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new SignalFilter(updateParameter(signal, delta, DEFAULT_RANGE));
+		return new PrecisionCRLBFilter(updateParameter(precision, delta, PrecisionFilter.DEFAULT_RANGE));
 	}
 
 	/*
@@ -135,7 +144,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new SignalFilter(parameters[0]);
+		return new PrecisionCRLBFilter(parameters[0]);
 	}
 
 	/*
@@ -146,7 +155,29 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void weakestParameters(double[] parameters)
 	{
-		setMin(parameters, 0, signal);
+		setMax(parameters, 0, precision);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return 1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
+	 */
+	@Override
+	public double[] upperLimit()
+	{
+		return new double[] { PrecisionFilter.UPPER_LIMIT };
 	}
 
 	/*
@@ -156,12 +187,12 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	 */
 	public double[] mutationStepRange()
 	{
-		return new double[] { DEFAULT_RANGE };
+		return new double[] { PrecisionFilter.DEFAULT_RANGE };
 	}
 
 	public double getSignal()
 	{
-		return signal;
+		return 0;
 	}
 
 	public double getSNR()
@@ -191,11 +222,11 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 
 	public double getPrecision()
 	{
-		return 0;
+		return precision;
 	}
 
 	public PrecisionType getPrecisionType()
 	{
-		return  PrecisionType.NONE;
+		return PrecisionType.CRLB;
 	}
 }

@@ -1,5 +1,9 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
@@ -18,12 +22,6 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using a width range
@@ -74,14 +72,9 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		// Set the width limit
 		lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			final double s = Double.parseDouble(match.group(1));
-			lowerSigmaThreshold = (float) (s * minWidth);
-			upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
-		}
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		lowerSigmaThreshold = (float) (s * minWidth);
+		upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
 	}
 
 	@Override
@@ -307,8 +300,8 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return false;
+		return PrecisionType.NONE;
 	}
 }

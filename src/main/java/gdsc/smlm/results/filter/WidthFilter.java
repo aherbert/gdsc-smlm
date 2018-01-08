@@ -1,5 +1,9 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
@@ -19,12 +23,6 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 /**
  * Filter results using an upper width factor
  */
@@ -40,10 +38,9 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	float upperSigmaThreshold;
 	@XStreamOmitField
 	boolean widthEnabled;
-	
+
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
-	
 
 	public WidthFilter(double width)
 	{
@@ -54,15 +51,10 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
-		
+
 		// Set the width limit
-		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			upperSigmaThreshold = Filter.getUpperLimit(Double.parseDouble(match.group(1)) * width);
-		}
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		upperSigmaThreshold = Filter.getUpperLimit(s * width);
 	}
 
 	@Override
@@ -193,7 +185,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	{
 		setMax(parameters, 0, width);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -261,8 +253,8 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return false;
+		return PrecisionType.NONE;
 	}
 }

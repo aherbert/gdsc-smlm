@@ -24,97 +24,102 @@ public interface IDirectFilter
 	/**
 	 * Validation flag for the signal in photons
 	 */
-	final static int V_PHOTONS = 1;
+	final static int V_PHOTONS = 0x000000001;
 
 	/**
 	 * Validation flag for the SNR
 	 */
-	final static int V_SNR = 2;
+	final static int V_SNR = 0x000000002;
 
 	/**
 	 * Validation flag for the noise
 	 */
-	final static int V_NOISE = 4;
+	final static int V_NOISE = 0x000000004;
 
 	/**
 	 * Validation flag for the location variance
 	 */
-	final static int V_LOCATION_VARIANCE = 8;
+	final static int V_LOCATION_VARIANCE = 0x000000008;
 
 	/**
 	 * Validation flag for the location variance using the local background
 	 */
-	final static int V_LOCATION_VARIANCE2 = 16;
+	final static int V_LOCATION_VARIANCE2 = 0x000000010;
 
 	/**
 	 * Validation flag for the average peak standard deviation in the X and Y dimension
 	 */
-	final static int V_SD = 32;
+	final static int V_SD = 0x000000020;
 
 	/**
 	 * Validation flag for the background
 	 */
-	final static int V_BACKGROUND = 64;
+	final static int V_BACKGROUND = 0x000000040;
 
 	/**
 	 * Validation flag for the amplitude
 	 */
-	final static int V_AMPLITUDE = 128;
+	final static int V_AMPLITUDE = 0x000000080;
 
 	/**
 	 * Validation flag for the angle (for an elliptical Gaussian peak)
 	 */
-	final static int V_ANGLE = 256;
+	final static int V_ANGLE = 0x000000100;
 
 	/**
 	 * Validation flag for the x position
 	 */
-	final static int V_X = 512;
+	final static int V_X = 0x000000200;
 
 	/**
 	 * Validation flag for the y position
 	 */
-	final static int V_Y = 1024;
+	final static int V_Y = 0x000000400;
 
 	/**
 	 * Validation flag for the relative x position shift squared
 	 */
-	final static int V_X_RELATIVE_SHIFT = 2048;
+	final static int V_X_RELATIVE_SHIFT = 0x000000800;
 
 	/**
 	 * Validation flag for the relative y position shift squared
 	 */
-	final static int V_Y_RELATIVE_SHIFT = 4096;
+	final static int V_Y_RELATIVE_SHIFT = 0x000001000;
 
 	/**
 	 * Validation flag for the x-dimension standard deviation
 	 */
-	final static int V_X_SD = 8192;
+	final static int V_X_SD = 0x000002000;
 
 	/**
 	 * Validation flag for the y-dimension standard deviation
 	 */
-	final static int V_Y_SD = 16384;
+	final static int V_Y_SD = 0x000004000;
 
 	/**
 	 * Validation flag for the x-dimension width factor
 	 */
-	final static int V_X_SD_FACTOR = 32768;
+	final static int V_X_SD_FACTOR = 0x000008000;
 
 	/**
 	 * Validation flag for the y-dimension width factor
 	 */
-	final static int V_Y_SD_FACTOR = 65536;
+	final static int V_Y_SD_FACTOR = 0x000010000;
 
+	/**
+	 * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower bound
+	 */
+	final static int V_LOCATION_VARIANCE_CRLB = 0x000020000;
+	
 	/**
 	 * Disable filtering using the width of the result
 	 */
-	final static int NO_WIDTH = 1;
+	final static int NO_WIDTH = 0x000000001;
 
 	/**
 	 * Disable filtering using the shift of the result
 	 */
-	final static int NO_SHIFT = 2;
+	final static int NO_SHIFT = 0x000000002;
 
 	/**
 	 * Called before the accept method is called for PreprocessedPeakResult

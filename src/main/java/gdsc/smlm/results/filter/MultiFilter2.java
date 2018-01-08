@@ -1,25 +1,10 @@
 package gdsc.smlm.results.filter;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -62,8 +47,6 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	boolean useBackground = false;
 	@XStreamOmitField
 	private Gaussian2DPeakResultCalculator calculator;
-	@XStreamOmitField
-	double bias = -1;
 	@XStreamOmitField
 	boolean widthEnabled;
 	@XStreamOmitField
@@ -118,25 +101,19 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 					Gaussian2DPeakResultHelper.LSE_PRECISION);
 			useBackground = false;
 		}
-		
+
 		signalThreshold = (float) (signal);
 
 		// Set the width limit
 		lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		// Set the shift limit
-		offset = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			double s = Double.parseDouble(match.group(1));
-			lowerSigmaThreshold = (float) (s * minWidth);
-			upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
-			offset = Filter.getUpperLimit(s * shift);
-			// Convert to squared distance
-			eoffset = Filter.getUpperSquaredLimit(s * eshift);
-		}
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		lowerSigmaThreshold = (float) (s * minWidth);
+		upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
+		offset = Filter.getUpperLimit(s * shift);
+		// Convert to squared distance
+		eoffset = Filter.getUpperSquaredLimit(s * eshift);
 
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
@@ -570,9 +547,9 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		return precision;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return true;
+		return PrecisionType.ESTIMATE_USING_LOCAL_BACKGROUND;
 	}
 
 	/*

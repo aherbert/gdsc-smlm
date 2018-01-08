@@ -1,30 +1,15 @@
 package gdsc.smlm.results.filter;
 
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision. Calculates the
@@ -166,19 +151,14 @@ public class MultiHysteresisFilter2 extends HysteresisFilter
 		// Set the shift limit
 		strictOffset = weakOffset = Float.POSITIVE_INFINITY;
 
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			double s = Double.parseDouble(match.group(1));
-			strictMinSigmaThreshold = (float) (s * strictMinWidth);
-			strictMaxSigmaThreshold = Filter.getUpperLimit(s * strictMaxWidth);
-			weakMinSigmaThreshold = (float) (s * (strictMinWidth - rangeMinWidth));
-			weakMaxSigmaThreshold = Filter.getUpperLimit(s * (strictMaxWidth + rangeMaxWidth));
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		strictMinSigmaThreshold = (float) (s * strictMinWidth);
+		strictMaxSigmaThreshold = Filter.getUpperLimit(s * strictMaxWidth);
+		weakMinSigmaThreshold = (float) (s * (strictMinWidth - rangeMinWidth));
+		weakMaxSigmaThreshold = Filter.getUpperLimit(s * (strictMaxWidth + rangeMaxWidth));
 
-			strictOffset = Filter.getUpperLimit(s * strictShift);
-			weakOffset = Filter.getUpperLimit(s * (strictShift + rangeShift));
-		}
+		strictOffset = Filter.getUpperLimit(s * strictShift);
+		weakOffset = Filter.getUpperLimit(s * (strictShift + rangeShift));
 
 		// Configure the precision limit
 		strictVariance = Filter.getDUpperSquaredLimit(strictPrecision);

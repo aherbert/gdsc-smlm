@@ -1,5 +1,10 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.data.config.PSFHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -18,12 +23,6 @@ import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision.
@@ -152,19 +151,14 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		// Set the shift limit
 		strictOffset = weakOffset = Float.POSITIVE_INFINITY;
 
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			double s = Double.parseDouble(match.group(1));
-			strictMinSigmaThreshold = (float) (s * strictMinWidth);
-			strictMaxSigmaThreshold = Filter.getUpperLimit(s * strictMaxWidth);
-			weakMinSigmaThreshold = (float) (s * (strictMinWidth - rangeMinWidth));
-			weakMaxSigmaThreshold = Filter.getUpperLimit(s * (strictMaxWidth + rangeMaxWidth));
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		strictMinSigmaThreshold = (float) (s * strictMinWidth);
+		strictMaxSigmaThreshold = Filter.getUpperLimit(s * strictMaxWidth);
+		weakMinSigmaThreshold = (float) (s * (strictMinWidth - rangeMinWidth));
+		weakMaxSigmaThreshold = Filter.getUpperLimit(s * (strictMaxWidth + rangeMaxWidth));
 
-			strictOffset = Filter.getUpperLimit(s * strictShift);
-			weakOffset = Filter.getUpperLimit(s * (strictShift + rangeShift));
-		}
+		strictOffset = Filter.getUpperLimit(s * strictShift);
+		weakOffset = Filter.getUpperLimit(s * (strictShift + rangeShift));
 
 		// Configure the precision limit
 		strictVariance = Filter.getDUpperSquaredLimit(strictPrecision);

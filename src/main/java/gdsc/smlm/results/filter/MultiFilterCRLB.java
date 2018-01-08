@@ -1,34 +1,19 @@
 package gdsc.smlm.results.filter;
 
-import java.util.Arrays;
-
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2013 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision
+ * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision. Calculates the
+ * precision using the true fitted background if a bias is provided.
  */
-public class MultiFilter extends DirectFilter implements IMultiFilter
+public class MultiFilterCRLB extends DirectFilter implements IMultiFilter
 {
 	@XStreamAsAttribute
 	final double signal;
@@ -72,7 +57,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	MultiFilterComponentSet components_Width_NoShift = null;
 
-	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
+	public MultiFilterCRLB(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision)
 	{
 		this.signal = Math.max(0, signal);
@@ -94,21 +79,19 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	protected String generateName()
 	{
-		return String.format("Multi: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f",
+		return String.format(
+				"MultiCRLB: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, PrecisionCRLB=%.1f",
 				signal, snr, minWidth, maxWidth, shift, eshift, precision);
 	}
 
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.LSE_PRECISION);
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(), 0);
 
 		signalThreshold = (float) (signal);
 
 		// Set the width limit
-		lowerSigmaThreshold = 0;
-		upperSigmaThreshold = Float.POSITIVE_INFINITY;
 		// Set the shift limit
 		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
 		lowerSigmaThreshold = (float) (s * minWidth);
@@ -153,7 +136,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			}
 			if (precision != 0)
 			{
-				components1[s1++] = new MultiFilterVarianceComponent(precision);
+				components1[s1++] = new MultiFilterVarianceCRLBComponent(precision);
 			}
 			if (shift != 0)
 			{
@@ -204,18 +187,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		//		variance = Filter.getDUpperSquaredLimit(precision);
 	}
 
-	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size, @SuppressWarnings("rawtypes") Class clazz)
-	{
-		MultiFilterComponent[] out = new MultiFilterComponent[size];
-		int length = 0;
-		for (int i = 0; i < size; i++)
-		{
-			if (in[i].getClass() != clazz)
-				out[length++] = in[i];
-		}
-		return Arrays.copyOf(out, length);
-	}
-
 	@Override
 	public boolean accept(PeakResult peak)
 	{
@@ -231,8 +202,13 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			return false;
 
 		// Precision
-		if (calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) > variance)
-			return false;
+		if (peak.hasParameterDeviations())
+		{
+			float vx = peak.getParameterDeviation(PeakResult.X);
+			float vy = peak.getParameterDeviation(PeakResult.Y);
+			if ((vx * vx + vy * vy) > variance)
+				return false;
+		}
 
 		// Shift
 		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
@@ -255,13 +231,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		return components.validate(peak);
 
-		//		// This is the legacy support for all components together
-		//		
 		//		// Current order of filter power obtained from BenchmarkFilterAnalysis:
 		//		// Precision, Max Width, SNR, Shift, Min width
 		//
-		//		if (peak.getLocationVariance() > variance)
-		//			return V_LOCATION_VARIANCE;
+		//		if (peak.getLocationVariance2() > variance)
+		//			return V_LOCATION_VARIANCE2;
 		//
 		//		if (widthEnabled)
 		//		{
@@ -313,7 +287,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift and precision";
+		return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift and precision (uses fitted parameter variance)";
 	}
 
 	/*
@@ -412,13 +386,9 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			case 5:
 				return ParameterType.ESHIFT;
 			default:
-				return ParameterType.PRECISION;
+				return ParameterType.PRECISION_CRLB;
 		}
 	}
-
-	static double[] defaultRange = new double[] { SignalFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE,
-			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
-			EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE };
 
 	/*
 	 * (non-Javadoc)
@@ -430,8 +400,8 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		checkIndex(index);
 		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
-		params[index] = updateParameter(params[index], delta, defaultRange[index]);
-		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6]);
+		params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
+		return new MultiFilterCRLB(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6]);
 	}
 
 	/*
@@ -442,7 +412,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new MultiFilter(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
+		return new MultiFilterCRLB(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
 				parameters[5], parameters[6]);
 	}
 
@@ -521,7 +491,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	 */
 	public double[] mutationStepRange()
 	{
-		return defaultRange;
+		return MultiFilter.defaultRange;
 	}
 
 	public double getSignal()
@@ -561,7 +531,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	public PrecisionType getPrecisionType()
 	{
-		return PrecisionType.ESTIMATE;
+		return PrecisionType.CRLB;
 	}
 
 	/*

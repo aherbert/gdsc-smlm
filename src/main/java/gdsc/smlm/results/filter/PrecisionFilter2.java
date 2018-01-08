@@ -182,7 +182,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	{
 		return 1;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -203,7 +203,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	{
 		return new double[] { PrecisionFilter.DEFAULT_RANGE };
 	}
-	
+
 	public double getSignal()
 	{
 		return 0;
@@ -239,8 +239,8 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 		return precision;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return true;
+		return PrecisionType.ESTIMATE_USING_LOCAL_BACKGROUND;
 	}
 }

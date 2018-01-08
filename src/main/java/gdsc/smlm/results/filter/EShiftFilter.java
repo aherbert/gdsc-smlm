@@ -1,5 +1,10 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.data.config.PSFHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,12 +20,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using a X/Y coordinate shift as a Euclidian distance. This filter requires that the result X and Y
@@ -50,14 +49,8 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the shift limit
-		eoffset = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			// Convert to squared distance
-			eoffset = getUpperSquaredLimit(Double.parseDouble(match.group(1)) * eshift);
-		}
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		eoffset = getUpperSquaredLimit(s * eshift);
 	}
 
 	@Override
@@ -258,8 +251,8 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return false;
+		return PrecisionType.NONE;
 	}
 }

@@ -19,16 +19,16 @@ package gdsc.smlm.results.filter;
 public class MultiFilterVariance2Component extends MultiFilterComponent
 {
 	final double variance;
-	
+
 	public MultiFilterVariance2Component(double precision)
 	{
 		this.variance = Filter.getDUpperSquaredLimit(precision);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
+	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	public boolean fail(final PreprocessedPeakResult peak)
 	{

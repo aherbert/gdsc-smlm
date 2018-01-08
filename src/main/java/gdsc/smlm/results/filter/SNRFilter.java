@@ -194,8 +194,8 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return false;
+		return  PrecisionType.NONE;
 	}
 }

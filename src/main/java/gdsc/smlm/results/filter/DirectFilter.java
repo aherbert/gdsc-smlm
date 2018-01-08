@@ -132,24 +132,25 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 			return "";
 		StringBuilder sb = new StringBuilder();
 		//@formatter:off
-		if (areSet(flags, V_AMPLITUDE))	         append(sb, "Amplitude",        peak.getAmplitude());
-		if (areSet(flags, V_PHOTONS))            append(sb, "Signal",           peak.getSignal());
-		if (areSet(flags, V_SNR))                append(sb, "SNR",              peak.getSNR());
-		if (areSet(flags, V_NOISE))              append(sb, "Noise",            peak.getNoise());
-		if (areSet(flags, V_LOCATION_VARIANCE))  append(sb, "Precision",        Math.sqrt(peak.getLocationVariance()));
-		if (areSet(flags, V_LOCATION_VARIANCE2)) append(sb, "Precision2",       Math.sqrt(peak.getLocationVariance2()));
-		if (areSet(flags, V_SD))                 append(sb, "SD",               peak.getSD());
-		if (areSet(flags, V_BACKGROUND))         append(sb, "Background",       peak.getBackground());
-		if (areSet(flags, V_AMPLITUDE))          append(sb, "Amplitude",        peak.getAmplitude());
-		if (areSet(flags, V_ANGLE))              append(sb, "Angle",            peak.getAngle());
-		if (areSet(flags, V_X))                  append(sb, "X",                peak.getX());
-		if (areSet(flags, V_Y))                  append(sb, "Y",                peak.getY());
-		if (areSet(flags, V_X_RELATIVE_SHIFT))   append(sb, "X Relative Shift", Math.sqrt(peak.getXRelativeShift2()));
-		if (areSet(flags, V_Y_RELATIVE_SHIFT))   append(sb, "Y Relative Shift", Math.sqrt(peak.getYRelativeShift2()));
-		if (areSet(flags, V_X_SD))               append(sb, "X SD",             peak.getXSD());
-		if (areSet(flags, V_Y_SD))               append(sb, "Y SD",             peak.getYSD());
-		if (areSet(flags, V_X_SD_FACTOR))        append(sb, "X SD Factor",      peak.getXSDFactor());
-		if (areSet(flags, V_Y_SD_FACTOR))        append(sb, "Y SD Factor",      peak.getYSDFactor());
+		if (areSet(flags, V_AMPLITUDE))	             append(sb, "Amplitude",        peak.getAmplitude());
+		if (areSet(flags, V_PHOTONS))                append(sb, "Signal",           peak.getSignal());
+		if (areSet(flags, V_SNR))                    append(sb, "SNR",              peak.getSNR());
+		if (areSet(flags, V_NOISE))                  append(sb, "Noise",            peak.getNoise());
+		if (areSet(flags, V_LOCATION_VARIANCE))      append(sb, "Precision",        Math.sqrt(peak.getLocationVariance()));
+		if (areSet(flags, V_LOCATION_VARIANCE2))     append(sb, "Precision2",       Math.sqrt(peak.getLocationVariance2()));
+		if (areSet(flags, V_LOCATION_VARIANCE_CRLB)) append(sb, "Precision CRLB",   Math.sqrt(peak.getLocationVarianceCRLB()));
+		if (areSet(flags, V_SD))                     append(sb, "SD",               peak.getSD());
+		if (areSet(flags, V_BACKGROUND))             append(sb, "Background",       peak.getBackground());
+		if (areSet(flags, V_AMPLITUDE))              append(sb, "Amplitude",        peak.getAmplitude());
+		if (areSet(flags, V_ANGLE))                  append(sb, "Angle",            peak.getAngle());
+		if (areSet(flags, V_X))                      append(sb, "X",                peak.getX());
+		if (areSet(flags, V_Y))                      append(sb, "Y",                peak.getY());
+		if (areSet(flags, V_X_RELATIVE_SHIFT))       append(sb, "X Relative Shift", Math.sqrt(peak.getXRelativeShift2()));
+		if (areSet(flags, V_Y_RELATIVE_SHIFT))       append(sb, "Y Relative Shift", Math.sqrt(peak.getYRelativeShift2()));
+		if (areSet(flags, V_X_SD))                   append(sb, "X SD",             peak.getXSD());
+		if (areSet(flags, V_Y_SD))                   append(sb, "Y SD",             peak.getYSD());
+		if (areSet(flags, V_X_SD_FACTOR))            append(sb, "X SD Factor",      peak.getXSDFactor());
+		if (areSet(flags, V_Y_SD_FACTOR))            append(sb, "Y SD Factor",      peak.getYSDFactor());
 		//@formatter:on
 		return sb.toString();
 	}
@@ -176,24 +177,25 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 			return "";
 		StringBuilder sb = new StringBuilder();
 		//@formatter:off
-		if (areSet(flags, V_AMPLITUDE))	         append(sb, "Amplitude");
-		if (areSet(flags, V_PHOTONS))            append(sb, "Signal");
-		if (areSet(flags, V_SNR))                append(sb, "SNR");
-		if (areSet(flags, V_NOISE))              append(sb, "Noise");
-		if (areSet(flags, V_LOCATION_VARIANCE))  append(sb, "Precision");
-		if (areSet(flags, V_LOCATION_VARIANCE2)) append(sb, "Precision2");
-		if (areSet(flags, V_SD))                 append(sb, "SD");
-		if (areSet(flags, V_BACKGROUND))         append(sb, "Background");
-		if (areSet(flags, V_AMPLITUDE))          append(sb, "Amplitude");
-		if (areSet(flags, V_ANGLE))              append(sb, "Angle");
-		if (areSet(flags, V_X))                  append(sb, "X");
-		if (areSet(flags, V_Y))                  append(sb, "Y");
-		if (areSet(flags, V_X_RELATIVE_SHIFT))   append(sb, "X Relative Shift");
-		if (areSet(flags, V_Y_RELATIVE_SHIFT))   append(sb, "Y Relative Shift");
-		if (areSet(flags, V_X_SD))               append(sb, "X SD");
-		if (areSet(flags, V_Y_SD))               append(sb, "Y SD");
-		if (areSet(flags, V_X_SD_FACTOR))        append(sb, "X SD Factor");
-		if (areSet(flags, V_Y_SD_FACTOR))        append(sb, "Y SD Factor");
+		if (areSet(flags, V_AMPLITUDE))	             append(sb, "Amplitude");
+		if (areSet(flags, V_PHOTONS))                append(sb, "Signal");
+		if (areSet(flags, V_SNR))                    append(sb, "SNR");
+		if (areSet(flags, V_NOISE))                  append(sb, "Noise");
+		if (areSet(flags, V_LOCATION_VARIANCE))      append(sb, "Precision");
+		if (areSet(flags, V_LOCATION_VARIANCE2))     append(sb, "Precision2");
+		if (areSet(flags, V_LOCATION_VARIANCE_CRLB)) append(sb, "Precision CRLB");
+		if (areSet(flags, V_SD))                     append(sb, "SD");
+		if (areSet(flags, V_BACKGROUND))             append(sb, "Background");
+		if (areSet(flags, V_AMPLITUDE))              append(sb, "Amplitude");
+		if (areSet(flags, V_ANGLE))                  append(sb, "Angle");
+		if (areSet(flags, V_X))                      append(sb, "X");
+		if (areSet(flags, V_Y))                      append(sb, "Y");
+		if (areSet(flags, V_X_RELATIVE_SHIFT))       append(sb, "X Relative Shift");
+		if (areSet(flags, V_Y_RELATIVE_SHIFT))       append(sb, "Y Relative Shift");
+		if (areSet(flags, V_X_SD))                   append(sb, "X SD");
+		if (areSet(flags, V_Y_SD))                   append(sb, "Y SD");
+		if (areSet(flags, V_X_SD_FACTOR))            append(sb, "X SD Factor");
+		if (areSet(flags, V_Y_SD_FACTOR))            append(sb, "Y SD Factor");
 		//@formatter:on
 		return sb.toString();
 	}

@@ -26,9 +26,9 @@ public interface IMultiFilter
 	double getSignal();
 
 	/**
-	 * Gets the Signa-to-noise ratio.
+	 * Gets the Signal-to-noise ratio.
 	 *
-	 * @return the snr
+	 * @return the Signal-to-noise ratio (SNR)
 	 */
 	double getSNR();
 
@@ -68,9 +68,9 @@ public interface IMultiFilter
 	double getPrecision();
 
 	/**
-	 * Checks if precision uses local background.
+	 * Gets the precision type.
 	 *
-	 * @return true, if precision uses local background
+	 * @return the precision type
 	 */
-	boolean isPrecisionUsesLocalBackground();
+	PrecisionType getPrecisionType();
 }

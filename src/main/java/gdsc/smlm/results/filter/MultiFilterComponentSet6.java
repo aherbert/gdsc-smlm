@@ -43,7 +43,7 @@ public class MultiFilterComponentSet6 extends MultiFilterComponentSet
 		if (component3.fail(peak)) return component3.getType();
 		if (component4.fail(peak)) return component4.getType();
 		if (component5.fail(peak)) return component5.getType();
-		//@formatter:oon
+		//@formatter:on
 		return 0;
 	}
 }

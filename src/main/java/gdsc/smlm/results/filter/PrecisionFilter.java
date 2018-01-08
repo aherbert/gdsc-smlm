@@ -224,8 +224,8 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 		return precision;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return false;
+		return  PrecisionType.ESTIMATE;
 	}
 }

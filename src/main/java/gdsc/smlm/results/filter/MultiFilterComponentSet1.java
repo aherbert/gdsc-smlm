@@ -29,7 +29,7 @@ public class MultiFilterComponentSet1 extends MultiFilterComponentSet
 	{
 		//@formatter:off
 		if (component0.fail(peak)) return component0.getType();
-		//@formatter:oon
+		//@formatter:on
 		return 0;
 	}
 }

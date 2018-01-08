@@ -29,7 +29,7 @@ public class MultiFilterWidthComponent extends MultiFilterComponent
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
+	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	public boolean fail(final PreprocessedPeakResult peak)
 	{

@@ -1,5 +1,10 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.data.config.PSFHelper;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,12 +20,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * Filter results using a X/Y coordinate shift. This filter requires that the result X and Y coordinates are reported
@@ -50,13 +49,8 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the shift limit
-		offset = Float.POSITIVE_INFINITY;
-		Pattern pattern = Pattern.compile("initialSD0>([\\d\\.]+)");
-		Matcher match = pattern.matcher(peakResults.getConfiguration());
-		if (match.find())
-		{
-			offset = getUpperLimit(Double.parseDouble(match.group(1)) * shift);
-		}
+		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
+		offset = getUpperLimit(s * shift);
 	}
 
 	@Override
@@ -189,7 +183,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	{
 		setMax(parameters, 0, shift);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -200,7 +194,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	{
 		return 1;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -257,8 +251,8 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
-	public boolean isPrecisionUsesLocalBackground()
+	public PrecisionType getPrecisionType()
 	{
-		return false;
+		return PrecisionType.NONE;
 	}
 }

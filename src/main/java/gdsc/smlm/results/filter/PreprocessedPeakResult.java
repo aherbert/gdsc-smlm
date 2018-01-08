@@ -85,6 +85,15 @@ public interface PreprocessedPeakResult
 	double getLocationVariance2();
 
 	/**
+	 * The localisation variance using the fitted parameter variance. This is computed using the Cramér-Rao lower bound
+	 * (CRLB) on the variance of the estimators. The variance for the fitted X and Y position is averaged to produce a
+	 * localisation precision.
+	 * 
+	 * @return The location variance in nm
+	 */
+	double getLocationVarianceCRLB();
+
+	/**
 	 * @return The average peak standard deviation in the X and Y dimension
 	 */
 	float getSD();
@@ -226,7 +235,7 @@ public interface PreprocessedPeakResult
 	 * Implementations can preprocess a results set to check if this is close to any preceeding results. If it is
 	 * impossible to be a duplicate then the return value is true.
 	 *
-	 * @return true, if is not duplicate. 
+	 * @return true, if is not duplicate.
 	 */
 	boolean isNotDuplicate();
 }
