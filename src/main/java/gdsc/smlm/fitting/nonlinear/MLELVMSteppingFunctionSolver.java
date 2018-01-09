@@ -40,7 +40,7 @@ import gdsc.smlm.function.PrecomputedGradient1Function;
 public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements MLEFunctionSolver
 {
 	/** The last Y fit. */
-	protected double[] lastY_fit;
+	protected double[] lastyFit;
 
 	/** The ll. */
 	protected double ll = Double.NaN;
@@ -131,7 +131,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	protected void preProcess()
 	{
 		ll = Double.NaN;
-		lastY_fit = null;
+		lastyFit = null;
 	}
 
 	/*
@@ -193,15 +193,15 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * @see gdsc.smlm.fitting.nonlinear.LVMSteppingFunctionSolver#computeValues(double[])
 	 */
 	@Override
-	protected void computeValues(double[] y_fit)
+	protected void computeValues(double[] yFit)
 	{
-		super.computeValues(y_fit);
+		super.computeValues(yFit);
 
 		// Cache the values to compute the log-likelihood
 		int size = f1.size();
-		if (lastY_fit == null)
-			lastY_fit = new double[size];
-		System.arraycopy(y_fit, 0, lastY_fit, 0, size);
+		if (lastyFit == null)
+			lastyFit = new double[size];
+		System.arraycopy(yFit, 0, lastyFit, 0, size);
 		
 		if (w != null)
 		{
@@ -209,7 +209,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 			// to the computed value, these must be subtracted to get the actual value
 			for (int i = 0, n = w.length; i < n; i++)
 			{
-				y_fit[i] -= w[i];
+				yFit[i] -= w[i];
 			}
 		}
 	}
@@ -241,15 +241,15 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	{
 		if (Double.isNaN(ll))
 		{
-			if (lastY_fit == null)
+			if (lastyFit == null)
 			{
 				// Evaluate the function values if necessary
 				int size = f1.size();
-				lastY_fit = new double[size];
-				super.computeValues(lastY_fit);
+				lastyFit = new double[size];
+				super.computeValues(lastyFit);
 			}
 
-			ll = PoissonCalculator.fastLogLikelihood(lastY_fit, lastY);
+			ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);
 		}
 		return ll;
 	}

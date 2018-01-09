@@ -63,7 +63,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	protected double initialResidualSumOfSquares;
 
 	protected NonLinearFunction func;
-	protected double[] lastY_fit;
+	protected double[] lastyFit;
 	protected double ll = Double.NaN;
 
 	/**
@@ -317,7 +317,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			ap[gradientIndices[j]] = a[gradientIndices[j]] + da[j];
 	}
 
-	private FitStatus doFit(int n, double[] y, double[] y_fit, double[] a, double[] a_dev, StoppingCriteria sc)
+	private FitStatus doFit(int n, double[] y, double[] yFit, double[] a, double[] aDev, StoppingCriteria sc)
 	{
 		sc.initialise(a);
 		if (!nonLinearModel(n, y, a, true))
@@ -340,19 +340,19 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			return FitStatus.FAILED_TO_CONVERGE;
 		}
 
-		if (a_dev != null)
+		if (aDev != null)
 		{
-			if (!computeDeviations(a_dev))
+			if (!computeDeviations(aDev))
 				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
 		}
 
 		value = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
 
 		// Compute fitted data points
-		if (y_fit != null)
+		if (yFit != null)
 		{
 			for (int i = 0; i < n; i++)
-				y_fit[i] = func.eval(i);
+				yFit[i] = func.eval(i);
 		}
 
 		return FitStatus.OK;
@@ -361,11 +361,11 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	/**
 	 * Compute the parameter deviations using the covariance matrix of the solution
 	 *
-	 * @param a_dev
+	 * @param aDev
 	 *            the a dev
 	 * @return true, if successful
 	 */
-	private boolean computeDeviations(double[] a_dev)
+	private boolean computeDeviations(double[] aDev)
 	{
 		if (isMLE())
 		{
@@ -378,13 +378,15 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 			// Use a dedicated solver optimised for inverting the matrix diagonal 
 			FisherInformationMatrix m = new FisherInformationMatrix(I);
-			setDeviations(a_dev, m.crlb(true));
+			setDeviations(aDev, m.crlb(true));
 		}
 		else
 		{
+			// alpha already contains the correct Fisher matrix
+			
 			// Use a dedicated solver optimised for inverting the matrix diagonal. 
 			FisherInformationMatrix m = new FisherInformationMatrix(alpha);
-			setDeviations(a_dev, m.crlb(true));
+			setDeviations(aDev, m.crlb(true));
 		}
 		return true;
 	}
@@ -397,15 +399,15 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 *
 	 * @param y
 	 *            Set of n data points to fit (input)
-	 * @param y_fit
+	 * @param yFit
 	 *            Fitted data points (output)
 	 * @param a
 	 *            Set of m coefficients (input/output)
-	 * @param a_dev
+	 * @param aDev
 	 *            Standard deviation of the set of m coefficients (output)
 	 * @return The fit status
 	 */
-	public FitStatus computeFit(double[] y, double[] y_fit, final double[] a, final double[] a_dev)
+	public FitStatus computeFit(double[] y, double[] yFit, final double[] a, final double[] aDev)
 	{
 		int n = y.length;
 		final int nparams = f.gradientIndices().length;
@@ -432,29 +434,29 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 			// Store the function values for use in computing the log likelihood
 			lastY = y;
-			if (y_fit == null)
+			if (yFit == null)
 			{
 				// Re-use space
-				if (lastY_fit == null || lastY_fit.length < y.length)
-					lastY_fit = new double[y.length];
-				y_fit = lastY_fit;
-				// We will not need to copy y_fit later since lastY_fit is used direct
+				if (lastyFit == null || lastyFit.length < y.length)
+					lastyFit = new double[y.length];
+				yFit = lastyFit;
+				// We will not need to copy yFit later since lastyFit is used direct
 				copyYfit = false;
 			}
 		}
 
-		final FitStatus result = doFit(n, y, y_fit, a, a_dev, sc);
+		final FitStatus result = doFit(n, y, yFit, a, aDev, sc);
 		this.evaluations = this.iterations = sc.getIteration();
 
 		if (isMLE())
 		{
-			// Ensure we have a private copy of the the y_fit since the any calling
+			// Ensure we have a private copy of the the yFit since the any calling
 			// code may modify it
 			if (copyYfit)
 			{
-				if (lastY_fit == null || lastY_fit.length < y.length)
-					lastY_fit = new double[y.length];
-				System.arraycopy(y_fit, 0, lastY_fit, 0, y.length);
+				if (lastyFit == null || lastyFit.length < y.length)
+					lastyFit = new double[y.length];
+				System.arraycopy(yFit, 0, lastyFit, 0, y.length);
 			}
 		}
 
@@ -557,7 +559,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
 	@Override
-	public boolean computeValue(double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		final int n = y.length;
 		final int nparams = f.gradientIndices().length;
@@ -572,21 +574,35 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 			// Store the function values for use in computing the log likelihood
 			lastY = y;
-			if (y_fit == null)
+			if (yFit == null)
 			{
 				// Re-use space
-				if (lastY_fit == null || lastY_fit.length < y.length)
-					lastY_fit = new double[y.length];
-				y_fit = lastY_fit;
+				if (lastyFit == null || lastyFit.length < y.length)
+					lastyFit = new double[y.length];
+				yFit = lastyFit;
 			}
 			else
 			{
-				lastY_fit = y_fit;
+				lastyFit = yFit;
 			}
 		}
 
-		value = calculator.findLinearised(n, y, y_fit, a, func);
+		value = calculator.findLinearised(n, y, yFit, a, func);
+		
+		if (aDev != null)
+		{
+			// Poor support because we recompute again
+			MLEGradientCalculator c = (MLEGradientCalculator) ((isMLE()) ? calculator : 
+				GradientCalculatorFactory.newCalculator(nparams, true));
+			
+			// The function is already initialised so use null params.
+			double[][] I = c.fisherInformationMatrix(lastY.length, null, func);
 
+			// Use a dedicated solver optimised for inverting the matrix diagonal 
+			FisherInformationMatrix m = new FisherInformationMatrix(I);
+			setDeviations(aDev, m.crlb(true));
+		}
+		
 		return true;
 	}
 
@@ -628,7 +644,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			// The MLE version directly computes the log-likelihood ratio.
 			// We must compute the log likelihood for a Poisson MLE.
 			if (Double.isNaN(ll))
-				ll = PoissonCalculator.logLikelihood(lastY_fit, lastY);
+				ll = PoissonCalculator.logLikelihood(lastyFit, lastY);
 			return ll;
 		}
 		throw new IllegalStateException();

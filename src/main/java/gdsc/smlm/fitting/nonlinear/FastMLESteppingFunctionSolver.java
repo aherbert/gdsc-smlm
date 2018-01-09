@@ -501,22 +501,22 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFunctionValue(double[], double[])
 	 */
 	@Override
-	protected double computeFunctionValue(double[] y_fit, double[] a)
+	protected double computeFunctionValue(double[] yFit, double[] a)
 	{
 		ll = gradientProcedure.computeLogLikelihood(a);
 		isPseudoLogLikelihood = false;
-		if (y_fit != null)
-			copyFunctionValue(y_fit);
+		if (yFit != null)
+			copyFunctionValue(yFit);
 		return ll;
 	}
 
 	/**
-	 * Copy the function value into the y_fit array.
+	 * Copy the function value into the yFit array.
 	 *
-	 * @param y_fit
+	 * @param yFit
 	 *            the function values
 	 */
-	private void copyFunctionValue(double[] y_fit)
+	private void copyFunctionValue(double[] yFit)
 	{
 		final double[] u = gradientProcedure.u;
 		if (w != null)
@@ -525,11 +525,11 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 			// to the computed value, these must be subtracted to get the actual value
 			for (int i = 0, n = u.length; i < n; i++)
 			{
-				y_fit[i] = u[i] - w[i];
+				yFit[i] = u[i] - w[i];
 			}
 		}
 		else
-			System.arraycopy(u, 0, y_fit, 0, u.length);
+			System.arraycopy(u, 0, yFit, 0, u.length);
 	}
 
 	/*
@@ -538,9 +538,9 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeValues(double[])
 	 */
 	@Override
-	protected void computeValues(double[] y_fit)
+	protected void computeValues(double[] yFit)
 	{
-		copyFunctionValue(y_fit);
+		copyFunctionValue(yFit);
 	}
 
 	/*

@@ -36,11 +36,11 @@ public interface FunctionSolver
 	 *            The evaluated function data points (output)
 	 * @param a
 	 *            Set of m coefficients (input/output)
-	 * @param a_dev
+	 * @param aDev
 	 *            Variance of the set of m coefficients (output)
 	 * @return The fit status
 	 */
-	public FitStatus fit(final double[] y, final double[] f, final double[] a, final double[] a_dev);
+	public FitStatus fit(final double[] y, final double[] f, final double[] a, final double[] aDev);
 
 	/**
 	 * Gets the number of fitted parameters.
@@ -94,7 +94,7 @@ public interface FunctionSolver
 	 * @return True if the function solver supports per observation weights
 	 */
 	public boolean isWeighted();
-	
+
 	/**
 	 * Checks if the function solver requires a strictly positive function.
 	 *
@@ -144,6 +144,9 @@ public interface FunctionSolver
 	 * Evaluate a function with coefficients (a) for a set of data points (x, y).
 	 * <p>
 	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
+	 * <p>
+	 * The deviations should be the same values as the result from the
+	 * {@link #fit(double[], double[], double[], double[])} method if this is called with the output fit coefficients.
 	 * 
 	 * @param y
 	 *            Set of data points (input)
@@ -151,12 +154,12 @@ public interface FunctionSolver
 	 *            The evaluated function data points (output)
 	 * @param a
 	 *            Set of m coefficients (input)
-	 * @param a_dev
+	 * @param aDev
 	 *            Variance of the set of m coefficients (output, can be null)
 	 * @return True if evaluation was performed
 	 */
-	public boolean evaluate(final double[] y, final double[] f, final double[] a, final double[] a_dev);
-	
+	public boolean evaluate(final double[] y, final double[] f, final double[] a, final double[] aDev);
+
 	/**
 	 * Gets the name of the parameter i.
 	 *

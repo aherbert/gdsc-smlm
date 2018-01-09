@@ -33,16 +33,16 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	private static class SimpleValueProcedure implements ValueProcedure
 	{
 		int i = 0;
-		double[] y_fit;
+		double[] yFit;
 
-		SimpleValueProcedure(double[] y_fit)
+		SimpleValueProcedure(double[] yFit)
 		{
-			this.y_fit = y_fit;
+			this.yFit = yFit;
 		};
 
 		public void execute(double value)
 		{
-			y_fit[i++] = value;
+			yFit[i++] = value;
 		}
 	}
 
@@ -101,15 +101,15 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 *
 	 * @param y
 	 *            the y
-	 * @param y_fit
-	 *            the y_fit
+	 * @param yFit
+	 *            the yFit
 	 * @param a
 	 *            the a
-	 * @param a_dev
-	 *            the a_dev
+	 * @param aDev
+	 *            the aDev
 	 * @return the fit status
 	 */
-	public FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev)
+	public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		// Lay out a simple iteration loop for a stepping solver.
 		// The sub-class must compute the next step.
@@ -172,10 +172,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
 			{
 				log("%s Converged [%s]\n", name, tc.getIterations());
-				if (a_dev != null)
-					computeDeviations(a_dev);
-				if (y_fit != null)
-					computeValues(y_fit);
+				if (aDev != null)
+					computeDeviations(aDev);
+				if (yFit != null)
+					computeValues(yFit);
 				return FitStatus.OK;
 			}
 
@@ -276,10 +276,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * Compute the deviations for the parameters a from the last call to
 	 * {@link #computeFitValue(double[], double[])}.
 	 *
-	 * @param a_dev
+	 * @param aDev
 	 *            the parameter deviations
 	 */
-	protected void computeDeviations(double[] a_dev)
+	protected void computeDeviations(double[] aDev)
 	{
 		// Use a dedicated solver optimised for inverting the matrix diagonal. 
 		// The last Hessian matrix should be stored in the working alpha.
@@ -289,10 +289,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		final double[] crlb = m.crlb();
 		if (crlb == null)
 			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		setDeviations(a_dev, crlb);
+		setDeviations(aDev, crlb);
 
 		// Use this method for robustness, i.e. it will not fail
-		//setDeviations(a_dev, m.crlb(true));
+		//setDeviations(aDev, m.crlb(true));
 	}
 
 	/**
@@ -310,29 +310,69 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * Sub-classes may override this if they have cached the function values from the
 	 * last execution of a forEach procedure.
 	 * 
-	 * @param y_fit
+	 * @param yFit
 	 *            the y fit values
 	 */
-	protected void computeValues(double[] y_fit)
+	protected void computeValues(double[] yFit)
 	{
 		ValueFunction f = (ValueFunction) this.f;
-		f.forEach(new SimpleValueProcedure(y_fit));
+		f.forEach(new SimpleValueProcedure(yFit));
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[], double[])
 	 */
-	public boolean computeValue(double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		gradientIndices = f.gradientIndices();
 		lastY = prepareFunctionValue(y, a);
-		//if (y_fit == null)
-		//	y_fit = new double[y.length];
-		value = computeFunctionValue(y_fit, a);
+		//if (yFit == null)
+		//	yFit = new double[y.length];
+		value = computeFunctionValue(yFit, a);
+		if (aDev != null)
+			computeDeviations(y, a, aDev);
 		return true;
 	}
+
+	/**
+	 * Compute the deviations for the parameters a from the last call to
+	 * {@link #computeFitValue(double[], double[])}.
+	 *
+	 * @param y
+	 *            the y values
+	 * @param a
+	 *            the parameters
+	 * @param aDev
+	 *            the parameter deviations
+	 */
+	protected void computeDeviations(double[] y, double[] a, double[] aDev)
+	{
+		// Use a dedicated solver optimised for inverting the matrix diagonal. 
+		// The last Hessian matrix should be stored in the working alpha.
+		final FisherInformationMatrix m = computeFisherInformationMatrix(y, a);
+
+		// This may fail if the matrix cannot be inverted
+		final double[] crlb = m.crlb();
+		if (crlb == null)
+			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
+		setDeviations(aDev, crlb);
+
+		// Use this method for robustness, i.e. it will not fail
+		//setDeviations(aDev, m.crlb(true));
+	}
+
+	/**
+	 * Compute the Fisher Information matrix. This can be used to set the covariances for each of the fitted parameters.
+	 *
+	 * @param y
+	 *            the y values
+	 * @param a
+	 *            the parameters
+	 * @return the Fisher Information matrix
+	 */
+	protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a);
 
 	/**
 	 * Prepare y for computing the function value, e.g. ensure strictly positive values.
@@ -349,13 +389,13 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * Compute the function value. The y data is the same as that passed to
 	 * {@link #prepareFunctionValue(double[], double[])}
 	 *
-	 * @param y_fit
+	 * @param yFit
 	 *            the y fit (this may be null)
 	 * @param a
 	 *            the parameters
 	 * @return the function value
 	 */
-	protected abstract double computeFunctionValue(double[] y_fit, double[] a);
+	protected abstract double computeFunctionValue(double[] yFit, double[] a);
 
 	/*
 	 * (non-Javadoc)

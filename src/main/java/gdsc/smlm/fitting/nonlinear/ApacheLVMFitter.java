@@ -55,7 +55,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 		super(gf);
 	}
 
-	public FitStatus computeFit(double[] y, final double[] y_fit, double[] a, double[] a_dev)
+	public FitStatus computeFit(double[] y, final double[] yFit, double[] a, double[] aDev)
 	{
 		int n = y.length;
 		try
@@ -135,12 +135,12 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 			setSolution(a, parameters);
 			iterations = optimum.getIterations();
 			evaluations = optimum.getEvaluations();
-			if (a_dev != null)
+			if (aDev != null)
 			{
 				try
 				{
 					double[][] covar = optimum.getCovariances(threshold).getData();
-					setDeviationsFromMatrix(a_dev, covar);
+					setDeviationsFromMatrix(aDev, covar);
 				}
 				catch (SingularMatrixException e)
 				{
@@ -155,11 +155,11 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					calculator.findLinearised(nparams, y, a, alpha, beta, (NonLinearFunction) f);
 
 					FisherInformationMatrix m = new FisherInformationMatrix(alpha);
-					setDeviations(a_dev, m.crlb(true));
+					setDeviations(aDev, m.crlb(true));
 				}
 			}
 			// Compute function value
-			if (y_fit != null)
+			if (yFit != null)
 			{
 				Gaussian2DFunction f = (Gaussian2DFunction) this.f;
 				f.initialise0(a);
@@ -169,7 +169,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 
 					public void execute(double value)
 					{
-						y_fit[i] = value;
+						yFit[i] = value;
 					}
 				});
 			}
@@ -202,15 +202,28 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 	}
 
 	@Override
-	public boolean computeValue(double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		final int nparams = f.gradientIndices().length;
 
 		GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams, false);
 
 		// Since we know the function is a Gaussian2DFunction
-		value = calculator.findLinearised(y.length, y, y_fit, a, (NonLinearFunction) f);
+		value = calculator.findLinearised(y.length, y, yFit, a, (NonLinearFunction) f);
 
+		if (aDev != null)
+		{
+			// Matrix inversion failed. In order to return a solution 
+			// return the reciprocal of the diagonal of the Fisher information 
+			// for a loose bound on the limit 
+			double[][] alpha = new double[nparams][nparams];
+			double[] beta = new double[nparams];
+			calculator.findLinearised(nparams, y, a, alpha, beta, (NonLinearFunction) f);
+
+			FisherInformationMatrix m = new FisherInformationMatrix(alpha);
+			setDeviations(aDev, m.crlb(true));
+		}
+		
 		return true;
 	}
 }

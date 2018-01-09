@@ -85,7 +85,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(double[], double[], double[], double[])
 	 */
-	public FitStatus fit(double[] y, double[] y_fit, double[] a, double[] aDev)
+	public FitStatus fit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		// Reset the results
 		numberOfFittedPoints = y.length;
@@ -95,7 +95,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		lastY = null;
 		lastA = null;
 		preProcess();
-		FitStatus status = computeFit(y, y_fit, a, aDev);
+		FitStatus status = computeFit(y, yFit, a, aDev);
 		if (status == FitStatus.OK)
 		{
 			if (lastY == null)
@@ -128,7 +128,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[], double[])
 	 */
-	public boolean evaluate(double[] y, double[] y_fit, double[] a, double[] aDev)
+	public boolean evaluate(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		// Reset the results
 		numberOfFittedPoints = y.length;
@@ -138,7 +138,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		lastY = null;
 		lastA = null;
 		preProcess();
-		boolean status = computeValue(y, y_fit, a, aDev);
+		boolean status = computeValue(y, yFit, a, aDev);
 		if (status)
 		{
 			if (lastY == null)
@@ -155,7 +155,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *
 	 * @param y
 	 *            the y values to fit
-	 * @param y_fit
+	 * @param yFit
 	 *            the final fitted y values
 	 * @param a
 	 *            the parameters a
@@ -163,14 +163,14 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *            the deviations for the parameters a
 	 * @return the fit status
 	 */
-	public abstract FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] aDev);
+	public abstract FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev);
 
 	/**
 	 * Evaluate the function.
 	 *
 	 * @param y
 	 *            the y values to fit
-	 * @param y_fit
+	 * @param yFit
 	 *            the final fitted y values
 	 * @param a
 	 *            the parameters a
@@ -178,7 +178,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *            the deviations for the parameters a
 	 * @return true if evaluated
 	 */
-	public abstract boolean computeValue(double[] y, double[] y_fit, double[] a, double[] aDev);
+	public abstract boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev);
 
 	public double[] getInitialSolution(double[] params)
 	{

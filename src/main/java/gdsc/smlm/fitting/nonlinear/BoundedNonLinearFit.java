@@ -140,10 +140,10 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#computeFit(double[], double[], double[], double[])
 	 */
 	@Override
-	public FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev)
+	public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		bounds.initialise();
-		return super.computeFit(y, y_fit, a, a_dev);
+		return super.computeFit(y, yFit, a, aDev);
 	}
 
 	/*

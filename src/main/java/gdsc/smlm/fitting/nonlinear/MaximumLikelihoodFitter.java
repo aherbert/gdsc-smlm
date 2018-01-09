@@ -327,7 +327,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(double[], double[], double[], double[])
 	 */
-	public FitStatus computeFit(double[] y, double[] y_fit, double[] a, double[] a_dev)
+	public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		final int n = y.length;
 		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
@@ -615,12 +615,12 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 			//System.out.printf("Iter = %d, Eval = %d, %g @ %s\n", iterations, evaluations, optimum.getValue(), 
 			//	java.util.Arrays.toString(solution));
 
-			if (a_dev != null)
+			if (aDev != null)
 			{
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
 				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
 				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
-				setDeviations(a_dev, m.crlb(true));
+				setDeviations(aDev, m.crlb(true));
 			}
 
 			// Reverse negative log likelihood for maximum likelihood score
@@ -947,7 +947,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	}
 
 	@Override
-	public boolean computeValue(double[] y, double[] y_fit, double[] a)
+	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		final int n = y.length;
 		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
@@ -959,6 +959,14 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		// Reverse negative log likelihood for maximum likelihood score
 		value = -l;
 
+		if (aDev != null)
+		{
+			// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
+			// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
+			FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
+			setDeviations(aDev, m.crlb(true));
+		}
+		
 		return false;
 	}
 

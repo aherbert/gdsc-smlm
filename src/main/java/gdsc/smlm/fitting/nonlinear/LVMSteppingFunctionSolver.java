@@ -251,14 +251,14 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	}
 
 	@Override
-	protected double computeFunctionValue(double[] y_fit, double[] a)
+	protected double computeFunctionValue(double[] yFit, double[] a)
 	{
 		gradientProcedure.value(a);
-		if (y_fit != null)
+		if (yFit != null)
 			// This simple implementation causes a double evaluation of the function 
 			// but only a single initialisation. The following method can be overriden
 			// to use cached function values.
-			computeValues(y_fit);
+			computeValues(yFit);
 		return gradientProcedure.value;
 	}
 
