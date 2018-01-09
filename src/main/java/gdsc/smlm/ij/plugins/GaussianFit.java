@@ -280,7 +280,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		blockFindAlgorithm = gd.getNextBoolean();
 		neighbourCheck = gd.getNextBoolean();
 		border = (int) gd.getNextNumber();
-		
+
 		fitFunction = gd.getNextChoiceIndex();
 		fitBackground = gd.getNextBoolean();
 		maxIterations = (int) gd.getNextNumber();
@@ -537,7 +537,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					int x = maxIndices[n] % width;
 
 					// Check the peak is a good fit
-					if (filterResults && config.validatePeak(n, initialParams, params) != FitStatus.OK)
+					if (filterResults && config.validatePeak(n, initialParams, params, paramsDev) != FitStatus.OK)
 						continue;
 
 					if (showFit)
@@ -687,7 +687,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		y += bounds.y;
 		params[3] += bounds.x + regionBounds.x;
 		params[4] += bounds.y + regionBounds.y;
-		results.add(n + 1, x, y, value, chiSquared, 0f, SimpleArrayUtils.toFloat(params), SimpleArrayUtils.toFloat(paramsDev));
+		results.add(n + 1, x, y, value, chiSquared, 0f, SimpleArrayUtils.toFloat(params),
+				SimpleArrayUtils.toFloat(paramsDev));
 	}
 
 	/**
@@ -924,7 +925,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public double[] fit(ImageProcessor ip)
 	{
 		// Note: This is a library function used in e.g. GDSC ImageJ plugins: FindFoci
-		
+
 		float[] data = (float[]) ip.toFloat(0, null).getPixels();
 
 		double[] result = fit(data, ip.getWidth(), ip.getHeight());
@@ -952,7 +953,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	public double[] fit(float[] data, int width, int height)
 	{
 		// Note: This is a library function used in e.g. GDSC ImageJ plugins: FindFoci
-		
+
 		if (data == null || data.length != width * height)
 			return null;
 

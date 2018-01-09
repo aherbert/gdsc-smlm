@@ -18,6 +18,168 @@ package gdsc.smlm.fitting;
  */
 public class FitResult
 {
+	/**
+	 * Provides a builder to allow simple adjustments to the immutable FitResult fields to create a new FitResult.
+	 */
+	public class Builder
+	{
+		private FitStatus status;
+		private int degreesOfFreedom;
+		private double error;
+		private double[] initialParameters;
+		private double[] parameters;
+		private double[] parametersDev;
+		private int nPeaks;
+		private int nFittedParameters;
+		private Object data;
+		private int iterations;
+		private int evaluations;
+
+		public Builder(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
+				double[] parameters, double[] parametersDev, int nPeaks, int nFittedParameters, Object data,
+				int iterations, int evaluations)
+		{
+			this.status = status;
+			this.degreesOfFreedom = degreesOfFreedom;
+			this.error = error;
+			this.initialParameters = initialParameters;
+			this.parameters = parameters;
+			this.parametersDev = parametersDev;
+			this.nPeaks = nPeaks;
+			this.nFittedParameters = nFittedParameters;
+			this.data = data;
+			this.iterations = iterations;
+			this.evaluations = evaluations;
+		}
+
+		public FitStatus getStatus()
+		{
+			return status;
+		}
+
+		public Builder setStatus(FitStatus status)
+		{
+			this.status = status;
+			return this;
+		}
+
+		public int getDegreesOfFreedom()
+		{
+			return degreesOfFreedom;
+		}
+
+		public Builder setDegreesOfFreedom(int degreesOfFreedom)
+		{
+			this.degreesOfFreedom = degreesOfFreedom;
+			return this;
+		}
+
+		public double getError()
+		{
+			return error;
+		}
+
+		public Builder setError(double error)
+		{
+			this.error = error;
+			return this;
+		}
+
+		public double[] getInitialParameters()
+		{
+			return initialParameters;
+		}
+
+		public Builder setInitialParameters(double[] initialParameters)
+		{
+			this.initialParameters = initialParameters;
+			return this;
+		}
+
+		public double[] getParameters()
+		{
+			return parameters;
+		}
+
+		public Builder setParameters(double[] parameters)
+		{
+			this.parameters = parameters;
+			return this;
+		}
+
+		public double[] getParametersDev()
+		{
+			return parametersDev;
+		}
+
+		public Builder setParametersDev(double[] parametersDev)
+		{
+			this.parametersDev = parametersDev;
+			return this;
+		}
+
+		public int getnPeaks()
+		{
+			return nPeaks;
+		}
+
+		public Builder setnPeaks(int nPeaks)
+		{
+			this.nPeaks = nPeaks;
+			return this;
+		}
+
+		public int getnFittedParameters()
+		{
+			return nFittedParameters;
+		}
+
+		public Builder setnFittedParameters(int nFittedParameters)
+		{
+			this.nFittedParameters = nFittedParameters;
+			return this;
+		}
+
+		public Object getData()
+		{
+			return data;
+		}
+
+		public Builder setData(Object data)
+		{
+			this.data = data;
+			return this;
+		}
+
+		public int getIterations()
+		{
+			return iterations;
+		}
+
+		public Builder setIterations(int iterations)
+		{
+			this.iterations = iterations;
+			return this;
+		}
+
+		public int getEvaluations()
+		{
+			return evaluations;
+		}
+
+		public Builder setEvaluations(int evaluations)
+		{
+			this.evaluations = evaluations;
+			return this;
+		}
+
+		public FitResult build()
+		{
+			return new FitResult(status, degreesOfFreedom, error, initialParameters, initialParameters, parametersDev,
+					nPeaks, nFittedParameters, data, iterations, evaluations);
+		}
+	}
+
 	private FitStatus status;
 	private final int degreesOfFreedom;
 	private double error;
@@ -209,5 +371,16 @@ public class FitResult
 	{
 		this.status = fitStatus;
 		this.data = data;
+	}
+
+	/**
+	 * Create a builder to allow creation of a new result. The builder is initialised using the current field values.
+	 *
+	 * @return the builder
+	 */
+	public Builder toBuilder()
+	{
+		return new Builder(status, degreesOfFreedom, error, initialParameters, initialParameters, parametersDev, nPeaks,
+				nFittedParameters, data, iterations, evaluations);
 	}
 }

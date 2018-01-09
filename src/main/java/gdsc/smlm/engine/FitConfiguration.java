@@ -1738,13 +1738,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param paramStdDevs
+	 *            the fitted peak parameters standard deviations (can be null)
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params)
+	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramStdDevs)
 	{
 		for (int n = 0; n < nPeaks; n++)
 		{
-			validatePeak(n, initialParams, params);
+			validatePeak(n, initialParams, params, paramStdDevs);
 			if (result != FitStatus.OK)
 				break;
 		}
@@ -1759,31 +1761,35 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param paramStdDevs
+	 *            the fitted peak parameters standard deviations (can be null)
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(double[] initialParams, double[] params)
+	public FitStatus validateFit(double[] initialParams, double[] params, double[] paramStdDevs)
 	{
-		return validatePeak(0, initialParams, params);
+		return validatePeak(0, initialParams, params, paramStdDevs);
 	}
 
 	/**
-	 * Check peak to see if the fit was sensible
-	 * 
+	 * Check peak to see if the fit was sensible.
+	 *
 	 * @param n
 	 *            The peak number
 	 * @param initialParams
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param paramStdDevs
+	 *            the fitted peak parameters standard deviations (can be null)
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validatePeak(int n, double[] initialParams, double[] params)
+	public FitStatus validatePeak(int n, double[] initialParams, double[] params, double[] paramStdDevs)
 	{
 		if (isDirectFilter())
 		{
 			// Always specify a new result and we have no local background or offset
-			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, 0, ResultType.NEW,
-					0, 0, false);
+			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, paramStdDevs, 0,
+					ResultType.NEW, 0, 0, false);
 			if (directFilter.accept(peak))
 				return setValidationResult(FitStatus.OK, null);
 			if (log != null)
@@ -1988,6 +1994,26 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the variance. This is computed using the mean of the variance for the X and Y parameters.
+	 *
+	 * @param paramsDev
+	 *            the parameter deviations
+	 * @param n
+	 *            the peak number
+	 * @return the variance (or zero if there are no deviations)
+	 */
+	public static double getVariance(double[] paramsDev, int n)
+	{
+		if (paramsDev != null)
+		{
+			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
+			return (Maths.pow2(paramsDev[offset + Gaussian2DFunction.X_POSITION]) +
+					Maths.pow2(paramsDev[offset + Gaussian2DFunction.Y_POSITION])) / 2.0;
+		}
+		return 0;
+	}
+
+	/**
 	 * An object that can return the results in a formatted state for the multi-path filter
 	 */
 	private class DynamicPeakResult implements PreprocessedPeakResult
@@ -1996,23 +2022,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		int offset;
 		double[] initialParams;
 		double[] params;
+		double[] paramsDev;
 		double xsd, ysd;
 		double localBackground;
 		boolean existingResult;
 		boolean newResult;
 		float offsetx;
 		float offsety;
-		double var, var2;
+		double var, var2, varCRLB;
 
-		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
-				ResultType resultType, float offsetx, float offsety)
+		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, double[] paramsDev,
+				double localBackground, ResultType resultType, float offsetx, float offsety)
 		{
-			setParameters(candidateId, n, initialParams, params, localBackground, resultType, offsetx, offsety);
+			setParameters(candidateId, n, initialParams, params, paramsDev, localBackground, resultType, offsetx,
+					offsety);
 		}
 
 		DynamicPeakResult()
 		{
-			var = var2 = -1;
+			var = var2 = varCRLB = -1;
 		}
 
 		/**
@@ -2026,6 +2054,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 *            The initial peak parameters
 		 * @param params
 		 *            The fitted peak parameters
+		 * @param paramsDev
+		 *            the parameter deviations (can be null)
 		 * @param localBackground
 		 *            the local background
 		 * @param resultType
@@ -2035,20 +2065,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * @param offsety
 		 *            the offsety
 		 */
-		void setParameters(int candidateId, int n, double[] initialParams, double[] params, double localBackground,
-				ResultType resultType, float offsetx, float offsety)
+		void setParameters(int candidateId, int n, double[] initialParams, double[] params, double[] paramsDev,
+				double localBackground, ResultType resultType, float offsetx, float offsety)
 		{
 			this.id = n;
 			this.candidateId = candidateId;
 			offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 			this.initialParams = initialParams;
 			this.params = params;
+			this.paramsDev = paramsDev;
 			this.localBackground = localBackground;
 			this.existingResult = resultType == ResultType.EXISTING;
 			this.newResult = resultType == ResultType.NEW;
 			this.offsetx = offsetx;
 			this.offsety = offsety;
-			var = var2 = -1;
+			var = var2 = varCRLB = -1;
 			xsd = params[Gaussian2DFunction.X_SD + offset];
 			ysd = params[Gaussian2DFunction.Y_SD + offset];
 			// Map the width parameters using the z-model
@@ -2124,6 +2155,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				var2 = FitConfiguration.this.getVariance(getLocalBackground(),
 						params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSD(), true);
 			return var2;
+		}
+
+		public double getLocationVarianceCRLB()
+		{
+			if (varCRLB == -1)
+				varCRLB = FitConfiguration.getVariance(paramsDev, id);
+			return varCRLB;
 		}
 
 		public float getSD()
@@ -2294,6 +2332,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param parameterStdDevs
+	 *            the parameter standard deviations (can be null)
 	 * @param localBackground
 	 *            the local background
 	 * @param resultType
@@ -2305,10 +2345,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	public PreprocessedPeakResult createDynamicPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety)
+			double[] params, double[] parameterStdDevs, double localBackground, ResultType resultType, float offsetx,
+			float offsety)
 	{
-		return createPreprocessedPeakResult(candidateId, n, initialParams, params, localBackground, resultType, offsetx,
-				offsety, true);
+		return createPreprocessedPeakResult(candidateId, n, initialParams, params, parameterStdDevs, localBackground,
+				resultType, offsetx, offsety, true);
 	}
 
 	/**
@@ -2335,6 +2376,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
+	 * @param parameterStdDevs
+	 *            the parameter standard deviations (can be null)
 	 * @param localBackground
 	 *            the local background
 	 * @param resultType
@@ -2348,15 +2391,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	private PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double localBackground, ResultType resultType, float offsetx, float offsety,
-			boolean newObject)
+			double[] params, double[] parameterStdDevs, double localBackground, ResultType resultType, float offsetx,
+			float offsety, boolean newObject)
 	{
 		if (newObject)
-			return new DynamicPeakResult(candidateId, n, initialParams, params, localBackground, resultType, offsetx,
-					offsety);
+			return new DynamicPeakResult(candidateId, n, initialParams, params, parameterStdDevs, localBackground,
+					resultType, offsetx, offsety);
 
-		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, localBackground, resultType, offsetx,
-				offsety);
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, parameterStdDevs, localBackground,
+				resultType, offsetx, offsety);
 		return dynamicPeakResult;
 	}
 
@@ -2383,6 +2426,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            the initial parameters
 	 * @param parameters
 	 *            the parameters
+	 * @param parameterStdDevs
+	 *            the parameter standard deviations (can be null)
 	 * @param localBackground
 	 *            the local background (set to negative to use the fitted background instead)
 	 * @param resultType
@@ -2394,8 +2439,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	public BasePreprocessedPeakResult createPreprocessedPeakResult(int frame, int candidateId, int n,
-			double[] initialParameters, double[] parameters, double localBackground, ResultType resultType,
-			float offsetx, float offsety)
+			double[] initialParameters, double[] parameters, double[] parameterStdDevs, double localBackground,
+			ResultType resultType, float offsetx, float offsety)
 	{
 		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToPhotons;
@@ -2420,6 +2465,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
 		final double variance = getVariance(0, signal, sd, false);
 		final double variance2 = getVariance(b, signal, sd, true);
+		final double varianceCRLB = getVariance(parameterStdDevs, n);
+
 		// Q. Should noise be the local background or the estimate from the whole image?
 
 		// This uses the local background if specified or the estimate from the whole image 
@@ -2429,7 +2476,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// This uses the local fitted background to estimate the noise
 		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, noise, b, angle, x, y, z, x0, y0, xsd, ysd,
-				xsd0, ysd0, variance, variance2, resultType);
+				xsd0, ysd0, variance, variance2, varianceCRLB, resultType);
 	}
 
 	/**

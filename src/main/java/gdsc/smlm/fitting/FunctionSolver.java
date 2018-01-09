@@ -151,10 +151,12 @@ public interface FunctionSolver
 	 *            The evaluated function data points (output)
 	 * @param a
 	 *            Set of m coefficients (input)
+	 * @param a_dev
+	 *            Variance of the set of m coefficients (output, can be null)
 	 * @return True if evaluation was performed
 	 */
-	public boolean evaluate(final double[] y, final double[] f, final double[] a);
-
+	public boolean evaluate(final double[] y, final double[] f, final double[] a, final double[] a_dev);
+	
 	/**
 	 * Gets the name of the parameter i.
 	 *

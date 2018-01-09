@@ -481,10 +481,10 @@ public class Gaussian2DFitter
 			setConstraints(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak);
 		}
 
-		double[] params_dev = (fitConfiguration.isComputeDeviations()) ? new double[params.length] : null;
+		double[] paramsDev = (fitConfiguration.isComputeDeviations()) ? new double[params.length] : null;
 		if (computeResiduals)
 			residuals = new double[ySize];
-		FitStatus result = solver.fit(y, residuals, params, params_dev);
+		FitStatus result = solver.fit(y, residuals, params, paramsDev);
 
 		// -----------------------
 
@@ -498,11 +498,11 @@ public class Gaussian2DFitter
 			if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
 			{
 				// Ensure Y width is updated with the fitted X width
-				for (int i = Gaussian2DFunction.X_SD; i < params.length; i += paramsPerPeak)
+				for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 				{
-					params[i + 1] = params[i];
-					if (params_dev != null)
-						params_dev[i + 1] = params_dev[i];
+					params[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.X_SD];
+					if (paramsDev != null)
+						paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
 				}
 			}
 			if (fitConfiguration.isAngleFitting())
@@ -510,20 +510,20 @@ public class Gaussian2DFitter
 				// Ensure the angle is within the correct bounds
 				for (int i = Gaussian2DFunction.ANGLE; i < params.length; i += paramsPerPeak)
 				{
-					correctAngle(i, params, params_dev);
+					correctAngle(i, params, paramsDev);
 				}
 			}
 			// Ensure widths are positive
-			for (int i = params.length - 1; i > 0; i -= paramsPerPeak)
+			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 			{
-				params[i] = Math.abs(params[i]);
-				params[i - 1] = Math.abs(params[i - 1]);
+				params[j + Gaussian2DFunction.X_SD] = Math.abs(params[j + Gaussian2DFunction.X_SD]);
+				params[j + Gaussian2DFunction.Y_SD] = Math.abs(params[j + Gaussian2DFunction.Y_SD]);
 			}
 
 			Object statusData = null;
 			if (fitConfiguration.isFitValidation())
 			{
-				result = fitConfiguration.validateFit(npeaks, initialParams, params);
+				result = fitConfiguration.validateFit(npeaks, initialParams, params, paramsDev);
 				statusData = fitConfiguration.getValidationData();
 			}
 
@@ -534,7 +534,7 @@ public class Gaussian2DFitter
 			}
 
 			return new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
-					solver.getValue(), initialParams, params, params_dev, npeaks, solver.getNumberOfFittedParameters(),
+					solver.getValue(), initialParams, params, paramsDev, npeaks, solver.getNumberOfFittedParameters(),
 					statusData, solver.getIterations(), solver.getEvaluations());
 		}
 		else
@@ -979,9 +979,9 @@ public class Gaussian2DFitter
 	 * @param i
 	 *            The angle position within the parameter array
 	 * @param params
-	 * @param params_dev
+	 * @param paramsDev
 	 */
-	protected void correctAngle(final int i, final double[] params, final double[] params_dev)
+	protected void correctAngle(final int i, final double[] params, final double[] paramsDev)
 	{
 		double angle = params[i];
 
@@ -1007,8 +1007,8 @@ public class Gaussian2DFitter
 		if (yWidth > xWidth)
 		{
 			swap(i + 3, params);
-			if (params_dev != null)
-				swap(i + 3, params_dev);
+			if (paramsDev != null)
+				swap(i + 3, paramsDev);
 
 			// Rotate 90 degrees
 			angle += Math.PI / 2.0;
@@ -1163,9 +1163,11 @@ public class Gaussian2DFitter
 	 *            The number of peaks
 	 * @param params
 	 *            The parameters of the peaks, e.g. from a previous call to fit(...)
+	 * @param params
+	 *            The parameters deviations (output, this can be null)
 	 * @return True if the function was evaluated
 	 */
-	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params)
+	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params, double[] paramsDev)
 	{
 		final int ySize = maxx * maxy;
 		// The solvers require y to be the correct length
@@ -1181,7 +1183,7 @@ public class Gaussian2DFitter
 
 		// Note: Do not apply bounds and constraints as it is assumed the input parameters are good
 
-		final boolean result = solver.evaluate(y, residuals, params);
+		final boolean result = solver.evaluate(y, residuals, params, paramsDev);
 
 		if (result)
 		{
@@ -1189,6 +1191,17 @@ public class Gaussian2DFitter
 			{
 				for (int i = 0; i < residuals.length; i++)
 					residuals[i] = y[i] - residuals[i];
+			}
+			if (paramsDev != null)
+			{
+				if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
+				{
+					// Ensure Y deviation is updated with the X deviation
+					for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+					{
+						paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
+					}
+				}
 			}
 		}
 
