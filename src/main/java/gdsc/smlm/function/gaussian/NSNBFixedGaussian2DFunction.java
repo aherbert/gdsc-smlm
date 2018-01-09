@@ -101,7 +101,7 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		int dydapos = 0;
 
 		// First parameter is the background level 
-		double y_fit = a[BACKGROUND];
+		double y = a[BACKGROUND];
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -109,12 +109,12 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
+			y += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
 			apos += PARAMETERS_PER_PEAK;
 			dydapos += GRADIENT_PARAMETERS_PER_PEAK;
 		}
 
-		return y_fit;
+		return y;
 	}
 
 	protected double gaussian(final int x0, final int x1, final double[] dy_da, final int apos, final int dydapos,
@@ -146,7 +146,7 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 		int apos = 0;
 
 		// First parameter is the background level 
-		double y_fit = a[BACKGROUND];
+		double y = a[BACKGROUND];
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -154,10 +154,10 @@ public class NSNBFixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++, apos += PARAMETERS_PER_PEAK)
 		{
-			y_fit += gaussian(x0, x1, apos, peakFactors[j]);
+			y += gaussian(x0, x1, apos, peakFactors[j]);
 		}
 
-		return y_fit;
+		return y;
 	}
 
 	protected double gaussian(final int x0, final int x1, final int apos, final double[] factors)

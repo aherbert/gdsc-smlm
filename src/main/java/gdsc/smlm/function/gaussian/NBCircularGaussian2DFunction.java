@@ -63,7 +63,7 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction
 		int dydapos = 0;
 
 		// First parameter is the background level 
-		double y_fit = a[BACKGROUND];
+		double y = a[BACKGROUND];
 
 		// Unpack the predictor into the dimensions
 		final int x1 = x / maxx;
@@ -71,12 +71,12 @@ public class NBCircularGaussian2DFunction extends CircularGaussian2DFunction
 
 		for (int j = 0; j < npeaks; j++)
 		{
-			y_fit += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
+			y += gaussian(x0, x1, dyda, apos, dydapos, peakFactors[j]);
 			apos += PARAMETERS_PER_PEAK;
 			dydapos += GRADIENT_PARAMETERS_PER_PEAK;
 		}
 
-		return y_fit;
+		return y;
 	}
 
 	@Override
