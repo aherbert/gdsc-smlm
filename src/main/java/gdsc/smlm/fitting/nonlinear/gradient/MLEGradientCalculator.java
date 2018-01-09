@@ -184,14 +184,14 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[], double[],
 	 *      gdsc.smlm.function.NonLinearFunction)
 	 */
-	public double findLinearised(final int[] x, final double[] y, double[] y_fit, final double[] a,
+	public double findLinearised(final int[] x, final double[] y, double[] yFit, final double[] a,
 			final NonLinearFunction func)
 	{
 		double chisq = 0;
 
 		func.initialise(a);
 
-		if (y_fit == null || y_fit.length < x.length)
+		if (yFit == null || yFit.length < x.length)
 		{
 			for (int i = 0; i < x.length; i++)
 			{
@@ -237,7 +237,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// penalise the chisq value. 
 				// Optimally the function should be bounded to always produce a positive number.
 				final double fi = func.eval(i);
-				y_fit[i] = fi;
+				yFit[i] = fi;
 
 				if (fi <= 0)
 				{
@@ -415,7 +415,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 *            the n
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
-	 * @param y_fit
+	 * @param yFit
 	 *            the y fit
 	 * @param a
 	 *            the a
@@ -426,14 +426,14 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[],
 	 *      gdsc.smlm.function.NonLinearFunction)
 	 */
-	public double findLinearised(final int n, final double[] y, double[] y_fit, final double[] a,
+	public double findLinearised(final int n, final double[] y, double[] yFit, final double[] a,
 			final NonLinearFunction func)
 	{
 		double chisq = 0;
 
 		func.initialise(a);
 
-		if (y_fit == null || y_fit.length < n)
+		if (yFit == null || yFit.length < n)
 		{
 			for (int i = 0; i < n; i++)
 			{
@@ -479,7 +479,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				// penalise the chisq value. 
 				// Optimally the function should be bounded to always produce a positive number.
 				final double fi = func.eval(i);
-				y_fit[i] = fi;
+				yFit[i] = fi;
 
 				if (fi <= 0)
 				{
