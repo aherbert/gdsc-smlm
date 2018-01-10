@@ -96,7 +96,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 * </pre>
 	 * 
 	 * In this case Yi refers to the expected value at observation i. This expression was updated (Ruisheng, et al
-	 * (2017)) to use Yi as the observed value at observation i (Oi). To avoid small Oi generating high weights a
+	 * (2017)) to use Yi as the observed value at observation i (Oi). To increase stability for zero or small Oi a
 	 * Baysian prior is added using max(0, Oi) + 1. To account for Gaussian noise per observation using the variance
 	 * (vari) the weights can be combined resulting in:
 	 * 
