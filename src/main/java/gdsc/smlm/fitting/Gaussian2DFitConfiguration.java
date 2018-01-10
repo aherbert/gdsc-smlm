@@ -139,11 +139,11 @@ public interface Gaussian2DFitConfiguration
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
-	 * @param paramStdDevs
-	 *            the fitted peak parameters standard deviations (can be null)
+	 * @param paramDevs
+	 *            the fitted peak parameters variances (can be null)
 	 * @return the fit status
 	 */
-	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramStdDevs);
+	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs);
 
 	/**
 	 * Gets the validation data. This can be set within the validateFit function.

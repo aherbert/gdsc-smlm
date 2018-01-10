@@ -2641,7 +2641,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			{
 				filterFitConfig.setNoise(result.noise);
 				FitStatus fitStatus0 = filterFitConfig.validatePeak(0, result.fitResult1.getInitialParameters(),
-						result.fitResult1.getParameters(), result.fitResult1.getParameterStdDev());
+						result.fitResult1.getParameters(), result.fitResult1.getParameterDeviations());
 
 				double tp1 = 0, fp1 = 0;
 				if (fitStatus0 == FitStatus.OK)
@@ -2663,9 +2663,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					// Basic spot criteria (SNR, Photons, width)
 					filterFitConfig2.setNoise(result.noise);
 					FitStatus fitStatus1 = filterFitConfig2.validatePeak(0, result.fitResult2.getInitialParameters(),
-							result.fitResult2.getParameters(), result.fitResult2.getParameterStdDev());
+							result.fitResult2.getParameters(), result.fitResult2.getParameterDeviations());
 					FitStatus fitStatus2 = filterFitConfig2.validatePeak(1, result.fitResult2.getInitialParameters(),
-							result.fitResult2.getParameters(), result.fitResult2.getParameterStdDev());
+							result.fitResult2.getParameters(), result.fitResult2.getParameterDeviations());
 
 					// Log basic failures
 					boolean[] accept = new boolean[2];

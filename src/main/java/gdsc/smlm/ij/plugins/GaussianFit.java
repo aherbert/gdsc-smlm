@@ -524,7 +524,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				validParams[c++] = params[0];
 
 				double[] initialParams = convertParameters(fitResult.getInitialParameters());
-				double[] paramsDev = convertParameters(fitResult.getParameterStdDev());
+				double[] paramsDev = convertParameters(fitResult.getParameterDeviations());
 				Rectangle regionBounds = new Rectangle();
 
 				int[] xpoints = new int[maxIndices.length];
@@ -629,7 +629,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					double[] peakParamsDev = null;
 					if (showDeviations)
 					{
-						peakParamsDev = convertParameters(fitResult.getParameterStdDev());
+						peakParamsDev = convertParameters(fitResult.getParameterDeviations());
 					}
 
 					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
@@ -862,7 +862,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			{
 				fitResult = new FitResult(FitStatus.OUTSIDE_FIT_REGION, fitResult.getDegreesOfFreedom(),
 						fitResult.getError(), fitResult.getInitialParameters(), fitResult.getParameters(),
-						fitResult.getParameterStdDev(), fitResult.getNumberOfPeaks(),
+						fitResult.getParameterDeviations(), fitResult.getNumberOfPeaks(),
 						fitResult.getNumberOfFittedParameters(), fitResult.getStatusData(), fitResult.getIterations(),
 						fitResult.getEvaluations());
 				return null;
