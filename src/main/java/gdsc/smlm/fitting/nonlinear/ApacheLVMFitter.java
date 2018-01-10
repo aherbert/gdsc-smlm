@@ -12,7 +12,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.util.Precision;
 
@@ -137,21 +136,16 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 			evaluations = optimum.getEvaluations();
 			if (aDev != null)
 			{
-				try
-				{
-					double[][] covar = optimum.getCovariances(threshold).getData();
-					setDeviationsFromMatrix(aDev, covar);
-				}
-				catch (SingularMatrixException e)
-				{
-					// Matrix inversion failed. In order to return a solution 
-					// return the reciprocal of the diagonal of the Fisher information 
-					// for a loose bound on the limit 
-					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
-					double[][] alpha = calculator.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
-					FisherInformationMatrix m = new FisherInformationMatrix(alpha);
-					setDeviations(aDev, m.crlb(true));
-				}
+				// Set up the Jacobian.
+				final RealMatrix j = optimum.getJacobian();
+
+				// Compute transpose(J)J.
+				final RealMatrix jTj = j.transpose().multiply(j);
+
+				double[][] data = (jTj instanceof Array2DRowRealMatrix) ? ((Array2DRowRealMatrix) jTj).getDataRef()
+						: jTj.getData();
+				FisherInformationMatrix m = new FisherInformationMatrix(data);
+				setDeviations(aDev, m);
 			}
 			// Compute function value
 			if (yFit != null)

@@ -620,7 +620,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
 				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
 				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
-				setDeviations(aDev, m.crlb(true));
+				setDeviations(aDev, m);
 			}
 
 			// Reverse negative log likelihood for maximum likelihood score

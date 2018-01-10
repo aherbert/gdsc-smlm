@@ -161,14 +161,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		// Use a dedicated solver optimised for inverting the matrix diagonal. 
 		final FisherInformationMatrix m = computeFisherInformationMatrix(y, a);
 
-		//// This may fail if the matrix cannot be inverted
-		//final double[] crlb = m.crlb();
-		//if (crlb == null)
-		//	throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		//setDeviations(aDev, crlb);
-
-		// Use this method for robustness, i.e. it will not fail
-		setDeviations(aDev, m.crlb(true));
+		setDeviations(aDev, m);
 
 		return true;
 	}
@@ -252,6 +245,18 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		final int n = indices.length;
 		for (int i = 0; i < n; i++)
 			deviations[indices[i]] = checkVariance(covar[i]);
+	}
+
+	public void setDeviations(double[] deviations, FisherInformationMatrix m)
+	{
+		//// This may fail if the matrix cannot be inverted
+		//final double[] crlb = m.crlb();
+		//if (crlb == null)
+		//	throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
+		//setDeviations(aDev, crlb);
+
+		// Use this method for robustness, i.e. it will not fail
+		setDeviations(deviations, m.crlb(true));
 	}
 
 	private static double checkVariance(double d)

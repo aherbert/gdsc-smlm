@@ -285,14 +285,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		// The last Hessian matrix should be stored in the working alpha.
 		final FisherInformationMatrix m = computeFisherInformationMatrix();
 
-		// This may fail if the matrix cannot be inverted
-		final double[] crlb = m.crlb();
-		if (crlb == null)
-			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		setDeviations(aDev, crlb);
-
-		// Use this method for robustness, i.e. it will not fail
-		//setDeviations(aDev, m.crlb(true));
+		setDeviations(aDev, m);
 	}
 
 	/**
@@ -393,7 +386,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * @return the Fisher Information matrix
 	 */
 	protected abstract FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a);
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

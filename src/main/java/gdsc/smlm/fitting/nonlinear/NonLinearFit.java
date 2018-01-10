@@ -367,6 +367,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	private boolean computeDeviations(double[] aDev)
 	{
+		// Use a dedicated solver optimised for inverting the matrix diagonal. 
+		FisherInformationMatrix m;
 		if (isMLE())
 		{
 			// The Hessian matrix refers to the log-likelihood ratio.
@@ -375,19 +377,18 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			// Poisson process.
 			MLEGradientCalculator c = (MLEGradientCalculator) calculator;
 			double[][] I = c.fisherInformationMatrix(lastY.length, null, func);
+			if (c.isNaNGradients())
+				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 
-			// Use a dedicated solver optimised for inverting the matrix diagonal 
-			FisherInformationMatrix m = new FisherInformationMatrix(I);
-			setDeviations(aDev, m.crlb(true));
+			m = new FisherInformationMatrix(I);
 		}
 		else
 		{
-			// alpha already contains the correct Fisher matrix
+			// alpha already contains the scaled Hessian
 
-			// Use a dedicated solver optimised for inverting the matrix diagonal. 
-			FisherInformationMatrix m = new FisherInformationMatrix(alpha);
-			setDeviations(aDev, m.crlb(true));
+			m = new FisherInformationMatrix(alpha);
 		}
+		setDeviations(aDev, m);
 		return true;
 	}
 
@@ -594,8 +595,26 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	@Override
 	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
 	{
-		GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), isMLE());
-		double[][] I = c.fisherInformationMatrix(y.length, a, func);
+		GradientCalculator c;
+		double[][] I;
+		if (isMLE())
+		{
+			// Compute and invert a matrix related to the Poisson log-likelihood.
+			// This assumes this does achieve the maximum likelihood estimate for a 
+			// Poisson process.
+			c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), true);
+			I = c.fisherInformationMatrix(y.length, a, func);
+		}
+		else
+		{
+			// Currently this uses the scaled Hessian which is not the same as that for the MLE
+			c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+			int n = y.length;
+			final int nparams = f.gradientIndices().length;
+			double[] beta = new double[nparams];
+			I = new double[nparams][nparams];
+			c.findLinearised(n, y, a, I, beta, func);
+		}
 		if (c.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		return new FisherInformationMatrix(I);

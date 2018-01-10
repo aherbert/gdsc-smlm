@@ -28,7 +28,7 @@ public class FitResult
 		private double error;
 		private double[] initialParameters;
 		private double[] parameters;
-		private double[] parametersDev;
+		private double[] parameterDevs;
 		private int nPeaks;
 		private int nFittedParameters;
 		private Object data;
@@ -36,7 +36,7 @@ public class FitResult
 		private int evaluations;
 
 		public Builder(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
-				double[] parameters, double[] parametersDev, int nPeaks, int nFittedParameters, Object data,
+				double[] parameters, double[] parameterDevs, int nPeaks, int nFittedParameters, Object data,
 				int iterations, int evaluations)
 		{
 			this.status = status;
@@ -44,7 +44,7 @@ public class FitResult
 			this.error = error;
 			this.initialParameters = initialParameters;
 			this.parameters = parameters;
-			this.parametersDev = parametersDev;
+			this.parameterDevs = parameterDevs;
 			this.nPeaks = nPeaks;
 			this.nFittedParameters = nFittedParameters;
 			this.data = data;
@@ -107,14 +107,14 @@ public class FitResult
 			return this;
 		}
 
-		public double[] getParametersDev()
+		public double[] getParameterDeviations()
 		{
-			return parametersDev;
+			return parameterDevs;
 		}
 
-		public Builder setParametersDev(double[] parametersDev)
+		public Builder setParameterDeviations(double[] parameterDevs)
 		{
-			this.parametersDev = parametersDev;
+			this.parameterDevs = parameterDevs;
 			return this;
 		}
 
@@ -175,7 +175,7 @@ public class FitResult
 
 		public FitResult build()
 		{
-			return new FitResult(status, degreesOfFreedom, error, initialParameters, initialParameters, parametersDev,
+			return new FitResult(status, degreesOfFreedom, error, initialParameters, initialParameters, parameterDevs,
 					nPeaks, nFittedParameters, data, iterations, evaluations);
 		}
 	}
@@ -185,7 +185,7 @@ public class FitResult
 	private double error;
 	private final double[] initialParameters;
 	private final double[] parameters;
-	private final double[] parametersDev;
+	private final double[] parameterDevs;
 	private final int nPeaks;
 	private final int nFittedParameters;
 	private Object data;
@@ -199,13 +199,13 @@ public class FitResult
 	 * @param error
 	 * @param initialParameters
 	 * @param parameters
-	 * @param parametersDev
+	 * @param parameterDevs
 	 * @param nPeaks
 	 * @param nFittedParameters
 	 * @param data
 	 */
 	public FitResult(FitStatus status, int degreesOfFreedom, double error, double[] initialParameters,
-			double[] parameters, double[] parametersDev, int nPeaks, int nFittedParameters, Object data, int iterations,
+			double[] parameters, double[] parameterDevs, int nPeaks, int nFittedParameters, Object data, int iterations,
 			int evaluations)
 	{
 		this.status = status;
@@ -213,7 +213,7 @@ public class FitResult
 		this.error = error;
 		this.initialParameters = initialParameters;
 		this.parameters = parameters;
-		this.parametersDev = parametersDev;
+		this.parameterDevs = parameterDevs;
 		this.nPeaks = nPeaks;
 		this.nFittedParameters = nFittedParameters;
 		this.data = data;
@@ -233,7 +233,7 @@ public class FitResult
 		this.error = 0;
 		this.initialParameters = null;
 		this.parameters = null;
-		this.parametersDev = null;
+		this.parameterDevs = null;
 		this.nPeaks = 0;
 		this.nFittedParameters = 0;
 		this.data = null;
@@ -277,6 +277,8 @@ public class FitResult
 	}
 
 	/**
+	 * Gets the initial parameters.
+	 *
 	 * @return the initial parameters
 	 */
 	public double[] getInitialParameters()
@@ -286,12 +288,6 @@ public class FitResult
 
 	/**
 	 * Get the fitted parameters
-	 * <p>
-	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; angle[N-1]; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Angle is the rotation
-	 * in the i to i+1 axis (in degrees). Position (p) is the position of the Gaussian in each of the N-dimensions.
-	 * Width (w) is the peak width at half-max in each of the N-dimensions. This produces an additional 3N coefficients
-	 * per peak.
 	 * 
 	 * @return the fitted parameters
 	 */
@@ -301,19 +297,13 @@ public class FitResult
 	}
 
 	/**
-	 * Get the standard deviations for the fitted parameters
-	 * <p>
-	 * The first coefficient is the Gaussian background level (B). The coefficients are then packed for each peak:
-	 * Amplitude; angle[N-1]; position[N]; width[N]. Amplitude (A) is the height of the Gaussian. Angle is the rotation
-	 * in the i to i+1 axis (in degrees). Position (p) is the position of the Gaussian in each of the N-dimensions.
-	 * Width (w) is the peak width at half-max in each of the N-dimensions. This produces an additional 3N coefficients
-	 * per peak.
+	 * Get the deviations (variances) for the fitted parameters
 	 * 
-	 * @return the fitted parameters
+	 * @return the parameter deviations
 	 */
-	public double[] getParameterStdDev()
+	public double[] getParameterDeviations()
 	{
-		return parametersDev;
+		return parameterDevs;
 	}
 
 	/**
@@ -380,7 +370,7 @@ public class FitResult
 	 */
 	public Builder toBuilder()
 	{
-		return new Builder(status, degreesOfFreedom, error, initialParameters, initialParameters, parametersDev, nPeaks,
+		return new Builder(status, degreesOfFreedom, error, initialParameters, parameters, parameterDevs, nPeaks,
 				nFittedParameters, data, iterations, evaluations);
 	}
 }
