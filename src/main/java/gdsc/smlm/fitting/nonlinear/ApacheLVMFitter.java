@@ -10,7 +10,6 @@ import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 import org.apache.commons.math3.fitting.leastsquares.ValueAndJacobianFunction;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularMatrixException;
@@ -75,11 +74,11 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 
 			// Create the target and weight arrays
 			final double[] yd = new double[n];
-			final double[] w = new double[n];
+			//final double[] w = new double[n];
 			for (int i = 0; i < n; i++)
 			{
 				yd[i] = y[i];
-				w[i] = 1;
+				//w[i] = 1;
 			}
 
 			LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer(initialStepBoundFactor,
@@ -90,8 +89,9 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					.maxEvaluations(Integer.MAX_VALUE)
 					.maxIterations(getMaxEvaluations())
 					.start(initialSolution)
-					.target(yd)
-					.weight(new DiagonalMatrix(w));
+					.target(yd);
+					// This is not required
+					//.weight(new DiagonalMatrix(w));
 			//@formatter:on
 
 			if (f instanceof ExtendedNonLinearFunction && ((ExtendedNonLinearFunction) f).canComputeValuesAndJacobian())
