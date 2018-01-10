@@ -16,7 +16,8 @@ import gdsc.smlm.function.Gradient1Function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Calculates the Fisher information matrix for a Poisson process.
+ * Calculates the Fisher information matrix for a Poisson process. The class can be used as a substitute for
+ * {@link WLSQLVMGradientProcedure} if the user only requires the alpha matrix.
  * <p>
  * This procedure is based on computation of a modified Chi-squared expression to perform Weighted Least Squares
  * Estimation assuming a Poisson model with a Gaussian noise component. The weight per observation is equal to
@@ -66,18 +67,18 @@ public class WPoissonGradientProcedure4 extends WPoissonGradientProcedure
 	@Override
 	protected void initialiseWorkingMatrix()
 	{
-		GradientProcedureHelper.initialiseWorkingMatrix5(data);
+		GradientProcedureHelper.initialiseWorkingMatrix4(data);
 	}
 
 	@Override
 	public void getMatrix(double[][] matrix)
 	{
-		GradientProcedureHelper.getMatrix5(data, matrix);
+		GradientProcedureHelper.getMatrix4(data, matrix);
 	}
 
 	@Override
 	public void getLinear(double[] matrix)
 	{
-		GradientProcedureHelper.getMatrix5(data, matrix);
+		GradientProcedureHelper.getMatrix4(data, matrix);
 	}
 }

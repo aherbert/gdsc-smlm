@@ -129,7 +129,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 		// Iab = 1 / (uk + var/g^2) * duda * dudb
 		// with uk the expected photon count.
 		// This will compute: 
-		// Iab = 1 / (xk + var/g^2) * duda * dudb
+		// Iab = 1 / (xk + 1.0 + var/g^2) * duda * dudb
 		// with xk the observed photon count.
 
 		// The last Hessian matrix should be stored in the working alpha.
