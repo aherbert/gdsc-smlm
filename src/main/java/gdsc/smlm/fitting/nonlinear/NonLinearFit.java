@@ -383,7 +383,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		else
 		{
 			// alpha already contains the correct Fisher matrix
-			
+
 			// Use a dedicated solver optimised for inverting the matrix diagonal. 
 			FisherInformationMatrix m = new FisherInformationMatrix(alpha);
 			setDeviations(aDev, m.crlb(true));
@@ -559,13 +559,12 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
 	@Override
-	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
+	public boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
 		final int n = y.length;
-		final int nparams = f.gradientIndices().length;
 
 		// Create dynamically for the parameter sizes
-		calculator = GradientCalculatorFactory.newCalculator(nparams, isMLE());
+		calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), isMLE());
 
 		if (isMLE())
 		{
@@ -588,22 +587,18 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		}
 
 		value = calculator.findLinearised(n, y, yFit, a, func);
-		
-		if (aDev != null)
-		{
-			// Poor support because we recompute again
-			MLEGradientCalculator c = (MLEGradientCalculator) ((isMLE()) ? calculator : 
-				GradientCalculatorFactory.newCalculator(nparams, true));
-			
-			// The function is already initialised so use null params.
-			double[][] I = c.fisherInformationMatrix(lastY.length, null, func);
 
-			// Use a dedicated solver optimised for inverting the matrix diagonal 
-			FisherInformationMatrix m = new FisherInformationMatrix(I);
-			setDeviations(aDev, m.crlb(true));
-		}
-		
 		return true;
+	}
+
+	@Override
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
+	{
+		GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), isMLE());
+		double[][] I = c.fisherInformationMatrix(y.length, a, func);
+		if (c.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		return new FisherInformationMatrix(I);
 	}
 
 	/*

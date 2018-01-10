@@ -41,6 +41,15 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 		this.values = values;
 	}
 
+	/**
+	 * Instantiates a new precomputed value function by combining the current precomputed values with more precomputed
+	 * values. This is used internally and so no checks are made on the size of values arrays (which must match).
+	 *
+	 * @param pre
+	 *            the pre-computed function
+	 * @param values2
+	 *            the second set of precomputed values
+	 */
 	protected PrecomputedValueFunction(PrecomputedValueFunction pre, double[] values2)
 	{
 		this.f = pre.f;
@@ -50,7 +59,7 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 		for (int i = 0; i < n; i++)
 			values[i] = values1[i] + values2[i];
 	}
-	
+
 	public ValueFunction getValueFunction()
 	{
 		return f;
@@ -94,7 +103,7 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 			// Avoid multiple wrapping
 			if (func instanceof PrecomputedValueFunction)
 			{
-				return new PrecomputedValueFunction((PrecomputedValueFunction)func, b);
+				return new PrecomputedValueFunction((PrecomputedValueFunction) func, b);
 			}
 			return new PrecomputedValueFunction(func, b);
 		}

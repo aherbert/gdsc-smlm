@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -133,7 +134,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 		// Ensure the gradient procedure is created
 		y = prepareY(y);
 		gradientProcedure = createGradientProcedure(y);
-		
+
 		// Ensure minimisation
 		tc.setMinimiseValue(true);
 
@@ -260,6 +261,19 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 			// to use cached function values.
 			computeValues(yFit);
 		return gradientProcedure.value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Note: In contrast to {@link #prepareFunctionValue(double[], double[])} this does not create the gradient
+	 * procedure.
+	 */
+	@Override
+	protected double[] prepareFunctionFisherInformationMatrix(double[] y, double[] a)
+	{
+		// Do not create the gradient procedure. Sub-classes will create the correct one required.
+		return prepareY(y);
 	}
 
 	/**

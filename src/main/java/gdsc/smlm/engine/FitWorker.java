@@ -2111,11 +2111,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Add the pre-computed function from outside the region. The parameters for this
 					// are ignored from the deviations computation.
 					fitConfig.setPrecomputedFunctionValues(precomputedFittedNeighboursMulti);
-					final boolean isComputeResiduals = gf.isComputeResiduals();
-					gf.setComputeResiduals(false);
-					gf.evaluate(region, width, height, npeaks, params, paramsDev);
+					gf.computeDeviations(region, width, height, npeaks, params, paramsDev);
 					fitConfig.setPrecomputedFunctionValues(null);
-					gf.setComputeResiduals(isComputeResiduals);
 				}
 
 				// Create all the output results
@@ -2517,11 +2514,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						double[] paramsDev1 = new double[functionParamsSingle.length];
 						// These pre-computed values will be those peaks outside the region
 						fitConfig.setPrecomputedFunctionValues(getPrecomputedFittedNeighbours());
-						final boolean isComputeResiduals = gf.isComputeResiduals();
-						gf.setComputeResiduals(false);
-						if (gf.evaluate(region, width, height, npeaks, functionParamsSingle, paramsDev1))
+						if (gf.computeDeviations(region, width, height, npeaks, functionParamsSingle, paramsDev1))
 							System.arraycopy(paramsDev1, 0, fitParamsDev, 0, fitParamsDev.length);
-						gf.setComputeResiduals(isComputeResiduals);
 						fitConfig.setPrecomputedFunctionValues(null);
 					}
 				}
@@ -2624,11 +2618,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				double[] paramsDev = new double[params.length];
 				// These pre-computed values will be those peaks outside the region
 				fitConfig.setPrecomputedFunctionValues(getPrecomputedFittedNeighbours());
-				final boolean isComputeResiduals = gf.isComputeResiduals();
-				gf.setComputeResiduals(false);
-				if (gf.evaluate(region, width, height, npeaks, params, paramsDev))
+				if (gf.computeDeviations(region, width, height, npeaks, params, paramsDev))
 					System.arraycopy(paramsDev, 0, fitParamsDev, 0, fitParamsDev.length);
-				gf.setComputeResiduals(isComputeResiduals);
 				fitConfig.setPrecomputedFunctionValues(null);
 
 				// Use the updated deviations
@@ -3226,6 +3217,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 *            the params 2
 	 * @return the double[]
 	 */
+	@SuppressWarnings("unused")
 	private static double[] joinParams(double[] params1, double[] params2)
 	{
 		double[] params = new double[params1.length + params2.length - 1];

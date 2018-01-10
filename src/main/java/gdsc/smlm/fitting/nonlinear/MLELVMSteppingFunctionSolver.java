@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FisherInformationMatrix;
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
@@ -228,10 +229,29 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// Poisson process.
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(lastA);
-		p.getLinear(walpha);
+		p.getLinear(walpha); // Re-use space
 		return new FisherInformationMatrix(walpha, beta.length);
 	}
 
+	@Override
+	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
+	{
+		// Compute and invert a matrix related to the Poisson log-likelihood.
+		// This assumes this does achieve the maximum likelihood estimate for a 
+		// Poisson process.
+		// We must wrap the gradient function if weights are present.
+		Gradient1Function f1 = (Gradient1Function) f;
+		if (w != null)
+		{
+			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
+		}		
+		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
+		p.computeFisherInformation(a);
+		if (p.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		return new FisherInformationMatrix(p.getLinear(), f.getNumberOfGradients());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

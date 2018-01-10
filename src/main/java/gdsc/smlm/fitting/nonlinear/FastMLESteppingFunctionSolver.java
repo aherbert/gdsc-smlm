@@ -19,8 +19,10 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.ExtendedGradient2Function;
+import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.PrecomputedExtendedGradient2Function;
+import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.PrecomputedGradient2Function;
 
 /*----------------------------------------------------------------------------- 
@@ -509,7 +511,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 			copyFunctionValue(yFit);
 		return ll;
 	}
-
+	
 	/**
 	 * Copy the function value into the yFit array.
 	 *
@@ -554,9 +556,35 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// The fisher information is that for a Poisson process
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
 		p.computeFisherInformation(null); // Assume preinitialised function
-		return new FisherInformationMatrix(p.getLinear(), gradientProcedure.n);
+		if (p.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		return new FisherInformationMatrix(p.getLinear(), p.n);
 	}
 
+	@Override
+	protected double[] prepareFunctionFisherInformationMatrix(double[] y, double[] a)
+	{
+		// Do not create the gradient procedure as we use a different one for the fisher information.
+		return prepareY(y);
+	}
+	
+	@Override
+	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
+	{
+		// The fisher information is that for a Poisson process.
+		// We must wrap the gradient function if weights are present.
+		Gradient1Function f1 = (Gradient1Function) f;
+		if (w != null)
+		{
+			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
+		}		
+		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
+		p.computeFisherInformation(a);
+		if (p.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		return new FisherInformationMatrix(p.getLinear(), p.n);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

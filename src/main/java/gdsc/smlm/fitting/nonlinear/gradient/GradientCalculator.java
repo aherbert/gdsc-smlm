@@ -675,7 +675,7 @@ public class GradientCalculator
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
-	 * x = obsereved values
+	 * x = observed values
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
@@ -711,7 +711,7 @@ public class GradientCalculator
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
-	 * x = obsereved values
+	 * x = observed values
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
@@ -733,7 +733,7 @@ public class GradientCalculator
 	 * @param a
 	 *            Set of m coefficients (if null then the function must be pre-initialised)
 	 * @param func
-	 *            Non-linear fitting function
+	 *            Non-linear fitting function. Must return positive values (other values are ignored)
 	 * @return I
 	 */
 	public double[][] fisherInformationMatrix(final int n, final double[] a, final NonLinearFunction func)
@@ -747,14 +747,16 @@ public class GradientCalculator
 
 		for (int i = 0; i < n; i++)
 		{
-			final double yi = 1.0 / func.eval(i, dy_da);
-
-			for (int j = 0; j < nparams; j++)
+			final double yi = func.eval(i, dy_da);
+			if (yi > 0)
 			{
-				final double dy_db = dy_da[j] * yi;
+				for (int j = 0; j < nparams; j++)
+				{
+					final double dy_db = dy_da[j] / yi;
 
-				for (int k = 0; k <= j; k++)
-					alpha[j][k] += dy_db * dy_da[k];
+					for (int k = 0; k <= j; k++)
+						alpha[j][k] += dy_db * dy_da[k];
+				}
 			}
 		}
 
@@ -773,7 +775,7 @@ public class GradientCalculator
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
-	 * x = obsereved values
+	 * x = observed values
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
@@ -795,7 +797,7 @@ public class GradientCalculator
 	 * @param a
 	 *            Set of m coefficients
 	 * @param func
-	 *            Non-linear fitting function
+	 *            Non-linear fitting function. Must return positive values (other values are ignored)
 	 * @return Iaa
 	 */
 	public double[] fisherInformationDiagonal(final int[] x, final double[] a, final NonLinearFunction func)
@@ -809,7 +811,7 @@ public class GradientCalculator
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
-	 * x = obsereved values
+	 * x = observed values
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
@@ -831,7 +833,7 @@ public class GradientCalculator
 	 * @param a
 	 *            Set of m coefficients
 	 * @param func
-	 *            Non-linear fitting function
+	 *            Non-linear fitting function. Must return positive values (other values are ignored)
 	 * @return Iaa
 	 */
 	public double[] fisherInformationDiagonal(final int n, final double[] a, final NonLinearFunction func)
@@ -844,10 +846,13 @@ public class GradientCalculator
 
 		for (int i = 0; i < n; i++)
 		{
-			final double yi = 1.0 / func.eval(i, dy_da);
-			for (int j = 0; j < nparams; j++)
+			final double yi = func.eval(i, dy_da);
+			if (yi > 0)
 			{
-				alpha[j] += dy_da[j] * dy_da[j] * yi;
+				for (int j = 0; j < nparams; j++)
+				{
+					alpha[j] += dy_da[j] * dy_da[j] / yi;
+				}
 			}
 		}
 

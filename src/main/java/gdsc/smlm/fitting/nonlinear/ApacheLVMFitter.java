@@ -147,13 +147,8 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					// Matrix inversion failed. In order to return a solution 
 					// return the reciprocal of the diagonal of the Fisher information 
 					// for a loose bound on the limit 
-					final int[] gradientIndices = f.gradientIndices();
-					final int nparams = gradientIndices.length;
-					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams);
-					double[][] alpha = new double[nparams][nparams];
-					double[] beta = new double[nparams];
-					calculator.findLinearised(nparams, y, a, alpha, beta, (NonLinearFunction) f);
-
+					GradientCalculator calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients());
+					double[][] alpha = calculator.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
 					FisherInformationMatrix m = new FisherInformationMatrix(alpha);
 					setDeviations(aDev, m.crlb(true));
 				}
@@ -202,28 +197,24 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 	}
 
 	@Override
-	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
+	public boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
-		final int nparams = f.gradientIndices().length;
+		GradientCalculator calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
 
-		GradientCalculator calculator = GradientCalculatorFactory.newCalculator(nparams, false);
-
-		// Since we know the function is a Gaussian2DFunction
+		// Since we know the function is a Gaussian2DFunction from the constructor
 		value = calculator.findLinearised(y.length, y, yFit, a, (NonLinearFunction) f);
 
-		if (aDev != null)
-		{
-			// Matrix inversion failed. In order to return a solution 
-			// return the reciprocal of the diagonal of the Fisher information 
-			// for a loose bound on the limit 
-			double[][] alpha = new double[nparams][nparams];
-			double[] beta = new double[nparams];
-			calculator.findLinearised(nparams, y, a, alpha, beta, (NonLinearFunction) f);
-
-			FisherInformationMatrix m = new FisherInformationMatrix(alpha);
-			setDeviations(aDev, m.crlb(true));
-		}
-		
 		return true;
+	}
+
+	@Override
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
+	{
+		GradientCalculator c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
+		// Since we know the function is a Gaussian2DFunction from the constructor
+		double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) f);
+		if (c.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		return new FisherInformationMatrix(I);
 	}
 }

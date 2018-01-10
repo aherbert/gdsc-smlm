@@ -8,7 +8,7 @@ import gdsc.smlm.function.Gradient1Procedure;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2017 Alex Herbert
+ * Copyright (C) 2018 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -21,11 +21,16 @@ import gdsc.smlm.function.Gradient1Procedure;
 /**
  * Calculates the Fisher information matrix for a Poisson process.
  * <p>
- * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
- * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
+ * This procedure is based on computation of a modified Chi-squared expression to perform Weighted Least Squares
+ * Estimation assuming a Poisson model with a Gaussian noise component. The weight per observation is equal to
+ * 1/[variance + max(y, 0) + 1].
+ * <p>
+ * See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation
+ * of a computationally efficient localization approach. Optical Express 25, Issue 10, pp 11701-11716.
  */
-public class PoissonGradientProcedure implements Gradient1Procedure
+public class WPoissonGradientProcedure implements Gradient1Procedure
 {
+	protected final double[] w;
 	protected final Gradient1Function func;
 
 	/**
@@ -38,14 +43,38 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	protected double[] data;
 
+	protected int yi;
+
 	/**
+	 * @param y
+	 *            Data to fit
+	 * @param var
+	 *            the base variance of each observation (must be positive)
 	 * @param func
 	 *            Gradient function
 	 */
-	public PoissonGradientProcedure(final Gradient1Function func)
+	public WPoissonGradientProcedure(final double[] y, final double[] var, final Gradient1Function func)
 	{
 		this.func = func;
 		this.n = func.getNumberOfGradients();
+
+		final int n = y.length;
+		w = new double[n];
+
+		// From Ruisheng, et al (2017):
+		// Total noise = variance + max(di, 0) + 1 
+
+		if (var != null && var.length == n)
+		{
+			// Include the variance in the weight. Assume variance is positive.
+			for (int i = 0; i < n; i++)
+				w[i] = (y[i] > 0) ? 1.0 / (var[i] + y[i] + 1.0) : 1.0 / (var[i] + 1.0);
+		}
+		else
+		{
+			for (int i = 0; i < n; i++)
+				w[i] = (y[i] > 0) ? 1.0 / (y[i] + 1.0) : 1.0;
+		}
 	}
 
 	/**
@@ -66,21 +95,22 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
 	 * 
-	 * This expression was extended (Huang et al, (2015)) to account for Gaussian noise per observation using the
-	 * variance (vari):
+	 * In this case Yi refers to the expected value at observation i. This expression was updated (Ruisheng, et al
+	 * (2017)) to use Yi as the observed value at observation i (Oi). To avoid small Oi generating high weights a
+	 * Baysian prior is added using max(0, Oi) + 1. To account for Gaussian noise per observation using the variance
+	 * (vari) the weights can be combined resulting in:
 	 * 
 	 * <pre>
-	 * Iab = sum(i) (dYi da) * (dYi db) / (Yi + vari)
+	 * Iab = sum(i) (dYi da) * (dYi db) / (max(0, Oi) + 1 + vari)
 	 * </pre>
 	 * 
-	 * Thus per-observation noise can be handled by wrapping the input function with a pre-computed gradient function
-	 * and pre-computed noise values.
 	 * <p>
 	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
 	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
 	 * <p>
-	 * See: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule localization
-	 * algorithms. Nature Methods 10, 653–658.
+	 * See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras -
+	 * characterisation of a computationally efficient localization approach. Optical Express 25, Issue 10, pp
+	 * 11701-11716.
 	 * 
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 *
@@ -89,6 +119,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public void computeFisherInformation(final double[] a)
 	{
+		yi = 0;
 		if (data == null)
 			data = new double[n * (n + 1) / 2];
 		else
@@ -113,16 +144,14 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 */
 	public void execute(double value, double[] dy_da)
 	{
-		if (value > 0.0)
+		// Note: Ignore the value
+		final double w = this.w[yi++];
+		for (int j = 0, i = 0; j < n; j++)
 		{
-			final double f = 1.0 / value;
-			for (int j = 0, i = 0; j < n; j++)
+			final double wgt = dy_da[j] * w;
+			for (int k = 0; k <= j; k++)
 			{
-				final double wgt = f * dy_da[j];
-				for (int k = 0; k <= j; k++)
-				{
-					data[i++] += wgt * dy_da[k];
-				}
+				data[i++] += wgt * dy_da[k];
 			}
 		}
 	}

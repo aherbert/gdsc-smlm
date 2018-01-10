@@ -1151,7 +1151,7 @@ public class Gaussian2DFitter
 
 	/**
 	 * Evaluate the function using the configured fit solver. No fit is attempted. The input parameters are assumed to
-	 * be the initial parameters of the Gaussian.
+	 * be the parameters of the Gaussian.
 	 *
 	 * @param data
 	 *            The data to fit
@@ -1163,11 +1163,9 @@ public class Gaussian2DFitter
 	 *            The number of peaks
 	 * @param params
 	 *            The parameters of the peaks, e.g. from a previous call to fit(...)
-	 * @param params
-	 *            The parameters deviations (output, this can be null)
 	 * @return True if the function was evaluated
 	 */
-	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params, double[] paramsDev)
+	public boolean evaluate(double[] data, int maxx, int maxy, int npeaks, double[] params)
 	{
 		final int ySize = maxx * maxy;
 		// The solvers require y to be the correct length
@@ -1183,7 +1181,7 @@ public class Gaussian2DFitter
 
 		// Note: Do not apply bounds and constraints as it is assumed the input parameters are good
 
-		final boolean result = solver.evaluate(y, residuals, params, paramsDev);
+		final boolean result = solver.evaluate(y, residuals, params);
 
 		if (result)
 		{
@@ -1192,15 +1190,56 @@ public class Gaussian2DFitter
 				for (int i = 0; i < residuals.length; i++)
 					residuals[i] = y[i] - residuals[i];
 			}
-			if (paramsDev != null)
+		}
+
+		return result;
+	}
+
+	/**
+	 * Compute the deviations of the parameters of the function using the configured fit solver. No fit is attempted.
+	 * The input parameters are assumed to
+	 * be the parameters of the Gaussian.
+	 *
+	 * @param data
+	 *            The data to fit
+	 * @param maxx
+	 *            The data size in the x dimension
+	 * @param maxy
+	 *            The data size in the y dimension
+	 * @param npeaks
+	 *            The number of peaks
+	 * @param params
+	 *            The parameters of the peaks, e.g. from a previous call to fit(...)
+	 * @param paramsDev
+	 *            The parameters deviations (output)
+	 * @return True if the function was evaluated
+	 */
+	public boolean computeDeviations(double[] data, int maxx, int maxy, int npeaks, double[] params, double[] paramsDev)
+	{
+		final int ySize = maxx * maxy;
+		// The solvers require y to be the correct length
+		double[] y = (data.length == ySize) ? data : Arrays.copyOf(data, ySize);
+
+		// -----------------------
+		// Use alternative fitters
+		// -----------------------
+
+		fitConfiguration.initialise(npeaks, maxx, maxy, params);
+		solver = fitConfiguration.getFunctionSolver();
+
+		// Note: Do not apply bounds and constraints as it is assumed the input parameters are good
+
+		final boolean result = solver.computeDeviations(y, params, paramsDev);
+
+		if (result)
+		{
+			// Ensure the deviations are copied for a symmetric Gaussian
+			if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
 			{
-				if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
+				// Ensure Y deviation is updated with the X deviation
+				for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				{
-					// Ensure Y deviation is updated with the X deviation
-					for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
-					{
-						paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
-					}
+					paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
 				}
 			}
 		}

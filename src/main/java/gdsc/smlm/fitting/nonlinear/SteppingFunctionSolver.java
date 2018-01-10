@@ -109,7 +109,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 *            the aDev
 	 * @return the fit status
 	 */
-	public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
+	protected FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		// Lay out a simple iteration loop for a stepping solver.
 		// The sub-class must compute the next step.
@@ -296,7 +296,9 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	}
 
 	/**
-	 * Compute the Fisher Information matrix. This can be used to set the covariances for each of the fitted parameters.
+	 * Compute the Fisher Information matrix for the parameters a from the last call to
+	 * {@link #computeFitValue(double[], double[])}. This can be used to set the covariances for each of the fitted
+	 * parameters.
 	 *
 	 * @return the Fisher Information matrix
 	 */
@@ -322,57 +324,17 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[], double[])
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
-	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
+	protected boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
 		gradientIndices = f.gradientIndices();
 		lastY = prepareFunctionValue(y, a);
 		//if (yFit == null)
 		//	yFit = new double[y.length];
 		value = computeFunctionValue(yFit, a);
-		if (aDev != null)
-			computeDeviations(y, a, aDev);
 		return true;
 	}
-
-	/**
-	 * Compute the deviations for the parameters a from the last call to
-	 * {@link #computeFitValue(double[], double[])}.
-	 *
-	 * @param y
-	 *            the y values
-	 * @param a
-	 *            the parameters
-	 * @param aDev
-	 *            the parameter deviations
-	 */
-	protected void computeDeviations(double[] y, double[] a, double[] aDev)
-	{
-		// Use a dedicated solver optimised for inverting the matrix diagonal. 
-		// The last Hessian matrix should be stored in the working alpha.
-		final FisherInformationMatrix m = computeFisherInformationMatrix(y, a);
-
-		// This may fail if the matrix cannot be inverted
-		final double[] crlb = m.crlb();
-		if (crlb == null)
-			throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
-		setDeviations(aDev, crlb);
-
-		// Use this method for robustness, i.e. it will not fail
-		//setDeviations(aDev, m.crlb(true));
-	}
-
-	/**
-	 * Compute the Fisher Information matrix. This can be used to set the covariances for each of the fitted parameters.
-	 *
-	 * @param y
-	 *            the y values
-	 * @param a
-	 *            the parameters
-	 * @return the Fisher Information matrix
-	 */
-	protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a);
 
 	/**
 	 * Prepare y for computing the function value, e.g. ensure strictly positive values.
@@ -397,6 +359,41 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	protected abstract double computeFunctionValue(double[] yFit, double[] a);
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFisherInformationMatrix(double[], double[])
+	 */
+	@Override
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
+	{
+		gradientIndices = f.gradientIndices();
+		y = prepareFunctionFisherInformationMatrix(y, a);
+		return computeFunctionFisherInformationMatrix(y, a);
+	}
+
+	/**
+	 * Prepare y for computing the Fisher information matrix, e.g. ensure strictly positive values.
+	 *
+	 * @param y
+	 *            the y
+	 * @param a
+	 *            the parameters
+	 * @return the new y
+	 */
+	protected abstract double[] prepareFunctionFisherInformationMatrix(double[] y, double[] a);
+
+	/**
+	 * Compute the Fisher information matrix.
+	 *
+	 * @param y
+	 *            the y
+	 * @param a
+	 *            the parameters
+	 * @return the Fisher Information matrix
+	 */
+	protected abstract FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a);
+	
 	/*
 	 * (non-Javadoc)
 	 * 

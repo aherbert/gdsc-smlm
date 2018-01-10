@@ -2,6 +2,7 @@ package gdsc.smlm.function;
 
 import java.util.Arrays;
 
+import gdsc.core.data.DataException;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 
@@ -255,7 +256,11 @@ public abstract class LikelihoodWrapper
 		// Generate symmetric matrix
 		for (int i = 0; i < nVariables - 1; i++)
 			for (int j = i + 1; j < nVariables; j++)
+			{
+				if (Double.isNaN(I[j][i]))
+					throw new DataException("Invalid gradients");
 				I[i][j] = I[j][i];
+			}
 
 		return I;
 	}

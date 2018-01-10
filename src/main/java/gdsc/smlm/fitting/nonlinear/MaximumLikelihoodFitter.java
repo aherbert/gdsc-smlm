@@ -947,7 +947,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	}
 
 	@Override
-	public boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev)
+	public boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
 		final int n = y.length;
 		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
@@ -958,16 +958,16 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 
 		// Reverse negative log likelihood for maximum likelihood score
 		value = -l;
-
-		if (aDev != null)
-		{
-			// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
-			// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
-			FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
-			setDeviations(aDev, m.crlb(true));
-		}
 		
-		return false;
+		return true;
+	}
+
+	@Override
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
+	{
+		final int n = y.length;
+		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+		return new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
 	}
 
 	@Override

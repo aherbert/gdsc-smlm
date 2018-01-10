@@ -144,9 +144,6 @@ public interface FunctionSolver
 	 * Evaluate a function with coefficients (a) for a set of data points (x, y).
 	 * <p>
 	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
-	 * <p>
-	 * The deviations should be the same values as the result from the
-	 * {@link #fit(double[], double[], double[], double[])} method if this is called with the output fit coefficients.
 	 * 
 	 * @param y
 	 *            Set of data points (input)
@@ -154,11 +151,27 @@ public interface FunctionSolver
 	 *            The evaluated function data points (output)
 	 * @param a
 	 *            Set of m coefficients (input)
-	 * @param aDev
-	 *            Variance of the set of m coefficients (output, can be null)
 	 * @return True if evaluation was performed
 	 */
-	public boolean evaluate(final double[] y, final double[] f, final double[] a, final double[] aDev);
+	public boolean evaluate(final double[] y, final double[] f, final double[] a);
+
+	/**
+	 * Compute the deviations for a function with coefficients (a) for a set of data points (x, y).
+	 * <p>
+	 * It is assumed that the data points x[i] corresponding to y[i] are consecutive integers from zero.
+	 * <p>
+	 * The deviations should be the same values as the result from the
+	 * {@link #fit(double[], double[], double[], double[])} method if this is called with the output fit coefficients.
+	 *
+	 * @param y
+	 *            Set of data points (input)
+	 * @param a
+	 *            Set of m coefficients (input)
+	 * @param aDev
+	 *            Variance of the set of m coefficients (output)
+	 * @return True if computation was performed
+	 */
+	public boolean computeDeviations(final double[] y, final double[] a, final double[] aDev);
 
 	/**
 	 * Gets the name of the parameter i.

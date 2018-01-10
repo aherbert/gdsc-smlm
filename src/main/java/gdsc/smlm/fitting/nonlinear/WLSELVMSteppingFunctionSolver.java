@@ -1,10 +1,13 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FisherInformationMatrix;
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.WLSQLVMGradientProcedureFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.WPoissonGradientProcedure;
+import gdsc.smlm.fitting.nonlinear.gradient.WPoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 
@@ -122,8 +125,28 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	protected FisherInformationMatrix computeFisherInformationMatrix()
 	{
 		// TODO. Check if these deviations are correct.
+		// Note: Huang et al (2015) compute:
+		// Iab = 1 / (uk + var/g^2) * duda * dudb
+		// with uk the expected photon count.
+		// This will compute: 
+		// Iab = 1 / (xk + var/g^2) * duda * dudb
+		// with xk the observed photon count.
+
 		// The last Hessian matrix should be stored in the working alpha.
 		return new FisherInformationMatrix(walpha, beta.length);
+	}
+
+	@Override
+	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
+	{
+		// Compute using the scaled Hessian as per the above method.
+		// Use a dedicated procedure that omits computing beta.
+		WPoissonGradientProcedure p = WPoissonGradientProcedureFactory.create(y, getWeights(y.length),
+				(Gradient1Function) f);
+		p.computeFisherInformation(a);
+		if (p.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
+		return new FisherInformationMatrix(p.getLinear(), p.n);
 	}
 
 	/*

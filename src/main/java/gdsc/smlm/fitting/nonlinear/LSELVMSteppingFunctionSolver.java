@@ -2,10 +2,13 @@ package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.FisherInformationMatrix;
+import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LSQLVMGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
+import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
+import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -128,10 +131,24 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	@Override
 	protected FisherInformationMatrix computeFisherInformationMatrix()
 	{
+		// TODO. Check if these deviations are correct.
 		// The last Hessian matrix should be stored in the working alpha.
 		return new FisherInformationMatrix(walpha, beta.length);
 	}
 
+	@Override
+	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
+	{
+		// Compute using the scaled Hessian as per the above method .
+		// TODO - Use a dedicated procedure that omits computing beta.
+		if (gradientProcedure == null)
+			gradientProcedure = createGradientProcedure(y);
+		gradientProcedure.gradient(a);
+		if (gradientProcedure.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);		
+		return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(), f.getNumberOfGradients());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

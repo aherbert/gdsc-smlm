@@ -2,6 +2,7 @@ package gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
 
+import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.FunctionSolverType;
@@ -126,9 +127,9 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[], double[])
+	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[])
 	 */
-	public boolean evaluate(double[] y, double[] yFit, double[] a, double[] aDev)
+	public boolean evaluate(double[] y, double[] yFit, double[] a)
 	{
 		// Reset the results
 		numberOfFittedPoints = y.length;
@@ -138,7 +139,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 		lastY = null;
 		lastA = null;
 		preProcess();
-		boolean status = computeValue(y, yFit, a, aDev);
+		boolean status = computeValue(y, yFit, a);
 		if (status)
 		{
 			if (lastY == null)
@@ -148,6 +149,28 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 			postProcess();
 		}
 		return status;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.fitting.FunctionSolver#computeDeviations(double[], double[], double[])
+	 */
+	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
+	{
+		// Use a dedicated solver optimised for inverting the matrix diagonal. 
+		final FisherInformationMatrix m = computeFisherInformationMatrix(y, a);
+
+		//// This may fail if the matrix cannot be inverted
+		//final double[] crlb = m.crlb();
+		//if (crlb == null)
+		//	throw new FunctionSolverException(FitStatus.SINGULAR_NON_LINEAR_SOLUTION);
+		//setDeviations(aDev, crlb);
+
+		// Use this method for robustness, i.e. it will not fail
+		setDeviations(aDev, m.crlb(true));
+
+		return true;
 	}
 
 	/**
@@ -163,7 +186,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *            the deviations for the parameters a
 	 * @return the fit status
 	 */
-	public abstract FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev);
+	protected abstract FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev);
 
 	/**
 	 * Evaluate the function.
@@ -174,11 +197,20 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 *            the final fitted y values
 	 * @param a
 	 *            the parameters a
-	 * @param aDev
-	 *            the deviations for the parameters a
 	 * @return true if evaluated
 	 */
-	public abstract boolean computeValue(double[] y, double[] yFit, double[] a, double[] aDev);
+	protected abstract boolean computeValue(double[] y, double[] yFit, double[] a);
+
+	/**
+	 * Compute the Fisher Information matrix. This can be used to set the deviations for each of the fitted parameters.
+	 *
+	 * @param y
+	 *            the y values
+	 * @param a
+	 *            the parameters
+	 * @return the Fisher Information matrix
+	 */
+	protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a);
 
 	public double[] getInitialSolution(double[] params)
 	{
