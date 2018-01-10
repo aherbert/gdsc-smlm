@@ -1000,15 +1000,17 @@ public class Gaussian2DFitter
 		//		}
 
 		// Commented out as this interferes with the PSF Estimator
-		double xWidth = params[i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE];
-		double yWidth = params[i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE];
+		int ix = i + Gaussian2DFunction.X_SD - Gaussian2DFunction.ANGLE;
+		int iy = i + Gaussian2DFunction.Y_SD - Gaussian2DFunction.ANGLE;
+		double xWidth = params[ix];
+		double yWidth = params[iy];
 		// The fit will compute the angle from the major axis. 
 		// Standardise so it is always from the X-axis
 		if (yWidth > xWidth)
 		{
-			swap(i + 3, params);
+			swap(ix, iy, params);
 			if (paramsDev != null)
-				swap(i + 3, paramsDev);
+				swap(ix, iy, paramsDev);
 
 			// Rotate 90 degrees
 			angle += Math.PI / 2.0;
@@ -1024,11 +1026,11 @@ public class Gaussian2DFitter
 		params[i] = (angle < 0) ? angle + Math.PI : angle;
 	}
 
-	private void swap(final int i, final double[] params)
+	private void swap(final int i, final int j, final double[] params)
 	{
 		double tmp = params[i];
-		params[i] = params[i + 1];
-		params[i + 1] = tmp;
+		params[i] = params[j];
+		params[j] = tmp;
 	}
 
 	/**
