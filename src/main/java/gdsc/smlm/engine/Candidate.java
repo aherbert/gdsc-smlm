@@ -31,9 +31,10 @@ class Candidate extends Spot
 
 	// Results of fitting
 	public float[] params;
-	public float[] paramsDev;
+	public float[] paramDevs;
 	public double error;
 	public float noise;
+	public double precision;
 
 	/**
 	 * Instantiates a new candidate.
@@ -66,8 +67,8 @@ class Candidate extends Spot
 	 *            the index
 	 * @param params
 	 *            the params
-	 * @param paramsDev
-	 *            the params dev
+	 * @param paramDevs
+	 *            the param deviations
 	 * @param error
 	 *            the error
 	 * @param noise
@@ -75,14 +76,14 @@ class Candidate extends Spot
 	 * @param valid
 	 *            the valid
 	 */
-	public Candidate(int x, int y, int index, float[] params, float[] paramsDev, 
+	public Candidate(int x, int y, int index, float[] params, float[] paramDevs, 
 			double error, float noise,
 			boolean valid)
 	{
 		super(x, y, 0, 0);
 		this.index = index;
 		this.params = params;
-		this.paramsDev = paramsDev;
+		this.paramDevs = paramDevs;
 		this.error = error;
 		this.noise = noise;
 		this.fit = valid;
@@ -113,8 +114,8 @@ class Candidate extends Spot
 	 *            the index
 	 * @param params
 	 *            the params
-	 * @param paramsDev
-	 *            the params dev
+	 * @param paramDevs
+	 *            the param deviations
 	 * @param error
 	 *            the error
 	 * @param noise
@@ -123,12 +124,12 @@ class Candidate extends Spot
 	 *            the valid
 	 * @return the candidate
 	 */
-	public Candidate createFitted(int x, int y, int index, float[] params, float[] paramsDev, double error, float noise,
+	public Candidate createFitted(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
 			boolean valid)
 	{
 		Candidate c = new Candidate(x, y, intensity, getScore(), index);
 		c.params = params;
-		c.paramsDev = paramsDev;
+		c.paramDevs = paramDevs;
 		c.error = error;
 		c.noise = noise;
 		c.fit = valid;

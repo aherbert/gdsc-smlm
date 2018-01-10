@@ -1997,18 +1997,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Gets the variance. This is computed using the mean of the variance for the X and Y parameters.
 	 *
 	 * @param paramsDev
-	 *            the parameter deviations
+	 *            the parameter variances
 	 * @param n
 	 *            the peak number
 	 * @return the variance (or zero if there are no deviations)
 	 */
-	public static double getVariance(double[] paramsDev, int n)
+	public double getVariance(double[] paramsDev, int n)
 	{
 		if (paramsDev != null)
 		{
 			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
-			return (Maths.pow2(paramsDev[offset + Gaussian2DFunction.X_POSITION]) +
-					Maths.pow2(paramsDev[offset + Gaussian2DFunction.Y_POSITION])) / 2.0;
+			// Scale to nm
+			return nmPerPixel * nmPerPixel * 
+					(paramsDev[offset + Gaussian2DFunction.X_POSITION] +
+					paramsDev[offset + Gaussian2DFunction.Y_POSITION]) / 2.0;
 		}
 		return 0;
 	}
@@ -2055,7 +2057,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * @param params
 		 *            The fitted peak parameters
 		 * @param paramsDev
-		 *            the parameter deviations (can be null)
+		 *            the parameter variances (can be null)
 		 * @param localBackground
 		 *            the local background
 		 * @param resultType
@@ -2160,7 +2162,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		public double getLocationVarianceCRLB()
 		{
 			if (varCRLB == -1)
-				varCRLB = FitConfiguration.getVariance(paramsDev, id);
+				varCRLB = FitConfiguration.this.getVariance(paramsDev, id);
 			return varCRLB;
 		}
 
@@ -2332,8 +2334,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
-	 * @param parameterStdDevs
-	 *            the parameter standard deviations (can be null)
+	 * @param paramVariances
+	 *            the parameter variances (can be null)
 	 * @param localBackground
 	 *            the local background
 	 * @param resultType
@@ -2345,10 +2347,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	public PreprocessedPeakResult createDynamicPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double[] parameterStdDevs, double localBackground, ResultType resultType, float offsetx,
+			double[] params, double[] paramVariances, double localBackground, ResultType resultType, float offsetx,
 			float offsety)
 	{
-		return createPreprocessedPeakResult(candidateId, n, initialParams, params, parameterStdDevs, localBackground,
+		return createPreprocessedPeakResult(candidateId, n, initialParams, params, paramVariances, localBackground,
 				resultType, offsetx, offsety, true);
 	}
 
@@ -2376,8 +2378,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
-	 * @param parameterStdDevs
-	 *            the parameter standard deviations (can be null)
+	 * @param paramVariances
+	 *            the parameter variances (can be null)
 	 * @param localBackground
 	 *            the local background
 	 * @param resultType
@@ -2391,14 +2393,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	private PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double[] parameterStdDevs, double localBackground, ResultType resultType, float offsetx,
+			double[] params, double[] paramVariances, double localBackground, ResultType resultType, float offsetx,
 			float offsety, boolean newObject)
 	{
 		if (newObject)
-			return new DynamicPeakResult(candidateId, n, initialParams, params, parameterStdDevs, localBackground,
+			return new DynamicPeakResult(candidateId, n, initialParams, params, paramVariances, localBackground,
 					resultType, offsetx, offsety);
 
-		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, parameterStdDevs, localBackground,
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, paramVariances, localBackground,
 				resultType, offsetx, offsety);
 		return dynamicPeakResult;
 	}
@@ -2426,8 +2428,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            the initial parameters
 	 * @param parameters
 	 *            the parameters
-	 * @param parameterStdDevs
-	 *            the parameter standard deviations (can be null)
+	 * @param paramVariances
+	 *            the parameter variances (can be null)
 	 * @param localBackground
 	 *            the local background (set to negative to use the fitted background instead)
 	 * @param resultType
@@ -2439,7 +2441,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	public BasePreprocessedPeakResult createPreprocessedPeakResult(int frame, int candidateId, int n,
-			double[] initialParameters, double[] parameters, double[] parameterStdDevs, double localBackground,
+			double[] initialParameters, double[] parameters, double[] paramVariances, double localBackground,
 			ResultType resultType, float offsetx, float offsety)
 	{
 		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
@@ -2465,7 +2467,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
 		final double variance = getVariance(0, signal, sd, false);
 		final double variance2 = getVariance(b, signal, sd, true);
-		final double varianceCRLB = getVariance(parameterStdDevs, n);
+		final double varianceCRLB = getVariance(paramVariances, n);
 
 		// Q. Should noise be the local background or the estimate from the whole image?
 
