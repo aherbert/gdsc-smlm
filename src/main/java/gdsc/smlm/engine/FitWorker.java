@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
@@ -128,6 +129,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private int slice;
 	private int endT;
 	private CoordinateConverter cc;
+	private boolean newBounds = false;
+	private BlockAverageDataProcessor backgroundSmoothing = new BlockAverageDataProcessor(0, 1);
 	//private Rectangle regionBounds;
 	private int border, borderLimitX, borderLimitY;
 	private FitJob job;
@@ -458,6 +461,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		// Crop to the ROI
 		cc = new CoordinateConverter(job.bounds);
+		// Note if the bounds change for efficient caching.
+		if (newBounds = !cc.dataBounds.equals(lastBounds))
+			lastBounds = cc.dataBounds;
 		final int width = cc.dataBounds.width;
 		final int height = cc.dataBounds.height;
 		borderLimitX = width - border;
@@ -569,8 +575,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			initialiseFitting();
 
 			// Smooth the data to provide initial background estimates
-			final BlockAverageDataProcessor processor = new BlockAverageDataProcessor(1, 1);
-			final float[] smoothedData = processor.process(data, width, height);
+			final float[] smoothedData = backgroundSmoothing.process(data, width, height);
 			final ImageExtractor ie2 = new ImageExtractor(smoothedData, width, height);
 
 			// Perform the Gaussian fit
@@ -777,11 +782,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Use a per-pixel variance for weighting. 
 			// Only get this if the bounds have changed to enable efficient caching.
-			if (!cc.dataBounds.equals(lastBounds))
+			if (newBounds)
 			{
-				lastBounds = cc.dataBounds;
-				float[] w = cameraModel.getWeights(lastBounds);
-				spotFilter.setWeights(w, lastBounds.width, lastBounds.height);
+				float[] w = cameraModel.getWeights(cc.dataBounds);
+				spotFilter.setWeights(w, cc.dataBounds.width, cc.dataBounds.height);
 			}
 		}
 		return spotFilter;
@@ -811,6 +815,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		for (int i = 0; i < length; i++)
 		{
 			gridManager.putCandidateOnGrid(candidates.get(i));
+		}
+
+		if (newBounds)
+		{
+			//float[] w = cameraModel.getWeights(cc.dataBounds);
+			//backgroundSmoothing.setWeights(w, cc.dataBounds.width, cc.dataBounds.height);
 		}
 	}
 
@@ -1199,6 +1209,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				// Use the min in the data
 				//singleBackground = getDefaultBackground(region, width, height);
+
+				// Use the edges to compute the min
+				//singleBackground = FastGaussian2DFitter.getBackground(region, width, height, 1);
 
 				// Use the min in smoothed data. This avoids noise
 				singleBackground = getDefaultBackground(region2, width, height);
