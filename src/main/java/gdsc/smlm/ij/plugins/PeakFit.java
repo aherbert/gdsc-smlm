@@ -937,7 +937,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				if (extraOptions)
 					textFitBackground = checkboxes.get(b++);
 				textFailuresLimit = numerics.get(n++);
-				textPassRate= numerics.get(n++);
+				textPassRate = numerics.get(n++);
 				textIncludeNeighbours = checkboxes.get(b++);
 				textNeighbourHeightThreshold = numerics.get(n++);
 				textResidualsThreshold = numerics.get(n++);
@@ -2687,7 +2687,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			if (calibration.isSCMOS())
 			{
 				fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
-				if (!checkCameraModel(fitConfig, sourceBounds, bounds, false))
+				if (!checkCameraModel(fitConfig, sourceBounds, bounds, true))
 					return false;
 			}
 
@@ -2772,6 +2772,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			// The camera model origin must be reset to the be relative to the source bounds origin
 			cameraModel = cropCameraModel(cameraModel, sourceBounds, cropBounds, true);
+			if (cameraModel == null)
+				return false;
 
 			if (initialise && cameraModel instanceof PerPixelCameraModel)
 			{
@@ -2838,7 +2840,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *            used.
 	 * @param resetOrigin
 	 *            the reset origin flag (to set the output camera model origin to match the source bounds)
-	 * @return the camera model
+	 * @return the camera model (or null if the dialog was cancelled)
 	 * @throws IllegalArgumentException
 	 *             If the model is null or the crop cannot be done
 	 */
@@ -2847,7 +2849,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		if (cameraModel == null)
 		{
-			throw new IllegalStateException("No camera model");
+			throw new IllegalArgumentException("No camera model");
 		}
 		Rectangle modelBounds = cameraModel.getBounds();
 		if (modelBounds == null || sourceBounds == null)
@@ -2882,7 +2884,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd2.addSlider("Origin_y", modelBounds.y, uppery, Maths.clip(modelBounds.y, uppery, oy));
 			gd2.showDialog();
 			if (gd2.wasCanceled())
-				throw new IllegalArgumentException("Unknown camera model crop");
+			{
+				return null;
+				//throw new IllegalArgumentException("Unknown camera model crop");
+			}
 			ox = (int) gd2.getNextNumber();
 			oy = (int) gd2.getNextNumber();
 
@@ -3337,7 +3342,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		if (!checkCameraModel(fitConfig, source.getBounds(), bounds, true))
 			return false;
-
 		return true;
 	}
 
