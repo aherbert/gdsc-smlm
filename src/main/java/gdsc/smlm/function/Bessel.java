@@ -80,6 +80,8 @@ public class Bessel
 
 	/**
 	 * Compute the second order Bessel function of the first kind.
+	 * <p>
+	 * This is stable when abs(x) > n.
 	 * 
 	 * @param x
 	 * 
