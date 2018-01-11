@@ -199,8 +199,8 @@ public class Gaussian2DFitter
 	/**
 	 * Guess the background from the data given the estimated peak heights.
 	 * <p>
-	 * For a single peak the method assumes the peak is in the centre. In this case the average edge value of the data
-	 * is used.
+	 * For a single peak the method assumes the peak is in the centre. In this case the minimum average value of the
+	 * four edges in used.
 	 * <p>
 	 * If multiple peaks heights are provided then always use the minimum value in the data since it cannot be assumed
 	 * that all peaks are away from the edge of the data.
@@ -233,18 +233,38 @@ public class Gaussian2DFitter
 
 		if (npeaks == 1)
 		{
-			// Set background using the average value of the edge in the data
-			final int s2 = getIndex(0, maxy - 1, maxx);
-			for (int xi = 0, xi2 = s2; xi < maxx; xi++, xi2++)
-				background += data[xi] + data[xi2];
-			for (int yi = maxx, yi2 = getIndex(maxx - 1, 1, maxx); yi < s2; yi += maxx, yi2 += maxx)
-				background += data[yi] + data[yi2];
-			background /= 2 * (maxx + maxy - 2);
+			//// Set background using the average value of the edge in the data
+			//final int s2 = getIndex(0, maxy - 1, maxx);
+			//for (int xi = 0, xi2 = s2; xi < maxx; xi++, xi2++)
+			//	background += data[xi] + data[xi2];
+			//for (int yi = maxx, yi2 = getIndex(maxx - 1, 1, maxx); yi < s2; yi += maxx, yi2 += maxx)
+			//	background += data[yi] + data[yi2];
+			//background /= 2 * (maxx + maxy - 2);
+
+			// Liu, et al (2013), Optics Express 21, 29462-87:
+			// Get background using the lowest mean of the four edges.
+			final int corner2 = (maxy - 1) * maxx;
+			double b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+			for (int xi = 0, xi2 = corner2; xi < maxx; xi++, xi2++)
+			{
+				b1 += data[xi];
+				b2 += data[xi2];
+			}
+			for (int yi = 0, yi2 = maxx - 1; yi <= corner2; yi += maxx, yi2 += maxx)
+			{
+				b3 += data[yi];
+				b4 += data[yi2];
+			}
+			//// Debugging which is best
+			//System.out.printf("Background %f vs %f (%f)\n", background, min(min(b1, b2) / maxx, min(b3, b4) / maxy),
+			//		gdsc.core.utils.DoubleEquality.relativeError(background,
+			//				min(min(b1, b2) / maxx, min(b3, b4) / maxy)));
+			background = min(min(b1, b2) / maxx, min(b3, b4) / maxy);
 		}
 		else
 		{
 			// Set background using the minimum value in the data
-			background = data[Gaussian2DFunction.BACKGROUND];
+			background = data[0];
 			for (int i = maxx * maxy; --i > 0;)
 				if (background > data[i])
 					background = data[i];
@@ -253,9 +273,15 @@ public class Gaussian2DFitter
 		return background;
 	}
 
+	@SuppressWarnings("unused")
 	private static int getIndex(int x, int y, int maxx)
 	{
 		return y * maxx + x;
+	}
+
+	private static double min(double a, double b)
+	{
+		return (a < b) ? a : b;
 	}
 
 	/**
