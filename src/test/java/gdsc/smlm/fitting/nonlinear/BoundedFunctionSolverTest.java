@@ -334,4 +334,45 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 		return ((bounded) ? "B" : "") + ((clamping == 0) ? "" : ((clamping == 1) ? "C" : "DC")) + "LVM" +
 				((mle) ? " MLE" : "");
 	}
+	
+	private class CheatingStoppingCriteria extends StoppingCriteria
+	{
+		@Override
+		public void evaluate(double oldError, double newError, double[] a)
+		{
+			
+		}
+		
+		@Override
+		public boolean areAchieved()
+		{
+			return true;
+		}		
+		
+		@Override
+		public boolean areNotSatisfied()
+		{
+			return false;
+		}
+	}
+	
+	@Test
+	public void canFitAndComputeDeviationsLVM()
+	{
+		canFitAndComputeDeviationsLVM(false);
+	}
+	
+	@Test
+	public void canFitAndComputeDeviationsLVMMLE()
+	{
+		canFitAndComputeDeviationsLVM(true);
+	}
+	
+	private void canFitAndComputeDeviationsLVM(boolean mle)
+	{
+		NonLinearFit solver1 = getLVM(0, 0, mle);
+		NonLinearFit solver2 = getLVM(0, 0, mle);
+		solver1.setStoppingCriteria(new CheatingStoppingCriteria());
+		fitAndComputeDeviationsMatch(solver1, solver2, NoiseModel.EMCCD, false);
+	}
 }

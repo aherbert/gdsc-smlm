@@ -21,11 +21,15 @@ import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 
 /**
- * Test that a bounded fitter can return the same results with and without bounds.
+ * Base class for testing the function solvers
  */
 public abstract class BaseFunctionSolverTest
 {
@@ -535,6 +539,25 @@ public abstract class BaseFunctionSolverTest
 	 */
 	double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel)
 	{
+		return drawGaussian(params, noise, noiseModel, randomGenerator);
+	}
+
+	/**
+	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
+	 *
+	 * @param params
+	 *            The Gaussian parameters
+	 * @param noise
+	 *            The read noise
+	 * @param noiseModel
+	 *            the noise model
+	 * @param randomGenerator
+	 *            the random generator
+	 * @return The data
+	 */
+	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel,
+			RandomGenerator randomGenerator)
+	{
 		double[] data = new double[size * size];
 		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
@@ -583,5 +606,103 @@ public abstract class BaseFunctionSolverTest
 
 		//gdsc.core.ij.Utils.display("Spot", data, size, size);
 		return data;
+	}
+
+	static double[] p1, p12;
+	static double[] p2v;
+	static
+	{
+		p1 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		double[] p2 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		p12 = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * 2];
+		p1[Gaussian2DFunction.BACKGROUND] = 5;
+		p1[Gaussian2DFunction.SIGNAL] = 1000;
+		p1[Gaussian2DFunction.X_POSITION] = 3.1;
+		p1[Gaussian2DFunction.Y_POSITION] = 4.2;
+		p1[Gaussian2DFunction.X_SD] = 1.2;
+		//p2[Gaussian2DFunction.BACKGROUND] = p1[Gaussian2DFunction.BACKGROUND];
+		p2[Gaussian2DFunction.SIGNAL] = 600;
+		p2[Gaussian2DFunction.X_POSITION] = 7.3;
+		p2[Gaussian2DFunction.Y_POSITION] = 8.4;
+		p2[Gaussian2DFunction.X_SD] = 1.1;
+		System.arraycopy(p1, 0, p12, 0, p1.length);
+		System.arraycopy(p2, 1, p12, p1.length, Gaussian2DFunction.PARAMETERS_PER_PEAK);
+
+		StandardValueProcedure p = new StandardValueProcedure();
+		p2v = p.getValues(GaussianFunctionFactory.create2D(1, size, size, flags, null), p2);
+	}
+
+	// TODO - add test that fit and computeDeviations return correct result.
+	// that a fit of 2-peak data with 2 peaks => deviations the same
+	// that a fit of 2-peak data with 1 peak + 1 precomputed => deviations higher
+
+	/**
+	 * Check the fit and compute deviations match. The first solver will be used to do the fit. This is initialise from
+	 * the solution so the convergence criteria can be set to accept the first step. The second solver is used to
+	 * compute deviations (thus is not initialised for fitting).
+	 *
+	 * @param solver1
+	 *            the solver
+	 * @param solver2
+	 *            the solver 2
+	 * @param noiseModel
+	 *            the noise model
+	 */
+	void fitAndComputeDeviationsMatch(BaseFunctionSolver solver1, BaseFunctionSolver solver2, NoiseModel noiseModel,
+			boolean useWeights)
+	{
+		double[] noise = getNoise(noiseModel);
+		if (solver1.isWeighted() && useWeights)
+		{
+			solver1.setWeights(getWeights(noiseModel));
+			solver2.setWeights(getWeights(noiseModel));
+		}
+
+		// Draw target data
+		double[] data = drawGaussian(p12, noise, noiseModel);
+
+		// fit with 2 peaks using the known params.
+		// compare to 2 peak deviation computation.
+		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);
+		solver1.setGradientFunction(f2);
+		solver2.setGradientFunction(f2);
+		double[] a = p12.clone();
+		double[] e = new double[a.length];
+		double[] o = new double[a.length];
+		solver1.fit(data, null, a, e);
+		//System.out.println("a="+Arrays.toString(a));
+		solver2.computeDeviations(data, a, o);
+
+		//System.out.println("e2="+Arrays.toString(e));
+		//System.out.println("o2="+Arrays.toString(o));
+		Assert.assertArrayEquals("Fit 2 peaks and deviations 2 peaks do not match", o, e, 0);
+
+		if (solver1 instanceof SteppingFunctionSolver)
+		{
+			// fit with 1 peak + 1 precomputed using the known params.
+			// compare to 2 peak deviation computation.
+			ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
+					null);
+			Gradient2Function pf1 = PrecomputedGradient2Function.wrapGradient2Function(f1, p2v);
+			solver1.setGradientFunction(pf1);
+			a = p1.clone();
+			e = new double[a.length];
+			solver1.fit(data, null, a, e);
+
+			double[] a2 = p12.clone(); // To copy the second peak
+			System.arraycopy(a, 0, a2, 0, a.length); // Add the same fitted first peak
+			solver2.computeDeviations(data, a2, o);
+			//System.out.println("e1p1=" + Arrays.toString(e));
+			//System.out.println("o2=" + Arrays.toString(o));
+
+			// Deviation should be lower with only 1 peak.
+			for (int i = 0; i < e.length; i++)
+			{
+				if (e[i] <= o[i])
+					continue;
+				Assert.fail(
+						"Fit 1 peak + 1 precomputed is higher than deviations 2 peaks" + Gaussian2DFunction.getName(i));
+			}
+		}
 	}
 }

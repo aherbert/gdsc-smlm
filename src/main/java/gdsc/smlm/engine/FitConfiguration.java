@@ -1210,6 +1210,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public boolean isPrecisionUsingBackground()
 	{
+		// XXX - change this to a precision type:
+		// estimated, estimated with local background, fit deviations
+		
 		return filterSettings.getPrecisionUsingBackground();
 	}
 
@@ -1729,24 +1732,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private FitStatus result;
 	private Object statusData;
 
-	/**
-	 * Check peaks to see if the fit was sensible
-	 * 
-	 * @param nPeaks
-	 *            The number of peaks
-	 * @param initialParams
-	 *            The initial peak parameters
-	 * @param params
-	 *            The fitted peak parameters
-	 * @param paramStdDevs
-	 *            the fitted peak parameters standard deviations (can be null)
-	 * @return True if the fit fails the criteria
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
 	 */
-	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramStdDevs)
+	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs)
 	{
 		for (int n = 0; n < nPeaks; n++)
 		{
-			validatePeak(n, initialParams, params, paramStdDevs);
+			validatePeak(n, initialParams, params, paramDevs);
 			if (result != FitStatus.OK)
 				break;
 		}
@@ -1761,13 +1754,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
-	 * @param paramStdDevs
-	 *            the fitted peak parameters standard deviations (can be null)
+	 * @param paramDevs
+	 *            the fitted peak parameter variances (can be null)
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validateFit(double[] initialParams, double[] params, double[] paramStdDevs)
+	public FitStatus validateFit(double[] initialParams, double[] params, double[] paramDevs)
 	{
-		return validatePeak(0, initialParams, params, paramStdDevs);
+		return validatePeak(0, initialParams, params, paramDevs);
 	}
 
 	/**
@@ -1779,16 +1772,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The initial peak parameters
 	 * @param params
 	 *            The fitted peak parameters
-	 * @param paramStdDevs
-	 *            the fitted peak parameters standard deviations (can be null)
+	 * @param paramDevs
+	 *            the fitted peak parameter variances (can be null)
 	 * @return True if the fit fails the criteria
 	 */
-	public FitStatus validatePeak(int n, double[] initialParams, double[] params, double[] paramStdDevs)
+	public FitStatus validatePeak(int n, double[] initialParams, double[] params, double[] paramDevs)
 	{
 		if (isDirectFilter())
 		{
 			// Always specify a new result and we have no local background or offset
-			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, paramStdDevs, 0,
+			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, paramDevs, 0,
 					ResultType.NEW, 0, 0, false);
 			if (directFilter.accept(peak))
 				return setValidationResult(FitStatus.OK, null);

@@ -341,6 +341,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	private void fitSingleGaussian(boolean bounded, SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type,
 			NoiseModel noiseModel)
 	{
+		//org.junit.Assume.assumeTrue(false);
 		SteppingFunctionSolver solver = getSolver(clamp, type);
 		canFitSingleGaussian(solver, bounded, noiseModel);
 	}
@@ -460,10 +461,101 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 			SteppingFunctionSolverType type, NoiseModel noiseModel)
 	{
 		//org.junit.Assume.assumeTrue(false);
-
 		SteppingFunctionSolver solver = getSolver(clamp, type);
 		SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getName(bounded, clamp, type),
 				getName(bounded2, clamp2, type2), noiseModel);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsEMCCD_LSELVM()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.LSELVM, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_LSELVM()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.LSELVM, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsEMCCD_WLSELVM()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.WLSELVM, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_WLSELVM()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_WLSELVM_Weighted()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, true);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsEMCCD_MLELVM()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.MLELVM, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_MLELVM()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_MLELVM_Weighted()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, true);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsEMCCD_FastMLE()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.FastMLE, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_FastMLE()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_FastMLE_Weighted()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, true);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsEMCCD_BTFastMLE()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.BTFastMLE, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_BTFastMLE()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeDeviationsSCMOS_BTFastMLE_Weighted()
+	{
+		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, true);
+	}
+
+	private void canFitAndComputeDeviationsLVM(SteppingFunctionSolverType type, NoiseModel noiseModel,
+			boolean useWeights)
+	{
+		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		fitAndComputeDeviationsMatch(solver1, solver2, noiseModel, useWeights);
 	}
 }

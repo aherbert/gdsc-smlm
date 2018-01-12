@@ -510,6 +510,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		super.setGradientFunction(f);
 		if (!(f instanceof NonLinearFunction))
 			throw new IllegalArgumentException("Function must be a NonLinearFunction");
+		func = (NonLinearFunction) f;
 	}
 
 	/**

@@ -1,12 +1,12 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.GradientFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -292,4 +292,11 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	{
 		return initialLambda;
 	}
+	
+	@Override
+	public void setGradientFunction(GradientFunction f)
+	{
+		super.setGradientFunction(f);
+		gradientProcedure = null;
+	}	
 }

@@ -29,6 +29,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 
 	enum SteppingFunctionSolverType
 	{
+		// Enum names should al be uppercase but this is just for a test so ignore that convention
 		MLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BTFastMLE
 	}
 
@@ -44,12 +45,33 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	static final SteppingFunctionSolverType BTFastMLE = SteppingFunctionSolverType.BTFastMLE;
 	static final boolean BOUNDED = true;
 	static final boolean NO_BOUND = false;
+	
+	static class NoToleranceChecker extends ToleranceChecker
+	{
+		public NoToleranceChecker()
+		{
+			super(0, 0);
+		}
+		
+		@Override
+		public int converged(double previousValue, double[] previousParameters, double currentValue,
+				double[] currentParameters)
+		{
+			return STATUS_VALUE;
+		}		
+	}
+	
+	static NoToleranceChecker noToleranceChecker = new NoToleranceChecker();
 
-	@SuppressWarnings("deprecation")
 	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
+		return getSolver(clamp, type, new ToleranceChecker(1e-5, 1e-5, 0, 0, 100));
+	}
+	
+	@SuppressWarnings("deprecation")
+	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type, ToleranceChecker tc)
+	{
 		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
-		ToleranceChecker tc = new ToleranceChecker(1e-5, 1e-5, 0, 0, 100);
 		ParameterBounds bounds = new ParameterBounds(f);
 		switch (clamp)
 		{
