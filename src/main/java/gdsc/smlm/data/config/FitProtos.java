@@ -593,6 +593,179 @@ public final class FitProtos {
 
   /**
    * <pre>
+   * Define the method to use for precision calculation.
+   * </pre>
+   *
+   * Protobuf enum {@code gdsc.smlm.data.config.PrecisionMethod}
+   */
+  public enum PrecisionMethod
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+     * The background noise component (b2) is computed using the variance of the fit region. 
+     * Note that computation of precision using this formula is relevant only for CCD cameras
+     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * </pre>
+     *
+     * <code>MORTENSEN = 0;</code>
+     */
+    MORTENSEN(0),
+    /**
+     * <pre>
+     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+     * The background noise component (b2) is computed using the fitted background of the fit region.
+     * Note that computation of precision using this formula is relevant only for CCD cameras
+     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * </pre>
+     *
+     * <code>MORTENSEN_LOCAL_BACKGROUND = 1;</code>
+     */
+    MORTENSEN_LOCAL_BACKGROUND(1),
+    /**
+     * <pre>
+     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
+     * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
+     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
+     * camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
+     * Note that this formula is good when the number of photons is high. Due to the approximation
+     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
+     * Fisher information is poor when the number of photons is low, leading to an approximation 
+     * of the true CRLB of a Poisson-Gaussian distribution.
+     * This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
+     * for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
+     * but may still be used as an approximation.
+     * </pre>
+     *
+     * <code>POISSON_CRLB = 2;</code>
+     */
+    POISSON_CRLB(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+     * The background noise component (b2) is computed using the variance of the fit region. 
+     * Note that computation of precision using this formula is relevant only for CCD cameras
+     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * </pre>
+     *
+     * <code>MORTENSEN = 0;</code>
+     */
+    public static final int MORTENSEN_VALUE = 0;
+    /**
+     * <pre>
+     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+     * The background noise component (b2) is computed using the fitted background of the fit region.
+     * Note that computation of precision using this formula is relevant only for CCD cameras
+     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * </pre>
+     *
+     * <code>MORTENSEN_LOCAL_BACKGROUND = 1;</code>
+     */
+    public static final int MORTENSEN_LOCAL_BACKGROUND_VALUE = 1;
+    /**
+     * <pre>
+     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
+     * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
+     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
+     * camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
+     * Note that this formula is good when the number of photons is high. Due to the approximation
+     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
+     * Fisher information is poor when the number of photons is low, leading to an approximation 
+     * of the true CRLB of a Poisson-Gaussian distribution.
+     * This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
+     * for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
+     * but may still be used as an approximation.
+     * </pre>
+     *
+     * <code>POISSON_CRLB = 2;</code>
+     */
+    public static final int POISSON_CRLB_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static PrecisionMethod valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static PrecisionMethod forNumber(int value) {
+      switch (value) {
+        case 0: return MORTENSEN;
+        case 1: return MORTENSEN_LOCAL_BACKGROUND;
+        case 2: return POISSON_CRLB;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<PrecisionMethod>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        PrecisionMethod> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<PrecisionMethod>() {
+            public PrecisionMethod findValueByNumber(int number) {
+              return PrecisionMethod.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(3);
+    }
+
+    private static final PrecisionMethod[] VALUES = values();
+
+    public static PrecisionMethod valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private PrecisionMethod(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.PrecisionMethod)
+  }
+
+  /**
+   * <pre>
    * Define the type of filter used for identifying candidate peaks.
    * </pre>
    *
@@ -700,7 +873,7 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(3);
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(4);
     }
 
     private static final DataFilterType[] VALUES = values();
@@ -869,7 +1042,7 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(4);
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(5);
     }
 
     private static final DataFilterMethod[] VALUES = values();
@@ -1089,7 +1262,7 @@ public final class FitProtos {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(5);
+      return gdsc.smlm.data.config.FitProtos.getDescriptor().getEnumTypes().get(6);
     }
 
     private static final NoiseEstimatorMethod[] VALUES = values();
@@ -3430,15 +3603,6 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
-     * </pre>
-     *
-     * <code>bool precision_using_background = 5;</code>
-     */
-    boolean getPrecisionUsingBackground();
-
-    /**
-     * <pre>
      * The minimum allowed width relative to the initial width estimate
      * </pre>
      *
@@ -3490,6 +3654,23 @@ public final class FitProtos {
      */
     com.google.protobuf.ByteString
         getSmartFilterStringBytes();
+
+    /**
+     * <pre>
+     * The type of precision filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+     */
+    int getPrecisionMethodValue();
+    /**
+     * <pre>
+     * The type of precision filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+     */
+    gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod();
   }
   /**
    * <pre>
@@ -3511,12 +3692,12 @@ public final class FitProtos {
       signalStrength_ = 0D;
       minPhotons_ = 0D;
       precisionThreshold_ = 0D;
-      precisionUsingBackground_ = false;
       minWidthFactor_ = 0D;
       maxWidthFactor_ = 0D;
       disableSimpleFilter_ = false;
       smartFilter_ = false;
       smartFilterString_ = "";
+      precisionMethod_ = 0;
     }
 
     @java.lang.Override
@@ -3564,11 +3745,6 @@ public final class FitProtos {
               precisionThreshold_ = input.readDouble();
               break;
             }
-            case 40: {
-
-              precisionUsingBackground_ = input.readBool();
-              break;
-            }
             case 49: {
 
               minWidthFactor_ = input.readDouble();
@@ -3593,6 +3769,12 @@ public final class FitProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               smartFilterString_ = s;
+              break;
+            }
+            case 88: {
+              int rawValue = input.readEnum();
+
+              precisionMethod_ = rawValue;
               break;
             }
           }
@@ -3668,19 +3850,6 @@ public final class FitProtos {
      */
     public double getPrecisionThreshold() {
       return precisionThreshold_;
-    }
-
-    public static final int PRECISION_USING_BACKGROUND_FIELD_NUMBER = 5;
-    private boolean precisionUsingBackground_;
-    /**
-     * <pre>
-     * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
-     * </pre>
-     *
-     * <code>bool precision_using_background = 5;</code>
-     */
-    public boolean getPrecisionUsingBackground() {
-      return precisionUsingBackground_;
     }
 
     public static final int MIN_WIDTH_FACTOR_FIELD_NUMBER = 6;
@@ -3777,6 +3946,30 @@ public final class FitProtos {
       }
     }
 
+    public static final int PRECISION_METHOD_FIELD_NUMBER = 11;
+    private int precisionMethod_;
+    /**
+     * <pre>
+     * The type of precision filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+     */
+    public int getPrecisionMethodValue() {
+      return precisionMethod_;
+    }
+    /**
+     * <pre>
+     * The type of precision filter
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+     */
+    public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+      gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+      return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3801,9 +3994,6 @@ public final class FitProtos {
       if (precisionThreshold_ != 0D) {
         output.writeDouble(4, precisionThreshold_);
       }
-      if (precisionUsingBackground_ != false) {
-        output.writeBool(5, precisionUsingBackground_);
-      }
       if (minWidthFactor_ != 0D) {
         output.writeDouble(6, minWidthFactor_);
       }
@@ -3818,6 +4008,9 @@ public final class FitProtos {
       }
       if (!getSmartFilterStringBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, smartFilterString_);
+      }
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.MORTENSEN.getNumber()) {
+        output.writeEnum(11, precisionMethod_);
       }
     }
 
@@ -3842,10 +4035,6 @@ public final class FitProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, precisionThreshold_);
       }
-      if (precisionUsingBackground_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(5, precisionUsingBackground_);
-      }
       if (minWidthFactor_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(6, minWidthFactor_);
@@ -3864,6 +4053,10 @@ public final class FitProtos {
       }
       if (!getSmartFilterStringBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, smartFilterString_);
+      }
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.MORTENSEN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(11, precisionMethod_);
       }
       memoizedSize = size;
       return size;
@@ -3897,8 +4090,6 @@ public final class FitProtos {
           java.lang.Double.doubleToLongBits(getPrecisionThreshold())
           == java.lang.Double.doubleToLongBits(
               other.getPrecisionThreshold()));
-      result = result && (getPrecisionUsingBackground()
-          == other.getPrecisionUsingBackground());
       result = result && (
           java.lang.Double.doubleToLongBits(getMinWidthFactor())
           == java.lang.Double.doubleToLongBits(
@@ -3913,6 +4104,7 @@ public final class FitProtos {
           == other.getSmartFilter());
       result = result && getSmartFilterString()
           .equals(other.getSmartFilterString());
+      result = result && precisionMethod_ == other.precisionMethod_;
       return result;
     }
 
@@ -3935,9 +4127,6 @@ public final class FitProtos {
       hash = (37 * hash) + PRECISION_THRESHOLD_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPrecisionThreshold()));
-      hash = (37 * hash) + PRECISION_USING_BACKGROUND_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getPrecisionUsingBackground());
       hash = (37 * hash) + MIN_WIDTH_FACTOR_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getMinWidthFactor()));
@@ -3952,6 +4141,8 @@ public final class FitProtos {
           getSmartFilter());
       hash = (37 * hash) + SMART_FILTER_STRING_FIELD_NUMBER;
       hash = (53 * hash) + getSmartFilterString().hashCode();
+      hash = (37 * hash) + PRECISION_METHOD_FIELD_NUMBER;
+      hash = (53 * hash) + precisionMethod_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4093,8 +4284,6 @@ public final class FitProtos {
 
         precisionThreshold_ = 0D;
 
-        precisionUsingBackground_ = false;
-
         minWidthFactor_ = 0D;
 
         maxWidthFactor_ = 0D;
@@ -4104,6 +4293,8 @@ public final class FitProtos {
         smartFilter_ = false;
 
         smartFilterString_ = "";
+
+        precisionMethod_ = 0;
 
         return this;
       }
@@ -4131,12 +4322,12 @@ public final class FitProtos {
         result.signalStrength_ = signalStrength_;
         result.minPhotons_ = minPhotons_;
         result.precisionThreshold_ = precisionThreshold_;
-        result.precisionUsingBackground_ = precisionUsingBackground_;
         result.minWidthFactor_ = minWidthFactor_;
         result.maxWidthFactor_ = maxWidthFactor_;
         result.disableSimpleFilter_ = disableSimpleFilter_;
         result.smartFilter_ = smartFilter_;
         result.smartFilterString_ = smartFilterString_;
+        result.precisionMethod_ = precisionMethod_;
         onBuilt();
         return result;
       }
@@ -4190,9 +4381,6 @@ public final class FitProtos {
         if (other.getPrecisionThreshold() != 0D) {
           setPrecisionThreshold(other.getPrecisionThreshold());
         }
-        if (other.getPrecisionUsingBackground() != false) {
-          setPrecisionUsingBackground(other.getPrecisionUsingBackground());
-        }
         if (other.getMinWidthFactor() != 0D) {
           setMinWidthFactor(other.getMinWidthFactor());
         }
@@ -4208,6 +4396,9 @@ public final class FitProtos {
         if (!other.getSmartFilterString().isEmpty()) {
           smartFilterString_ = other.smartFilterString_;
           onChanged();
+        }
+        if (other.precisionMethod_ != 0) {
+          setPrecisionMethodValue(other.getPrecisionMethodValue());
         }
         onChanged();
         return this;
@@ -4383,44 +4574,6 @@ public final class FitProtos {
       public Builder clearPrecisionThreshold() {
         
         precisionThreshold_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private boolean precisionUsingBackground_ ;
-      /**
-       * <pre>
-       * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
-       * </pre>
-       *
-       * <code>bool precision_using_background = 5;</code>
-       */
-      public boolean getPrecisionUsingBackground() {
-        return precisionUsingBackground_;
-      }
-      /**
-       * <pre>
-       * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
-       * </pre>
-       *
-       * <code>bool precision_using_background = 5;</code>
-       */
-      public Builder setPrecisionUsingBackground(boolean value) {
-        
-        precisionUsingBackground_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
-       * </pre>
-       *
-       * <code>bool precision_using_background = 5;</code>
-       */
-      public Builder clearPrecisionUsingBackground() {
-        
-        precisionUsingBackground_ = false;
         onChanged();
         return this;
       }
@@ -4662,6 +4815,70 @@ public final class FitProtos {
   checkByteStringIsUtf8(value);
         
         smartFilterString_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int precisionMethod_ = 0;
+      /**
+       * <pre>
+       * The type of precision filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+       */
+      public int getPrecisionMethodValue() {
+        return precisionMethod_;
+      }
+      /**
+       * <pre>
+       * The type of precision filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+       */
+      public Builder setPrecisionMethodValue(int value) {
+        precisionMethod_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of precision filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+       */
+      public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+        gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+        return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The type of precision filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+       */
+      public Builder setPrecisionMethod(gdsc.smlm.data.config.FitProtos.PrecisionMethod value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        precisionMethod_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of precision filter
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
+       */
+      public Builder clearPrecisionMethod() {
+        
+        precisionMethod_ = 0;
         onChanged();
         return this;
       }
@@ -10723,61 +10940,65 @@ public final class FitProtos {
       "ing\030\020 \001(\010\022\034\n\024use_dynamic_clamping\030\021 \001(\010\022" +
       "\024\n\014clamp_values\030\022 \003(\001\022C\n\022line_search_met" +
       "hod\030\023 \001(\0162\'.gdsc.smlm.data.config.LineSe" +
-      "archMethod\"\233\002\n\016FilterSettings\022\024\n\014shift_f" +
+      "archMethod\"\333\002\n\016FilterSettings\022\024\n\014shift_f" +
       "actor\030\001 \001(\001\022\027\n\017signal_strength\030\002 \001(\001\022\023\n\013" +
       "min_photons\030\003 \001(\001\022\033\n\023precision_threshold",
-      "\030\004 \001(\001\022\"\n\032precision_using_background\030\005 \001" +
-      "(\010\022\030\n\020min_width_factor\030\006 \001(\001\022\030\n\020max_widt" +
-      "h_factor\030\007 \001(\001\022\035\n\025disable_simple_filter\030" +
-      "\010 \001(\010\022\024\n\014smart_filter\030\t \001(\010\022\033\n\023smart_fil" +
-      "ter_string\030\n \001(\t\"\224\001\n\013FitSettings\022E\n\023fit_" +
-      "solver_settings\030\001 \001(\0132(.gdsc.smlm.data.c" +
-      "onfig.FitSolverSettings\022>\n\017filter_settin" +
-      "gs\030\002 \001(\0132%.gdsc.smlm.data.config.FilterS" +
-      "ettings\"4\n\021RelativeParameter\022\r\n\005value\030\001 " +
-      "\001(\001\022\020\n\010absolute\030\002 \001(\010\"\217\001\n\nDataFilter\022C\n\022",
-      "data_filter_method\030\001 \001(\0162\'.gdsc.smlm.dat" +
-      "a.config.DataFilterMethod\022<\n\nparameters\030" +
-      "\002 \003(\0132(.gdsc.smlm.data.config.RelativePa" +
-      "rameter\"\216\001\n\022DataFilterSettings\022?\n\020data_f" +
-      "ilter_type\030\001 \001(\0162%.gdsc.smlm.data.config" +
-      ".DataFilterType\0227\n\014data_filters\030\002 \003(\0132!." +
-      "gdsc.smlm.data.config.DataFilter\"\326\004\n\021Fit" +
-      "EngineSettings\0228\n\014fit_settings\030\001 \001(\0132\".g" +
-      "dsc.smlm.data.config.FitSettings\022A\n\014nois" +
-      "e_method\030\002 \001(\0162+.gdsc.smlm.data.config.N",
-      "oiseEstimatorMethod\022G\n\024data_filter_setti" +
-      "ngs\030\003 \001(\0132).gdsc.smlm.data.config.DataFi" +
-      "lterSettings\0228\n\006search\030\004 \001(\0132(.gdsc.smlm" +
-      ".data.config.RelativeParameter\0228\n\006border" +
-      "\030\005 \001(\0132(.gdsc.smlm.data.config.RelativeP" +
-      "arameter\0229\n\007fitting\030\006 \001(\0132(.gdsc.smlm.da" +
-      "ta.config.RelativeParameter\022\032\n\022include_n" +
-      "eighbours\030\007 \001(\010\022\"\n\032neighbour_height_thre" +
-      "shold\030\010 \001(\001\022\033\n\023residuals_threshold\030\t \001(\001" +
-      "\022D\n\022duplicate_distance\030\n \001(\0132(.gdsc.smlm",
-      ".data.config.RelativeParameter\022\026\n\016failur" +
-      "es_limit\030\013 \001(\005\022\021\n\tpass_rate\030\014 \001(\001*e\n\tFit" +
-      "Solver\022\013\n\007LVM_LSE\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_" +
-      "WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRA" +
-      "CKING_FAST_MLE\020\005*\231\001\n\014SearchMethod\022\022\n\016POW" +
-      "ELL_BOUNDED\020\000\022\n\n\006POWELL\020\001\022\022\n\016POWELL_ADAP" +
-      "TER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGAT" +
-      "E_GRADIENT_FR\020\005\022\031\n\025CONJUGATE_GRADIENT_PR" +
-      "\020\006\022\010\n\004BFGS\020\007*<\n\020LineSearchMethod\022\010\n\004NONE" +
-      "\020\000\022\n\n\006IGNORE\020\001\022\022\n\016PARTIAL_IGNORE\020\002*6\n\016Da",
-      "taFilterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001" +
-      "\022\010\n\004JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEAN\020\000" +
-      "\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010G" +
-      "AUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstimator" +
-      "Method\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020" +
-      "\001\022%\n!RESIDUALS_LEAST_MEDIAN_OF_SQUARES\020\002" +
-      "\022&\n\"RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\003" +
-      "\022#\n\037RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004\022+\n" +
-      "\'QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUARES" +
-      "\020\005\022,\n(QUICK_RESIDUALS_LEAST_TRIMMED_OF_S",
-      "QUARES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEAN_O" +
-      "F_SQUARES\020\007B\013B\tFitProtosb\006proto3"
+      "\030\004 \001(\001\022\030\n\020min_width_factor\030\006 \001(\001\022\030\n\020max_" +
+      "width_factor\030\007 \001(\001\022\035\n\025disable_simple_fil" +
+      "ter\030\010 \001(\010\022\024\n\014smart_filter\030\t \001(\010\022\033\n\023smart" +
+      "_filter_string\030\n \001(\t\022@\n\020precision_method" +
+      "\030\013 \001(\0162&.gdsc.smlm.data.config.Precision" +
+      "MethodJ\004\010\005\020\006R\032precision_using_background" +
+      "\"\224\001\n\013FitSettings\022E\n\023fit_solver_settings\030" +
+      "\001 \001(\0132(.gdsc.smlm.data.config.FitSolverS" +
+      "ettings\022>\n\017filter_settings\030\002 \001(\0132%.gdsc." +
+      "smlm.data.config.FilterSettings\"4\n\021Relat",
+      "iveParameter\022\r\n\005value\030\001 \001(\001\022\020\n\010absolute\030" +
+      "\002 \001(\010\"\217\001\n\nDataFilter\022C\n\022data_filter_meth" +
+      "od\030\001 \001(\0162\'.gdsc.smlm.data.config.DataFil" +
+      "terMethod\022<\n\nparameters\030\002 \003(\0132(.gdsc.sml" +
+      "m.data.config.RelativeParameter\"\216\001\n\022Data" +
+      "FilterSettings\022?\n\020data_filter_type\030\001 \001(\016" +
+      "2%.gdsc.smlm.data.config.DataFilterType\022" +
+      "7\n\014data_filters\030\002 \003(\0132!.gdsc.smlm.data.c" +
+      "onfig.DataFilter\"\326\004\n\021FitEngineSettings\0228" +
+      "\n\014fit_settings\030\001 \001(\0132\".gdsc.smlm.data.co",
+      "nfig.FitSettings\022A\n\014noise_method\030\002 \001(\0162+" +
+      ".gdsc.smlm.data.config.NoiseEstimatorMet" +
+      "hod\022G\n\024data_filter_settings\030\003 \001(\0132).gdsc" +
+      ".smlm.data.config.DataFilterSettings\0228\n\006" +
+      "search\030\004 \001(\0132(.gdsc.smlm.data.config.Rel" +
+      "ativeParameter\0228\n\006border\030\005 \001(\0132(.gdsc.sm" +
+      "lm.data.config.RelativeParameter\0229\n\007fitt" +
+      "ing\030\006 \001(\0132(.gdsc.smlm.data.config.Relati" +
+      "veParameter\022\032\n\022include_neighbours\030\007 \001(\010\022" +
+      "\"\n\032neighbour_height_threshold\030\010 \001(\001\022\033\n\023r",
+      "esiduals_threshold\030\t \001(\001\022D\n\022duplicate_di" +
+      "stance\030\n \001(\0132(.gdsc.smlm.data.config.Rel" +
+      "ativeParameter\022\026\n\016failures_limit\030\013 \001(\005\022\021" +
+      "\n\tpass_rate\030\014 \001(\001*e\n\tFitSolver\022\013\n\007LVM_LS" +
+      "E\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022" +
+      "\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005" +
+      "*\231\001\n\014SearchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n" +
+      "\006POWELL\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020" +
+      "\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022" +
+      "\031\n\025CONJUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020",
+      "LineSearchMethod\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022" +
+      "\n\016PARTIAL_IGNORE\020\002*R\n\017PrecisionMethod\022\r\n" +
+      "\tMORTENSEN\020\000\022\036\n\032MORTENSEN_LOCAL_BACKGROU" +
+      "ND\020\001\022\020\n\014POISSON_CRLB\020\002*6\n\016DataFilterType" +
+      "\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y" +
+      "\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_ME" +
+      "AN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n" +
+      "\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMethod\022\016\n\nAL" +
+      "L_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n!RESIDUA" +
+      "LS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n\"RESIDUAL",
+      "S_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n\037RESIDUAL" +
+      "S_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QUICK_RESID" +
+      "UALS_LEAST_MEDIAN_OF_SQUARES\020\005\022,\n(QUICK_" +
+      "RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\006\022)\n%" +
+      "QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES\020\007B" +
+      "\013B\tFitProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -10802,7 +11023,7 @@ public final class FitProtos {
     internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FilterSettings_descriptor,
-        new java.lang.String[] { "ShiftFactor", "SignalStrength", "MinPhotons", "PrecisionThreshold", "PrecisionUsingBackground", "MinWidthFactor", "MaxWidthFactor", "DisableSimpleFilter", "SmartFilter", "SmartFilterString", });
+        new java.lang.String[] { "ShiftFactor", "SignalStrength", "MinPhotons", "PrecisionThreshold", "MinWidthFactor", "MaxWidthFactor", "DisableSimpleFilter", "SmartFilter", "SmartFilterString", "PrecisionMethod", });
     internal_static_gdsc_smlm_data_config_FitSettings_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable = new

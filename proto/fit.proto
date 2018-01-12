@@ -73,6 +73,38 @@ enum LineSearchMethod
 	PARTIAL_IGNORE = 2;
 }
 
+// Define the method to use for precision calculation.
+enum PrecisionMethod
+{
+	// Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+	// The background noise component (b2) is computed using the variance of the fit region. 
+	// Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
+	// with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+	// but can be used to approximate localisation precision on any spot-type PSF. There are formulas
+	// for least squares or maximum likelihood estimators.
+	MORTENSEN = 0;
+	// Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+	// The background noise component (b2) is computed using the fitted background of the fit region.
+	// Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
+	// with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+	// but can be used to approximate localisation precision on any spot-type PSF. There are formulas
+	// for least squares or maximum likelihood estimators.     
+	MORTENSEN_LOCAL_BACKGROUND = 1;
+	// Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
+	// Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
+	// uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
+	// to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
+	// camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
+	// Note that this formula is good when the number of photons is high. Due to the approximation
+	// of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
+	// Fisher information is poor when the number of photons is low, leading to an approximation 
+	// of the true CRLB of a Poisson-Gaussian distribution.
+	// This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
+	// for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
+	// but may still be used as an approximation.
+	POISSON_CRLB = 2;
+}
+
 // Define settings for the fit solver.
 message FitSolverSettings {
 	// Set to true to fix the PSF using the initial parameters
@@ -124,6 +156,11 @@ message FitSolverSettings {
 
 // Define the settings for filtering fit results.
 message FilterSettings {
+	// Computation of precision using the local background has been removed and 
+	// replaced by precision method
+	reserved 5;
+	reserved "precision_using_background";
+
     // The maximum amount a localisation can move from the initial estimate relative to the PSF width
 	double shift_factor = 1;
 	// The minimum Signal-to-Noise (SNR) threshold
@@ -132,8 +169,6 @@ message FilterSettings {
 	double min_photons = 3;
 	// The maximum allowed localisation precision (expressed as the localisation standard deviation)
 	double precision_threshold = 4;
-	// Set to true to compute the precision using the local background. The default uses a noise estimate for the entire frame.
-	bool precision_using_background = 5;
 	// The minimum allowed width relative to the initial width estimate
 	double min_width_factor = 6;
 	// The maximum allowed width relative to the initial width estimate
@@ -144,6 +179,9 @@ message FilterSettings {
 	bool smart_filter = 9;
 	// The smart filter expressed as a serialised string
 	string smart_filter_string = 10;
+	// The type of precision filter
+	PrecisionMethod precision_method = 11;
+	
 }
 	
 // Define the settings for fitting. These settings are used to fit a PSF to an 

@@ -12,6 +12,7 @@ import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
 import gdsc.smlm.data.config.FitProtos.LineSearchMethod;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtos.RelativeParameter;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
@@ -87,7 +88,7 @@ public class FitProtosHelper
 		builder.setSignalStrength(30);
 		builder.setMinPhotons(30);
 		builder.setPrecisionThreshold(40);
-		builder.setPrecisionUsingBackground(false);
+		builder.setPrecisionMethod(PrecisionMethod.MORTENSEN);
 		builder.setMinWidthFactor(0.5);
 		builder.setMaxWidthFactor(2);
 		builder.setDisableSimpleFilter(false);
