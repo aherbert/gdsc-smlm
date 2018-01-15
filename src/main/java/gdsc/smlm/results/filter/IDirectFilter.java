@@ -110,7 +110,7 @@ public interface IDirectFilter
 	 * Validation flag for the location variance using the fitted x/y parameter Cramér-Rao lower bound
 	 */
 	final static int V_LOCATION_VARIANCE_CRLB = 0x000020000;
-	
+
 	/**
 	 * Disable filtering using the width of the result
 	 */
@@ -131,7 +131,7 @@ public interface IDirectFilter
 	void setup();
 
 	/**
-	 * Called before the accept method is called for PreprocessedPeakResult. the flags can control the type of filtering
+	 * Called before the accept method is called for PreprocessedPeakResult. The flags can control the type of filtering
 	 * requested. Filters are asked to respect the flags defined in this class.
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.
@@ -141,6 +141,20 @@ public interface IDirectFilter
 	 * @see #validate(PreprocessedPeakResult)
 	 */
 	void setup(final int flags);
+
+	/**
+	 * Called before the accept method is called for PreprocessedPeakResult. The filter data can control the
+	 * type of filtering requested.
+	 * <p>
+	 * This should be called once to initialise the filter before processing a batch of results.
+	 *
+	 * @param flags
+	 *            Flags used to control the filter
+	 * @param filterSetupData
+	 *            Data used to control the filter
+	 * @see #validate(PreprocessedPeakResult)
+	 */
+	void setup(final FilterSetupData... filterSetupData);
 
 	/**
 	 * Filter the peak result.
@@ -176,7 +190,7 @@ public interface IDirectFilter
 	 * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
 	 */
 	int getResult();
-	
+
 	/**
 	 * Copy this filter.
 	 *

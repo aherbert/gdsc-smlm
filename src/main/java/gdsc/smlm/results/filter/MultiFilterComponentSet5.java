@@ -18,11 +18,11 @@ package gdsc.smlm.results.filter;
  */
 public class MultiFilterComponentSet5 extends MultiFilterComponentSet
 {
-	private final MultiFilterComponent component0;
-	private final MultiFilterComponent component1;
-	private final MultiFilterComponent component2;
-	private final MultiFilterComponent component3;
-	private final MultiFilterComponent component4;
+	private MultiFilterComponent component0;
+	private MultiFilterComponent component1;
+	private MultiFilterComponent component2;
+	private MultiFilterComponent component3;
+	private MultiFilterComponent component4;
 
 	public MultiFilterComponentSet5(MultiFilterComponent[] components)
 	{
@@ -43,5 +43,11 @@ public class MultiFilterComponentSet5 extends MultiFilterComponentSet
 		if (component4.fail(peak)) return component4.getType();
 		//@formatter:on
 		return 0;
+	}
+
+	@Override
+	void replace0(MultiFilterComponent c)
+	{
+		component0 = c;
 	}
 }

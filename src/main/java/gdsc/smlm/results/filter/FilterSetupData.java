@@ -3,7 +3,7 @@ package gdsc.smlm.results.filter;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2016 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -14,23 +14,8 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Contains a set of components of the multi filter.
+ * Interface used to mark data passed in to the set-up routine of a filter
  */
-public abstract class MultiFilterComponentSet
+public interface FilterSetupData
 {
-	/**
-	 * Validate the peak
-	 *
-	 * @param peak
-	 *            the peak
-	 * @return the result
-	 */
-	public abstract int validate(final PreprocessedPeakResult peak);
-	
-	/**
-	 * Replace the first component.
-	 *
-	 * @param c the replacement component
-	 */
-	abstract void replace0(MultiFilterComponent c);
 }

@@ -52,12 +52,14 @@ import gdsc.smlm.results.PeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.DirectFilter;
+import gdsc.smlm.results.filter.FilterSetupData;
 import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiFilterCRLB;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
+import gdsc.smlm.results.filter.ShiftFilterSetupData;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1095,9 +1097,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double shiftFactor = getCoordinateShiftFactor();
 		if (shiftFactor > 0)
 		{
-			double widthMax = getInitialXSD();
-			if (isTwoAxisGaussian2D)
-				widthMax = Math.max(widthMax, getInitialYSD());
+			double widthMax = getWidthMax();
 			if (widthMax > 0)
 			{
 				setCoordinateShift(shiftFactor * widthMax);
@@ -1105,6 +1105,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			}
 		}
 		setCoordinateShift(Double.POSITIVE_INFINITY);
+	}
+
+	/**
+	 * Gets the maximum of the initial X and Y widths.
+	 *
+	 * @return the width max
+	 */
+	public double getWidthMax()
+	{
+		double widthMax = getInitialXSD();
+		if (isTwoAxisGaussian2D)
+			widthMax = Math.max(widthMax, getInitialYSD());
+		return widthMax;
 	}
 
 	/**
@@ -3067,15 +3080,48 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (directFilter != null)
 		{
-			//if (flags == 0)
-			//	directFilter.setup();
-			//else
 			directFilter.setup(flags);
 		}
 		else
 		{
 			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
 			double shiftFactor = getCoordinateShiftFactor();
+			offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
+			varianceThreshold = (precisionThreshold > 0) ? precisionThreshold : Double.POSITIVE_INFINITY;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(gdsc.smlm.results.filter.FilterSetupData[])
+	 */
+	public void setup(FilterSetupData... filterSetupData)
+	{
+		if (directFilter != null)
+		{
+			directFilter.setup(filterSetupData);
+		}
+		else
+		{
+			double shiftFactor = getCoordinateShiftFactor();
+			for (int i = filterSetupData.length; i-- > 0;)
+			{
+				if (filterSetupData[i] instanceof ShiftFilterSetupData)
+				{
+					double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
+					if (shift > 0)
+					{
+						double widthMax = getWidthMax();
+						if (widthMax > 0)
+						{
+							shiftFactor = shift / widthMax;
+						}
+					}
+					break;
+				}
+			}
+			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
 			offset = (float) ((shiftFactor > 0) ? shiftFactor * shiftFactor : Float.POSITIVE_INFINITY);
 			varianceThreshold = (precisionThreshold > 0) ? precisionThreshold : Double.POSITIVE_INFINITY;
 		}

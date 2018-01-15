@@ -26,4 +26,9 @@ public class MultiFilterComponentSet0 extends MultiFilterComponentSet
 	{
 		return 0;
 	}
+	
+	@Override
+	void replace0(MultiFilterComponent c)
+	{
+	}
 }

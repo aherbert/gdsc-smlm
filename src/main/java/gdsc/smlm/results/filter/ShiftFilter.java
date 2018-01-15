@@ -65,6 +65,22 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 		setup(!areSet(flags, DirectFilter.NO_SHIFT));
 	}
 
+	@Override
+	public void setup(FilterSetupData... filterSetupData)
+	{
+		for (int i = filterSetupData.length; i-- > 0;)
+		{
+			if (filterSetupData[i] instanceof ShiftFilterSetupData)
+			{
+				shift2 = getUpperSquaredLimit(((ShiftFilterSetupData) filterSetupData[i]).shift);
+				shiftEnabled = (shift2 != Float.POSITIVE_INFINITY);
+				return;
+			}
+		}
+		// Default
+		setup(true);
+	}
+
 	private void setup(final boolean shiftEnabled)
 	{
 		this.shiftEnabled = shiftEnabled;

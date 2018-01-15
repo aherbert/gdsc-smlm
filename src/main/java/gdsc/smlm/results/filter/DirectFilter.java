@@ -46,6 +46,15 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	{
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(gdsc.smlm.results.filter.FilterSetupData[])
+	 */
+	public void setup(FilterSetupData... filterSetupData)
+	{
+	}
+
 	/**
 	 * Check if all of the given bits are set in the flags
 	 * 
@@ -303,9 +312,9 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		//			System.out.println("No strength (inf)");
 		//			return super.weakestUnsafe(o);
 		//		}
-		
+
 		//System.out.println("weakestUnsafe");
-		
+
 		//int result = super.weakestUnsafe(o); 
 
 		if (this.strength < o.strength)

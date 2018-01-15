@@ -78,6 +78,7 @@ import gdsc.smlm.results.filter.MultiPathFilter.SelectedResult;
 import gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore;
 import gdsc.smlm.results.filter.MultiPathFitResult;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
+import gdsc.smlm.results.filter.ShiftFilterSetupData;
 
 /**
  * Fits local maxima using a 2D Gaussian.
@@ -2804,11 +2805,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final int maxIterations = fitConfig.getMaxIterations();
 			final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 
-			fitConfig.setCoordinateShift(FastMath.min(width, height));
+			double coordinateShift = FastMath.min(width, height);
+			fitConfig.setCoordinateShift(coordinateShift);
 			fitConfig.setFitRegion(0, 0, 0);
 			fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
 			fitConfig.setMaxFunctionEvaluations(maxEvaluations * FitWorker.EVALUATION_INCREASE_FOR_DOUBLETS);
-
+			// Also change the shift in a smart filter
+			if (fitConfig.isDirectFilter())
+			{
+				fitConfig.setup(new ShiftFilterSetupData(coordinateShift / fitConfig.getWidthMax()));
+			}
+			
 			// We assume that residuals calculation is on but just in case something else turned it off we get the state.
 			final boolean isComputeResiduals = gf.isComputeResiduals();
 			gf.setComputeResiduals(false);
@@ -2823,6 +2830,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitConfig.setFitRegion(width, height, 0.5);
 			fitConfig.setMaxIterations(maxIterations);
 			fitConfig.setMaxFunctionEvaluations(maxEvaluations);
+			if (fitConfig.isDirectFilter())
+			{
+				fitConfig.setup(0);
+			}
 
 			updateError(newFitResult);
 

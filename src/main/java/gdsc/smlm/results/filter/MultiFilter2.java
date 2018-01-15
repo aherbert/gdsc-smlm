@@ -59,6 +59,8 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 	MultiFilterComponentSet components_NoWidth_NoShift = null;
 	@XStreamOmitField
 	MultiFilterComponentSet components_Width_NoShift = null;
+	@XStreamOmitField
+	MultiFilterComponentSet components_Shift0 = null;
 
 	public MultiFilter2(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision)
@@ -178,6 +180,10 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 			components_NoWidth_Shift = MultiFilterComponentSetFactory.create(components2, components2.length);
 			components_Width_NoShift = MultiFilterComponentSetFactory.create(components3, components3.length);
 			components_NoWidth_NoShift = MultiFilterComponentSetFactory.create(components4, components4.length);
+
+			MultiFilterComponent[] data = new MultiFilterComponent[components3.length + 1];
+			System.arraycopy(components3, 0, data, 1, components3.length);
+			components_Shift0 = MultiFilterComponentSetFactory.create(data, data.length);
 		}
 
 		if (widthEnabled)
@@ -200,6 +206,29 @@ public class MultiFilter2 extends DirectFilter implements IMultiFilter
 		//		offset = Filter.getUpperSquaredLimit(shift);
 		//		eoffset = Filter.getUpperSquaredLimit(eshift);
 		//		variance = Filter.getDUpperSquaredLimit(precision);
+	}
+
+	@Override
+	public void setup(FilterSetupData... filterSetupData)
+	{
+		setup(true, true);
+		for (int i = filterSetupData.length; i-- > 0;)
+		{
+			if (filterSetupData[i] instanceof ShiftFilterSetupData)
+			{
+				double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
+				if (shift > 0)
+				{
+					components_Shift0.replace0(new MultiFilterShiftComponent(shift));
+					components = components_Shift0;
+				}
+				else
+				{
+					components = components_Width_NoShift;
+				}
+				return;
+			}
+		}
 	}
 
 	@Override
