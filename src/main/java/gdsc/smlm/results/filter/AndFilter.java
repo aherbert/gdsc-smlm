@@ -46,12 +46,6 @@ public class AndFilter extends CombinedFilter
 	}
 
 	@Override
-	public String getDescription()
-	{
-		return "Filter results using the combination of two filters. Results must pass both filters.";
-	}
-
-	@Override
 	protected Filter createFilter(Filter f1, Filter f2)
 	{
 		return new AndFilter(f1, f2);

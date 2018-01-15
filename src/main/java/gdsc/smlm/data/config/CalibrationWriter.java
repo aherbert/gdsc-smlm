@@ -6,6 +6,7 @@ import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.CameraCalibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
@@ -214,7 +215,7 @@ public class CalibrationWriter extends CalibrationReader
 		if (cameraType == null)
 			getBuilder().getCameraCalibrationBuilder().clearCameraType();
 		else
-			getBuilder().getCameraCalibrationBuilder().setCameraType(cameraType);
+			getBuilder().getCameraCalibrationBuilder().setCameraTypeValue(cameraType.getNumber());
 	}
 
 	/**
@@ -277,7 +278,7 @@ public class CalibrationWriter extends CalibrationReader
 		if (distanceUnit == null)
 			getBuilder().getDistanceCalibrationBuilder().clearDistanceUnit();
 		else
-			getBuilder().getDistanceCalibrationBuilder().setDistanceUnit(distanceUnit);
+			getBuilder().getDistanceCalibrationBuilder().setDistanceUnitValue(distanceUnit.getNumber());
 	}
 
 	/**
@@ -291,7 +292,7 @@ public class CalibrationWriter extends CalibrationReader
 		if (intensityUnit == null)
 			getBuilder().getIntensityCalibrationBuilder().clearIntensityUnit();
 		else
-			getBuilder().getIntensityCalibrationBuilder().setIntensityUnit(intensityUnit);
+			getBuilder().getIntensityCalibrationBuilder().setIntensityUnitValue(intensityUnit.getNumber());
 	}
 
 	/**
@@ -305,7 +306,21 @@ public class CalibrationWriter extends CalibrationReader
 		if (angleUnit == null)
 			getBuilder().getAngleCalibrationBuilder().clearAngleUnit();
 		else
-			getBuilder().getAngleCalibrationBuilder().setAngleUnit(angleUnit);
+			getBuilder().getAngleCalibrationBuilder().setAngleUnitValue(angleUnit.getNumber());
+	}
+
+	/**
+	 * Set the precision method used for the results.
+	 *
+	 * @param precision method
+	 *            The new precision method
+	 */
+	public void setPrecisionMethod(PrecisionMethod precisionMethod)
+	{
+		if (precisionMethod == null)
+			getBuilder().getResultDataCalibrationBuilder().clearPrecisionMethod();
+		else
+			getBuilder().getResultDataCalibrationBuilder().setPrecisionMethodValue(precisionMethod.getNumber());
 	}
 
 	/**

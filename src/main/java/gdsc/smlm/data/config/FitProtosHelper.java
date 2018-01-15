@@ -277,6 +277,24 @@ public class FitProtosHelper
 		}
 	}
 
+	public static String getName(PrecisionMethod value)
+	{
+		switch (value)
+		{
+			case PRECISION_METHOD_NA:
+				return "NA";
+			case MORTENSEN:
+				return "Mortensen";
+			case MORTENSEN_LOCAL_BACKGROUND:
+				return "Mortensen (local background)";
+			case POISSON_CRLB:
+				return "Poisson CRLB";
+			case UNRECOGNIZED:
+				return "Unknown";
+			default:
+				throw new IllegalStateException("Unknown name: " + value);
+		}
+	}	
 	public static Method convertNoiseEstimatorMethod(NoiseEstimatorMethod method)
 	{
 		switch (method)

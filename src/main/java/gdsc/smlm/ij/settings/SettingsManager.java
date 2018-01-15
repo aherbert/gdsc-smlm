@@ -31,6 +31,7 @@ import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
@@ -480,6 +481,36 @@ public class SettingsManager
 		}
 	}
 
+	private static PrecisionMethod[] _PrecisionMethodValues;
+
+	public static PrecisionMethod[] getPrecisionMethodValues()
+	{
+		if (_PrecisionMethodValues == null)
+			initPrecisionMethod();
+		return _PrecisionMethodValues;
+	}
+
+	private static String[] _PrecisionMethodNames;
+
+	public static String[] getPrecisionMethodNames()
+	{
+		if (_PrecisionMethodNames == null)
+			initPrecisionMethod();
+		return _PrecisionMethodNames;
+	}
+
+	private static void initPrecisionMethod()
+	{
+		EnumSet<PrecisionMethod> d = EnumSet.allOf(PrecisionMethod.class);
+		d.remove(PrecisionMethod.UNRECOGNIZED);
+		_PrecisionMethodValues = d.toArray(new PrecisionMethod[d.size()]);
+		_PrecisionMethodNames = new String[_PrecisionMethodValues.length];
+		for (int i = 0; i < _PrecisionMethodValues.length; i++)
+		{
+			_PrecisionMethodNames[i] = FitProtosHelper.getName(_PrecisionMethodValues[i]);
+		}
+	}
+
 	/**
 	 * Convert a list of objects into names (e.g. pass in (Object[])enum.getValues()). The first letter is capitalised.
 	 * The rest of the name is converted to lowercase if it is all uppercase. Remaining mixed case names are left
@@ -526,7 +557,17 @@ public class SettingsManager
 		return names;
 	}
 
-	private static String getName(String name, String shortName)
+	/**
+	 * Gets the name by appending the short name after the name in brackets, only if the short name is different to the
+	 * name.
+	 *
+	 * @param name
+	 *            the name
+	 * @param shortName
+	 *            the short name
+	 * @return the name
+	 */
+	public static String getName(String name, String shortName)
 	{
 		if (!name.equals(shortName))
 			name += " (" + shortName + ")";

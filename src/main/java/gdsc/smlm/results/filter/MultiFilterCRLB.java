@@ -293,6 +293,17 @@ public class MultiFilterCRLB extends DirectFilter implements IMultiFilter
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.filter.Filter#requiresParameterDeviations()
+	 */
+	@Override
+	public boolean requiresParameterDeviations()
+	{
+		return (precision != 0);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getNumberOfParameters()
 	 */
 	@Override

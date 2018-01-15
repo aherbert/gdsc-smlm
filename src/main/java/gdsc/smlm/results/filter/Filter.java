@@ -1087,6 +1087,17 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	public abstract String getDescription();
 
 	/**
+	 * Set to true if the filter requires parameter deviations within the PeakResult data. The default just uses the
+	 * result parameters.
+	 *
+	 * @return true, if the filter requires parameter deviations
+	 */
+	public boolean requiresParameterDeviations()
+	{
+		return false;
+	}
+	
+	/**
 	 * @return An XML representation of this object
 	 */
 	public String toXML()

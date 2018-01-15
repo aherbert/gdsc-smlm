@@ -98,12 +98,28 @@ public abstract class CombinedFilter extends DirectFilter
 		return sb.toString();
 	}
 
+	@Override
+	public String getDescription()
+	{
+		StringBuilder sb = new StringBuilder();
+		addText(sb, filter1, filter1.getDescription());
+		sb.append(" ").append(getOperator()).append(" ");
+		addText(sb, filter2, filter2.getDescription());
+		return sb.toString();
+	}
+
 	/**
 	 * Get the string representation of the operator used to combine the two filters. This is used in the filter name.
 	 * 
 	 * @return The operator
 	 */
 	protected abstract String getOperator();
+
+	@Override
+	public boolean requiresParameterDeviations()
+	{
+		return filter1.requiresParameterDeviations() || filter2.requiresParameterDeviations();
+	}
 
 	/**
 	 * Filter the result using filter1

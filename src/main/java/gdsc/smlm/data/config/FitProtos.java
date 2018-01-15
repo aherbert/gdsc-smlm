@@ -602,28 +602,39 @@ public final class FitProtos {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-     * The background noise component (b2) is computed using the variance of the fit region. 
-     * Note that computation of precision using this formula is relevant only for CCD cameras
-     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
-     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * Not available. The results may have been loaded from a source where the precision was computed 
+     * using another method, or the results may have no precision. 
      * </pre>
      *
-     * <code>MORTENSEN = 0;</code>
+     * <code>PRECISION_METHOD_NA = 0;</code>
      */
-    MORTENSEN(0),
+    PRECISION_METHOD_NA(0),
+    /**
+     * <pre>
+     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+     * The background noise component (b2) is computed using the variance of the fit region. 
+     * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
+     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+     * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
+     * for least squares or maximum likelihood estimators.
+     * </pre>
+     *
+     * <code>MORTENSEN = 1;</code>
+     */
+    MORTENSEN(1),
     /**
      * <pre>
      * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
      * The background noise component (b2) is computed using the fitted background of the fit region.
-     * Note that computation of precision using this formula is relevant only for CCD cameras
+     * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
-     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
+     * for least squares or maximum likelihood estimators.     
      * </pre>
      *
-     * <code>MORTENSEN_LOCAL_BACKGROUND = 1;</code>
+     * <code>MORTENSEN_LOCAL_BACKGROUND = 2;</code>
      */
-    MORTENSEN_LOCAL_BACKGROUND(1),
+    MORTENSEN_LOCAL_BACKGROUND(2),
     /**
      * <pre>
      * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
@@ -640,36 +651,47 @@ public final class FitProtos {
      * but may still be used as an approximation.
      * </pre>
      *
-     * <code>POISSON_CRLB = 2;</code>
+     * <code>POISSON_CRLB = 3;</code>
      */
-    POISSON_CRLB(2),
+    POISSON_CRLB(3),
     UNRECOGNIZED(-1),
     ;
 
     /**
      * <pre>
-     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-     * The background noise component (b2) is computed using the variance of the fit region. 
-     * Note that computation of precision using this formula is relevant only for CCD cameras
-     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
-     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * Not available. The results may have been loaded from a source where the precision was computed 
+     * using another method, or the results may have no precision. 
      * </pre>
      *
-     * <code>MORTENSEN = 0;</code>
+     * <code>PRECISION_METHOD_NA = 0;</code>
      */
-    public static final int MORTENSEN_VALUE = 0;
+    public static final int PRECISION_METHOD_NA_VALUE = 0;
+    /**
+     * <pre>
+     * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
+     * The background noise component (b2) is computed using the variance of the fit region. 
+     * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
+     * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
+     * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
+     * for least squares or maximum likelihood estimators.
+     * </pre>
+     *
+     * <code>MORTENSEN = 1;</code>
+     */
+    public static final int MORTENSEN_VALUE = 1;
     /**
      * <pre>
      * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
      * The background noise component (b2) is computed using the fitted background of the fit region.
-     * Note that computation of precision using this formula is relevant only for CCD cameras
+     * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
-     * but can be used to approximate localisation precision on any spot-type PSF.     
+     * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
+     * for least squares or maximum likelihood estimators.     
      * </pre>
      *
-     * <code>MORTENSEN_LOCAL_BACKGROUND = 1;</code>
+     * <code>MORTENSEN_LOCAL_BACKGROUND = 2;</code>
      */
-    public static final int MORTENSEN_LOCAL_BACKGROUND_VALUE = 1;
+    public static final int MORTENSEN_LOCAL_BACKGROUND_VALUE = 2;
     /**
      * <pre>
      * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
@@ -686,9 +708,9 @@ public final class FitProtos {
      * but may still be used as an approximation.
      * </pre>
      *
-     * <code>POISSON_CRLB = 2;</code>
+     * <code>POISSON_CRLB = 3;</code>
      */
-    public static final int POISSON_CRLB_VALUE = 2;
+    public static final int POISSON_CRLB_VALUE = 3;
 
 
     public final int getNumber() {
@@ -709,9 +731,10 @@ public final class FitProtos {
 
     public static PrecisionMethod forNumber(int value) {
       switch (value) {
-        case 0: return MORTENSEN;
-        case 1: return MORTENSEN_LOCAL_BACKGROUND;
-        case 2: return POISSON_CRLB;
+        case 0: return PRECISION_METHOD_NA;
+        case 1: return MORTENSEN;
+        case 2: return MORTENSEN_LOCAL_BACKGROUND;
+        case 3: return POISSON_CRLB;
         default: return null;
       }
     }
@@ -4009,7 +4032,7 @@ public final class FitProtos {
       if (!getSmartFilterStringBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, smartFilterString_);
       }
-      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.MORTENSEN.getNumber()) {
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
         output.writeEnum(11, precisionMethod_);
       }
     }
@@ -4054,7 +4077,7 @@ public final class FitProtos {
       if (!getSmartFilterStringBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, smartFilterString_);
       }
-      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.MORTENSEN.getNumber()) {
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(11, precisionMethod_);
       }
@@ -10984,21 +11007,22 @@ public final class FitProtos {
       "\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022" +
       "\031\n\025CONJUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020",
       "LineSearchMethod\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022" +
-      "\n\016PARTIAL_IGNORE\020\002*R\n\017PrecisionMethod\022\r\n" +
-      "\tMORTENSEN\020\000\022\036\n\032MORTENSEN_LOCAL_BACKGROU" +
-      "ND\020\001\022\020\n\014POISSON_CRLB\020\002*6\n\016DataFilterType" +
-      "\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y" +
-      "\n\020DataFilterMethod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_ME" +
-      "AN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n" +
-      "\006MEDIAN\020\004*\263\002\n\024NoiseEstimatorMethod\022\016\n\nAL" +
-      "L_PIXELS\020\000\022\021\n\rLOWEST_PIXELS\020\001\022%\n!RESIDUA" +
-      "LS_LEAST_MEDIAN_OF_SQUARES\020\002\022&\n\"RESIDUAL",
-      "S_LEAST_TRIMMED_OF_SQUARES\020\003\022#\n\037RESIDUAL" +
-      "S_LEAST_MEAN_OF_SQUARES\020\004\022+\n\'QUICK_RESID" +
-      "UALS_LEAST_MEDIAN_OF_SQUARES\020\005\022,\n(QUICK_" +
-      "RESIDUALS_LEAST_TRIMMED_OF_SQUARES\020\006\022)\n%" +
-      "QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES\020\007B" +
-      "\013B\tFitProtosb\006proto3"
+      "\n\016PARTIAL_IGNORE\020\002*k\n\017PrecisionMethod\022\027\n" +
+      "\023PRECISION_METHOD_NA\020\000\022\r\n\tMORTENSEN\020\001\022\036\n" +
+      "\032MORTENSEN_LOCAL_BACKGROUND\020\002\022\020\n\014POISSON" +
+      "_CRLB\020\003*6\n\016DataFilterType\022\n\n\006SINGLE\020\000\022\016\n" +
+      "\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y\n\020DataFilterMet" +
+      "hod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULA" +
+      "R_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024N" +
+      "oiseEstimatorMethod\022\016\n\nALL_PIXELS\020\000\022\021\n\rL" +
+      "OWEST_PIXELS\020\001\022%\n!RESIDUALS_LEAST_MEDIAN",
+      "_OF_SQUARES\020\002\022&\n\"RESIDUALS_LEAST_TRIMMED" +
+      "_OF_SQUARES\020\003\022#\n\037RESIDUALS_LEAST_MEAN_OF" +
+      "_SQUARES\020\004\022+\n\'QUICK_RESIDUALS_LEAST_MEDI" +
+      "AN_OF_SQUARES\020\005\022,\n(QUICK_RESIDUALS_LEAST" +
+      "_TRIMMED_OF_SQUARES\020\006\022)\n%QUICK_RESIDUALS" +
+      "_LEAST_MEAN_OF_SQUARES\020\007B\013B\tFitProtosb\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

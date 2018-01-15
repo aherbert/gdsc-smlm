@@ -52,6 +52,7 @@ import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
@@ -85,7 +86,6 @@ import ij.ImageStack;
 import ij.Macro;
 import ij.Prefs;
 import ij.gui.ExtendedGenericDialog;
-import ij.gui.GenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.Plot2;
@@ -150,7 +150,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setPrecisionThreshold(0);
 		filterFitConfig.setMinWidthFactor(0);
 		filterFitConfig.setWidthFactor(0);
-		filterFitConfig.setPrecisionUsingBackground(false);
+		filterFitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN);
 	}
 
 	private static boolean useBenchmarkSettings = false;
@@ -214,7 +214,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	private TextField textSignalStrength;
 	private TextField textMinPhotons;
 	private TextField textPrecisionThreshold;
-	private Checkbox cbLocalBackground;
+	private Choice textPrecisionMethod;
 	private TextField textMinWidthFactor;
 	private TextField textWidthFactor;
 
@@ -2825,7 +2825,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			sb.append(filterFitConfig.getMinWidthFactor()).append('\t');
 			sb.append(filterFitConfig.getMaxWidthFactor()).append('\t');
 			sb.append(filterFitConfig.getPrecisionThreshold()).append('\t');
-			sb.append(filterFitConfig.isPrecisionUsingBackground()).append('\t');
+			sb.append(filterFitConfig.getPrecisionMethod()).append('\t');
 		}
 		sb.append(analysisDriftAngle).append('\t');
 		sb.append(minGap).append('\t');
@@ -3066,7 +3066,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	@SuppressWarnings("unchecked")
 	private boolean showAnalysisDialog()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		StringBuilder sb = new StringBuilder("Filters the doublet fits and reports the performance increase\n");
@@ -3097,7 +3097,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addSlider("Min_width_factor", 0, 0.99, filterFitConfig.getMinWidthFactor());
 		gd.addSlider("Max_width_factor", 1.01, 5, filterFitConfig.getMaxWidthFactor());
 		gd.addNumericField("Precision", filterFitConfig.getPrecisionThreshold(), 2);
-		gd.addCheckbox("Local_background", filterFitConfig.isPrecisionUsingBackground());
+		gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(),
+				filterFitConfig.getPrecisionMethod().ordinal());
 
 		gd.addNumericField("Drift_angle", analysisDriftAngle, 2);
 		gd.addNumericField("Min_gap", minGap, 2);
@@ -3128,7 +3129,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			textMinWidthFactor = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
-			cbLocalBackground = checkboxes.get(2);
+			textPrecisionMethod = choices.get(2);;
 		}
 
 		gd.showDialog();
@@ -3149,7 +3150,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		filterFitConfig.setMinWidthFactor(gd.getNextNumber());
 		filterFitConfig.setWidthFactor(gd.getNextNumber());
 		filterFitConfig.setPrecisionThreshold(gd.getNextNumber());
-		filterFitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
+		filterFitConfig.setPrecisionMethod(gd.getNextChoiceIndex());
 		analysisDriftAngle = gd.getNextNumber();
 		minGap = gd.getNextNumber();
 
@@ -3239,7 +3240,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
 				textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
 				textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
-				cbLocalBackground.setState(fitConfig.isPrecisionUsingBackground());
+				textPrecisionMethod.select(fitConfig.getPrecisionMethod().ordinal());
 			}
 			else
 			{
@@ -3292,7 +3293,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				textMinWidthFactor.setText("" + filterFitConfig.getMinWidthFactor());
 				textWidthFactor.setText("" + filterFitConfig.getMaxWidthFactor());
 				textPrecisionThreshold.setText("" + filterFitConfig.getPrecisionThreshold());
-				cbLocalBackground.setState(filterFitConfig.isPrecisionUsingBackground());
+				textPrecisionMethod.select(filterFitConfig.getPrecisionMethod().ordinal());
 			}
 			else
 			{

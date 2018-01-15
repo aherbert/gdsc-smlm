@@ -212,7 +212,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
-		gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
+		PeakFit.addPrecisionOptions(gd, new PeakFit.SimpleFitConfigurationProvider(fitConfig));
 
 		gd.showDialog();
 

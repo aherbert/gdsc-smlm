@@ -43,6 +43,7 @@ import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
@@ -877,7 +878,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
-			gd.addNumericField("Precision", fitConfig.getPrecisionThreshold(), 2);
+			addPrecisionOptions(gd, fitConfigurationProvider);
 		}
 
 		gd.addMessage("--- Results ---");
@@ -1641,6 +1642,52 @@ public class PeakFit implements PlugInFilter, ItemListener
 				});
 	}
 
+	/**
+	 * Adds the precision options. A single numeric field for the precision is added. A pop-up is added to allow the
+	 * precision method to be configured.
+	 *
+	 * @param gd
+	 *            the dialog
+	 * @param fitConfigurationProvider
+	 *            the fit configuration provider
+	 */
+	public static void addPrecisionOptions(final ExtendedGenericDialog gd,
+			final FitConfigurationProvider fitConfigurationProvider)
+	{
+		gd.addNumericField("Precision", fitConfigurationProvider.getFitConfiguration().getPrecisionThreshold(), 2,
+				new OptionListener<Double>()
+				{
+					public boolean collectOptions(Double field)
+					{
+						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+						fitConfig.setPrecisionThreshold(field);
+						boolean result = collectOptions(false);
+						return result;
+					}
+
+					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
+					{
+						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+						ExtendedGenericDialog egd = new ExtendedGenericDialog("Precision Options", null);
+						int oldIndex = fitConfig.getPrecisionMethod().ordinal();
+						egd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), oldIndex);
+						egd.setSilent(silent);
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						int newIndex = egd.getNextChoiceIndex();
+						fitConfig.setPrecisionMethod(newIndex);
+						boolean changed = oldIndex != newIndex;
+						return changed;
+					}
+				});
+	}
+
 	private void log(String format, Object... args)
 	{
 		if (!silent)
@@ -2126,6 +2173,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 					Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
 					Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
 					Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+					if (fitConfig.getPrecisionThreshold() > 0)
+					{
+						if (fitConfig.getPrecisionMethod() == PrecisionMethod.PRECISION_METHOD_NA)
+						{
+							throw new IllegalArgumentException(
+									"Precision filter requires a precision method");
+						}
+						if (fitConfig.isPrecisionUsingBackground() && calibration.getBias() == 0)
+						{
+							throw new IllegalArgumentException(
+									"Precision using the local background requires the camera bias");
+						}
+					}
 				}
 			}
 			final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
@@ -2151,24 +2211,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			if (!configureSmartFilter(config, flags))
 				return false;
-
-			if (!fitConfig.isSmartFilter() && fitConfig.getPrecisionThreshold() > 0)
-			{
-				gd = new ExtendedGenericDialog(TITLE);
-				gd.addMessage("Precision filtering can use global noise estimate or local background level");
-				gd.addCheckbox("Local_background", fitConfig.isPrecisionUsingBackground());
-				if (calibration.isCCDCamera())
-				{
-					gd.addMessage("Local background requires the camera bias");
-					gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
-				}
-				gd.showDialog();
-				if (gd.wasCanceled())
-					return false;
-				fitConfig.setPrecisionUsingBackground(gd.getNextBoolean());
-				if (calibration.isCCDCamera())
-					calibration.setBias(Math.abs(gd.getNextNumber()));
-			}
 		}
 
 		if (!configureDataFilter(config, flags))
@@ -2249,7 +2291,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 		FitConfiguration fitConfig = config.getFitConfiguration();
 		if (!fitConfig.isSmartFilter())
 			return true;
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
@@ -2259,10 +2300,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		gd.addMessage("Smart filter (used to pick optimum results during fitting)");
 		gd.addTextAreas(XmlUtils.convertQuotes(xml), null, 8, 60);
-		// Currently we just collect it here even if not needed
-		gd.addMessage(
-				"Smart filters using precision filtering may require a local background level.\n \nLocal background requires the camera bias:");
-		gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
+		// Add message about precision filtering
+		gd.addMessage(TextUtils.wrap(
+				"Note: Smart filters using precision may require a local background level. " +
+				"Ensure the camera calibration is correct including any bias.", 80));
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -2272,9 +2313,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		Filter f = DirectFilter.fromXML(xml);
 		if (f == null || !(f instanceof DirectFilter))
 			return false;
+		
 		fitConfig.setDirectFilter((DirectFilter) f);
-
-		calibration.setBias(Math.abs(gd.getNextNumber()));
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
 		{
@@ -3336,7 +3376,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 		logger = (resultsSettings.getLogProgress()) ? new IJLogger() : null;
 		fitConfig.setLog(logger);
 
-		fitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
+		if (resultsSettings.getShowDeviations())
+			// Note: This may already by true if the deviations are needed for the smart filter
+			fitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
 
 		config.configureOutputUnits();
 

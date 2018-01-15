@@ -8,6 +8,7 @@ package gdsc.smlm.data.config;
 option java_outer_classname = "CalibrationProtos";
 
 import "unit.proto";
+import "fit.proto";
 
 // Define the calibration for distance
 message DistanceCalibration {
@@ -78,6 +79,13 @@ message CameraCalibration {
 	double quantum_efficiency = 6;
 }
 
+// Define the calibration for the result data
+message ResultDataCalibration {
+	// Results may have an XY localisation precision. This stores the method used to 
+	// compute the localisation precision.
+	PrecisionMethod precision_method = 1;
+}
+
 // Define the calibration for the results. The calibration contains details of the 
 // results units and how to convert them. Note that data can be loaded without knowledge
 // of the camera used so the distance, time and intensity calibration are separate.
@@ -97,6 +105,9 @@ message Calibration
 	
 	// The camera calibration.
 	CameraCalibration camera_calibration = 5;
+	
+	// The result data calibration.
+	ResultDataCalibration result_data_calibration = 6;
 }
 
 // Define a camera model resource that can be loaded

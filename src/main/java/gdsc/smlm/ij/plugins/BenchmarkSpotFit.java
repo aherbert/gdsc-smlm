@@ -61,6 +61,7 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.XmlUtils;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
@@ -89,6 +90,8 @@ import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.EShiftFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
+import gdsc.smlm.results.filter.IDirectFilter;
+import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
@@ -305,7 +308,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	static MultiPathFilter multiFilter;
 	private static final MultiPathFilter defaultMultiFilter;
 	private static final double[] defaultParameters;
-	private static MultiFilter2 minimalFilter;;
+	private static IDirectFilter minimalFilter;;
 
 	static
 	{
@@ -330,10 +333,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Add a filter to use for storing the slice results:
 		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
 		FitConfiguration tmp = new FitConfiguration();
-		tmp.setPrecisionUsingBackground(true); // So we get a MultiFilter2 to match the minimal filter
+		PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND; 
+		tmp.setPrecisionMethod(precisionMethod );
 
 		// Add a minimum filter to use for storing estimates
-		minimalFilter = FitWorker.createMinimalFilter();
+		minimalFilter = FitWorker.createMinimalFilter(precisionMethod );
 
 		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
 

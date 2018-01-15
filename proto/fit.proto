@@ -76,20 +76,23 @@ enum LineSearchMethod
 // Define the method to use for precision calculation.
 enum PrecisionMethod
 {
+	// Not available. The results may have been loaded from a source where the precision was computed 
+	// using another method, or the results may have no precision. 
+	PRECISION_METHOD_NA = 0;
 	// Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
 	// The background noise component (b2) is computed using the variance of the fit region. 
 	// Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
 	// with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
 	// but can be used to approximate localisation precision on any spot-type PSF. There are formulas
 	// for least squares or maximum likelihood estimators.
-	MORTENSEN = 0;
+	MORTENSEN = 1;
 	// Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
 	// The background noise component (b2) is computed using the fitted background of the fit region.
 	// Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
 	// with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
 	// but can be used to approximate localisation precision on any spot-type PSF. There are formulas
 	// for least squares or maximum likelihood estimators.     
-	MORTENSEN_LOCAL_BACKGROUND = 1;
+	MORTENSEN_LOCAL_BACKGROUND = 2;
 	// Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
 	// Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
 	// uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
@@ -102,7 +105,7 @@ enum PrecisionMethod
 	// This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
 	// for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
 	// but may still be used as an approximation.
-	POISSON_CRLB = 2;
+	POISSON_CRLB = 3;
 }
 
 // Define settings for the fit solver.

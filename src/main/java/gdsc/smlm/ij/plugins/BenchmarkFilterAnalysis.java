@@ -71,6 +71,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
@@ -1054,7 +1055,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			{
 				// Default to the fit config settings
 				FitConfiguration tmp = new FitConfiguration();
-				tmp.setPrecisionUsingBackground(true); // So we get a MultiFilter2
+				tmp.setPrecisionMethod(PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND); // So we get a MultiFilter2
 				scoreFilter = tmp.getDefaultSmartFilter();
 			}
 		}

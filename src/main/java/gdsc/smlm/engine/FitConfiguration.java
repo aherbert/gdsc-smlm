@@ -14,6 +14,7 @@ import gdsc.smlm.data.config.FitProtos.FitSettings;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.FitSolverSettings;
 import gdsc.smlm.data.config.FitProtos.LineSearchMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
@@ -55,6 +56,7 @@ import gdsc.smlm.results.filter.FilterType;
 import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.smlm.results.filter.MultiFilterCRLB;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 
 /*----------------------------------------------------------------------------- 
@@ -824,6 +826,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets to true to compute the deviations.
+	 *
 	 * @param computeDeviations
 	 *            True if computing the parameter deviations
 	 */
@@ -833,11 +837,43 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * @return True if computing the parameter deviations
+	 * {@inheritDoc}
+	 * <p>
+	 * Note: This is also true if validation is active and the precision method requires computation of the deviations
+	 * (see {@link #isFilterRequiresDeviations()}).
+	 * 
+	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#isComputeDeviations()
 	 */
 	public boolean isComputeDeviations()
 	{
+		if (computeDeviations)
+			return true;
+		return isFilterRequiresDeviations();
+	}
+
+	/**
+	 * Get the value of the compute deviations flag. This may be false but {@link #isComputeDeviations()} can still
+	 * return true.
+	 *
+	 * @return the value of the compute deviations flag
+	 */
+	public boolean getComputeDeviationsFlag()
+	{
 		return computeDeviations;
+	}
+
+	/**
+	 * Checks if the current filter settings require deviations.
+	 *
+	 * @return true, if filtering requires deviations
+	 */
+	public boolean isFilterRequiresDeviations()
+	{
+		if (isDirectFilter() && directFilter.requiresParameterDeviations())
+			return true;
+		if (precisionThreshold > 0 && getPrecisionMethodValue() == PrecisionMethod.POISSON_CRLB_VALUE)
+			return true;
+		return false;
 	}
 
 	/**
@@ -846,6 +882,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public FitSolver getFitSolver()
 	{
 		return fitSolverSettings.getFitSolver();
+	}
+
+	/**
+	 * @return the fit solver used to fit the point spread function (PSF)
+	 */
+	public int getFitSolverValue()
+	{
+		return fitSolverSettings.getFitSolverValue();
 	}
 
 	/**
@@ -1193,16 +1237,26 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private void updatePrecisionThreshold()
 	{
-		// Store the squared threshold for speed. 
-		// XXX - Determine if precision filtering for SCMOS is valid.
-		// For now we leave this in but it may have to be changed to have a precision
-		// computed during the fit which is stored for validation.
-		if (nmPerPixel > 0 && gain > 0 &&
-				//calibration.isCCDCamera()
-				(calibration.isCCDCamera() || calibration.isSCMOS()))
-			this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
-		else
-			this.precisionThreshold = 0;
+		// Note: Store the squared threshold for speed.
+		precisionThreshold = 0;
+		switch (getPrecisionMethod())
+		{
+			case MORTENSEN:
+			case MORTENSEN_LOCAL_BACKGROUND:
+				// XXX - Determine if precision filtering for SCMOS is valid.
+				// For now we leave this in but it may have to be changed to have a precision
+				// computed during the fit which is stored for validation.
+				if (nmPerPixel > 0 && gain > 0 &&
+						//calibration.isCCDCamera()
+						(calibration.isCCDCamera() || calibration.isSCMOS()))
+					this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
+				break;
+			case POISSON_CRLB:
+				this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
+				break;
+			default:
+				break;
+		}
 	}
 
 	/**
@@ -1210,23 +1264,54 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public boolean isPrecisionUsingBackground()
 	{
-		// XXX - change this to a precision type:
-		// estimated, estimated with local background, fit deviations
-		
-		return filterSettings.getPrecisionUsingBackground();
+		return getPrecisionMethodValue() == PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE;
 	}
 
 	/**
-	 * Set to true to calculate the precision using the fitted background. Set to false to use the configured noise
-	 * (which may not be reflective of the noise at the fit location). Using false will be consistent with results
-	 * analysis performed using a global estimated noise.
-	 * 
-	 * @param precisionUsingBackground
-	 *            True if calculating the precision using the fitted background
+	 * Gets the precision method used to calculate the precision.
+	 *
+	 * @return the precision method
 	 */
-	public void setPrecisionUsingBackground(boolean precisionUsingBackground)
+	public PrecisionMethod getPrecisionMethod()
 	{
-		filterSettings.setPrecisionUsingBackground(precisionUsingBackground);
+		return filterSettings.getPrecisionMethod();
+	}
+
+	/**
+	 * Gets the precision method used to calculate the precision.
+	 *
+	 * @return the precision method
+	 */
+	public int getPrecisionMethodValue()
+	{
+		return filterSettings.getPrecisionMethodValue();
+	}
+
+	/**
+	 * Sets the precision method used to calculate the precision.
+	 *
+	 * @param precisionMethod
+	 *            the new precision method
+	 */
+	public void setPrecisionMethod(int precisionMethod)
+	{
+		PrecisionMethod pm = PrecisionMethod.forNumber(precisionMethod);
+		if (pm != null)
+		{
+			setPrecisionMethod(pm);
+		}
+	}
+
+	/**
+	 * Sets the precision method used to calculate the precision.
+	 *
+	 * @param precisionMethod
+	 *            the new precision method
+	 */
+	public void setPrecisionMethod(PrecisionMethod precisionMethod)
+	{
+		filterSettings.setPrecisionMethodValue(precisionMethod.getNumber());
+		updatePrecisionThreshold();
 	}
 
 	/**
@@ -1404,6 +1489,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the camera type.
+	 *
+	 * @return the camera type
+	 */
+	public int getCameraTypeValue()
+	{
+		return calibration.getCameraTypeValue();
+	}
+
+	/**
 	 * @return True if modelling the camera noise during maximum likelihood fitting
 	 */
 	public boolean isModelCamera()
@@ -1485,6 +1580,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * @return the search for the Maximum Likelihood Estimator
+	 */
+	public int getSearchMethodValue()
+	{
+		return fitSolverSettings.getSearchMethodValue();
+	}
+
+	/**
 	 * @param searchMethod
 	 *            the search for the Maximum Likelihood Estimator
 	 */
@@ -1513,6 +1616,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public LineSearchMethod getLineSearchMethod()
 	{
 		return fitSolverSettings.getLineSearchMethod();
+	}
+
+	/**
+	 * @return the line search for the Fast MLE
+	 */
+	public int getLineSearchMethodValue()
+	{
+		return fitSolverSettings.getLineSearchMethodValue();
 	}
 
 	/**
@@ -1732,7 +1843,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private FitStatus result;
 	private Object statusData;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
 	 */
 	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs)
@@ -1892,12 +2005,27 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			}
 		}
 
-		// Check precision
+		// Check precision. This is above zero if a threshold is present.
 		if (precisionThreshold > 0)
 		{
-			final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd) : xsd;
-			final double variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
-					params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd, isPrecisionUsingBackground());
+			final double variance;
+			switch (getPrecisionMethod())
+			{
+				case MORTENSEN:
+				case MORTENSEN_LOCAL_BACKGROUND:
+					final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd)
+							: xsd;
+					variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
+							params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd,
+							isPrecisionUsingBackground());
+					break;
+				case POISSON_CRLB:
+					variance = getVariance(paramDevs, n);
+					break;
+				default:
+					// This should not happen
+					throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
+			}
 
 			if (variance > precisionThreshold)
 			{
@@ -2001,8 +2129,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 			// Scale to nm
-			return nmPerPixel * nmPerPixel * 
-					(paramsDev[offset + Gaussian2DFunction.X_POSITION] +
+			return nmPerPixel * nmPerPixel * (paramsDev[offset + Gaussian2DFunction.X_POSITION] +
 					paramsDev[offset + Gaussian2DFunction.Y_POSITION]) / 2.0;
 		}
 		return 0;
@@ -2147,7 +2274,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		public double getLocationVariance2()
 		{
 			if (var2 == -1)
-				var2 = FitConfiguration.this.getVariance(getLocalBackground(),
+				var2 = FitConfiguration.this.getVariance(getLocalBackground() * signalToPhotons,
 						params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, getSD(), true);
 			return var2;
 		}
@@ -2501,7 +2628,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		// Only the legacy MLE solvers that explicitly model the camera noise require the data
 		// and estimate to be in ADUs. This is also true if there is no camera calibration.
-		if (getFitSolver() == FitSolver.MLE || getCameraType() == CameraType.CAMERA_TYPE_NA)
+		if (fitSolverSettings.getFitSolverValue() == FitSolver.MLE_VALUE ||
+				calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE)
 			return true;
 		return false;
 	}
@@ -2513,7 +2641,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public boolean isModelCameraMLE()
 	{
-		return (isModelCamera() && fitSolverSettings.getFitSolverValue() == FitSolver.MLE.getNumber());
+		return (isModelCamera() && fitSolverSettings.getFitSolverValue() == FitSolver.MLE_VALUE);
 	}
 
 	/**
@@ -2602,7 +2730,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			gaussianFunction = createGaussianFunction(1, 1, 1);
 		}
 
-		if (getFitSolver() == FitSolver.MLE)
+		if (getFitSolverValue() == FitSolver.MLE_VALUE)
 		{
 			// Only support CCD/EM-CCD at the moment
 			if (!calibration.isCCDCamera())
@@ -2847,10 +2975,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double eshift = 0;
 		double precision = getPrecisionThreshold();
 
-		DirectFilter f = (isPrecisionUsingBackground())
-				? new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision)
-				: new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
-		return f;
+		switch (getPrecisionMethod())
+		{
+			case MORTENSEN:
+				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+			case MORTENSEN_LOCAL_BACKGROUND:
+				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+			case POISSON_CRLB:
+				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+			default:
+				throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
+		}
 	}
 
 	/**
@@ -3002,9 +3137,24 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Do not support Euclidian shift
 		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
 		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-		final double p = (isPrecisionUsingBackground()) ? peak.getLocationVariance2() : peak.getLocationVariance();
-		if (p > varianceThreshold)
-			return V_LOCATION_VARIANCE;
+
+		switch (getPrecisionMethod())
+		{
+			case MORTENSEN:
+				if (peak.getLocationVariance() > varianceThreshold)
+					return V_LOCATION_VARIANCE;
+				break;
+			case MORTENSEN_LOCAL_BACKGROUND:
+				if (peak.getLocationVariance2() > varianceThreshold)
+					return V_LOCATION_VARIANCE2;
+				break;
+			case POISSON_CRLB:
+				if (peak.getLocationVarianceCRLB() > varianceThreshold)
+					return V_LOCATION_VARIANCE_CRLB;
+				break;
+			default:
+				throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
+		}
 		return 0;
 	}
 

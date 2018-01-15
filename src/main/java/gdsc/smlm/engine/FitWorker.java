@@ -19,6 +19,7 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
@@ -67,8 +68,11 @@ import gdsc.smlm.results.count.FailCounter;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.CoordinateStore;
 import gdsc.smlm.results.filter.CoordinateStoreFactory;
+import gdsc.smlm.results.filter.IDirectFilter;
 import gdsc.smlm.results.filter.IMultiPathFitResults;
+import gdsc.smlm.results.filter.MultiFilter;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.smlm.results.filter.MultiFilterCRLB;
 import gdsc.smlm.results.filter.MultiPathFilter;
 import gdsc.smlm.results.filter.MultiPathFilter.SelectedResult;
 import gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore;
@@ -610,13 +614,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// so we do not use that object.
 					final FitConfiguration tmp = new FitConfiguration();
 					final double residualsThreshold = 0.4;
-					filter = new MultiPathFilter(tmp, createMinimalFilter(), residualsThreshold);
+					filter = new MultiPathFilter(tmp, createMinimalFilter(PrecisionMethod.POISSON_CRLB),
+							residualsThreshold);
 				}
 			}
 			else
 			{
 				// Filter using the configuration
-				filter = new MultiPathFilter(fitConfig, createMinimalFilter(), config.getResidualsThreshold());
+				filter = new MultiPathFilter(fitConfig, createMinimalFilter(fitConfig.getPrecisionMethod()),
+						config.getResidualsThreshold());
 			}
 
 			// If we are benchmarking then do not generate results dynamically since we will store all 
@@ -1504,6 +1510,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Turn off validation of peaks
 			final boolean smartFilter = fitConfig.isSmartFilter();
 			final boolean disableSimpleFilter = fitConfig.isDisableSimpleFilter();
+			final boolean computeDeviationsFlag = fitConfig.getComputeDeviationsFlag();
+			// Check if the filter requires deviations as we temporarily disable it
+			if (fitConfig.isComputeDeviations())
+				fitConfig.setComputeDeviations(true);
 			fitConfig.setSmartFilter(false);
 			fitConfig.setDisableSimpleFilter(true);
 			fitConfig.setFitRegion(0, 0, 0);
@@ -1537,6 +1547,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//			}
 
 			// Restore
+			fitConfig.setComputeDeviations(computeDeviationsFlag);
 			fitConfig.setSmartFilter(smartFilter);
 			fitConfig.setDisableSimpleFilter(disableSimpleFilter);
 			fitConfig.setFitRegion(width, height, 0.5);
@@ -3151,8 +3162,23 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private void storeEstimate(int i, PreprocessedPeakResult peak, byte filterRank)
 	{
 		final double[] params = peak.toGaussian2DParameters();
-		double precision = (fitConfig.isPrecisionUsingBackground()) ? peak.getLocationVariance2()
-				: peak.getLocationVariance();
+		double precision;
+		switch (fitConfig.getPrecisionMethod())
+		{
+			case MORTENSEN:
+				precision = peak.getLocationVariance();
+				break;
+			case MORTENSEN_LOCAL_BACKGROUND:
+				precision = peak.getLocationVariance2();
+				break;
+			case POISSON_CRLB:
+				precision = peak.getLocationVarianceCRLB();
+				break;
+			case UNRECOGNIZED:
+			default:
+				precision = 0;
+				break;
+		}
 		storeEstimate(i, params, precision, filterRank);
 	}
 
@@ -4225,7 +4251,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @return The minimal filter
 	 */
-	public static MultiFilter2 createMinimalFilter()
+	public static IDirectFilter createMinimalFilter(PrecisionMethod precisionMethod)
 	{
 		double signal = 30;
 		float snr = 20;
@@ -4234,7 +4260,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		double shift = 2;
 		double eshift = 0;
 		double precision = 60;
-		return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+		switch (precisionMethod)
+		{
+			case MORTENSEN:
+				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+			case MORTENSEN_LOCAL_BACKGROUND:
+				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+			case POISSON_CRLB:
+				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+			default:
+				throw new IllegalArgumentException("Unknown preciosn method: " + precisionMethod);
+		}
 	}
 
 	/**

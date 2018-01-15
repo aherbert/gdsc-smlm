@@ -10,6 +10,7 @@ import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -310,6 +311,17 @@ public class CalibrationReader
 	}
 
 	/**
+	 * Get the camera type.
+	 *
+	 * @return the camera type
+	 */
+	public int getCameraTypeValue()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraTypeValue() : CameraType.CAMERA_TYPE_NA_VALUE;
+	}
+
+	/**
 	 * Checks for camera type.
 	 *
 	 * @return true, if successful
@@ -464,7 +476,7 @@ public class CalibrationReader
 	/**
 	 * Get the distance unit used for the results.
 	 *
-	 * @return the distanceUnit
+	 * @return the distance unit
 	 */
 	public DistanceUnit getDistanceUnit()
 	{
@@ -473,6 +485,18 @@ public class CalibrationReader
 				: DistanceUnit.DISTANCE_UNIT_NA;
 	}
 
+	/**
+	 * Get the distance unit used for the results.
+	 *
+	 * @return the distance unit
+	 */
+	public int getDistanceUnitValue()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getDistanceUnitValue()
+				: DistanceUnit.DISTANCE_UNIT_NA_VALUE;
+	}
+	
 	/**
 	 * Checks for distance unit.
 	 *
@@ -486,13 +510,25 @@ public class CalibrationReader
 	/**
 	 * Get the intensity unit used for the results.
 	 *
-	 * @return the intensityUnit
+	 * @return the intensity unit
 	 */
 	public IntensityUnit getIntensityUnit()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getIntensityUnit()
 				: IntensityUnit.INTENSITY_UNIT_NA;
+	}
+
+	/**
+	 * Get the intensity unit used for the results.
+	 *
+	 * @return the intensity unit
+	 */
+	public int getIntensityUnitValue()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasIntensityCalibration()) ? c.getIntensityCalibration().getIntensityUnitValue()
+				: IntensityUnit.INTENSITY_UNIT_NA_VALUE;
 	}
 
 	/**
@@ -508,7 +544,7 @@ public class CalibrationReader
 	/**
 	 * Get the angle unit used for the results.
 	 *
-	 * @return the angleUnit
+	 * @return the angle unit
 	 */
 	public AngleUnit getAngleUnit()
 	{
@@ -517,6 +553,17 @@ public class CalibrationReader
 	}
 
 	/**
+	 * Get the angle unit used for the results.
+	 *
+	 * @return the angle unit
+	 */
+	public int getAngleUnitValue()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasAngleCalibration()) ? c.getAngleCalibration().getAngleUnitValue() : AngleUnit.ANGLE_UNIT_NA_VALUE;
+	}
+	
+	/**
 	 * Checks for angle unit.
 	 *
 	 * @return true, if successful
@@ -524,5 +571,37 @@ public class CalibrationReader
 	public boolean hasAngleUnit()
 	{
 		return getAngleUnit().getNumber() > 0;
+	}
+	
+	/**
+	 * Get the precision method used for the results.
+	 *
+	 * @return the precision method
+	 */
+	public PrecisionMethod getPrecisionMethod()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethod() : PrecisionMethod.PRECISION_METHOD_NA;
+	}
+
+	/**
+	 * Get the precision method used for the results.
+	 *
+	 * @return the precision method
+	 */
+	public int getPrecisionMethodValue()
+	{
+		CalibrationOrBuilder c = getCalibrationOrBuilder();
+		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethodValue() : PrecisionMethod.PRECISION_METHOD_NA_VALUE;
+	}
+	
+	/**
+	 * Checks for precision method.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasPrecisionMethod()
+	{
+		return getPrecisionMethod().getNumber() > 0;
 	}
 }

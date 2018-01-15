@@ -19,6 +19,8 @@ import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
+import gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
+import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
@@ -27,7 +29,7 @@ import ij.plugin.PlugIn;
 /**
  * Adjust the configuration used for fitting.
  */
-public class Configuration implements PlugIn, ItemListener
+public class Configuration implements PlugIn, ItemListener, FitConfigurationProvider, FitEngineConfigurationProvider
 {
 	private static final String TITLE = "Fit Configuration";
 	private static String templateFilename = "";
@@ -109,8 +111,7 @@ public class Configuration implements PlugIn, ItemListener
 		PeakFit.addPSFOptions(gd, fitConfig);
 
 		gd.addMessage("--- Maxima identification ---");
-		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
-				config);
+		FitEngineConfigurationProvider provider = this; //Fit.SimpleFitEngineConfigurationProvider(config);
 		PeakFit.addDataFilterOptions(gd, provider);
 		PeakFit.addSearchOptions(gd, provider);
 		PeakFit.addBorderOptions(gd, provider);
@@ -139,7 +140,7 @@ public class Configuration implements PlugIn, ItemListener
 		gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
 		gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 		gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
-		gd.addNumericField("Precision_threshold", fitConfig.getPrecisionThreshold(), 2);
+		PeakFit.addPrecisionOptions(gd, this);
 
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
@@ -167,7 +168,7 @@ public class Configuration implements PlugIn, ItemListener
 			textFitting = numerics.get(n++);
 			textFitSolver = choices.get(ch++);
 			textFailuresLimit = numerics.get(n++);
-			textPassRate= numerics.get(n++);
+			textPassRate = numerics.get(n++);
 			textIncludeNeighbours = checkboxes.get(b++);
 			textNeighbourHeightThreshold = numerics.get(n++);
 			textResidualsThreshold = numerics.get(n++);
@@ -251,7 +252,7 @@ public class Configuration implements PlugIn, ItemListener
 			Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
 			Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
 			Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
-			
+
 			if (!fitConfig.isSmartFilter())
 			{
 				Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
@@ -317,14 +318,24 @@ public class Configuration implements PlugIn, ItemListener
 		return true;
 	}
 
-	/**
-	 * Gets the fit engine configuration.
-	 *
-	 * @return the fit engine configuration
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider#getFitEngineConfiguration()
 	 */
 	public FitEngineConfiguration getFitEngineConfiguration()
 	{
 		return config;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
+	 */
+	public FitConfiguration getFitConfiguration()
+	{
+		return config.getFitConfiguration();
 	}
 
 	/*

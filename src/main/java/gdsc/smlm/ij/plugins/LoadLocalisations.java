@@ -32,6 +32,7 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -60,9 +61,21 @@ public class LoadLocalisations implements PlugIn
 {
 	// Time units for the exposure time cannot be in frames as this makes no sense
 	private static EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
+	private static String[] tUnits;
+	private static TimeUnit[] tUnitValues;
 	static
 	{
 		set.remove(TimeUnit.FRAME);
+		set.remove(TimeUnit.UNRECOGNIZED);
+		tUnits = new String[set.size()];
+		tUnitValues = new TimeUnit[set.size()];
+		int i = 0;
+		for (TimeUnit t : set)
+		{
+			tUnits[i] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
+			tUnitValues[i] = t;
+			i++;
+		}
 	}
 
 	public static class Localisation
@@ -81,9 +94,10 @@ public class LoadLocalisations implements PlugIn
 		public final double gain;
 		public final double pixelPitch;
 		public final double exposureTime;
+		public final PrecisionMethod precisionMethod;
 
 		public LocalisationList(TimeUnit timeUnit, DistanceUnit distanceUnit, IntensityUnit intensityUnit, double gain,
-				double pixelPitch, double exposureTime)
+				double pixelPitch, double exposureTime, PrecisionMethod precisionMethod)
 		{
 			this.timeUnit = timeUnit;
 			this.distanceUnit = distanceUnit;
@@ -91,13 +105,15 @@ public class LoadLocalisations implements PlugIn
 			this.gain = gain;
 			this.pixelPitch = pixelPitch;
 			this.exposureTime = exposureTime;
+			this.precisionMethod = precisionMethod;
 		}
 
 		private LocalisationList(int timeUnit, int distanceUnit, int intensityUnit, double gain, double pixelPitch,
-				double exposureTime)
+				double exposureTime, int precisionMethod)
 		{
-			this((TimeUnit) set.toArray()[timeUnit], DistanceUnit.values()[distanceUnit],
-					IntensityUnit.values()[intensityUnit], gain, pixelPitch, exposureTime);
+			this(TimeUnit.forNumber(timeUnit), DistanceUnit.forNumber(distanceUnit),
+					IntensityUnit.forNumber(intensityUnit), gain, pixelPitch, exposureTime,
+					PrecisionMethod.forNumber(precisionMethod));
 		}
 
 		public MemoryPeakResults toPeakResults()
@@ -117,6 +133,8 @@ public class LoadLocalisations implements PlugIn
 			calibration.setExposureTime(timeConverter.convert(exposureTime));
 			calibration.setDistanceUnit(distanceUnit);
 			calibration.setIntensityUnit(intensityUnit);
+			if (hasPrecision())
+				calibration.setPrecisionMethod(precisionMethod);
 			results.setCalibration(calibration.getCalibration());
 
 			if (size() > 0)
@@ -162,8 +180,9 @@ public class LoadLocalisations implements PlugIn
 					AttributePeakResult peakResult = new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, params,
 							null);
 					peakResult.setId(l.id);
-					// Convert to nm
-					peakResult.setPrecision(distanceConverter.convert(l.precision));
+					if (l.precision > 0)
+						// Convert to nm
+						peakResult.setPrecision(distanceConverter.convert(l.precision));
 					results.add(peakResult);
 				}
 			}
@@ -172,6 +191,14 @@ public class LoadLocalisations implements PlugIn
 			results.convertToPreferredUnits();
 
 			return results;
+		}
+
+		private boolean hasPrecision()
+		{
+			for (int i = 0; i < size(); i++)
+				if (get(i).precision > 0)
+					return true;
+			return false;
 		}
 	}
 
@@ -200,6 +227,7 @@ public class LoadLocalisations implements PlugIn
 	private static double gain;
 	private static double pixelPitch;
 	private static double exposureTime;
+	private static int precisionMethod = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -342,8 +370,10 @@ public class LoadLocalisations implements PlugIn
 		if (!getFields())
 			return null;
 
-		LocalisationList localisations = new LocalisationList(timeUnit, distanceUnit, intensityUnit, gain, pixelPitch,
-				exposureTime);
+		LocalisationList localisations = new LocalisationList(
+				// The time units used a truncated list
+				tUnitValues[timeUnit].getNumber(), distanceUnit, intensityUnit, gain, pixelPitch, exposureTime,
+				precisionMethod);
 
 		final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
 		int errors = 0;
@@ -441,17 +471,15 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
 		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "");
 
-		String[] tUnits = SettingsManager.getTimeUnitNames();
-		gd.addChoice("Time_unit", tUnits, tUnits[timeUnit]);
+		// This is the unit for the exposure time (used to convert the exposure time to milliseconds).
+		gd.addChoice("Time_unit", tUnits, timeUnit);
 
 		gd.addMessage("Records:");
 		gd.addNumericField("Header_lines", header, 0);
 		gd.addStringField("Comment", comment);
 		gd.addStringField("Delimiter", delimiter);
-		String[] dUnits = SettingsManager.getDistanceUnitNames();
-		gd.addChoice("Distance_unit", dUnits, distanceUnit);
-		String[] iUnits = SettingsManager.getIntensityUnitNames();
-		gd.addChoice("Intensity_unit", iUnits, intensityUnit);
+		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), distanceUnit);
+		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(), intensityUnit);
 
 		gd.addMessage("Define the fields:");
 		gd.addNumericField("T", it, 0);
@@ -463,6 +491,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Sx", isx, 0);
 		gd.addNumericField("Sy", isy, 0);
 		gd.addNumericField("Precision", ip, 0);
+		gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), precisionMethod);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -499,6 +528,8 @@ public class LoadLocalisations implements PlugIn
 			isy = columns[i++];
 			ip = columns[i++];
 		}
+
+		precisionMethod = gd.getNextChoiceIndex();
 
 		// Validate after reading the dialog (so the static fields store the last entered values)
 

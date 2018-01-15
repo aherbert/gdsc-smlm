@@ -47,12 +47,6 @@ public class OrFilter extends CombinedFilter
 	}
 
 	@Override
-	public String getDescription()
-	{
-		return "Filter results using the combination of two filters. Results can pass either filter.";
-	}
-
-	@Override
 	protected Filter createFilter(Filter f1, Filter f2)
 	{
 		return new OrFilter(f1, f2);

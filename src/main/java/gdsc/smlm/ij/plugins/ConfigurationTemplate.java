@@ -36,6 +36,7 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings.Builder;
@@ -289,7 +290,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		FitEngineConfiguration config = new FitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
 
-		fitConfig.setPrecisionUsingBackground(true);
+		fitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND);
 		config.setFailuresLimit(1);
 
 		// LSE

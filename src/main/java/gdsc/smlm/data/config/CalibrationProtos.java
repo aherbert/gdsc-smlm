@@ -3471,6 +3471,528 @@ public final class CalibrationProtos {
 
   }
 
+  public interface ResultDataCalibrationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ResultDataCalibration)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Results may have an XY localisation precision. This stores the method used to 
+     * compute the localisation precision.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+     */
+    int getPrecisionMethodValue();
+    /**
+     * <pre>
+     * Results may have an XY localisation precision. This stores the method used to 
+     * compute the localisation precision.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+     */
+    gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod();
+  }
+  /**
+   * <pre>
+   * Define the calibration for the result data
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.ResultDataCalibration}
+   */
+  public  static final class ResultDataCalibration extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.ResultDataCalibration)
+      ResultDataCalibrationOrBuilder {
+    // Use ResultDataCalibration.newBuilder() to construct.
+    private ResultDataCalibration(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ResultDataCalibration() {
+      precisionMethod_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private ResultDataCalibration(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+
+              precisionMethod_ = rawValue;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_ResultDataCalibration_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_ResultDataCalibration_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.class, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder.class);
+    }
+
+    public static final int PRECISION_METHOD_FIELD_NUMBER = 1;
+    private int precisionMethod_;
+    /**
+     * <pre>
+     * Results may have an XY localisation precision. This stores the method used to 
+     * compute the localisation precision.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+     */
+    public int getPrecisionMethodValue() {
+      return precisionMethod_;
+    }
+    /**
+     * <pre>
+     * Results may have an XY localisation precision. This stores the method used to 
+     * compute the localisation precision.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+     */
+    public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+      gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+      return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
+        output.writeEnum(1, precisionMethod_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, precisionMethod_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration other = (gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration) obj;
+
+      boolean result = true;
+      result = result && precisionMethod_ == other.precisionMethod_;
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PRECISION_METHOD_FIELD_NUMBER;
+      hash = (53 * hash) + precisionMethod_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the calibration for the result data
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.ResultDataCalibration}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.ResultDataCalibration)
+        gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_ResultDataCalibration_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_ResultDataCalibration_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.class, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        precisionMethod_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.CalibrationProtos.internal_static_gdsc_smlm_data_config_ResultDataCalibration_descriptor;
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration build() {
+        gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration buildPartial() {
+        gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration result = new gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration(this);
+        result.precisionMethod_ = precisionMethod_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration) {
+          return mergeFrom((gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration other) {
+        if (other == gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.getDefaultInstance()) return this;
+        if (other.precisionMethod_ != 0) {
+          setPrecisionMethodValue(other.getPrecisionMethodValue());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int precisionMethod_ = 0;
+      /**
+       * <pre>
+       * Results may have an XY localisation precision. This stores the method used to 
+       * compute the localisation precision.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+       */
+      public int getPrecisionMethodValue() {
+        return precisionMethod_;
+      }
+      /**
+       * <pre>
+       * Results may have an XY localisation precision. This stores the method used to 
+       * compute the localisation precision.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+       */
+      public Builder setPrecisionMethodValue(int value) {
+        precisionMethod_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Results may have an XY localisation precision. This stores the method used to 
+       * compute the localisation precision.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+       */
+      public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+        gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
+        return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Results may have an XY localisation precision. This stores the method used to 
+       * compute the localisation precision.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+       */
+      public Builder setPrecisionMethod(gdsc.smlm.data.config.FitProtos.PrecisionMethod value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        precisionMethod_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Results may have an XY localisation precision. This stores the method used to 
+       * compute the localisation precision.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 1;</code>
+       */
+      public Builder clearPrecisionMethod() {
+        
+        precisionMethod_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.ResultDataCalibration)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.ResultDataCalibration)
+    private static final gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration();
+    }
+
+    public static gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ResultDataCalibration>
+        PARSER = new com.google.protobuf.AbstractParser<ResultDataCalibration>() {
+      public ResultDataCalibration parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ResultDataCalibration(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ResultDataCalibration> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ResultDataCalibration> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CalibrationOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Calibration)
       com.google.protobuf.MessageOrBuilder {
@@ -3599,6 +4121,31 @@ public final class CalibrationProtos {
      * <code>.gdsc.smlm.data.config.CameraCalibration camera_calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationProtos.CameraCalibrationOrBuilder getCameraCalibrationOrBuilder();
+
+    /**
+     * <pre>
+     * The result data calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+     */
+    boolean hasResultDataCalibration();
+    /**
+     * <pre>
+     * The result data calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+     */
+    gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration getResultDataCalibration();
+    /**
+     * <pre>
+     * The result data calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+     */
+    gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder getResultDataCalibrationOrBuilder();
   }
   /**
    * <pre>
@@ -3706,6 +4253,19 @@ public final class CalibrationProtos {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(cameraCalibration_);
                 cameraCalibration_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 50: {
+              gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder subBuilder = null;
+              if (resultDataCalibration_ != null) {
+                subBuilder = resultDataCalibration_.toBuilder();
+              }
+              resultDataCalibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(resultDataCalibration_);
+                resultDataCalibration_ = subBuilder.buildPartial();
               }
 
               break;
@@ -3898,6 +4458,39 @@ public final class CalibrationProtos {
       return getCameraCalibration();
     }
 
+    public static final int RESULT_DATA_CALIBRATION_FIELD_NUMBER = 6;
+    private gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration resultDataCalibration_;
+    /**
+     * <pre>
+     * The result data calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+     */
+    public boolean hasResultDataCalibration() {
+      return resultDataCalibration_ != null;
+    }
+    /**
+     * <pre>
+     * The result data calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+     */
+    public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration getResultDataCalibration() {
+      return resultDataCalibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.getDefaultInstance() : resultDataCalibration_;
+    }
+    /**
+     * <pre>
+     * The result data calibration.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+     */
+    public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder getResultDataCalibrationOrBuilder() {
+      return getResultDataCalibration();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3925,6 +4518,9 @@ public final class CalibrationProtos {
       if (cameraCalibration_ != null) {
         output.writeMessage(5, getCameraCalibration());
       }
+      if (resultDataCalibration_ != null) {
+        output.writeMessage(6, getResultDataCalibration());
+      }
     }
 
     public int getSerializedSize() {
@@ -3951,6 +4547,10 @@ public final class CalibrationProtos {
       if (cameraCalibration_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getCameraCalibration());
+      }
+      if (resultDataCalibration_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getResultDataCalibration());
       }
       memoizedSize = size;
       return size;
@@ -3993,6 +4593,11 @@ public final class CalibrationProtos {
         result = result && getCameraCalibration()
             .equals(other.getCameraCalibration());
       }
+      result = result && (hasResultDataCalibration() == other.hasResultDataCalibration());
+      if (hasResultDataCalibration()) {
+        result = result && getResultDataCalibration()
+            .equals(other.getResultDataCalibration());
+      }
       return result;
     }
 
@@ -4022,6 +4627,10 @@ public final class CalibrationProtos {
       if (hasCameraCalibration()) {
         hash = (37 * hash) + CAMERA_CALIBRATION_FIELD_NUMBER;
         hash = (53 * hash) + getCameraCalibration().hashCode();
+      }
+      if (hasResultDataCalibration()) {
+        hash = (37 * hash) + RESULT_DATA_CALIBRATION_FIELD_NUMBER;
+        hash = (53 * hash) + getResultDataCalibration().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -4188,6 +4797,12 @@ public final class CalibrationProtos {
           cameraCalibration_ = null;
           cameraCalibrationBuilder_ = null;
         }
+        if (resultDataCalibrationBuilder_ == null) {
+          resultDataCalibration_ = null;
+        } else {
+          resultDataCalibration_ = null;
+          resultDataCalibrationBuilder_ = null;
+        }
         return this;
       }
 
@@ -4234,6 +4849,11 @@ public final class CalibrationProtos {
           result.cameraCalibration_ = cameraCalibration_;
         } else {
           result.cameraCalibration_ = cameraCalibrationBuilder_.build();
+        }
+        if (resultDataCalibrationBuilder_ == null) {
+          result.resultDataCalibration_ = resultDataCalibration_;
+        } else {
+          result.resultDataCalibration_ = resultDataCalibrationBuilder_.build();
         }
         onBuilt();
         return result;
@@ -4290,6 +4910,9 @@ public final class CalibrationProtos {
         }
         if (other.hasCameraCalibration()) {
           mergeCameraCalibration(other.getCameraCalibration());
+        }
+        if (other.hasResultDataCalibration()) {
+          mergeResultDataCalibration(other.getResultDataCalibration());
         }
         onChanged();
         return this;
@@ -5080,6 +5703,159 @@ public final class CalibrationProtos {
           cameraCalibration_ = null;
         }
         return cameraCalibrationBuilder_;
+      }
+
+      private gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration resultDataCalibration_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder> resultDataCalibrationBuilder_;
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public boolean hasResultDataCalibration() {
+        return resultDataCalibrationBuilder_ != null || resultDataCalibration_ != null;
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration getResultDataCalibration() {
+        if (resultDataCalibrationBuilder_ == null) {
+          return resultDataCalibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.getDefaultInstance() : resultDataCalibration_;
+        } else {
+          return resultDataCalibrationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public Builder setResultDataCalibration(gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration value) {
+        if (resultDataCalibrationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          resultDataCalibration_ = value;
+          onChanged();
+        } else {
+          resultDataCalibrationBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public Builder setResultDataCalibration(
+          gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder builderForValue) {
+        if (resultDataCalibrationBuilder_ == null) {
+          resultDataCalibration_ = builderForValue.build();
+          onChanged();
+        } else {
+          resultDataCalibrationBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public Builder mergeResultDataCalibration(gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration value) {
+        if (resultDataCalibrationBuilder_ == null) {
+          if (resultDataCalibration_ != null) {
+            resultDataCalibration_ =
+              gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.newBuilder(resultDataCalibration_).mergeFrom(value).buildPartial();
+          } else {
+            resultDataCalibration_ = value;
+          }
+          onChanged();
+        } else {
+          resultDataCalibrationBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public Builder clearResultDataCalibration() {
+        if (resultDataCalibrationBuilder_ == null) {
+          resultDataCalibration_ = null;
+          onChanged();
+        } else {
+          resultDataCalibration_ = null;
+          resultDataCalibrationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder getResultDataCalibrationBuilder() {
+        
+        onChanged();
+        return getResultDataCalibrationFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder getResultDataCalibrationOrBuilder() {
+        if (resultDataCalibrationBuilder_ != null) {
+          return resultDataCalibrationBuilder_.getMessageOrBuilder();
+        } else {
+          return resultDataCalibration_ == null ?
+              gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.getDefaultInstance() : resultDataCalibration_;
+        }
+      }
+      /**
+       * <pre>
+       * The result data calibration.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultDataCalibration result_data_calibration = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder> 
+          getResultDataCalibrationFieldBuilder() {
+        if (resultDataCalibrationBuilder_ == null) {
+          resultDataCalibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibration.Builder, gdsc.smlm.data.config.CalibrationProtos.ResultDataCalibrationOrBuilder>(
+                  getResultDataCalibration(),
+                  getParentForChildren(),
+                  isClean());
+          resultDataCalibration_ = null;
+        }
+        return resultDataCalibrationBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -6739,6 +7515,11 @@ public final class CalibrationProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CameraCalibration_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_ResultDataCalibration_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_ResultDataCalibration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Calibration_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -6768,41 +7549,46 @@ public final class CalibrationProtos {
   static {
     java.lang.String[] descriptorData = {
       "\n\021calibration.proto\022\025gdsc.smlm.data.conf" +
-      "ig\032\nunit.proto\"g\n\023DistanceCalibration\022:\n" +
-      "\rdistance_unit\030\001 \001(\0162#.gdsc.smlm.data.co" +
-      "nfig.DistanceUnit\022\024\n\014nm_per_pixel\030\002 \001(\001\"" +
-      "\\\n\017TimeCalibration\0222\n\ttime_unit\030\001 \001(\0162\037." +
-      "gdsc.smlm.data.config.TimeUnit\022\025\n\rexposu" +
-      "re_time\030\002 \001(\001\"n\n\024IntensityCalibration\022<\n" +
-      "\016intensity_unit\030\001 \001(\0162$.gdsc.smlm.data.c" +
-      "onfig.IntensityUnit\022\030\n\020count_per_photon\030" +
-      "\002 \001(\001\"H\n\020AngleCalibration\0224\n\nangle_unit\030",
-      "\001 \001(\0162 .gdsc.smlm.data.config.AngleUnit\"" +
-      "\276\001\n\021CameraCalibration\0226\n\013camera_type\030\001 \001" +
-      "(\0162!.gdsc.smlm.data.config.CameraType\022\022\n" +
-      "\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001(\001\022\031\n\021camer" +
-      "a_model_name\030\005 \001(\t\022\032\n\022quantum_efficiency" +
-      "\030\006 \001(\001J\004\010\004\020\005R\022count_per_electron\"\357\002\n\013Cal" +
-      "ibration\022H\n\024distance_calibration\030\001 \001(\0132*" +
-      ".gdsc.smlm.data.config.DistanceCalibrati" +
-      "on\022@\n\020time_calibration\030\002 \001(\0132&.gdsc.smlm" +
-      ".data.config.TimeCalibration\022J\n\025intensit",
-      "y_calibration\030\003 \001(\0132+.gdsc.smlm.data.con" +
-      "fig.IntensityCalibration\022B\n\021angle_calibr" +
-      "ation\030\004 \001(\0132\'.gdsc.smlm.data.config.Angl" +
-      "eCalibration\022D\n\022camera_calibration\030\005 \001(\013" +
-      "2(.gdsc.smlm.data.config.CameraCalibrati" +
-      "on\"\\\n\023CameraModelResource\022\t\n\001x\030\001 \001(\005\022\t\n\001" +
-      "y\030\002 \001(\005\022\r\n\005width\030\003 \001(\005\022\016\n\006height\030\004 \001(\005\022\020" +
-      "\n\010filename\030\005 \001(\t\"\344\001\n\023CameraModelSettings" +
-      "\022d\n\026camera_model_resources\030\001 \003(\0132D.gdsc." +
-      "smlm.data.config.CameraModelSettings.Cam",
-      "eraModelResourcesEntry\032g\n\031CameraModelRes" +
-      "ourcesEntry\022\013\n\003key\030\001 \001(\t\0229\n\005value\030\002 \001(\0132" +
-      "*.gdsc.smlm.data.config.CameraModelResou" +
-      "rce:\0028\001*?\n\nCameraType\022\022\n\016CAMERA_TYPE_NA\020" +
-      "\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD\020\002\022\t\n\005SCMOS\020\003B\023B\021Cali" +
-      "brationProtosb\006proto3"
+      "ig\032\nunit.proto\032\tfit.proto\"g\n\023DistanceCal" +
+      "ibration\022:\n\rdistance_unit\030\001 \001(\0162#.gdsc.s" +
+      "mlm.data.config.DistanceUnit\022\024\n\014nm_per_p" +
+      "ixel\030\002 \001(\001\"\\\n\017TimeCalibration\0222\n\ttime_un" +
+      "it\030\001 \001(\0162\037.gdsc.smlm.data.config.TimeUni" +
+      "t\022\025\n\rexposure_time\030\002 \001(\001\"n\n\024IntensityCal" +
+      "ibration\022<\n\016intensity_unit\030\001 \001(\0162$.gdsc." +
+      "smlm.data.config.IntensityUnit\022\030\n\020count_" +
+      "per_photon\030\002 \001(\001\"H\n\020AngleCalibration\0224\n\n",
+      "angle_unit\030\001 \001(\0162 .gdsc.smlm.data.config" +
+      ".AngleUnit\"\276\001\n\021CameraCalibration\0226\n\013came" +
+      "ra_type\030\001 \001(\0162!.gdsc.smlm.data.config.Ca" +
+      "meraType\022\022\n\nread_noise\030\002 \001(\001\022\014\n\004bias\030\003 \001" +
+      "(\001\022\031\n\021camera_model_name\030\005 \001(\t\022\032\n\022quantum" +
+      "_efficiency\030\006 \001(\001J\004\010\004\020\005R\022count_per_elect" +
+      "ron\"Y\n\025ResultDataCalibration\022@\n\020precisio" +
+      "n_method\030\001 \001(\0162&.gdsc.smlm.data.config.P" +
+      "recisionMethod\"\276\003\n\013Calibration\022H\n\024distan" +
+      "ce_calibration\030\001 \001(\0132*.gdsc.smlm.data.co",
+      "nfig.DistanceCalibration\022@\n\020time_calibra" +
+      "tion\030\002 \001(\0132&.gdsc.smlm.data.config.TimeC" +
+      "alibration\022J\n\025intensity_calibration\030\003 \001(" +
+      "\0132+.gdsc.smlm.data.config.IntensityCalib" +
+      "ration\022B\n\021angle_calibration\030\004 \001(\0132\'.gdsc" +
+      ".smlm.data.config.AngleCalibration\022D\n\022ca" +
+      "mera_calibration\030\005 \001(\0132(.gdsc.smlm.data." +
+      "config.CameraCalibration\022M\n\027result_data_" +
+      "calibration\030\006 \001(\0132,.gdsc.smlm.data.confi" +
+      "g.ResultDataCalibration\"\\\n\023CameraModelRe",
+      "source\022\t\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\022\r\n\005width\030\003 " +
+      "\001(\005\022\016\n\006height\030\004 \001(\005\022\020\n\010filename\030\005 \001(\t\"\344\001" +
+      "\n\023CameraModelSettings\022d\n\026camera_model_re" +
+      "sources\030\001 \003(\0132D.gdsc.smlm.data.config.Ca" +
+      "meraModelSettings.CameraModelResourcesEn" +
+      "try\032g\n\031CameraModelResourcesEntry\022\013\n\003key\030" +
+      "\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.data.co" +
+      "nfig.CameraModelResource:\0028\001*?\n\nCameraTy" +
+      "pe\022\022\n\016CAMERA_TYPE_NA\020\000\022\t\n\005EMCCD\020\001\022\007\n\003CCD" +
+      "\020\002\022\t\n\005SCMOS\020\003B\023B\021CalibrationProtosb\006prot",
+      "o3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6816,6 +7602,7 @@ public final class CalibrationProtos {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           gdsc.smlm.data.config.UnitProtos.getDescriptor(),
+          gdsc.smlm.data.config.FitProtos.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_DistanceCalibration_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -6847,20 +7634,26 @@ public final class CalibrationProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraCalibration_descriptor,
         new java.lang.String[] { "CameraType", "ReadNoise", "Bias", "CameraModelName", "QuantumEfficiency", });
-    internal_static_gdsc_smlm_data_config_Calibration_descriptor =
+    internal_static_gdsc_smlm_data_config_ResultDataCalibration_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_gdsc_smlm_data_config_ResultDataCalibration_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_ResultDataCalibration_descriptor,
+        new java.lang.String[] { "PrecisionMethod", });
+    internal_static_gdsc_smlm_data_config_Calibration_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_gdsc_smlm_data_config_Calibration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_Calibration_descriptor,
-        new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "IntensityCalibration", "AngleCalibration", "CameraCalibration", });
+        new java.lang.String[] { "DistanceCalibration", "TimeCalibration", "IntensityCalibration", "AngleCalibration", "CameraCalibration", "ResultDataCalibration", });
     internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_gdsc_smlm_data_config_CameraModelResource_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraModelResource_descriptor,
         new java.lang.String[] { "X", "Y", "Width", "Height", "Filename", });
     internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_gdsc_smlm_data_config_CameraModelSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraModelSettings_descriptor,
@@ -6872,6 +7665,7 @@ public final class CalibrationProtos {
         internal_static_gdsc_smlm_data_config_CameraModelSettings_CameraModelResourcesEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
+    gdsc.smlm.data.config.FitProtos.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
