@@ -294,6 +294,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		// Cast to a float as the precision is probably limited in significant figures 
 		sb.append('\t').append((float) value);
+		if (computed)
+			sb.append('*');
 	}
 
 	public void add(PeakResult result)
