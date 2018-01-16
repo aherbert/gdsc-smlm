@@ -21,6 +21,8 @@ import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationReader;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -89,7 +91,7 @@ public class SummariseResults implements PlugIn
 		{
 			StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
 			// Calibration
-			sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit");
+			sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\tPrecision Method");
 			for (String statName : new String[] { "Precision (nm)", "SNR" })
 			{
 				sb.append("\tAv ").append(statName);
@@ -110,11 +112,9 @@ public class SummariseResults implements PlugIn
 	private void addSummary(StringBuilder sb, MemoryPeakResults result)
 	{
 		final DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
-		char[] suffix = new char[2];
 		for (int i = 0; i < stats.length; i++)
 		{
 			stats[i] = new DescriptiveStatistics();
-			suffix[i] = 0;
 		}
 
 		if (result.hasNullResults())
@@ -134,14 +134,22 @@ public class SummariseResults implements PlugIn
 			result.removeNullResults();
 		}
 
+		CalibrationReader calibration = result.getCalibrationReader();
+
+		PrecisionMethod precisionMethod = PrecisionMethod.PRECISION_METHOD_NA;
+		boolean stored = false;
 		final int size = result.size();
 		if (size > 0)
 		{
 			// Precision
 			// Check if we can use the stored precision
-			if (result.hasStoredPrecision())
+			if (result.hasPrecision())
 			{
-				suffix[0] = '*';
+				if (calibration != null)
+				{
+					// This will return NA if the results do not have the precision method
+					precisionMethod = calibration.getPrecisionMethod();
+				}
 				result.forEach(new PeakResultProcedure()
 				{
 					public void execute(PeakResult peakResult)
@@ -149,6 +157,7 @@ public class SummariseResults implements PlugIn
 						stats[0].addValue(peakResult.getPrecision());
 					}
 				});
+				stored = true;
 			}
 			else
 			{
@@ -161,6 +170,7 @@ public class SummariseResults implements PlugIn
 					pp.getLSEPrecision();
 					for (double v : pp.precision)
 						stats[0].addValue(v);
+					precisionMethod = PrecisionMethod.MORTENSEN;
 				}
 				catch (DataException e)
 				{
@@ -180,8 +190,6 @@ public class SummariseResults implements PlugIn
 				});
 			}
 		}
-
-		CalibrationReader calibration = result.getCalibrationReader();
 
 		sb.append(result.getName());
 		int maxT = 0;
@@ -245,6 +253,9 @@ public class SummariseResults implements PlugIn
 		{
 			sb.append("\t\t\t\t\t");
 		}
+		sb.append("\t").append(FitProtosHelper.getName(precisionMethod));
+		if (stored)
+			sb.append(" (Stored)");
 		for (int i = 0; i < stats.length; i++)
 		{
 			if (Double.isNaN(stats[i].getMean()))
@@ -254,8 +265,6 @@ public class SummariseResults implements PlugIn
 			else
 			{
 				sb.append('\t').append(IJ.d2s(stats[i].getMean(), 3));
-				if (suffix[i] != 0)
-					sb.append(suffix[i]);
 				sb.append('\t').append(IJ.d2s(stats[i].getPercentile(50), 3));
 				sb.append('\t').append(IJ.d2s(stats[i].getMin(), 3));
 				sb.append('\t').append(IJ.d2s(stats[i].getMax(), 3));
