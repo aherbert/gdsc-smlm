@@ -32,6 +32,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 
 import gdsc.core.logging.TrackProgress;
+import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TextUtils;
@@ -112,7 +113,7 @@ public class PeakResultsReader
 	private TrackProgress tracker = null;
 	private ResultOption[] options = null;
 
-	private boolean deviations, readEndFrame, readId, readSource;
+	private boolean deviations, readEndFrame, readId, readPrecision, readSource;
 	private int smlmVersion = 3; // Assume the current
 
 	public PeakResultsReader(String filename)
@@ -214,22 +215,32 @@ public class PeakResultsReader
 			{
 				// The original files did not have the version tag
 				deviations = header.contains((format == FileFormat.SMLM_BINARY) ? "iiiifdfffffffffffffff" : "+/-");
-				readEndFrame = readId = false;
+				readEndFrame = readId = readPrecision = false;
 			}
 			else
 			{
 				deviations = version.contains(".D1");
-				// Extended marker has a bit flag:
-				// 1 = showEndFrame
-				// 2 = showId
-				if (version.contains(".E3"))
+				// Extended marker has a bit flag within .E[0-9]+.:
+				int startIndex = version.indexOf(".E");
+				if (startIndex != -1)
 				{
-					readEndFrame = readId = true;
-				}
-				else
-				{
-					readEndFrame = version.contains(".E1");
-					readId = version.contains(".E2");
+					startIndex += 2;
+					int endIndex = version.indexOf('.', startIndex);
+					if (endIndex != -1)
+					{
+						// Get the flags
+						try
+						{
+							int flags = Integer.parseInt(version.substring(startIndex, endIndex));
+							readEndFrame = BitFlags.areSet(flags, SMLMFilePeakResults.FLAG_END_FRAME);
+							readId = BitFlags.areSet(flags, SMLMFilePeakResults.FLAG_ID);
+							readPrecision = BitFlags.areSet(flags, SMLMFilePeakResults.FLAG_PRECISION);
+						}
+						catch (NumberFormatException e)
+						{
+							// Ignore
+						}
+					}
 				}
 			}
 			return true;
@@ -831,8 +842,14 @@ public class PeakResultsReader
 
 			// Format: [i]i[i]iifdf + n*f [+ n*f]
 			// where [] are optional and n is the number of fields
-
-			int length = BinaryFilePeakResults.getDataSize(deviations, readEndFrame, readId, nFields);
+			int flags = 0;
+			if (readEndFrame)
+				flags += SMLMFilePeakResults.FLAG_END_FRAME;
+			if (readId)
+				flags += SMLMFilePeakResults.FLAG_ID;
+			if (readPrecision)
+				flags += SMLMFilePeakResults.FLAG_PRECISION;
+			int length = BinaryFilePeakResults.getDataSize(deviations, flags, nFields);
 			byte[] buffer = new byte[length];
 
 			int c = 0;
