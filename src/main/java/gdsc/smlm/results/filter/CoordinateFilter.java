@@ -73,6 +73,11 @@ public class CoordinateFilter extends DirectFilter
 				peak.getYPosition() <= maxY;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_X | V_Y;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
@@ -160,7 +165,6 @@ public class CoordinateFilter extends DirectFilter
 		}
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -241,7 +245,7 @@ public class CoordinateFilter extends DirectFilter
 	{
 		return (index == 1 || index == 3) ? 1 : -1;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

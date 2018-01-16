@@ -50,6 +50,11 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 		return peak.getSignal() >= signalThreshold;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_PHOTONS;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
@@ -196,6 +201,6 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 
 	public PrecisionType getPrecisionType()
 	{
-		return  PrecisionType.NONE;
+		return PrecisionType.NONE;
 	}
 }

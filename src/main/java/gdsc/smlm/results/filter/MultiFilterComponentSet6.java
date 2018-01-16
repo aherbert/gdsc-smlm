@@ -16,7 +16,7 @@ package gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public class MultiFilterComponentSet6 extends MultiFilterComponentSet 
+public class MultiFilterComponentSet6 extends MultiFilterComponentSet
 {
 	private MultiFilterComponent component0;
 	private MultiFilterComponent component1;
@@ -34,6 +34,15 @@ public class MultiFilterComponentSet6 extends MultiFilterComponentSet
 		this.component4 = components[4];
 		this.component5 = components[5];
 	}
+
+	@Override
+	public int getValidationFlags()
+	{
+		return component0.getType() | component1.getType() | component2.getType() | component3.getType() |
+				component4.getType() | component5.getType();
+	}
+
+	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		//@formatter:off

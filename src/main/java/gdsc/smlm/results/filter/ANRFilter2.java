@@ -105,6 +105,11 @@ public class ANRFilter2 extends DirectFilter
 		return ANRFilter.getANR(calculator, peak) >= this.anr && sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_AMPLITUDE | V_NOISE | V_X_SD_FACTOR;
+	}
+	
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

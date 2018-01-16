@@ -106,6 +106,11 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		return sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_X_SD_FACTOR;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

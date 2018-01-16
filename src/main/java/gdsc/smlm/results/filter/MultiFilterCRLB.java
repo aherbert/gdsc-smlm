@@ -255,6 +255,11 @@ public class MultiFilterCRLB extends DirectFilter implements IMultiFilter
 		return true;
 	}
 
+	public int getValidationFlags()
+	{
+		return components.getValidationFlags();
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

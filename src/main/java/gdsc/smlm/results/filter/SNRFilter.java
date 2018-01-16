@@ -45,6 +45,11 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 		return getSNR(peak) >= this.snr;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_SNR;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
@@ -196,6 +201,6 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 
 	public PrecisionType getPrecisionType()
 	{
-		return  PrecisionType.NONE;
+		return PrecisionType.NONE;
 	}
 }

@@ -82,6 +82,11 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		return dx * dx + dy * dy <= eoffset;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

@@ -121,6 +121,16 @@ public abstract class CombinedFilter extends DirectFilter
 		return filter1.requiresParameterDeviations() || filter2.requiresParameterDeviations();
 	}
 
+	public int getValidationFlags()
+	{
+		int flags = 0;
+		if (dfilter1 != null)
+			flags |= dfilter1.getValidationFlags();
+		if (dfilter2 != null)
+			flags |= dfilter2.getValidationFlags();
+		return flags;
+	}
+
 	/**
 	 * Filter the result using filter1
 	 * 

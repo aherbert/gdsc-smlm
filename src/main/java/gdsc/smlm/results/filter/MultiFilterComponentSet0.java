@@ -22,6 +22,13 @@ public class MultiFilterComponentSet0 extends MultiFilterComponentSet
 	{
 	}
 
+	@Override
+	public int getValidationFlags()
+	{
+		return 0;
+	}
+	
+	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		return 0;

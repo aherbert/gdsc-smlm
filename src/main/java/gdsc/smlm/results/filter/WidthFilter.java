@@ -84,6 +84,11 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 		return calculator.getStandardDeviation(peak.getParameters()) <= upperSigmaThreshold;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_X_SD_FACTOR;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

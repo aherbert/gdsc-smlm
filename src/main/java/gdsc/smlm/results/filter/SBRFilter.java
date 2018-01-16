@@ -50,6 +50,11 @@ public class SBRFilter extends DirectFilter
 		return SNRFilter.getSNR(peak) >= this.sbr;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_PHOTONS | V_BACKGROUND| V_SNR;
+	}
+	
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

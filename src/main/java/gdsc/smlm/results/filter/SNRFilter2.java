@@ -104,6 +104,11 @@ public class SNRFilter2 extends DirectFilter implements IMultiFilter
 		return SNRFilter.getSNR(peak) >= this.snr && sd <= upperSigmaThreshold && sd >= lowerSigmaThreshold;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_SNR | V_X_SD_FACTOR;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

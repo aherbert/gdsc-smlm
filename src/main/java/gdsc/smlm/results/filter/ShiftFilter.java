@@ -96,6 +96,11 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 		return Math.abs(peak.getXShift()) <= offset && Math.abs(peak.getYShift()) <= offset;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

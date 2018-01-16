@@ -122,6 +122,14 @@ public interface IDirectFilter
 	final static int NO_SHIFT = 0x000000002;
 
 	/**
+	 * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the
+	 * filter {@link #validate(PreprocessedPeakResult)} method if the result fails validation.
+	 *
+	 * @return the validation flags
+	 */
+	int getValidationFlags();
+
+	/**
 	 * Called before the accept method is called for PreprocessedPeakResult
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.

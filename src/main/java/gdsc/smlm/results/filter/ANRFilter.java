@@ -56,6 +56,11 @@ public class ANRFilter extends DirectFilter
 				: Float.POSITIVE_INFINITY;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_AMPLITUDE | V_NOISE;
+	}
+	
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (getANR(peak) < this.anr)

@@ -19,6 +19,14 @@ package gdsc.smlm.results.filter;
 public abstract class MultiFilterComponentSet
 {
 	/**
+	 * Gets the validation flags. These are possible return flags from the {@link #validate(PreprocessedPeakResult)}
+	 * method.
+	 *
+	 * @return the validation flags
+	 */
+	abstract public int getValidationFlags();
+
+	/**
 	 * Validate the peak
 	 *
 	 * @param peak
@@ -26,11 +34,12 @@ public abstract class MultiFilterComponentSet
 	 * @return the result
 	 */
 	public abstract int validate(final PreprocessedPeakResult peak);
-	
+
 	/**
 	 * Replace the first component.
 	 *
-	 * @param c the replacement component
+	 * @param c
+	 *            the replacement component
 	 */
 	abstract void replace0(MultiFilterComponent c);
 }

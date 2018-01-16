@@ -58,6 +58,11 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter
 		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) <= variance;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_LOCATION_VARIANCE;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{

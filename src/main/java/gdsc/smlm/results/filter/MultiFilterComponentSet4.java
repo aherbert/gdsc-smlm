@@ -31,6 +31,13 @@ public class MultiFilterComponentSet4 extends MultiFilterComponentSet
 		this.component3 = components[3];
 	}
 
+	@Override
+	public int getValidationFlags()
+	{
+		return component0.getType() | component1.getType() | component2.getType() | component3.getType();
+	}
+
+	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		//@formatter:off

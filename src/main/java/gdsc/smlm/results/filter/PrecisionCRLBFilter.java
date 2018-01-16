@@ -59,6 +59,11 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 		return true;
 	}
 
+	public int getValidationFlags()
+	{
+		return V_LOCATION_VARIANCE_CRLB;
+	}
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
