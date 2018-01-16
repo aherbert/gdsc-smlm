@@ -1130,21 +1130,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
-	 * Checks if all results have a stored precision value.
-	 *
-	 * @return true, if all results have a stored precision value
-	 */
-	public boolean hasStoredPrecision()
-	{
-		for (int i = 0; i < size(); i++)
-		{
-			if (!getf(i).hasPrecision())
-				return false;
-		}
-		return true;
-	}
-
-	/**
 	 * Checks for null results in the store.
 	 *
 	 * @return true, if null PeakResult object(s) exist
