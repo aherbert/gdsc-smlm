@@ -1252,10 +1252,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		// Note: Store the squared threshold for speed.
 		precisionThreshold = 0;
-		switch (getPrecisionMethod())
+		switch (getPrecisionMethodValue())
 		{
-			case MORTENSEN:
-			case MORTENSEN_LOCAL_BACKGROUND:
+			case PrecisionMethod.MORTENSEN_VALUE:
+			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
 				// XXX - Determine if precision filtering for SCMOS is valid.
 				// For now we leave this in but it may have to be changed to have a precision
 				// computed during the fit which is stored for validation.
@@ -1264,7 +1264,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 						(calibration.isCCDCamera() || calibration.isSCMOS()))
 					this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
 				break;
-			case POISSON_CRLB:
+			case PrecisionMethod.POISSON_CRLB_VALUE:
 				this.precisionThreshold = Maths.pow2(getPrecisionThreshold());
 				break;
 			default:
@@ -1777,23 +1777,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private boolean isMinimiseValue()
 	{
-		switch (getFitSolver())
+		switch (getFitSolverValue())
 		{
-			case BACKTRACKING_FAST_MLE:
-			case FAST_MLE:
+			case FitSolver.BACKTRACKING_FAST_MLE_VALUE:
+			case FitSolver.FAST_MLE_VALUE:
 				// Maximum likelihood
 				return false;
 
-			case LVM_LSE:
-			case LVM_WLSE:
+			case FitSolver.LVM_LSE_VALUE:
+			case FitSolver.LVM_WLSE_VALUE:
 				// Minimise sum-of-squares
 				return true;
 
-			case LVM_MLE:
+			case FitSolver.LVM_MLE_VALUE:
 				// Minimises the log-likelihood ratio 
 				return true;
 
-			case MLE:
+			case FitSolver.MLE_VALUE:
 				// The legacy MLE actual minimises the negative likelihood.
 				// This should not matter anyway since the tolerance checker is not used
 				// for this fitter.
@@ -2022,17 +2022,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (precisionThreshold > 0)
 		{
 			final double variance;
-			switch (getPrecisionMethod())
+			switch (getPrecisionMethodValue())
 			{
-				case MORTENSEN:
-				case MORTENSEN_LOCAL_BACKGROUND:
+				case PrecisionMethod.MORTENSEN_VALUE:
+				case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
 					final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd)
 							: xsd;
 					variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
 							params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd,
 							isPrecisionUsingBackground());
 					break;
-				case POISSON_CRLB:
+				case PrecisionMethod.POISSON_CRLB_VALUE:
 					variance = getVariance(paramDevs, n);
 					break;
 				default:
@@ -2665,16 +2665,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public boolean requireStrictlyPositiveFunction()
 	{
 		// Only the LSE variants can fit negatives. The MLE variants all require a positive function. 
-		switch (getFitSolver())
+		switch (getFitSolverValue())
 		{
-			case LVM_LSE:
-			case LVM_WLSE:
+			case FitSolver.LVM_LSE_VALUE:
+			case FitSolver.LVM_WLSE_VALUE:
 				return false;
 
-			case LVM_MLE:
-			case MLE:
-			case FAST_MLE:
-			case BACKTRACKING_FAST_MLE:
+			case FitSolver.LVM_MLE_VALUE:
+			case FitSolver.MLE_VALUE:
+			case FitSolver.FAST_MLE_VALUE:
+			case FitSolver.BACKTRACKING_FAST_MLE_VALUE:
 				return true;
 
 			default:
@@ -2822,30 +2822,30 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		SteppingFunctionSolver solver;
 
-		switch (getFitSolver())
+		switch (getFitSolverValue())
 		{
-			case LVM_LSE:
+			case FitSolver.LVM_LSE_VALUE:
 				solver = new LSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
 				break;
 
-			case LVM_MLE:
+			case FitSolver.LVM_MLE_VALUE:
 				checkCameraCalibration();
 				solver = new MLELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
 				break;
 
-			case LVM_WLSE:
+			case FitSolver.LVM_WLSE_VALUE:
 				checkCameraCalibration();
 				solver = new WLSELVMSteppingFunctionSolver(gaussianFunction, tc, bounds);
 				break;
 
-			case FAST_MLE:
+			case FitSolver.FAST_MLE_VALUE:
 				checkCameraCalibration();
 				// This may throw a class cast exception if the function does not support
 				// the Gradient2Function interface
 				solver = new FastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
 				break;
 
-			case BACKTRACKING_FAST_MLE:
+			case FitSolver.BACKTRACKING_FAST_MLE_VALUE:
 				checkCameraCalibration();
 				solver = new BacktrackingFastMLESteppingFunctionSolver((Gradient2Function) gaussianFunction, tc,
 						bounds);
@@ -2881,22 +2881,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (!calibration.hasCameraCalibration())
 			throw new IllegalStateException("The camera calibration is required for fit solver: " + getFitSolver());
 
-		switch (getCameraType())
+		switch (getCameraTypeValue())
 		{
 			// CCD/EMCCD requires gain and bias (but bias could be zero)
-			case CCD:
-			case EMCCD:
+			case CameraType.CCD_VALUE:
+			case CameraType.EMCCD_VALUE:
 
 				// sCMOS requires per-pixel bias, gain and read noise (var/gain^2)
-			case SCMOS:
+			case CameraType.SCMOS_VALUE:
 
 				// Handle the camera checks within getCameraModel(). This throws if the 
 				// camera model is invalid
 				getCameraModel();
 				break;
 
-			case CAMERA_TYPE_NA:
-			case UNRECOGNIZED:
+			case CameraType.CAMERA_TYPE_NA_VALUE:
 			default:
 				throw new IllegalStateException(
 						"Unrecognised camera type for for fit solver: " + getFitSolver() + ": " + getCameraType());
@@ -2988,13 +2987,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double eshift = 0;
 		double precision = getPrecisionThreshold();
 
-		switch (getPrecisionMethod())
+		switch (getPrecisionMethodValue())
 		{
-			case MORTENSEN:
+			case PrecisionMethod. MORTENSEN_VALUE:
 				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
-			case MORTENSEN_LOCAL_BACKGROUND:
+			case PrecisionMethod. MORTENSEN_LOCAL_BACKGROUND_VALUE:
 				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
-			case POISSON_CRLB:
+			case PrecisionMethod. POISSON_CRLB_VALUE:
 				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision);
 			default:
 				throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
@@ -3184,17 +3183,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
 		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
 
-		switch (getPrecisionMethod())
+		switch (getPrecisionMethodValue())
 		{
-			case MORTENSEN:
+			case PrecisionMethod.MORTENSEN_VALUE:
 				if (peak.getLocationVariance() > varianceThreshold)
 					return V_LOCATION_VARIANCE;
 				break;
-			case MORTENSEN_LOCAL_BACKGROUND:
+			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
 				if (peak.getLocationVariance2() > varianceThreshold)
 					return V_LOCATION_VARIANCE2;
 				break;
-			case POISSON_CRLB:
+			case PrecisionMethod.POISSON_CRLB_VALUE:
 				if (peak.getLocationVarianceCRLB() > varianceThreshold)
 					return V_LOCATION_VARIANCE_CRLB;
 				break;
@@ -3538,17 +3537,16 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public boolean isPerPixelCameraType()
 	{
-		switch (getCameraType())
+		switch (getCameraTypeValue())
 		{
-			case CAMERA_TYPE_NA:
-			case CCD:
-			case EMCCD:
+			case CameraType.CAMERA_TYPE_NA_VALUE:
+			case CameraType.CCD_VALUE:
+			case CameraType.EMCCD_VALUE:
 				return false;
 
-			case SCMOS:
+			case CameraType.SCMOS_VALUE:
 				return true;
 
-			case UNRECOGNIZED:
 			default:
 				throw new IllegalStateException("Unknown camera type: " + getCameraType());
 		}
@@ -3563,15 +3561,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (cameraModel == null)
 		{
-			switch (getCameraType())
+			switch (getCameraTypeValue())
 			{
-				case CAMERA_TYPE_NA:
+				case CameraType.CAMERA_TYPE_NA_VALUE:
 					// We can support this by doing nothing to pixels values
 					cameraModel = new NullCameraModel();
 					break;
 
-				case CCD:
-				case EMCCD:
+				case CameraType.CCD_VALUE:
+				case CameraType.EMCCD_VALUE:
 					float bias = (float) calibration.getBias();
 					float gain = (float) calibration.getCountPerPhoton();
 					float variance = (float) Maths.pow2(calibration.getReadNoise());
@@ -3579,8 +3577,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					cameraModel = new FixedPixelCameraModel(bias, gain, variance);
 					break;
 
-				case SCMOS:
-				case UNRECOGNIZED:
+				case CameraType.SCMOS_VALUE:
 				default:
 					throw new IllegalStateException("No camera model for camera type: " + getCameraType());
 			}

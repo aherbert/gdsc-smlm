@@ -3174,20 +3174,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	{
 		final double[] params = peak.toGaussian2DParameters();
 		double precision;
-		switch (fitConfig.getPrecisionMethod())
+		switch (fitConfig.getPrecisionMethodValue())
 		{
-			case MORTENSEN:
+			case PrecisionMethod.MORTENSEN_VALUE:
 				precision = peak.getLocationVariance();
 				break;
-			case MORTENSEN_LOCAL_BACKGROUND:
+			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
 				precision = peak.getLocationVariance2();
 				break;
-			case POISSON_CRLB:
+			case PrecisionMethod.POISSON_CRLB_VALUE:
 				precision = peak.getLocationVarianceCRLB();
 				break;
-			case UNRECOGNIZED:
 			default:
-				precision = 0;
+				// Get a standard precision, even if inaccurate it is good enough for 
+				// differentiating estimates
+				precision = peak.getLocationVariance();
+				//precision = 0;
 				break;
 		}
 		storeEstimate(i, params, precision, filterRank);
