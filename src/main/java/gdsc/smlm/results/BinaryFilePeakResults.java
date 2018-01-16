@@ -241,6 +241,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 					buffer.writeFloat(paramsStdDev[i]);
 			}
 		}
+		if (isShowPrecision())
+			buffer.writeFloat((float) precision);
 	}
 
 	public void add(PeakResult result)

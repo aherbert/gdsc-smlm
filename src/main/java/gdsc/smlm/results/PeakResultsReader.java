@@ -831,6 +831,7 @@ public class PeakResultsReader
 		}
 
 		DataInputStream input = null;
+		boolean extended = readEndFrame || readId || readPrecision;
 		try
 		{
 			FileInputStream fis = new FileInputStream(filename);
@@ -886,9 +887,19 @@ public class PeakResultsReader
 					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				}
 
-				if (readId || readEndFrame)
-					results.add(new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev, endPeak, id));
+				if (extended)
+				{
+					AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
+							paramsStdDev);
+					if (readEndFrame)
+						r.setEndFrame(endPeak);
+					if (readId)
+						r.setId(id);
+					if (readPrecision)
+						// Read it here because it is the final field
+						r.setPrecision(readFloat(buffer));
+					results.add(r);
+				}
 				else
 					results.add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
 
@@ -1470,12 +1481,17 @@ public class PeakResultsReader
 				{
 					params[i] = scanner.nextFloat();
 				}
+				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
+						null);
+				if (readEndFrame)
+					r.setEndFrame(endPeak);
+				if (readId)
+					r.setId(id);
+				if (readPrecision)
+					// Read it here because it is the final field
+					r.setPrecision(scanner.nextFloat());
 				scanner.close();
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
-							id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
+				return r;
 			}
 			else
 			{
@@ -1494,11 +1510,16 @@ public class PeakResultsReader
 				{
 					params[i] = Float.parseFloat(fields[j++]);
 				}
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, null, endPeak,
-							id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, params, null);
+				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
+						null);
+				if (readEndFrame)
+					r.setEndFrame(endPeak);
+				if (readId)
+					r.setId(id);
+				if (readPrecision)
+					// Read it here because it is the final field
+					r.setPrecision(Float.parseFloat(fields[j++]));
+				return r;
 			}
 		}
 		catch (InputMismatchException e)
@@ -1545,12 +1566,17 @@ public class PeakResultsReader
 					params[i] = scanner.nextFloat();
 					paramsStdDev[i] = scanner.nextFloat();
 				}
+				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
+						paramsStdDev);
+				if (readEndFrame)
+					r.setEndFrame(endPeak);
+				if (readId)
+					r.setId(id);
+				if (readPrecision)
+					// Read it here because it is the final field
+					r.setPrecision(scanner.nextFloat());
 				scanner.close();
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
-							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+				return r;
 			}
 			else
 			{
@@ -1572,11 +1598,16 @@ public class PeakResultsReader
 					params[i] = Float.parseFloat(fields[j++]);
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
-				if (readId || readEndFrame)
-					return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev,
-							endPeak, id);
-				else
-					return new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
+						paramsStdDev);
+				if (readEndFrame)
+					r.setEndFrame(endPeak);
+				if (readId)
+					r.setId(id);
+				if (readPrecision)
+					// Read it here because it is the final field
+					r.setPrecision(Float.parseFloat(fields[j++]));
+				return r;
 			}
 		}
 		catch (InputMismatchException e)

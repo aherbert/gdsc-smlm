@@ -198,7 +198,7 @@ public class PeakResultsReaderTest
 	@Test
 	public void writeBinaryWithPrecisionWithSortMatchesRead()
 	{
-		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, false, true);
+		writeMatchesRead(false, ResultsFileFormat.BINARY, false, false, false, true, true);
 	}
 
 	@Test
@@ -416,7 +416,7 @@ public class PeakResultsReaderTest
 
 		String filename = createFile();
 
-		writeFile(false, ResultsFileFormat.MALK, false, false, false, false, out, filename);
+		writeFile(false, ResultsFileFormat.MALK, false, false, false, false, false, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false);
 
@@ -456,7 +456,7 @@ public class PeakResultsReaderTest
 
 		String filename = createFile();
 
-		writeFile(false, fileFormat, false, false, false, false, out, filename);
+		writeFile(false, fileFormat, false, false, false, false, false, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false, false);
 
@@ -507,7 +507,7 @@ public class PeakResultsReaderTest
 
 		String filename = createFile();
 
-		writeFile(false, fileFormat, false, false, false, false, out, filename);
+		writeFile(false, fileFormat, false, false, false, false, false, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false, false);
 
@@ -537,7 +537,7 @@ public class PeakResultsReaderTest
 			}
 		});
 
-		writeFile(false, fileFormat, false, false, false, false, out, filename);
+		writeFile(false, fileFormat, false, false, false, false, false, out, filename);
 
 		in = readFile(filename, false, false);
 
@@ -562,10 +562,10 @@ public class PeakResultsReaderTest
 		MemoryPeakResults out = createResults(20000, showDeviations, showEndFrame, showId, showPrecision);
 		String filename = createFile();
 
-		writeFile(false, f1, showDeviations, showEndFrame, showId, false, out, filename);
+		writeFile(false, f1, showDeviations, showEndFrame, showId, showPrecision, false, out, filename);
 		long time1 = getReadTime(filename, useScanner1, loops);
 
-		writeFile(false, f2, showDeviations, showEndFrame, showId, false, out, filename);
+		writeFile(false, f2, showDeviations, showEndFrame, showId, showPrecision, false, out, filename);
 		long time2 = getReadTime(filename, useScanner2, loops);
 
 		if (useScanner1 != useScanner2)
@@ -612,7 +612,7 @@ public class PeakResultsReaderTest
 
 		String filename = createFile();
 
-		writeFile(sequential, fileFormat, showDeviations, showEndFrame, showId, sort, out, filename);
+		writeFile(sequential, fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false);
 
@@ -655,7 +655,7 @@ public class PeakResultsReaderTest
 		String filename = createFile();
 
 		ResultsFileFormat fileFormat = ResultsFileFormat.TEXT;
-		writeFile(false, fileFormat, showDeviations, showEndFrame, showId, sort, out, filename);
+		writeFile(false, fileFormat, showDeviations, showEndFrame, showId, showPrecision, sort, out, filename);
 
 		MemoryPeakResults in = readFile(filename, false);
 		MemoryPeakResults in2 = readFile(filename, true);
@@ -884,16 +884,17 @@ public class PeakResultsReaderTest
 	}
 
 	private void writeFile(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
-			boolean showEndFrame, boolean showId, boolean sort, MemoryPeakResults results, String filename)
+			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort, MemoryPeakResults results,
+			String filename)
 	{
 		final PeakResults out;
 		switch (fileFormat)
 		{
 			case BINARY:
-				out = new BinaryFilePeakResults(filename, showDeviations, showEndFrame, showId);
+				out = new BinaryFilePeakResults(filename, showDeviations, showEndFrame, showId, showPrecision);
 				break;
 			case TEXT:
-				out = new TextFilePeakResults(filename, showDeviations, showEndFrame, showId);
+				out = new TextFilePeakResults(filename, showDeviations, showEndFrame, showId, showPrecision);
 				break;
 			case TSF:
 				out = new TSFPeakResultsWriter(filename);

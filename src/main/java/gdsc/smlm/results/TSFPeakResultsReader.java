@@ -382,7 +382,7 @@ public class TSFPeakResultsReader
 				peakResult.setId(id);
 				if (spot.hasXPrecision() || spot.hasYPrecision())
 				{
-					// Use the average. Note this is not the Euclidean distance since we divide by n!
+					// Use the average. Note this is not the Euclidean distance since we divide by n
 					double p = 0;
 					int n = 0;
 					if (spot.hasXPrecision())
