@@ -1194,8 +1194,9 @@ public class FitEngineConfiguration implements Cloneable
 	 */
 	public void configureOutputUnits()
 	{
+		FitConfiguration fitConfig = getFitConfiguration();
 		// If there is no calibration then the writer will just have the defaults
-		CalibrationWriter calibration = getFitConfiguration().getCalibrationWriter();
+		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
 
 		// Fitting is always done pixels and radians
 		calibration.setDistanceUnit(DistanceUnit.PIXEL);
@@ -1205,9 +1206,12 @@ public class FitEngineConfiguration implements Cloneable
 		IntensityUnit intensityUnit = IntensityUnit.PHOTON;
 
 		if (//calibration.getCountPerPhoton() == 0 || 
-		getFitConfiguration().isFitCameraCounts())
+			fitConfig.isFitCameraCounts())
 			intensityUnit = IntensityUnit.COUNT;
 
 		calibration.setIntensityUnit(intensityUnit);
+		
+		// This initialises the calibration precision method
+		fitConfig.getFilterPrecisionMethod();
 	}
 }

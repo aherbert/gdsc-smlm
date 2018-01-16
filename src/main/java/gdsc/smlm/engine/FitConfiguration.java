@@ -1327,6 +1327,102 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		updatePrecisionThreshold();
 	}
 
+	// Enable caching the location variance selection
+	private class BaseVarianceSelector
+	{
+		double getLocationVariance(PreprocessedPeakResult peak)
+		{
+			return 0;
+		}
+	}
+
+	private class VarianceSelector extends BaseVarianceSelector
+	{
+		double getLocationVariance(PreprocessedPeakResult peak)
+		{
+			return peak.getLocationVariance();
+		}
+	}
+
+	private class VarianceSelector2 extends BaseVarianceSelector
+	{
+		double getLocationVariance(PreprocessedPeakResult peak)
+		{
+			return peak.getLocationVariance2();
+		}
+	}
+
+	private class VarianceSelectorCRLB extends BaseVarianceSelector
+	{
+		double getLocationVariance(PreprocessedPeakResult peak)
+		{
+			return peak.getLocationVarianceCRLB();
+		}
+	}
+
+	private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
+
+	/**
+	 * Gets the precision method that will be used to produce the precision value for filtering.
+	 * <p>
+	 * This checks first the direct filter and then the current value for the precision method.
+	 * <p>
+	 * The value is written into the current calibration to allow the calibration to be used in saved results.
+	 *
+	 * @return the filter precision method
+	 */
+	public PrecisionMethod getFilterPrecisionMethod()
+	{
+		PrecisionMethod m = getFilterPrecisionMethodInternal();
+		switch (m)
+		{
+			case MORTENSEN:
+				varianceSelector = new VarianceSelector();
+				break;
+			case MORTENSEN_LOCAL_BACKGROUND:
+				varianceSelector = new VarianceSelector2();
+				break;
+			case POISSON_CRLB:
+				varianceSelector = new VarianceSelectorCRLB();
+				break;
+			default:
+				m = PrecisionMethod.PRECISION_METHOD_NA;
+				varianceSelector = new BaseVarianceSelector();
+				break;
+		}
+		calibration.setPrecisionMethod(m);
+		return m;
+	}
+
+	private PrecisionMethod getFilterPrecisionMethodInternal()
+	{
+		if (isDirectFilter())
+		{
+			int flags = directFilter.getValidationFlags();
+			if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE_CRLB))
+				return PrecisionMethod.POISSON_CRLB;
+			if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE2))
+				return PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
+			if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE))
+				return PrecisionMethod.MORTENSEN;
+		}
+		return getPrecisionMethod();
+	}
+
+	/**
+	 * Gets the location variance of the result that was used for result filtering. This will use the method matching
+	 * that from the last call to {@link #getFilterPrecisionMethod()}. This allows the state to be cached for efficient
+	 * selection of the location variance.
+	 *
+	 * @param peak
+	 *            the peak
+	 * @return the variance
+	 */
+	public double getLocationVariance(PreprocessedPeakResult peak)
+	{
+		return varianceSelector.getLocationVariance(peak);
+	}
+
 	/**
 	 * Set the image noise used to determine the signal strength for a good fit (signalThreshold =
 	 * max(minSignal, noise x signalStrength).
@@ -2989,11 +3085,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		switch (getPrecisionMethodValue())
 		{
-			case PrecisionMethod. MORTENSEN_VALUE:
+			case PrecisionMethod.MORTENSEN_VALUE:
 				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
-			case PrecisionMethod. MORTENSEN_LOCAL_BACKGROUND_VALUE:
+			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
 				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
-			case PrecisionMethod. POISSON_CRLB_VALUE:
+			case PrecisionMethod.POISSON_CRLB_VALUE:
 				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision);
 			default:
 				throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
@@ -3150,6 +3246,36 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (flags != 0)
 			log.info("Bad peak %d (%.1f,%.1f) [%d]: %s", peak.getCandidateId(), peak.getX(), peak.getY(), peak.getId(),
 					DirectFilter.getStatusMessage(peak, flags));
+		return flags;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
+	 */
+	public int getValidationFlags()
+	{
+		if (directFilter != null)
+			return directFilter.getValidationFlags();
+		if (isDisableSimpleFilter())
+			return 0;
+		// These could be conditional on the filter settings. For now just set them all.
+		int flags = V_PHOTONS | V_SNR | V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+		if (widthEnabled)
+			flags |= V_X_SD_FACTOR;
+		switch (getPrecisionMethodValue())
+		{
+			case PrecisionMethod.MORTENSEN_VALUE:
+				flags |= V_LOCATION_VARIANCE;
+				break;
+			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
+				flags |= V_LOCATION_VARIANCE2;
+				break;
+			case PrecisionMethod.POISSON_CRLB_VALUE:
+				flags |= V_LOCATION_VARIANCE_CRLB;
+				break;
+		}
 		return flags;
 	}
 

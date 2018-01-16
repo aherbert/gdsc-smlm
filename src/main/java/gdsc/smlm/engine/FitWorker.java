@@ -4119,7 +4119,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				}
 
 				addSingleResult(peak.getCandidateId(), params, paramDevs, fitResult.getError(), peak.getNoise(),
-						peak.getLocationVarianceCRLB());
+						fitConfig.getLocationVariance(peak));
 
 				if (logger != null)
 				{
