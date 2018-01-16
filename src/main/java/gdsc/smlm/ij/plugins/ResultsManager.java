@@ -408,15 +408,16 @@ public class ResultsManager implements PlugIn
 				switch (resultsSettings.getFileFormat())
 				{
 					case BINARY:
-						r = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame, showId);
+						r = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame, showId,
+								resultsSettings.getShowPrecision());
 						break;
 					case TEXT:
 						TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations, showEndFrame,
-								showId);
+								showId, resultsSettings.getShowPrecision());
 						f.setDistanceUnit(resultsSettings.getDistanceUnit());
 						f.setIntensityUnit(resultsSettings.getIntensityUnit());
 						f.setAngleUnit(resultsSettings.getAngleUnit());
-						f.setComputePrecision(resultsSettings.getComputePrecision());
+						f.setComputePrecision(true);
 						r = f;
 						break;
 					case MALK:
@@ -681,7 +682,7 @@ public class ResultsManager implements PlugIn
 									fileSettings.getIntensityUnit().ordinal());
 							egd.addChoice("File_angle_unit", SettingsManager.getAngleUnitNames(),
 									fileSettings.getAngleUnit().ordinal());
-							egd.addCheckbox("File_show_precision", fileSettings.getComputePrecision());
+							egd.addCheckbox("File_show_precision", fileSettings.getShowPrecision());
 						}
 						egd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
 						egd.setSilent(silent);
@@ -691,7 +692,7 @@ public class ResultsManager implements PlugIn
 						fileSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
 						fileSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
 						fileSettings.setAngleUnitValue(egd.getNextChoiceIndex());
-						fileSettings.setComputePrecision(egd.getNextBoolean());
+						fileSettings.setShowPrecision(egd.getNextBoolean());
 						resultsSettings.setShowDeviations(egd.getNextBoolean());
 						return true;
 					}

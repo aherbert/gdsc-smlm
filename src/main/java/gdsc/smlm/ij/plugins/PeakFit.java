@@ -2180,7 +2180,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 							throw new IllegalArgumentException(
 									"Precision filter requires a precision method");
 						}
-						if (fitConfig.isPrecisionUsingBackground() && calibration.getBias() == 0)
+						if (fitConfig.isPrecisionUsingBackground() &&
+								calibration.isCCDCamera() &&
+								(calibration.getBias() == 0 || !calibration.hasCountPerPhoton()))
 						{
 							throw new IllegalArgumentException(
 									"Precision using the local background requires the camera bias");

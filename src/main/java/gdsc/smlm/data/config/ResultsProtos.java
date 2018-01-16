@@ -1627,12 +1627,12 @@ public final class ResultsProtos {
 
     /**
      * <pre>
-     * Set to true to compute and output precision to the results file
+     * Set to true to show precision in the results file
      * </pre>
      *
-     * <code>bool compute_precision = 7;</code>
+     * <code>bool show_precision = 7;</code>
      */
-    boolean getComputePrecision();
+    boolean getShowPrecision();
   }
   /**
    * <pre>
@@ -1656,7 +1656,7 @@ public final class ResultsProtos {
       distanceUnit_ = 0;
       intensityUnit_ = 0;
       angleUnit_ = 0;
-      computePrecision_ = false;
+      showPrecision_ = false;
     }
 
     @java.lang.Override
@@ -1722,7 +1722,7 @@ public final class ResultsProtos {
             }
             case 56: {
 
-              computePrecision_ = input.readBool();
+              showPrecision_ = input.readBool();
               break;
             }
           }
@@ -1928,17 +1928,17 @@ public final class ResultsProtos {
       return result == null ? gdsc.smlm.data.config.UnitProtos.AngleUnit.UNRECOGNIZED : result;
     }
 
-    public static final int COMPUTE_PRECISION_FIELD_NUMBER = 7;
-    private boolean computePrecision_;
+    public static final int SHOW_PRECISION_FIELD_NUMBER = 7;
+    private boolean showPrecision_;
     /**
      * <pre>
-     * Set to true to compute and output precision to the results file
+     * Set to true to show precision in the results file
      * </pre>
      *
-     * <code>bool compute_precision = 7;</code>
+     * <code>bool show_precision = 7;</code>
      */
-    public boolean getComputePrecision() {
-      return computePrecision_;
+    public boolean getShowPrecision() {
+      return showPrecision_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1971,8 +1971,8 @@ public final class ResultsProtos {
       if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
         output.writeEnum(6, angleUnit_);
       }
-      if (computePrecision_ != false) {
-        output.writeBool(7, computePrecision_);
+      if (showPrecision_ != false) {
+        output.writeBool(7, showPrecision_);
       }
     }
 
@@ -2003,9 +2003,9 @@ public final class ResultsProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, angleUnit_);
       }
-      if (computePrecision_ != false) {
+      if (showPrecision_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(7, computePrecision_);
+          .computeBoolSize(7, showPrecision_);
       }
       memoizedSize = size;
       return size;
@@ -2031,8 +2031,8 @@ public final class ResultsProtos {
       result = result && distanceUnit_ == other.distanceUnit_;
       result = result && intensityUnit_ == other.intensityUnit_;
       result = result && angleUnit_ == other.angleUnit_;
-      result = result && (getComputePrecision()
-          == other.getComputePrecision());
+      result = result && (getShowPrecision()
+          == other.getShowPrecision());
       return result;
     }
 
@@ -2055,9 +2055,9 @@ public final class ResultsProtos {
       hash = (53 * hash) + intensityUnit_;
       hash = (37 * hash) + ANGLE_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + angleUnit_;
-      hash = (37 * hash) + COMPUTE_PRECISION_FIELD_NUMBER;
+      hash = (37 * hash) + SHOW_PRECISION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getComputePrecision());
+          getShowPrecision());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2203,7 +2203,7 @@ public final class ResultsProtos {
 
         angleUnit_ = 0;
 
-        computePrecision_ = false;
+        showPrecision_ = false;
 
         return this;
       }
@@ -2233,7 +2233,7 @@ public final class ResultsProtos {
         result.distanceUnit_ = distanceUnit_;
         result.intensityUnit_ = intensityUnit_;
         result.angleUnit_ = angleUnit_;
-        result.computePrecision_ = computePrecision_;
+        result.showPrecision_ = showPrecision_;
         onBuilt();
         return result;
       }
@@ -2295,8 +2295,8 @@ public final class ResultsProtos {
         if (other.angleUnit_ != 0) {
           setAngleUnitValue(other.getAngleUnitValue());
         }
-        if (other.getComputePrecision() != false) {
-          setComputePrecision(other.getComputePrecision());
+        if (other.getShowPrecision() != false) {
+          setShowPrecision(other.getShowPrecision());
         }
         onChanged();
         return this;
@@ -2758,40 +2758,40 @@ public final class ResultsProtos {
         return this;
       }
 
-      private boolean computePrecision_ ;
+      private boolean showPrecision_ ;
       /**
        * <pre>
-       * Set to true to compute and output precision to the results file
+       * Set to true to show precision in the results file
        * </pre>
        *
-       * <code>bool compute_precision = 7;</code>
+       * <code>bool show_precision = 7;</code>
        */
-      public boolean getComputePrecision() {
-        return computePrecision_;
+      public boolean getShowPrecision() {
+        return showPrecision_;
       }
       /**
        * <pre>
-       * Set to true to compute and output precision to the results file
+       * Set to true to show precision in the results file
        * </pre>
        *
-       * <code>bool compute_precision = 7;</code>
+       * <code>bool show_precision = 7;</code>
        */
-      public Builder setComputePrecision(boolean value) {
+      public Builder setShowPrecision(boolean value) {
         
-        computePrecision_ = value;
+        showPrecision_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to compute and output precision to the results file
+       * Set to true to show precision in the results file
        * </pre>
        *
-       * <code>bool compute_precision = 7;</code>
+       * <code>bool show_precision = 7;</code>
        */
-      public Builder clearComputePrecision() {
+      public Builder clearShowPrecision() {
         
-        computePrecision_ = false;
+        showPrecision_ = false;
         onChanged();
         return this;
       }
@@ -6110,7 +6110,7 @@ public final class ResultsProtos {
       "ResultsImageType\022\020\n\010weighted\030\002 \001(\010\022\021\n\teq" +
       "ualised\030\003 \001(\010\022\031\n\021average_precision\030\004 \001(\001" +
       "\022\r\n\005scale\030\005 \001(\001\022\033\n\023rolling_window_size\030\006" +
-      " \001(\005\"\324\002\n\023ResultsFileSettings\022\031\n\021results_" +
+      " \001(\005\"\321\002\n\023ResultsFileSettings\022\031\n\021results_" +
       "directory\030\001 \001(\t\022\030\n\020results_filename\030\002 \001(" +
       "\t\022=\n\013file_format\030\003 \001(\0162(.gdsc.smlm.data." +
       "config.ResultsFileFormat\022:\n\rdistance_uni",
@@ -6118,37 +6118,37 @@ public final class ResultsProtos {
       "Unit\022<\n\016intensity_unit\030\005 \001(\0162$.gdsc.smlm" +
       ".data.config.IntensityUnit\0224\n\nangle_unit" +
       "\030\006 \001(\0162 .gdsc.smlm.data.config.AngleUnit" +
-      "\022\031\n\021compute_precision\030\007 \001(\010\"\305\002\n\024ResultsT" +
-      "ableSettings\022\022\n\nshow_table\030\001 \001(\010\022:\n\rdist" +
-      "ance_unit\030\002 \001(\0162#.gdsc.smlm.data.config." +
-      "DistanceUnit\022<\n\016intensity_unit\030\003 \001(\0162$.g" +
-      "dsc.smlm.data.config.IntensityUnit\0224\n\nan" +
-      "gle_unit\030\004 \001(\0162 .gdsc.smlm.data.config.A",
-      "ngleUnit\022\031\n\021compute_precision\030\005 \001(\010\022\031\n\021s" +
-      "how_fitting_data\030\006 \001(\010\022\027\n\017show_noise_dat" +
-      "a\030\007 \001(\010\022\032\n\022rounding_precision\030\010 \001(\005\",\n\027R" +
-      "esultsInMemorySettings\022\021\n\tin_memory\030\001 \001(" +
-      "\010\"\371\002\n\017ResultsSettings\022\024\n\014log_progress\030\001 " +
-      "\001(\010\022\027\n\017show_deviations\030\002 \001(\010\022K\n\026results_" +
-      "image_settings\030\003 \001(\0132+.gdsc.smlm.data.co" +
-      "nfig.ResultsImageSettings\022I\n\025results_fil" +
-      "e_settings\030\004 \001(\0132*.gdsc.smlm.data.config" +
-      ".ResultsFileSettings\022K\n\026results_table_se",
-      "ttings\030\005 \001(\0132+.gdsc.smlm.data.config.Res" +
-      "ultsTableSettings\022R\n\032results_in_memory_s" +
-      "ettings\030\006 \001(\0132..gdsc.smlm.data.config.Re" +
-      "sultsInMemorySettings*\235\002\n\020ResultsImageTy" +
-      "pe\022\r\n\tDRAW_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020" +
-      "\001\022\022\n\016DRAW_INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMB" +
-      "ER\020\003\022\023\n\017DRAW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALI" +
-      "SATIONS_PRECISION\020\005\022\034\n\030DRAW_INTENSITY_PR" +
-      "ECISION\020\006\022(\n$DRAW_LOCALISATIONS_AVERAGE_" +
-      "PRECISION\020\007\022$\n DRAW_INTENSITY_AVERAGE_PR",
-      "ECISION\020\010\022\022\n\016DRAW_FIT_ERROR\020\t*C\n\020Results" +
-      "ImageMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLAC" +
-      "E\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022" +
-      "\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003" +
-      "TSF\020\003\022\010\n\004MALK\020\004B\017B\rResultsProtosb\006proto3"
+      "\022\026\n\016show_precision\030\007 \001(\010\"\305\002\n\024ResultsTabl" +
+      "eSettings\022\022\n\nshow_table\030\001 \001(\010\022:\n\rdistanc" +
+      "e_unit\030\002 \001(\0162#.gdsc.smlm.data.config.Dis" +
+      "tanceUnit\022<\n\016intensity_unit\030\003 \001(\0162$.gdsc" +
+      ".smlm.data.config.IntensityUnit\0224\n\nangle" +
+      "_unit\030\004 \001(\0162 .gdsc.smlm.data.config.Angl",
+      "eUnit\022\031\n\021compute_precision\030\005 \001(\010\022\031\n\021show" +
+      "_fitting_data\030\006 \001(\010\022\027\n\017show_noise_data\030\007" +
+      " \001(\010\022\032\n\022rounding_precision\030\010 \001(\005\",\n\027Resu" +
+      "ltsInMemorySettings\022\021\n\tin_memory\030\001 \001(\010\"\371" +
+      "\002\n\017ResultsSettings\022\024\n\014log_progress\030\001 \001(\010" +
+      "\022\027\n\017show_deviations\030\002 \001(\010\022K\n\026results_ima" +
+      "ge_settings\030\003 \001(\0132+.gdsc.smlm.data.confi" +
+      "g.ResultsImageSettings\022I\n\025results_file_s" +
+      "ettings\030\004 \001(\0132*.gdsc.smlm.data.config.Re" +
+      "sultsFileSettings\022K\n\026results_table_setti",
+      "ngs\030\005 \001(\0132+.gdsc.smlm.data.config.Result" +
+      "sTableSettings\022R\n\032results_in_memory_sett" +
+      "ings\030\006 \001(\0132..gdsc.smlm.data.config.Resul" +
+      "tsInMemorySettings*\235\002\n\020ResultsImageType\022" +
+      "\r\n\tDRAW_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022" +
+      "\n\016DRAW_INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020" +
+      "\003\022\023\n\017DRAW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISAT" +
+      "IONS_PRECISION\020\005\022\034\n\030DRAW_INTENSITY_PRECI" +
+      "SION\020\006\022(\n$DRAW_LOCALISATIONS_AVERAGE_PRE" +
+      "CISION\020\007\022$\n DRAW_INTENSITY_AVERAGE_PRECI",
+      "SION\020\010\022\022\n\016DRAW_FIT_ERROR\020\t*C\n\020ResultsIma" +
+      "geMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLACE\020\001" +
+      "\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022\r\n\t" +
+      "FILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003TSF" +
+      "\020\003\022\010\n\004MALK\020\004B\017B\rResultsProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6174,7 +6174,7 @@ public final class ResultsProtos {
     internal_static_gdsc_smlm_data_config_ResultsFileSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsFileSettings_descriptor,
-        new java.lang.String[] { "ResultsDirectory", "ResultsFilename", "FileFormat", "DistanceUnit", "IntensityUnit", "AngleUnit", "ComputePrecision", });
+        new java.lang.String[] { "ResultsDirectory", "ResultsFilename", "FileFormat", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", });
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_fieldAccessorTable = new

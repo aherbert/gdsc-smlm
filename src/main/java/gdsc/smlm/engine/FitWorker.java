@@ -966,7 +966,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		params[Gaussian2DFunction.Y_POSITION] += offsety;
 
 		return createResult(x, y, value, fitted.error, fitted.noise, params, fitted.paramDevs, candidateId,
-				c.precision);
+				fitted.precision);
 	}
 
 	private PeakResult createResult(int origX, int origY, float origValue, double error, float noise, float[] params,

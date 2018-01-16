@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import gdsc.core.utils.BitFlags;
+
 /**
  * Saves the fit results to a binary file format
  */
@@ -51,6 +53,12 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	public BinaryFilePeakResults(String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId)
 	{
 		super(resultsFilename, showDeviations, showEndFrame, showId);
+	}
+
+	public BinaryFilePeakResults(String resultsFilename, boolean showDeviations, boolean showEndFrame, boolean showId,
+			boolean showPrecision)
+	{
+		super(resultsFilename, showDeviations, showEndFrame, showId, showPrecision);
 	}
 
 	@Override
@@ -110,6 +118,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			for (int i = 0; i < nFields; i++)
 				sb.append('f');
 		}
+		if (isShowPrecision())
+			sb.append("f");
 		comments[1] = "Binary Format (raw Java bytes) = " + sb.toString();
 		return comments;
 	}
@@ -144,6 +154,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 				names.add(fieldNames[i] + " StdDev");
 			}
 		}
+		if (isShowPrecision())
+			names.add("Precision (nm)");
 		return names.toArray(new String[names.size()]);
 	}
 
@@ -185,7 +197,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 		try
 		{
-			addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, params, paramsStdDev);
+			addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, params, paramsStdDev, 0.0);
 			buffer.flush();
 		}
 		catch (IOException e)
@@ -199,7 +211,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	private void addResult(DataOutputStream buffer, final int id, final int peak, final int endPeak, final int origX,
 			final int origY, final float origValue, final double error, final float noise, final float[] params,
-			float[] paramsStdDev) throws IOException
+			float[] paramsStdDev, double precision) throws IOException
 	{
 		if (isShowId())
 			buffer.writeInt(id);
@@ -244,7 +256,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
 					result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-					result.getParameters(), result.getParameterDeviations());
+					result.getParameters(), result.getParameterDeviations(), result.getPrecision());
 			buffer.flush();
 		}
 		catch (IOException e)
@@ -278,7 +290,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			{
 				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
 						result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-						result.getParameters(), result.getParameterDeviations());
+						result.getParameters(), result.getParameterDeviations(), result.getPrecision());
 			}
 			catch (IOException e)
 			{
@@ -352,7 +364,14 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			{
 				header = readHeader(input);
 
-				byte[] line = new byte[getDataSize(isShowDeviations(), isShowEndFrame(), isShowId(), nFields)];
+				int flags = 0;
+				if (isShowEndFrame())
+					flags += FLAG_END_FRAME;
+				if (isShowId())
+					flags += FLAG_ID;
+				if (isShowPrecision())
+					flags += FLAG_PRECISION;
+				byte[] line = new byte[getDataSize(isShowDeviations(), flags, nFields)];
 				while (input.read(line) == line.length)
 				{
 					results.add(new Result(line));
@@ -428,7 +447,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		return sb.toString();
 	}
 
-	public static int getDataSize(boolean deviations, boolean endFrame, boolean id, int nFields)
+	public static int getDataSize(boolean deviations, int flags, int nFields)
 	{
 		final int BYTES_INT = 4;
 		final int BYTES_FLOAT = 4;
@@ -442,9 +461,11 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		int size = 3 * BYTES_INT + BYTES_FLOAT + BYTES_DOUBLE + BYTES_FLOAT + nFields * BYTES_FLOAT;
 		if (deviations)
 			size += nFields * BYTES_FLOAT;
-		if (endFrame)
+		if (BitFlags.areSet(flags, FLAG_END_FRAME))
 			size += BYTES_INT;
-		if (id)
+		if (BitFlags.areSet(flags, FLAG_ID))
+			size += BYTES_INT;
+		if (BitFlags.areSet(flags, FLAG_PRECISION))
 			size += BYTES_INT;
 		return size;
 	}

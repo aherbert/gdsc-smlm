@@ -595,6 +595,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		log = other.log;
 		cameraModel = other.cameraModel;
+		varianceSelector = other.varianceSelector;
 		return this;
 	}
 

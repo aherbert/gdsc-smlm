@@ -165,17 +165,12 @@ public class Gaussian2DPeakResultHelper
 			return Erf.erf(lx * (ONE_OVER_ROOT2 / s), (lx + 1) * (ONE_OVER_ROOT2 / s));
 		}
 
-		private static boolean isCCD(CalibrationReader calibration)
-		{
-			return calibration.isCCDCamera();
-		}
-
 		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -186,14 +181,17 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
-		private void checkLSEPrecisionCalibration()
+		private void checkPrecisionCalibration()
 		{
 			if (calibration == null)
 				throw new ConfigurationException("No calibration");
 			if (!calibration.hasNmPerPixel())
 				throw new ConfigurationException("Not a valid calibration: nm/pixel is required");
-			if (!isCCD(calibration))
-				throw new ConfigurationException("Not a valid calibration: CCD/EM-CCD camera type is required");
+			// Note: The Mortensen formula can be used for a sCMOS since that is like a CCD just with 
+			// per pixel read noise. The noise component then should represent an average across the
+			// region used to fit the data.
+			//if (!calibration.isCCDCamera())
+			//	throw new ConfigurationException("Not a valid calibration: CCD/EM-CCD camera type is required");
 		}
 
 		public double getLSEPrecision(float[] params) throws ConfigurationException
@@ -201,7 +199,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -218,7 +216,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -234,7 +232,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -251,7 +249,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -267,7 +265,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -284,7 +282,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);
@@ -300,7 +298,7 @@ public class Gaussian2DPeakResultHelper
 			// Try to create the converter
 			if (toPhoton == null)
 			{
-				checkLSEPrecisionCalibration();
+				checkPrecisionCalibration();
 				nmPerPixel = calibration.getNmPerPixel();
 				emCCD = calibration.getCameraType() == CameraType.EMCCD;
 				toPhoton = calibration.getIntensityConverter(IntensityUnit.PHOTON);

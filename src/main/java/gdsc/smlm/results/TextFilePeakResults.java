@@ -72,6 +72,12 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		super(filename, showDeviations, showEndFrame, showId);
 	}
 
+	public TextFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId,
+			boolean showPrecision)
+	{
+		super(filename, showDeviations, showEndFrame, showId, showPrecision);
+	}
+
 	@Override
 	protected void openOutput()
 	{
@@ -130,8 +136,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		calculator = null;
 		canComputePrecision = false;
 
-		if (hasCalibration())
+		if (isShowPrecision() && hasCalibration())
 		{
+			// Determine if we can compute the precision using the current settings
 			if (computePrecision)
 			{
 				try
@@ -194,7 +201,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			if (isShowDeviations())
 				names.add("+/-");
 		}
-		if (canComputePrecision)
+		if (isShowPrecision())
 			names.add("Precision (nm)");
 		return names.toArray(new String[names.size()]);
 	}
@@ -244,9 +251,12 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			}
 		}
 
-		if (canComputePrecision)
+		if (isShowPrecision())
 		{
-			add(sb, calculator.getLSEPrecision(params, noise));
+			if (canComputePrecision)
+				addPrecision(sb, calculator.getLSEPrecision(params, noise), true);
+			else
+				sb.append("\t0");
 		}
 
 		sb.append('\n');
@@ -280,11 +290,10 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		sb.append('\t').append(value);
 	}
 
-	private void addResult(StringBuilder sb, float... args)
+	private void addPrecision(StringBuilder sb, double value, boolean computed)
 	{
-		for (float f : args)
-			//sb.append(String.format("\t%g", f));
-			sb.append('\t').append(f);
+		// Cast to a float as the precision is probably limited in significant figures 
+		sb.append('\t').append((float) value);
 	}
 
 	public void add(PeakResult result)
@@ -334,9 +343,14 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				add(sb, converters[i].convert(params[i]));
 			}
 		}
-		if (canComputePrecision)
+		if (isShowPrecision())
 		{
-			addResult(sb, (float) calculator.getLSEPrecision(params, result.getNoise()));
+			if (result.hasPrecision())
+				addPrecision(sb, result.getPrecision(), false);
+			else if (canComputePrecision)
+				addPrecision(sb, calculator.getLSEPrecision(params, result.getNoise()), true);
+			else
+				sb.append("\t0");
 		}
 		sb.append('\n');
 	}
@@ -647,7 +661,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	}
 
 	/**
-	 * Checks if the precision will be computed.
+	 * Checks if the precision will be computed if needed. This is only relevant if show deviations is true (see
+	 * {@link #isShowDeviations()}).
 	 *
 	 * @return true, if the precision will be computed
 	 */
@@ -657,10 +672,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	}
 
 	/**
-	 * Sets the compute precision flag.
+	 * Sets the compute precision flag. This is only relevant if show deviations is true (see
+	 * {@link #isShowDeviations()}).
 	 *
 	 * @param computePrecision
-	 *            set to true to compute the precision and write to the output
+	 *            set to true to compute the precision
 	 */
 	public void setComputePrecision(boolean computePrecision)
 	{

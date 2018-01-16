@@ -91,8 +91,8 @@ message ResultsFileSettings {
 	IntensityUnit intensity_unit = 5;
 	// The angle unit
 	AngleUnit angle_unit = 6;
-	// Set to true to compute and output precision to the results file
-	bool compute_precision = 7;
+	// Set to true to show precision in the results file
+	bool show_precision = 7;
 }
 
 // Define the results table settings

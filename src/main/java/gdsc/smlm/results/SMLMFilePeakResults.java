@@ -18,35 +18,45 @@ package gdsc.smlm.results;
  */
 public abstract class SMLMFilePeakResults extends FilePeakResults
 {
-	private boolean showDeviations = true;
-	private boolean showEndFrame = false;
-	private boolean showId = false;
+	public final static int FLAG_END_FRAME = 0x0001;
+	public final static int FLAG_ID = 0x0002;
+	public final static int FLAG_PRECISION = 0x0004;
+
+	private final boolean showDeviations;
+	private final boolean showEndFrame;
+	private final boolean showId;
+	private final boolean showPrecision;
 	protected String peakIdColumnName = "Frame";
 
 	public SMLMFilePeakResults(String filename)
 	{
-		super(filename);
+		// showDeviations=true
+		this(filename, true);
 	}
 
 	public SMLMFilePeakResults(String filename, boolean showDeviations)
 	{
-		super(filename);
-		this.showDeviations = showDeviations;
+		this(filename, showDeviations, false);
 	}
 
 	public SMLMFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame)
 	{
-		super(filename);
-		this.showDeviations = showDeviations;
-		this.showEndFrame = showEndFrame;
+		this(filename, showDeviations, showEndFrame, false, false);
 	}
 
 	public SMLMFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId)
+	{
+		this(filename, showDeviations, showEndFrame, showId, false);
+	}
+
+	public SMLMFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame, boolean showId,
+			boolean showPrecision)
 	{
 		super(filename);
 		this.showDeviations = showDeviations;
 		this.showEndFrame = showEndFrame;
 		this.showId = showId;
+		this.showPrecision = showPrecision;
 	}
 
 	/**
@@ -94,8 +104,13 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 		sb.append(".");
 		sb.append(isShowDeviations() ? "D1" : "D0");
 		sb.append(".E");
-		int extended = isShowEndFrame() ? 1 : 0;
-		extended += isShowId() ? 2 : 0;
+		int extended = 0;
+		if (isShowEndFrame())
+			extended += FLAG_END_FRAME;
+		if (isShowId())
+			extended += FLAG_ID;
+		if (isShowPrecision())
+			extended += FLAG_PRECISION;
 		sb.append(extended);
 		// Version 1 had signal and amplitude in the results. It did not have the version string.
 		// .V2 = Version 2 has only signal in the results
@@ -143,5 +158,13 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	public boolean isShowId()
 	{
 		return showId;
+	}
+
+	/**
+	 * @return True if the records contain the localisation precision
+	 */
+	public boolean isShowPrecision()
+	{
+		return showPrecision;
 	}
 }
