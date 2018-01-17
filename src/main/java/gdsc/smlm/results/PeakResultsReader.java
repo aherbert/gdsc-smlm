@@ -1511,7 +1511,8 @@ public class PeakResultsReader
 					params[i] = scanner.nextFloat();
 				}
 				PeakResult r;
-				if (readPrecision)
+				// The format appends a * to computed precision. We ignore these.
+				if (readPrecision && !line.endsWith("*"))
 				{
 					r = createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id,
 							// Read precision here because it is the final field
@@ -1541,11 +1542,12 @@ public class PeakResultsReader
 				{
 					params[i] = Float.parseFloat(fields[j++]);
 				}
-				if (readPrecision)
+				// The format appends a * to computed precision. We ignore these.
+				if (readPrecision && !line.endsWith("*"))
 				{
 					return createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id,
 							// Read precision here because it is the final field
-							Float.parseFloat(fields[j++]));
+							Float.parseFloat(fields[j]));
 				}
 				return createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id);
 			}
@@ -1595,7 +1597,7 @@ public class PeakResultsReader
 					paramsStdDev[i] = scanner.nextFloat();
 				}
 				PeakResult r;
-				if (readPrecision)
+				if (readPrecision && !line.endsWith("*"))
 				{
 					r = createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id,
 							// Read precision here because it is the final field
@@ -1628,11 +1630,11 @@ public class PeakResultsReader
 					params[i] = Float.parseFloat(fields[j++]);
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
-				if (readPrecision)
+				if (readPrecision && !line.endsWith("*"))
 				{
 					return createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id,
 							// Read precision here because it is the final field
-							Float.parseFloat(fields[j++]));
+							Float.parseFloat(fields[j]));
 				}
 				return createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id);
 			}

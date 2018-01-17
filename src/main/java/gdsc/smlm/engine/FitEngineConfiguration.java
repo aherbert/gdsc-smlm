@@ -1191,6 +1191,8 @@ public class FitEngineConfiguration implements Cloneable
 	 * Configure the output units from fitting using the current calibration and fit solver settings.
 	 * <p>
 	 * This method should be called before the calibration is passed to any object that will handle the fitting output.
+	 * <p>
+	 * It will update the calibration units and the precision method to match that used by precision filter.
 	 */
 	public void configureOutputUnits()
 	{

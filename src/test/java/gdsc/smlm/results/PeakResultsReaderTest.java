@@ -427,6 +427,32 @@ public class PeakResultsReaderTest
 	}
 
 	@Test
+	public void writeTextWithComputedPrecisionMatchesRead()
+	{
+		// Create without precision
+		MemoryPeakResults results = createResults(200, false, false, false, false);
+		// Ensure units are OK for computing precision
+		CalibrationWriter cw = results.getCalibrationWriter();
+		cw.setIntensityUnit(IntensityUnit.PHOTON);
+		cw.setDistanceUnit(DistanceUnit.PIXEL);
+		results.setCalibration(cw.getCalibration());
+
+		String filename = createFile();
+
+		TextFilePeakResults out = new TextFilePeakResults(filename, false, false, false, true);
+		// Compute precision
+		out.setComputePrecision(true);
+		out.copySettings(results);
+		out.begin();
+		out.addAll(Arrays.asList(results.toArray()));
+		out.end();
+
+		MemoryPeakResults in = readFile(filename, false);
+
+		checkEqual(ResultsFileFormat.TEXT, false, false, false, false, false, results, in);
+	}
+
+	@Test
 	public void canReadTextIntoPreferredUnits()
 	{
 		canReadIntoPreferredUnits(ResultsFileFormat.TEXT);

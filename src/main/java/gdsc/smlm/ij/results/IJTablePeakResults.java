@@ -133,7 +133,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 					}
 					catch (ConfigurationException e)
 					{
-						// Not a Gaussian 2D function
+					}
+					catch (ConversionException e)
+					{
 					}
 				}
 			}

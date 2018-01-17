@@ -13,6 +13,8 @@ import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import gdsc.core.data.utils.ConversionException;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -149,7 +151,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				}
 				catch (ConfigurationException e)
 				{
-					// Not a Gaussian 2D function
+				}
+				catch (ConversionException e)
+				{
 				}
 			}
 		}

@@ -7,6 +7,7 @@ import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussInteg
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
+import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.BitFlags;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -69,11 +70,14 @@ public class Gaussian2DPeakResultHelper
 		 *            the psf
 		 * @param calibration
 		 *            the calibration (used for converting the parameters)
-		 * @see #create(PSF, CalibrationReader, int)
 		 * @throws ConfigurationException
 		 *             If not a Gaussian 2D PSF
+		 * @throws ConversionException
+		 *             If unit conversion fails
+		 * @see #create(PSF, CalibrationReader, int)
 		 */
-		public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration) throws ConfigurationException
+		public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration)
+				throws ConfigurationException, ConversionException
 		{
 			int[] indices = PSFHelper.getGaussian2DWxWyIndices(psf);
 			isx = indices[0];
@@ -102,7 +106,7 @@ public class Gaussian2DPeakResultHelper
 					: (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy]);
 		}
 
-		public float getAmplitude(float[] params) throws ConfigurationException
+		public float getAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPixel == null)
@@ -116,7 +120,7 @@ public class Gaussian2DPeakResultHelper
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
-		public float getPixelAmplitude(float[] params) throws ConfigurationException
+		public float getPixelAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPixel == null)
@@ -165,7 +169,7 @@ public class Gaussian2DPeakResultHelper
 			return Erf.erf(lx * (ONE_OVER_ROOT2 / s), (lx + 1) * (ONE_OVER_ROOT2 / s));
 		}
 
-		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException
+		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -194,7 +198,7 @@ public class Gaussian2DPeakResultHelper
 			//	throw new ConfigurationException("Not a valid calibration: CCD/EM-CCD camera type is required");
 		}
 
-		public double getLSEPrecision(float[] params) throws ConfigurationException
+		public double getLSEPrecision(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -211,7 +215,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
-		public double getLSEVariance(float[] params, float noise) throws ConfigurationException
+		public double getLSEVariance(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -227,7 +231,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
-		public double getLSEVariance(float[] params) throws ConfigurationException
+		public double getLSEVariance(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -244,7 +248,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
-		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException
+		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -260,7 +264,8 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
-		public double getMLEPrecision(float[] params) throws ConfigurationException
+		public double getMLEPrecision(float[] params)
+				throws ConfigurationException, ConversionException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -277,7 +282,8 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
-		public double getMLEVariance(float[] params, float noise) throws ConfigurationException
+		public double getMLEVariance(float[] params, float noise)
+				throws ConfigurationException, ConversionException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -293,7 +299,8 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
-		public double getMLEVariance(float[] params) throws ConfigurationException
+		public double getMLEVariance(float[] params)
+				throws ConfigurationException, ConversionException, ConversionException
 		{
 			// Try to create the converter
 			if (toPhoton == null)
@@ -314,7 +321,7 @@ public class Gaussian2DPeakResultHelper
 	private static abstract class BaseFastGaussian2DPeakResultCalculator extends BaseGaussian2DPeakResultCalculator
 	{
 		public BaseFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper)
-				throws ConfigurationException
+				throws ConfigurationException, ConversionException
 		{
 			super(helper);
 		}
@@ -323,26 +330,26 @@ public class Gaussian2DPeakResultHelper
 		public abstract float getStandardDeviation(float[] params);
 
 		@Override
-		public float getAmplitude(float[] params) throws ConfigurationException
+		public float getAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			return (float) (params[PeakResult.INTENSITY] /
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
-		public float getPixelAmplitude(float[] params) throws ConfigurationException
+		public float getPixelAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			return getPixelAmplitudeImpl(params);
 		}
 
 		@Override
-		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException
+		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getPrecision(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
 		@Override
-		public double getLSEPrecision(float[] params) throws ConfigurationException
+		public double getLSEPrecision(float[] params) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
@@ -350,14 +357,14 @@ public class Gaussian2DPeakResultHelper
 		}
 
 		@Override
-		public double getLSEVariance(float[] params, float noise) throws ConfigurationException
+		public double getLSEVariance(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getVariance(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
 		@Override
-		public double getLSEVariance(float[] params) throws ConfigurationException
+		public double getLSEVariance(float[] params) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
@@ -365,14 +372,14 @@ public class Gaussian2DPeakResultHelper
 		}
 
 		@Override
-		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException
+		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getMLPrecision(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
 		@Override
-		public double getMLEPrecision(float[] params) throws ConfigurationException
+		public double getMLEPrecision(float[] params) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getMLPrecisionX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
@@ -380,14 +387,14 @@ public class Gaussian2DPeakResultHelper
 		}
 
 		@Override
-		public double getMLEVariance(float[] params, float noise) throws ConfigurationException
+		public double getMLEVariance(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getMLVariance(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
 		@Override
-		public double getMLEVariance(float[] params) throws ConfigurationException
+		public double getMLEVariance(float[] params) throws ConfigurationException, ConversionException
 		{
 			return Gaussian2DPeakResultHelper.getMLVarianceX(nmPerPixel, toNM.convert(getStandardDeviation(params)),
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(params[PeakResult.BACKGROUND]),
@@ -401,7 +408,7 @@ public class Gaussian2DPeakResultHelper
 	private static class TwoAxisFastGaussian2DPeakResultCalculator extends BaseFastGaussian2DPeakResultCalculator
 	{
 		public TwoAxisFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper)
-				throws ConfigurationException
+				throws ConfigurationException, ConversionException
 		{
 			super(helper);
 		}
@@ -419,7 +426,7 @@ public class Gaussian2DPeakResultHelper
 	private static class OneAxisFastGaussian2DPeakResultCalculator extends BaseFastGaussian2DPeakResultCalculator
 	{
 		public OneAxisFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper)
-				throws ConfigurationException
+				throws ConfigurationException, ConversionException
 		{
 			super(helper);
 		}
@@ -468,9 +475,11 @@ public class Gaussian2DPeakResultHelper
 	 * @return the gaussian 2 D peak result helper
 	 * @throws ConfigurationException
 	 *             If not a Gaussian 2D PSF or the calibration is invalid
+	 * @throws ConversionException
+	 *             If unit conversion fails
 	 */
 	public static Gaussian2DPeakResultCalculator create(PSF psf, Calibration calibration, int flags)
-			throws ConfigurationException
+			throws ConfigurationException, ConversionException
 	{
 		CalibrationReader helper = (calibration != null) ? new CalibrationReader(calibration) : null;
 		return create(psf, helper, flags);
@@ -490,9 +499,11 @@ public class Gaussian2DPeakResultHelper
 	 * @return the gaussian 2 D peak result helper
 	 * @throws ConfigurationException
 	 *             If not a Gaussian 2D PSF or the calibration is invalid
+	 * @throws ConversionException
+	 *             If unit conversion fails
 	 */
 	public static Gaussian2DPeakResultCalculator create(PSF psf, CalibrationReader calibrationReader, int flags)
-			throws ConfigurationException
+			throws ConfigurationException, ConversionException
 	{
 		BaseGaussian2DPeakResultCalculator helper = new BaseGaussian2DPeakResultCalculator(psf, calibrationReader);
 

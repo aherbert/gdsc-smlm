@@ -1407,7 +1407,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE))
 				return PrecisionMethod.MORTENSEN;
 		}
-		return getPrecisionMethod();
+		if (precisionThreshold == 0)
+			// No simple precision filter
+			return PrecisionMethod.PRECISION_METHOD_NA;
+		switch (getPrecisionMethodValue())
+		{
+			case PrecisionMethod.MORTENSEN_VALUE:
+				return PrecisionMethod.MORTENSEN;
+			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
+				return PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
+			case PrecisionMethod.POISSON_CRLB_VALUE:
+				return PrecisionMethod.POISSON_CRLB;
+			default:
+				break;
+		}
+		return PrecisionMethod.PRECISION_METHOD_NA;
 	}
 
 	/**
