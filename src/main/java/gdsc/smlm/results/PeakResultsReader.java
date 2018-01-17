@@ -831,7 +831,6 @@ public class PeakResultsReader
 		}
 
 		DataInputStream input = null;
-		boolean extended = readEndFrame || readId || readPrecision;
 		try
 		{
 			FileInputStream fis = new FileInputStream(filename);
@@ -887,21 +886,16 @@ public class PeakResultsReader
 					paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 				}
 
-				if (extended)
+				if (readPrecision)
 				{
-					AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
-							paramsStdDev);
-					if (readEndFrame)
-						r.setEndFrame(endPeak);
-					if (readId)
-						r.setId(id);
-					if (readPrecision)
-						// Read it here because it is the final field
-						r.setPrecision(readFloat(buffer));
-					results.add(r);
+					results.add(createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak,
+							id, readFloat(buffer)));
 				}
 				else
-					results.add(new PeakResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev));
+				{
+					results.add(createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak,
+							id));
+				}
 
 				if (++c % 512 == 0)
 					showProgress(channel);
@@ -929,6 +923,41 @@ public class PeakResultsReader
 			}
 		}
 		return results;
+	}
+
+	/**
+	 * Creates the result. End frame and id will be ignored if the read flags are unset.
+	 *
+	 * @return the peak result
+	 */
+	private PeakResult createResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
+			float[] params, float[] paramsStdDev, int endFrame, int id)
+	{
+		if (readEndFrame)
+			return new ExtendedPeakResult(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev,
+					endFrame, id);
+		if (readId)
+			return new IdPeakResult(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev, id);
+		return new PeakResult(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
+	}
+
+	/**
+	 * Creates the result. End frame and id will be ignored if the read flags are unset. Only call this when
+	 * readPrecision is true as it creates an AttributePeakResult and uses the precision.
+	 *
+	 * @return the peak result
+	 */
+	private PeakResult createResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
+			float[] params, float[] paramsStdDev, int endFrame, int id, double precision)
+	{
+		AttributePeakResult r = new AttributePeakResult(startFrame, origX, origY, origValue, error, noise, params,
+				paramsStdDev);
+		if (readEndFrame)
+			r.setEndFrame(endFrame);
+		if (readId)
+			r.setId(id);
+		r.setPrecision(precision);
+		return r;
 	}
 
 	private float[] mapGaussian2DFormatParams(float[] params)
@@ -1481,15 +1510,17 @@ public class PeakResultsReader
 				{
 					params[i] = scanner.nextFloat();
 				}
-				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
-						null);
-				if (readEndFrame)
-					r.setEndFrame(endPeak);
-				if (readId)
-					r.setId(id);
+				PeakResult r;
 				if (readPrecision)
-					// Read it here because it is the final field
-					r.setPrecision(scanner.nextFloat());
+				{
+					r = createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id,
+							// Read precision here because it is the final field
+							scanner.nextFloat());
+				}
+				else
+				{
+					r = createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id);
+				}
 				scanner.close();
 				return r;
 			}
@@ -1510,16 +1541,13 @@ public class PeakResultsReader
 				{
 					params[i] = Float.parseFloat(fields[j++]);
 				}
-				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
-						null);
-				if (readEndFrame)
-					r.setEndFrame(endPeak);
-				if (readId)
-					r.setId(id);
 				if (readPrecision)
-					// Read it here because it is the final field
-					r.setPrecision(Float.parseFloat(fields[j++]));
-				return r;
+				{
+					return createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id,
+							// Read precision here because it is the final field
+							Float.parseFloat(fields[j++]));
+				}
+				return createResult(peak, origX, origY, origValue, error, noise, params, null, endPeak, id);
 			}
 		}
 		catch (InputMismatchException e)
@@ -1566,15 +1594,17 @@ public class PeakResultsReader
 					params[i] = scanner.nextFloat();
 					paramsStdDev[i] = scanner.nextFloat();
 				}
-				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
-						paramsStdDev);
-				if (readEndFrame)
-					r.setEndFrame(endPeak);
-				if (readId)
-					r.setId(id);
+				PeakResult r;
 				if (readPrecision)
-					// Read it here because it is the final field
-					r.setPrecision(scanner.nextFloat());
+				{
+					r = createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id,
+							// Read precision here because it is the final field
+							scanner.nextFloat());
+				}
+				else
+				{
+					r = createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id);
+				}
 				scanner.close();
 				return r;
 			}
@@ -1598,16 +1628,13 @@ public class PeakResultsReader
 					params[i] = Float.parseFloat(fields[j++]);
 					paramsStdDev[i] = Float.parseFloat(fields[j++]);
 				}
-				AttributePeakResult r = new AttributePeakResult(peak, origX, origY, origValue, error, noise, params,
-						paramsStdDev);
-				if (readEndFrame)
-					r.setEndFrame(endPeak);
-				if (readId)
-					r.setId(id);
 				if (readPrecision)
-					// Read it here because it is the final field
-					r.setPrecision(Float.parseFloat(fields[j++]));
-				return r;
+				{
+					return createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id,
+							// Read precision here because it is the final field
+							Float.parseFloat(fields[j++]));
+				}
+				return createResult(peak, origX, origY, origValue, error, noise, params, paramsStdDev, endPeak, id);
 			}
 		}
 		catch (InputMismatchException e)
