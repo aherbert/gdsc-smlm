@@ -32,8 +32,9 @@ import org.ejml.data.DenseMatrix64F;
  * This class assumes that the input matrix is symmetric positive definite matrices, for instance it has been generated
  * in the numerical solution of partial differential equations (for example a Hessian matrix).
  * <p>
- * If zeros occur on the diagonal of the matrix, for example if no gradient is available for a parameter, then the index
- * can be excised from the matrix before solving.
+ * The solve and invert methods uses two solvers, the first is an optimised solver chosen for speed. If the solver fails
+ * then a pseudo inverse solver is used so that a solution can be found. For example the first solver may fail if zeros
+ * occur on the diagonal of the matrix, for example if no gradient is available for a parameter.
  */
 public class EJMLLinearSolver
 {
@@ -800,7 +801,7 @@ public class EJMLLinearSolver
 		//			DoubleEquality.complement(e, o));
 		return (Math.abs(e - o) > inversionTolerance);
 	}
-	
+
 	/**
 	 * Computes the inverse of the symmetric positive definite matrix and returns only the diagonal. Will not modify the
 	 * matrix.
