@@ -3,6 +3,7 @@ package gdsc.smlm.fitting.nonlinear;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.LSEFunctionSolver;
+import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.GradientFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -146,5 +147,110 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	public double getMeanSquaredError()
 	{
 		return getResidualSumOfSquares() / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
+	}
+
+	/**
+	 * Compute the covariance matrix of the parameters of the function assuming a least squares fit of a Poisson process.
+	 * <p>
+	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+	 * <p>
+	 * The method involves inversion of a matrix and may fail.
+	 * <pre>
+	 * I = sum_i { Ei,a * Ei,b }
+	 * E = sum_i { Ei * Ei,a * Ei,b }
+	 * 
+	 * with
+	 * i the number of data points fit using least squares using a function of n variable parameters
+	 * Ei the expected value of the function at i
+	 * Ei,a the gradient the function at i with respect to parameter a
+	 * Ei,b the gradient the function at i with respect to parameter b
+	 * </pre>
+	 *
+	 * @param I
+	 *            the Iab matrix
+	 * @param E
+	 *            the Ei_Eia_Eib matrix
+	 * @return the covariance matrix (or null)
+	 */
+	public static double[][] covariance(double[][] I, double[][] E)
+	{
+		int n = I.length;
+
+		// Invert the matrix
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		if (!solver.invert(I))
+			return null;
+
+		// Note that I now refers to I^-1 in the Mortensen notation
+
+		double[][] covar = new double[n][n];
+		for (int a = 0; a < n; a++)
+		{
+			for (int b = 0; b < n; b++)
+			{
+				double v = 0;
+				for (int ap = 0; ap < n; ap++)
+				{
+					for (int bp = 0; bp < n; bp++)
+					{
+						v += I[a][ap] * E[ap][bp] * I[bp][b];
+					}
+				}
+				covar[a][b] = v;
+			}
+		}
+
+		return covar;
+	}
+	/**
+	 * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
+	 * <p>
+	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+	 * <p>
+	 * The method involves inversion of a matrix and may fail.
+	 * <pre>
+	 * I = sum_i { Ei,a * Ei,b }
+	 * E = sum_i { Ei * Ei,a * Ei,b }
+	 * 
+	 * with
+	 * i the number of data points fit using least squares using a function of n variable parameters
+	 * Ei the expected value of the function at i
+	 * Ei,a the gradient the function at i with respect to parameter a
+	 * Ei,b the gradient the function at i with respect to parameter b
+	 * </pre>
+	 *
+	 * @param I
+	 *            the Iab matrix
+	 * @param E
+	 *            the Ei_Eia_Eib matrix
+	 * @return the variance (or null)
+	 */
+	public static double[] variance(double[][] I, double[][] E)
+	{
+		int n = I.length;
+
+		// Invert the matrix
+		EJMLLinearSolver solver = EJMLLinearSolver.createForInversion(1e-2);
+		if (!solver.invert(I))
+			return null;
+
+		// Note that I now refers to I^-1 in the Mortensen notation
+
+		double[] covar = new double[n];
+		for (int a = 0; a < n; a++)
+		{
+			// Note: b==a as we only do the diagonal
+			double v = 0;
+			for (int ap = 0; ap < n; ap++)
+			{
+				for (int bp = 0; bp < n; bp++)
+				{
+					v += I[a][ap] * E[ap][bp] * I[bp][a];
+				}
+			}
+			covar[a] = v;
+		}
+
+		return covar;
 	}
 }

@@ -196,6 +196,9 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/**
 	 * Compute the Fisher Information matrix. This can be used to set the deviations for each of the fitted parameters.
+	 * <p>
+	 * Alternatively a sub-class can override {@link #computeDeviations(double[], double[], double[])} directly and
+	 * provide a dummy implementation of this function as it will not be used, e.g. throw an exception.
 	 *
 	 * @param y
 	 *            the y values

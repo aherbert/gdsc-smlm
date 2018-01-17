@@ -292,6 +292,9 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * Compute the Fisher Information matrix for the parameters a from the last call to
 	 * {@link #computeFitValue(double[], double[])}. This can be used to set the covariances for each of the fitted
 	 * parameters.
+	 * <p>
+	 * Alternatively a sub-class can override {@link #computeDeviations(double[])} directly and
+	 * provide a dummy implementation of this function as it will not be used, e.g. throw an exception.
 	 *
 	 * @return the Fisher Information matrix
 	 */

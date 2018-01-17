@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver;
 import gdsc.smlm.function.NonLinearFunction;
 
 /*----------------------------------------------------------------------------- 
@@ -697,7 +698,7 @@ public class GradientCalculator
 	 * @param a
 	 *            Set of m coefficients (if null then the function must be pre-initialised)
 	 * @param func
-	 *            Non-linear fitting function
+	 *            Non-linear fitting function. Must return positive values (other values are ignored)
 	 * @return I
 	 */
 	public double[][] fisherInformationMatrix(int[] x, final double[] a, final NonLinearFunction func)
@@ -770,97 +771,6 @@ public class GradientCalculator
 	}
 
 	/**
-	 * Compute the central diagonal of Fisher's Information Matrix (I) assuming a Poisson process.
-	 * 
-	 * <pre>
-	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
-	 * p = parameters
-	 * x = observed values
-	 * L(x|p) = likelihood of X given p
-	 * E = expected value
-	 * </pre>
-	 * 
-	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
-	 * Poisson process. In this case the equation reduces to:
-	 * 
-	 * <pre>
-	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
-	 * </pre>
-	 * 
-	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
-	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
-	 * 
-	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
-	 * @param x
-	 *            n observations
-	 * @param a
-	 *            Set of m coefficients
-	 * @param func
-	 *            Non-linear fitting function. Must return positive values (other values are ignored)
-	 * @return Iaa
-	 */
-	public double[] fisherInformationDiagonal(final int[] x, final double[] a, final NonLinearFunction func)
-	{
-		return fisherInformationDiagonal(x.length, a, func);
-	}
-
-	/**
-	 * Compute the central diagonal of Fisher's Information Matrix (I) assuming a Poisson process.
-	 * 
-	 * <pre>
-	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
-	 * p = parameters
-	 * x = observed values
-	 * L(x|p) = likelihood of X given p
-	 * E = expected value
-	 * </pre>
-	 * 
-	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
-	 * Poisson process. In this case the equation reduces to:
-	 * 
-	 * <pre>
-	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
-	 * </pre>
-	 * 
-	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
-	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
-	 * 
-	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
-	 * @param n
-	 *            The number of data points
-	 * @param a
-	 *            Set of m coefficients
-	 * @param func
-	 *            Non-linear fitting function. Must return positive values (other values are ignored)
-	 * @return Iaa
-	 */
-	public double[] fisherInformationDiagonal(final int n, final double[] a, final NonLinearFunction func)
-	{
-		final double[] dy_da = new double[a.length];
-
-		final double[] alpha = new double[nparams];
-
-		func.initialise(a);
-
-		for (int i = 0; i < n; i++)
-		{
-			final double yi = func.eval(i, dy_da);
-			if (yi > 0)
-			{
-				for (int j = 0; j < nparams; j++)
-				{
-					alpha[j] += dy_da[j] * dy_da[j] / yi;
-				}
-			}
-		}
-
-		checkGradients(alpha, nparams);
-		return alpha;
-	}
-
-	/**
 	 * Evaluate the function and compute the sum-of-squares and the gradient with respect to the model
 	 * parameters.
 	 * <p>
@@ -926,5 +836,157 @@ public class GradientCalculator
 		{
 			beta[i] = 0;
 		}
+	}
+
+	/**
+	 * Compute the covariance matrix for the parameters of the function assuming a least squares fit of a Poisson
+	 * process.
+	 * <p>
+	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+	 * <p>
+	 * The method involves inversion of a matrix and may fail.
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param a
+	 *            Set of m coefficients (if null then the function must be pre-initialised)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return the covariance matrix (or null)
+	 */
+	public double[][] covarianceMatrix(int[] x, final double[] a, final NonLinearFunction func)
+	{
+		return covarianceMatrix(x.length, a, func);
+	}
+
+	/**
+	 * Compute the covariance matrix for the parameters of the function assuming a least squares fit of a Poisson
+	 * process.
+	 * <p>
+	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+	 * <p>
+	 * The method involves inversion of a matrix and may fail.
+	 * 
+	 * @param n
+	 *            The number of data points
+	 * @param theta
+	 *            Set of m coefficients (if null then the function must be pre-initialised)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return the covariance matrix (or null)
+	 */
+	public double[][] covarianceMatrix(final int n, final double[] theta, final NonLinearFunction func)
+	{
+		// Same notation as Mortensen
+		final double[] Eix = new double[nparams];
+
+		final double[][] I = new double[nparams][nparams];
+		final double[][] Ei_Eia_Eib = new double[nparams][nparams];
+
+		if (theta != null)
+			func.initialise(theta);
+
+		for (int i = 0; i < n; i++)
+		{
+			final double Ei = func.eval(i, Eix);
+			for (int a = 0; a < nparams; a++)
+			{
+				for (int b = 0; b <= a; b++)
+				{
+					double v = Eix[a] * Eix[b];
+					I[a][b] += v;
+					Ei_Eia_Eib[a][b] += Ei * v;
+				}
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nparams - 1; i++)
+			for (int j = i + 1; j < nparams; j++)
+			{
+				I[i][j] = I[j][i];
+				Ei_Eia_Eib[i][j] = I[j][i];
+			}
+
+		checkGradients(I, nparams);
+		if (isNaNGradients())
+			return null;
+		
+		return LSEBaseFunctionSolver.covariance(I, Ei_Eia_Eib);
+	}
+
+	/**
+	 * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
+	 * <p>
+	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+	 * <p>
+	 * The method involves inversion of a matrix and may fail.
+	 * 
+	 * @param x
+	 *            n observations
+	 * @param a
+	 *            Set of m coefficients (if null then the function must be pre-initialised)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return the variance (or null)
+	 */
+	public double[] variance(int[] x, final double[] a, final NonLinearFunction func)
+	{
+		return variance(x.length, a, func);
+	}
+
+	/**
+	 * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
+	 * <p>
+	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+	 * <p>
+	 * The method involves inversion of a matrix and may fail.
+	 * 
+	 * @param n
+	 *            The number of data points
+	 * @param theta
+	 *            Set of m coefficients (if null then the function must be pre-initialised)
+	 * @param func
+	 *            Non-linear fitting function
+	 * @return the variance (or null)
+	 */
+	public double[] variance(final int n, final double[] theta, final NonLinearFunction func)
+	{
+		// Same notation as Mortensen
+		final double[] Eix = new double[nparams];
+
+		final double[][] I = new double[nparams][nparams];
+		final double[][] Ei_Eia_Eib = new double[nparams][nparams];
+
+		if (theta != null)
+			func.initialise(theta);
+
+		for (int i = 0; i < n; i++)
+		{
+			final double Ei = func.eval(i, Eix);
+			for (int a = 0; a < nparams; a++)
+			{
+				for (int b = 0; b <= a; b++)
+				{
+					double v = Eix[a] * Eix[b];
+					I[a][b] += v;
+					Ei_Eia_Eib[a][b] += Ei * v;
+				}
+			}
+		}
+
+		// Generate symmetric matrix
+		for (int i = 0; i < nparams - 1; i++)
+			for (int j = i + 1; j < nparams; j++)
+			{
+				I[i][j] = I[j][i];
+				Ei_Eia_Eib[i][j] = I[j][i];
+			}
+
+		checkGradients(I, nparams);
+		if (isNaNGradients())
+			return null;
+		
+		return LSEBaseFunctionSolver.variance(I, Ei_Eia_Eib);
 	}
 }

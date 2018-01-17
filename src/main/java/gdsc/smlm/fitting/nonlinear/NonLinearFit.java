@@ -9,7 +9,6 @@ import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
-import gdsc.smlm.fitting.nonlinear.gradient.MLEGradientCalculator;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.GradientFunction;
@@ -367,29 +366,31 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 */
 	private boolean computeDeviations(double[] aDev)
 	{
-		// Use a dedicated solver optimised for inverting the matrix diagonal. 
-		FisherInformationMatrix m;
 		if (isMLE())
 		{
 			// The Hessian matrix refers to the log-likelihood ratio.
 			// Compute and invert a matrix related to the Poisson log-likelihood.
 			// This assumes this does achieve the maximum likelihood estimate for a 
 			// Poisson process.
-			MLEGradientCalculator c = (MLEGradientCalculator) calculator;
-			double[][] I = c.fisherInformationMatrix(lastY.length, null, func);
-			if (c.isNaNGradients())
+			double[][] I = calculator.fisherInformationMatrix(lastY.length, null, func);
+			if (calculator.isNaNGradients())
 				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 
-			m = new FisherInformationMatrix(I);
+			// Use a dedicated solver optimised for inverting the matrix diagonal. 
+			FisherInformationMatrix m = new FisherInformationMatrix(I);
+			setDeviations(aDev, m);
+			return true;
 		}
 		else
 		{
-			// alpha already contains the scaled Hessian
-
-			m = new FisherInformationMatrix(alpha);
+			double[] covar = calculator.variance(lastY.length, null, func);
+			if (covar != null)
+			{
+				setDeviations(aDev, covar);
+				return true;
+			}
+			return false;
 		}
-		setDeviations(aDev, m);
-		return true;
 	}
 
 	/**
@@ -594,29 +595,31 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	}
 
 	@Override
-	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
+	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
-		GradientCalculator c;
-		double[][] I;
 		if (isMLE())
 		{
-			// Compute and invert a matrix related to the Poisson log-likelihood.
-			// This assumes this does achieve the maximum likelihood estimate for a 
-			// Poisson process.
-			c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), true);
-			I = c.fisherInformationMatrix(y.length, a, func);
+			return super.computeDeviations(y, a, aDev);
 		}
-		else
+
+		// LSE computation
+		double[] covar = calculator.variance(y.length, a, func);
+		if (covar != null)
 		{
-			// Currently this uses the scaled Hessian which is not the same as that for the MLE
-			c = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), false);
-			int n = y.length;
-			final int nparams = f.gradientIndices().length;
-			double[] beta = new double[nparams];
-			I = new double[nparams][nparams];
-			c.findLinearised(n, y, a, I, beta, func);
+			setDeviations(aDev, covar);
+			return true;
 		}
-		if (c.isNaNGradients())
+		return false;
+	}
+
+	@Override
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
+	{
+		// Compute and invert a matrix related to the Poisson log-likelihood.
+		// This assumes this does achieve the maximum likelihood estimate for a 
+		// Poisson process.
+		double[][] I = calculator.fisherInformationMatrix(y.length, a, func);
+		if (calculator.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		return new FisherInformationMatrix(I);
 	}
