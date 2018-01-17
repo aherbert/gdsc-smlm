@@ -105,8 +105,8 @@ message ResultsTableSettings {
 	IntensityUnit intensity_unit = 3;
 	// The angle unit
 	AngleUnit angle_unit = 4;
-	// Set to true to compute and output precision to the results table
-	bool compute_precision = 5;
+	// Set to true to show precision in the results table
+	bool show_precision = 5;
 	// Set to true to show the fitting data in the results table
 	bool show_fitting_data = 6;
 	// Set to true to show the noise data in the results table

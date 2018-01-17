@@ -143,7 +143,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			{
 				try
 				{
-					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibration(),
+					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
 							Gaussian2DPeakResultHelper.LSE_PRECISION);
 					canComputePrecision = true;
 				}
@@ -250,7 +250,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 				add(sb, converters[i].convert(params[i]));
 			}
 		}
-
 		if (isShowPrecision())
 		{
 			if (canComputePrecision)
@@ -258,7 +257,6 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			else
 				sb.append("\t0");
 		}
-
 		sb.append('\n');
 		writeResult(1, sb.toString());
 	}
@@ -663,8 +661,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	}
 
 	/**
-	 * Checks if the precision will be computed if needed. This is only relevant if show deviations is true (see
-	 * {@link #isShowDeviations()}).
+	 * Checks if the precision will be computed if needed. This is only relevant if show precision is true (see
+	 * {@link #isShowPrecision()}).
 	 *
 	 * @return true, if the precision will be computed
 	 */
@@ -674,8 +672,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	}
 
 	/**
-	 * Sets the compute precision flag. This is only relevant if show deviations is true (see
-	 * {@link #isShowDeviations()}).
+	 * Sets the compute precision flag. This is only relevant if show precision is true (see
+	 * {@link #isShowPrecision()}).
 	 *
 	 * @param computePrecision
 	 *            set to true to compute the precision

@@ -332,7 +332,9 @@ public class ResultsManager implements PlugIn
 			r.setDistanceUnit(resultsSettings.getDistanceUnit());
 			r.setIntensityUnit(resultsSettings.getIntensityUnit());
 			r.setAngleUnit(resultsSettings.getAngleUnit());
-			r.setComputePrecision(resultsSettings.getComputePrecision());
+			r.setShowPrecision(resultsSettings.getShowPrecision());
+			if (resultsSettings.getShowPrecision())
+				r.setComputePrecision(true);
 			r.setShowEndFrame(showEndFrame);
 			r.setRoundingPrecision(resultsSettings.getRoundingPrecision());
 			r.setShowZ(showZ);
@@ -557,7 +559,7 @@ public class ResultsManager implements PlugIn
 						tableSettings.getAngleUnit().getNumber());
 				egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
 				egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
-				egd.addCheckbox("Table_show_precision", tableSettings.getComputePrecision());
+				egd.addCheckbox("Table_show_precision", tableSettings.getShowPrecision());
 				egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
@@ -568,7 +570,7 @@ public class ResultsManager implements PlugIn
 				tableSettings.setAngleUnitValue(egd.getNextChoiceIndex());
 				tableSettings.setShowFittingData(egd.getNextBoolean());
 				tableSettings.setShowNoiseData(egd.getNextBoolean());
-				tableSettings.setComputePrecision(egd.getNextBoolean());
+				tableSettings.setShowPrecision(egd.getNextBoolean());
 				tableSettings.setRoundingPrecision((int) egd.getNextNumber());
 				return true;
 			}

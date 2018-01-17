@@ -52,6 +52,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private DistanceUnit distanceUnit = null;
 	private IntensityUnit intensityUnit = null;
 	private AngleUnit angleUnit = null;
+	private boolean showPrecision = false;
 	private boolean computePrecision = false;
 	private int roundingPrecision = 0;
 
@@ -120,17 +121,20 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 		if (hasCalibration())
 		{
-			if (computePrecision)
+			if (showPrecision)
 			{
-				try
+				if (computePrecision)
 				{
-					calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
-							Gaussian2DPeakResultHelper.LSE_PRECISION);
-					canComputePrecision = true;
-				}
-				catch (ConfigurationException e)
-				{
-					// Not a Gaussian 2D function
+					try
+					{
+						calculator = Gaussian2DPeakResultHelper.create(getPSF(), getCalibrationReader(),
+								Gaussian2DPeakResultHelper.LSE_PRECISION);
+						canComputePrecision = true;
+					}
+					catch (ConfigurationException e)
+					{
+						// Not a Gaussian 2D function
+					}
 				}
 			}
 
@@ -308,7 +312,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 				sb.append(" (").append(unitNames[outIndices[i]]).append(')');
 			addDeviation(sb);
 		}
-		if (canComputePrecision)
+		if (showPrecision)
 		{
 			sb.append("\tPrecision (nm)");
 		}
@@ -354,11 +358,11 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void add(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
 			float[] paramsDev)
 	{
-		addPeak(frame, frame, 0, origX, origY, origValue, error, noise, params, paramsDev);
+		addPeak(frame, frame, 0, origX, origY, origValue, error, noise, params, paramsDev, -1);
 	}
 
 	private void addPeak(int frame, int endFrame, int id, int origX, int origY, float origValue, double error,
-			float noise, float[] params, float[] paramsStdDev)
+			float noise, float[] params, float[] paramsStdDev, double precision)
 	{
 		if (!tableActive)
 			return;
@@ -389,11 +393,16 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			for (int i = 0; i < outIndices.length; i++)
 				add(sb, converters[outIndices[i]].convert(params[outIndices[i]]));
 		}
-		if (canComputePrecision)
+		if (isShowPrecision())
 		{
-			add(sb, calculator.getLSEPrecision(params, noise));
+			// The default precision in a peak result is NaN so this compare will be false
+			if (precision >= 0)
+				addPrecision(sb, precision, false);
+			else if (canComputePrecision)
+				addPrecision(sb, calculator.getLSEPrecision(params, noise), true);
+			else
+				sb.append("\t0");
 		}
-
 		append(sb.toString());
 	}
 
@@ -436,6 +445,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	private void add(StringBuilder sb, double value)
 	{
 		sb.append('\t').append(rounder.toString(value));
+	}
+
+	private void addPrecision(StringBuilder sb, double value, boolean computed)
+	{
+		add(sb, value);
+		if (computed)
+			sb.append('*');
 	}
 
 	private void append(String result)
@@ -481,8 +497,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	public void add(PeakResult result)
 	{
-		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
-				result.getError(), result.getNoise(), result.getParameters(), result.getParameterDeviations());
+		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
+				result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
+				result.getParameterDeviations(), result.getPrecision());
 	}
 
 	/*
@@ -499,7 +516,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		{
 			addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
 					result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
-					result.getParameterDeviations());
+					result.getParameterDeviations(), result.getPrecision());
 			if (n++ > 31)
 			{
 				if (!tableActive)
@@ -529,7 +546,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		tableActive = false;
 		drawTable();
 	}
-	
+
 	/**
 	 * Forces the table to be updated with the current contents.
 	 */
@@ -873,16 +890,39 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 *
 	 * @return true, if the precision will be computed
 	 */
+	public boolean isShowPrecision()
+	{
+		return showPrecision;
+	}
+
+	/**
+	 * Sets the show precision flag.
+	 *
+	 * @param showPrecision
+	 *            set to true to show the precision and write to the output
+	 */
+	public void setShowPrecision(boolean showPrecision)
+	{
+		this.showPrecision = showPrecision;
+	}
+
+	/**
+	 * Checks if the precision will be computed if needed. This is only relevant if show precision is true (see
+	 * {@link #isShowPrecision()}).
+	 *
+	 * @return true, if the precision will be computed
+	 */
 	public boolean isComputePrecision()
 	{
 		return computePrecision;
 	}
 
 	/**
-	 * Sets the compute precision flag.
+	 * Sets the compute precision flag. This is only relevant if show precision is true (see
+	 * {@link #isShowPrecision()}).
 	 *
 	 * @param computePrecision
-	 *            set to true to compute the precision and write to the output
+	 *            set to true to compute the precision if needed
 	 */
 	public void setComputePrecision(boolean computePrecision)
 	{

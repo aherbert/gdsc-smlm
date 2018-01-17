@@ -2910,12 +2910,12 @@ public final class ResultsProtos {
 
     /**
      * <pre>
-     * Set to true to compute and output precision to the results table
+     * Set to true to show precision in the results table
      * </pre>
      *
-     * <code>bool compute_precision = 5;</code>
+     * <code>bool show_precision = 5;</code>
      */
-    boolean getComputePrecision();
+    boolean getShowPrecision();
 
     /**
      * <pre>
@@ -2964,7 +2964,7 @@ public final class ResultsProtos {
       distanceUnit_ = 0;
       intensityUnit_ = 0;
       angleUnit_ = 0;
-      computePrecision_ = false;
+      showPrecision_ = false;
       showFittingData_ = false;
       showNoiseData_ = false;
       roundingPrecision_ = 0;
@@ -3020,7 +3020,7 @@ public final class ResultsProtos {
             }
             case 40: {
 
-              computePrecision_ = input.readBool();
+              showPrecision_ = input.readBool();
               break;
             }
             case 48: {
@@ -3146,17 +3146,17 @@ public final class ResultsProtos {
       return result == null ? gdsc.smlm.data.config.UnitProtos.AngleUnit.UNRECOGNIZED : result;
     }
 
-    public static final int COMPUTE_PRECISION_FIELD_NUMBER = 5;
-    private boolean computePrecision_;
+    public static final int SHOW_PRECISION_FIELD_NUMBER = 5;
+    private boolean showPrecision_;
     /**
      * <pre>
-     * Set to true to compute and output precision to the results table
+     * Set to true to show precision in the results table
      * </pre>
      *
-     * <code>bool compute_precision = 5;</code>
+     * <code>bool show_precision = 5;</code>
      */
-    public boolean getComputePrecision() {
-      return computePrecision_;
+    public boolean getShowPrecision() {
+      return showPrecision_;
     }
 
     public static final int SHOW_FITTING_DATA_FIELD_NUMBER = 6;
@@ -3222,8 +3222,8 @@ public final class ResultsProtos {
       if (angleUnit_ != gdsc.smlm.data.config.UnitProtos.AngleUnit.ANGLE_UNIT_NA.getNumber()) {
         output.writeEnum(4, angleUnit_);
       }
-      if (computePrecision_ != false) {
-        output.writeBool(5, computePrecision_);
+      if (showPrecision_ != false) {
+        output.writeBool(5, showPrecision_);
       }
       if (showFittingData_ != false) {
         output.writeBool(6, showFittingData_);
@@ -3257,9 +3257,9 @@ public final class ResultsProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, angleUnit_);
       }
-      if (computePrecision_ != false) {
+      if (showPrecision_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(5, computePrecision_);
+          .computeBoolSize(5, showPrecision_);
       }
       if (showFittingData_ != false) {
         size += com.google.protobuf.CodedOutputStream
@@ -3294,8 +3294,8 @@ public final class ResultsProtos {
       result = result && distanceUnit_ == other.distanceUnit_;
       result = result && intensityUnit_ == other.intensityUnit_;
       result = result && angleUnit_ == other.angleUnit_;
-      result = result && (getComputePrecision()
-          == other.getComputePrecision());
+      result = result && (getShowPrecision()
+          == other.getShowPrecision());
       result = result && (getShowFittingData()
           == other.getShowFittingData());
       result = result && (getShowNoiseData()
@@ -3321,9 +3321,9 @@ public final class ResultsProtos {
       hash = (53 * hash) + intensityUnit_;
       hash = (37 * hash) + ANGLE_UNIT_FIELD_NUMBER;
       hash = (53 * hash) + angleUnit_;
-      hash = (37 * hash) + COMPUTE_PRECISION_FIELD_NUMBER;
+      hash = (37 * hash) + SHOW_PRECISION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getComputePrecision());
+          getShowPrecision());
       hash = (37 * hash) + SHOW_FITTING_DATA_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShowFittingData());
@@ -3473,7 +3473,7 @@ public final class ResultsProtos {
 
         angleUnit_ = 0;
 
-        computePrecision_ = false;
+        showPrecision_ = false;
 
         showFittingData_ = false;
 
@@ -3507,7 +3507,7 @@ public final class ResultsProtos {
         result.distanceUnit_ = distanceUnit_;
         result.intensityUnit_ = intensityUnit_;
         result.angleUnit_ = angleUnit_;
-        result.computePrecision_ = computePrecision_;
+        result.showPrecision_ = showPrecision_;
         result.showFittingData_ = showFittingData_;
         result.showNoiseData_ = showNoiseData_;
         result.roundingPrecision_ = roundingPrecision_;
@@ -3564,8 +3564,8 @@ public final class ResultsProtos {
         if (other.angleUnit_ != 0) {
           setAngleUnitValue(other.getAngleUnitValue());
         }
-        if (other.getComputePrecision() != false) {
-          setComputePrecision(other.getComputePrecision());
+        if (other.getShowPrecision() != false) {
+          setShowPrecision(other.getShowPrecision());
         }
         if (other.getShowFittingData() != false) {
           setShowFittingData(other.getShowFittingData());
@@ -3832,40 +3832,40 @@ public final class ResultsProtos {
         return this;
       }
 
-      private boolean computePrecision_ ;
+      private boolean showPrecision_ ;
       /**
        * <pre>
-       * Set to true to compute and output precision to the results table
+       * Set to true to show precision in the results table
        * </pre>
        *
-       * <code>bool compute_precision = 5;</code>
+       * <code>bool show_precision = 5;</code>
        */
-      public boolean getComputePrecision() {
-        return computePrecision_;
+      public boolean getShowPrecision() {
+        return showPrecision_;
       }
       /**
        * <pre>
-       * Set to true to compute and output precision to the results table
+       * Set to true to show precision in the results table
        * </pre>
        *
-       * <code>bool compute_precision = 5;</code>
+       * <code>bool show_precision = 5;</code>
        */
-      public Builder setComputePrecision(boolean value) {
+      public Builder setShowPrecision(boolean value) {
         
-        computePrecision_ = value;
+        showPrecision_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to compute and output precision to the results table
+       * Set to true to show precision in the results table
        * </pre>
        *
-       * <code>bool compute_precision = 5;</code>
+       * <code>bool show_precision = 5;</code>
        */
-      public Builder clearComputePrecision() {
+      public Builder clearShowPrecision() {
         
-        computePrecision_ = false;
+        showPrecision_ = false;
         onChanged();
         return this;
       }
@@ -6118,37 +6118,37 @@ public final class ResultsProtos {
       "Unit\022<\n\016intensity_unit\030\005 \001(\0162$.gdsc.smlm" +
       ".data.config.IntensityUnit\0224\n\nangle_unit" +
       "\030\006 \001(\0162 .gdsc.smlm.data.config.AngleUnit" +
-      "\022\026\n\016show_precision\030\007 \001(\010\"\305\002\n\024ResultsTabl" +
+      "\022\026\n\016show_precision\030\007 \001(\010\"\302\002\n\024ResultsTabl" +
       "eSettings\022\022\n\nshow_table\030\001 \001(\010\022:\n\rdistanc" +
       "e_unit\030\002 \001(\0162#.gdsc.smlm.data.config.Dis" +
       "tanceUnit\022<\n\016intensity_unit\030\003 \001(\0162$.gdsc" +
       ".smlm.data.config.IntensityUnit\0224\n\nangle" +
       "_unit\030\004 \001(\0162 .gdsc.smlm.data.config.Angl",
-      "eUnit\022\031\n\021compute_precision\030\005 \001(\010\022\031\n\021show" +
-      "_fitting_data\030\006 \001(\010\022\027\n\017show_noise_data\030\007" +
-      " \001(\010\022\032\n\022rounding_precision\030\010 \001(\005\",\n\027Resu" +
-      "ltsInMemorySettings\022\021\n\tin_memory\030\001 \001(\010\"\371" +
-      "\002\n\017ResultsSettings\022\024\n\014log_progress\030\001 \001(\010" +
-      "\022\027\n\017show_deviations\030\002 \001(\010\022K\n\026results_ima" +
-      "ge_settings\030\003 \001(\0132+.gdsc.smlm.data.confi" +
-      "g.ResultsImageSettings\022I\n\025results_file_s" +
-      "ettings\030\004 \001(\0132*.gdsc.smlm.data.config.Re" +
-      "sultsFileSettings\022K\n\026results_table_setti",
-      "ngs\030\005 \001(\0132+.gdsc.smlm.data.config.Result" +
-      "sTableSettings\022R\n\032results_in_memory_sett" +
-      "ings\030\006 \001(\0132..gdsc.smlm.data.config.Resul" +
-      "tsInMemorySettings*\235\002\n\020ResultsImageType\022" +
-      "\r\n\tDRAW_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022" +
-      "\n\016DRAW_INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020" +
-      "\003\022\023\n\017DRAW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISAT" +
-      "IONS_PRECISION\020\005\022\034\n\030DRAW_INTENSITY_PRECI" +
-      "SION\020\006\022(\n$DRAW_LOCALISATIONS_AVERAGE_PRE" +
-      "CISION\020\007\022$\n DRAW_INTENSITY_AVERAGE_PRECI",
-      "SION\020\010\022\022\n\016DRAW_FIT_ERROR\020\t*C\n\020ResultsIma" +
-      "geMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLACE\020\001" +
-      "\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022\r\n\t" +
-      "FILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003TSF" +
-      "\020\003\022\010\n\004MALK\020\004B\017B\rResultsProtosb\006proto3"
+      "eUnit\022\026\n\016show_precision\030\005 \001(\010\022\031\n\021show_fi" +
+      "tting_data\030\006 \001(\010\022\027\n\017show_noise_data\030\007 \001(" +
+      "\010\022\032\n\022rounding_precision\030\010 \001(\005\",\n\027Results" +
+      "InMemorySettings\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017" +
+      "ResultsSettings\022\024\n\014log_progress\030\001 \001(\010\022\027\n" +
+      "\017show_deviations\030\002 \001(\010\022K\n\026results_image_" +
+      "settings\030\003 \001(\0132+.gdsc.smlm.data.config.R" +
+      "esultsImageSettings\022I\n\025results_file_sett" +
+      "ings\030\004 \001(\0132*.gdsc.smlm.data.config.Resul" +
+      "tsFileSettings\022K\n\026results_table_settings",
+      "\030\005 \001(\0132+.gdsc.smlm.data.config.ResultsTa" +
+      "bleSettings\022R\n\032results_in_memory_setting" +
+      "s\030\006 \001(\0132..gdsc.smlm.data.config.ResultsI" +
+      "nMemorySettings*\235\002\n\020ResultsImageType\022\r\n\t" +
+      "DRAW_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016D" +
+      "RAW_INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023" +
+      "\n\017DRAW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISATION" +
+      "S_PRECISION\020\005\022\034\n\030DRAW_INTENSITY_PRECISIO" +
+      "N\020\006\022(\n$DRAW_LOCALISATIONS_AVERAGE_PRECIS" +
+      "ION\020\007\022$\n DRAW_INTENSITY_AVERAGE_PRECISIO",
+      "N\020\010\022\022\n\016DRAW_FIT_ERROR\020\t*C\n\020ResultsImageM" +
+      "ode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLACE\020\001\022\r\n" +
+      "\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022\r\n\tFIL" +
+      "E_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003TSF\020\003\022" +
+      "\010\n\004MALK\020\004B\017B\rResultsProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6180,7 +6180,7 @@ public final class ResultsProtos {
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsTableSettings_descriptor,
-        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ComputePrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", });
+        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", });
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_fieldAccessorTable = new
