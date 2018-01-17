@@ -1,14 +1,15 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.fitting.FisherInformationMatrix;
-import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.fitting.LSEFunctionSolver;
+import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.fitting.nonlinear.gradient.LSQLVMGradientProcedureFactory;
+import gdsc.smlm.fitting.nonlinear.gradient.LSQVarianceGradientProcedure;
+import gdsc.smlm.fitting.nonlinear.gradient.LSQVarianceGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
-import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
-import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -29,6 +30,8 @@ import gdsc.smlm.function.Gradient1Function;
  */
 public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver implements LSEFunctionSolver
 {
+	protected EJMLLinearSolver inversionSolver;
+
 	/** The total sum of squares. */
 	protected double totalSumOfSquares = Double.NaN;
 
@@ -123,32 +126,75 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
-	 */
+	// TODO check if this works. Update to use a procedure on the gradient function.
+
+	@Override
+	protected void computeDeviations(double[] aDev)
+	{
+		LSQVarianceGradientProcedure p = createVarianceProcedure();
+		if (p.variance(null) == LSQVarianceGradientProcedure.STATUS_OK)
+			setDeviations(aDev, p.variance);
+	}
+
+	private LSQVarianceGradientProcedure createVarianceProcedure()
+	{
+		if (inversionSolver == null)
+			inversionSolver = EJMLLinearSolver.createForInversion(1e-2);
+		return LSQVarianceGradientProcedureFactory.create((Gradient1Function) f, inversionSolver);
+	}
+
+	@Override
+	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
+	{
+		LSQVarianceGradientProcedure p = createVarianceProcedure();
+		if (p.variance(a) == LSQVarianceGradientProcedure.STATUS_OK)
+		{
+			setDeviations(aDev, p.variance);
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	protected FisherInformationMatrix computeFisherInformationMatrix()
 	{
-		// TODO. Check if these deviations are correct.
-		// The last Hessian matrix should be stored in the working alpha.
-		return new FisherInformationMatrix(walpha, beta.length);
+		// This solver directly implements computation of the deviations
+		throw new NotImplementedException();
 	}
 
 	@Override
 	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
 	{
-		// Compute using the scaled Hessian as per the above method .
-		// TODO - Use a dedicated procedure that omits computing beta.
-		if (gradientProcedure == null)
-			gradientProcedure = createGradientProcedure(y);
-		gradientProcedure.gradient(a);
-		if (gradientProcedure.isNaNGradients())
-			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);		
-		return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(), f.getNumberOfGradients());
+		// This solver directly implements computation of the deviations
+		throw new NotImplementedException();
 	}
-	
+
+	//	/*
+	//	 * (non-Javadoc)
+	//	 * 
+	//	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
+	//	 */
+	//	@Override
+	//	protected FisherInformationMatrix computeFisherInformationMatrix()
+	//	{
+	//		// TODO. Check if these deviations are correct.
+	//		// The last Hessian matrix should be stored in the working alpha.
+	//		return new FisherInformationMatrix(walpha, beta.length);
+	//	}
+	//
+	//	@Override
+	//	protected FisherInformationMatrix computeFunctionFisherInformationMatrix(double[] y, double[] a)
+	//	{
+	//		// Compute using the scaled Hessian as per the above method .
+	//		// TODO - Use a dedicated procedure that omits computing beta.
+	//		if (gradientProcedure == null)
+	//			gradientProcedure = createGradientProcedure(y);
+	//		gradientProcedure.gradient(a);
+	//		if (gradientProcedure.isNaNGradients())
+	//			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);		
+	//		return new FisherInformationMatrix(gradientProcedure.getAlphaLinear(), f.getNumberOfGradients());
+	//	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
