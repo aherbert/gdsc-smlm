@@ -275,14 +275,6 @@ public class GradientCalculatorSpeedTest
 							eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]));
 			}
 		}
-
-		// Only the diagonal Fisher Information has been unrolled into the other calculators
-		for (int i = 0; i < paramsList.size(); i++)
-		{
-			beta = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-			beta2 = calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-			Assert.assertTrue("Not same diagonal @ " + i, eq.almostEqualRelativeOrAbsolute(beta, beta2));
-		}
 	}
 
 	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
@@ -323,27 +315,6 @@ public class GradientCalculatorSpeedTest
 
 		log("%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "", start1,
 				nparams, start2, (1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
-
-		for (int i = 0; i < paramsList.size(); i++)
-			calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-
-		for (int i = 0; i < paramsList.size(); i++)
-			calc2.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-
-		start1 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
-			calc.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-		start1 = System.nanoTime() - start1;
-
-		start2 = System.nanoTime();
-		for (int i = 0; i < paramsList.size(); i++)
-			calc2.fisherInformationDiagonal(x.length, paramsList.get(i), func);
-		start2 = System.nanoTime() - start2;
-
-		log("%sFisher Diagonal GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "",
-				start1, nparams, start2, (1.0 * start1) / start2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(start2 < start1);
 	}

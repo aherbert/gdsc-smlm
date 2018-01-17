@@ -1,7 +1,5 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.function.NonLinearFunction;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -27,7 +25,6 @@ import gdsc.smlm.function.NonLinearFunction;
  */
 public class MLEGradientCalculator5 extends MLEGradientCalculator
 {
-
 	/**
 	 * Instantiates a new MLE gradient calculator.
 	 */
@@ -127,34 +124,5 @@ public class MLEGradientCalculator5 extends MLEGradientCalculator
 		alpha[2][3] = alpha[3][2];
 		alpha[2][4] = alpha[4][2];
 		alpha[3][4] = alpha[4][3];
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#fisherInformationDiagonal(int, double[],
-	 * gdsc.smlm.function.NonLinearFunction)
-	 */
-	@Override
-	public double[] fisherInformationDiagonal(final int n, final double[] a, final NonLinearFunction func)
-	{
-		final double[] dy_da = new double[a.length];
-
-		final double[] alpha = new double[nparams];
-
-		func.initialise(a);
-
-		for (int i = 0; i < n; i++)
-		{
-			final double yi = 1.0 / func.eval(i, dy_da);
-			alpha[0] += dy_da[0] * dy_da[0] * yi;
-			alpha[1] += dy_da[1] * dy_da[1] * yi;
-			alpha[2] += dy_da[2] * dy_da[2] * yi;
-			alpha[3] += dy_da[3] * dy_da[3] * yi;
-			alpha[4] += dy_da[4] * dy_da[4] * yi;
-		}
-
-		checkGradients(alpha, nparams);
-		return alpha;
 	}
 }
