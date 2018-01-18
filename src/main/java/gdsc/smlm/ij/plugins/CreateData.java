@@ -3334,7 +3334,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			sb.append(" ").append(size).append("x").append(size);
 			if (settings.getCameraType() == CameraType.EMCCD)
 				sb.append(" EM=").append(settings.getEmGain());
-			sb.append(" CG=").append(settings.getEmGain());
+			sb.append(" CG=").append(settings.getCameraGain());
 			sb.append(" RN=").append(settings.getReadNoise());
 			sb.append(" B=").append(settings.getBias());
 		}
