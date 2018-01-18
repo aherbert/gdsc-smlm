@@ -23,11 +23,19 @@ import gdsc.smlm.function.Gradient1Procedure;
  * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
  * <p>
  * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
+ * <p>
+ * Note: If the fit is for a Poisson process convolved with a Gamma distribution, e.g. in the case of an EM-CCD camera,
+ * and the function describes a 2D point-spread function (PSF) with long tails then the variance for position parameters
+ * will be scaled by a factor of 2 (See Mortensen, SI 4.3 for assumptions and proof using MLE). The estimated variance
+ * of other function parameters (e.g. background, total intensity) will be incorrect.
  */
 public class LSQVarianceGradientProcedure implements Gradient1Procedure
 {
+	/** Returned when computation was OK */
 	public static final int STATUS_OK = 0;
+	/** Returned when computation failed due to NaN values in the gradients */
 	public static final int STATUS_BAD_GRADIENTS = 1;
+	/** Returned when computation failed to invert the information matrix */
 	public static final int STATUS_FAILED_INVERSION = 2;
 
 	protected final Gradient1Function func;
@@ -89,7 +97,8 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	}
 
 	/**
-	 * Evaluate the function and compute the variance of the parameters.
+	 * Evaluate the function and compute the variance of the parameters. The result will be zero if OK. Otherwise the
+	 * failure reason can be checked using the status constants.
 	 *
 	 * @param a
 	 *            Set of coefficients for the function (if null the function must be pre-initialised)

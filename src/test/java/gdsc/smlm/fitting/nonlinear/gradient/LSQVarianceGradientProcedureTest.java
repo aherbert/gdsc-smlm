@@ -18,6 +18,7 @@ import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 public class LSQVarianceGradientProcedureTest
 {
@@ -228,7 +229,8 @@ public class LSQVarianceGradientProcedureTest
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
-			func = PrecomputedGradient1Function.wrapGradient1Function(func, SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
+			func = PrecomputedGradient1Function.wrapGradient1Function(func,
+					SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
 
 		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
@@ -274,7 +276,8 @@ public class LSQVarianceGradientProcedureTest
 		// Remove the timing of the function call by creating a dummy function
 		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
-				? PrecomputedGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3)) : f;
+				? PrecomputedGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
+				: f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -369,6 +372,54 @@ public class LSQVarianceGradientProcedureTest
 			//System.out.printf("%s : %s\n", Arrays.toString(crlb1), Arrays.toString(crlb2));
 			for (int j = 0; j < n; j++)
 				Assert.assertTrue(crlb1[j] < crlb2[j]);
+		}
+	}
+
+	@Test
+	public void varianceMatchesFormula()
+	{
+		//Assume.assumeTrue(false);
+		
+		double[] N_ = new double[] { 20, 50, 100, 500 };
+		double[] b2_ = new double[] { 0, 1, 2, 4 };
+		double[] s_ = new double[] { 1, 1.2, 1.5 };
+		double[] x_ = new double[] { 4.8, 5, 5.5 };
+		double a = 100;
+		int size = 10;
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_ERF_CIRCLE,
+				null);
+		LSQVarianceGradientProcedure p = LSQVarianceGradientProcedureFactory.create(f);
+		int ix = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
+		int iy = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
+		double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		for (double N : N_)
+		{
+			params[Gaussian2DFunction.SIGNAL] = N;
+			for (double b2 : b2_)
+			{
+				params[Gaussian2DFunction.BACKGROUND] = b2;
+				for (double s : s_)
+				{
+					double ss = s * a;
+					params[Gaussian2DFunction.X_SD] = s;
+					for (double x : x_)
+					{
+						params[Gaussian2DFunction.X_POSITION] = x;
+						for (double y : x_)
+						{
+							params[Gaussian2DFunction.Y_POSITION] = y;
+							if (p.variance(params) != LSQVarianceGradientProcedure.STATUS_OK)
+								Assert.fail("No variance");
+							double o1 = Math.sqrt(p.variance[ix]) * a;
+							double o2 = Math.sqrt(p.variance[iy]) * a;
+							double e = Gaussian2DPeakResultHelper.getPrecisionX(a, ss, N, b2, false);
+							//System.out.printf("e = %f  :  o  =   %f   %f\n", e, o1, o2);
+							Assert.assertEquals(e, o1, e * 5e-2);
+							Assert.assertEquals(e, o2, e * 5e-2);
+						}
+					}
+				}
+			}
 		}
 	}
 
