@@ -3165,6 +3165,15 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		final int step = Utils.getProgressInterval(totalFrames);
 
+		// To pre-process data for noise estimation
+		boolean isFitCameraCounts = false;
+		CameraModel cameraModel = null;
+		if (ignoreBoundsForNoise)
+		{
+			isFitCameraCounts = fitConfig.isFitCameraCounts();
+			cameraModel = fitConfig.getCameraModel();
+		}
+		
 		runTime = System.nanoTime();
 		boolean shutdown = false;
 		int slice = 0;
@@ -3184,7 +3193,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 			float noise = Float.NaN;
 			if (ignoreBoundsForNoise)
 			{
-				noise = FitWorker.estimateNoise(data, source.getWidth(), source.getHeight(), config.getNoiseMethod());
+				// We must pre-process the data before noise estimation
+				float[] data2 = data.clone();
+				if (isFitCameraCounts)
+				{
+					cameraModel.removeBias(data2);
+				}
+				else
+				{
+					cameraModel.removeBiasAndGain(data2);
+				}
+				
+				
+				noise = FitWorker.estimateNoise(data2, source.getWidth(), source.getHeight(), config.getNoiseMethod());
 
 				// Crop the data to the region
 				data = IJImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
