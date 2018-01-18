@@ -1883,8 +1883,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				maxIterations = -maxIterations;
 
 			boolean minimiseValue = isMinimiseValue();
-			toleranceChecker = new ToleranceChecker(minimiseValue, getRelativeThreshold(), getAbsoluteThreshold(),
-					getParameterRelativeThreshold(), getParameterAbsoluteThreshold(), maxIterations);
+			// If the value is zero then ignore this for convergence. 
+			toleranceChecker = new ToleranceChecker(minimiseValue, getIfStrictlyPositive(getRelativeThreshold()),
+					getIfStrictlyPositive(getAbsoluteThreshold()), getIfStrictlyPositive(getParameterRelativeThreshold()),
+					getIfStrictlyPositive(getParameterAbsoluteThreshold()), maxIterations);
 		}
 		return toleranceChecker;
 	}
@@ -1916,6 +1918,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			default:
 				throw new IllegalStateException("Unrecognised fit solver: " + getFitSolver());
 		}
+	}
+
+	/**
+	 * Gets the value if positive, otherwise return -1.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the value if positive, or -1
+	 */
+	private double getIfStrictlyPositive(double value)
+	{
+		return (value > 0) ? value : -1.0;
 	}
 
 	/**
