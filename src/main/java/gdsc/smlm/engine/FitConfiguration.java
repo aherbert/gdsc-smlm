@@ -2277,7 +2277,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void updateVariance(double[] paramsDev)
 	{
-		if (emCCD)
+		if (emCCD && paramsDev != null)
 		{
 			for (int i = Gaussian2DFunction.X_POSITION; i < paramsDev.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 			{
