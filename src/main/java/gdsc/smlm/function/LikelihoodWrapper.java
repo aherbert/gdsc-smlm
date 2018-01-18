@@ -216,8 +216,8 @@ public abstract class LikelihoodWrapper
 
 	/**
 	 * Compute the Fisher's Information Matrix (I) for fitted variables.
-	 * 
-	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
+	 * <p>
+	 * Note that this is only a true Fisher information matrix if the function returns the expected value for a
 	 * Poisson process. In this case the equation reduces to:
 	 * 
 	 * <pre>
@@ -268,12 +268,12 @@ public abstract class LikelihoodWrapper
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
 	 * inverted Fisher's Information Matrix (I).
-	 * 
+	 * <p>
 	 * The information matrix is inverted and the central diagonal returned.
 	 * 
 	 * @param variables
 	 *            The variables of the function
-	 * @return CRLB-sCMOS (or null if inversion failed)
+	 * @return CRLB (or null if inversion failed)
 	 */
 	public double[] crlb(final double[] variables)
 	{
@@ -283,7 +283,7 @@ public abstract class LikelihoodWrapper
 	/**
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
 	 * inverted Fisher's Information Matrix (I).
-	 * 
+	 * <p>
 	 * The information matrix is inverted and the central diagonal returned. If the inversion fails then the routine
 	 * optionally returns the reciprocal of the diagonal element to find a (possibly loose) lower bound.
 	 *
