@@ -102,6 +102,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private double gain = 0;
 	private double signalToPhotons;
 	private boolean emCCD = false;
+	private boolean isMLE = false;
 	private double noise = 0;
 	private double minWidthFactor = 0.5;
 	private double widthFactor = 2;
@@ -902,6 +903,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setFitSolver(FitSolver fitSolver)
 	{
 		invalidateFunctionSolver();
+		updatePrecisionThreshold();
 		fitSolverSettings.setFitSolver(fitSolver);
 	}
 
@@ -1271,6 +1273,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			default:
 				break;
 		}
+		isMLE = isMLE();
 	}
 
 	/**
@@ -2190,7 +2193,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			// Check using the formula which uses the estimated background.
 			// This allows for better filtering when the background is variable, e.g. when imaging cells.
-			if (isModelCameraMLE())
+			if (isMLE)
 			{
 				try
 				{
@@ -2214,7 +2217,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		else
 		{
-			if (isModelCameraMLE())
+			if (isMLE)
 			{
 				try
 				{
@@ -2794,6 +2797,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public boolean isModelCameraMLE()
 	{
 		return (isModelCamera() && fitSolverSettings.getFitSolverValue() == FitSolver.MLE_VALUE);
+	}
+
+	/**
+	 * Checks if is using a maximum likelihood estimator (MLE).
+	 *
+	 * @return true, if is a MLE
+	 */
+	public boolean isMLE()
+	{
+		switch (getFitSolverValue())
+		{
+			case FitSolver.LVM_MLE_VALUE:
+			case FitSolver.MLE_VALUE:
+			case FitSolver.FAST_MLE_VALUE:
+			case FitSolver.BACKTRACKING_FAST_MLE_VALUE:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	/**
