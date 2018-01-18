@@ -126,8 +126,6 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		return LSQLVMGradientProcedureFactory.create(y, (Gradient1Function) f);
 	}
 
-	// TODO check if this works. Update to use a procedure on the gradient function.
-
 	@Override
 	protected void computeDeviations(double[] aDev)
 	{

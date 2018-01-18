@@ -32,18 +32,17 @@ public class LSQVarianceGradientProcedureFactory
 	{
 		switch (func.getNumberOfGradients())
 		{
-			//			case 5:
-			//				return new LSQVarianceGradientProcedure5(func);
-			//			case 4:
-			//				return new LSQVarianceGradientProcedure4(func);
-			//			case 6:
-			//				return new LSQVarianceGradientProcedure6(func);
-
+			case 5:
+				return new LSQVarianceGradientProcedure5(func);
+			case 4:
+				return new LSQVarianceGradientProcedure4(func);
+			case 6:
+				return new LSQVarianceGradientProcedure6(func);
 			default:
 				return new LSQVarianceGradientProcedure(func);
 		}
 	}
-	
+
 	/**
 	 * Create a new gradient procedure.
 	 *
@@ -55,13 +54,12 @@ public class LSQVarianceGradientProcedureFactory
 	{
 		switch (func.getNumberOfGradients())
 		{
-			//			case 5:
-			//				return new LSQVarianceGradientProcedure5(func, solver);
-			//			case 4:
-			//				return new LSQVarianceGradientProcedure4(func, solver);
-			//			case 6:
-			//				return new LSQVarianceGradientProcedure6(func, solver);
-
+			case 5:
+				return new LSQVarianceGradientProcedure5(func, solver);
+			case 4:
+				return new LSQVarianceGradientProcedure4(func, solver);
+			case 6:
+				return new LSQVarianceGradientProcedure6(func, solver);
 			default:
 				return new LSQVarianceGradientProcedure(func, solver);
 		}

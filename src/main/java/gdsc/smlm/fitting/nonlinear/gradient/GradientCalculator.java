@@ -911,7 +911,7 @@ public class GradientCalculator
 		checkGradients(I, nparams);
 		if (isNaNGradients())
 			return null;
-		
+
 		return LSEBaseFunctionSolver.covariance(I, Ei_Eia_Eib);
 	}
 
@@ -980,13 +980,17 @@ public class GradientCalculator
 			for (int j = i + 1; j < nparams; j++)
 			{
 				I[i][j] = I[j][i];
-				Ei_Eia_Eib[i][j] = I[j][i];
+				Ei_Eia_Eib[i][j] = Ei_Eia_Eib[j][i];
 			}
 
 		checkGradients(I, nparams);
 		if (isNaNGradients())
 			return null;
-		
+
+		//System.out.println("Gradient calc");
+		//System.out.println(new DenseMatrix64F(I).toString());
+		//System.out.println(new DenseMatrix64F(Ei_Eia_Eib).toString());
+
 		return LSEBaseFunctionSolver.variance(I, Ei_Eia_Eib);
 	}
 }

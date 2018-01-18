@@ -36,8 +36,6 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	 * The number of gradients
 	 */
 	public final int n;
-	/** The working size. */
-	private final int size;
 	/**
 	 * Working space for I = sum_i { Ei,a * Ei,b }
 	 */
@@ -82,9 +80,8 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 
 		this.func = func;
 		this.n = func.getNumberOfGradients();
-		size = n * (n + 1) / 2;
 
-		I = new double[func.size()];
+		I = new double[n * n];
 		E = new double[I.length];
 		variance = new double[n];
 
@@ -135,8 +132,15 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	 */
 	protected void initialise()
 	{
-		Arrays.fill(I, 0);
-		Arrays.fill(E, 0);
+		for (int a = 0; a < n; a++)
+		{
+			for (int b = 0, j = a * n; b <= a; b++, j++)
+			{
+				//System.out.printf("I[%d] = 0; E[%d] = 0;\n", j, j);
+				I[j] = 0;
+				E[j] = 0;
+			}
+		}
 		Arrays.fill(variance, 0);
 	}
 
@@ -148,20 +152,31 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	 */
 	protected boolean finish()
 	{
-		for (int i = 0; i < size; i++)
-			if (Double.isNaN(I[i]))
-				return true;
+		//System.out.printf("if (");
+		for (int a = 0; a < n; a++)
+			for (int b = 0, j = a * n; b <= a; b++, j++)
+			{
+				//System.out.printf("%s I[%d]!=I[%d] ", (a+b==0)?"":"||", j, j);
+				if (Double.isNaN(I[j]))
+					return true;
+			}
+		//System.out.printf(") return true;\n");
 		// Generate symmetric matrix
 		for (int a = 0; a < n; a++)
 			for (int b = 0; b < a; b++)
 			{
 				int j = a * n + b;
 				int k = b * n + a;
-				//	System.out.printf("I[%d] = I[%d];\n", k, j);
-				//	System.out.printf("E[%d] = E[%d];\n", k, j);
+				//System.out.printf("I[%d] = I[%d];\n", k, j);
+				//System.out.printf("E[%d] = E[%d];\n", k, j);
 				I[k] = I[j];
 				E[k] = E[j];
 			}
+
+		//System.out.println("Procedure");
+		//System.out.println(DenseMatrix64F.wrap(n, n, I).toString());
+		//System.out.println(DenseMatrix64F.wrap(n, n, E).toString());
+
 		return false;
 	}
 
@@ -173,14 +188,17 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 		for (int a = 0; a < n; a++)
 		{
 			// Note: b==a as we only do the diagonal
+			//System.out.printf("variance[%d] = \n", a);
 			double v = 0;
 			for (int ap = 0; ap < n; ap++)
 			{
 				for (int bp = 0; bp < n; bp++)
 				{
+					//System.out.printf("%s I[%d]*E[%d]*I[%d]\n", (ap+bp==0)?"":"+", a*n+ap, ap*n+bp, bp*n+a);
 					v += I[a * n + ap] * E[ap * n + bp] * I[bp * n + a];
 				}
 			}
+			//System.out.printf(";\n");
 			variance[a] = v;
 		}
 	}
