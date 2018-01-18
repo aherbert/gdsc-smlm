@@ -617,8 +617,12 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 
 			if (aDev != null)
 			{
-				// Assume the Maximum Likelihood estimator returns the optimum fit (achieves the Cramer Roa
-				// lower bounds) and so the covariance can be obtained from the Fisher Information Matrix.
+				// Compute assuming a Poisson process.
+				// Note: 
+				// If using a Poisson-Gamma-Gaussian model then these will be incorrect.
+				// However the variance for the position estimates of a 2D PSF can be 
+				// scaled by a factor of 2 as in Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3.
+				// Since the type of function is unknown this cannot be done here. 
 				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
 				setDeviations(aDev, m);
 			}
@@ -967,6 +971,12 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	{
 		final int n = y.length;
 		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+		// Compute assuming a Poisson process.
+		// Note: 
+		// If using a Poisson-Gamma-Gaussian model then these will be incorrect.
+		// However the variance for the position estimates of a 2D PSF can be 
+		// scaled by a factor of 2 as in Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3.
+		// Since the type of function is unknown this cannot be done here. 
 		return new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
 	}
 

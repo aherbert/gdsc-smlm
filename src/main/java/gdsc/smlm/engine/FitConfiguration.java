@@ -2238,6 +2238,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		return variance;
 	}
 
+	private final static int Y_OFFSET = Gaussian2DFunction.Y_POSITION - Gaussian2DFunction.X_POSITION;
+
 	/**
 	 * Gets the variance. This is computed using the mean of the variance for the X and Y parameters.
 	 *
@@ -2257,6 +2259,32 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					paramsDev[offset + Gaussian2DFunction.Y_POSITION]) / 2.0;
 		}
 		return 0;
+	}
+
+	/**
+	 * Update the estimated parameter variance. This method should be run on the deviations produced by fitting.
+	 * <p>
+	 * If not an EM-CCD then the method does nothing.
+	 * <p>
+	 * If an EM-CCD the method scales the variance for XY position parameters by a factor of 2. This
+	 * allows the computation of the localisation variance using the parameter deviations to match the estimation
+	 * formulas of Mortensen. See Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3 for assumptions and proof
+	 * using MLE. Note that in the EM-CCD case the deviations for the other parameters will be incorrect as they are
+	 * computed assuming a Poisson process.
+	 *
+	 * @param paramsDev
+	 *            the params dev
+	 */
+	public void updateVariance(double[] paramsDev)
+	{
+		if (emCCD)
+		{
+			for (int i = Gaussian2DFunction.X_POSITION; i < paramsDev.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+			{
+				paramsDev[i] *= 2;
+				paramsDev[i + Y_OFFSET] *= 2;
+			}
+		}
 	}
 
 	/**

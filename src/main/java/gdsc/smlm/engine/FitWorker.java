@@ -1555,7 +1555,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			fitConfig.setMaxIterations(maxIterations);
 			fitConfig.setMaxFunctionEvaluations(maxEvaluations);
 
-			updateError(fitResult);
+			updateResult(fitResult);
 
 			// Ensure the initial parameters are at the candidate position since we may have used an estimate.
 			// This will ensure that drift is computed correctly.
@@ -1901,14 +1901,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		/**
-		 * Update error to the coefficient of determination (so that the error describes how much of the data is
-		 * encapsulated in the fit)
+		 * Update the result. This is run after a fit is performed.
 		 *
 		 * @param result
 		 *            the result
 		 */
-		private void updateError(FitResult result)
+		private void updateResult(FitResult result)
 		{
+			fitConfig.updateVariance(result.getParameterDeviations());			
+			
 			// The error is now set by the function solver. Not all function solvers can compute 
 			// the sum-of-squares so we can no longer update the error to be the independent
 			// of the solver.
@@ -2358,7 +2359,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					params[Gaussian2DFunction.BACKGROUND] == 0);
 			fitConfig.setPrecomputedFunctionValues(null);
 			valueSingle = getFitValue();
-			updateError(fitResult);
+			updateResult(fitResult);
 
 			// Ensure the initial parameters are at the candidate position since we may have used an estimate.
 			// This will ensure that drift is computed correctly.
@@ -2835,7 +2836,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				fitConfig.setup(0);
 			}
 
-			updateError(newFitResult);
+			updateResult(newFitResult);
 
 			if (newFitResult.getStatus() == FitStatus.OK)
 			{
