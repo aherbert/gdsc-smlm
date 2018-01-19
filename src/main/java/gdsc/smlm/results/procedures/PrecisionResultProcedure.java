@@ -21,6 +21,7 @@ import gdsc.smlm.results.MemoryPeakResults;
  */
 //@formatter:off
 public class PrecisionResultProcedure extends AbstractResultProcedure implements 
+	StoredPrecisionProcedure, 
 	LSEPrecisionProcedure, 
 	LSEPrecisionBProcedure, 
 	MLEPrecisionProcedure, 
@@ -42,9 +43,45 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	}
 
 	/**
-	 * Gets the precision assuming a Least Squares Estimator and a local noise estimate.
-	 *
-	 * @return the precision
+	 * Gets the precision for the results.
+	 * <p>
+	 * If the results contain stored precision values then these are used. Otherwise an attempt is made to compute the
+	 * precision using {@link #getLSEPrecision()}. If no exception is thrown then the precision has been computed.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units for precision is not possible
+	 */
+	public void getPrecision()
+	{
+		if (results.hasPrecision())
+			getStoredPrecision();
+		else
+			getLSEPrecision();
+	}
+
+	/**
+	 * Gets the precision stored in the results
+	 */
+	public void getStoredPrecision()
+	{
+		i = 0;
+		precision = allocate(precision);
+		results.forEach((StoredPrecisionProcedure) this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.procedures.StoredPrecisionProcedure#executeStoredPrecision(double)
+	 */
+	public void executeStoredPrecision(double precision)
+	{
+		this.precision[i++] = precision;
+	}
+
+	/**
+	 * Gets the precision assuming a Gaussian 2D PSF and a Least Squares Estimator and a local noise estimate.
+	 * 
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -66,9 +103,8 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	}
 
 	/**
-	 * Gets the precision assuming a Least Squares Estimator and a local background estimate.
-	 *
-	 * @return the precision
+	 * Gets the precision assuming a Gaussian 2D PSF and a Least Squares Estimator and a local background estimate.
+	 * 
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -90,9 +126,8 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	}
 
 	/**
-	 * Gets the precision assuming a Maximum Likelihood Estimator and a local noise estimate.
-	 *
-	 * @return the precision
+	 * Gets the precision assuming a Gaussian 2D PSF and a Maximum Likelihood Estimator and a local noise estimate.
+	 * 
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -114,9 +149,8 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	}
 
 	/**
-	 * Gets the precision assuming a Maximum Likelihood Estimator and a local background estimate.
-	 *
-	 * @return the precision
+	 * Gets the precision assuming a Gaussian 2D PSF and a Maximum Likelihood Estimator and a local background estimate.
+	 * 
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */

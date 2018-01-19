@@ -36,6 +36,7 @@ import gdsc.smlm.results.procedures.MLEPrecisionBProcedure;
 import gdsc.smlm.results.procedures.MLEPrecisionProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
+import gdsc.smlm.results.procedures.StoredPrecisionProcedure;
 import gdsc.smlm.results.procedures.TResultProcedure;
 import gdsc.smlm.results.procedures.TXYResultProcedure;
 import gdsc.smlm.results.procedures.WResultProcedure;
@@ -1856,6 +1857,22 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		}
 	}
 
+	/**
+	 * For each result execute the procedure
+	 * <p>
+	 * Note the precision may not be stored in the results. The default precision for a result is NaN.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEach(StoredPrecisionProcedure procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			procedure.executeStoredPrecision(r.getPrecision());
+		}
+	}
 	/**
 	 * For each result execute the procedure
 	 * <p>
