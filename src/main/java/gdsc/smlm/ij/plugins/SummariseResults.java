@@ -141,41 +141,19 @@ public class SummariseResults implements PlugIn
 		final int size = result.size();
 		if (size > 0)
 		{
-			// Precision
-			// Check if we can use the stored precision
-			if (result.hasPrecision())
+			// Precision 
+			try
 			{
-				if (calibration != null)
-				{
-					// This will return NA if the results do not have the precision method
-					precisionMethod = calibration.getPrecisionMethod();
-				}
-				result.forEach(new PeakResultProcedure()
-				{
-					public void execute(PeakResult peakResult)
-					{
-						stats[0].addValue(peakResult.getPrecision());
-					}
-				});
-				stored = true;
+				PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
+				// Use stored precision if possible
+				stored = result.hasPrecision();
+				precisionMethod = pp.getPrecision(stored);
+				for (double v : pp.precision)
+					stats[0].addValue(v);
 			}
-			else
+			catch (DataException e)
 			{
-				try
-				{
-					// We use the LSE precision even if the results are fit using MLE.
-					// This is just a rough indicator of the result precision so it doesn't matter
-					// that much anyway.
-					PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
-					pp.getLSEPrecision();
-					for (double v : pp.precision)
-						stats[0].addValue(v);
-					precisionMethod = PrecisionMethod.MORTENSEN;
-				}
-				catch (DataException e)
-				{
-					// Ignore
-				}
+				// Ignore
 			}
 
 			// SNR requires noise
