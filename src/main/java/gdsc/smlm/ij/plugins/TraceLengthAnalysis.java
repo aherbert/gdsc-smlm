@@ -117,7 +117,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 		try
 		{
 			PrecisionResultProcedure p = new PrecisionResultProcedure(results);
-			p.getLSEPrecision();
+			p.getPrecision();
 
 			// Precision in nm using the median
 			precision = new Percentile().evaluate(p.precision, 50);

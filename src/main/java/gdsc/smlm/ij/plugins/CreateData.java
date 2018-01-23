@@ -3249,7 +3249,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 				// Get precision
 				PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
-				pp.getLSEPrecision();
+				pp.getPrecision();
 				stats[PRECISION].add(pp.precision);
 				for (int i = 0; i < pp.size(); i++)
 				{

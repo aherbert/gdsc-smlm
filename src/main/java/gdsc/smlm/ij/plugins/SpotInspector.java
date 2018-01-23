@@ -124,7 +124,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		if (sortOrderIndex == 1)
 		{
 			pp = new PrecisionResultProcedure(results);
-			pp.getLSEPrecision();
+			pp.getPrecision();
 		}
 		else
 			pp = null;
