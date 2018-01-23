@@ -44,6 +44,7 @@ import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -991,6 +992,19 @@ public class SettingsManager
 	public static FailCountManagerSettings readFailCountManagerSettings(int flags)
 	{
 		return new ConfigurationReader<FailCountManagerSettings>(GUIProtosHelper.defaultFailCountManagerSettings)
+				.read(flags);
+	}
+
+	/**
+	 * Read the PSFAstigmatismModelSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the PSFAstigmatismModelSettings
+	 */
+	public static PSFAstigmatismModelSettings readPSFAstigmatismModelSettings(int flags)
+	{
+		return new ConfigurationReader<PSFAstigmatismModelSettings>(GUIProtosHelper.defaultPSFAstigmatismModelSettings)
 				.read(flags);
 	}
 

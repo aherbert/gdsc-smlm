@@ -880,7 +880,7 @@ public class PSFCreator implements PlugInFilter
 		FitEngine engine = new FitEngine(config, SynchronizedPeakResults.create(results, threadCount), threadCount,
 				FitQueue.BLOCKING);
 
-		List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
+		//List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
 
 		for (int slice = 1; slice <= stack.getSize(); slice++)
 		{
@@ -894,7 +894,7 @@ public class PSFCreator implements PlugInFilter
 			FitParameters params = new FitParameters();
 			params.maxIndices = new int[] { boxRadius * regionBounds.width + boxRadius };
 			ParameterisedFitJob job = new ParameterisedFitJob(slice, params, slice, region, regionBounds);
-			jobItems.add(job);
+			//jobItems.add(job);
 			engine.run(job);
 		}
 

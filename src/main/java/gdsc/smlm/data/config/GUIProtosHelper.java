@@ -5,6 +5,7 @@ import java.io.File;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.optics.SampleMode;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.GUIProtos.*;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
@@ -287,5 +288,18 @@ public class GUIProtosHelper
 		builder.setPassRateCounterMaxPassRate(0.2);
 		builder.setPassRateCounterIncPassRate(0.01);
 		defaultFailCountManagerSettings = builder.build();
+	}
+
+	/** The default PSFAstigmatismModelSettings */
+	public static final PSFAstigmatismModelSettings defaultPSFAstigmatismModelSettings;
+	static
+	{
+		PSFAstigmatismModelSettings.Builder builder = PSFAstigmatismModelSettings.newBuilder();
+		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
+		// Adjust for a wider fit range
+		b.getFittingBuilder().setValue(4);
+		builder.setFitEngineSettings(b);
+		builder.setPsf(PSFProtosHelper.defaultTwoAxisGaussian2DPSF);
+		defaultPSFAstigmatismModelSettings = builder.build();
 	}
 }

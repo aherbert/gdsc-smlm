@@ -500,3 +500,15 @@ message FailCountManagerSettings
 	double pass_rate_counter_max_pass_rate = 30;
 	double pass_rate_counter_inc_pass_rate = 31;
 }
+
+// Contains settings for the PSF Astigmatism Model plugin
+message PSFAstigmatismModelSettings
+{
+	double nm_per_slice = 1;
+
+	// For the fitting
+	FitEngineSettings fit_engine_settings = 2;
+	PSF psf = 3;
+	Calibration calibration = 4;	
+	double radius = 5;
+}
