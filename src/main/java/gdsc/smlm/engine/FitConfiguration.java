@@ -128,6 +128,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private double[] precomputedFunctionValues = null, observationWeights = null;
 	private CameraModel cameraModel = null;
+	
+	private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
 
 	/**
 	 * Instantiates a new fit configuration.
@@ -552,6 +554,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		updateSignalThreshold();
 		updatePrecisionThreshold();
 		updateCoordinateShift();
+		updateWidthThreshold();
+		updateMinWidthThreshold();
 	}
 
 	/*
@@ -561,6 +565,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitConfiguration clone()
 	{
+		// Make a new initialised instance. This will have new settings builder objects.
 		return new FitConfiguration(getFitSettings(), getCalibration(), getPSF()).copySettings(this);
 
 		//		// This is not a complete duplicate. The settings builder objects with the 
@@ -594,9 +599,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	FitConfiguration copySettings(FitConfiguration other)
 	{
+		// Set all the proerties that are not updated by a change in the settings
 		log = other.log;
+		computeDeviations = other.computeDeviations;
+		astigmatismZModel = other.astigmatismZModel;
+		fitRegionWidth = other.fitRegionWidth;
+		fitRegionHeight = other.fitRegionHeight;
+		coordinateOffset = other.coordinateOffset;
+		noise = other.noise;
+		computeResiduals = other.computeResiduals;
+		directFilter = other.getSmartFilter(); // This is a clone
+
 		cameraModel = other.cameraModel;
 		varianceSelector = other.varianceSelector;
+		
 		return this;
 	}
 
@@ -1364,8 +1380,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 	}
 
-	private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
-
 	/**
 	 * Gets the precision method that will be used to produce the precision value for filtering.
 	 * <p>
@@ -1478,9 +1492,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setWidthFactor(double widthFactor)
 	{
 		filterSettings.setMaxWidthFactor(widthFactor);
-		if (widthFactor > 1)
+		updateWidthThreshold();
+	}
+
+	private void updateWidthThreshold()
+	{
+		double w = filterSettings.getMaxWidthFactor();
+		if (w > 1)
 		{
-			this.widthFactor = widthFactor;
+			this.widthFactor = w;
 		}
 		else
 		{
@@ -1504,9 +1524,15 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setMinWidthFactor(double minWidthFactor)
 	{
 		filterSettings.setMinWidthFactor(minWidthFactor);
-		if (minWidthFactor < 1 && minWidthFactor > 0)
+		updateMinWidthThreshold();
+	}
+
+	private void updateMinWidthThreshold()
+	{
+		double w = filterSettings.getMinWidthFactor();
+		if (w < 1 && w > 0)
 		{
-			this.minWidthFactor = minWidthFactor;
+			this.minWidthFactor = w;
 		}
 		else
 		{
@@ -1885,7 +1911,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			boolean minimiseValue = isMinimiseValue();
 			// If the value is zero then ignore this for convergence. 
 			toleranceChecker = new ToleranceChecker(minimiseValue, getIfStrictlyPositive(getRelativeThreshold()),
-					getIfStrictlyPositive(getAbsoluteThreshold()), getIfStrictlyPositive(getParameterRelativeThreshold()),
+					getIfStrictlyPositive(getAbsoluteThreshold()),
+					getIfStrictlyPositive(getParameterRelativeThreshold()),
 					getIfStrictlyPositive(getParameterAbsoluteThreshold()), maxIterations);
 		}
 		return toleranceChecker;
@@ -3379,6 +3406,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			if (peak.getXSDFactor() > widthFactor || peak.getXSDFactor() < minWidthFactor)
 				return V_X_SD_FACTOR;
+			if (isTwoAxisGaussian2D)
+			{
+				if (peak.getYSDFactor() > widthFactor || peak.getYSDFactor() < minWidthFactor)
+					return V_X_SD_FACTOR;
+			}
 		}
 		if (peak.getXRelativeShift2() > offset)
 			return V_X_RELATIVE_SHIFT;
