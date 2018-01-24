@@ -5,8 +5,23 @@ import java.io.File;
 import gdsc.core.clustering.ClusteringAlgorithm;
 import gdsc.core.clustering.optics.SampleMode;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.FitProtos.FilterSettings;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
-import gdsc.smlm.data.config.GUIProtos.*;
+import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
+import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
+import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
+import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
+import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
+import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
+import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
+import gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
+import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
+import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
 import gdsc.smlm.ij.plugins.OPTICS.ImageMode;
@@ -295,11 +310,26 @@ public class GUIProtosHelper
 	static
 	{
 		PSFAstigmatismModelSettings.Builder builder = PSFAstigmatismModelSettings.newBuilder();
+		builder.setSmoothing(0.2);
 		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
+		
 		// Adjust for a wider fit range
-		b.getFittingBuilder().setValue(4);
+		b.getFittingBuilder().setValue(10).setAbsolute(true);
+		
+		// Simple filter
+		FilterSettings.Builder fb = b.getFitSettingsBuilder().getFilterSettingsBuilder();
+		fb.setSmartFilter(false);
+		fb.setDisableSimpleFilter(false);
+		fb.setShiftFactor(2);
+		fb.setSignalStrength(0);
+		fb.setMinPhotons(50);
+		fb.setMinWidthFactor(0.5);
+		fb.setMaxWidthFactor(5);
+		fb.setPrecisionThreshold(50);
+		
 		builder.setFitEngineSettings(b);
 		builder.setPsf(PSFProtosHelper.defaultTwoAxisGaussian2DPSF);
+
 		defaultPSFAstigmatismModelSettings = builder.build();
 	}
 }

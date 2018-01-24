@@ -511,4 +511,6 @@ message PSFAstigmatismModelSettings
 	PSF psf = 3;
 	Calibration calibration = 4;	
 	double radius = 5;
+	bool log_fit_progress = 6;
+	double smoothing = 7;
 }
