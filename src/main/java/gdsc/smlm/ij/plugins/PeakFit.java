@@ -1364,14 +1364,32 @@ public class PeakFit implements PlugInFilter, ItemListener
 		double min, max;
 		String name;
 		FitEngineConfigurationProvider fitEngineConfigurationProvider;
+		boolean includeValue;
 
 		public RelativeParameterProvider(double min, double max, String name,
 				FitEngineConfigurationProvider fitEngineConfigurationProvider)
+		{
+			this(min, max, name, fitEngineConfigurationProvider, false);
+		}
+
+		public RelativeParameterProvider(double min, double max, String name,
+				FitEngineConfigurationProvider fitEngineConfigurationProvider, boolean includeValue)
 		{
 			this.min = min;
 			this.max = max;
 			this.name = name;
 			this.fitEngineConfigurationProvider = fitEngineConfigurationProvider;
+			this.includeValue = includeValue;
+		}
+
+		double getMin()
+		{
+			return (includeValue) ? Math.min(min, getValue()) : min;
+		}
+
+		double getMax()
+		{
+			return (includeValue) ? Math.max(max, getValue()) : max;
 		}
 
 		abstract double getValue();
@@ -1389,7 +1407,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	static void addRelativeParameterOptions(final ExtendedGenericDialog gd, final RelativeParameterProvider rp)
 	{
 		final String label = rp.getDialogName();
-		gd.addSlider(label, rp.min, rp.max, rp.getValue(), new OptionListener<Double>()
+		gd.addSlider(label, rp.getMin(), rp.getMax(), rp.getValue(), new OptionListener<Double>()
 		{
 			public boolean collectOptions(Double value)
 			{
@@ -1477,7 +1495,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
 				config.getDataFilterMethod(n).ordinal());
 		addRelativeParameterOptions(gd,
-				new RelativeParameterProvider(0, 2.5, "Smoothing", fitEngineConfigurationProvider)
+				new RelativeParameterProvider(0, 2.5, "Smoothing", fitEngineConfigurationProvider, true)
 				{
 					@Override
 					void setAbsolute(boolean absolute)
@@ -1516,7 +1534,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
 	{
 		addRelativeParameterOptions(gd,
-				new RelativeParameterProvider(0.5, 2.5, "Search Width", fitEngineConfigurationProvider)
+				new RelativeParameterProvider(0.5, 2.5, "Search Width", fitEngineConfigurationProvider, true)
 				{
 					@Override
 					void setAbsolute(boolean absolute)
@@ -1550,7 +1568,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
 	{
 		addRelativeParameterOptions(gd,
-				new RelativeParameterProvider(0.5, 2.5, "Border Width", fitEngineConfigurationProvider)
+				new RelativeParameterProvider(0.5, 2.5, "Border Width", fitEngineConfigurationProvider, true)
 				{
 					@Override
 					void setAbsolute(boolean absolute)
@@ -1583,8 +1601,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static void addFittingOptions(final ExtendedGenericDialog gd,
 			final FitEngineConfigurationProvider fitEngineConfigurationProvider)
 	{
+		// For this we allow the slider range to increase as the user may have a large fit width
 		addRelativeParameterOptions(gd,
-				new RelativeParameterProvider(2, 4.5, "Fitting Width", fitEngineConfigurationProvider)
+				new RelativeParameterProvider(2, 4.5, "Fitting Width", fitEngineConfigurationProvider, true)
 				{
 					@Override
 					void setAbsolute(boolean absolute)
@@ -2177,11 +2196,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 					{
 						if (fitConfig.getPrecisionMethod() == PrecisionMethod.PRECISION_METHOD_NA)
 						{
-							throw new IllegalArgumentException(
-									"Precision filter requires a precision method");
+							throw new IllegalArgumentException("Precision filter requires a precision method");
 						}
-						if (fitConfig.isPrecisionUsingBackground() &&
-								calibration.isCCDCamera() &&
+						if (fitConfig.isPrecisionUsingBackground() && calibration.isCCDCamera() &&
 								(calibration.getBias() == 0 || !calibration.hasCountPerPhoton()))
 						{
 							throw new IllegalArgumentException(
@@ -2303,8 +2320,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addMessage("Smart filter (used to pick optimum results during fitting)");
 		gd.addTextAreas(XmlUtils.convertQuotes(xml), null, 8, 60);
 		// Add message about precision filtering
-		gd.addMessage(TextUtils.wrap(
-				"Note: Smart filters using precision may require a local background level. " +
+		gd.addMessage(TextUtils.wrap("Note: Smart filters using precision may require a local background level. " +
 				"Ensure the camera calibration is correct including any bias.", 80));
 
 		gd.showDialog();
@@ -2315,7 +2331,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		Filter f = DirectFilter.fromXML(xml);
 		if (f == null || !(f instanceof DirectFilter))
 			return false;
-		
+
 		fitConfig.setDirectFilter((DirectFilter) f);
 
 		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
@@ -2405,7 +2421,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				gd.addChoice(fieldName, filterNames,
 						filterNames[config.getDataFilterMethod(ii, config.getDataFilterMethod(ii - 1)).ordinal()]);
 			addRelativeParameterOptions(gd,
-					new RelativeParameterProvider(0, 4.5, "Smoothing" + filter, fitEngineConfigurationProvider)
+					new RelativeParameterProvider(0, 4.5, "Smoothing" + filter, fitEngineConfigurationProvider, true)
 					{
 						@Override
 						void setAbsolute(boolean absolute)
@@ -3173,7 +3189,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			isFitCameraCounts = fitConfig.isFitCameraCounts();
 			cameraModel = fitConfig.getCameraModel();
 		}
-		
+
 		runTime = System.nanoTime();
 		boolean shutdown = false;
 		int slice = 0;
@@ -3203,8 +3219,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				{
 					cameraModel.removeBiasAndGain(data2);
 				}
-				
-				
+
 				noise = FitWorker.estimateNoise(data2, source.getWidth(), source.getHeight(), config.getNoiseMethod());
 
 				// Crop the data to the region
