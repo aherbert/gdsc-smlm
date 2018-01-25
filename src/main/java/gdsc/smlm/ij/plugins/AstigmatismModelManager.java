@@ -35,6 +35,7 @@ import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngine;
@@ -56,6 +57,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -647,6 +649,7 @@ public class AstigmatismModelManager implements PlugIn
 		{
 			plot.setColor(Color.BLUE);
 			plot.addPoints(z, y2, Plot.CIRCLE);
+			plot.setColor(Color.BLACK);
 			plot.addLegend(y1Title + "\n" + y2Title);
 		}
 		return Utils.display(title, plot, 0, wo);
@@ -1240,11 +1243,13 @@ public class AstigmatismModelManager implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] MODELS = listAstigmatismModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.addCheckbox("Show_depth_of_focus", pluginSettings.getShowDepthOfFocus());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
+		pluginSettings.setShowDepthOfFocus(gd.getNextBoolean());
 
 		// Try and get the named resource
 		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
@@ -1257,8 +1262,62 @@ public class AstigmatismModelManager implements PlugIn
 		Utils.log("Astigmatism model: %s\n%s", name, model);
 
 		// Plot the curve. Do this so we encompass twice the depth-of-field.
-		double range = Math.abs(model.getGamma()) + 2 * model.getD();
-		
+		double gamma = model.getGamma();
+		double d = model.getD();
+		double s0x = model.getS0X();
+		double Ax = model.getAx();
+		double Bx = model.getBx();
+		double s0y = model.getS0Y();
+		double Ay = model.getAy();
+		double By = model.getBy();
+
+		double range = Math.abs(gamma) + 1.5 * d;
+		int n = 200;
+		double step = range / n;
+		double[] z = new double[2 * n + 1];
+		double[] sx = new double[z.length];
+		double[] sy = new double[z.length];
+		// Use the same class that is used during fitting
+		HoltzerAstigmatismZModel m = HoltzerAstigmatismZModel.create(gamma, d, Ax, Bx, Ay, By);
+		for (int i = 0; i < z.length; i++)
+		{
+			double zz = -range + i * step;
+			z[i] = zz;
+			sx[i] = s0x * m.getSx(zz);
+			sy[i] = s0y * m.getSy(zz);
+		}
+
+		String title = TITLE + " Width Curve";
+		Plot plot = new Plot(title, "Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")",
+				"Width (" + UnitHelper.getShortName(model.getSDistanceUnit()) + ")");
+		double[] limits = Maths.limits(sx);
+		limits = Maths.limits(limits, sy);
+		double rangex = (z[z.length - 1] - z[0]) * 0.05;
+		double rangey = (limits[1] - limits[0]) * 0.05;
+		double miny = limits[0] - rangey;
+		double maxy = limits[1] + rangey;
+		plot.setLimits(z[0] - rangex, z[z.length - 1] + rangex, miny, maxy);
+		plot.setColor(Color.RED);
+		plot.addPoints(z, sx, Plot.LINE);
+		plot.setColor(Color.BLUE);
+		plot.addPoints(z, sy, Plot.LINE);
+		plot.setColor(Color.YELLOW);
+
+		if (pluginSettings.getShowDepthOfFocus())
+		{
+			double z0x = gamma, z0y = -gamma;
+			plot.setColor(Color.RED.darker());
+			plot.drawDottedLine(z0x - d, miny, z0x - d, maxy, 4);
+			plot.drawDottedLine(z0x + d, miny, z0x + d, maxy, 4);
+			plot.setColor(Color.BLUE.darker());
+			plot.drawDottedLine(z0y - d, miny, z0y - d, maxy, 4);
+			plot.drawDottedLine(z0y + d, miny, z0y + d, maxy, 4);
+		}
+
+		plot.setColor(Color.BLACK);
+		plot.addLegend("Sx\nSy");
+		plot.addLabel(0, 0, "Model = " + name);
+		Utils.display(title, plot);
 	}
 
 	private void deleteModel()

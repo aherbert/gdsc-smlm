@@ -523,4 +523,5 @@ message AstigmatismModelManagerSettings
 	
 	// For display
 	string selected = 13;
+	bool show_depth_of_focus = 16;
 }
