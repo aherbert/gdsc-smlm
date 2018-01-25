@@ -518,6 +518,8 @@ message AstigmatismModelManagerSettings
 	bool show_estimated_curve = 10;
 	string image = 11;
 	string model_name = 12;
+	bool save_model = 14;
+	bool save_fit_width = 15;
 	
 	// For display
 	string selected = 13;

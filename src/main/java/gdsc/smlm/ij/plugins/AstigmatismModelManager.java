@@ -255,6 +255,11 @@ public class AstigmatismModelManager implements PlugIn
 		// Select an image
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] list = getImageList();
+		if (list.length == 0)
+		{
+			IJ.error("No suitable images");
+			return false;
+		}
 		gd.addChoice("Image", list, pluginSettings.getImage());
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -1126,7 +1131,7 @@ public class AstigmatismModelManager implements PlugIn
 		Rounder rounder = RounderFactory.create(4);
 		sb.append(fitZ.length * 2);
 		sb.append('\t').append(pluginSettings.getWeightedFit());
-		sb.append('\t').append(optimum.getRMS());
+		sb.append('\t').append(Utils.rounded(optimum.getRMS(), 6));
 		sb.append('\t').append(optimum.getIterations());
 		sb.append('\t').append(optimum.getEvaluations());
 		sb.append('\t').append(rounder.round(parameters[P_GAMMA]));
@@ -1145,63 +1150,82 @@ public class AstigmatismModelManager implements PlugIn
 	{
 		if (resultsWindow == null || !resultsWindow.isShowing())
 			resultsWindow = new TextWindow(TITLE,
-					"N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 800, 400);
+					"N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 1000, 300);
 	}
 
 	private boolean saveModel()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addMessage("Save the model");
+		gd.addCheckbox("Save_model", pluginSettings.getSaveModel());
 		gd.addStringField("Model_name", pluginSettings.getModelName());
+		gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
+		//gd.setCancelLabel(" No ");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
+		pluginSettings.setSaveModel(gd.getNextBoolean());
 		String name = gd.getNextString();
-		pluginSettings.setModelName(name);
+		pluginSettings.setSaveFitWidth(gd.getNextBoolean());
 
-		// Check existing names
-		AstigmatismModelSettings.Builder settings = getSettings();
-		Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
-		if (map.containsKey(name))
+		if (pluginSettings.getSaveFitWidth())
 		{
-			name = suggest(map, name);
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("Model name already exists.\nSuggest renaming to:");
-			gd.addStringField("Model_name", name);
-			gd.enableYesNoCancel("Rename", "Overwrite");
-			gd.showDialog(true);
-			if (gd.wasCanceled())
-				return false;
-			if (gd.wasOKed())
-				// Rename
-				pluginSettings.setModelName(name);
+			// Save the widths in the fit configuration
+			fitConfig.setInitialPeakStdDev0(parameters[P_S0X]);
+			fitConfig.setInitialPeakStdDev1(parameters[P_S0Y]);
+			pluginSettings.setPsf(fitConfig.getPSF());
+			SettingsManager.writeSettings(pluginSettings);
 		}
 
-		// Save the model
-		AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
-		model.setGamma(parameters[P_GAMMA]);
-		model.setD(parameters[P_D]);
-		model.setS0X(parameters[P_S0X]);
-		model.setAx(parameters[P_AX]);
-		model.setBx(parameters[P_BX]);
-		model.setS0Y(parameters[P_S0Y]);
-		model.setAy(parameters[P_AY]);
-		model.setBy(parameters[P_BY]);
-		model.setZDistanceUnit(DistanceUnit.UM);
-		model.setSDistanceUnit(DistanceUnit.PIXEL);
-		model.setNmPerPixel(fitConfig.getCalibrationWriter().getNmPerPixel());
-
-		settings.putAstigmatismModelResources(pluginSettings.getModelName(), model.build());
-		if (!SettingsManager.writeSettings(settings.build()))
+		if (pluginSettings.getSaveModel())
 		{
-			IJ.error(TITLE, "Failed to save the model");
-			return false;
+			pluginSettings.setModelName(name);
+
+			// Check existing names
+			AstigmatismModelSettings.Builder settings = getSettings();
+			Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
+			if (map.containsKey(name))
+			{
+				name = suggest(map, name);
+				gd = new ExtendedGenericDialog(TITLE);
+				gd.addMessage(
+						"Model name " + pluginSettings.getModelName() + " already exists.\n \nSuggest renaming to:");
+				gd.addStringField("Model_name", name);
+				gd.enableYesNoCancel("Rename", "Overwrite");
+				gd.showDialog(true);
+				if (gd.wasCanceled())
+					return false;
+				if (gd.wasOKed())
+					// Rename
+					pluginSettings.setModelName(name);
+			}
+
+			// Save the model
+			AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
+			model.setGamma(parameters[P_GAMMA]);
+			model.setD(parameters[P_D]);
+			model.setS0X(parameters[P_S0X]);
+			model.setAx(parameters[P_AX]);
+			model.setBx(parameters[P_BX]);
+			model.setS0Y(parameters[P_S0Y]);
+			model.setAy(parameters[P_AY]);
+			model.setBy(parameters[P_BY]);
+			model.setZDistanceUnit(DistanceUnit.UM);
+			model.setSDistanceUnit(DistanceUnit.PIXEL);
+			model.setNmPerPixel(fitConfig.getCalibrationWriter().getNmPerPixel());
+
+			settings.putAstigmatismModelResources(pluginSettings.getModelName(), model.build());
+			if (!SettingsManager.writeSettings(settings.build()))
+			{
+				IJ.error(TITLE, "Failed to save the model");
+				return false;
+			}
 		}
 		return true;
 	}
 
 	private String suggest(Map<String, AstigmatismModel> map, String name)
 	{
+		name += '_';
 		for (int i = 2; i > 0; i++)
 		{
 			String name2 = name + i;
@@ -1231,7 +1255,7 @@ public class AstigmatismModelManager implements PlugIn
 		}
 
 		Utils.log("Astigmatism model: %s\n%s", name, resource);
-		
+
 		// TODO - Plot the curve
 	}
 

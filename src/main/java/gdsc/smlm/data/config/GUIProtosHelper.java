@@ -7,6 +7,7 @@ import gdsc.core.clustering.optics.SampleMode;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.FitProtos.FilterSettings;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
@@ -312,6 +313,8 @@ public class GUIProtosHelper
 		AstigmatismModelManagerSettings.Builder builder = AstigmatismModelManagerSettings.newBuilder();
 		builder.setSmoothing(0.2);
 		builder.setWeightedFit(true);
+		builder.setSaveFitWidth(true);
+		builder.setSaveModel(true);
 		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
 		
 		// Adjust for a wider fit range
@@ -327,6 +330,7 @@ public class GUIProtosHelper
 		fb.setMinWidthFactor(0.5);
 		fb.setMaxWidthFactor(5);
 		fb.setPrecisionThreshold(50);
+		fb.setPrecisionMethodValue(PrecisionMethod.POISSON_CRLB_VALUE);
 		
 		builder.setFitEngineSettings(b);
 		builder.setPsf(PSFProtosHelper.defaultTwoAxisGaussian2DPSF);

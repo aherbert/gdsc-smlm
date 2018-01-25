@@ -29823,6 +29823,16 @@ public final class GUIProtos {
         getModelNameBytes();
 
     /**
+     * <code>bool save_model = 14;</code>
+     */
+    boolean getSaveModel();
+
+    /**
+     * <code>bool save_fit_width = 15;</code>
+     */
+    boolean getSaveFitWidth();
+
+    /**
      * <pre>
      * For display
      * </pre>
@@ -29865,6 +29875,8 @@ public final class GUIProtos {
       showEstimatedCurve_ = false;
       image_ = "";
       modelName_ = "";
+      saveModel_ = false;
+      saveFitWidth_ = false;
       selected_ = "";
     }
 
@@ -29983,6 +29995,16 @@ public final class GUIProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               selected_ = s;
+              break;
+            }
+            case 112: {
+
+              saveModel_ = input.readBool();
+              break;
+            }
+            case 120: {
+
+              saveFitWidth_ = input.readBool();
               break;
             }
           }
@@ -30206,6 +30228,24 @@ public final class GUIProtos {
       }
     }
 
+    public static final int SAVE_MODEL_FIELD_NUMBER = 14;
+    private boolean saveModel_;
+    /**
+     * <code>bool save_model = 14;</code>
+     */
+    public boolean getSaveModel() {
+      return saveModel_;
+    }
+
+    public static final int SAVE_FIT_WIDTH_FIELD_NUMBER = 15;
+    private boolean saveFitWidth_;
+    /**
+     * <code>bool save_fit_width = 15;</code>
+     */
+    public boolean getSaveFitWidth() {
+      return saveFitWidth_;
+    }
+
     public static final int SELECTED_FIELD_NUMBER = 13;
     private volatile java.lang.Object selected_;
     /**
@@ -30299,6 +30339,12 @@ public final class GUIProtos {
       if (!getSelectedBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 13, selected_);
       }
+      if (saveModel_ != false) {
+        output.writeBool(14, saveModel_);
+      }
+      if (saveFitWidth_ != false) {
+        output.writeBool(15, saveFitWidth_);
+      }
     }
 
     public int getSerializedSize() {
@@ -30355,6 +30401,14 @@ public final class GUIProtos {
       if (!getSelectedBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, selected_);
       }
+      if (saveModel_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(14, saveModel_);
+      }
+      if (saveFitWidth_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(15, saveFitWidth_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -30410,6 +30464,10 @@ public final class GUIProtos {
           .equals(other.getImage());
       result = result && getModelName()
           .equals(other.getModelName());
+      result = result && (getSaveModel()
+          == other.getSaveModel());
+      result = result && (getSaveFitWidth()
+          == other.getSaveFitWidth());
       result = result && getSelected()
           .equals(other.getSelected());
       return result;
@@ -30458,6 +30516,12 @@ public final class GUIProtos {
       hash = (53 * hash) + getImage().hashCode();
       hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getModelName().hashCode();
+      hash = (37 * hash) + SAVE_MODEL_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveModel());
+      hash = (37 * hash) + SAVE_FIT_WIDTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveFitWidth());
       hash = (37 * hash) + SELECTED_FIELD_NUMBER;
       hash = (53 * hash) + getSelected().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -30629,6 +30693,10 @@ public final class GUIProtos {
 
         modelName_ = "";
 
+        saveModel_ = false;
+
+        saveFitWidth_ = false;
+
         selected_ = "";
 
         return this;
@@ -30677,6 +30745,8 @@ public final class GUIProtos {
         result.showEstimatedCurve_ = showEstimatedCurve_;
         result.image_ = image_;
         result.modelName_ = modelName_;
+        result.saveModel_ = saveModel_;
+        result.saveFitWidth_ = saveFitWidth_;
         result.selected_ = selected_;
         onBuilt();
         return result;
@@ -30756,6 +30826,12 @@ public final class GUIProtos {
         if (!other.getModelName().isEmpty()) {
           modelName_ = other.modelName_;
           onChanged();
+        }
+        if (other.getSaveModel() != false) {
+          setSaveModel(other.getSaveModel());
+        }
+        if (other.getSaveFitWidth() != false) {
+          setSaveFitWidth(other.getSaveFitWidth());
         }
         if (!other.getSelected().isEmpty()) {
           selected_ = other.selected_;
@@ -31470,6 +31546,58 @@ public final class GUIProtos {
         return this;
       }
 
+      private boolean saveModel_ ;
+      /**
+       * <code>bool save_model = 14;</code>
+       */
+      public boolean getSaveModel() {
+        return saveModel_;
+      }
+      /**
+       * <code>bool save_model = 14;</code>
+       */
+      public Builder setSaveModel(boolean value) {
+        
+        saveModel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_model = 14;</code>
+       */
+      public Builder clearSaveModel() {
+        
+        saveModel_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveFitWidth_ ;
+      /**
+       * <code>bool save_fit_width = 15;</code>
+       */
+      public boolean getSaveFitWidth() {
+        return saveFitWidth_;
+      }
+      /**
+       * <code>bool save_fit_width = 15;</code>
+       */
+      public Builder setSaveFitWidth(boolean value) {
+        
+        saveFitWidth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_fit_width = 15;</code>
+       */
+      public Builder clearSaveFitWidth() {
+        
+        saveFitWidth_ = false;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object selected_ = "";
       /**
        * <pre>
@@ -31898,7 +32026,7 @@ public final class GUIProtos {
       "_counts\030\034 \001(\005\022\'\n\037pass_rate_counter_min_p" +
       "ass_rate\030\035 \001(\001\022\'\n\037pass_rate_counter_max_" +
       "pass_rate\030\036 \001(\001\022\'\n\037pass_rate_counter_inc" +
-      "_pass_rate\030\037 \001(\001\"\226\003\n\037AstigmatismModelMan" +
+      "_pass_rate\030\037 \001(\001\"\302\003\n\037AstigmatismModelMan" +
       "agerSettings\022\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_s" +
       "lice\030\002 \001(\001\022E\n\023fit_engine_settings\030\003 \001(\0132",
       "(.gdsc.smlm.data.config.FitEngineSetting" +
@@ -31908,10 +32036,11 @@ public final class GUIProtos {
       "og_fit_progress\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001" +
       "\022\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_estimated" +
       "_curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmodel_nam" +
-      "e\030\014 \001(\t\022\020\n\010selected\030\r \001(\t*O\n\014TemplateTyp" +
-      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
-      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb",
-      "\006proto3"
+      "e\030\014 \001(\t\022\022\n\nsave_model\030\016 \001(\010\022\026\n\016save_fit_" +
+      "width\030\017 \001(\010\022\020\n\010selected\030\r \001(\t*O\n\014Templat" +
+      "eType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_T",
+      "EMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPro" +
+      "tosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -32030,7 +32159,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "Selected", });
+        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
