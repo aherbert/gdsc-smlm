@@ -29794,6 +29794,16 @@ public final class GUIProtos {
      * <code>double smoothing = 7;</code>
      */
     double getSmoothing();
+
+    /**
+     * <code>bool weighted_fit = 8;</code>
+     */
+    boolean getWeightedFit();
+
+    /**
+     * <code>bool show_estimated_curve = 9;</code>
+     */
+    boolean getShowEstimatedCurve();
   }
   /**
    * <pre>
@@ -29815,6 +29825,8 @@ public final class GUIProtos {
       radius_ = 0D;
       logFitProgress_ = false;
       smoothing_ = 0D;
+      weightedFit_ = false;
+      showEstimatedCurve_ = false;
     }
 
     @java.lang.Override
@@ -29899,6 +29911,16 @@ public final class GUIProtos {
             case 57: {
 
               smoothing_ = input.readDouble();
+              break;
+            }
+            case 64: {
+
+              weightedFit_ = input.readBool();
+              break;
+            }
+            case 72: {
+
+              showEstimatedCurve_ = input.readBool();
               break;
             }
           }
@@ -30035,6 +30057,24 @@ public final class GUIProtos {
       return smoothing_;
     }
 
+    public static final int WEIGHTED_FIT_FIELD_NUMBER = 8;
+    private boolean weightedFit_;
+    /**
+     * <code>bool weighted_fit = 8;</code>
+     */
+    public boolean getWeightedFit() {
+      return weightedFit_;
+    }
+
+    public static final int SHOW_ESTIMATED_CURVE_FIELD_NUMBER = 9;
+    private boolean showEstimatedCurve_;
+    /**
+     * <code>bool show_estimated_curve = 9;</code>
+     */
+    public boolean getShowEstimatedCurve() {
+      return showEstimatedCurve_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -30067,6 +30107,12 @@ public final class GUIProtos {
       }
       if (smoothing_ != 0D) {
         output.writeDouble(7, smoothing_);
+      }
+      if (weightedFit_ != false) {
+        output.writeBool(8, weightedFit_);
+      }
+      if (showEstimatedCurve_ != false) {
+        output.writeBool(9, showEstimatedCurve_);
       }
     }
 
@@ -30102,6 +30148,14 @@ public final class GUIProtos {
       if (smoothing_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(7, smoothing_);
+      }
+      if (weightedFit_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, weightedFit_);
+      }
+      if (showEstimatedCurve_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(9, showEstimatedCurve_);
       }
       memoizedSize = size;
       return size;
@@ -30148,6 +30202,10 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getSmoothing())
           == java.lang.Double.doubleToLongBits(
               other.getSmoothing()));
+      result = result && (getWeightedFit()
+          == other.getWeightedFit());
+      result = result && (getShowEstimatedCurve()
+          == other.getShowEstimatedCurve());
       return result;
     }
 
@@ -30182,6 +30240,12 @@ public final class GUIProtos {
       hash = (37 * hash) + SMOOTHING_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getSmoothing()));
+      hash = (37 * hash) + WEIGHTED_FIT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getWeightedFit());
+      hash = (37 * hash) + SHOW_ESTIMATED_CURVE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowEstimatedCurve());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -30341,6 +30405,10 @@ public final class GUIProtos {
 
         smoothing_ = 0D;
 
+        weightedFit_ = false;
+
+        showEstimatedCurve_ = false;
+
         return this;
       }
 
@@ -30382,6 +30450,8 @@ public final class GUIProtos {
         result.radius_ = radius_;
         result.logFitProgress_ = logFitProgress_;
         result.smoothing_ = smoothing_;
+        result.weightedFit_ = weightedFit_;
+        result.showEstimatedCurve_ = showEstimatedCurve_;
         onBuilt();
         return result;
       }
@@ -30443,6 +30513,12 @@ public final class GUIProtos {
         }
         if (other.getSmoothing() != 0D) {
           setSmoothing(other.getSmoothing());
+        }
+        if (other.getWeightedFit() != false) {
+          setWeightedFit(other.getWeightedFit());
+        }
+        if (other.getShowEstimatedCurve() != false) {
+          setShowEstimatedCurve(other.getShowEstimatedCurve());
         }
         onChanged();
         return this;
@@ -30960,6 +31036,58 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private boolean weightedFit_ ;
+      /**
+       * <code>bool weighted_fit = 8;</code>
+       */
+      public boolean getWeightedFit() {
+        return weightedFit_;
+      }
+      /**
+       * <code>bool weighted_fit = 8;</code>
+       */
+      public Builder setWeightedFit(boolean value) {
+        
+        weightedFit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool weighted_fit = 8;</code>
+       */
+      public Builder clearWeightedFit() {
+        
+        weightedFit_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean showEstimatedCurve_ ;
+      /**
+       * <code>bool show_estimated_curve = 9;</code>
+       */
+      public boolean getShowEstimatedCurve() {
+        return showEstimatedCurve_;
+      }
+      /**
+       * <code>bool show_estimated_curve = 9;</code>
+       */
+      public Builder setShowEstimatedCurve(boolean value) {
+        
+        showEstimatedCurve_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_estimated_curve = 9;</code>
+       */
+      public Builder clearShowEstimatedCurve() {
+        
+        showEstimatedCurve_ = false;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -31300,17 +31428,18 @@ public final class GUIProtos {
       "_counts\030\034 \001(\005\022\'\n\037pass_rate_counter_min_p" +
       "ass_rate\030\035 \001(\001\022\'\n\037pass_rate_counter_max_" +
       "pass_rate\030\036 \001(\001\022\'\n\037pass_rate_counter_inc" +
-      "_pass_rate\030\037 \001(\001\"\231\002\n\033PSFAstigmatismModel" +
+      "_pass_rate\030\037 \001(\001\"\315\002\n\033PSFAstigmatismModel" +
       "Settings\022\024\n\014nm_per_slice\030\001 \001(\001\022E\n\023fit_en" +
       "gine_settings\030\002 \001(\0132(.gdsc.smlm.data.con",
       "fig.FitEngineSettings\022\'\n\003psf\030\003 \001(\0132\032.gds" +
       "c.smlm.data.config.PSF\0227\n\013calibration\030\004 " +
       "\001(\0132\".gdsc.smlm.data.config.Calibration\022" +
       "\016\n\006radius\030\005 \001(\001\022\030\n\020log_fit_progress\030\006 \001(" +
-      "\010\022\021\n\tsmoothing\030\007 \001(\001*O\n\014TemplateType\022\023\n\017" +
-      "INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001" +
-      "\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006prot" +
-      "o3"
+      "\010\022\021\n\tsmoothing\030\007 \001(\001\022\024\n\014weighted_fit\030\010 \001" +
+      "(\010\022\034\n\024show_estimated_curve\030\t \001(\010*O\n\014Temp" +
+      "lateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURC" +
+      "E_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUI" +
+      "Protosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -31429,7 +31558,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor,
-        new java.lang.String[] { "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", });
+        new java.lang.String[] { "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

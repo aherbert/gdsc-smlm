@@ -311,6 +311,7 @@ public class GUIProtosHelper
 	{
 		PSFAstigmatismModelSettings.Builder builder = PSFAstigmatismModelSettings.newBuilder();
 		builder.setSmoothing(0.2);
+		builder.setWeightedFit(true);
 		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
 		
 		// Adjust for a wider fit range

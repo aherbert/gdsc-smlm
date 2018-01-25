@@ -12,6 +12,7 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.Precision;
 
 import gdsc.core.data.utils.Rounder;
@@ -74,6 +75,7 @@ import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+import ij.text.TextWindow;
 
 /**
  * Produces a 2D Gaussian astigmatism model for a 2D astigmatic PSF.
@@ -83,6 +85,8 @@ import ij.process.ImageProcessor;
 public class PSFAstigmatismModel implements PlugInFilter
 {
 	private final static String TITLE = "PSF Astigmatism Model";
+
+	private static TextWindow resultsWindow = null;
 
 	private final static int FLAGS = DOES_16 | DOES_8G | DOES_32 | STACK_REQUIRED | NO_CHANGES;
 	private PSFAstigmatismModelSettings.Builder settings;
@@ -197,6 +201,14 @@ public class PSFAstigmatismModel implements PlugInFilter
 		if (!loadConfiguration())
 			return;
 
+		// TODO - Can this plugin be updated to handle multiple spots on the same image?
+		// This would produce an astigmatism curve for each spot. Then optimise the parameters
+		// by having a z0 for each spot.
+		// - Store the width curve (z, sx, sy) for each spot.
+		// - Pick the range (fitZ, fitSx, fitSy) for each spot.
+		// - Guess parameters for each and then average them.
+		// - Optimisation function to handle the different z-range for each spot.
+
 		if (!findFitRegion())
 			return;
 
@@ -209,6 +221,11 @@ public class PSFAstigmatismModel implements PlugInFilter
 		if (!fitData())
 			return;
 
+		// TODO - Save the astigmatism model. Prompt the user where to save it.
+		// This may require a Astigmatism model manager. Each model can have a name and 
+		// should store the pixel width. It can only then be used when the pixel width
+		// for fitting is the same.
+		saveModel();
 	}
 
 	private boolean loadConfiguration()
@@ -516,14 +533,15 @@ public class PSFAstigmatismModel implements PlugInFilter
 		minz = 0;
 		maxz = z.length - 1;
 
-		sPlot.getImagePlus().killRoi();
-
 		NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-		gd.addMessage("Select z-range for curve fit");
+		gd.addMessage("Select z-range for curve fit.\nChoose a region with a smooth width curve and low XY drift.");
 		gd.addSlider("Min_z", minz, maxz, minz);
 		gd.addSlider("Max_z", minz, maxz, maxz);
-		gd.addMessage("Select smoothing before curve parameter estimation");
+		gd.addMessage("Curve parameter estimation");
 		gd.addSlider("Smoothing", 0.05, 0.5, settings.getSmoothing());
+		gd.addCheckbox("Show_estimated_curve", settings.getShowEstimatedCurve());
+		gd.addMessage("Fit options");
+		gd.addCheckbox("Weighted_fit", settings.getWeightedFit());
 		gd.addDialogListener(new ZDialogListener());
 		gd.showDialog();
 
@@ -551,6 +569,12 @@ public class PSFAstigmatismModel implements PlugInFilter
 	private class ZDialogListener implements DialogListener
 	{
 		boolean showRoi = Utils.isShowGenericDialog();
+		
+		public ZDialogListener()
+		{
+			sPlot.getImagePlus().killRoi();
+			xyPlot.getImagePlus().killRoi();
+		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
@@ -559,17 +583,25 @@ public class PSFAstigmatismModel implements PlugInFilter
 			minz = (int) gd.getNextNumber();
 			maxz = (int) gd.getNextNumber();
 			settings.setSmoothing(gd.getNextNumber());
+			settings.setShowEstimatedCurve(gd.getNextBoolean());
+			settings.setWeightedFit(gd.getNextBoolean());
 			if (showRoi && (oldMinz != minz || oldMaxz != maxz))
 			{
-				Plot plot = sPlot.getPlot();
-				int x1 = (int) plot.scaleXtoPxl(z[minz]);
-				int x2 = (int) plot.scaleXtoPxl(z[maxz]);
-				double[] limits = plot.getLimits();
-				int y1 = (int) plot.scaleYtoPxl(limits[3]);
-				int y2 = (int) plot.scaleYtoPxl(limits[2]);
-				sPlot.getImagePlus().setRoi(new Roi(x1, y1, x2 - x1, y2 - y1));
+				addRoi(sPlot);
+				addRoi(xyPlot);
 			}
 			return maxz > minz;
+		}
+
+		private void addRoi(PlotWindow pw)
+		{
+			Plot plot = pw.getPlot();
+			int x1 = (int) plot.scaleXtoPxl(z[minz]);
+			int x2 = (int) plot.scaleXtoPxl(z[maxz]);
+			double[] limits = plot.getLimits();
+			int y1 = (int) plot.scaleYtoPxl(limits[3]);
+			int y2 = (int) plot.scaleYtoPxl(limits[2]);
+			pw.getImagePlus().setRoi(new Roi(x1, y1, x2 - x1, y2 - y1));
 		}
 	}
 
@@ -613,6 +645,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		double Ax = 0, Bx = 0, Ay = 0, By = 0;
 
 		// Equations assume that x direction is focused above (positive).
+		// If this is not the case we can invert the gamma parameter.
 		if (focalPlaneXindex < focalPlaneYindex)
 			gamma = -gamma;
 
@@ -642,8 +675,12 @@ public class PSFAstigmatismModel implements PlugInFilter
 		parameters[P_AY] = Ay;
 		parameters[P_BY] = By;
 
-		//plotFit(initialSolution);
 		record("Initial", parameters);
+		if (settings.getShowEstimatedCurve())
+		{
+			plotFit(parameters);
+			IJ.showMessage(TITLE, "Showing the estimated curve parameters.\nClick OK to continue.");
+		}
 
 		//@formatter:off
 		LeastSquaresBuilder builder = new LeastSquaresBuilder()
@@ -652,6 +689,9 @@ public class PSFAstigmatismModel implements PlugInFilter
 				.start(parameters)
 				.target(y);
 		//@formatter:on
+
+		if (settings.getWeightedFit())
+			builder.weight(new DiagonalMatrix(getWeights(smoothSx, smoothSy)));
 
 		AstigmatismVectorFunction vf = new AstigmatismVectorFunction();
 		builder.model(vf, new AstigmatismMatrixFunction());
@@ -666,6 +706,8 @@ public class PSFAstigmatismModel implements PlugInFilter
 
 			record("Final", parameters);
 			plotFit(parameters);
+
+			saveResult(optimum);
 		}
 		catch (Exception e)
 		{
@@ -677,7 +719,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 	}
 
 	/**
-	 * Get depth of focus as twice the min width.
+	 * Get depth of focus as the point where width = min width * sqrt(2).
 	 *
 	 * @param min
 	 *            the index of the min value of the width
@@ -687,27 +729,42 @@ public class PSFAstigmatismModel implements PlugInFilter
 	 *            the width
 	 * @return the estimated depth of focus
 	 */
-	private double estimateD(int min, double[] z, double[] sx)
+	private static double estimateD(int min, double[] z, double[] sx)
 	{
-		double w = sx[min] * 2; // Twice the min width
+		// w = w0 * sqrt(1 + z^2/d^2)
+		// if z==d then w = w0 * sqrt(2) 
+		
+		double w = sx[min] * 1.414213562; // sqrt(2) the min width
 		int lower = min;
 		while (lower > 0 && sx[lower] < w)
 			lower--;
 		int upper = min;
 		while (upper < sx.length - 1 && sx[upper] < w)
 			upper++;
-		return z[upper] - z[lower];
+		return (z[upper] - z[lower]) / 2; // Since we searched both directions
+	}
+
+	private static double[] getWeights(double[]... y)
+	{
+		int n = 0;
+		for (int i = 0; i < y.length; i++)
+			n += y[i].length;
+		double[] w = new double[n];
+		for (int i = 0, k = 0; i < y.length; i++)
+			for (int j = 0; j < y[i].length; j++)
+				w[k++] = 1.0 / y[i][j];
+		return w;
 	}
 
 	private static final int P_GAMMA = 0;
-	private static final int P_Z0 = 1;
-	private static final int P_D = 2;
-	private static final int P_S0X = 3;
-	private static final int P_AX = 4;
-	private static final int P_BX = 5;
-	private static final int P_S0Y = 6;
-	private static final int P_AY = 7;
-	private static final int P_BY = 8;
+	private static final int P_D = 1;
+	private static final int P_S0X = 2;
+	private static final int P_AX = 3;
+	private static final int P_BX = 4;
+	private static final int P_S0Y = 5;
+	private static final int P_AY = 6;
+	private static final int P_BY = 7;
+	private static final int P_Z0 = 8;
 
 	/**
 	 * Gets the standard deviation for the z-depth.
@@ -877,7 +934,6 @@ public class PSFAstigmatismModel implements PlugInFilter
 		StringBuilder sb = new StringBuilder(name);
 		Rounder rounder = RounderFactory.create(4);
 		sb.append(": ").append("gamma=").append(rounder.round(parameters[P_GAMMA]));
-		sb.append("; ").append("z0=").append(rounder.round(parameters[P_Z0]));
 		sb.append("; ").append("d=").append(rounder.round(parameters[P_D]));
 		sb.append("; ").append("s0x=").append(rounder.round(parameters[P_S0X]));
 		sb.append("; ").append("Ax=").append(rounder.round(parameters[P_AX]));
@@ -885,6 +941,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		sb.append("; ").append("s0y=").append(rounder.round(parameters[P_S0Y]));
 		sb.append("; ").append("Ay=").append(rounder.round(parameters[P_AY]));
 		sb.append("; ").append("By=").append(rounder.round(parameters[P_BY]));
+		sb.append("; ").append("z0=").append(rounder.round(parameters[P_Z0]));
 		IJ.log(sb.toString());
 	}
 
@@ -893,7 +950,6 @@ public class PSFAstigmatismModel implements PlugInFilter
 		//System.out.println(Arrays.toString(parameters));
 
 		double gamma = parameters[P_GAMMA];
-		double z0 = parameters[P_Z0];
 		double d = parameters[P_D];
 		double s0x = parameters[P_S0X];
 		double Ax = parameters[P_AX];
@@ -901,6 +957,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		double s0y = parameters[P_S0Y];
 		double Ay = parameters[P_AY];
 		double By = parameters[P_BY];
+		double z0 = parameters[P_Z0];
 
 		// Draw across the entire data range
 		double one_d2 = 1.0 / Maths.pow2(d);
@@ -930,5 +987,39 @@ public class PSFAstigmatismModel implements PlugInFilter
 
 		plot.setColor(Color.BLACK);
 		plot.updateImage();
+	}
+
+	private void saveResult(Optimum optimum)
+	{
+		createResultWindow();
+		StringBuilder sb = new StringBuilder();
+		Rounder rounder = RounderFactory.create(4);
+		sb.append(fitZ.length * 2);
+		sb.append('\t').append(settings.getWeightedFit());
+		sb.append('\t').append(optimum.getRMS());
+		sb.append('\t').append(optimum.getIterations());
+		sb.append('\t').append(optimum.getEvaluations());
+		sb.append('\t').append(rounder.round(parameters[P_GAMMA]));
+		sb.append('\t').append(rounder.round(parameters[P_D]));
+		sb.append('\t').append(rounder.round(parameters[P_S0X]));
+		sb.append('\t').append(rounder.round(parameters[P_AX]));
+		sb.append('\t').append(rounder.round(parameters[P_BX]));
+		sb.append('\t').append(rounder.round(parameters[P_S0Y]));
+		sb.append('\t').append(rounder.round(parameters[P_AY]));
+		sb.append('\t').append(rounder.round(parameters[P_BY]));
+		sb.append('\t').append(rounder.round(parameters[P_Z0]));
+		resultsWindow.append(sb.toString());
+	}
+
+	private void createResultWindow()
+	{
+		if (resultsWindow == null || !resultsWindow.isShowing())
+			resultsWindow = new TextWindow(TITLE,
+					"N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 800, 400);
+	}
+
+	private void saveModel()
+	{
+		
 	}
 }

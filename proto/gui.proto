@@ -513,4 +513,6 @@ message PSFAstigmatismModelSettings
 	double radius = 5;
 	bool log_fit_progress = 6;
 	double smoothing = 7;
+	bool weighted_fit = 8;
+	bool show_estimated_curve = 9;
 }
