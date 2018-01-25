@@ -17,10 +17,10 @@ package gdsc.smlm.function.gaussian;
  * Implements a astigmatism model of a 2D Gaussian function, where z-depth determines the x and y width.
  * <p>
  * Ref: Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
- *      Nature Methods 7, 373-375 (supplementary note).
- * <p>     
+ * Nature Methods 7, 373-375 (supplementary note).
+ * <p>
  * Ref: Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
- *      Applied Physics Letters 90, 1–3 (2007).
+ * Applied Physics Letters 90, 1–3 (2007).
  */
 public class HoltzerAstigmatismZModel implements AstigmatismZModel
 {
@@ -28,6 +28,10 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 
 	/**
 	 * Static constructor.
+	 * <p>
+	 * Note that a positive gamma puts the focal plane for the X-dimension above the z-centre (positive Z) and the focal
+	 * plane for the Y-dimension below the z-centre (negative Z). If gamma is negative then the orientation of the focal 
+	 * planes of X and Y are reversed.
 	 *
 	 * @param gamma
 	 *            the gamma parameter (half the distance between the focal planes)
@@ -51,6 +55,10 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 
 	/**
 	 * Constructor.
+	 * <p>
+	 * Note that a positive gamma puts the focal plane for the X-dimension above the z-centre (positive Z) and the focal
+	 * plane for the Y-dimension below the z-centre (negative Z). If gamma is negative then the orientation of the focal 
+	 * planes of X and Y are reversed.
 	 *
 	 * @param gamma
 	 *            the gamma parameter (half the distance between the focal planes)
