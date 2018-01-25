@@ -1247,16 +1247,18 @@ public class AstigmatismModelManager implements PlugIn
 		pluginSettings.setSelected(name);
 
 		// Try and get the named resource
-		AstigmatismModel resource = settings.getAstigmatismModelResourcesMap().get(name);
-		if (resource == null)
+		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		if (model == null)
 		{
 			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
 			return;
 		}
 
-		Utils.log("Astigmatism model: %s\n%s", name, resource);
+		Utils.log("Astigmatism model: %s\n%s", name, model);
 
-		// TODO - Plot the curve
+		// Plot the curve. Do this so we encompass twice the depth-of-field.
+		double range = Math.abs(model.getGamma()) + 2 * model.getD();
+		
 	}
 
 	private void deleteModel()
@@ -1270,8 +1272,8 @@ public class AstigmatismModelManager implements PlugIn
 		String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 
-		AstigmatismModel resource = settings.getAstigmatismModelResourcesMap().get(name);
-		if (resource == null)
+		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		if (model == null)
 		{
 			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
 			return;
@@ -1280,6 +1282,6 @@ public class AstigmatismModelManager implements PlugIn
 		settings.removeAstigmatismModelResources(name);
 		SettingsManager.writeSettings(settings.build());
 
-		Utils.log("Deleted astigmatism model: %s\n%s", name, resource);
+		Utils.log("Deleted astigmatism model: %s\n%s", name, model);
 	}
 }
