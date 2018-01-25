@@ -170,7 +170,9 @@ public class AstigmatismModelManager implements PlugIn
 			"Create a model",
 			// All option below require models
 			"View a model",
-			"Delete a model" };
+			"Delete a model",
+			"Invert a model",
+			};
 	//@formatter:on
 	private static String[] OPTIONS2;
 	static
@@ -205,6 +207,9 @@ public class AstigmatismModelManager implements PlugIn
 
 		switch (pluginSettings.getOption())
 		{
+			case 3:
+				invertModel();
+				break;
 			case 2:
 				deleteModel();
 				break;
@@ -1341,6 +1346,51 @@ public class AstigmatismModelManager implements PlugIn
 		settings.removeAstigmatismModelResources(name);
 		SettingsManager.writeSettings(settings.build());
 
-		Utils.log("Deleted astigmatism model: %s\n%s", name, model);
+		Utils.log("Deleted astigmatism model: %s", name);
+	}
+
+	private void invertModel()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		String[] MODELS = listAstigmatismModels(false);
+		gd.addMessage(
+				"Invert the z-orientation of a model.\n \n"+
+				TextUtils.wrap(
+				//@formatter:off
+				 "Note that a positive gamma puts the focal plane for the X-dimension " +
+				 "above the z-centre (positive Z) and the focal "+
+				 "plane for the Y-dimension below the z-centre (negative Z). If gamma " +
+				 "is negative then the orientation of the focal "+ 
+				 "planes of X and Y are reversed."
+				//@formatter:on
+				 , 80)
+		);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
+
+		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		if (model == null)
+		{
+			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
+			return;
+		}
+
+		AstigmatismModel.Builder builder = model.toBuilder();
+		// Invert the gamma
+		builder.setGamma(-model.getGamma());
+		// Invert the constants of z^3 as these have an asymmetric effect on the curve 
+		builder.setAx(-model.getAx());
+		builder.setAy(-model.getAy());
+		// The constants of z^4 have a symmetric effect on the curve
+		//builder.setBx(-model.getBx());
+		//builder.setBy(-model.getBy());
+		settings.putAstigmatismModelResources(name, builder.build());
+		SettingsManager.writeSettings(settings.build());
+
+		Utils.log("Inverted astigmatism model: %s", name);
 	}
 }
