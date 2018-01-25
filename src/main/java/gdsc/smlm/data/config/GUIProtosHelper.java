@@ -18,7 +18,7 @@ import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
-import gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings;
+import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -305,11 +305,11 @@ public class GUIProtosHelper
 		defaultFailCountManagerSettings = builder.build();
 	}
 
-	/** The default PSFAstigmatismModelSettings */
-	public static final PSFAstigmatismModelSettings defaultPSFAstigmatismModelSettings;
+	/** The default AstigmatismModelManagerSettings */
+	public static final AstigmatismModelManagerSettings defaultAstigmatismModelManagerSettings;
 	static
 	{
-		PSFAstigmatismModelSettings.Builder builder = PSFAstigmatismModelSettings.newBuilder();
+		AstigmatismModelManagerSettings.Builder builder = AstigmatismModelManagerSettings.newBuilder();
 		builder.setSmoothing(0.2);
 		builder.setWeightedFit(true);
 		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
@@ -331,6 +331,6 @@ public class GUIProtosHelper
 		builder.setFitEngineSettings(b);
 		builder.setPsf(PSFProtosHelper.defaultTwoAxisGaussian2DPSF);
 
-		defaultPSFAstigmatismModelSettings = builder.build();
+		defaultAstigmatismModelManagerSettings = builder.build();
 	}
 }

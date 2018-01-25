@@ -3,7 +3,7 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "deprecation"})
 public final class PSFProtos {
   private PSFProtos() {}
   public static void registerAllExtensions(
@@ -1033,6 +1033,2168 @@ public final class PSFProtos {
 
   }
 
+  public interface AstigmatismModelOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModel)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The gamma parameter (half the distance between the focal planes). 
+     * Note that a positive gamma puts the focal plane for the X-dimension above the 
+     * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+     * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+     * and Y are reversed.	
+     * </pre>
+     *
+     * <code>double gamma = 1;</code>
+     */
+    double getGamma();
+
+    /**
+     * <pre>
+     * Depth-of-focus. This is the z-distance where the width is enlarged by 
+     * a factor of sqrt(2) compared to the width in the focal plane.   
+     * </pre>
+     *
+     * <code>double d = 2;</code>
+     */
+    double getD();
+
+    /**
+     * <pre>
+     * Empirical constant A for the x-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double ax = 3;</code>
+     */
+    double getAx();
+
+    /**
+     * <pre>
+     * Empirical constant B for the x-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double bx = 4;</code>
+     */
+    double getBx();
+
+    /**
+     * <pre>
+     * Empirical constant A for the y-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double ay = 5;</code>
+     */
+    double getAy();
+
+    /**
+     * <pre>
+     * Empirical constant B for the y-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double by = 6;</code>
+     */
+    double getBy();
+
+    /**
+     * <pre>
+     * The width (standard deviation) in the x-focal plane
+     * </pre>
+     *
+     * <code>double s0x = 7;</code>
+     */
+    double getS0X();
+
+    /**
+     * <pre>
+     * The width (standard deviation) in the y-focal plane
+     * </pre>
+     *
+     * <code>double s0y = 8;</code>
+     */
+    double getS0Y();
+
+    /**
+     * <pre>
+     * The input distance unit for z (μm, nm)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+     */
+    int getZDistanceUnitValue();
+    /**
+     * <pre>
+     * The input distance unit for z (μm, nm)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+     */
+    gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit();
+
+    /**
+     * <pre>
+     * The output distance unit for s (may be pixels)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+     */
+    int getSDistanceUnitValue();
+    /**
+     * <pre>
+     * The output distance unit for s (may be pixels)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+     */
+    gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit();
+
+    /**
+     * <pre>
+     * The pixel size used to create the model. A model is only valid when used 
+     * with the same light path (objective, magnification, camera sensor). The entire 
+     * light path is not recorded but the pixel size is stored. This can be used as 
+     * a quick validation of matching calibration, or to convert output width in pixels.
+     * </pre>
+     *
+     * <code>double nm_per_pixel = 11;</code>
+     */
+    double getNmPerPixel();
+  }
+  /**
+   * <pre>
+   * Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
+   * for the X and Y dimensions. 
+   * Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
+   * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
+   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
+   * Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual 
+   * quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
+   * For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModel}
+   */
+  public  static final class AstigmatismModel extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModel)
+      AstigmatismModelOrBuilder {
+    // Use AstigmatismModel.newBuilder() to construct.
+    private AstigmatismModel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AstigmatismModel() {
+      gamma_ = 0D;
+      d_ = 0D;
+      ax_ = 0D;
+      bx_ = 0D;
+      ay_ = 0D;
+      by_ = 0D;
+      s0X_ = 0D;
+      s0Y_ = 0D;
+      zDistanceUnit_ = 0;
+      sDistanceUnit_ = 0;
+      nmPerPixel_ = 0D;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private AstigmatismModel(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 9: {
+
+              gamma_ = input.readDouble();
+              break;
+            }
+            case 17: {
+
+              d_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              ax_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              bx_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              ay_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              by_ = input.readDouble();
+              break;
+            }
+            case 57: {
+
+              s0X_ = input.readDouble();
+              break;
+            }
+            case 65: {
+
+              s0Y_ = input.readDouble();
+              break;
+            }
+            case 72: {
+              int rawValue = input.readEnum();
+
+              zDistanceUnit_ = rawValue;
+              break;
+            }
+            case 80: {
+              int rawValue = input.readEnum();
+
+              sDistanceUnit_ = rawValue;
+              break;
+            }
+            case 89: {
+
+              nmPerPixel_ = input.readDouble();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.PSFProtos.AstigmatismModel.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder.class);
+    }
+
+    public static final int GAMMA_FIELD_NUMBER = 1;
+    private double gamma_;
+    /**
+     * <pre>
+     * The gamma parameter (half the distance between the focal planes). 
+     * Note that a positive gamma puts the focal plane for the X-dimension above the 
+     * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+     * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+     * and Y are reversed.	
+     * </pre>
+     *
+     * <code>double gamma = 1;</code>
+     */
+    public double getGamma() {
+      return gamma_;
+    }
+
+    public static final int D_FIELD_NUMBER = 2;
+    private double d_;
+    /**
+     * <pre>
+     * Depth-of-focus. This is the z-distance where the width is enlarged by 
+     * a factor of sqrt(2) compared to the width in the focal plane.   
+     * </pre>
+     *
+     * <code>double d = 2;</code>
+     */
+    public double getD() {
+      return d_;
+    }
+
+    public static final int AX_FIELD_NUMBER = 3;
+    private double ax_;
+    /**
+     * <pre>
+     * Empirical constant A for the x-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double ax = 3;</code>
+     */
+    public double getAx() {
+      return ax_;
+    }
+
+    public static final int BX_FIELD_NUMBER = 4;
+    private double bx_;
+    /**
+     * <pre>
+     * Empirical constant B for the x-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double bx = 4;</code>
+     */
+    public double getBx() {
+      return bx_;
+    }
+
+    public static final int AY_FIELD_NUMBER = 5;
+    private double ay_;
+    /**
+     * <pre>
+     * Empirical constant A for the y-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double ay = 5;</code>
+     */
+    public double getAy() {
+      return ay_;
+    }
+
+    public static final int BY_FIELD_NUMBER = 6;
+    private double by_;
+    /**
+     * <pre>
+     * Empirical constant B for the y-astigmatism of the PSF
+     * </pre>
+     *
+     * <code>double by = 6;</code>
+     */
+    public double getBy() {
+      return by_;
+    }
+
+    public static final int S0X_FIELD_NUMBER = 7;
+    private double s0X_;
+    /**
+     * <pre>
+     * The width (standard deviation) in the x-focal plane
+     * </pre>
+     *
+     * <code>double s0x = 7;</code>
+     */
+    public double getS0X() {
+      return s0X_;
+    }
+
+    public static final int S0Y_FIELD_NUMBER = 8;
+    private double s0Y_;
+    /**
+     * <pre>
+     * The width (standard deviation) in the y-focal plane
+     * </pre>
+     *
+     * <code>double s0y = 8;</code>
+     */
+    public double getS0Y() {
+      return s0Y_;
+    }
+
+    public static final int Z_DISTANCE_UNIT_FIELD_NUMBER = 9;
+    private int zDistanceUnit_;
+    /**
+     * <pre>
+     * The input distance unit for z (μm, nm)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+     */
+    public int getZDistanceUnitValue() {
+      return zDistanceUnit_;
+    }
+    /**
+     * <pre>
+     * The input distance unit for z (μm, nm)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+     */
+    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
+      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
+      return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+    }
+
+    public static final int S_DISTANCE_UNIT_FIELD_NUMBER = 10;
+    private int sDistanceUnit_;
+    /**
+     * <pre>
+     * The output distance unit for s (may be pixels)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+     */
+    public int getSDistanceUnitValue() {
+      return sDistanceUnit_;
+    }
+    /**
+     * <pre>
+     * The output distance unit for s (may be pixels)
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+     */
+    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
+      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
+      return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+    }
+
+    public static final int NM_PER_PIXEL_FIELD_NUMBER = 11;
+    private double nmPerPixel_;
+    /**
+     * <pre>
+     * The pixel size used to create the model. A model is only valid when used 
+     * with the same light path (objective, magnification, camera sensor). The entire 
+     * light path is not recorded but the pixel size is stored. This can be used as 
+     * a quick validation of matching calibration, or to convert output width in pixels.
+     * </pre>
+     *
+     * <code>double nm_per_pixel = 11;</code>
+     */
+    public double getNmPerPixel() {
+      return nmPerPixel_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (gamma_ != 0D) {
+        output.writeDouble(1, gamma_);
+      }
+      if (d_ != 0D) {
+        output.writeDouble(2, d_);
+      }
+      if (ax_ != 0D) {
+        output.writeDouble(3, ax_);
+      }
+      if (bx_ != 0D) {
+        output.writeDouble(4, bx_);
+      }
+      if (ay_ != 0D) {
+        output.writeDouble(5, ay_);
+      }
+      if (by_ != 0D) {
+        output.writeDouble(6, by_);
+      }
+      if (s0X_ != 0D) {
+        output.writeDouble(7, s0X_);
+      }
+      if (s0Y_ != 0D) {
+        output.writeDouble(8, s0Y_);
+      }
+      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        output.writeEnum(9, zDistanceUnit_);
+      }
+      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        output.writeEnum(10, sDistanceUnit_);
+      }
+      if (nmPerPixel_ != 0D) {
+        output.writeDouble(11, nmPerPixel_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (gamma_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1, gamma_);
+      }
+      if (d_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, d_);
+      }
+      if (ax_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, ax_);
+      }
+      if (bx_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, bx_);
+      }
+      if (ay_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, ay_);
+      }
+      if (by_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, by_);
+      }
+      if (s0X_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, s0X_);
+      }
+      if (s0Y_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(8, s0Y_);
+      }
+      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(9, zDistanceUnit_);
+      }
+      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(10, sDistanceUnit_);
+      }
+      if (nmPerPixel_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(11, nmPerPixel_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModel)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.PSFProtos.AstigmatismModel other = (gdsc.smlm.data.config.PSFProtos.AstigmatismModel) obj;
+
+      boolean result = true;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getGamma())
+          == java.lang.Double.doubleToLongBits(
+              other.getGamma()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getD())
+          == java.lang.Double.doubleToLongBits(
+              other.getD()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getAx())
+          == java.lang.Double.doubleToLongBits(
+              other.getAx()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getBx())
+          == java.lang.Double.doubleToLongBits(
+              other.getBx()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getAy())
+          == java.lang.Double.doubleToLongBits(
+              other.getAy()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getBy())
+          == java.lang.Double.doubleToLongBits(
+              other.getBy()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getS0X())
+          == java.lang.Double.doubleToLongBits(
+              other.getS0X()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getS0Y())
+          == java.lang.Double.doubleToLongBits(
+              other.getS0Y()));
+      result = result && zDistanceUnit_ == other.zDistanceUnit_;
+      result = result && sDistanceUnit_ == other.sDistanceUnit_;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNmPerPixel())
+          == java.lang.Double.doubleToLongBits(
+              other.getNmPerPixel()));
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + GAMMA_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getGamma()));
+      hash = (37 * hash) + D_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getD()));
+      hash = (37 * hash) + AX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getAx()));
+      hash = (37 * hash) + BX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getBx()));
+      hash = (37 * hash) + AY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getAy()));
+      hash = (37 * hash) + BY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getBy()));
+      hash = (37 * hash) + S0X_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getS0X()));
+      hash = (37 * hash) + S0Y_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getS0Y()));
+      hash = (37 * hash) + Z_DISTANCE_UNIT_FIELD_NUMBER;
+      hash = (53 * hash) + zDistanceUnit_;
+      hash = (37 * hash) + S_DISTANCE_UNIT_FIELD_NUMBER;
+      hash = (53 * hash) + sDistanceUnit_;
+      hash = (37 * hash) + NM_PER_PIXEL_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNmPerPixel()));
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.AstigmatismModel prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
+     * for the X and Y dimensions. 
+     * Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
+     * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
+     * Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual 
+     * quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
+     * For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModel}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModel)
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.PSFProtos.AstigmatismModel.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.PSFProtos.AstigmatismModel.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        gamma_ = 0D;
+
+        d_ = 0D;
+
+        ax_ = 0D;
+
+        bx_ = 0D;
+
+        ay_ = 0D;
+
+        by_ = 0D;
+
+        s0X_ = 0D;
+
+        s0Y_ = 0D;
+
+        zDistanceUnit_ = 0;
+
+        sDistanceUnit_ = 0;
+
+        nmPerPixel_ = 0D;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel build() {
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModel result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel buildPartial() {
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModel result = new gdsc.smlm.data.config.PSFProtos.AstigmatismModel(this);
+        result.gamma_ = gamma_;
+        result.d_ = d_;
+        result.ax_ = ax_;
+        result.bx_ = bx_;
+        result.ay_ = ay_;
+        result.by_ = by_;
+        result.s0X_ = s0X_;
+        result.s0Y_ = s0Y_;
+        result.zDistanceUnit_ = zDistanceUnit_;
+        result.sDistanceUnit_ = sDistanceUnit_;
+        result.nmPerPixel_ = nmPerPixel_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModel) {
+          return mergeFrom((gdsc.smlm.data.config.PSFProtos.AstigmatismModel)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.AstigmatismModel other) {
+        if (other == gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance()) return this;
+        if (other.getGamma() != 0D) {
+          setGamma(other.getGamma());
+        }
+        if (other.getD() != 0D) {
+          setD(other.getD());
+        }
+        if (other.getAx() != 0D) {
+          setAx(other.getAx());
+        }
+        if (other.getBx() != 0D) {
+          setBx(other.getBx());
+        }
+        if (other.getAy() != 0D) {
+          setAy(other.getAy());
+        }
+        if (other.getBy() != 0D) {
+          setBy(other.getBy());
+        }
+        if (other.getS0X() != 0D) {
+          setS0X(other.getS0X());
+        }
+        if (other.getS0Y() != 0D) {
+          setS0Y(other.getS0Y());
+        }
+        if (other.zDistanceUnit_ != 0) {
+          setZDistanceUnitValue(other.getZDistanceUnitValue());
+        }
+        if (other.sDistanceUnit_ != 0) {
+          setSDistanceUnitValue(other.getSDistanceUnitValue());
+        }
+        if (other.getNmPerPixel() != 0D) {
+          setNmPerPixel(other.getNmPerPixel());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModel parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.PSFProtos.AstigmatismModel) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private double gamma_ ;
+      /**
+       * <pre>
+       * The gamma parameter (half the distance between the focal planes). 
+       * Note that a positive gamma puts the focal plane for the X-dimension above the 
+       * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+       * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+       * and Y are reversed.	
+       * </pre>
+       *
+       * <code>double gamma = 1;</code>
+       */
+      public double getGamma() {
+        return gamma_;
+      }
+      /**
+       * <pre>
+       * The gamma parameter (half the distance between the focal planes). 
+       * Note that a positive gamma puts the focal plane for the X-dimension above the 
+       * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+       * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+       * and Y are reversed.	
+       * </pre>
+       *
+       * <code>double gamma = 1;</code>
+       */
+      public Builder setGamma(double value) {
+        
+        gamma_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The gamma parameter (half the distance between the focal planes). 
+       * Note that a positive gamma puts the focal plane for the X-dimension above the 
+       * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+       * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+       * and Y are reversed.	
+       * </pre>
+       *
+       * <code>double gamma = 1;</code>
+       */
+      public Builder clearGamma() {
+        
+        gamma_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double d_ ;
+      /**
+       * <pre>
+       * Depth-of-focus. This is the z-distance where the width is enlarged by 
+       * a factor of sqrt(2) compared to the width in the focal plane.   
+       * </pre>
+       *
+       * <code>double d = 2;</code>
+       */
+      public double getD() {
+        return d_;
+      }
+      /**
+       * <pre>
+       * Depth-of-focus. This is the z-distance where the width is enlarged by 
+       * a factor of sqrt(2) compared to the width in the focal plane.   
+       * </pre>
+       *
+       * <code>double d = 2;</code>
+       */
+      public Builder setD(double value) {
+        
+        d_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Depth-of-focus. This is the z-distance where the width is enlarged by 
+       * a factor of sqrt(2) compared to the width in the focal plane.   
+       * </pre>
+       *
+       * <code>double d = 2;</code>
+       */
+      public Builder clearD() {
+        
+        d_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double ax_ ;
+      /**
+       * <pre>
+       * Empirical constant A for the x-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double ax = 3;</code>
+       */
+      public double getAx() {
+        return ax_;
+      }
+      /**
+       * <pre>
+       * Empirical constant A for the x-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double ax = 3;</code>
+       */
+      public Builder setAx(double value) {
+        
+        ax_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Empirical constant A for the x-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double ax = 3;</code>
+       */
+      public Builder clearAx() {
+        
+        ax_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double bx_ ;
+      /**
+       * <pre>
+       * Empirical constant B for the x-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double bx = 4;</code>
+       */
+      public double getBx() {
+        return bx_;
+      }
+      /**
+       * <pre>
+       * Empirical constant B for the x-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double bx = 4;</code>
+       */
+      public Builder setBx(double value) {
+        
+        bx_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Empirical constant B for the x-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double bx = 4;</code>
+       */
+      public Builder clearBx() {
+        
+        bx_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double ay_ ;
+      /**
+       * <pre>
+       * Empirical constant A for the y-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double ay = 5;</code>
+       */
+      public double getAy() {
+        return ay_;
+      }
+      /**
+       * <pre>
+       * Empirical constant A for the y-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double ay = 5;</code>
+       */
+      public Builder setAy(double value) {
+        
+        ay_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Empirical constant A for the y-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double ay = 5;</code>
+       */
+      public Builder clearAy() {
+        
+        ay_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double by_ ;
+      /**
+       * <pre>
+       * Empirical constant B for the y-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double by = 6;</code>
+       */
+      public double getBy() {
+        return by_;
+      }
+      /**
+       * <pre>
+       * Empirical constant B for the y-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double by = 6;</code>
+       */
+      public Builder setBy(double value) {
+        
+        by_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Empirical constant B for the y-astigmatism of the PSF
+       * </pre>
+       *
+       * <code>double by = 6;</code>
+       */
+      public Builder clearBy() {
+        
+        by_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double s0X_ ;
+      /**
+       * <pre>
+       * The width (standard deviation) in the x-focal plane
+       * </pre>
+       *
+       * <code>double s0x = 7;</code>
+       */
+      public double getS0X() {
+        return s0X_;
+      }
+      /**
+       * <pre>
+       * The width (standard deviation) in the x-focal plane
+       * </pre>
+       *
+       * <code>double s0x = 7;</code>
+       */
+      public Builder setS0X(double value) {
+        
+        s0X_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The width (standard deviation) in the x-focal plane
+       * </pre>
+       *
+       * <code>double s0x = 7;</code>
+       */
+      public Builder clearS0X() {
+        
+        s0X_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double s0Y_ ;
+      /**
+       * <pre>
+       * The width (standard deviation) in the y-focal plane
+       * </pre>
+       *
+       * <code>double s0y = 8;</code>
+       */
+      public double getS0Y() {
+        return s0Y_;
+      }
+      /**
+       * <pre>
+       * The width (standard deviation) in the y-focal plane
+       * </pre>
+       *
+       * <code>double s0y = 8;</code>
+       */
+      public Builder setS0Y(double value) {
+        
+        s0Y_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The width (standard deviation) in the y-focal plane
+       * </pre>
+       *
+       * <code>double s0y = 8;</code>
+       */
+      public Builder clearS0Y() {
+        
+        s0Y_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int zDistanceUnit_ = 0;
+      /**
+       * <pre>
+       * The input distance unit for z (μm, nm)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+       */
+      public int getZDistanceUnitValue() {
+        return zDistanceUnit_;
+      }
+      /**
+       * <pre>
+       * The input distance unit for z (μm, nm)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+       */
+      public Builder setZDistanceUnitValue(int value) {
+        zDistanceUnit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The input distance unit for z (μm, nm)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+       */
+      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
+        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
+        return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The input distance unit for z (μm, nm)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+       */
+      public Builder setZDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        zDistanceUnit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The input distance unit for z (μm, nm)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+       */
+      public Builder clearZDistanceUnit() {
+        
+        zDistanceUnit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int sDistanceUnit_ = 0;
+      /**
+       * <pre>
+       * The output distance unit for s (may be pixels)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+       */
+      public int getSDistanceUnitValue() {
+        return sDistanceUnit_;
+      }
+      /**
+       * <pre>
+       * The output distance unit for s (may be pixels)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+       */
+      public Builder setSDistanceUnitValue(int value) {
+        sDistanceUnit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The output distance unit for s (may be pixels)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+       */
+      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
+        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
+        return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The output distance unit for s (may be pixels)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+       */
+      public Builder setSDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        sDistanceUnit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The output distance unit for s (may be pixels)
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+       */
+      public Builder clearSDistanceUnit() {
+        
+        sDistanceUnit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double nmPerPixel_ ;
+      /**
+       * <pre>
+       * The pixel size used to create the model. A model is only valid when used 
+       * with the same light path (objective, magnification, camera sensor). The entire 
+       * light path is not recorded but the pixel size is stored. This can be used as 
+       * a quick validation of matching calibration, or to convert output width in pixels.
+       * </pre>
+       *
+       * <code>double nm_per_pixel = 11;</code>
+       */
+      public double getNmPerPixel() {
+        return nmPerPixel_;
+      }
+      /**
+       * <pre>
+       * The pixel size used to create the model. A model is only valid when used 
+       * with the same light path (objective, magnification, camera sensor). The entire 
+       * light path is not recorded but the pixel size is stored. This can be used as 
+       * a quick validation of matching calibration, or to convert output width in pixels.
+       * </pre>
+       *
+       * <code>double nm_per_pixel = 11;</code>
+       */
+      public Builder setNmPerPixel(double value) {
+        
+        nmPerPixel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The pixel size used to create the model. A model is only valid when used 
+       * with the same light path (objective, magnification, camera sensor). The entire 
+       * light path is not recorded but the pixel size is stored. This can be used as 
+       * a quick validation of matching calibration, or to convert output width in pixels.
+       * </pre>
+       *
+       * <code>double nm_per_pixel = 11;</code>
+       */
+      public Builder clearNmPerPixel() {
+        
+        nmPerPixel_ = 0D;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModel)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModel)
+    private static final gdsc.smlm.data.config.PSFProtos.AstigmatismModel DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.AstigmatismModel();
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AstigmatismModel>
+        PARSER = new com.google.protobuf.AbstractParser<AstigmatismModel>() {
+      public AstigmatismModel parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new AstigmatismModel(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AstigmatismModel> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AstigmatismModel> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AstigmatismModelSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModelSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+    int getAstigmatismModelResourcesCount();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+    boolean containsAstigmatismModelResources(
+        java.lang.String key);
+    /**
+     * Use {@link #getAstigmatismModelResourcesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+    getAstigmatismModelResources();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+    getAstigmatismModelResourcesMap();
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+
+    gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
+        java.lang.String key,
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue);
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+
+    gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Define the astigmatism model settings
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelSettings}
+   */
+  public  static final class AstigmatismModelSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModelSettings)
+      AstigmatismModelSettingsOrBuilder {
+    // Use AstigmatismModelSettings.newBuilder() to construct.
+    private AstigmatismModelSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AstigmatismModelSettings() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private AstigmatismModelSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                astigmatismModelResources_ = com.google.protobuf.MapField.newMapField(
+                    AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000001;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+              astigmatismModelResources__ = input.readMessage(
+                  AstigmatismModelResourcesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              astigmatismModelResources_.getMutableMap().put(
+                  astigmatismModelResources__.getKey(), astigmatismModelResources__.getValue());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 1:
+          return internalGetAstigmatismModelResources();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.Builder.class);
+    }
+
+    public static final int ASTIGMATISM_MODEL_RESOURCES_FIELD_NUMBER = 1;
+    private static final class AstigmatismModelResourcesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>newDefaultInstance(
+                  gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance());
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources_;
+    private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+    internalGetAstigmatismModelResources() {
+      if (astigmatismModelResources_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+      }
+      return astigmatismModelResources_;
+    }
+
+    public int getAstigmatismModelResourcesCount() {
+      return internalGetAstigmatismModelResources().getMap().size();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+
+    public boolean containsAstigmatismModelResources(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetAstigmatismModelResources().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getAstigmatismModelResourcesMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources() {
+      return getAstigmatismModelResourcesMap();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+
+    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap() {
+      return internalGetAstigmatismModelResources().getMap();
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+
+    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
+        java.lang.String key,
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
+          internalGetAstigmatismModelResources().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+     */
+
+    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
+          internalGetAstigmatismModelResources().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetAstigmatismModelResources(),
+          AstigmatismModelResourcesDefaultEntryHolder.defaultEntry,
+          1);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> entry
+           : internalGetAstigmatismModelResources().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+        astigmatismModelResources__ = AstigmatismModelResourcesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, astigmatismModelResources__);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings other = (gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) obj;
+
+      boolean result = true;
+      result = result && internalGetAstigmatismModelResources().equals(
+          other.internalGetAstigmatismModelResources());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (!internalGetAstigmatismModelResources().getMap().isEmpty()) {
+        hash = (37 * hash) + ASTIGMATISM_MODEL_RESOURCES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetAstigmatismModelResources().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Define the astigmatism model settings
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModelSettings)
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetAstigmatismModelResources();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetMutableAstigmatismModelResources();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        internalGetMutableAstigmatismModelResources().clear();
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings build() {
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings buildPartial() {
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings result = new gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings(this);
+        int from_bitField0_ = bitField0_;
+        result.astigmatismModelResources_ = internalGetAstigmatismModelResources();
+        result.astigmatismModelResources_.makeImmutable();
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) {
+          return mergeFrom((gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings other) {
+        if (other == gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.getDefaultInstance()) return this;
+        internalGetMutableAstigmatismModelResources().mergeFrom(
+            other.internalGetAstigmatismModelResources());
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.MapField<
+          java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources_;
+      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+      internalGetAstigmatismModelResources() {
+        if (astigmatismModelResources_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+        }
+        return astigmatismModelResources_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+      internalGetMutableAstigmatismModelResources() {
+        onChanged();;
+        if (astigmatismModelResources_ == null) {
+          astigmatismModelResources_ = com.google.protobuf.MapField.newMapField(
+              AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+        }
+        if (!astigmatismModelResources_.isMutable()) {
+          astigmatismModelResources_ = astigmatismModelResources_.copy();
+        }
+        return astigmatismModelResources_;
+      }
+
+      public int getAstigmatismModelResourcesCount() {
+        return internalGetAstigmatismModelResources().getMap().size();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+
+      public boolean containsAstigmatismModelResources(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        return internalGetAstigmatismModelResources().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getAstigmatismModelResourcesMap()} instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources() {
+        return getAstigmatismModelResourcesMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap() {
+        return internalGetAstigmatismModelResources().getMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
+          java.lang.String key,
+          gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
+            internalGetAstigmatismModelResources().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
+            internalGetAstigmatismModelResources().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearAstigmatismModelResources() {
+        internalGetMutableAstigmatismModelResources().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+
+      public Builder removeAstigmatismModelResources(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableAstigmatismModelResources().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
+      getMutableAstigmatismModelResources() {
+        return internalGetMutableAstigmatismModelResources().getMutableMap();
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+      public Builder putAstigmatismModelResources(
+          java.lang.String key,
+          gdsc.smlm.data.config.PSFProtos.AstigmatismModel value) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableAstigmatismModelResources().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+       */
+
+      public Builder putAllAstigmatismModelResources(
+          java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> values) {
+        internalGetMutableAstigmatismModelResources().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModelSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModelSettings)
+    private static final gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings();
+    }
+
+    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AstigmatismModelSettings>
+        PARSER = new com.google.protobuf.AbstractParser<AstigmatismModelSettings>() {
+      public AstigmatismModelSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new AstigmatismModelSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AstigmatismModelSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AstigmatismModelSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface PSFOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSF)
       com.google.protobuf.MessageOrBuilder {
@@ -1107,6 +3269,31 @@ public final class PSFProtos {
      */
     gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(
         int index);
+
+    /**
+     * <pre>
+     * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+     */
+    boolean hasAstigmatismModel();
+    /**
+     * <pre>
+     * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+     */
+    gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModel();
+    /**
+     * <pre>
+     * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+     */
+    gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder getAstigmatismModelOrBuilder();
   }
   /**
    * <pre>
@@ -1166,6 +3353,19 @@ public final class PSFProtos {
               }
               parameters_.add(
                   input.readMessage(gdsc.smlm.data.config.PSFProtos.PSFParameter.parser(), extensionRegistry));
+              break;
+            }
+            case 26: {
+              gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder subBuilder = null;
+              if (astigmatismModel_ != null) {
+                subBuilder = astigmatismModel_.toBuilder();
+              }
+              astigmatismModel_ = input.readMessage(gdsc.smlm.data.config.PSFProtos.AstigmatismModel.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(astigmatismModel_);
+                astigmatismModel_ = subBuilder.buildPartial();
+              }
+
               break;
             }
           }
@@ -1284,6 +3484,39 @@ public final class PSFProtos {
       return parameters_.get(index);
     }
 
+    public static final int ASTIGMATISM_MODEL_FIELD_NUMBER = 3;
+    private gdsc.smlm.data.config.PSFProtos.AstigmatismModel astigmatismModel_;
+    /**
+     * <pre>
+     * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+     */
+    public boolean hasAstigmatismModel() {
+      return astigmatismModel_ != null;
+    }
+    /**
+     * <pre>
+     * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+     */
+    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModel() {
+      return astigmatismModel_ == null ? gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance() : astigmatismModel_;
+    }
+    /**
+     * <pre>
+     * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+     */
+    public gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder getAstigmatismModelOrBuilder() {
+      return getAstigmatismModel();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1302,6 +3535,9 @@ public final class PSFProtos {
       for (int i = 0; i < parameters_.size(); i++) {
         output.writeMessage(2, parameters_.get(i));
       }
+      if (astigmatismModel_ != null) {
+        output.writeMessage(3, getAstigmatismModel());
+      }
     }
 
     public int getSerializedSize() {
@@ -1316,6 +3552,10 @@ public final class PSFProtos {
       for (int i = 0; i < parameters_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, parameters_.get(i));
+      }
+      if (astigmatismModel_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getAstigmatismModel());
       }
       memoizedSize = size;
       return size;
@@ -1336,6 +3576,11 @@ public final class PSFProtos {
       result = result && psfType_ == other.psfType_;
       result = result && getParametersList()
           .equals(other.getParametersList());
+      result = result && (hasAstigmatismModel() == other.hasAstigmatismModel());
+      if (hasAstigmatismModel()) {
+        result = result && getAstigmatismModel()
+            .equals(other.getAstigmatismModel());
+      }
       return result;
     }
 
@@ -1351,6 +3596,10 @@ public final class PSFProtos {
       if (getParametersCount() > 0) {
         hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
         hash = (53 * hash) + getParametersList().hashCode();
+      }
+      if (hasAstigmatismModel()) {
+        hash = (37 * hash) + ASTIGMATISM_MODEL_FIELD_NUMBER;
+        hash = (53 * hash) + getAstigmatismModel().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -1494,6 +3743,12 @@ public final class PSFProtos {
         } else {
           parametersBuilder_.clear();
         }
+        if (astigmatismModelBuilder_ == null) {
+          astigmatismModel_ = null;
+        } else {
+          astigmatismModel_ = null;
+          astigmatismModelBuilder_ = null;
+        }
         return this;
       }
 
@@ -1527,6 +3782,11 @@ public final class PSFProtos {
           result.parameters_ = parameters_;
         } else {
           result.parameters_ = parametersBuilder_.build();
+        }
+        if (astigmatismModelBuilder_ == null) {
+          result.astigmatismModel_ = astigmatismModel_;
+        } else {
+          result.astigmatismModel_ = astigmatismModelBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -1598,6 +3858,9 @@ public final class PSFProtos {
               parametersBuilder_.addAllMessages(other.parameters_);
             }
           }
+        }
+        if (other.hasAstigmatismModel()) {
+          mergeAstigmatismModel(other.getAstigmatismModel());
         }
         onChanged();
         return this;
@@ -2036,6 +4299,159 @@ public final class PSFProtos {
           parameters_ = null;
         }
         return parametersBuilder_;
+      }
+
+      private gdsc.smlm.data.config.PSFProtos.AstigmatismModel astigmatismModel_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.PSFProtos.AstigmatismModel, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder, gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder> astigmatismModelBuilder_;
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public boolean hasAstigmatismModel() {
+        return astigmatismModelBuilder_ != null || astigmatismModel_ != null;
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModel() {
+        if (astigmatismModelBuilder_ == null) {
+          return astigmatismModel_ == null ? gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance() : astigmatismModel_;
+        } else {
+          return astigmatismModelBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public Builder setAstigmatismModel(gdsc.smlm.data.config.PSFProtos.AstigmatismModel value) {
+        if (astigmatismModelBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          astigmatismModel_ = value;
+          onChanged();
+        } else {
+          astigmatismModelBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public Builder setAstigmatismModel(
+          gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder builderForValue) {
+        if (astigmatismModelBuilder_ == null) {
+          astigmatismModel_ = builderForValue.build();
+          onChanged();
+        } else {
+          astigmatismModelBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public Builder mergeAstigmatismModel(gdsc.smlm.data.config.PSFProtos.AstigmatismModel value) {
+        if (astigmatismModelBuilder_ == null) {
+          if (astigmatismModel_ != null) {
+            astigmatismModel_ =
+              gdsc.smlm.data.config.PSFProtos.AstigmatismModel.newBuilder(astigmatismModel_).mergeFrom(value).buildPartial();
+          } else {
+            astigmatismModel_ = value;
+          }
+          onChanged();
+        } else {
+          astigmatismModelBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public Builder clearAstigmatismModel() {
+        if (astigmatismModelBuilder_ == null) {
+          astigmatismModel_ = null;
+          onChanged();
+        } else {
+          astigmatismModel_ = null;
+          astigmatismModelBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder getAstigmatismModelBuilder() {
+        
+        onChanged();
+        return getAstigmatismModelFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder getAstigmatismModelOrBuilder() {
+        if (astigmatismModelBuilder_ != null) {
+          return astigmatismModelBuilder_.getMessageOrBuilder();
+        } else {
+          return astigmatismModel_ == null ?
+              gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance() : astigmatismModel_;
+        }
+      }
+      /**
+       * <pre>
+       * The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.AstigmatismModel astigmatism_model = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.PSFProtos.AstigmatismModel, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder, gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder> 
+          getAstigmatismModelFieldBuilder() {
+        if (astigmatismModelBuilder_ == null) {
+          astigmatismModelBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.PSFProtos.AstigmatismModel, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder, gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder>(
+                  getAstigmatismModel(),
+                  getParentForChildren(),
+                  isClean());
+          astigmatismModel_ = null;
+        }
+        return astigmatismModelBuilder_;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -5799,6 +8215,21 @@ public final class PSFProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_PSF_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -5847,38 +8278,53 @@ public final class PSFProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\tpsf.proto\022\025gdsc.smlm.data.config\"b\n\014PS" +
-      "FParameter\022\014\n\004name\030\001 \001(\t\0225\n\004unit\030\002 \001(\0162\'" +
-      ".gdsc.smlm.data.config.PSFParameterUnit\022" +
-      "\r\n\005value\030\003 \001(\001\"p\n\003PSF\0220\n\010psf_type\030\001 \001(\0162" +
-      "\036.gdsc.smlm.data.config.PSFType\0227\n\nparam" +
-      "eters\030\002 \003(\0132#.gdsc.smlm.data.config.PSFP" +
-      "arameter\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002cy\030\003 \001" +
-      "(\001\"\231\003\n\010ImagePSF\022\023\n\013image_count\030\001 \001(\005\022\024\n\014" +
-      "centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003 \001(\001\022\023" +
-      "\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229\n\005not",
-      "es\030\006 \003(\0132*.gdsc.smlm.data.config.ImagePS" +
-      "F.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gdsc.sml" +
-      "m.data.config.ImagePSF.OffsetsEntry\022\020\n\010x" +
-      "_centre\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010z_cen" +
-      "tre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
-      "value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003key\030\001" +
-      " \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.data.con" +
-      "fig.Offset:\0028\001\"=\n\023CubicSplineResource\022\020\n" +
-      "\010filename\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001(\001\"\344\001" +
-      "\n\023CubicSplineSettings\022d\n\026cubic_spline_re",
-      "sources\030\001 \003(\0132D.gdsc.smlm.data.config.Cu" +
-      "bicSplineSettings.CubicSplineResourcesEn" +
-      "try\032g\n\031CubicSplineResourcesEntry\022\013\n\003key\030" +
-      "\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.data.co" +
-      "nfig.CubicSplineResource:\0028\001*\232\001\n\007PSFType" +
-      "\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2" +
-      "D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXI" +
-      "S_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMATIC_" +
-      "GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFParamete" +
-      "rUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n\010DIST",
-      "ANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFP" +
-      "rotosb\006proto3"
+      "\n\tpsf.proto\022\025gdsc.smlm.data.config\032\nunit" +
+      ".proto\"b\n\014PSFParameter\022\014\n\004name\030\001 \001(\t\0225\n\004" +
+      "unit\030\002 \001(\0162\'.gdsc.smlm.data.config.PSFPa" +
+      "rameterUnit\022\r\n\005value\030\003 \001(\001\"\210\002\n\020Astigmati" +
+      "smModel\022\r\n\005gamma\030\001 \001(\001\022\t\n\001d\030\002 \001(\001\022\n\n\002ax\030" +
+      "\003 \001(\001\022\n\n\002bx\030\004 \001(\001\022\n\n\002ay\030\005 \001(\001\022\n\n\002by\030\006 \001(" +
+      "\001\022\013\n\003s0x\030\007 \001(\001\022\013\n\003s0y\030\010 \001(\001\022<\n\017z_distanc" +
+      "e_unit\030\t \001(\0162#.gdsc.smlm.data.config.Dis" +
+      "tanceUnit\022<\n\017s_distance_unit\030\n \001(\0162#.gds" +
+      "c.smlm.data.config.DistanceUnit\022\024\n\014nm_pe",
+      "r_pixel\030\013 \001(\001\"\372\001\n\030AstigmatismModelSettin" +
+      "gs\022s\n\033astigmatism_model_resources\030\001 \003(\0132" +
+      "N.gdsc.smlm.data.config.AstigmatismModel" +
+      "Settings.AstigmatismModelResourcesEntry\032" +
+      "i\n\036AstigmatismModelResourcesEntry\022\013\n\003key" +
+      "\030\001 \001(\t\0226\n\005value\030\002 \001(\0132\'.gdsc.smlm.data.c" +
+      "onfig.AstigmatismModel:\0028\001\"\264\001\n\003PSF\0220\n\010ps" +
+      "f_type\030\001 \001(\0162\036.gdsc.smlm.data.config.PSF" +
+      "Type\0227\n\nparameters\030\002 \003(\0132#.gdsc.smlm.dat" +
+      "a.config.PSFParameter\022B\n\021astigmatism_mod",
+      "el\030\003 \001(\0132\'.gdsc.smlm.data.config.Astigma" +
+      "tismModel\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002cy\030\003 " +
+      "\001(\001\"\231\003\n\010ImagePSF\022\023\n\013image_count\030\001 \001(\005\022\024\n" +
+      "\014centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003 \001(\001\022" +
+      "\023\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229\n\005no" +
+      "tes\030\006 \003(\0132*.gdsc.smlm.data.config.ImageP" +
+      "SF.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gdsc.sm" +
+      "lm.data.config.ImagePSF.OffsetsEntry\022\020\n\010" +
+      "x_centre\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010z_ce" +
+      "ntre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n",
+      "\005value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003key\030" +
+      "\001 \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.data.co" +
+      "nfig.Offset:\0028\001\"=\n\023CubicSplineResource\022\020" +
+      "\n\010filename\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001(\001\"\344" +
+      "\001\n\023CubicSplineSettings\022d\n\026cubic_spline_r" +
+      "esources\030\001 \003(\0132D.gdsc.smlm.data.config.C" +
+      "ubicSplineSettings.CubicSplineResourcesE" +
+      "ntry\032g\n\031CubicSplineResourcesEntry\022\013\n\003key" +
+      "\030\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.data.c" +
+      "onfig.CubicSplineResource:\0028\001*\232\001\n\007PSFTyp",
+      "e\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_" +
+      "2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_AX" +
+      "IS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMATIC" +
+      "_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFParamet" +
+      "erUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n\010DIS" +
+      "TANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSF" +
+      "Protosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5891,6 +8337,7 @@ public final class PSFProtos {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          gdsc.smlm.data.config.UnitProtos.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_PSFParameter_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -5898,20 +8345,38 @@ public final class PSFProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSFParameter_descriptor,
         new java.lang.String[] { "Name", "Unit", "Value", });
-    internal_static_gdsc_smlm_data_config_PSF_descriptor =
+    internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor,
+        new java.lang.String[] { "Gamma", "D", "Ax", "Bx", "Ay", "By", "S0X", "S0Y", "ZDistanceUnit", "SDistanceUnit", "NmPerPixel", });
+    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor,
+        new java.lang.String[] { "AstigmatismModelResources", });
+    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor =
+      internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor.getNestedTypes().get(0);
+    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_gdsc_smlm_data_config_PSF_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_PSF_descriptor,
-        new java.lang.String[] { "PsfType", "Parameters", });
+        new java.lang.String[] { "PsfType", "Parameters", "AstigmatismModel", });
     internal_static_gdsc_smlm_data_config_Offset_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_Offset_descriptor,
         new java.lang.String[] { "Cx", "Cy", });
     internal_static_gdsc_smlm_data_config_ImagePSF_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImagePSF_descriptor,
@@ -5929,13 +8394,13 @@ public final class PSFProtos {
         internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor,
         new java.lang.String[] { "Filename", "SplineScale", });
     internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor,
@@ -5946,6 +8411,7 @@ public final class PSFProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
+    gdsc.smlm.data.config.UnitProtos.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

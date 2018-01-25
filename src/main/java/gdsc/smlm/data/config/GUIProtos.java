@@ -29720,113 +29720,152 @@ public final class GUIProtos {
 
   }
 
-  public interface PSFAstigmatismModelSettingsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSFAstigmatismModelSettings)
+  public interface AstigmatismModelManagerSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModelManagerSettings)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>double nm_per_slice = 1;</code>
+     * <code>int32 option = 1;</code>
+     */
+    int getOption();
+
+    /**
+     * <pre>
+     * For the fitting
+     * </pre>
+     *
+     * <code>double nm_per_slice = 2;</code>
      */
     double getNmPerSlice();
 
     /**
-     * <pre>
-     * For the fitting
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
     boolean hasFitEngineSettings();
     /**
-     * <pre>
-     * For the fitting
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
     gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings();
     /**
-     * <pre>
-     * For the fitting
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
     gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder();
 
     /**
-     * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+     * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
     boolean hasPsf();
     /**
-     * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+     * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
     gdsc.smlm.data.config.PSFProtos.PSF getPsf();
     /**
-     * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+     * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
     gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder();
 
     /**
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
     boolean hasCalibration();
     /**
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration();
     /**
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
     gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder();
 
     /**
-     * <code>double radius = 5;</code>
+     * <code>double radius = 6;</code>
      */
     double getRadius();
 
     /**
-     * <code>bool log_fit_progress = 6;</code>
+     * <code>bool log_fit_progress = 7;</code>
      */
     boolean getLogFitProgress();
 
     /**
-     * <code>double smoothing = 7;</code>
+     * <code>double smoothing = 8;</code>
      */
     double getSmoothing();
 
     /**
-     * <code>bool weighted_fit = 8;</code>
+     * <code>bool weighted_fit = 9;</code>
      */
     boolean getWeightedFit();
 
     /**
-     * <code>bool show_estimated_curve = 9;</code>
+     * <code>bool show_estimated_curve = 10;</code>
      */
     boolean getShowEstimatedCurve();
+
+    /**
+     * <code>string image = 11;</code>
+     */
+    java.lang.String getImage();
+    /**
+     * <code>string image = 11;</code>
+     */
+    com.google.protobuf.ByteString
+        getImageBytes();
+
+    /**
+     * <code>string model_name = 12;</code>
+     */
+    java.lang.String getModelName();
+    /**
+     * <code>string model_name = 12;</code>
+     */
+    com.google.protobuf.ByteString
+        getModelNameBytes();
+
+    /**
+     * <pre>
+     * For display
+     * </pre>
+     *
+     * <code>string selected = 13;</code>
+     */
+    java.lang.String getSelected();
+    /**
+     * <pre>
+     * For display
+     * </pre>
+     *
+     * <code>string selected = 13;</code>
+     */
+    com.google.protobuf.ByteString
+        getSelectedBytes();
   }
   /**
    * <pre>
-   * Contains settings for the PSF Astigmatism Model plugin
+   * Contains settings for the Astigmatism Model Manager plugin
    * </pre>
    *
-   * Protobuf type {@code gdsc.smlm.data.config.PSFAstigmatismModelSettings}
+   * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelManagerSettings}
    */
-  public  static final class PSFAstigmatismModelSettings extends
+  public  static final class AstigmatismModelManagerSettings extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.PSFAstigmatismModelSettings)
-      PSFAstigmatismModelSettingsOrBuilder {
-    // Use PSFAstigmatismModelSettings.newBuilder() to construct.
-    private PSFAstigmatismModelSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModelManagerSettings)
+      AstigmatismModelManagerSettingsOrBuilder {
+    // Use AstigmatismModelManagerSettings.newBuilder() to construct.
+    private AstigmatismModelManagerSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private PSFAstigmatismModelSettings() {
+    private AstigmatismModelManagerSettings() {
+      option_ = 0;
       nmPerSlice_ = 0D;
       radius_ = 0D;
       logFitProgress_ = false;
       smoothing_ = 0D;
       weightedFit_ = false;
       showEstimatedCurve_ = false;
+      image_ = "";
+      modelName_ = "";
+      selected_ = "";
     }
 
     @java.lang.Override
@@ -29834,7 +29873,7 @@ public final class GUIProtos {
     getUnknownFields() {
       return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
     }
-    private PSFAstigmatismModelSettings(
+    private AstigmatismModelManagerSettings(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -29854,12 +29893,17 @@ public final class GUIProtos {
               }
               break;
             }
-            case 9: {
+            case 8: {
+
+              option_ = input.readInt32();
+              break;
+            }
+            case 17: {
 
               nmPerSlice_ = input.readDouble();
               break;
             }
-            case 18: {
+            case 26: {
               gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder subBuilder = null;
               if (fitEngineSettings_ != null) {
                 subBuilder = fitEngineSettings_.toBuilder();
@@ -29872,7 +29916,7 @@ public final class GUIProtos {
 
               break;
             }
-            case 26: {
+            case 34: {
               gdsc.smlm.data.config.PSFProtos.PSF.Builder subBuilder = null;
               if (psf_ != null) {
                 subBuilder = psf_.toBuilder();
@@ -29885,7 +29929,7 @@ public final class GUIProtos {
 
               break;
             }
-            case 34: {
+            case 42: {
               gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder subBuilder = null;
               if (calibration_ != null) {
                 subBuilder = calibration_.toBuilder();
@@ -29898,29 +29942,47 @@ public final class GUIProtos {
 
               break;
             }
-            case 41: {
+            case 49: {
 
               radius_ = input.readDouble();
               break;
             }
-            case 48: {
+            case 56: {
 
               logFitProgress_ = input.readBool();
               break;
             }
-            case 57: {
+            case 65: {
 
               smoothing_ = input.readDouble();
               break;
             }
-            case 64: {
+            case 72: {
 
               weightedFit_ = input.readBool();
               break;
             }
-            case 72: {
+            case 80: {
 
               showEstimatedCurve_ = input.readBool();
+              break;
+            }
+            case 90: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              image_ = s;
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              modelName_ = s;
+              break;
+            }
+            case 106: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              selected_ = s;
               break;
             }
           }
@@ -29936,143 +29998,254 @@ public final class GUIProtos {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor;
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_fieldAccessorTable
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.class, gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.Builder.class);
+              gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.class, gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.Builder.class);
     }
 
-    public static final int NM_PER_SLICE_FIELD_NUMBER = 1;
+    public static final int OPTION_FIELD_NUMBER = 1;
+    private int option_;
+    /**
+     * <code>int32 option = 1;</code>
+     */
+    public int getOption() {
+      return option_;
+    }
+
+    public static final int NM_PER_SLICE_FIELD_NUMBER = 2;
     private double nmPerSlice_;
     /**
-     * <code>double nm_per_slice = 1;</code>
+     * <pre>
+     * For the fitting
+     * </pre>
+     *
+     * <code>double nm_per_slice = 2;</code>
      */
     public double getNmPerSlice() {
       return nmPerSlice_;
     }
 
-    public static final int FIT_ENGINE_SETTINGS_FIELD_NUMBER = 2;
+    public static final int FIT_ENGINE_SETTINGS_FIELD_NUMBER = 3;
     private gdsc.smlm.data.config.FitProtos.FitEngineSettings fitEngineSettings_;
     /**
-     * <pre>
-     * For the fitting
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
     public boolean hasFitEngineSettings() {
       return fitEngineSettings_ != null;
     }
     /**
-     * <pre>
-     * For the fitting
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
     public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
       return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
     }
     /**
-     * <pre>
-     * For the fitting
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+     * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
     public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
       return getFitEngineSettings();
     }
 
-    public static final int PSF_FIELD_NUMBER = 3;
+    public static final int PSF_FIELD_NUMBER = 4;
     private gdsc.smlm.data.config.PSFProtos.PSF psf_;
     /**
-     * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+     * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
     public boolean hasPsf() {
       return psf_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+     * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
     public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
       return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+     * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
      */
     public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
       return getPsf();
     }
 
-    public static final int CALIBRATION_FIELD_NUMBER = 4;
+    public static final int CALIBRATION_FIELD_NUMBER = 5;
     private gdsc.smlm.data.config.CalibrationProtos.Calibration calibration_;
     /**
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
     public boolean hasCalibration() {
       return calibration_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
     public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
       return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
     public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
       return getCalibration();
     }
 
-    public static final int RADIUS_FIELD_NUMBER = 5;
+    public static final int RADIUS_FIELD_NUMBER = 6;
     private double radius_;
     /**
-     * <code>double radius = 5;</code>
+     * <code>double radius = 6;</code>
      */
     public double getRadius() {
       return radius_;
     }
 
-    public static final int LOG_FIT_PROGRESS_FIELD_NUMBER = 6;
+    public static final int LOG_FIT_PROGRESS_FIELD_NUMBER = 7;
     private boolean logFitProgress_;
     /**
-     * <code>bool log_fit_progress = 6;</code>
+     * <code>bool log_fit_progress = 7;</code>
      */
     public boolean getLogFitProgress() {
       return logFitProgress_;
     }
 
-    public static final int SMOOTHING_FIELD_NUMBER = 7;
+    public static final int SMOOTHING_FIELD_NUMBER = 8;
     private double smoothing_;
     /**
-     * <code>double smoothing = 7;</code>
+     * <code>double smoothing = 8;</code>
      */
     public double getSmoothing() {
       return smoothing_;
     }
 
-    public static final int WEIGHTED_FIT_FIELD_NUMBER = 8;
+    public static final int WEIGHTED_FIT_FIELD_NUMBER = 9;
     private boolean weightedFit_;
     /**
-     * <code>bool weighted_fit = 8;</code>
+     * <code>bool weighted_fit = 9;</code>
      */
     public boolean getWeightedFit() {
       return weightedFit_;
     }
 
-    public static final int SHOW_ESTIMATED_CURVE_FIELD_NUMBER = 9;
+    public static final int SHOW_ESTIMATED_CURVE_FIELD_NUMBER = 10;
     private boolean showEstimatedCurve_;
     /**
-     * <code>bool show_estimated_curve = 9;</code>
+     * <code>bool show_estimated_curve = 10;</code>
      */
     public boolean getShowEstimatedCurve() {
       return showEstimatedCurve_;
+    }
+
+    public static final int IMAGE_FIELD_NUMBER = 11;
+    private volatile java.lang.Object image_;
+    /**
+     * <code>string image = 11;</code>
+     */
+    public java.lang.String getImage() {
+      java.lang.Object ref = image_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        image_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string image = 11;</code>
+     */
+    public com.google.protobuf.ByteString
+        getImageBytes() {
+      java.lang.Object ref = image_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        image_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MODEL_NAME_FIELD_NUMBER = 12;
+    private volatile java.lang.Object modelName_;
+    /**
+     * <code>string model_name = 12;</code>
+     */
+    public java.lang.String getModelName() {
+      java.lang.Object ref = modelName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        modelName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string model_name = 12;</code>
+     */
+    public com.google.protobuf.ByteString
+        getModelNameBytes() {
+      java.lang.Object ref = modelName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        modelName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SELECTED_FIELD_NUMBER = 13;
+    private volatile java.lang.Object selected_;
+    /**
+     * <pre>
+     * For display
+     * </pre>
+     *
+     * <code>string selected = 13;</code>
+     */
+    public java.lang.String getSelected() {
+      java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        selected_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * For display
+     * </pre>
+     *
+     * <code>string selected = 13;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSelectedBytes() {
+      java.lang.Object ref = selected_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        selected_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private byte memoizedIsInitialized = -1;
@@ -30087,32 +30260,44 @@ public final class GUIProtos {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (option_ != 0) {
+        output.writeInt32(1, option_);
+      }
       if (nmPerSlice_ != 0D) {
-        output.writeDouble(1, nmPerSlice_);
+        output.writeDouble(2, nmPerSlice_);
       }
       if (fitEngineSettings_ != null) {
-        output.writeMessage(2, getFitEngineSettings());
+        output.writeMessage(3, getFitEngineSettings());
       }
       if (psf_ != null) {
-        output.writeMessage(3, getPsf());
+        output.writeMessage(4, getPsf());
       }
       if (calibration_ != null) {
-        output.writeMessage(4, getCalibration());
+        output.writeMessage(5, getCalibration());
       }
       if (radius_ != 0D) {
-        output.writeDouble(5, radius_);
+        output.writeDouble(6, radius_);
       }
       if (logFitProgress_ != false) {
-        output.writeBool(6, logFitProgress_);
+        output.writeBool(7, logFitProgress_);
       }
       if (smoothing_ != 0D) {
-        output.writeDouble(7, smoothing_);
+        output.writeDouble(8, smoothing_);
       }
       if (weightedFit_ != false) {
-        output.writeBool(8, weightedFit_);
+        output.writeBool(9, weightedFit_);
       }
       if (showEstimatedCurve_ != false) {
-        output.writeBool(9, showEstimatedCurve_);
+        output.writeBool(10, showEstimatedCurve_);
+      }
+      if (!getImageBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, image_);
+      }
+      if (!getModelNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, modelName_);
+      }
+      if (!getSelectedBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, selected_);
       }
     }
 
@@ -30121,41 +30306,54 @@ public final class GUIProtos {
       if (size != -1) return size;
 
       size = 0;
+      if (option_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, option_);
+      }
       if (nmPerSlice_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1, nmPerSlice_);
+          .computeDoubleSize(2, nmPerSlice_);
       }
       if (fitEngineSettings_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, getFitEngineSettings());
+          .computeMessageSize(3, getFitEngineSettings());
       }
       if (psf_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getPsf());
+          .computeMessageSize(4, getPsf());
       }
       if (calibration_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, getCalibration());
+          .computeMessageSize(5, getCalibration());
       }
       if (radius_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(5, radius_);
+          .computeDoubleSize(6, radius_);
       }
       if (logFitProgress_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(6, logFitProgress_);
+          .computeBoolSize(7, logFitProgress_);
       }
       if (smoothing_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(7, smoothing_);
+          .computeDoubleSize(8, smoothing_);
       }
       if (weightedFit_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(8, weightedFit_);
+          .computeBoolSize(9, weightedFit_);
       }
       if (showEstimatedCurve_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(9, showEstimatedCurve_);
+          .computeBoolSize(10, showEstimatedCurve_);
+      }
+      if (!getImageBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, image_);
+      }
+      if (!getModelNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, modelName_);
+      }
+      if (!getSelectedBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, selected_);
       }
       memoizedSize = size;
       return size;
@@ -30167,12 +30365,14 @@ public final class GUIProtos {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings)) {
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)) {
         return super.equals(obj);
       }
-      gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings other = (gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings) obj;
+      gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings other = (gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) obj;
 
       boolean result = true;
+      result = result && (getOption()
+          == other.getOption());
       result = result && (
           java.lang.Double.doubleToLongBits(getNmPerSlice())
           == java.lang.Double.doubleToLongBits(
@@ -30206,6 +30406,12 @@ public final class GUIProtos {
           == other.getWeightedFit());
       result = result && (getShowEstimatedCurve()
           == other.getShowEstimatedCurve());
+      result = result && getImage()
+          .equals(other.getImage());
+      result = result && getModelName()
+          .equals(other.getModelName());
+      result = result && getSelected()
+          .equals(other.getSelected());
       return result;
     }
 
@@ -30216,6 +30422,8 @@ public final class GUIProtos {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getOption();
       hash = (37 * hash) + NM_PER_SLICE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getNmPerSlice()));
@@ -30246,74 +30454,80 @@ public final class GUIProtos {
       hash = (37 * hash) + SHOW_ESTIMATED_CURVE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShowEstimatedCurve());
+      hash = (37 * hash) + IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getImage().hashCode();
+      hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getModelName().hashCode();
+      hash = (37 * hash) + SELECTED_FIELD_NUMBER;
+      hash = (53 * hash) + getSelected().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(byte[] data)
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(java.io.InputStream input)
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseDelimitedFrom(java.io.InputStream input)
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseDelimitedFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parseFrom(
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -30325,7 +30539,7 @@ public final class GUIProtos {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings prototype) {
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() {
@@ -30341,28 +30555,28 @@ public final class GUIProtos {
     }
     /**
      * <pre>
-     * Contains settings for the PSF Astigmatism Model plugin
+     * Contains settings for the Astigmatism Model Manager plugin
      * </pre>
      *
-     * Protobuf type {@code gdsc.smlm.data.config.PSFAstigmatismModelSettings}
+     * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelManagerSettings}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.PSFAstigmatismModelSettings)
-        gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettingsOrBuilder {
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModelManagerSettings)
+        gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettingsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor;
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_fieldAccessorTable
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.class, gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.Builder.class);
+                gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.class, gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.Builder.class);
       }
 
-      // Construct using gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.newBuilder()
+      // Construct using gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -30379,6 +30593,8 @@ public final class GUIProtos {
       }
       public Builder clear() {
         super.clear();
+        option_ = 0;
+
         nmPerSlice_ = 0D;
 
         if (fitEngineSettingsBuilder_ == null) {
@@ -30409,28 +30625,35 @@ public final class GUIProtos {
 
         showEstimatedCurve_ = false;
 
+        image_ = "";
+
+        modelName_ = "";
+
+        selected_ = "";
+
         return this;
       }
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor;
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.getDefaultInstance();
+      public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings build() {
-        gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings result = buildPartial();
+      public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings build() {
+        gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings buildPartial() {
-        gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings result = new gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings(this);
+      public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings result = new gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings(this);
+        result.option_ = option_;
         result.nmPerSlice_ = nmPerSlice_;
         if (fitEngineSettingsBuilder_ == null) {
           result.fitEngineSettings_ = fitEngineSettings_;
@@ -30452,6 +30675,9 @@ public final class GUIProtos {
         result.smoothing_ = smoothing_;
         result.weightedFit_ = weightedFit_;
         result.showEstimatedCurve_ = showEstimatedCurve_;
+        result.image_ = image_;
+        result.modelName_ = modelName_;
+        result.selected_ = selected_;
         onBuilt();
         return result;
       }
@@ -30483,16 +30709,19 @@ public final class GUIProtos {
         return (Builder) super.addRepeatedField(field, value);
       }
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings) {
-          return mergeFrom((gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings)other);
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings other) {
-        if (other == gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings.getDefaultInstance()) return this;
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings.getDefaultInstance()) return this;
+        if (other.getOption() != 0) {
+          setOption(other.getOption());
+        }
         if (other.getNmPerSlice() != 0D) {
           setNmPerSlice(other.getNmPerSlice());
         }
@@ -30520,6 +30749,18 @@ public final class GUIProtos {
         if (other.getShowEstimatedCurve() != false) {
           setShowEstimatedCurve(other.getShowEstimatedCurve());
         }
+        if (!other.getImage().isEmpty()) {
+          image_ = other.image_;
+          onChanged();
+        }
+        if (!other.getModelName().isEmpty()) {
+          modelName_ = other.modelName_;
+          onChanged();
+        }
+        if (!other.getSelected().isEmpty()) {
+          selected_ = other.selected_;
+          onChanged();
+        }
         onChanged();
         return this;
       }
@@ -30532,11 +30773,11 @@ public final class GUIProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings parsedMessage = null;
+        gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings) e.getUnfinishedMessage();
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -30546,15 +30787,49 @@ public final class GUIProtos {
         return this;
       }
 
+      private int option_ ;
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public int getOption() {
+        return option_;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder setOption(int value) {
+        
+        option_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 option = 1;</code>
+       */
+      public Builder clearOption() {
+        
+        option_ = 0;
+        onChanged();
+        return this;
+      }
+
       private double nmPerSlice_ ;
       /**
-       * <code>double nm_per_slice = 1;</code>
+       * <pre>
+       * For the fitting
+       * </pre>
+       *
+       * <code>double nm_per_slice = 2;</code>
        */
       public double getNmPerSlice() {
         return nmPerSlice_;
       }
       /**
-       * <code>double nm_per_slice = 1;</code>
+       * <pre>
+       * For the fitting
+       * </pre>
+       *
+       * <code>double nm_per_slice = 2;</code>
        */
       public Builder setNmPerSlice(double value) {
         
@@ -30563,7 +30838,11 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>double nm_per_slice = 1;</code>
+       * <pre>
+       * For the fitting
+       * </pre>
+       *
+       * <code>double nm_per_slice = 2;</code>
        */
       public Builder clearNmPerSlice() {
         
@@ -30576,21 +30855,13 @@ public final class GUIProtos {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder> fitEngineSettingsBuilder_;
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public boolean hasFitEngineSettings() {
         return fitEngineSettingsBuilder_ != null || fitEngineSettings_ != null;
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
         if (fitEngineSettingsBuilder_ == null) {
@@ -30600,11 +30871,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public Builder setFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
@@ -30620,11 +30887,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public Builder setFitEngineSettings(
           gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder builderForValue) {
@@ -30638,11 +30901,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public Builder mergeFitEngineSettings(gdsc.smlm.data.config.FitProtos.FitEngineSettings value) {
         if (fitEngineSettingsBuilder_ == null) {
@@ -30660,11 +30919,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public Builder clearFitEngineSettings() {
         if (fitEngineSettingsBuilder_ == null) {
@@ -30678,11 +30933,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder getFitEngineSettingsBuilder() {
         
@@ -30690,11 +30941,7 @@ public final class GUIProtos {
         return getFitEngineSettingsFieldBuilder().getBuilder();
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
         if (fitEngineSettingsBuilder_ != null) {
@@ -30705,11 +30952,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <pre>
-       * For the fitting
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 2;</code>
+       * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder> 
@@ -30729,13 +30972,13 @@ public final class GUIProtos {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder> psfBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public boolean hasPsf() {
         return psfBuilder_ != null || psf_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
         if (psfBuilder_ == null) {
@@ -30745,7 +30988,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public Builder setPsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
@@ -30761,7 +31004,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public Builder setPsf(
           gdsc.smlm.data.config.PSFProtos.PSF.Builder builderForValue) {
@@ -30775,7 +31018,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public Builder mergePsf(gdsc.smlm.data.config.PSFProtos.PSF value) {
         if (psfBuilder_ == null) {
@@ -30793,7 +31036,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public Builder clearPsf() {
         if (psfBuilder_ == null) {
@@ -30807,7 +31050,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public gdsc.smlm.data.config.PSFProtos.PSF.Builder getPsfBuilder() {
         
@@ -30815,7 +31058,7 @@ public final class GUIProtos {
         return getPsfFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
         if (psfBuilder_ != null) {
@@ -30826,7 +31069,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.PSF psf = 3;</code>
+       * <code>.gdsc.smlm.data.config.PSF psf = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder> 
@@ -30846,13 +31089,13 @@ public final class GUIProtos {
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> calibrationBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public boolean hasCalibration() {
         return calibrationBuilder_ != null || calibration_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
         if (calibrationBuilder_ == null) {
@@ -30862,7 +31105,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public Builder setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
@@ -30878,7 +31121,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public Builder setCalibration(
           gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder builderForValue) {
@@ -30892,7 +31135,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
         if (calibrationBuilder_ == null) {
@@ -30910,7 +31153,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public Builder clearCalibration() {
         if (calibrationBuilder_ == null) {
@@ -30924,7 +31167,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder getCalibrationBuilder() {
         
@@ -30932,7 +31175,7 @@ public final class GUIProtos {
         return getCalibrationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
         if (calibrationBuilder_ != null) {
@@ -30943,7 +31186,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>.gdsc.smlm.data.config.Calibration calibration = 4;</code>
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> 
@@ -30961,13 +31204,13 @@ public final class GUIProtos {
 
       private double radius_ ;
       /**
-       * <code>double radius = 5;</code>
+       * <code>double radius = 6;</code>
        */
       public double getRadius() {
         return radius_;
       }
       /**
-       * <code>double radius = 5;</code>
+       * <code>double radius = 6;</code>
        */
       public Builder setRadius(double value) {
         
@@ -30976,7 +31219,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>double radius = 5;</code>
+       * <code>double radius = 6;</code>
        */
       public Builder clearRadius() {
         
@@ -30987,13 +31230,13 @@ public final class GUIProtos {
 
       private boolean logFitProgress_ ;
       /**
-       * <code>bool log_fit_progress = 6;</code>
+       * <code>bool log_fit_progress = 7;</code>
        */
       public boolean getLogFitProgress() {
         return logFitProgress_;
       }
       /**
-       * <code>bool log_fit_progress = 6;</code>
+       * <code>bool log_fit_progress = 7;</code>
        */
       public Builder setLogFitProgress(boolean value) {
         
@@ -31002,7 +31245,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>bool log_fit_progress = 6;</code>
+       * <code>bool log_fit_progress = 7;</code>
        */
       public Builder clearLogFitProgress() {
         
@@ -31013,13 +31256,13 @@ public final class GUIProtos {
 
       private double smoothing_ ;
       /**
-       * <code>double smoothing = 7;</code>
+       * <code>double smoothing = 8;</code>
        */
       public double getSmoothing() {
         return smoothing_;
       }
       /**
-       * <code>double smoothing = 7;</code>
+       * <code>double smoothing = 8;</code>
        */
       public Builder setSmoothing(double value) {
         
@@ -31028,7 +31271,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>double smoothing = 7;</code>
+       * <code>double smoothing = 8;</code>
        */
       public Builder clearSmoothing() {
         
@@ -31039,13 +31282,13 @@ public final class GUIProtos {
 
       private boolean weightedFit_ ;
       /**
-       * <code>bool weighted_fit = 8;</code>
+       * <code>bool weighted_fit = 9;</code>
        */
       public boolean getWeightedFit() {
         return weightedFit_;
       }
       /**
-       * <code>bool weighted_fit = 8;</code>
+       * <code>bool weighted_fit = 9;</code>
        */
       public Builder setWeightedFit(boolean value) {
         
@@ -31054,7 +31297,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>bool weighted_fit = 8;</code>
+       * <code>bool weighted_fit = 9;</code>
        */
       public Builder clearWeightedFit() {
         
@@ -31065,13 +31308,13 @@ public final class GUIProtos {
 
       private boolean showEstimatedCurve_ ;
       /**
-       * <code>bool show_estimated_curve = 9;</code>
+       * <code>bool show_estimated_curve = 10;</code>
        */
       public boolean getShowEstimatedCurve() {
         return showEstimatedCurve_;
       }
       /**
-       * <code>bool show_estimated_curve = 9;</code>
+       * <code>bool show_estimated_curve = 10;</code>
        */
       public Builder setShowEstimatedCurve(boolean value) {
         
@@ -31080,11 +31323,238 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>bool show_estimated_curve = 9;</code>
+       * <code>bool show_estimated_curve = 10;</code>
        */
       public Builder clearShowEstimatedCurve() {
         
         showEstimatedCurve_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object image_ = "";
+      /**
+       * <code>string image = 11;</code>
+       */
+      public java.lang.String getImage() {
+        java.lang.Object ref = image_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          image_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string image = 11;</code>
+       */
+      public com.google.protobuf.ByteString
+          getImageBytes() {
+        java.lang.Object ref = image_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          image_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string image = 11;</code>
+       */
+      public Builder setImage(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        image_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image = 11;</code>
+       */
+      public Builder clearImage() {
+        
+        image_ = getDefaultInstance().getImage();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string image = 11;</code>
+       */
+      public Builder setImageBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        image_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object modelName_ = "";
+      /**
+       * <code>string model_name = 12;</code>
+       */
+      public java.lang.String getModelName() {
+        java.lang.Object ref = modelName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          modelName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string model_name = 12;</code>
+       */
+      public com.google.protobuf.ByteString
+          getModelNameBytes() {
+        java.lang.Object ref = modelName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          modelName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string model_name = 12;</code>
+       */
+      public Builder setModelName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        modelName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string model_name = 12;</code>
+       */
+      public Builder clearModelName() {
+        
+        modelName_ = getDefaultInstance().getModelName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string model_name = 12;</code>
+       */
+      public Builder setModelNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        modelName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object selected_ = "";
+      /**
+       * <pre>
+       * For display
+       * </pre>
+       *
+       * <code>string selected = 13;</code>
+       */
+      public java.lang.String getSelected() {
+        java.lang.Object ref = selected_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          selected_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * For display
+       * </pre>
+       *
+       * <code>string selected = 13;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSelectedBytes() {
+        java.lang.Object ref = selected_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          selected_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * For display
+       * </pre>
+       *
+       * <code>string selected = 13;</code>
+       */
+      public Builder setSelected(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        selected_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * For display
+       * </pre>
+       *
+       * <code>string selected = 13;</code>
+       */
+      public Builder clearSelected() {
+        
+        selected_ = getDefaultInstance().getSelected();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * For display
+       * </pre>
+       *
+       * <code>string selected = 13;</code>
+       */
+      public Builder setSelectedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        selected_ = value;
         onChanged();
         return this;
       }
@@ -31099,39 +31569,39 @@ public final class GUIProtos {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.PSFAstigmatismModelSettings)
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModelManagerSettings)
     }
 
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.PSFAstigmatismModelSettings)
-    private static final gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModelManagerSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings();
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings();
     }
 
-    public static gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings getDefaultInstance() {
+    public static gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<PSFAstigmatismModelSettings>
-        PARSER = new com.google.protobuf.AbstractParser<PSFAstigmatismModelSettings>() {
-      public PSFAstigmatismModelSettings parsePartialFrom(
+    private static final com.google.protobuf.Parser<AstigmatismModelManagerSettings>
+        PARSER = new com.google.protobuf.AbstractParser<AstigmatismModelManagerSettings>() {
+      public AstigmatismModelManagerSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-          return new PSFAstigmatismModelSettings(input, extensionRegistry);
+          return new AstigmatismModelManagerSettings(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<PSFAstigmatismModelSettings> parser() {
+    public static com.google.protobuf.Parser<AstigmatismModelManagerSettings> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<PSFAstigmatismModelSettings> getParserForType() {
+    public com.google.protobuf.Parser<AstigmatismModelManagerSettings> getParserForType() {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings getDefaultInstanceForType() {
+    public gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -31218,10 +31688,10 @@ public final class GUIProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor;
+    internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_fieldAccessorTable;
+      internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -31428,18 +31898,20 @@ public final class GUIProtos {
       "_counts\030\034 \001(\005\022\'\n\037pass_rate_counter_min_p" +
       "ass_rate\030\035 \001(\001\022\'\n\037pass_rate_counter_max_" +
       "pass_rate\030\036 \001(\001\022\'\n\037pass_rate_counter_inc" +
-      "_pass_rate\030\037 \001(\001\"\315\002\n\033PSFAstigmatismModel" +
-      "Settings\022\024\n\014nm_per_slice\030\001 \001(\001\022E\n\023fit_en" +
-      "gine_settings\030\002 \001(\0132(.gdsc.smlm.data.con",
-      "fig.FitEngineSettings\022\'\n\003psf\030\003 \001(\0132\032.gds" +
-      "c.smlm.data.config.PSF\0227\n\013calibration\030\004 " +
-      "\001(\0132\".gdsc.smlm.data.config.Calibration\022" +
-      "\016\n\006radius\030\005 \001(\001\022\030\n\020log_fit_progress\030\006 \001(" +
-      "\010\022\021\n\tsmoothing\030\007 \001(\001\022\024\n\014weighted_fit\030\010 \001" +
-      "(\010\022\034\n\024show_estimated_curve\030\t \001(\010*O\n\014Temp" +
-      "lateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURC" +
-      "E_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUI" +
-      "Protosb\006proto3"
+      "_pass_rate\030\037 \001(\001\"\226\003\n\037AstigmatismModelMan" +
+      "agerSettings\022\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_s" +
+      "lice\030\002 \001(\001\022E\n\023fit_engine_settings\030\003 \001(\0132",
+      "(.gdsc.smlm.data.config.FitEngineSetting" +
+      "s\022\'\n\003psf\030\004 \001(\0132\032.gdsc.smlm.data.config.P" +
+      "SF\0227\n\013calibration\030\005 \001(\0132\".gdsc.smlm.data" +
+      ".config.Calibration\022\016\n\006radius\030\006 \001(\001\022\030\n\020l" +
+      "og_fit_progress\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001" +
+      "\022\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_estimated" +
+      "_curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmodel_nam" +
+      "e\030\014 \001(\t\022\020\n\010selected\030\r \001(\t*O\n\014TemplateTyp" +
+      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
+      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb",
+      "\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -31553,12 +32025,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
         new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", "RollingCounterMinAllowedFailures", "RollingCounterMaxAllowedFailures", "RollingCounterMinWindow", "RollingCounterMaxWindow", "WeightedCounterMinAllowedFailures", "WeightedCounterMaxAllowedFailures", "WeightedCounterMinPassDecrement", "WeightedCounterMaxPassDecrement", "ResettingCounterMinAllowedFailures", "ResettingCounterMaxAllowedFailures", "ResettingCounterMinResetFraction", "ResettingCounterMaxResetFraction", "ResettingCounterIncResetFraction", "PassRateCounterMinAllowedCounts", "PassRateCounterMaxAllowedCounts", "PassRateCounterMinPassRate", "PassRateCounterMaxPassRate", "PassRateCounterIncPassRate", });
-    internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor =
+    internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(16);
-    internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_fieldAccessorTable = new
+    internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_PSFAstigmatismModelSettings_descriptor,
-        new java.lang.String[] { "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", });
+        internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor,
+        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "Selected", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

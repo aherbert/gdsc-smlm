@@ -4,6 +4,8 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -24,10 +26,13 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
-import gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings;
+import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
+import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
+import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -63,6 +68,7 @@ import gdsc.smlm.results.procedures.WidthResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
@@ -71,10 +77,9 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
 import ij.measure.Calibration;
+import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
-import ij.plugin.filter.PlugInFilter;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
 /**
@@ -82,14 +87,14 @@ import ij.text.TextWindow;
  * <p>
  * The input images must be a z-stack of a PSF.
  */
-public class PSFAstigmatismModel implements PlugInFilter
+public class AstigmatismModelManager implements PlugIn
 {
-	private final static String TITLE = "PSF Astigmatism Model";
+	private final static String TITLE = "Astigmatism Model Manager";
 
+	private static AstigmatismModelSettings.Builder settings = null;
 	private static TextWindow resultsWindow = null;
 
-	private final static int FLAGS = DOES_16 | DOES_8G | DOES_32 | STACK_REQUIRED | NO_CHANGES;
-	private PSFAstigmatismModelSettings.Builder settings;
+	private AstigmatismModelManagerSettings.Builder pluginSettings;
 	private ImagePlus imp;
 	private FitEngineConfiguration config;
 	private FitConfiguration fitConfig;
@@ -101,103 +106,124 @@ public class PSFAstigmatismModel implements PlugInFilter
 	double[] fitZ, fitSx, fitSy;
 	double[] parameters;
 
+	private static AstigmatismModelSettings.Builder getSettings()
+	{
+		return getSettings(0);
+	}
+
+	private static AstigmatismModelSettings.Builder getSettings(int flags)
+	{
+		if (settings == null)
+			settings = SettingsManager.readAstigmatismModelSettings(flags).toBuilder();
+		return settings;
+	}
+
+	/**
+	 * List the astigmatism models.
+	 *
+	 * @param includeNone
+	 *            Set to true to include an invalid none model string
+	 * @return the list
+	 */
+	public static String[] listAstigmatismModels(boolean includeNone)
+	{
+		AstigmatismModelSettings.Builder settings = getSettings();
+		List<String> list = createList(includeNone);
+		list.addAll(settings.getAstigmatismModelResourcesMap().keySet());
+		return list.toArray(new String[list.size()]);
+	}
+
+	private static List<String> createList(boolean includeNone)
+	{
+		List<String> list = new TurboList<String>();
+		if (includeNone)
+			list.add("[None]");
+		return list;
+	}
+
+	/**
+	 * List the astigmatism models with the correct pixel scale.
+	 *
+	 * @param includeNone
+	 *            Set to true to include an empty string
+	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @return the list
+	 */
+	public static String[] listAstigmatismModels(boolean includeNone, double nmPerPixel)
+	{
+		AstigmatismModelSettings.Builder settings = getSettings();
+		List<String> list = createList(includeNone);
+		for (Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
+		{
+			AstigmatismModel resource = entry.getValue();
+			if (resource.getNmPerPixel() == nmPerPixel)
+				list.add(entry.getKey());
+		}
+		return list.toArray(new String[list.size()]);
+	}
+
+	//@formatter:off
+	private static String[] OPTIONS = { 
+			"Create a model",
+			// All option below require models
+			"View a model",
+			"Delete a model" };
+	//@formatter:on
+	private static String[] OPTIONS2;
+	static
+	{
+		OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
+	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
-	public int setup(String arg, ImagePlus imp)
+	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		if (imp == null)
+		String[] options = OPTIONS;
+		AstigmatismModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
+		if (settings.getAstigmatismModelResourcesCount() == 0)
 		{
-			IJ.noImage();
-			return DONE;
+			options = OPTIONS2;
 		}
 
-		Roi roi = imp.getRoi();
-		if (roi == null || roi.getType() != Roi.POINT)
-		{
-			IJ.error("Point ROI required");
-			return DONE;
-		}
+		pluginSettings = SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
 
-		this.imp = imp;
-
-		return showDialog();
-	}
-
-	private int showDialog()
-	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
-
-		settings = SettingsManager.readPSFAstigmatismModelSettings(0).toBuilder();
-
-		guessScale();
-
-		gd.addMessage("Use Gaussian 2D PSF fitting to create an astigmatism z-model");
-
-		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0);
-
+		gd.addChoice("Option", options, pluginSettings.getOption());
 		gd.showDialog();
-
-		SettingsManager.writeSettings(settings);
-
 		if (gd.wasCanceled())
-			return DONE;
+			return;
+		pluginSettings.setOption(gd.getNextChoiceIndex());
 
-		settings.setNmPerSlice(gd.getNextNumber());
-
-		// Check arguments
-		try
+		switch (pluginSettings.getOption())
 		{
-			Parameters.isPositive("nm/slice", settings.getNmPerSlice());
-		}
-		catch (IllegalArgumentException e)
-		{
-			IJ.error(TITLE, e.getMessage());
-			return DONE;
+			case 2:
+				deleteModel();
+				break;
+			case 1:
+				viewModel();
+				break;
+			default:
+				createModel();
 		}
 
-		return FLAGS;
+		SettingsManager.writeSettings(pluginSettings);
 	}
 
-	private void guessScale()
+	private void createModel()
 	{
-		CalibrationWriter cw = CalibrationWriter.create(settings.getCalibration());
-		// It does not matter if we already have settings, try and update them anyway
-		Calibration c = imp.getCalibration();
-		double r = guessScale(c.getXUnit(), c.pixelWidth);
-		if (r != 0)
-		{
-			cw.setNmPerPixel(r);
-			settings.setCalibration(cw.getBuilder());
-		}
-		r = guessScale(c.getZUnit(), c.pixelDepth);
-		if (r != 0)
-			settings.setNmPerSlice(r);
-	}
+		if (!getImage())
+			return;
 
-	private double guessScale(String unit, double units)
-	{
-		unit = unit.toLowerCase();
-		if (unit.equals("nm") || unit.startsWith("nanomet"))
-			return units;
-		if (unit.equals("\u00B5m") || // Sanitised version of um
-				unit.startsWith("micron"))
-			return units * 1000;
-		return 0;
-	}
+		if (!showFitDialog())
+			return;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
-	 */
-	public void run(ImageProcessor ip)
-	{
 		if (!loadConfiguration())
 			return;
 
@@ -221,26 +247,133 @@ public class PSFAstigmatismModel implements PlugInFilter
 		if (!fitData())
 			return;
 
-		// TODO - Save the astigmatism model. Prompt the user where to save it.
-		// This may require a Astigmatism model manager. Each model can have a name and 
-		// should store the pixel width. It can only then be used when the pixel width
-		// for fitting is the same.
 		saveModel();
+	}
+
+	private boolean getImage()
+	{
+		// Select an image
+		GenericDialog gd = new GenericDialog(TITLE);
+		String[] list = getImageList();
+		gd.addChoice("Image", list, pluginSettings.getImage());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		String image = gd.getNextChoice();
+		pluginSettings.setImage(image);
+		imp = WindowManager.getImage(image);
+		if (imp == null)
+		{
+			IJ.error(TITLE, "Failed to find image: " + image);
+			return false;
+		}
+		Roi roi = imp.getRoi();
+		if (roi == null || roi.getType() != Roi.POINT)
+		{
+			IJ.error("Point ROI required");
+			return false;
+		}
+		return true;
+	}
+
+	private static String[] getImageList()
+	{
+		TurboList<String> newImageList = new TurboList<String>();
+
+		for (int id : Utils.getIDList())
+		{
+			ImagePlus imp = WindowManager.getImage(id);
+			if (imp == null)
+				continue;
+			if (imp.getNDimensions() != 3)
+				continue;
+			if (imp.getBitDepth() == 24)
+				continue;
+			Roi roi = imp.getRoi();
+			if (roi == null || roi.getType() != Roi.POINT)
+				continue;
+			newImageList.add(imp.getTitle());
+		}
+
+		return newImageList.toArray(new String[0]);
+	}
+
+	private boolean showFitDialog()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		pluginSettings = SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
+
+		guessScale();
+
+		gd.addMessage("Use Gaussian 2D PSF fitting to create an astigmatism z-model");
+
+		gd.addNumericField("nm_per_slice", pluginSettings.getNmPerSlice(), 0);
+
+		gd.showDialog();
+
+		SettingsManager.writeSettings(pluginSettings);
+
+		if (gd.wasCanceled())
+			return false;
+
+		pluginSettings.setNmPerSlice(gd.getNextNumber());
+
+		// Check arguments
+		try
+		{
+			Parameters.isPositive("nm/slice", pluginSettings.getNmPerSlice());
+		}
+		catch (IllegalArgumentException e)
+		{
+			IJ.error(TITLE, e.getMessage());
+			return false;
+		}
+
+		return true;
+	}
+
+	private void guessScale()
+	{
+		CalibrationWriter cw = CalibrationWriter.create(pluginSettings.getCalibration());
+		// It does not matter if we already have settings, try and update them anyway
+		Calibration c = imp.getCalibration();
+		double r = guessScale(c.getXUnit(), c.pixelWidth);
+		if (r != 0)
+		{
+			cw.setNmPerPixel(r);
+			pluginSettings.setCalibration(cw.getBuilder());
+		}
+		r = guessScale(c.getZUnit(), c.pixelDepth);
+		if (r != 0)
+			pluginSettings.setNmPerSlice(r);
+	}
+
+	private double guessScale(String unit, double units)
+	{
+		unit = unit.toLowerCase();
+		if (unit.equals("nm") || unit.startsWith("nanomet"))
+			return units;
+		if (unit.equals("\u00B5m") || // Sanitised version of um
+				unit.startsWith("micron"))
+			return units * 1000;
+		return 0;
 	}
 
 	private boolean loadConfiguration()
 	{
 		// We have a different fit configuration just for the PSF Creator.
 		// This allows it to be saved and not effect PeakFit settings.
-		config = new FitEngineConfiguration(settings.getFitEngineSettings(), settings.getCalibration(),
-				settings.getPsf());
+		config = new FitEngineConfiguration(pluginSettings.getFitEngineSettings(), pluginSettings.getCalibration(),
+				pluginSettings.getPsf());
 		if (!showConfigurationDialog())
 		{
 			IJ.error(TITLE, "No fit configuration loaded");
 			return false;
 		}
 
-		SettingsManager.writeSettings(settings);
+		SettingsManager.writeSettings(pluginSettings);
 
 		if (fitConfig.getPSFType() != PSFType.TWO_AXIS_GAUSSIAN_2D)
 		{
@@ -257,10 +390,10 @@ public class PSFAstigmatismModel implements PlugInFilter
 		config.setResidualsThreshold(1);
 		config.setDuplicateDistance(0);
 
-		settings.setFitEngineSettings(config.getFitEngineSettings());
-		settings.setCalibration(fitConfig.getCalibration());
-		settings.setPsf(fitConfig.getPSF());
-		SettingsManager.writeSettings(settings);
+		pluginSettings.setFitEngineSettings(config.getFitEngineSettings());
+		pluginSettings.setCalibration(fitConfig.getCalibration());
+		pluginSettings.setPsf(fitConfig.getPSF());
+		SettingsManager.writeSettings(pluginSettings);
 
 		return true;
 	}
@@ -283,7 +416,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		FitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(config);
 		PeakFit.addFittingOptions(gd, provider);
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
-		gd.addCheckbox("Log_fit_progress", settings.getLogFitProgress());
+		gd.addCheckbox("Log_fit_progress", pluginSettings.getLogFitProgress());
 
 		gd.addMessage("--- Peak filtering ---\nDiscard fits that shift; are too low; or expand/contract");
 
@@ -312,7 +445,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		settings.setLogFitProgress(gd.getNextBoolean());
+		pluginSettings.setLogFitProgress(gd.getNextBoolean());
 		fitConfig.setSmartFilter(gd.getNextBoolean());
 		fitConfig.setDisableSimpleFilter(gd.getNextBoolean());
 		fitConfig.setCoordinateShiftFactor(gd.getNextNumber());
@@ -389,7 +522,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 
 		//IJ.log(config.getFitEngineSettings().toString());
 
-		if (settings.getLogFitProgress())
+		if (pluginSettings.getLogFitProgress())
 			fitConfig.setLog(new IJLogger());
 
 		// Create a fit engine
@@ -401,8 +534,6 @@ public class PSFAstigmatismModel implements PlugInFilter
 		int threadCount = Prefs.getThreads();
 		FitEngine engine = new FitEngine(config, SynchronizedPeakResults.create(results, threadCount), threadCount,
 				FitQueue.BLOCKING);
-
-		//List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
 
 		IJImageSource source = new IJImageSource(imp);
 		source.open();
@@ -429,7 +560,6 @@ public class PSFAstigmatismModel implements PlugInFilter
 			params.maxIndices = maxIndices.clone();
 			int slice = (int) ticker.getCurrent();
 			ParameterisedFitJob job = new ParameterisedFitJob(slice, params, slice, region, regionBounds);
-			//jobItems.add(job);
 			engine.run(job);
 
 			ticker.tick();
@@ -457,7 +587,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 			return false;
 		}
 
-		final double umPerSlice = settings.getNmPerSlice() / 1000.0;
+		final double umPerSlice = pluginSettings.getNmPerSlice() / 1000.0;
 		//final double nmPerPixel = results.getNmPerPixel();
 
 		z = new double[results.size()];
@@ -538,15 +668,15 @@ public class PSFAstigmatismModel implements PlugInFilter
 		gd.addSlider("Min_z", minz, maxz, minz);
 		gd.addSlider("Max_z", minz, maxz, maxz);
 		gd.addMessage("Curve parameter estimation");
-		gd.addSlider("Smoothing", 0.05, 0.5, settings.getSmoothing());
-		gd.addCheckbox("Show_estimated_curve", settings.getShowEstimatedCurve());
+		gd.addSlider("Smoothing", 0.05, 0.5, pluginSettings.getSmoothing());
+		gd.addCheckbox("Show_estimated_curve", pluginSettings.getShowEstimatedCurve());
 		gd.addMessage("Fit options");
-		gd.addCheckbox("Weighted_fit", settings.getWeightedFit());
+		gd.addCheckbox("Weighted_fit", pluginSettings.getWeightedFit());
 		gd.addDialogListener(new ZDialogListener());
 		gd.showDialog();
 
 		// Save settings
-		SettingsManager.writeSettings(settings);
+		SettingsManager.writeSettings(pluginSettings);
 
 		if (gd.wasCanceled())
 			return false;
@@ -569,7 +699,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 	private class ZDialogListener implements DialogListener
 	{
 		boolean showRoi = Utils.isShowGenericDialog();
-		
+
 		public ZDialogListener()
 		{
 			sPlot.getImagePlus().killRoi();
@@ -582,9 +712,9 @@ public class PSFAstigmatismModel implements PlugInFilter
 			int oldMaxz = maxz;
 			minz = (int) gd.getNextNumber();
 			maxz = (int) gd.getNextNumber();
-			settings.setSmoothing(gd.getNextNumber());
-			settings.setShowEstimatedCurve(gd.getNextBoolean());
-			settings.setWeightedFit(gd.getNextBoolean());
+			pluginSettings.setSmoothing(gd.getNextNumber());
+			pluginSettings.setShowEstimatedCurve(gd.getNextBoolean());
+			pluginSettings.setWeightedFit(gd.getNextBoolean());
 			if (showRoi && (oldMinz != minz || oldMaxz != maxz))
 			{
 				addRoi(sPlot);
@@ -616,9 +746,9 @@ public class PSFAstigmatismModel implements PlugInFilter
 
 		double[] smoothSx = fitSx;
 		double[] smoothSy = fitSy;
-		if (settings.getSmoothing() > 0)
+		if (pluginSettings.getSmoothing() > 0)
 		{
-			LoessInterpolator loess = new LoessInterpolator(settings.getSmoothing(), 0);
+			LoessInterpolator loess = new LoessInterpolator(pluginSettings.getSmoothing(), 0);
 			smoothSx = loess.smooth(fitZ, fitSx);
 			smoothSy = loess.smooth(fitZ, fitSy);
 
@@ -676,7 +806,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		parameters[P_BY] = By;
 
 		record("Initial", parameters);
-		if (settings.getShowEstimatedCurve())
+		if (pluginSettings.getShowEstimatedCurve())
 		{
 			plotFit(parameters);
 			IJ.showMessage(TITLE, "Showing the estimated curve parameters.\nClick OK to continue.");
@@ -690,7 +820,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 				.target(y);
 		//@formatter:on
 
-		if (settings.getWeightedFit())
+		if (pluginSettings.getWeightedFit())
 			builder.weight(new DiagonalMatrix(getWeights(smoothSx, smoothSy)));
 
 		AstigmatismVectorFunction vf = new AstigmatismVectorFunction();
@@ -733,7 +863,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 	{
 		// w = w0 * sqrt(1 + z^2/d^2)
 		// if z==d then w = w0 * sqrt(2) 
-		
+
 		double w = sx[min] * 1.414213562; // sqrt(2) the min width
 		int lower = min;
 		while (lower > 0 && sx[lower] < w)
@@ -995,7 +1125,7 @@ public class PSFAstigmatismModel implements PlugInFilter
 		StringBuilder sb = new StringBuilder();
 		Rounder rounder = RounderFactory.create(4);
 		sb.append(fitZ.length * 2);
-		sb.append('\t').append(settings.getWeightedFit());
+		sb.append('\t').append(pluginSettings.getWeightedFit());
 		sb.append('\t').append(optimum.getRMS());
 		sb.append('\t').append(optimum.getIterations());
 		sb.append('\t').append(optimum.getEvaluations());
@@ -1018,8 +1148,114 @@ public class PSFAstigmatismModel implements PlugInFilter
 					"N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 800, 400);
 	}
 
-	private void saveModel()
+	private boolean saveModel()
 	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Save the model");
+		gd.addStringField("Model_name", pluginSettings.getModelName());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		String name = gd.getNextString();
+		pluginSettings.setModelName(name);
+
+		// Check existing names
+		AstigmatismModelSettings.Builder settings = getSettings();
+		Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
+		if (map.containsKey(name))
+		{
+			name = suggest(map, name);
+			gd = new ExtendedGenericDialog(TITLE);
+			gd.addMessage("Model name already exists.\nSuggest renaming to:");
+			gd.addStringField("Model_name", name);
+			gd.enableYesNoCancel("Rename", "Overwrite");
+			gd.showDialog(true);
+			if (gd.wasCanceled())
+				return false;
+			if (gd.wasOKed())
+				// Rename
+				pluginSettings.setModelName(name);
+		}
+
+		// Save the model
+		AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
+		model.setGamma(parameters[P_GAMMA]);
+		model.setD(parameters[P_D]);
+		model.setS0X(parameters[P_S0X]);
+		model.setAx(parameters[P_AX]);
+		model.setBx(parameters[P_BX]);
+		model.setS0Y(parameters[P_S0Y]);
+		model.setAy(parameters[P_AY]);
+		model.setBy(parameters[P_BY]);
+		model.setZDistanceUnit(DistanceUnit.UM);
+		model.setSDistanceUnit(DistanceUnit.PIXEL);
+		model.setNmPerPixel(fitConfig.getCalibrationWriter().getNmPerPixel());
+
+		settings.putAstigmatismModelResources(pluginSettings.getModelName(), model.build());
+		if (!SettingsManager.writeSettings(settings.build()))
+		{
+			IJ.error(TITLE, "Failed to save the model");
+			return false;
+		}
+		return true;
+	}
+
+	private String suggest(Map<String, AstigmatismModel> map, String name)
+	{
+		for (int i = 2; i > 0; i++)
+		{
+			String name2 = name + i;
+			if (!map.containsKey(name2))
+				return name2;
+		}
+		return ""; // This happens if there are a lot of models
+	}
+
+	private void viewModel()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		String[] MODELS = listAstigmatismModels(false);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
+
+		// Try and get the named resource
+		AstigmatismModel resource = settings.getAstigmatismModelResourcesMap().get(name);
+		if (resource == null)
+		{
+			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
+			return;
+		}
+
+		Utils.log("Astigmatism model: %s\n%s", name, resource);
 		
+		// TODO - Plot the curve
+	}
+
+	private void deleteModel()
+	{
+		GenericDialog gd = new GenericDialog(TITLE);
+		String[] MODELS = listAstigmatismModels(false);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
+
+		AstigmatismModel resource = settings.getAstigmatismModelResourcesMap().get(name);
+		if (resource == null)
+		{
+			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
+			return;
+		}
+
+		settings.removeAstigmatismModelResources(name);
+		SettingsManager.writeSettings(settings.build());
+
+		Utils.log("Deleted astigmatism model: %s\n%s", name, resource);
 	}
 }

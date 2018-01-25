@@ -44,11 +44,12 @@ import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
-import gdsc.smlm.data.config.GUIProtos.PSFAstigmatismModelSettings;
+import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
+import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtosHelper;
@@ -996,15 +997,27 @@ public class SettingsManager
 	}
 
 	/**
-	 * Read the PSFAstigmatismModelSettings from the settings file in the settings directory.
+	 * Read the AstigmatismModelSettings from the settings file in the settings directory.
 	 *
 	 * @param flags
 	 *            the flags
-	 * @return the PSFAstigmatismModelSettings
+	 * @return the AstigmatismModelSettings
 	 */
-	public static PSFAstigmatismModelSettings readPSFAstigmatismModelSettings(int flags)
+	public static AstigmatismModelSettings readAstigmatismModelSettings(int flags)
 	{
-		return new ConfigurationReader<PSFAstigmatismModelSettings>(GUIProtosHelper.defaultPSFAstigmatismModelSettings)
+		return new ConfigurationReader<AstigmatismModelSettings>(AstigmatismModelSettings.getDefaultInstance()).read(flags);
+	}
+
+	/**
+	 * Read the AstigmatismModelManagerSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the AstigmatismModelManagerSettings
+	 */
+	public static AstigmatismModelManagerSettings readAstigmatismModelManagerSettings(int flags)
+	{
+		return new ConfigurationReader<AstigmatismModelManagerSettings>(GUIProtosHelper.defaultAstigmatismModelManagerSettings)
 				.read(flags);
 	}
 

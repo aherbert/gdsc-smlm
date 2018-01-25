@@ -501,18 +501,24 @@ message FailCountManagerSettings
 	double pass_rate_counter_inc_pass_rate = 31;
 }
 
-// Contains settings for the PSF Astigmatism Model plugin
-message PSFAstigmatismModelSettings
+// Contains settings for the Astigmatism Model Manager plugin
+message AstigmatismModelManagerSettings
 {
-	double nm_per_slice = 1;
-
+	int32 option = 1;
+	
 	// For the fitting
-	FitEngineSettings fit_engine_settings = 2;
-	PSF psf = 3;
-	Calibration calibration = 4;	
-	double radius = 5;
-	bool log_fit_progress = 6;
-	double smoothing = 7;
-	bool weighted_fit = 8;
-	bool show_estimated_curve = 9;
+	double nm_per_slice = 2;
+	FitEngineSettings fit_engine_settings = 3;
+	PSF psf = 4;
+	Calibration calibration = 5;	
+	double radius = 6;
+	bool log_fit_progress = 7;
+	double smoothing = 8;
+	bool weighted_fit = 9;
+	bool show_estimated_curve = 10;
+	string image = 11;
+	string model_name = 12;
+	
+	// For display
+	string selected = 13;
 }
