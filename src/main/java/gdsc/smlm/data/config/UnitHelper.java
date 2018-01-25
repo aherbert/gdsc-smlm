@@ -35,11 +35,11 @@ public class UnitHelper
 		switch (unit)
 		{
 			case NM:
-				return "nanometer";
+				return "nanometre";
 			case PIXEL:
 				return "pixel";
 			case UM:
-				return "micrometer";
+				return "micrometre";
 			default:
 				return "unknown";
 		}
@@ -61,7 +61,7 @@ public class UnitHelper
 			case PIXEL:
 				return "px";
 			case UM:
-				return "um";
+				return "μm";
 			default:
 				return "na";
 		}
@@ -80,7 +80,8 @@ public class UnitHelper
 		{
 			if (name.equalsIgnoreCase("px"))
 				return DistanceUnit.PIXEL;
-			if (name.equalsIgnoreCase("um"))
+			// There is no uppercase μm 
+			if (name.equals("μm") || name.equalsIgnoreCase("um"))
 				return DistanceUnit.UM;
 			if (name.equalsIgnoreCase("nm"))
 				return DistanceUnit.NM;
