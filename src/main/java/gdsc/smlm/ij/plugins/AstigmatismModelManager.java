@@ -3,6 +3,9 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +31,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationWriter;
@@ -74,12 +78,12 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.Line;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
@@ -88,6 +92,7 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.process.FloatPolygon;
+import ij.process.FloatProcessor;
 import ij.text.TextWindow;
 
 /**
@@ -1399,27 +1404,124 @@ public class AstigmatismModelManager implements PlugIn
 
 		// Get pixel range using 3x[max SD]
 		int width = 1 + 2 * ((int) Math.ceil(limits[1] * 3));
-		double cx = width * 0.5;
+		new ModelRenderer(name, model, m, range, width, plot).run();
+	}
 
-		ImageStack stack = new ImageStack(width, width);
-		GaussianPSFModel psf = new GaussianPSFModel(m);
-		n = 25;
-		step = range / n;
-		for (int i = 0, len = 2 * n + 1; i < len; i++)
+	private class ModelRenderer implements DialogListener
+	{
+		String name;
+		AstigmatismModel model;
+		double range;
+		double z = 0;
+		int width;
+		double cx;
+		GaussianPSFModel psf;
+		Plot plot;
+
+		public ModelRenderer(String name, AstigmatismModel model, HoltzerAstigmatismZModel m, double range, int width,
+				Plot plot)
 		{
-			float[] data = new float[width * width];
-			double zz = -range + i * step;
-			psf.create3D(data, width, width, 1, cx, cx, zz, false);
-			stack.addSlice(null, data);
+			this.name = name;
+			this.model = model;
+			this.range = range;
+			this.width = width;
+			cx = width * 0.5;
+			psf = new GaussianPSFModel(m);
+			this.plot = plot;
 		}
-		ImagePlus imp = Utils.display(TITLE + " PSF", stack);
-		Calibration cal = new Calibration();
-		cal.setXUnit("um");
-		cal.pixelWidth = cal.pixelHeight = model.getNmPerPixel() / 1000;
-		cal.pixelDepth = step;
-		imp.setCalibration(cal);
-		imp.setSlice(n + 1);
-		imp.resetDisplayRange();
+
+		public void run()
+		{
+			final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+			gd.addMessage("Model = " + name);
+			gd.addSlider("Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")", -range, range, 0);
+			final TextField tfz = gd.getLastTextField();
+			gd.addDialogListener(this);
+			if (Utils.isShowGenericDialog())
+			{
+				gd.hideCancelButton();
+				gd.setOKLabel(" Close ");
+				gd.addAndGetButton("Reset", new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						update();
+						// The events triggered by setting these should be ignored now
+						tfz.setText("0");
+					}
+				});
+				draw();
+			}
+			gd.showDialog();
+		}
+
+		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
+		{
+			z = gd.getNextNumber();
+			if (gd.invalidNumber())
+				return false;
+			update();
+			return true;
+		}
+
+		private double _z = -1;
+
+		private void draw()
+		{
+			_z = z;
+
+			float[] data = new float[width * width];
+			psf.create3D(data, width, width, 1, cx, cx, _z, false);
+			ImagePlus imp = Utils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
+			if (Utils.isNewWindow())
+			{
+				//Calibration cal = new Calibration();
+				//cal.setXUnit("um");
+				//cal.pixelWidth = cal.pixelHeight = model.getNmPerPixel() / 1000;
+				//imp.setCalibration(cal);
+			}
+			imp.resetDisplayRange();
+
+			// Show the z position using an overlay
+			double x = plot.scaleXtoPxl(_z);
+			double[] limits = plot.getLimits();
+			int y1 = (int) plot.scaleYtoPxl(limits[3]);
+			int y2 = (int) plot.scaleYtoPxl(limits[2]);
+			plot.getImagePlus().setRoi(new Line(x, y1, x, y2));
+		}
+
+		SimpleLock lock = new SimpleLock();
+
+		private void update()
+		{
+			if (lock.acquire())
+			{
+				// Run in a new thread to allow the GUI to continue updating
+				new Thread(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							// Continue while the parameter is changing
+							//@formatter:off
+							while (
+									_z != z
+									)
+							//@formatter:on
+							{
+								draw();
+							}
+						}
+						finally
+						{
+							// Ensure the running flag is reset
+							lock.release();
+						}
+					}
+				}).start();
+			}
+		}
 	}
 
 	/**
