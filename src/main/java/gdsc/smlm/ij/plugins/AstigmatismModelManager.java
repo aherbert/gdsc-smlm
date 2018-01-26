@@ -18,8 +18,10 @@ import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.util.Precision;
 
+import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -36,6 +38,7 @@ import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
@@ -62,6 +65,7 @@ import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.model.GaussianPSFModel;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.SynchronizedPeakResults;
@@ -70,6 +74,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.WidthResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
@@ -1302,7 +1307,7 @@ public class AstigmatismModelManager implements PlugIn
 			IJ.error(TITLE, "Failed to export astigmatism model: " + name);
 			return;
 		}
-		
+
 		Utils.log("Exported astigmatism model: %s to %s", name, pluginSettings.getFilename());
 	}
 
@@ -1312,12 +1317,14 @@ public class AstigmatismModelManager implements PlugIn
 		String[] MODELS = listAstigmatismModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.addCheckbox("Show_depth_of_focus", pluginSettings.getShowDepthOfFocus());
+		gd.addCheckbox("Show_PSF", pluginSettings.getShowPsf());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
 		pluginSettings.setShowDepthOfFocus(gd.getNextBoolean());
+		pluginSettings.setShowPsf(gd.getNextBoolean());
 
 		// Try and get the named resource
 		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
@@ -1386,6 +1393,67 @@ public class AstigmatismModelManager implements PlugIn
 		plot.addLegend("Sx\nSy");
 		plot.addLabel(0, 0, "Model = " + name);
 		Utils.display(title, plot);
+
+		if (!pluginSettings.getShowPsf())
+			return;
+
+		// Get pixel range using 3x[max SD]
+		int width = 1 + 2 * ((int) Math.ceil(limits[1] * 3));
+		double cx = width * 0.5;
+
+		ImageStack stack = new ImageStack(width, width);
+		GaussianPSFModel psf = new GaussianPSFModel(m);
+		n = 25;
+		step = range / n;
+		for (int i = 0, len = 2 * n + 1; i < len; i++)
+		{
+			float[] data = new float[width * width];
+			double zz = -range + i * step;
+			psf.create3D(data, width, width, 1, cx, cx, zz, false);
+			stack.addSlice(null, data);
+		}
+		ImagePlus imp = Utils.display(TITLE + " PSF", stack);
+		Calibration cal = new Calibration();
+		cal.setXUnit("um");
+		cal.pixelWidth = cal.pixelHeight = model.getNmPerPixel() / 1000;
+		cal.pixelDepth = step;
+		imp.setCalibration(cal);
+		imp.setSlice(n + 1);
+		imp.resetDisplayRange();
+	}
+
+	/**
+	 * Convert the model to the given units.
+	 *
+	 * @param model
+	 *            the model
+	 * @param zDistanceUnit
+	 *            the desired input z distance unit
+	 * @param sDistanceUnit
+	 *            the desired output s distance unit
+	 * @return the astigmatism model
+	 * @throws ConversionException
+	 *             if the units cannot be converted
+	 */
+	public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
+			DistanceUnit sDistanceUnit) throws ConversionException
+	{
+		if (model.getZDistanceUnitValue() == zDistanceUnit.getNumber() &&
+				model.getSDistanceUnitValue() == sDistanceUnit.getNumber())
+			return model;
+
+		AstigmatismModel.Builder builder = model.toBuilder();
+		TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(model.getZDistanceUnit(), zDistanceUnit,
+				model.getNmPerPixel());
+		TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(model.getSDistanceUnit(), sDistanceUnit,
+				model.getNmPerPixel());
+		builder.setZDistanceUnitValue(zDistanceUnit.getNumber());
+		builder.setSDistanceUnitValue(sDistanceUnit.getNumber());
+		builder.setGamma(zc.convert(model.getGamma()));
+		builder.setD(zc.convert(model.getD()));
+		builder.setS0X(sc.convert(model.getS0X()));
+		builder.setS0Y(sc.convert(model.getS0Y()));
+		return builder.build();
 	}
 
 	private void deleteModel()

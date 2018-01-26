@@ -42,6 +42,20 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
+	 * @param zModel
+	 *            the z model
+	 */
+	public GaussianPSFModel(AstigmatismZModel zModel)
+	{
+		super();
+		if (zModel == null)
+			throw new IllegalArgumentException("Model must not be null");
+		this.zModel = zModel;
+	}
+
+	/**
 	 * @param randomGenerator
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0
@@ -65,6 +79,8 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(RandomGenerator randomGenerator, AstigmatismZModel zModel)
 	{
 		super(randomGenerator);
+		if (zModel == null)
+			throw new IllegalArgumentException("Model must not be null");
 		this.zModel = zModel;
 	}
 
@@ -92,6 +108,8 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, AstigmatismZModel zModel)
 	{
 		super(randomDataGenerator);
+		if (zModel == null)
+			throw new IllegalArgumentException("Model must not be null");
 		this.zModel = zModel;
 	}
 

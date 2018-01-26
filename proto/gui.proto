@@ -511,6 +511,7 @@ message AstigmatismModelManagerSettings
 	int32 option = 1;
 	
 	// For the fitting
+
 	double nm_per_slice = 2;
 	FitEngineSettings fit_engine_settings = 3;
 	PSF psf = 4;
@@ -526,8 +527,11 @@ message AstigmatismModelManagerSettings
 	bool save_fit_width = 15;
 	
 	// For display
+
 	string selected = 13;
 	bool show_depth_of_focus = 16;
+	bool show_psf = 18;
 
+	// Filename for import/export
 	string filename = 17;
 }
