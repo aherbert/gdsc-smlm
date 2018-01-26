@@ -2276,7 +2276,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Calibration based on imaging fluorescent beads at 20nm intervals.
 			// Set the depth-of-focus to 450nm
 			double sd = getPsfSD();
-			double d = 450.0 / settings.getPixelPitch();
+			double d = settings.getDepthOfFocus() / settings.getPixelPitch();
 			double gamma = 0;
 			// Test astigmatism
 			//double gamma = 500 / settings.getPixelPitch();
@@ -4211,6 +4211,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.setPhotonsPerSecondMaximum(settings.getPhotonsPerSecond());
 			if (!imagePSF)
 			{
+				Parameters.isAboveZero("Depth-of-focus", settings.getDepthOfFocus());
 				if (settings.getEnterWidth())
 				{
 					Parameters.isAboveZero("PSF SD", settings.getPsfSd());
