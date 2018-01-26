@@ -30,7 +30,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * Static constructor.
 	 * <p>
 	 * Note that a positive gamma puts the focal plane for the X-dimension above the z-centre (positive Z) and the focal
-	 * plane for the Y-dimension below the z-centre (negative Z). If gamma is negative then the orientation of the focal 
+	 * plane for the Y-dimension below the z-centre (negative Z). If gamma is negative then the orientation of the focal
 	 * planes of X and Y are reversed.
 	 *
 	 * @param gamma
@@ -57,7 +57,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * Constructor.
 	 * <p>
 	 * Note that a positive gamma puts the focal plane for the X-dimension above the z-centre (positive Z) and the focal
-	 * plane for the Y-dimension below the z-centre (negative Z). If gamma is negative then the orientation of the focal 
+	 * plane for the Y-dimension below the z-centre (negative Z). If gamma is negative then the orientation of the focal
 	 * planes of X and Y are reversed.
 	 *
 	 * @param gamma
@@ -225,5 +225,23 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	public double getSy2(double z, double[] ds_dz)
 	{
 		return getS2(z + gamma, one_d2, Ay, By, ds_dz);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public HoltzerAstigmatismZModel clone()
+	{
+		try
+		{
+			return (HoltzerAstigmatismZModel) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
 	}
 }
