@@ -1551,10 +1551,19 @@ public class AstigmatismModelManager implements PlugIn
 				model.getNmPerPixel());
 		builder.setZDistanceUnitValue(zDistanceUnit.getNumber());
 		builder.setSDistanceUnitValue(sDistanceUnit.getNumber());
+		
+		// Convert the input units 
 		builder.setGamma(zc.convert(model.getGamma()));
 		builder.setD(zc.convert(model.getD()));
+		builder.setAx(zc.convertBack(model.getAx()));
+		builder.setAy(zc.convertBack(model.getAy()));
+		builder.setBx(zc.convertBack(zc.convertBack(model.getBx())));
+		builder.setBy(zc.convertBack(zc.convertBack(model.getBy())));
+		
+		// Convert the output units
 		builder.setS0X(sc.convert(model.getS0X()));
 		builder.setS0Y(sc.convert(model.getS0Y()));
+		
 		return builder.build();
 	}
 
