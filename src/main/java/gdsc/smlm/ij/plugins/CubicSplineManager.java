@@ -519,10 +519,10 @@ public class CubicSplineManager implements PlugIn
 		}
 
 		// Interactive render
-		new CSoplineRenderer(psfModel).run();
+		new CSplineRenderer(psfModel).run();
 	}
 
-	private class CSoplineRenderer implements DialogListener
+	private class CSplineRenderer implements DialogListener
 	{
 		CubicSplinePSF psfModel;
 		ImagePSF imagePSF;
@@ -530,7 +530,7 @@ public class CubicSplineManager implements PlugIn
 		double padx, pady;
 		Label label;
 
-		public CSoplineRenderer(CubicSplinePSF psfModel)
+		public CSplineRenderer(CubicSplinePSF psfModel)
 		{
 			this.psfModel = psfModel;
 			imagePSF = psfModel.imagePSF;
