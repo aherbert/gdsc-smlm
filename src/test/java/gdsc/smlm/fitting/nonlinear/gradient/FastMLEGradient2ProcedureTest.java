@@ -462,7 +462,7 @@ public class FastMLEGradient2ProcedureTest
 		createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-5;
-		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
+		DoubleEquality eq = new DoubleEquality(1e-4, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
