@@ -380,9 +380,6 @@ public class PeakFit implements PlugInFilter, ItemListener
 				String message = "The selected image may be a previous fit result";
 				if (tmpImageSource != null)
 				{
-					// TODO - Find out why XStream does not serialise the inherited name field in 
-					// all ImageSource subclasses. Thjs means that some of the ImageSource details
-					// are missing
 					if (!TextUtils.isNullOrEmpty(tmpImageSource.getName()))
 						message += " of: \n \n" + tmpImageSource.getName();
 					message += " \n \nFit the parent?";
