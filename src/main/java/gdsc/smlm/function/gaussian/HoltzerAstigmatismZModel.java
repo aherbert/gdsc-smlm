@@ -70,7 +70,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 			double Ay, double By)
 	{
 		final double d2 = d * d;
-		return new HoltzerAstigmatismZModel(gamma, 1.0 / d2, Ax, Bx, Ay, By, s0x, s0y);
+		return new HoltzerAstigmatismZModel(s0x, s0y, gamma, 1.0 / d2, Ax, Bx, Ay, By);
 	}
 
 	/**
