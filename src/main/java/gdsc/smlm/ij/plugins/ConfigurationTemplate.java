@@ -693,7 +693,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		boolean result = true;
 		if (file != null)
-			result = !template.save(file);
+			result = template.save(file);
 		if (result)
 		{
 			// Update the loaded templates
