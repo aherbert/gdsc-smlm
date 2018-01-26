@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -167,11 +168,13 @@ public class AstigmatismModelManager implements PlugIn
 
 	//@formatter:off
 	private static String[] OPTIONS = { 
-			"Create a model",
+			"Create model",
+			"Import model",
 			// All option below require models
-			"View a model",
-			"Delete a model",
-			"Invert a model",
+			"View model",
+			"Delete model",
+			"Invert model",
+			"Export model",
 			};
 	//@formatter:on
 	private static String[] OPTIONS2;
@@ -207,14 +210,20 @@ public class AstigmatismModelManager implements PlugIn
 
 		switch (pluginSettings.getOption())
 		{
-			case 3:
+			case 5:
+				exportModel();
+				break;
+			case 4:
 				invertModel();
 				break;
-			case 2:
+			case 3:
 				deleteModel();
 				break;
-			case 1:
+			case 2:
 				viewModel();
+				break;
+			case 1:
+				importModel();
 				break;
 			default:
 				createModel();
@@ -1186,28 +1195,6 @@ public class AstigmatismModelManager implements PlugIn
 
 		if (pluginSettings.getSaveModel())
 		{
-			pluginSettings.setModelName(name);
-
-			// Check existing names
-			AstigmatismModelSettings.Builder settings = getSettings();
-			Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
-			if (map.containsKey(name))
-			{
-				name = suggest(map, name);
-				gd = new ExtendedGenericDialog(TITLE);
-				gd.addMessage(
-						"Model name " + pluginSettings.getModelName() + " already exists.\n \nSuggest renaming to:");
-				gd.addStringField("Model_name", name);
-				gd.enableYesNoCancel("Rename", "Overwrite");
-				gd.showDialog(true);
-				if (gd.wasCanceled())
-					return false;
-				if (gd.wasOKed())
-					// Rename
-					pluginSettings.setModelName(name);
-			}
-
-			// Save the model
 			AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
 			model.setGamma(parameters[P_GAMMA]);
 			model.setD(parameters[P_D]);
@@ -1220,13 +1207,39 @@ public class AstigmatismModelManager implements PlugIn
 			model.setZDistanceUnit(DistanceUnit.UM);
 			model.setSDistanceUnit(DistanceUnit.PIXEL);
 			model.setNmPerPixel(fitConfig.getCalibrationWriter().getNmPerPixel());
+			return save(name, model);
+		}
+		return true;
+	}
 
-			settings.putAstigmatismModelResources(pluginSettings.getModelName(), model.build());
-			if (!SettingsManager.writeSettings(settings.build()))
-			{
-				IJ.error(TITLE, "Failed to save the model");
+	private boolean save(String name, AstigmatismModel.Builder model)
+	{
+		pluginSettings.setModelName(name);
+
+		// Check existing names
+		AstigmatismModelSettings.Builder settings = getSettings();
+		Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
+		if (map.containsKey(name))
+		{
+			name = suggest(map, name);
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			gd.addMessage("Model name " + pluginSettings.getModelName() + " already exists.\n \nSuggest renaming to:");
+			gd.addStringField("Model_name", name);
+			gd.enableYesNoCancel("Rename", "Overwrite");
+			gd.showDialog(true);
+			if (gd.wasCanceled())
 				return false;
-			}
+			if (gd.wasOKed())
+				// Rename
+				pluginSettings.setModelName(name);
+		}
+
+		// Save the model
+		settings.putAstigmatismModelResources(pluginSettings.getModelName(), model.build());
+		if (!SettingsManager.writeSettings(settings.build()))
+		{
+			IJ.error(TITLE, "Failed to save the model");
+			return false;
 		}
 		return true;
 	}
@@ -1241,6 +1254,56 @@ public class AstigmatismModelManager implements PlugIn
 				return name2;
 		}
 		return ""; // This happens if there are a lot of models
+	}
+
+	private void importModel()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addStringField("Model_name", pluginSettings.getModelName());
+		gd.addFilenameField("Filename", pluginSettings.getFilename());
+		//gd.setCancelLabel(" No ");
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = gd.getNextString();
+		pluginSettings.setModelName(name);
+		pluginSettings.setFilename(gd.getNextString());
+
+		AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
+		if (!SettingsManager.fromJSON(new File(pluginSettings.getFilename()), model, 0))
+			return;
+
+		save(name, model);
+	}
+
+	private void exportModel()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		String[] MODELS = listAstigmatismModels(false);
+		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.addFilenameField("Filename", pluginSettings.getFilename());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String name = gd.getNextChoice();
+		pluginSettings.setSelected(name);
+		pluginSettings.setFilename(gd.getNextString());
+
+		// Try and get the named resource
+		AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+		if (model == null)
+		{
+			IJ.error(TITLE, "Failed to find astigmatism model: " + name);
+			return;
+		}
+
+		if (!SettingsManager.toJSON(model, new File(pluginSettings.getFilename()), 0))
+		{
+			IJ.error(TITLE, "Failed to export astigmatism model: " + name);
+			return;
+		}
+		
+		Utils.log("Exported astigmatism model: %s to %s", name, pluginSettings.getFilename());
 	}
 
 	private void viewModel()

@@ -29960,6 +29960,16 @@ public final class GUIProtos {
      * <code>bool show_depth_of_focus = 16;</code>
      */
     boolean getShowDepthOfFocus();
+
+    /**
+     * <code>string filename = 17;</code>
+     */
+    java.lang.String getFilename();
+    /**
+     * <code>string filename = 17;</code>
+     */
+    com.google.protobuf.ByteString
+        getFilenameBytes();
   }
   /**
    * <pre>
@@ -29990,6 +30000,7 @@ public final class GUIProtos {
       saveFitWidth_ = false;
       selected_ = "";
       showDepthOfFocus_ = false;
+      filename_ = "";
     }
 
     @java.lang.Override
@@ -30122,6 +30133,12 @@ public final class GUIProtos {
             case 128: {
 
               showDepthOfFocus_ = input.readBool();
+              break;
+            }
+            case 138: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filename_ = s;
               break;
             }
           }
@@ -30414,6 +30431,40 @@ public final class GUIProtos {
       return showDepthOfFocus_;
     }
 
+    public static final int FILENAME_FIELD_NUMBER = 17;
+    private volatile java.lang.Object filename_;
+    /**
+     * <code>string filename = 17;</code>
+     */
+    public java.lang.String getFilename() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filename_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string filename = 17;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFilenameBytes() {
+      java.lang.Object ref = filename_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filename_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -30473,6 +30524,9 @@ public final class GUIProtos {
       }
       if (showDepthOfFocus_ != false) {
         output.writeBool(16, showDepthOfFocus_);
+      }
+      if (!getFilenameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 17, filename_);
       }
     }
 
@@ -30542,6 +30596,9 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(16, showDepthOfFocus_);
       }
+      if (!getFilenameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, filename_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -30605,6 +30662,8 @@ public final class GUIProtos {
           .equals(other.getSelected());
       result = result && (getShowDepthOfFocus()
           == other.getShowDepthOfFocus());
+      result = result && getFilename()
+          .equals(other.getFilename());
       return result;
     }
 
@@ -30662,6 +30721,8 @@ public final class GUIProtos {
       hash = (37 * hash) + SHOW_DEPTH_OF_FOCUS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShowDepthOfFocus());
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFilename().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -30839,6 +30900,8 @@ public final class GUIProtos {
 
         showDepthOfFocus_ = false;
 
+        filename_ = "";
+
         return this;
       }
 
@@ -30889,6 +30952,7 @@ public final class GUIProtos {
         result.saveFitWidth_ = saveFitWidth_;
         result.selected_ = selected_;
         result.showDepthOfFocus_ = showDepthOfFocus_;
+        result.filename_ = filename_;
         onBuilt();
         return result;
       }
@@ -30980,6 +31044,10 @@ public final class GUIProtos {
         }
         if (other.getShowDepthOfFocus() != false) {
           setShowDepthOfFocus(other.getShowDepthOfFocus());
+        }
+        if (!other.getFilename().isEmpty()) {
+          filename_ = other.filename_;
+          onChanged();
         }
         onChanged();
         return this;
@@ -31856,6 +31924,75 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private java.lang.Object filename_ = "";
+      /**
+       * <code>string filename = 17;</code>
+       */
+      public java.lang.String getFilename() {
+        java.lang.Object ref = filename_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filename_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string filename = 17;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFilenameBytes() {
+        java.lang.Object ref = filename_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filename_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string filename = 17;</code>
+       */
+      public Builder setFilename(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filename_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filename = 17;</code>
+       */
+      public Builder clearFilename() {
+        
+        filename_ = getDefaultInstance().getFilename();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filename = 17;</code>
+       */
+      public Builder setFilenameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filename_ = value;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -32197,7 +32334,7 @@ public final class GUIProtos {
       "\037pass_rate_counter_min_pass_rate\030\035 \001(\001\022\'" +
       "\n\037pass_rate_counter_max_pass_rate\030\036 \001(\001\022" +
       "\'\n\037pass_rate_counter_inc_pass_rate\030\037 \001(\001" +
-      "\"\337\003\n\037AstigmatismModelManagerSettings\022\016\n\006" +
+      "\"\361\003\n\037AstigmatismModelManagerSettings\022\016\n\006" +
       "option\030\001 \001(\005\022\024\n\014nm_per_slice\030\002 \001(\001\022E\n\023fi",
       "t_engine_settings\030\003 \001(\0132(.gdsc.smlm.data" +
       ".config.FitEngineSettings\022\'\n\003psf\030\004 \001(\0132\032" +
@@ -32209,9 +32346,10 @@ public final class GUIProtos {
       "image\030\013 \001(\t\022\022\n\nmodel_name\030\014 \001(\t\022\022\n\nsave_" +
       "model\030\016 \001(\010\022\026\n\016save_fit_width\030\017 \001(\010\022\020\n\010s" +
       "elected\030\r \001(\t\022\033\n\023show_depth_of_focus\030\020 \001",
-      "(\010*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022" +
-      "\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLAT" +
-      "E\020\002B\013B\tGUIProtosb\006proto3"
+      "(\010\022\020\n\010filename\030\021 \001(\t*O\n\014TemplateType\022\023\n\017" +
+      "INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001" +
+      "\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006prot" +
+      "o3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -32330,7 +32468,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", "ShowDepthOfFocus", });
+        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", "ShowDepthOfFocus", "Filename", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
