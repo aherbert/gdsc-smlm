@@ -25,7 +25,6 @@ import gdsc.smlm.function.gaussian.NullAstigmatismZModel;
  */
 public class GaussianPSFModel extends PSFModel
 {
-	private double zeroS0, zeroS1;
 	private double s0;
 	private double s1;
 	private final AstigmatismZModel zModel;
@@ -39,9 +38,7 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(double s0, double s1)
 	{
 		super();
-		this.zeroS0 = s0;
-		this.zeroS1 = s1;
-		zModel = NullAstigmatismZModel.INSTANCE;
+		zModel = new NullAstigmatismZModel(s0, s1);
 	}
 
 	/**
@@ -54,29 +51,7 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1)
 	{
 		super(randomGenerator);
-		this.zeroS0 = s0;
-		this.zeroS1 = s1;
-		zModel = NullAstigmatismZModel.INSTANCE;
-	}
-
-	/**
-	 * Instantiates a new gaussian PSF model.
-	 *
-	 * @param randomGenerator
-	 *            the random generator
-	 * @param s0
-	 *            The Gaussian standard deviation dimension 0
-	 * @param s1
-	 *            The Gaussian standard deviation dimension 1
-	 * @param zModel
-	 *            the z model. The widths produced by the model are multiplied by s0/s1 respectively.
-	 */
-	public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1, AstigmatismZModel zModel)
-	{
-		super(randomGenerator);
-		this.zeroS0 = s0;
-		this.zeroS1 = s1;
-		this.zModel = zModel;
+		zModel = new NullAstigmatismZModel(s0, s1);
 	}
 
 	/**
@@ -90,8 +65,6 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(RandomGenerator randomGenerator, AstigmatismZModel zModel)
 	{
 		super(randomGenerator);
-		this.zeroS0 = 1;
-		this.zeroS1 = 1;
 		this.zModel = zModel;
 	}
 
@@ -105,29 +78,7 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, double s0, double s1)
 	{
 		super(randomDataGenerator);
-		this.zeroS0 = s0;
-		this.zeroS1 = s1;
-		zModel = NullAstigmatismZModel.INSTANCE;
-	}
-
-	/**
-	 * Instantiates a new gaussian PSF model.
-	 *
-	 * @param randomDataGenerator
-	 *            the random data generator
-	 * @param s0
-	 *            The Gaussian standard deviation dimension 0
-	 * @param s1
-	 *            The Gaussian standard deviation dimension 1
-	 * @param zModel
-	 *            the z model. The widths produced by the model are multiplied by s0/s1 respectively.
-	 */
-	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, double s0, double s1, AstigmatismZModel zModel)
-	{
-		super(randomDataGenerator);
-		this.zeroS0 = s0;
-		this.zeroS1 = s1;
-		this.zModel = zModel;
+		zModel = new NullAstigmatismZModel(s0, s1);
 	}
 
 	/**
@@ -141,8 +92,6 @@ public class GaussianPSFModel extends PSFModel
 	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, AstigmatismZModel zModel)
 	{
 		super(randomDataGenerator);
-		this.zeroS0 = 1;
-		this.zeroS1 = 1;
 		this.zModel = zModel;
 	}
 
@@ -203,7 +152,7 @@ public class GaussianPSFModel extends PSFModel
 	 */
 	public double getS0(double z)
 	{
-		return zModel.getSx(z) * zeroS0;
+		return zModel.getSx(z);
 	}
 
 	/**
@@ -215,7 +164,7 @@ public class GaussianPSFModel extends PSFModel
 	 */
 	public double getS1(double z)
 	{
-		return zModel.getSy(z) * zeroS1;
+		return zModel.getSy(z);
 	}
 
 	/**

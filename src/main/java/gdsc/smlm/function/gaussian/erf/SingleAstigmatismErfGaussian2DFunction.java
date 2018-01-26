@@ -69,12 +69,10 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
-		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
-		final double sx = tsx * zModel.getSx(tz);
-		final double sy = tsy * zModel.getSy(tz);
+		final double sx = zModel.getSx(tz);
+		final double sy = zModel.getSy(tz);
 		createDeltaETable(ONE_OVER_ROOT2 / sx, deltaEx, tx);
 		createDeltaETable(ONE_OVER_ROOT2 / sy, deltaEy, ty);
 	}
@@ -92,17 +90,15 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
-		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
 		final double[] ds_dz = new double[1];
-		final double sx = tsx * zModel.getSx(tz, ds_dz);
-		dtsx_dtz = tsx * ds_dz[0];
-		final double sy = tsy * zModel.getSy(tz, ds_dz);
-		dtsy_dtz = tsy * ds_dz[0];
+		final double sx = zModel.getSx(tz, ds_dz);
+		dtsx_dtz = ds_dz[0];
+		final double sy = zModel.getSy(tz, ds_dz);
+		dtsy_dtz = ds_dz[0];
 		createFirstOrderTables(tI, deltaEx, du_dtx, du_dtsx, tx, sx);
 		createFirstOrderTables(tI, deltaEy, du_dty, du_dtsy, ty, sy);
 	}
@@ -120,19 +116,17 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
-		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
 		final double[] ds_dz = new double[2];
-		final double sx = tsx * zModel.getSx2(tz, ds_dz);
-		dtsx_dtz = tsx * ds_dz[0];
-		d2tsx_dtz2 = tsx * ds_dz[1];
-		final double sy = tsy * zModel.getSy2(tz, ds_dz);
-		dtsy_dtz = tsy * ds_dz[0];
-		d2tsy_dtz2 = tsy * ds_dz[1];
+		final double sx = zModel.getSx2(tz, ds_dz);
+		dtsx_dtz = ds_dz[0];
+		d2tsx_dtz2 = ds_dz[1];
+		final double sy = zModel.getSy2(tz, ds_dz);
+		dtsy_dtz = ds_dz[0];
+		d2tsy_dtz2 = ds_dz[1];
 		createSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, sx);
 		createSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, sy);
 	}
@@ -145,19 +139,17 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		// Pre-compute the offset by 0.5
 		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double tsx = abs(a[Gaussian2DFunction.X_SD]);
-		final double tsy = abs(a[Gaussian2DFunction.Y_SD]);
 		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
 
 		// We can pre-compute part of the derivatives for position and sd in arrays 
 		// since the Gaussian is XY separable
 		final double[] ds_dz = new double[2];
-		final double sx = tsx * zModel.getSx2(tz, ds_dz);
-		dtsx_dtz = tsx * ds_dz[0];
-		d2tsx_dtz2 = tsx * ds_dz[1];
-		final double sy = tsy * zModel.getSy2(tz, ds_dz);
-		dtsy_dtz = tsy * ds_dz[0];
-		d2tsy_dtz2 = tsy * ds_dz[1];
+		final double sx = zModel.getSx2(tz, ds_dz);
+		dtsx_dtz = ds_dz[0];
+		d2tsx_dtz2 = ds_dz[1];
+		final double sy = zModel.getSy2(tz, ds_dz);
+		dtsy_dtz = ds_dz[0];
+		d2tsy_dtz2 = ds_dz[1];
 		createExSecondOrderTables(tI, deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx, tx, sx);
 		createExSecondOrderTables(tI, deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, d2deltaEy_dtsydy, ty, sy);
 		// Pre-apply the gradient mapping from width to z

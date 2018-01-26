@@ -100,12 +100,10 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			// Pre-compute the offset by 0.5
 			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
 
-			final double sx = tsx * zModel.getSx(tz);
-			final double sy = tsy * zModel.getSy(tz);
+			final double sx = zModel.getSx(tz);
+			final double sy = zModel.getSy(tz);
 			createDeltaETable(n, maxx, ONE_OVER_ROOT2 / sx, deltaEx, tx);
 			createDeltaETable(n, maxy, ONE_OVER_ROOT2 / sy, deltaEy, ty);
 		}
@@ -127,16 +125,14 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			// Pre-compute the offset by 0.5
 			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
 
 			// We can pre-compute part of the derivatives for position and sd in arrays 
 			// since the Gaussian is XY separable
-			final double sx = tsx * zModel.getSx(tz, ds_dz);
-			dtsx_dtz[n] = tsx * ds_dz[0];
-			final double sy = tsy * zModel.getSy(tz, ds_dz);
-			dtsy_dtz[n] = tsy * ds_dz[0];
+			final double sx = zModel.getSx(tz, ds_dz);
+			dtsx_dtz[n] = ds_dz[0];
+			final double sy = zModel.getSy(tz, ds_dz);
+			dtsy_dtz[n] = ds_dz[0];
 			createFirstOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, tx, sx);
 			createFirstOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, ty, sy);
 		}
@@ -158,18 +154,16 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			// Pre-compute the offset by 0.5
 			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
 
 			// We can pre-compute part of the derivatives for position and sd in arrays 
 			// since the Gaussian is XY separable
-			final double sx = tsx * zModel.getSx2(tz, ds_dz);
-			dtsx_dtz[n] = tsx * ds_dz[0];
-			d2tsx_dtz2[n] = tsx * ds_dz[1];
-			final double sy = tsy * zModel.getSy2(tz, ds_dz);
-			dtsy_dtz[n] = tsy * ds_dz[0];
-			d2tsy_dtz2[n] = tsy * ds_dz[1];
+			final double sx = zModel.getSx2(tz, ds_dz);
+			dtsx_dtz[n] = ds_dz[0];
+			d2tsx_dtz2[n] = ds_dz[1];
+			final double sy = zModel.getSy2(tz, ds_dz);
+			dtsy_dtz[n] = ds_dz[0];
+			d2tsy_dtz2[n] = ds_dz[1];
 			createSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, sx);
 			createSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, sy);
 		}
@@ -191,18 +185,16 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			// Pre-compute the offset by 0.5
 			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
-			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 			final double tz = a[i + ErfGaussian2DFunction.Z_POSITION];
 
 			// We can pre-compute part of the derivatives for position and sd in arrays 
 			// since the Gaussian is XY separable
-			final double sx = tsx * zModel.getSx2(tz, ds_dz);
-			dtsx_dtz[n] = tsx * ds_dz[0];
-			d2tsx_dtz2[n] = tsx * ds_dz[1];
-			final double sy = tsy * zModel.getSy2(tz, ds_dz);
-			dtsy_dtz[n] = tsy * ds_dz[0];
-			d2tsy_dtz2[n] = tsy * ds_dz[1];
+			final double sx = zModel.getSx2(tz, ds_dz);
+			dtsx_dtz[n] = ds_dz[0];
+			d2tsx_dtz2[n] = ds_dz[1];
+			final double sy = zModel.getSy2(tz, ds_dz);
+			dtsy_dtz[n] = ds_dz[0];
+			d2tsy_dtz2[n] = ds_dz[1];
 			createExSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx,
 					tx, sx);
 			createExSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, d2deltaEy_dtsydy,

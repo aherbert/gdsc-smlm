@@ -591,8 +591,8 @@ public abstract class Gaussian2DFunctionTest
 								if (zDepth)
 								{
 									// Change to a standard free circular function
-									a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
-									a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
+									a[Gaussian2DFunction.X_SD] = zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
+									a[Gaussian2DFunction.Y_SD] = zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
 									a[Gaussian2DFunction.Z_POSITION] = 0;
 								}
 								f2.initialise(a);

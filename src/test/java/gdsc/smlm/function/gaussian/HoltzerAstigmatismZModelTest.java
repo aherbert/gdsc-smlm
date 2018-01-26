@@ -19,17 +19,18 @@ public class HoltzerAstigmatismZModelTest
 	@Test
 	public void canStaticComputeGradient()
 	{
+		double s0 = 1.234;
 		double d = 0.531;
 		double Ax = -0.0708;
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		
-		canStaticComputeGradient(d, Ax, Bx);
-		canStaticComputeGradient(d, Ay, By);
+
+		canStaticComputeGradient(s0, d, Ax, Bx);
+		canStaticComputeGradient(s0, d, Ay, By);
 	}
-	
-	private void canStaticComputeGradient(double d, double Ax, double Bx)
+
+	private void canStaticComputeGradient(double s, double d, double Ax, double Bx)
 	{
 		double one_d2 = 1.0 / d / d;
 
@@ -39,9 +40,9 @@ public class HoltzerAstigmatismZModelTest
 		double[] ds_dlz = new double[1];
 		for (double z = -0.5; z < 0.5; z += 0.01)
 		{
-			double s0 = HoltzerAstigmatismZModel.getS(z, one_d2, Ax, Bx);
-			double s1 = HoltzerAstigmatismZModel.getS1(z, one_d2, Ax, Bx, ds_dz);
-			double s2 = HoltzerAstigmatismZModel.getS2(z, one_d2, Ax, Bx, ds_dz2);
+			double s0 = HoltzerAstigmatismZModel.getS(s, z, one_d2, Ax, Bx);
+			double s1 = HoltzerAstigmatismZModel.getS1(s, z, one_d2, Ax, Bx, ds_dz);
+			double s2 = HoltzerAstigmatismZModel.getS2(s, z, one_d2, Ax, Bx, ds_dz2);
 
 			Assert.assertEquals(s0, s1, 0);
 			Assert.assertEquals(s0, s2, 0);
@@ -49,8 +50,8 @@ public class HoltzerAstigmatismZModelTest
 
 			double uz = z + h_;
 			double lz = z - h_;
-			double upper = HoltzerAstigmatismZModel.getS1(uz, one_d2, Ax, Bx, ds_duz);
-			double lower = HoltzerAstigmatismZModel.getS1(lz, one_d2, Ax, Bx, ds_dlz);
+			double upper = HoltzerAstigmatismZModel.getS1(s, uz, one_d2, Ax, Bx, ds_duz);
+			double lower = HoltzerAstigmatismZModel.getS1(s, lz, one_d2, Ax, Bx, ds_dlz);
 
 			double e1 = (upper - lower) / (uz - lz);
 			double o1 = ds_dz[0];

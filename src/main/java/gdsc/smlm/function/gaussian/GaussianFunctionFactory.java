@@ -367,8 +367,8 @@ public class GaussianFunctionFactory
 				for (int i = 0, j = 0; i < nPeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK)
 				{
 					final double tz = a[j + Gaussian2DFunction.Z_POSITION];
-					a[j + Gaussian2DFunction.X_SD] *= zModel.getSx(tz);
-					a[j + Gaussian2DFunction.Y_SD] *= zModel.getSy(tz);
+					a[j + Gaussian2DFunction.X_SD] = zModel.getSx(tz);
+					a[j + Gaussian2DFunction.Y_SD] = zModel.getSy(tz);
 					//a[ErfGaussian2DFunction.Z_POSITION] = 0;
 				}
 
@@ -423,8 +423,8 @@ public class GaussianFunctionFactory
 			{
 				// Convert the parameters for a free-circle function
 				final double tz = a[Gaussian2DFunction.Z_POSITION];
-				a[Gaussian2DFunction.X_SD] *= zModel.getSx(tz);
-				a[Gaussian2DFunction.Y_SD] *= zModel.getSy(tz);
+				a[Gaussian2DFunction.X_SD] = zModel.getSx(tz);
+				a[Gaussian2DFunction.Y_SD] = zModel.getSy(tz);
 				//a[ErfGaussian2DFunction.Z_POSITION] = 0;
 
 				return FIT_ERF_FREE_CIRCLE;

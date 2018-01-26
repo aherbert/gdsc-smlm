@@ -127,6 +127,7 @@ public class GUIProtosHelper
 		builder.setMaxBinaryDistance(30);
 		builder.setDensityRadius(3);
 		builder.setDepthOfField(250);
+		builder.setDepthOfFocus(450);
 		defaultCreateDataSettings = builder.build();
 	}
 

@@ -435,13 +435,15 @@ public class FastMLEGradient2ProcedureTest
 		gradientCalculatorComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
 
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
+		double sx = 1.08;
+		double sy = 1.01;
 		double gamma = 0.389;
 		double d = 0.531;
 		double Ax = -0.0708;
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(gamma, d, Ax, Bx, Ay, By);
+		HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 		gradientCalculatorComputesGradient(new SingleAstigmatismErfGaussian2DFunction(blockWidth, blockWidth, zModel));
 	}
 
@@ -460,7 +462,7 @@ public class FastMLEGradient2ProcedureTest
 		createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-5;
-		DoubleEquality eq = new DoubleEquality(1e-4, 1e-3);
+		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -491,7 +493,10 @@ public class FastMLEGradient2ProcedureTest
 				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
 				//		gradient1, d1[j], gradient2, d2[j]);
 				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualRelativeOrAbsolute(gradient1, d1[j]));
-				Assert.assertTrue("Not same gradient2 @ " + j, eq.almostEqualRelativeOrAbsolute(gradient2, d2[j]));
+				if (!eq.almostEqualRelativeOrAbsolute(gradient2, d2[j]))
+				{
+					Assert.fail("Not same gradient2 @ " + j + " error = " + DoubleEquality.relativeError(gradient2, d2[j]));
+				}
 			}
 		}
 	}

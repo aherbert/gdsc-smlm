@@ -1283,13 +1283,13 @@ public class AstigmatismModelManager implements PlugIn
 		double[] sx = new double[z.length];
 		double[] sy = new double[z.length];
 		// Use the same class that is used during fitting
-		HoltzerAstigmatismZModel m = HoltzerAstigmatismZModel.create(gamma, d, Ax, Bx, Ay, By);
+		HoltzerAstigmatismZModel m = HoltzerAstigmatismZModel.create(s0x, s0y, gamma, d, Ax, Bx, Ay, By);
 		for (int i = 0; i < z.length; i++)
 		{
 			double zz = -range + i * step;
 			z[i] = zz;
-			sx[i] = s0x * m.getSx(zz);
-			sy[i] = s0y * m.getSy(zz);
+			sx[i] = m.getSx(zz);
+			sy[i] = m.getSy(zz);
 		}
 
 		String title = TITLE + " Width Curve";
@@ -1353,9 +1353,7 @@ public class AstigmatismModelManager implements PlugIn
 	{
 		GenericDialog gd = new GenericDialog(TITLE);
 		String[] MODELS = listAstigmatismModels(false);
-		gd.addMessage(
-				"Invert the z-orientation of a model.\n \n"+
-				TextUtils.wrap(
+		gd.addMessage("Invert the z-orientation of a model.\n \n" + TextUtils.wrap(
 				//@formatter:off
 				 "Note that a positive gamma puts the focal plane for the X-dimension " +
 				 "above the z-centre (positive Z) and the focal "+
@@ -1363,8 +1361,7 @@ public class AstigmatismModelManager implements PlugIn
 				 "is negative then the orientation of the focal "+ 
 				 "planes of X and Y are reversed."
 				//@formatter:on
-				 , 80)
-		);
+				, 80));
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
 		gd.showDialog();
 		if (gd.wasCanceled())
