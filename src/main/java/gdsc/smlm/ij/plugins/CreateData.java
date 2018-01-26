@@ -76,6 +76,7 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
@@ -2273,9 +2274,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		else if (settings.getPsfModel().equals(PSF_MODELS[0]))
 		{
 			// Calibration based on imaging fluorescent beads at 20nm intervals.
-			// Set the PSF to 1.5 x FWHM at 450nm
+			// Set the depth-of-focus to 450nm
 			double sd = getPsfSD();
-			return new GaussianPSFModel(createRandomGenerator(), sd, sd, 450.0 / settings.getPixelPitch());
+			double d = 450.0 / settings.getPixelPitch();
+			double gamma = 0;
+			// Test astigmatism
+			//double gamma = 500 / settings.getPixelPitch();
+			HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
+			return new GaussianPSFModel(createRandomGenerator(), zModel);
 		}
 		else
 		{
@@ -4089,8 +4095,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		addCameraOptions(gd);
 
-		// PSF Model
-		List<String> imageNames = addPSFOptions(gd);
+		addPSFOptions(gd);
 
 		gd.addMessage("--- Fluorophores ---");
 		// Do not allow grid or mask distribution
@@ -4150,8 +4155,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.setBackground(Math.abs(gd.getNextNumber()));
 		settings.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 
-		if (!collectPSFOptions(gd, imageNames))
-			return false;
+		settings.setPsfModel(gd.getNextChoice());
 
 		if (simpleMode)
 		{
@@ -4207,9 +4211,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.setPhotonsPerSecondMaximum(settings.getPhotonsPerSecond());
 			if (!imagePSF)
 			{
-				Parameters.isAboveZero("Wavelength", settings.getWavelength());
-				Parameters.isAboveZero("NA", settings.getNumericalAperture());
-				Parameters.isBelow("NA", settings.getNumericalAperture(), 2);
+				if (settings.getEnterWidth())
+				{
+					Parameters.isAboveZero("PSF SD", settings.getPsfSd());
+				}
+				else
+				{
+					Parameters.isAboveZero("Wavelength", settings.getWavelength());
+					Parameters.isAboveZero("NA", settings.getNumericalAperture());
+					Parameters.isBelow("NA", settings.getNumericalAperture(), 2);
+				}
 			}
 			Parameters.isPositive("Histogram bins", settings.getHistogramBins());
 			if (simpleMode)
@@ -4255,8 +4266,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					public boolean collectOptions(Integer field)
 					{
 						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
-						boolean result = collectOptions(false);
-						return result;
+						return collectOptions(false);
 					}
 
 					public boolean collectOptions()
@@ -4434,93 +4444,78 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * @param gd
 	 * @return
 	 */
-	private List<String> addPSFOptions(GenericDialog gd)
+	private void addPSFOptions(final ExtendedGenericDialog gd)
 	{
 		gd.addMessage("--- PSF Model ---");
 		List<String> imageNames = PSFCombiner.createImageList();
-		String[] models = PSF_MODELS;
+		final String[] models;
+		final String[] images;
 		if (imageNames.isEmpty())
 		{
 			imagePSF = false;
 			models = Arrays.copyOf(PSF_MODELS, PSF_MODELS.length - 1);
-		}
-		gd.addChoice("PSF_model", models, settings.getPsfModel());
-		gd.addCheckbox("Enter_width", settings.getEnterWidth());
-		return imageNames;
-	}
-
-	/**
-	 * If there are any suitable PSF images open then get the selected PSF model and collect the parameters required to
-	 * configure it. If no PSF images are open then collect the wavelength and NA for the simulated microscope.
-	 * 
-	 * @param gd
-	 * @return
-	 */
-	private boolean collectPSFOptions(GenericDialog gd, List<String> imageNames)
-	{
-		settings.setPsfModel(gd.getNextChoice());
-		settings.setEnterWidth(gd.getNextBoolean());
-		if (!imageNames.isEmpty())
-			imagePSF = settings.getPsfModel().equals(PSF_MODELS[PSF_MODELS.length - 1]);
-
-		// Show a second dialog to get the PSF parameters we need
-		GenericDialog gd2 = new GenericDialog(TITLE);
-		gd2.addMessage("Configure the " + settings.getPsfModel() + " PSF model");
-		if (imagePSF)
-		{
-			gd2.addChoice("PSF_image", imageNames.toArray(new String[imageNames.size()]), settings.getPsfImageName());
+			images = imageNames.toArray(new String[imageNames.size()]);
 		}
 		else
 		{
-			if (settings.getEnterWidth())
-			{
-				gd2.addNumericField("PSF_SD (nm)", settings.getPsfSd(), 2);
-			}
-			else
-			{
-				gd2.addNumericField("Wavelength (nm)", settings.getWavelength(), 2);
-				gd2.addNumericField("Numerical_aperture", settings.getNumericalAperture(), 2);
-			}
+			models = PSF_MODELS;
+			images = null;
 		}
-		gd2.showDialog();
-		if (gd2.wasCanceled())
-			return false;
-		if (imagePSF)
+		gd.addChoice("PSF_model", models, settings.getPsfModel(), new OptionListener<Integer>()
 		{
-			settings.setPsfImageName(gd2.getNextChoice());
-		}
-		else
-		{
-			if (settings.getEnterWidth())
+			public boolean collectOptions(Integer value)
 			{
-				settings.setPsfSd(Math.abs(gd2.getNextNumber()));
-			}
-			else
-			{
-				settings.setWavelength(Math.abs(gd2.getNextNumber()));
-				settings.setNumericalAperture(Math.abs(gd2.getNextNumber()));
+				settings.setPsfModel(models[value]);
+				return collectOptions(false);
 			}
 
-			try
+			public boolean collectOptions()
 			{
-				if (settings.getEnterWidth())
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+				egd.addMessage("Configure the " + settings.getPsfModel() + " PSF model");
+
+				int type = 0;
+
+				// Get the image
+				if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODELS.length - 1]))
 				{
-					Parameters.isAboveZero("PSF SD", settings.getPsfSd());
+					egd.addChoice("PSF_image", images, settings.getPsfImageName());
+				}
+				// Get the width of the model
+				else
+				{
+					type = 1;
+					egd.addNumericField("Depth-of-focus (nm)", settings.getDepthOfFocus(), 2);
+					egd.addCheckbox("Enter_width", settings.getEnterWidth());
+					egd.addNumericField("PSF_SD (nm)", settings.getPsfSd(), 2);
+					egd.addMessage("Or compute from optics:");
+					egd.addNumericField("Wavelength (nm)", settings.getWavelength(), 2);
+					egd.addNumericField("Numerical_aperture", settings.getNumericalAperture(), 2);
+				}
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				if (type == 0)
+				{
+					settings.setPsfImageName(egd.getNextChoice());
 				}
 				else
 				{
-					Parameters.isAboveZero("Wavelength", settings.getWavelength());
-					Parameters.isAboveZero("NA", settings.getNumericalAperture());
+					settings.setDepthOfFocus(egd.getNextNumber());
+					settings.setEnterWidth(egd.getNextBoolean());
+					settings.setPsfSd(Math.abs(egd.getNextNumber()));
+					settings.setWavelength(Math.abs(egd.getNextNumber()));
+					settings.setNumericalAperture(Math.abs(egd.getNextNumber()));
 				}
+				return true;
 			}
-			catch (IllegalArgumentException e)
-			{
-				IJ.error(TITLE, e.getMessage());
-				return false;
-			}
-		}
 
-		return true;
+		});
 	}
 
 	private boolean getHistogramOptions()
@@ -4584,7 +4579,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		addCameraOptions(gd);
 
-		List<String> imageNames = addPSFOptions(gd);
+		addPSFOptions(gd);
 
 		gd.addMessage("--- Fluorophores ---");
 		gd.addChoice("Distribution", DISTRIBUTION, settings.getDistribution());
@@ -4661,8 +4656,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		settings.setBackground(Math.abs(gd.getNextNumber()));
 		settings.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 
-		if (!collectPSFOptions(gd, imageNames))
-			return false;
+		settings.setPsfModel(gd.getNextChoice());
 
 		settings.setDistribution(gd.getNextChoice());
 		settings.setParticles(Math.abs((int) gd.getNextNumber()));
