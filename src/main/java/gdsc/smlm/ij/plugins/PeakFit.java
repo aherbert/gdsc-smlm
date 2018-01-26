@@ -406,7 +406,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 			}
 
 			if (imageSource == null)
-				imageSource = new IJImageSource(imp);
+			{
+				try
+				{
+					imageSource = new IJImageSource(imp);
+				}
+				catch (IllegalArgumentException e)
+				{
+					// This can happen if the image has an origin not in integer pixels
+					// e.g. the plugin is run on a plot
+					IJ.error(TITLE, "Error using image: " + imp.getTitle() + "\n \n" + e.getMessage());
+					return DONE;
+				}
+			}
 		}
 
 		time = -1;
