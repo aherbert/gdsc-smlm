@@ -88,7 +88,7 @@ public class AiryPSFModel extends PSFModel
 	 * @param w1
 	 *            The Airy width for dimension 1
 	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
+	 *            the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
 	 */
 	public AiryPSFModel(RandomGenerator randomGenerator, double w0, double w1, double zDepth)
 	{
@@ -119,7 +119,7 @@ public class AiryPSFModel extends PSFModel
 	 * @param w1
 	 *            The Airy width for dimension 1
 	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is twice the width (2 x FWHM)
+	 *            the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
 	 */
 	public AiryPSFModel(RandomDataGenerator randomDataGenerator, double w0, double w1, double zDepth)
 	{
@@ -175,7 +175,7 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
-	 * Generate a scale so that at the configured zDepth the scale is 1.5.
+	 * Generate a scale so that at the configured zDepth the scale is sqrt(2).
 	 * 
 	 * @param z
 	 * @return The scale
@@ -185,13 +185,13 @@ public class AiryPSFModel extends PSFModel
 		if (zDepth == 0) // Not 3D data
 			return 1;
 
-		// PSF fitting on data from the GDSC microscope show that the PSF width spread can be modelled
-		// by a simple quadratic up to 1.5 times the width:
-		//   width = 1 + z^2 / 2
-		//         = 1.5 @ z=1
+		// Holtzer z-model:
+		// Ref: Holtzer, L., Meckel, T. & Schmidt, T. Nanometric three-dimensional tracking of individual quantum dots in cells.
+		// Applied Physics Letters 90, 1–3 (2007).
+		//   width = sqrt(1 + z^2 / d^2)
 
 		z /= zDepth; // Scale so z=1 at the configured z-depth
-		return 1.0 + z * z * 0.5;
+		return Math.sqrt(1.0 + z * z);
 	}
 
 	/**
@@ -596,7 +596,7 @@ public class AiryPSFModel extends PSFModel
 	}
 
 	/**
-	 * @return the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
+	 * @return the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
 	 */
 	public double getzDepth()
 	{
@@ -605,7 +605,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
+	 *            the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
 	 */
 	public void setzDepth(double zDepth)
 	{

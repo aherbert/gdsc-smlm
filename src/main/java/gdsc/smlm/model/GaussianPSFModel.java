@@ -17,6 +17,9 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.special.Erf;
 
+import gdsc.smlm.function.gaussian.AstigmatismZModel;
+import gdsc.smlm.function.gaussian.NullAstigmatismZModel;
+
 /**
  * Contains methods for generating models of a Point Spread Function using a Gaussian approximation
  */
@@ -25,7 +28,7 @@ public class GaussianPSFModel extends PSFModel
 	private double zeroS0, zeroS1;
 	private double s0;
 	private double s1;
-	private double zDepth = 0;
+	private final AstigmatismZModel zModel;
 
 	/**
 	 * @param s0
@@ -38,6 +41,7 @@ public class GaussianPSFModel extends PSFModel
 		super();
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
+		zModel = NullAstigmatismZModel.INSTANCE;
 	}
 
 	/**
@@ -52,23 +56,43 @@ public class GaussianPSFModel extends PSFModel
 		super(randomGenerator);
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
+		zModel = NullAstigmatismZModel.INSTANCE;
 	}
 
 	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
 	 * @param randomGenerator
+	 *            the random generator
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0
 	 * @param s1
 	 *            The Gaussian standard deviation dimension 1
-	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
+	 * @param zModel
+	 *            the z model. The widths produced by the model are multiplied by s0/s1 respectively.
 	 */
-	public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1, double zDepth)
+	public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1, AstigmatismZModel zModel)
 	{
 		super(randomGenerator);
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
-		setzDepth(zDepth);
+		this.zModel = zModel;
+	}
+
+	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
+	 * @param randomGenerator
+	 *            the random generator
+	 * @param zModel
+	 *            the z model
+	 */
+	public GaussianPSFModel(RandomGenerator randomGenerator, AstigmatismZModel zModel)
+	{
+		super(randomGenerator);
+		this.zeroS0 = 1;
+		this.zeroS1 = 1;
+		this.zModel = zModel;
 	}
 
 	/**
@@ -83,23 +107,43 @@ public class GaussianPSFModel extends PSFModel
 		super(randomDataGenerator);
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
+		zModel = NullAstigmatismZModel.INSTANCE;
 	}
 
 	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
 	 * @param randomDataGenerator
+	 *            the random data generator
 	 * @param s0
 	 *            The Gaussian standard deviation dimension 0
 	 * @param s1
 	 *            The Gaussian standard deviation dimension 1
-	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is twice the width (2 x FWHM)
+	 * @param zModel
+	 *            the z model. The widths produced by the model are multiplied by s0/s1 respectively.
 	 */
-	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, double s0, double s1, double zDepth)
+	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, double s0, double s1, AstigmatismZModel zModel)
 	{
 		super(randomDataGenerator);
 		this.zeroS0 = s0;
 		this.zeroS1 = s1;
-		setzDepth(zDepth);
+		this.zModel = zModel;
+	}
+
+	/**
+	 * Instantiates a new gaussian PSF model.
+	 *
+	 * @param randomDataGenerator
+	 *            the random data generator
+	 * @param zModel
+	 *            the z model
+	 */
+	public GaussianPSFModel(RandomDataGenerator randomDataGenerator, AstigmatismZModel zModel)
+	{
+		super(randomDataGenerator);
+		this.zeroS0 = 1;
+		this.zeroS1 = 1;
+		this.zModel = zModel;
 	}
 
 	/*
@@ -112,10 +156,9 @@ public class GaussianPSFModel extends PSFModel
 	{
 		if (sum == 0)
 			return 0;
-		final double scale = createWidthScale(x2);
 		try
 		{
-			final double d = gaussian2D(data, width, height, sum, x0, x1, scale * zeroS0, scale * zeroS1, poissonNoise);
+			final double d = gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), poissonNoise);
 			//			if (d == 0)
 			//			{
 			//				System.out.printf("No data inserted: %f @ %f %f %f (%f x %f)\n", sum, x0, x1, x2, scale * zeroS0,
@@ -140,10 +183,9 @@ public class GaussianPSFModel extends PSFModel
 	{
 		if (sum == 0)
 			return 0;
-		final double scale = createWidthScale(x2);
 		try
 		{
-			return gaussian2D(data, width, height, sum, x0, x1, scale * zeroS0, scale * zeroS1, poissonNoise);
+			return gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), poissonNoise);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -153,23 +195,27 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
-	 * Generate a scale so that at the configured zDepth the scale is 1.5.
-	 * 
+	 * Gets the width in dimension 0 for the given z-depth.
+	 *
 	 * @param z
-	 * @return The scale
+	 *            the z
+	 * @return the s0
 	 */
-	private double createWidthScale(double z)
+	public double getS0(double z)
 	{
-		if (zDepth == 0) // Not 3D data
-			return 1;
+		return zModel.getSx(z) * zeroS0;
+	}
 
-		// PSF fitting on data from the GDSC microscope show that the PSF width spread can be modelled
-		// by a simple quadratic up to 1.5 times the width:
-		//   width = 1 + z^2 / 2
-		//         = 1.5 @ z=1
-
-		z /= zDepth; // Scale so z=1 at the configured z-depth
-		return 1.0 + z * z * 0.5;
+	/**
+	 * Gets the width in dimension 1 for the given z-depth.
+	 *
+	 * @param z
+	 *            the z
+	 * @return the s1
+	 */
+	public double getS1(double z)
+	{
+		return zModel.getSy(z) * zeroS1;
 	}
 
 	/**
@@ -306,8 +352,8 @@ public class GaussianPSFModel extends PSFModel
 		return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
 	}
 
-	private final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2); 
-	
+	private final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
+
 	/**
 	 * Construct a Gaussian 2D function based at the origin using the specified range in each dimension.
 	 * <p>
@@ -345,7 +391,7 @@ public class GaussianPSFModel extends PSFModel
 
 		final double denom0 = ONE_OVER_ROOT2 / s0;
 		final double denom1 = ONE_OVER_ROOT2 / s1;
-		
+
 		// Note: The 0.5 factors are moved to reduce computations 
 		for (int x = 0; x <= x0range; x++)
 		{
@@ -406,23 +452,6 @@ public class GaussianPSFModel extends PSFModel
 	}
 
 	/**
-	 * @return the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
-	 */
-	public double getzDepth()
-	{
-		return zDepth;
-	}
-
-	/**
-	 * @param zDepth
-	 *            the Z-depth where the 3D PSF is 1.5x the width (1.5 x FWHM)
-	 */
-	public void setzDepth(double zDepth)
-	{
-		this.zDepth = Math.abs(zDepth);
-	}
-
-	/**
 	 * @return The standard deviation dimension 0 for the last drawn Gaussian
 	 */
 	public double getS0()
@@ -453,8 +482,7 @@ public class GaussianPSFModel extends PSFModel
 	{
 		if (n <= 0)
 			return insertSample(data, width, height, null, null);
-		final double scale = createWidthScale(x2);
-		double[][] sample = sample(n, x0, x1, scale * zeroS0, scale * zeroS1);
+		double[][] sample = sample(n, x0, x1, getS0(x2), getS1(x2));
 		return insertSample(data, width, height, sample[0], sample[1]);
 	}
 
@@ -463,8 +491,7 @@ public class GaussianPSFModel extends PSFModel
 	{
 		if (n <= 0)
 			return insertSample(data, width, height, null, null);
-		final double scale = createWidthScale(x2);
-		double[][] sample = sample(n, x0, x1, scale * zeroS0, scale * zeroS1);
+		double[][] sample = sample(n, x0, x1, getS0(x2), getS1(x2));
 		return insertSample(data, width, height, sample[0], sample[1]);
 	}
 
