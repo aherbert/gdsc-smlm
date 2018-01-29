@@ -22,12 +22,12 @@ public class IdPeakResultComparator implements Comparator<PeakResult>
 {
 	/** An instance of the comparator */
 	public static final IdPeakResultComparator INSTANCE = new IdPeakResultComparator();
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
+	 */b
 	public int compare(PeakResult o1, PeakResult o2)
 	{
 		int id1 = o1.getId();
@@ -36,7 +36,21 @@ public class IdPeakResultComparator implements Comparator<PeakResult>
 			return -1;
 		if (id1 == id2)
 			// Sort by frame
-			return Integer.compare(o1.getFrame(), o2.getFrame());
+			return compare(o1.getFrame(), o2.getFrame());
 		return 1;
+	}
+
+	/**
+	 * Compare the integers. Copied from Java 1.7.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the comparison
+	 */
+	private static int compare(int x, int y)
+	{
+		return (x < y) ? -1 : ((x == y) ? 0 : 1);
 	}
 }
