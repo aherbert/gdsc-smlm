@@ -4564,7 +4564,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
 		availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);
 		final String[] images;
-		if (imageNames.isEmpty())
+		if (!imageNames.isEmpty())
 		{
 			availableModels.add(PSF_MODELS[PSF_MODEL_IMAGE]);
 			images = imageNames.toArray(new String[imageNames.size()]);
