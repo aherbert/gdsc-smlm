@@ -27,7 +27,7 @@ public class IdPeakResultComparator implements Comparator<PeakResult>
 	 * (non-Javadoc)
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */b
+	 */
 	public int compare(PeakResult o1, PeakResult o2)
 	{
 		int id1 = o1.getId();
