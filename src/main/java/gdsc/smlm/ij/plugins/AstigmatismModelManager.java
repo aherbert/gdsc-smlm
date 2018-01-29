@@ -1318,9 +1318,11 @@ public class AstigmatismModelManager implements PlugIn
 
 	private void viewModel()
 	{
-		GenericDialog gd = new GenericDialog(TITLE);
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		String[] MODELS = listAstigmatismModels(false);
 		gd.addChoice("Model", MODELS, pluginSettings.getSelected());
+		gd.addChoice("z_distance_unit", SettingsManager.getDistanceUnitNames(), pluginSettings.getZDistanceUnitValue());
+		gd.addChoice("s_distance_unit", SettingsManager.getDistanceUnitNames(), pluginSettings.getSDistanceUnitValue());
 		gd.addCheckbox("Show_depth_of_focus", pluginSettings.getShowDepthOfFocus());
 		gd.addCheckbox("Show_PSF", pluginSettings.getShowPsf());
 		gd.showDialog();
@@ -1328,6 +1330,8 @@ public class AstigmatismModelManager implements PlugIn
 			return;
 		String name = gd.getNextChoice();
 		pluginSettings.setSelected(name);
+		pluginSettings.setZDistanceUnitValue(gd.getNextChoiceIndex());
+		pluginSettings.setSDistanceUnitValue(gd.getNextChoiceIndex());
 		pluginSettings.setShowDepthOfFocus(gd.getNextBoolean());
 		pluginSettings.setShowPsf(gd.getNextBoolean());
 
@@ -1340,6 +1344,15 @@ public class AstigmatismModelManager implements PlugIn
 		}
 
 		Utils.log("Astigmatism model: %s\n%s", name, model);
+
+		try
+		{
+			model = convert(model, pluginSettings.getZDistanceUnit(), pluginSettings.getSDistanceUnit());
+		}
+		catch (ConversionException e)
+		{
+			// Ignore
+		}
 
 		// Plot the curve. Do this so we encompass twice the depth-of-field.
 		double gamma = model.getGamma();
@@ -1436,6 +1449,7 @@ public class AstigmatismModelManager implements PlugIn
 			gd.addMessage("Model = " + name);
 			gd.addSlider("Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")", -range, range, 0);
 			final TextField tfz = gd.getLastTextField();
+			gd.addCheckbox("Calibrated_image", pluginSettings.getCalibratedImage());
 			gd.addDialogListener(this);
 			if (Utils.isShowGenericDialog())
 			{
@@ -1453,11 +1467,14 @@ public class AstigmatismModelManager implements PlugIn
 				draw();
 			}
 			gd.showDialog();
+			
+			SettingsManager.writeSettings(pluginSettings);
 		}
 
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			z = gd.getNextNumber();
+			pluginSettings.setCalibratedImage(gd.getNextBoolean());
 			if (gd.invalidNumber())
 				return false;
 			update();
@@ -1465,20 +1482,29 @@ public class AstigmatismModelManager implements PlugIn
 		}
 
 		private double _z = -1;
+		private int _calibratedImage = -1;
 
 		private void draw()
 		{
 			_z = z;
-
+			int calibratedImage = getCalibratedImage();
 			float[] data = new float[width * width];
 			psf.create3D(data, width, width, 1, cx, cx, _z, false);
 			ImagePlus imp = Utils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
-			if (Utils.isNewWindow())
+			if (_calibratedImage != calibratedImage)
 			{
-				//Calibration cal = new Calibration();
-				//cal.setXUnit("um");
-				//cal.pixelWidth = cal.pixelHeight = model.getNmPerPixel() / 1000;
-				//imp.setCalibration(cal);
+				if (calibratedImage == 1)
+				{
+					Calibration cal = new Calibration();
+					cal.setXUnit("um");
+					cal.pixelWidth = cal.pixelHeight = model.getNmPerPixel() / 1000;
+					imp.setCalibration(cal);
+				}
+				else
+				{
+					imp.setCalibration(null);
+				}
+				_calibratedImage = calibratedImage;
 			}
 			imp.resetDisplayRange();
 
@@ -1506,7 +1532,8 @@ public class AstigmatismModelManager implements PlugIn
 							// Continue while the parameter is changing
 							//@formatter:off
 							while (
-									_z != z
+									_z != z ||
+									_calibratedImage != getCalibratedImage()
 									)
 							//@formatter:on
 							{
@@ -1521,6 +1548,11 @@ public class AstigmatismModelManager implements PlugIn
 					}
 				}).start();
 			}
+		}
+
+		private int getCalibratedImage()
+		{
+			return pluginSettings.getCalibratedImage() ? 1 : 0;
 		}
 	}
 
@@ -1551,7 +1583,7 @@ public class AstigmatismModelManager implements PlugIn
 				model.getNmPerPixel());
 		builder.setZDistanceUnitValue(zDistanceUnit.getNumber());
 		builder.setSDistanceUnitValue(sDistanceUnit.getNumber());
-		
+
 		// Convert the input units 
 		builder.setGamma(zc.convert(model.getGamma()));
 		builder.setD(zc.convert(model.getD()));
@@ -1559,11 +1591,11 @@ public class AstigmatismModelManager implements PlugIn
 		builder.setAy(zc.convertBack(model.getAy()));
 		builder.setBx(zc.convertBack(zc.convertBack(model.getBx())));
 		builder.setBy(zc.convertBack(zc.convertBack(model.getBy())));
-		
+
 		// Convert the output units
 		builder.setS0X(sc.convert(model.getS0X()));
 		builder.setS0Y(sc.convert(model.getS0Y()));
-		
+
 		return builder.build();
 	}
 

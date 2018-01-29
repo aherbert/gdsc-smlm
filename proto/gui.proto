@@ -531,6 +531,9 @@ message AstigmatismModelManagerSettings
 	string selected = 13;
 	bool show_depth_of_focus = 16;
 	bool show_psf = 18;
+	DistanceUnit z_distance_unit = 19;
+	DistanceUnit s_distance_unit = 20;
+	bool calibrated_image = 21;
 
 	// Filename for import/export
 	string filename = 17;
