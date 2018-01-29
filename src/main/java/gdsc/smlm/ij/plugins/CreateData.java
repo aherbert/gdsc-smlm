@@ -2010,15 +2010,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Do all the frames that had no localisations
+		float[] limits = null;
 		for (int t = 1; t <= maxT; t++)
 		{
 			if (Utils.isInterrupted())
 				break;
-			if (stack.getPixels(t) == null)
+			Object pixels = stack.getPixels(t);
+			if (pixels == null)
 			{
 				futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT, t, null,
 						syncResults, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
 			}
+			else if (limits == null)
+				limits = Maths.limits((float[]) pixels);
 		}
 
 		// Finish
@@ -2067,17 +2071,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			// Get the global limits and ensure all values can be represented
 			Object[] imageArray = stack.getImageArray();
-			float[] limits = Maths.limits((float[]) imageArray[0]);
+			limits = Maths.limits((float[]) imageArray[0]);
 			for (int j = 1; j < imageArray.length; j++)
 				limits = Maths.limits(limits, (float[]) imageArray[j]);
-			limits[0] = 0; // Leave bias in place
+			//float limits0 = limits[0];
+			float limits0 = 0; // Leave bias in place
 			// Check if the image will fit in a 16-bit range
-			if ((limits[1] - limits[0]) < 65535)
+			if ((limits[1] - limits0) < 65535)
 			{
 				// Convert to 16-bit
 				newStack = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
 				// Account for rounding
-				final float min = (float) (limits[0] - 0.5);
+				final float min = (float) (limits0 - 0.5);
 				for (int j = 0; j < imageArray.length; j++)
 				{
 					float[] image = (float[]) imageArray[j];
@@ -2093,6 +2098,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (MemoryPeakResults.freeMemory() < 33554432L)
 						MemoryPeakResults.runGCOnce();
 				}
+				for (int k = 2; k-- > 0;)
+					limits[k] = (float) Math.floor(limits[k] - min);
 			}
 			else
 			{
@@ -2105,6 +2112,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						pixels[k] = Math.round(pixels[k]);
 					}
 				}
+				for (int k = 2; k-- > 0;)
+					limits[k] = Math.round(limits[k]);
 			}
 		}
 
@@ -2130,7 +2139,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		imp.setCalibration(cal);
 
 		imp.setDimensions(1, 1, newStack.getSize());
-		imp.resetDisplayRange();
+		imp.setDisplayRange(limits[0], limits[1]);
+		//imp.resetDisplayRange();
 		imp.updateAndDraw();
 
 		saveImage(imp);
@@ -3425,6 +3435,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			throw new IllegalStateException();
 		}
 		sb.append(" QE=").append(settings.getQuantumEfficiency()).append('\t');
+		sb.append(settings.getPsfModel());
+		if (psfModelType == PSF_MODEL_IMAGE)
+		{
+			sb.append(" Image").append(settings.getPsfImageName());
+		}
+		else if (psfModelType == PSF_MODEL_ASTIGMATISM)
+		{
+			sb.append(" model=").append(settings.getAstigmatismModel());
+		}
+		else
+		{
+			sb.append(" DoF=").append(Utils.rounded(settings.getDepthOfFocus()));
+			if (settings.getEnterWidth())
+			{
+				sb.append(" SD=").append(Utils.rounded(settings.getPsfSd()));
+			}
+			else
+			{
+				sb.append(" λ=").append(Utils.rounded(settings.getWavelength()));
+				sb.append(" NA=").append(Utils.rounded(settings.getNumericalAperture()));
+			}
+		}
+		sb.append('\t');
 		sb.append((fluorophores == null) ? localisations.size() : fluorophores.size()).append('\t');
 		sb.append(stats[SAMPLED_BLINKS].getN() + (int) stats[SAMPLED_BLINKS].getSum()).append('\t');
 		sb.append(localisations.size()).append('\t');
@@ -3642,7 +3675,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private String createHeader()
 	{
 		StringBuilder sb = new StringBuilder(
-				"Dataset\tCamera\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
+				"Dataset\tCamera\tPSF\tMolecules\tPulses\tLocalisations\tnFrames\tArea (um^2)\tDensity (mol/um^2)\tHWHM\tS\tSa");
 		for (int i = 0; i < NAMES.length; i++)
 		{
 			sb.append('\t').append(NAMES[i]);
