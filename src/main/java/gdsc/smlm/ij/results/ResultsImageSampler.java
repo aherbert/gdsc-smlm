@@ -116,7 +116,7 @@ public class ResultsImageSampler
 	{
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = Integer.compare(o1.size(), o2.size());
+			int result = compareInt(o1.size(), o2.size());
 			if (result == 0)
 				// Use index if the same count
 				return Long.compare(o1.index, o2.index);
@@ -128,12 +128,17 @@ public class ResultsImageSampler
 	{
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
-			int result = Integer.compare(o2.size(), o1.size());
+			int result = compareInt(o2.size(), o1.size());
 			if (result == 0)
 				// Use index if the same count
 				return Long.compare(o1.index, o2.index);
 			return result;
 		}
+	}
+
+	private static int compareInt(int x, int y)
+	{
+		return (x < y) ? -1 : ((x == y) ? 0 : 1);
 	}
 
 	private static IndexComparator ic = new IndexComparator();
@@ -177,7 +182,7 @@ public class ResultsImageSampler
 	{
 		if (results.getDistanceUnit() != DistanceUnit.PIXEL)
 			throw new IllegalArgumentException("Results must be in pixel units");
-		
+
 		this.results = results;
 		this.stack = stack;
 		this.size = size;
@@ -493,7 +498,7 @@ public class ResultsImageSampler
 				nmPerPixel = calibration.getNmPerPixel();
 			}
 		}
-		
+
 		// Sort descending by number in the frame
 		ResultsSample[] sample = list.toArray(new ResultsSample[list.size()]);
 		Arrays.sort(sample, rcc);

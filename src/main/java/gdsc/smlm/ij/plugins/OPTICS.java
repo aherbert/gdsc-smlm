@@ -2843,7 +2843,7 @@ public class OPTICS implements PlugIn
 
 		public int compareColumn(TableResult o1, TableResult o2)
 		{
-			return Integer.compare(o1.id, o2.id);
+			return compareInt(o1.id, o2.id);
 		}
 	}
 
@@ -2856,7 +2856,7 @@ public class OPTICS implements PlugIn
 
 		public int compareColumn(TableResult o1, TableResult o2)
 		{
-			return Integer.compare(o1.size, o2.size);
+			return compareInt(o1.size, o2.size);
 		}
 	}
 
@@ -2869,8 +2869,22 @@ public class OPTICS implements PlugIn
 
 		public int compareColumn(TableResult o1, TableResult o2)
 		{
-			return Integer.compare(o1.level, o2.level);
+			return compareInt(o1.level, o2.level);
 		}
+	}
+
+	/**
+	 * Compare the integers. Copied from Java 1.7.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the result
+	 */
+	private static int compareInt(int x, int y)
+	{
+		return (x < y) ? -1 : ((x == y) ? 0 : 1);
 	}
 
 	private static class AreaTableResultComparator extends BaseTableResultComparator
