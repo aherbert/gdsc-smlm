@@ -425,11 +425,12 @@ public abstract class PSFModel
 	}
 
 	/**
-	 * Get the Full-Width at Half-Maximum (FWHM) of the PSF
+	 * Produce a shallow copy of this object. This shares the pre-computed PSF data but will allow
+	 * the copy to store its own version of the most recently created PSF.
 	 * 
-	 * @return the FWHM of the PSF
+	 * @return A shallow copy of this object
 	 */
-	public abstract double getFwhm();
+	public abstract PSFModel copy();
 
 	/**
 	 * Sample a PSF function on the provided data.

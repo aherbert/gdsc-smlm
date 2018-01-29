@@ -79,6 +79,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
+import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.ij.IJImageSource;
@@ -181,6 +182,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static final int PSF_MODEL_IMAGE = 2;
 	private static final int PSF_MODEL_ASTIGMATISM = 3;
 
+	/**
+	 * The PSF model type. This is set when validating the PSF settings.
+	 */
+	private int psfModelType = -1;
+
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
 	private static double areaInUm = 0;
@@ -246,7 +252,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private AtomicInteger t1Removed;
 	private AtomicInteger tNRemoved;
 	private SummaryStatistics photonStats;
-	private boolean imagePSF;
+	//private boolean imagePSF;
 	private double hwhm = 0;
 
 	private TIntHashSet movingMolecules;
@@ -1329,9 +1335,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (hwhm == 0)
 		{
-			if (imagePSF)
+			if (psfModelType == PSF_MODEL_IMAGE)
 			{
 				hwhm = getImageHWHM();
+			}
+			else if (psfModelType == PSF_MODEL_ASTIGMATISM)
+			{
+				hwhm = getAstigmatismHWHM();
 			}
 			else
 			{
@@ -1387,6 +1397,32 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// The width of the PSF is specified in pixels of the PSF image. Convert to the pixels of the 
 		// output image
 		return 0.5 * psfSettings.getFwhm() * psfSettings.getPixelSize() / settings.getPixelPitch();
+	}
+
+	private double getAstigmatismHWHM()
+	{
+		AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
+		if (model == null)
+		{
+			IJ.error(TITLE, "Unknown PSF model: " + settings.getAstigmatismModel());
+			return -1;
+		}
+		try
+		{
+			// Get the width at z=0 in pixels
+			model = AstigmatismModelManager.convert(model, model.getZDistanceUnit(), DistanceUnit.PIXEL);
+			AstigmatismZModel zModel = AstigmatismModelManager.create(model);
+			double sx = zModel.getSx(0);
+			double sy = zModel.getSy(0);
+			return Gaussian2DPeakResultHelper.getStandardDeviation(sx, sy) * Gaussian2DFunction.SD_TO_HWHM_FACTOR
+			// Scale appropriately
+					* model.getNmPerPixel() / settings.getPixelPitch();
+		}
+		catch (ConversionException e)
+		{
+			IJ.error(TITLE, "Unknown PSF FWHM setting for model: " + settings.getAstigmatismModel());
+			return -1;
+		}
 	}
 
 	/**
@@ -1922,15 +1958,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final double psfSD = getPsfSD();
 		if (psfSD <= 0)
 			return null;
-		ImagePSFModel imagePSFModel = null;
-
-		if (imagePSF)
-		{
-			// Create one Image PSF model that can be copied
-			imagePSFModel = createImagePSF(localisationSets);
-			if (imagePSFModel == null)
-				return null;
-		}
+		PSFModel psfModel = createPSFModel(localisationSets);
+		if (psfModel == null)
+			return null;
 
 		// Create the camera noise model
 		createPerPixelCameraModelData(cameraModel);
@@ -1965,7 +1995,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				lastT = l.getTime();
 				futures.add(threadPool.submit(
-						new ImageGenerator(localisationSets, newLocalisations, i, lastT, createPSFModel(imagePSFModel),
+						new ImageGenerator(localisationSets, newLocalisations, i, lastT, createPSFModel(psfModel),
 								syncResults, stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
 			}
 			i++;
@@ -2002,7 +2032,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.end();
 
 		// Clear memory
-		imagePSFModel = null;
+		psfModel = null;
 		threadPool = null;
 		futures.clear();
 		futures = null;
@@ -2271,26 +2301,42 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return image;
 	}
 
-	private PSFModel createPSFModel(ImagePSFModel imagePSFModel) throws IllegalArgumentException
+	private PSFModel createPSFModel(List<LocalisationModelSet> localisationSets) throws IllegalArgumentException
 	{
-		if (imagePSF)
+		if (psfModelType == PSF_MODEL_IMAGE)
 		{
-			PSFModel copy = imagePSFModel.copy();
-			copy.setRandomGenerator(createRandomGenerator());
-			return copy;
+			return createImagePSF(localisationSets);
 		}
-		else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
+
+		if (psfModelType == PSF_MODEL_ASTIGMATISM)
 		{
 			AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
 			if (model == null)
 				throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
-			if (DoubleEquality.relativeError(model.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
-				throw new IllegalArgumentException(
-						String.format("Astigmatism model %s calibration (%d nm) does not match pixel pitch (%s nm)",
-								settings.getAstigmatismModel(), model.getNmPerPixel(), settings.getPixelPitch()));
 			// Convert for simulation
 			try
 			{
+				if (DoubleEquality.relativeError(model.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
+				{
+					String message = String.format(
+							"Astigmatism model '%s' calibration (%s nm) does not match pixel pitch (%s nm)",
+							settings.getAstigmatismModel(), Utils.rounded(model.getNmPerPixel()),
+							Utils.rounded(settings.getPixelPitch()));
+					// Optionally convert
+					GenericDialog gd = new GenericDialog(TITLE);
+					gd.addMessage(TextUtils.wrap(message + ". Created data is not suitable for fitting.", 80));
+					gd.addMessage(TextUtils.wrap("Click OK to continue anyway (i.e. draw the spot using the " +
+							"correct nm width on the different sized pixels).", 80));
+					gd.showDialog();
+					if (gd.wasCanceled())
+						throw new IllegalArgumentException(message);
+					// Convert to nm
+					model = AstigmatismModelManager.convert(model, DistanceUnit.NM, DistanceUnit.NM);
+					// Reset pixel pitch. This will draw the spot using the correct size on the different size pixels.
+					model = model.toBuilder().setNmPerPixel(settings.getPixelPitch()).build();
+				}
+
+				// Convert for simulation in pixels
 				model = AstigmatismModelManager.convert(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
 				return new GaussianPSFModel(AstigmatismModelManager.create(model));
 			}
@@ -2300,26 +2346,29 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				throw new IllegalArgumentException(e);
 			}
 		}
-		else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_GAUSSIAN]))
+
+		if (psfModelType == PSF_MODEL_GAUSSIAN)
 		{
-			// Calibration based on imaging fluorescent beads at 20nm intervals.
-			// Set the depth-of-focus to 450nm
 			double sd = getPsfSD();
 			double d = settings.getDepthOfFocus() / settings.getPixelPitch();
 			double gamma = 0;
-			// Test astigmatism
-			//double gamma = 500 / settings.getPixelPitch();
 			HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
 			return new GaussianPSFModel(createRandomGenerator(), zModel);
 		}
-		else
-		{
-			// Airy pattern
-			double width = getPsfSD() / PSFCalculator.AIRY_TO_GAUSSIAN;
-			AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, 450.0 / settings.getPixelPitch());
-			m.setRing(2);
-			return m;
-		}
+
+		// Default to Airy pattern
+		double width = getPsfSD() / PSFCalculator.AIRY_TO_GAUSSIAN;
+		AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, 450.0 / settings.getPixelPitch());
+		m.setRing(2);
+		return m;
+	}
+
+	private PSFModel createPSFModel(PSFModel psfModel) throws IllegalArgumentException
+	{
+		PSFModel copy = psfModel.copy();
+		copy.setRandomGenerator(createRandomGenerator());
+		return copy;
+
 	}
 
 	private synchronized void showProgress()
@@ -2459,8 +2508,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (Utils.isInterrupted())
 				return;
 
-			final double psfSD = getPsfSD();
-
 			showProgress();
 
 			final boolean checkSNR = minSNRt1 > 0 || minSNRtN > 0;
@@ -2598,7 +2645,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					}
 					else
 					{
-						sx = sy = (float) psfSD;
+						throw new IllegalStateException("Unknown PSF model");
 					}
 
 					// *-*-*-*-*
@@ -3390,8 +3437,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		s *= settings.getPixelPitch();
 		final double sa = PSFCalculator.squarePixelAdjustment(s, settings.getPixelPitch()) / settings.getPixelPitch();
 		sb.append(Utils.rounded(sa, 4)).append('\t');
-		// Width not valid for the Image PSF
-		int nStats = (imagePSF) ? stats.length - 1 : stats.length;
+		// Width not valid for the Image PSF.
+		// Q. Is this true? We can approximate the FHWM for a spot-like image PSF.
+		int nStats = (psfModelType == PSF_MODEL_IMAGE) ? stats.length - 1 : stats.length;
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
@@ -3846,7 +3894,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				for (int id = 1; id <= fluorophores.size(); id++)
 				{
 					FluorophoreSequenceModel f = fluorophores.get(id - 1);
-					StringBuffer sb = new StringBuffer();
+					StringBuilder sb = new StringBuilder();
 					sb.append(f.getId()).append('\t');
 					sb.append(f.getNumberOfBlinks()).append('\t');
 					for (double[] burst : f.getBurstSequence())
@@ -3929,7 +3977,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				output.newLine();
 				for (LocalisationModel l : localisations)
 				{
-					StringBuffer sb = new StringBuffer();
+					StringBuilder sb = new StringBuilder();
 					sb.append(l.getTime()).append('\t');
 					sb.append(l.getId()).append('\t');
 					sb.append(l.getX()).append('\t');
@@ -3969,7 +4017,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			String[] backgroundImages = createBackgroundImageList();
 
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("# ").append(TITLE).append(" Parameters:\n");
 			addHeaderLine(sb, "Pixel_pitch (nm)", settings.getPixelPitch());
 			addHeaderLine(sb, "Size", settings.getSize());
@@ -3996,14 +4044,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			addHeaderLine(sb, "Background", settings.getBackground());
 			addCameraOptions(sb);
 			addHeaderLine(sb, "PSF_model", settings.getPsfModel());
-			if (imagePSF)
+			if (psfModelType == PSF_MODEL_IMAGE)
 			{
 				addHeaderLine(sb, "PSF_image", settings.getPsfImageName());
 			}
+			else if (psfModelType == PSF_MODEL_ASTIGMATISM)
+			{
+				addHeaderLine(sb, "Astigmatism_model", settings.getAstigmatismModel());
+				// Q. Should the actual model be appended?
+				//addHeaderLine(sb, "Astigmatism_model parameters", SettingsManager.toJSON(getTheModel()));
+			}
 			else
 			{
-				addHeaderLine(sb, "Wavelength (nm)", settings.getWavelength());
-				addHeaderLine(sb, "Numerical_aperture", settings.getNumericalAperture());
+				addHeaderLine(sb, "Depth-of-focus (nm)", settings.getDepthOfFocus());
+				if (settings.getEnterWidth())
+				{
+					addHeaderLine(sb, "PSF_SD", settings.getPsfSd());
+				}
+				else
+				{
+					addHeaderLine(sb, "Wavelength (nm)", settings.getWavelength());
+					addHeaderLine(sb, "Numerical_aperture", settings.getNumericalAperture());
+				}
 			}
 			if (!(benchmarkMode || spotMode))
 			{
@@ -4090,7 +4152,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return resultsFileHeader;
 	}
 
-	private void addHeaderLine(StringBuffer sb, String name, Object o)
+	private void addHeaderLine(StringBuilder sb, String name, Object o)
 	{
 		sb.append(String.format("# %-20s = %s\n", name, o.toString()));
 	}
@@ -4238,25 +4300,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isAboveZero("Min Photons", settings.getPhotonsPerSecond());
 			if (settings.getPhotonsPerSecondMaximum() < settings.getPhotonsPerSecond())
 				settings.setPhotonsPerSecondMaximum(settings.getPhotonsPerSecond());
-			if (!imagePSF)
-			{
-				Parameters.isAboveZero("Depth-of-focus", settings.getDepthOfFocus());
-				if (settings.getEnterWidth())
-				{
-					Parameters.isAboveZero("PSF SD", settings.getPsfSd());
-				}
-				else
-				{
-					Parameters.isAboveZero("Wavelength", settings.getWavelength());
-					Parameters.isAboveZero("NA", settings.getNumericalAperture());
-					Parameters.isBelow("NA", settings.getNumericalAperture(), 2);
-				}
-			}
 			Parameters.isPositive("Histogram bins", settings.getHistogramBins());
 			if (simpleMode)
 				Parameters.isPositive("Density radius", settings.getDensityRadius());
 
 			validateCameraOptions();
+			validatePSFOptions();
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -4440,7 +4489,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private void addCameraOptions(StringBuffer sb)
+	private void addCameraOptions(StringBuilder sb)
 	{
 		CameraType cameraType = settings.getCameraType();
 		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
@@ -4481,12 +4530,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		TurboList<String> availableModels = new TurboList<String>();
 		availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
 		availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);
-		final String[] models;
 		final String[] images;
 		if (imageNames.isEmpty())
 		{
 			availableModels.add(PSF_MODELS[PSF_MODEL_IMAGE]);
-			imagePSF = false;
 			images = imageNames.toArray(new String[imageNames.size()]);
 		}
 		else
@@ -4496,7 +4543,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final String[] astigmatismModels = AstigmatismModelManager.listAstigmatismModels(false, true);
 		if (astigmatismModels.length != 0)
 			availableModels.add(PSF_MODELS[PSF_MODEL_ASTIGMATISM]);
-		models = availableModels.toArray(new String[availableModels.size()]);
+		final String[] models = availableModels.toArray(new String[availableModels.size()]);
 		gd.addChoice("PSF_model", models, settings.getPsfModel(), new OptionListener<Integer>()
 		{
 			public boolean collectOptions(Integer value)
@@ -4527,7 +4574,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				{
 					type = 1;
 					egd.addChoice("Astigmatism_model", astigmatismModels, settings.getAstigmatismModel());
-					egd.addMessage("Note: The pixel size of the astigmatism model must\nmatch the pixel pitch. Settings are checked before running.");
+					egd.addMessage(TextUtils.wrap("Note: The pixel size of the astigmatism model should match " +
+							"the pixel pitch if fitting of the data is to be performed (i.e. fitting requires the " +
+							"astigmatism model to be calibrated to the image). If not then the model will be " +
+							"optionally converted before the simulation.", 80));
 				}
 				// Get the width of the model
 				else
@@ -4563,6 +4613,37 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 
 		});
+	}
+
+	private void validatePSFOptions()
+	{
+		if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
+		{
+			psfModelType = PSF_MODEL_ASTIGMATISM;
+			AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
+			if (model == null)
+				throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
+		}
+		else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_IMAGE]))
+		{
+			psfModelType = PSF_MODEL_IMAGE;
+		}
+		else
+		{
+			psfModelType = (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_GAUSSIAN])) ? PSF_MODEL_GAUSSIAN
+					: PSF_MODEL_AIRY;
+			Parameters.isAboveZero("Depth-of-focus", settings.getDepthOfFocus());
+			if (settings.getEnterWidth())
+			{
+				Parameters.isAboveZero("PSF SD", settings.getPsfSd());
+			}
+			else
+			{
+				Parameters.isAboveZero("Wavelength", settings.getWavelength());
+				Parameters.isAboveZero("NA", settings.getNumericalAperture());
+				Parameters.isBelow("NA", settings.getNumericalAperture(), 2);
+			}
+		}
 	}
 
 	private boolean getHistogramOptions()
@@ -4771,17 +4852,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Background", settings.getBackground());
 			Parameters.isAboveZero("Particles", settings.getParticles());
 			Parameters.isAboveZero("Photons", settings.getPhotonsPerSecond());
-			if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
-			{
-				// This will throw if it cannot be created
-				createPSFModel(null);
-			}
-			else if (!imagePSF)
-			{
-				Parameters.isAboveZero("Wavelength", settings.getWavelength());
-				Parameters.isAboveZero("NA", settings.getNumericalAperture());
-				Parameters.isBelow("NA", settings.getNumericalAperture(), 2);
-			}
 			Parameters.isPositive("Diffusion rate", settings.getDiffusionRate());
 			Parameters.isPositive("Fixed fraction", settings.getFixedFraction());
 			Parameters.isPositive("Pulse interval", settings.getPulseInterval());
@@ -4801,6 +4871,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Density radius", settings.getDensityRadius());
 
 			validateCameraOptions();
+			validatePSFOptions();
 		}
 		catch (IllegalArgumentException e)
 		{

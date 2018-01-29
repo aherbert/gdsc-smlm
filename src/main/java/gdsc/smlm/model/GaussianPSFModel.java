@@ -27,7 +27,7 @@ public class GaussianPSFModel extends PSFModel
 {
 	private double s0;
 	private double s1;
-	private final AstigmatismZModel zModel;
+	private AstigmatismZModel zModel;
 
 	/**
 	 * @param s0
@@ -111,6 +111,14 @@ public class GaussianPSFModel extends PSFModel
 		if (zModel == null)
 			throw new IllegalArgumentException("Model must not be null");
 		this.zModel = zModel;
+	}
+
+	/**
+	 * Private constructor used in the {@link #copy()} method
+	 */
+	private GaussianPSFModel()
+	{
+		super();
 	}
 
 	/*
@@ -437,12 +445,15 @@ public class GaussianPSFModel extends PSFModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.PSFModel#getFwhm()
+	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
-	public double getFwhm()
+	public GaussianPSFModel copy()
 	{
-		return (s0 + s1) * Math.sqrt(2.0 * Math.log(2.0));
+		GaussianPSFModel model = new GaussianPSFModel();
+		model.zModel = zModel;
+		return model;
 	}
+	
 
 	@Override
 	public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2)

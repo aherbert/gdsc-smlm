@@ -28,14 +28,12 @@ public class ImagePSFModel extends PSFModel
 	public static final double DEFAULT_NOISE_FRACTION = 5e-2;
 	private static final boolean COM_CHECK = false;
 
-	//private double[][] inputImage;
 	private double[][] sumImage;
 	private double[][] cumulativeImage;
 	private int psfWidth, zCentre;
 	private double[][] xyCentre;
 	private double unitsPerPixel;
 	private double unitsPerSlice;
-	private double fwhm;
 	private double[] hwhm0, hwhm1;
 	private int lastSlice;
 
@@ -837,33 +835,20 @@ public class ImagePSFModel extends PSFModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.PSFModel#getFwhm()
-	 */
-	public double getFwhm()
-	{
-		return fwhm;
-	}
-
-	/**
-	 * Produce a shallow copy of this object. This shares the pre-computed PSF image data but will allow
-	 * the copy to store its own version of the most recently created PSF. The copy has a new random data generator.
-	 * 
-	 * @return A shallow copy of this object
+	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
 	public ImagePSFModel copy()
 	{
 		ImagePSFModel model = new ImagePSFModel();
 		model.sumImage = sumImage;
 		model.cumulativeImage = cumulativeImage;
-		model.hwhm0 = hwhm0;
-		model.hwhm1 = hwhm1;
-		//model.inputImage = inputImage;
 		model.psfWidth = psfWidth;
 		model.xyCentre = xyCentre;
 		model.zCentre = zCentre;
 		model.unitsPerPixel = unitsPerPixel;
 		model.unitsPerSlice = unitsPerSlice;
-		model.fwhm = fwhm;
+		model.hwhm0 = hwhm0;
+		model.hwhm1 = hwhm1;
 		return model;
 	}
 
@@ -1093,7 +1078,7 @@ public class ImagePSFModel extends PSFModel
 		initialiseHWHM();
 		return hwhm1[lastSlice];
 	}
-	
+
 	/**
 	 * @return The HWHM table for dimension 0 for all the slices
 	 */
@@ -1102,7 +1087,7 @@ public class ImagePSFModel extends PSFModel
 		initialiseHWHM();
 		return hwhm0;
 	}
-	
+
 	/**
 	 * @return The HWHM table for dimension 1 for all the slices
 	 */
@@ -1149,7 +1134,7 @@ public class ImagePSFModel extends PSFModel
 				hwhm1[slice] = Double.NaN;
 				continue;
 			}
-			
+
 			// Identify the centre
 			int cx = (int) xyCentre[slice][0];
 			int cy = (int) xyCentre[slice][1];

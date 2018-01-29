@@ -129,6 +129,14 @@ public class AiryPSFModel extends PSFModel
 		setzDepth(zDepth);
 	}
 
+	/**
+	 * Private constructor used in the {@link #copy()} method
+	 */
+	private AiryPSFModel()
+	{
+		super();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -631,16 +639,22 @@ public class AiryPSFModel extends PSFModel
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.model.PSFModel#getFwhm()
+	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
-	public double getFwhm()
+	public AiryPSFModel copy()
 	{
-		// Use the Gaussian approximation to the Airy pattern to get the FWHM
-		// Gaussian SD = 1.323 * Airy width
-		// Gaussian FWHM = SD * 2.35 = SD * (2 * Math.sqrt(2.0 * Math.log(2.0)))
-		return AiryPattern.FACTOR * (w0 + w1) * Math.sqrt(2.0 * Math.log(2.0));
+		AiryPSFModel model = new AiryPSFModel();
+		model.zeroW0 = zeroW0;
+		model.zeroW1 = zeroW1;
+		model.zDepth = zDepth;
+		model.ring = ring;
+		//model.inputImage = inputImage;
+		model.singlePixelApproximation = singlePixelApproximation;
+		model.minSamplesPerDimension = minSamplesPerDimension;
+		model.maxSamplesPerDimension = maxSamplesPerDimension;
+		return model;
 	}
-
+	
 	/**
 	 * @return the ring limit for the calculated Airy pattern
 	 */
