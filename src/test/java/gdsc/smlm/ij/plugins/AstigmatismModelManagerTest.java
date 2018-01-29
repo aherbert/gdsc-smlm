@@ -14,6 +14,14 @@ public class AstigmatismModelManagerTest
 	@Test
 	public void canConvertModel()
 	{
+		DistanceUnit[] unit = new DistanceUnit[] { DistanceUnit.PIXEL, DistanceUnit.NM, DistanceUnit.UM };
+		for (int i = 0; i < unit.length; i++)
+			for (int j = 0; j < unit.length; j++)
+				canConvertModel(unit[i], unit[j]);
+	}
+
+	private void canConvertModel(DistanceUnit zDistanceUnit, DistanceUnit sDistanceUnit)
+	{
 		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
 		double sx = 1.08;
 		double sy = 1.01;
@@ -42,14 +50,14 @@ public class AstigmatismModelManagerTest
 		builder.setNmPerPixel(nmPerPixel);
 
 		AstigmatismModel model1 = builder.build();
-		AstigmatismModel model2 = AstigmatismModelManager.convert(model1, DistanceUnit.PIXEL, DistanceUnit.NM);
+		AstigmatismModel model2 = AstigmatismModelManager.convert(model1, zDistanceUnit, sDistanceUnit);
 
 		AstigmatismZModel m1 = AstigmatismModelManager.create(model1);
 		AstigmatismZModel m2 = AstigmatismModelManager.create(model2);
 
-		TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(DistanceUnit.UM, DistanceUnit.PIXEL,
+		TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(DistanceUnit.UM, zDistanceUnit,
 				nmPerPixel);
-		TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, DistanceUnit.NM,
+		TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, sDistanceUnit,
 				nmPerPixel);
 
 		for (double z = -0.5; z <= 0.5; z += 0.1)
