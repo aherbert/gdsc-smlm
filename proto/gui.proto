@@ -167,6 +167,7 @@ message CreateDataSettings
 
 	// The depth-of-focus for a simulated Gaussian 2D PSF
 	double depth_of_focus = 85;
+	string astigmatism_model = 86;
 }
 
 // Settings for the Load Localisations plugin

@@ -44,14 +44,17 @@ import com.google.protobuf.TextFormat;
 
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.data.DataException;
+import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.threshold.AutoThreshold;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.TurboList;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -66,6 +69,7 @@ import gdsc.smlm.data.config.MoleculeProtos.AtomOrBuilder;
 import gdsc.smlm.data.config.MoleculeProtos.Mixture;
 import gdsc.smlm.data.config.MoleculeProtos.Molecule;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtos.PSF;
@@ -171,7 +175,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private static int PHOTON_FIXED = 3;
 	private static int PHOTON_CORRELATED = 4;
 
-	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Airy", "Image" };
+	private static String[] PSF_MODELS = new String[] { "2D Gaussian", "Airy", "Image", "Astigmatism" };
+	private static final int PSF_MODEL_GAUSSIAN = 0;
+	private static final int PSF_MODEL_AIRY = 1;
+	private static final int PSF_MODEL_IMAGE = 2;
+	private static final int PSF_MODEL_ASTIGMATISM = 3;
 
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
@@ -2263,7 +2271,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return image;
 	}
 
-	private PSFModel createPSFModel(ImagePSFModel imagePSFModel)
+	private PSFModel createPSFModel(ImagePSFModel imagePSFModel) throws IllegalArgumentException
 	{
 		if (imagePSF)
 		{
@@ -2271,7 +2279,28 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			copy.setRandomGenerator(createRandomGenerator());
 			return copy;
 		}
-		else if (settings.getPsfModel().equals(PSF_MODELS[0]))
+		else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
+		{
+			AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
+			if (model == null)
+				throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
+			if (DoubleEquality.relativeError(model.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
+				throw new IllegalArgumentException(
+						String.format("Astigmatism model %s calibration (%d nm) does not match pixel pitch (%s nm)",
+								settings.getAstigmatismModel(), model.getNmPerPixel(), settings.getPixelPitch()));
+			// Convert for simulation
+			try
+			{
+				model = AstigmatismModelManager.convert(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
+				return new GaussianPSFModel(AstigmatismModelManager.create(model));
+			}
+			catch (ConversionException e)
+			{
+				// Wrap so this can be caught as the same type
+				throw new IllegalArgumentException(e);
+			}
+		}
+		else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_GAUSSIAN]))
 		{
 			// Calibration based on imaging fluorescent beads at 20nm intervals.
 			// Set the depth-of-focus to 450nm
@@ -4449,19 +4478,25 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		gd.addMessage("--- PSF Model ---");
 		List<String> imageNames = PSFCombiner.createImageList();
+		TurboList<String> availableModels = new TurboList<String>();
+		availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
+		availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);
 		final String[] models;
 		final String[] images;
 		if (imageNames.isEmpty())
 		{
+			availableModels.add(PSF_MODELS[PSF_MODEL_IMAGE]);
 			imagePSF = false;
-			models = Arrays.copyOf(PSF_MODELS, PSF_MODELS.length - 1);
 			images = imageNames.toArray(new String[imageNames.size()]);
 		}
 		else
 		{
-			models = PSF_MODELS;
 			images = null;
 		}
+		final String[] astigmatismModels = AstigmatismModelManager.listAstigmatismModels(false, true);
+		if (astigmatismModels.length != 0)
+			availableModels.add(PSF_MODELS[PSF_MODEL_ASTIGMATISM]);
+		models = availableModels.toArray(new String[availableModels.size()]);
 		gd.addChoice("PSF_model", models, settings.getPsfModel(), new OptionListener<Integer>()
 		{
 			public boolean collectOptions(Integer value)
@@ -4483,14 +4518,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				int type = 0;
 
 				// Get the image
-				if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODELS.length - 1]))
+				if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_IMAGE]))
 				{
 					egd.addChoice("PSF_image", images, settings.getPsfImageName());
+				}
+				// Get the astigmatism model
+				else if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
+				{
+					type = 1;
+					egd.addChoice("Astigmatism_model", astigmatismModels, settings.getAstigmatismModel());
+					egd.addMessage("Note: The pixel size of the astigmatism model must\nmatch the pixel pitch. Settings are checked before running.");
 				}
 				// Get the width of the model
 				else
 				{
-					type = 1;
+					type = 2;
 					egd.addNumericField("Depth-of-focus (nm)", settings.getDepthOfFocus(), 2);
 					egd.addCheckbox("Enter_width", settings.getEnterWidth());
 					egd.addNumericField("PSF_SD (nm)", settings.getPsfSd(), 2);
@@ -4504,6 +4546,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				if (type == 0)
 				{
 					settings.setPsfImageName(egd.getNextChoice());
+				}
+				else if (type == 1)
+				{
+					settings.setAstigmatismModel(AstigmatismModelManager.removeFormatting(egd.getNextChoice()));
 				}
 				else
 				{
@@ -4725,7 +4771,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			Parameters.isPositive("Background", settings.getBackground());
 			Parameters.isAboveZero("Particles", settings.getParticles());
 			Parameters.isAboveZero("Photons", settings.getPhotonsPerSecond());
-			if (!imagePSF)
+			if (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_ASTIGMATISM]))
+			{
+				// This will throw if it cannot be created
+				createPSFModel(null);
+			}
+			else if (!imagePSF)
 			{
 				Parameters.isAboveZero("Wavelength", settings.getWavelength());
 				Parameters.isAboveZero("NA", settings.getNumericalAperture());

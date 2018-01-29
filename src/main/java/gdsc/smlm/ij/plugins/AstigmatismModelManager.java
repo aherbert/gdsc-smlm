@@ -65,6 +65,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
 import gdsc.smlm.engine.ParameterisedFitJob;
+import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
@@ -174,6 +175,70 @@ public class AstigmatismModelManager implements PlugIn
 				list.add(entry.getKey());
 		}
 		return list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * List the astigmatism models with their pixel scale.
+	 *
+	 * @param includeNone
+	 *            Set to true to include an empty string
+	 * @param withNmPerPixel
+	 *            Append the nm per pixel to the model names
+	 * @return the list
+	 */
+	public static String[] listAstigmatismModels(boolean includeNone, boolean withNmPerPixel)
+	{
+		AstigmatismModelSettings.Builder settings = getSettings();
+		List<String> list = createList(includeNone);
+		for (Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
+		{
+			AstigmatismModel resource = entry.getValue();
+			if (withNmPerPixel)
+				list.add(String.format("%s [%s nm]", entry.getKey(), Utils.rounded(resource.getNmPerPixel())));
+			else
+				list.add(entry.getKey());
+		}
+		return list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * Remove the extra information added to a name for use in dialogs
+	 * 
+	 * @param name
+	 *            the formatted name
+	 * @return The name
+	 */
+	public static String removeFormatting(String name)
+	{
+		int index = name.lastIndexOf('[');
+		if (index > 0)
+			name = name.substring(0, index - 1);
+		return name;
+	}
+
+	/**
+	 * Gets the model.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the model (or null)
+	 */
+	public static AstigmatismModel getModel(String name)
+	{
+		return getSettings().getAstigmatismModelResourcesMap().get(name);
+	}
+
+	/**
+	 * Creates the working astigmatism model from the model settings.
+	 *
+	 * @param model
+	 *            the model settings
+	 * @return the astigmatism Z model
+	 */
+	public static AstigmatismZModel create(AstigmatismModel model)
+	{
+		return HoltzerAstigmatismZModel.create(model.getS0X(), model.getS0Y(), model.getGamma(), model.getD(),
+				model.getAx(), model.getBx(), model.getAy(), model.getBy());
 	}
 
 	//@formatter:off
@@ -1467,7 +1532,7 @@ public class AstigmatismModelManager implements PlugIn
 				draw();
 			}
 			gd.showDialog();
-			
+
 			SettingsManager.writeSettings(pluginSettings);
 		}
 

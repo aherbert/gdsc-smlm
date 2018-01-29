@@ -7,7 +7,7 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
+import gdsc.smlm.function.gaussian.AstigmatismZModel;
 
 public class AstigmatismModelManagerTest
 {
@@ -44,8 +44,8 @@ public class AstigmatismModelManagerTest
 		AstigmatismModel model1 = builder.build();
 		AstigmatismModel model2 = AstigmatismModelManager.convert(model1, DistanceUnit.PIXEL, DistanceUnit.NM);
 
-		HoltzerAstigmatismZModel m1 = create(model1);
-		HoltzerAstigmatismZModel m2 = create(model2);
+		AstigmatismZModel m1 = AstigmatismModelManager.create(model1);
+		AstigmatismZModel m2 = AstigmatismModelManager.create(model2);
 
 		TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(DistanceUnit.UM, DistanceUnit.PIXEL,
 				nmPerPixel);
@@ -59,11 +59,5 @@ public class AstigmatismModelManagerTest
 			//System.out.printf("%f vs %f\n", e, o);
 			Assert.assertEquals(e, o, e * 1e-8);
 		}
-	}
-
-	private HoltzerAstigmatismZModel create(AstigmatismModel model)
-	{
-		return HoltzerAstigmatismZModel.create(model.getS0X(), model.getS0Y(), model.getGamma(), model.getD(),
-				model.getAx(), model.getBx(), model.getAy(), model.getBy());
 	}
 }
