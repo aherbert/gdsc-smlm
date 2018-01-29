@@ -134,7 +134,7 @@ public class PeakResultsReader
 				FileInputStream fis = new FileInputStream(filename);
 				input = new BufferedReader(new UnicodeReader(fis, null));
 
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				String line;
 				int count = 0;
 				while ((line = input.readLine()) != null)

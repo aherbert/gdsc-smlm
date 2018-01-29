@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.InputMismatchException;
@@ -31,12 +30,13 @@ import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import gdsc.smlm.data.config.PSFProtos.PSFType;
 
 /**
  * Saves the fit results to file using the simple MALK file format (Molecular Accuracy Localisation Keep). This consists
@@ -147,7 +147,7 @@ public class MALKFilePeakResults extends FilePeakResults
 			{
 				// Gracefully fail so ignore this
 			}
-			
+
 			setCalibration(cw.getCalibration());
 		}
 
@@ -305,9 +305,9 @@ public class MALKFilePeakResults extends FilePeakResults
 	{
 		try
 		{
-			ArrayList<Result> results = new ArrayList<Result>(size);
+			TurboList<Result> results = new TurboList<Result>(size);
 
-			StringBuffer header = new StringBuffer();
+			StringBuilder header = new StringBuilder();
 			BufferedReader input = new BufferedReader(new FileReader(filename));
 			try
 			{
@@ -341,9 +341,9 @@ public class MALKFilePeakResults extends FilePeakResults
 			try
 			{
 				output.write(header.toString());
-				for (Result result : results)
+				for (int i = 0; i < results.size(); i++)
 				{
-					output.write(result.line);
+					output.write(results.getf(i).line);
 					output.write("\n");
 				}
 			}

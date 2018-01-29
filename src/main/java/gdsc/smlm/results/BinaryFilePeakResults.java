@@ -424,7 +424,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 */
 	public static String readHeader(DataInputStream input) throws IOException
 	{
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String line;
 		do
 		{
@@ -439,7 +439,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	private static String readLine(DataInputStream input) throws IOException
 	{
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		byte b;
 		do
 		{

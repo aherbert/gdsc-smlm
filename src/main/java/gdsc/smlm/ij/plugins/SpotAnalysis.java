@@ -1133,7 +1133,7 @@ public class SpotAnalysis extends PlugInFrame
 			files[4] = openBufferedWriter(resultsDirectory + "signal.txt", "");
 			for (TraceResult traceResult : traceResults)
 			{
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				sb.append(traceResult.spot.frame).append('\t');
 				sb.append(traceResult.trace.getHead().getXPosition()).append('\t');
 				sb.append(traceResult.trace.getHead().getYPosition()).append('\t');

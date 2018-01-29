@@ -46,11 +46,11 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	 * @see gdsc.smlm.fitting.nonlinear.stop.GaussianStoppingCriteria#logParameters(double, double, double[])
 	 */
 	@Override
-	protected StringBuffer logParameters(double oldError, double newError, double[] a)
+	protected StringBuilder logParameters(double oldError, double newError, double[] a)
 	{
 		if (log != null)
 		{
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError).append(" -> ")
 					.append(newError);
 			if (newError <= oldError)

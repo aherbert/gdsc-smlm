@@ -30,6 +30,7 @@ import gdsc.core.data.utils.ConversionException;
 
 import gdsc.core.data.utils.Converter;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -504,9 +505,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	{
 		try
 		{
-			ArrayList<Result> results = new ArrayList<Result>(size);
+			TurboList<Result> results = new TurboList<Result>(size);
 
-			StringBuffer header = new StringBuffer();
+			StringBuilder header = new StringBuilder();
 			BufferedReader input = new BufferedReader(new FileReader(filename));
 			try
 			{
@@ -540,9 +541,9 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			try
 			{
 				output.write(header.toString());
-				for (Result result : results)
+				for (int i = 0; i < results.size(); i++)
 				{
-					output.write(result.line);
+					output.write(results.getf(i).line);
 					output.write("\n");
 				}
 			}
