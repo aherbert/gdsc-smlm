@@ -1408,16 +1408,16 @@ public class AstigmatismModelManager implements PlugIn
 			return;
 		}
 
-		Utils.log("Astigmatism model: %s\n%s", name, model);
-
 		try
 		{
 			model = convert(model, pluginSettings.getZDistanceUnit(), pluginSettings.getSDistanceUnit());
 		}
 		catch (ConversionException e)
 		{
-			// Ignore
+			Utils.log("Bad conversion (%s), defaulting to native model units", e.getMessage());
 		}
+
+		Utils.log("Astigmatism model: %s\n%s", name, model);
 
 		// Plot the curve. Do this so we encompass twice the depth-of-field.
 		double gamma = model.getGamma();
@@ -1474,7 +1474,7 @@ public class AstigmatismModelManager implements PlugIn
 
 		plot.setColor(Color.BLACK);
 		plot.addLegend("Sx\nSy");
-		plot.addLabel(0, 0, "Model = " + name);
+		plot.addLabel(0, 0, String.format("Model = %s (%s nm/pixel)", name, Utils.rounded(model.getNmPerPixel())));
 		Utils.display(title, plot);
 
 		if (!pluginSettings.getShowPsf())
