@@ -37,6 +37,7 @@ import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
+import gdsc.smlm.data.config.GUIProtos.CropResultsSettings;
 import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
@@ -1021,6 +1022,18 @@ public class SettingsManager
 				.read(flags);
 	}
 
+	/**
+	 * Read the CropResultsSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CropResultsSettings
+	 */
+	public static CropResultsSettings readCropResultsSettings(int flags)
+	{
+		return new ConfigurationReader<CropResultsSettings>(CropResultsSettings.getDefaultInstance()).read(flags);
+	}
+	
 	/**
 	 * Write to a settings file in the settings directory.
 	 *

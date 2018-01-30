@@ -15029,10 +15029,6 @@ public final class GUIProtos {
     boolean getSaveApproximateSets();
 
     /**
-     * <pre>
-     ** The sample mode. 
-     * </pre>
-     *
      * <code>int32 sample_mode = 6;</code>
      */
     int getSampleMode();
@@ -15633,10 +15629,6 @@ public final class GUIProtos {
     public static final int SAMPLE_MODE_FIELD_NUMBER = 6;
     private int sampleMode_;
     /**
-     * <pre>
-     ** The sample mode. 
-     * </pre>
-     *
      * <code>int32 sample_mode = 6;</code>
      */
     public int getSampleMode() {
@@ -17060,20 +17052,12 @@ public final class GUIProtos {
 
       private int sampleMode_ ;
       /**
-       * <pre>
-       ** The sample mode. 
-       * </pre>
-       *
        * <code>int32 sample_mode = 6;</code>
        */
       public int getSampleMode() {
         return sampleMode_;
       }
       /**
-       * <pre>
-       ** The sample mode. 
-       * </pre>
-       *
        * <code>int32 sample_mode = 6;</code>
        */
       public Builder setSampleMode(int value) {
@@ -17083,10 +17067,6 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <pre>
-       ** The sample mode. 
-       * </pre>
-       *
        * <code>int32 sample_mode = 6;</code>
        */
       public Builder clearSampleMode() {
@@ -22395,6 +22375,10 @@ public final class GUIProtos {
     int getInterpolationMethod();
 
     /**
+     * <pre>
+     * For the alignment mode
+     * </pre>
+     *
      * <code>int32 psfType = 15;</code>
      */
     int getPsfType();
@@ -23031,6 +23015,10 @@ public final class GUIProtos {
     public static final int PSFTYPE_FIELD_NUMBER = 15;
     private int psfType_;
     /**
+     * <pre>
+     * For the alignment mode
+     * </pre>
+     *
      * <code>int32 psfType = 15;</code>
      */
     public int getPsfType() {
@@ -24912,12 +24900,20 @@ public final class GUIProtos {
 
       private int psfType_ ;
       /**
+       * <pre>
+       * For the alignment mode
+       * </pre>
+       *
        * <code>int32 psfType = 15;</code>
        */
       public int getPsfType() {
         return psfType_;
       }
       /**
+       * <pre>
+       * For the alignment mode
+       * </pre>
+       *
        * <code>int32 psfType = 15;</code>
        */
       public Builder setPsfType(int value) {
@@ -24927,6 +24923,10 @@ public final class GUIProtos {
         return this;
       }
       /**
+       * <pre>
+       * For the alignment mode
+       * </pre>
+       *
        * <code>int32 psfType = 15;</code>
        */
       public Builder clearPsfType() {
@@ -29973,6 +29973,10 @@ public final class GUIProtos {
     int getOption();
 
     /**
+     * <pre>
+     * For the fitting
+     * </pre>
+     *
      * <code>double nm_per_slice = 2;</code>
      */
     double getNmPerSlice();
@@ -30072,10 +30076,18 @@ public final class GUIProtos {
     boolean getSaveFitWidth();
 
     /**
+     * <pre>
+     * For display
+     * </pre>
+     *
      * <code>string selected = 13;</code>
      */
     java.lang.String getSelected();
     /**
+     * <pre>
+     * For display
+     * </pre>
+     *
      * <code>string selected = 13;</code>
      */
     com.google.protobuf.ByteString
@@ -30363,6 +30375,10 @@ public final class GUIProtos {
     public static final int NM_PER_SLICE_FIELD_NUMBER = 2;
     private double nmPerSlice_;
     /**
+     * <pre>
+     * For the fitting
+     * </pre>
+     *
      * <code>double nm_per_slice = 2;</code>
      */
     public double getNmPerSlice() {
@@ -30566,6 +30582,10 @@ public final class GUIProtos {
     public static final int SELECTED_FIELD_NUMBER = 13;
     private volatile java.lang.Object selected_;
     /**
+     * <pre>
+     * For display
+     * </pre>
+     *
      * <code>string selected = 13;</code>
      */
     public java.lang.String getSelected() {
@@ -30581,6 +30601,10 @@ public final class GUIProtos {
       }
     }
     /**
+     * <pre>
+     * For display
+     * </pre>
+     *
      * <code>string selected = 13;</code>
      */
     public com.google.protobuf.ByteString
@@ -31404,12 +31428,20 @@ public final class GUIProtos {
 
       private double nmPerSlice_ ;
       /**
+       * <pre>
+       * For the fitting
+       * </pre>
+       *
        * <code>double nm_per_slice = 2;</code>
        */
       public double getNmPerSlice() {
         return nmPerSlice_;
       }
       /**
+       * <pre>
+       * For the fitting
+       * </pre>
+       *
        * <code>double nm_per_slice = 2;</code>
        */
       public Builder setNmPerSlice(double value) {
@@ -31419,6 +31451,10 @@ public final class GUIProtos {
         return this;
       }
       /**
+       * <pre>
+       * For the fitting
+       * </pre>
+       *
        * <code>double nm_per_slice = 2;</code>
        */
       public Builder clearNmPerSlice() {
@@ -32101,6 +32137,10 @@ public final class GUIProtos {
 
       private java.lang.Object selected_ = "";
       /**
+       * <pre>
+       * For display
+       * </pre>
+       *
        * <code>string selected = 13;</code>
        */
       public java.lang.String getSelected() {
@@ -32116,6 +32156,10 @@ public final class GUIProtos {
         }
       }
       /**
+       * <pre>
+       * For display
+       * </pre>
+       *
        * <code>string selected = 13;</code>
        */
       public com.google.protobuf.ByteString
@@ -32132,6 +32176,10 @@ public final class GUIProtos {
         }
       }
       /**
+       * <pre>
+       * For display
+       * </pre>
+       *
        * <code>string selected = 13;</code>
        */
       public Builder setSelected(
@@ -32145,6 +32193,10 @@ public final class GUIProtos {
         return this;
       }
       /**
+       * <pre>
+       * For display
+       * </pre>
+       *
        * <code>string selected = 13;</code>
        */
       public Builder clearSelected() {
@@ -32154,6 +32206,10 @@ public final class GUIProtos {
         return this;
       }
       /**
+       * <pre>
+       * For display
+       * </pre>
+       *
        * <code>string selected = 13;</code>
        */
       public Builder setSelectedBytes(
@@ -32471,6 +32527,1587 @@ public final class GUIProtos {
 
   }
 
+  public interface CropResultsSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CropResultsSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    java.lang.String getInputOption();
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getInputOptionBytes();
+
+    /**
+     * <code>double border = 2;</code>
+     */
+    double getBorder();
+
+    /**
+     * <code>double x = 3;</code>
+     */
+    double getX();
+
+    /**
+     * <code>double y = 4;</code>
+     */
+    double getY();
+
+    /**
+     * <code>double width = 5;</code>
+     */
+    double getWidth();
+
+    /**
+     * <code>double height = 6;</code>
+     */
+    double getHeight();
+
+    /**
+     * <code>bool select_region = 7;</code>
+     */
+    boolean getSelectRegion();
+
+    /**
+     * <code>bool use_roi = 8;</code>
+     */
+    boolean getUseRoi();
+
+    /**
+     * <code>string roi_image = 9;</code>
+     */
+    java.lang.String getRoiImage();
+    /**
+     * <code>string roi_image = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getRoiImageBytes();
+
+    /**
+     * <code>bool reset_origin = 10;</code>
+     */
+    boolean getResetOrigin();
+
+    /**
+     * <code>string output_name = 11;</code>
+     */
+    java.lang.String getOutputName();
+    /**
+     * <code>string output_name = 11;</code>
+     */
+    com.google.protobuf.ByteString
+        getOutputNameBytes();
+
+    /**
+     * <code>int32 name_option = 12;</code>
+     */
+    int getNameOption();
+
+    /**
+     * <code>string name_suffix = 13;</code>
+     */
+    java.lang.String getNameSuffix();
+    /**
+     * <code>string name_suffix = 13;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameSuffixBytes();
+
+    /**
+     * <code>int32 name_counter = 14;</code>
+     */
+    int getNameCounter();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Crop Results plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CropResultsSettings}
+   */
+  public  static final class CropResultsSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CropResultsSettings)
+      CropResultsSettingsOrBuilder {
+    // Use CropResultsSettings.newBuilder() to construct.
+    private CropResultsSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CropResultsSettings() {
+      inputOption_ = "";
+      border_ = 0D;
+      x_ = 0D;
+      y_ = 0D;
+      width_ = 0D;
+      height_ = 0D;
+      selectRegion_ = false;
+      useRoi_ = false;
+      roiImage_ = "";
+      resetOrigin_ = false;
+      outputName_ = "";
+      nameOption_ = 0;
+      nameSuffix_ = "";
+      nameCounter_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CropResultsSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              inputOption_ = s;
+              break;
+            }
+            case 17: {
+
+              border_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              x_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              y_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              width_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              height_ = input.readDouble();
+              break;
+            }
+            case 56: {
+
+              selectRegion_ = input.readBool();
+              break;
+            }
+            case 64: {
+
+              useRoi_ = input.readBool();
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              roiImage_ = s;
+              break;
+            }
+            case 80: {
+
+              resetOrigin_ = input.readBool();
+              break;
+            }
+            case 90: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              outputName_ = s;
+              break;
+            }
+            case 96: {
+
+              nameOption_ = input.readInt32();
+              break;
+            }
+            case 106: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              nameSuffix_ = s;
+              break;
+            }
+            case 112: {
+
+              nameCounter_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.CropResultsSettings.class, gdsc.smlm.data.config.GUIProtos.CropResultsSettings.Builder.class);
+    }
+
+    public static final int INPUT_OPTION_FIELD_NUMBER = 1;
+    private volatile java.lang.Object inputOption_;
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    public java.lang.String getInputOption() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        inputOption_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInputOptionBytes() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        inputOption_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int BORDER_FIELD_NUMBER = 2;
+    private double border_;
+    /**
+     * <code>double border = 2;</code>
+     */
+    public double getBorder() {
+      return border_;
+    }
+
+    public static final int X_FIELD_NUMBER = 3;
+    private double x_;
+    /**
+     * <code>double x = 3;</code>
+     */
+    public double getX() {
+      return x_;
+    }
+
+    public static final int Y_FIELD_NUMBER = 4;
+    private double y_;
+    /**
+     * <code>double y = 4;</code>
+     */
+    public double getY() {
+      return y_;
+    }
+
+    public static final int WIDTH_FIELD_NUMBER = 5;
+    private double width_;
+    /**
+     * <code>double width = 5;</code>
+     */
+    public double getWidth() {
+      return width_;
+    }
+
+    public static final int HEIGHT_FIELD_NUMBER = 6;
+    private double height_;
+    /**
+     * <code>double height = 6;</code>
+     */
+    public double getHeight() {
+      return height_;
+    }
+
+    public static final int SELECT_REGION_FIELD_NUMBER = 7;
+    private boolean selectRegion_;
+    /**
+     * <code>bool select_region = 7;</code>
+     */
+    public boolean getSelectRegion() {
+      return selectRegion_;
+    }
+
+    public static final int USE_ROI_FIELD_NUMBER = 8;
+    private boolean useRoi_;
+    /**
+     * <code>bool use_roi = 8;</code>
+     */
+    public boolean getUseRoi() {
+      return useRoi_;
+    }
+
+    public static final int ROI_IMAGE_FIELD_NUMBER = 9;
+    private volatile java.lang.Object roiImage_;
+    /**
+     * <code>string roi_image = 9;</code>
+     */
+    public java.lang.String getRoiImage() {
+      java.lang.Object ref = roiImage_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        roiImage_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string roi_image = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRoiImageBytes() {
+      java.lang.Object ref = roiImage_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        roiImage_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESET_ORIGIN_FIELD_NUMBER = 10;
+    private boolean resetOrigin_;
+    /**
+     * <code>bool reset_origin = 10;</code>
+     */
+    public boolean getResetOrigin() {
+      return resetOrigin_;
+    }
+
+    public static final int OUTPUT_NAME_FIELD_NUMBER = 11;
+    private volatile java.lang.Object outputName_;
+    /**
+     * <code>string output_name = 11;</code>
+     */
+    public java.lang.String getOutputName() {
+      java.lang.Object ref = outputName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        outputName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string output_name = 11;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOutputNameBytes() {
+      java.lang.Object ref = outputName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        outputName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_OPTION_FIELD_NUMBER = 12;
+    private int nameOption_;
+    /**
+     * <code>int32 name_option = 12;</code>
+     */
+    public int getNameOption() {
+      return nameOption_;
+    }
+
+    public static final int NAME_SUFFIX_FIELD_NUMBER = 13;
+    private volatile java.lang.Object nameSuffix_;
+    /**
+     * <code>string name_suffix = 13;</code>
+     */
+    public java.lang.String getNameSuffix() {
+      java.lang.Object ref = nameSuffix_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        nameSuffix_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string name_suffix = 13;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameSuffixBytes() {
+      java.lang.Object ref = nameSuffix_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        nameSuffix_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_COUNTER_FIELD_NUMBER = 14;
+    private int nameCounter_;
+    /**
+     * <code>int32 name_counter = 14;</code>
+     */
+    public int getNameCounter() {
+      return nameCounter_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getInputOptionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      }
+      if (border_ != 0D) {
+        output.writeDouble(2, border_);
+      }
+      if (x_ != 0D) {
+        output.writeDouble(3, x_);
+      }
+      if (y_ != 0D) {
+        output.writeDouble(4, y_);
+      }
+      if (width_ != 0D) {
+        output.writeDouble(5, width_);
+      }
+      if (height_ != 0D) {
+        output.writeDouble(6, height_);
+      }
+      if (selectRegion_ != false) {
+        output.writeBool(7, selectRegion_);
+      }
+      if (useRoi_ != false) {
+        output.writeBool(8, useRoi_);
+      }
+      if (!getRoiImageBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, roiImage_);
+      }
+      if (resetOrigin_ != false) {
+        output.writeBool(10, resetOrigin_);
+      }
+      if (!getOutputNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, outputName_);
+      }
+      if (nameOption_ != 0) {
+        output.writeInt32(12, nameOption_);
+      }
+      if (!getNameSuffixBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, nameSuffix_);
+      }
+      if (nameCounter_ != 0) {
+        output.writeInt32(14, nameCounter_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getInputOptionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      }
+      if (border_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, border_);
+      }
+      if (x_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, x_);
+      }
+      if (y_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, y_);
+      }
+      if (width_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, width_);
+      }
+      if (height_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, height_);
+      }
+      if (selectRegion_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, selectRegion_);
+      }
+      if (useRoi_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, useRoi_);
+      }
+      if (!getRoiImageBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, roiImage_);
+      }
+      if (resetOrigin_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(10, resetOrigin_);
+      }
+      if (!getOutputNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, outputName_);
+      }
+      if (nameOption_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(12, nameOption_);
+      }
+      if (!getNameSuffixBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, nameSuffix_);
+      }
+      if (nameCounter_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(14, nameCounter_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.CropResultsSettings other = (gdsc.smlm.data.config.GUIProtos.CropResultsSettings) obj;
+
+      boolean result = true;
+      result = result && getInputOption()
+          .equals(other.getInputOption());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getBorder())
+          == java.lang.Double.doubleToLongBits(
+              other.getBorder()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getX())
+          == java.lang.Double.doubleToLongBits(
+              other.getX()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getY())
+          == java.lang.Double.doubleToLongBits(
+              other.getY()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getWidth())
+          == java.lang.Double.doubleToLongBits(
+              other.getWidth()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getHeight())
+          == java.lang.Double.doubleToLongBits(
+              other.getHeight()));
+      result = result && (getSelectRegion()
+          == other.getSelectRegion());
+      result = result && (getUseRoi()
+          == other.getUseRoi());
+      result = result && getRoiImage()
+          .equals(other.getRoiImage());
+      result = result && (getResetOrigin()
+          == other.getResetOrigin());
+      result = result && getOutputName()
+          .equals(other.getOutputName());
+      result = result && (getNameOption()
+          == other.getNameOption());
+      result = result && getNameSuffix()
+          .equals(other.getNameSuffix());
+      result = result && (getNameCounter()
+          == other.getNameCounter());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getInputOption().hashCode();
+      hash = (37 * hash) + BORDER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getBorder()));
+      hash = (37 * hash) + X_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getX()));
+      hash = (37 * hash) + Y_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getY()));
+      hash = (37 * hash) + WIDTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getWidth()));
+      hash = (37 * hash) + HEIGHT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getHeight()));
+      hash = (37 * hash) + SELECT_REGION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSelectRegion());
+      hash = (37 * hash) + USE_ROI_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getUseRoi());
+      hash = (37 * hash) + ROI_IMAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getRoiImage().hashCode();
+      hash = (37 * hash) + RESET_ORIGIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getResetOrigin());
+      hash = (37 * hash) + OUTPUT_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getOutputName().hashCode();
+      hash = (37 * hash) + NAME_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getNameOption();
+      hash = (37 * hash) + NAME_SUFFIX_FIELD_NUMBER;
+      hash = (53 * hash) + getNameSuffix().hashCode();
+      hash = (37 * hash) + NAME_COUNTER_FIELD_NUMBER;
+      hash = (53 * hash) + getNameCounter();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CropResultsSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Crop Results plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CropResultsSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CropResultsSettings)
+        gdsc.smlm.data.config.GUIProtos.CropResultsSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.CropResultsSettings.class, gdsc.smlm.data.config.GUIProtos.CropResultsSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.CropResultsSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        inputOption_ = "";
+
+        border_ = 0D;
+
+        x_ = 0D;
+
+        y_ = 0D;
+
+        width_ = 0D;
+
+        height_ = 0D;
+
+        selectRegion_ = false;
+
+        useRoi_ = false;
+
+        roiImage_ = "";
+
+        resetOrigin_ = false;
+
+        outputName_ = "";
+
+        nameOption_ = 0;
+
+        nameSuffix_ = "";
+
+        nameCounter_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.CropResultsSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CropResultsSettings build() {
+        gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CropResultsSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.CropResultsSettings result = new gdsc.smlm.data.config.GUIProtos.CropResultsSettings(this);
+        result.inputOption_ = inputOption_;
+        result.border_ = border_;
+        result.x_ = x_;
+        result.y_ = y_;
+        result.width_ = width_;
+        result.height_ = height_;
+        result.selectRegion_ = selectRegion_;
+        result.useRoi_ = useRoi_;
+        result.roiImage_ = roiImage_;
+        result.resetOrigin_ = resetOrigin_;
+        result.outputName_ = outputName_;
+        result.nameOption_ = nameOption_;
+        result.nameSuffix_ = nameSuffix_;
+        result.nameCounter_ = nameCounter_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CropResultsSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CropResultsSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CropResultsSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.CropResultsSettings.getDefaultInstance()) return this;
+        if (!other.getInputOption().isEmpty()) {
+          inputOption_ = other.inputOption_;
+          onChanged();
+        }
+        if (other.getBorder() != 0D) {
+          setBorder(other.getBorder());
+        }
+        if (other.getX() != 0D) {
+          setX(other.getX());
+        }
+        if (other.getY() != 0D) {
+          setY(other.getY());
+        }
+        if (other.getWidth() != 0D) {
+          setWidth(other.getWidth());
+        }
+        if (other.getHeight() != 0D) {
+          setHeight(other.getHeight());
+        }
+        if (other.getSelectRegion() != false) {
+          setSelectRegion(other.getSelectRegion());
+        }
+        if (other.getUseRoi() != false) {
+          setUseRoi(other.getUseRoi());
+        }
+        if (!other.getRoiImage().isEmpty()) {
+          roiImage_ = other.roiImage_;
+          onChanged();
+        }
+        if (other.getResetOrigin() != false) {
+          setResetOrigin(other.getResetOrigin());
+        }
+        if (!other.getOutputName().isEmpty()) {
+          outputName_ = other.outputName_;
+          onChanged();
+        }
+        if (other.getNameOption() != 0) {
+          setNameOption(other.getNameOption());
+        }
+        if (!other.getNameSuffix().isEmpty()) {
+          nameSuffix_ = other.nameSuffix_;
+          onChanged();
+        }
+        if (other.getNameCounter() != 0) {
+          setNameCounter(other.getNameCounter());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.CropResultsSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.CropResultsSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object inputOption_ = "";
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public java.lang.String getInputOption() {
+        java.lang.Object ref = inputOption_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          inputOption_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInputOptionBytes() {
+        java.lang.Object ref = inputOption_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          inputOption_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOption(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder clearInputOption() {
+        
+        inputOption_ = getDefaultInstance().getInputOption();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double border_ ;
+      /**
+       * <code>double border = 2;</code>
+       */
+      public double getBorder() {
+        return border_;
+      }
+      /**
+       * <code>double border = 2;</code>
+       */
+      public Builder setBorder(double value) {
+        
+        border_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double border = 2;</code>
+       */
+      public Builder clearBorder() {
+        
+        border_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double x_ ;
+      /**
+       * <code>double x = 3;</code>
+       */
+      public double getX() {
+        return x_;
+      }
+      /**
+       * <code>double x = 3;</code>
+       */
+      public Builder setX(double value) {
+        
+        x_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double x = 3;</code>
+       */
+      public Builder clearX() {
+        
+        x_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double y_ ;
+      /**
+       * <code>double y = 4;</code>
+       */
+      public double getY() {
+        return y_;
+      }
+      /**
+       * <code>double y = 4;</code>
+       */
+      public Builder setY(double value) {
+        
+        y_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double y = 4;</code>
+       */
+      public Builder clearY() {
+        
+        y_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double width_ ;
+      /**
+       * <code>double width = 5;</code>
+       */
+      public double getWidth() {
+        return width_;
+      }
+      /**
+       * <code>double width = 5;</code>
+       */
+      public Builder setWidth(double value) {
+        
+        width_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double width = 5;</code>
+       */
+      public Builder clearWidth() {
+        
+        width_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double height_ ;
+      /**
+       * <code>double height = 6;</code>
+       */
+      public double getHeight() {
+        return height_;
+      }
+      /**
+       * <code>double height = 6;</code>
+       */
+      public Builder setHeight(double value) {
+        
+        height_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double height = 6;</code>
+       */
+      public Builder clearHeight() {
+        
+        height_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean selectRegion_ ;
+      /**
+       * <code>bool select_region = 7;</code>
+       */
+      public boolean getSelectRegion() {
+        return selectRegion_;
+      }
+      /**
+       * <code>bool select_region = 7;</code>
+       */
+      public Builder setSelectRegion(boolean value) {
+        
+        selectRegion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool select_region = 7;</code>
+       */
+      public Builder clearSelectRegion() {
+        
+        selectRegion_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean useRoi_ ;
+      /**
+       * <code>bool use_roi = 8;</code>
+       */
+      public boolean getUseRoi() {
+        return useRoi_;
+      }
+      /**
+       * <code>bool use_roi = 8;</code>
+       */
+      public Builder setUseRoi(boolean value) {
+        
+        useRoi_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool use_roi = 8;</code>
+       */
+      public Builder clearUseRoi() {
+        
+        useRoi_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object roiImage_ = "";
+      /**
+       * <code>string roi_image = 9;</code>
+       */
+      public java.lang.String getRoiImage() {
+        java.lang.Object ref = roiImage_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          roiImage_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string roi_image = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRoiImageBytes() {
+        java.lang.Object ref = roiImage_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          roiImage_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string roi_image = 9;</code>
+       */
+      public Builder setRoiImage(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        roiImage_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string roi_image = 9;</code>
+       */
+      public Builder clearRoiImage() {
+        
+        roiImage_ = getDefaultInstance().getRoiImage();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string roi_image = 9;</code>
+       */
+      public Builder setRoiImageBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        roiImage_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean resetOrigin_ ;
+      /**
+       * <code>bool reset_origin = 10;</code>
+       */
+      public boolean getResetOrigin() {
+        return resetOrigin_;
+      }
+      /**
+       * <code>bool reset_origin = 10;</code>
+       */
+      public Builder setResetOrigin(boolean value) {
+        
+        resetOrigin_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool reset_origin = 10;</code>
+       */
+      public Builder clearResetOrigin() {
+        
+        resetOrigin_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object outputName_ = "";
+      /**
+       * <code>string output_name = 11;</code>
+       */
+      public java.lang.String getOutputName() {
+        java.lang.Object ref = outputName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          outputName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string output_name = 11;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOutputNameBytes() {
+        java.lang.Object ref = outputName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          outputName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string output_name = 11;</code>
+       */
+      public Builder setOutputName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        outputName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string output_name = 11;</code>
+       */
+      public Builder clearOutputName() {
+        
+        outputName_ = getDefaultInstance().getOutputName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string output_name = 11;</code>
+       */
+      public Builder setOutputNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        outputName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int nameOption_ ;
+      /**
+       * <code>int32 name_option = 12;</code>
+       */
+      public int getNameOption() {
+        return nameOption_;
+      }
+      /**
+       * <code>int32 name_option = 12;</code>
+       */
+      public Builder setNameOption(int value) {
+        
+        nameOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 name_option = 12;</code>
+       */
+      public Builder clearNameOption() {
+        
+        nameOption_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object nameSuffix_ = "";
+      /**
+       * <code>string name_suffix = 13;</code>
+       */
+      public java.lang.String getNameSuffix() {
+        java.lang.Object ref = nameSuffix_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          nameSuffix_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string name_suffix = 13;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameSuffixBytes() {
+        java.lang.Object ref = nameSuffix_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          nameSuffix_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string name_suffix = 13;</code>
+       */
+      public Builder setNameSuffix(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        nameSuffix_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name_suffix = 13;</code>
+       */
+      public Builder clearNameSuffix() {
+        
+        nameSuffix_ = getDefaultInstance().getNameSuffix();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name_suffix = 13;</code>
+       */
+      public Builder setNameSuffixBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        nameSuffix_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int nameCounter_ ;
+      /**
+       * <code>int32 name_counter = 14;</code>
+       */
+      public int getNameCounter() {
+        return nameCounter_;
+      }
+      /**
+       * <code>int32 name_counter = 14;</code>
+       */
+      public Builder setNameCounter(int value) {
+        
+        nameCounter_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 name_counter = 14;</code>
+       */
+      public Builder clearNameCounter() {
+        
+        nameCounter_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CropResultsSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CropResultsSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.CropResultsSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.CropResultsSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CropResultsSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CropResultsSettings>() {
+      public CropResultsSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CropResultsSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CropResultsSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CropResultsSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.CropResultsSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -32556,6 +34193,11 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -32780,9 +34422,16 @@ public final class GUIProtos {
       "smlm.data.config.DistanceUnit\022<\n\017s_dista" +
       "nce_unit\030\024 \001(\0162#.gdsc.smlm.data.config.D" +
       "istanceUnit\022\030\n\020calibrated_image\030\025 \001(\010\022\020\n" +
-      "\010filename\030\021 \001(\t*O\n\014TemplateType\022\023\n\017INLIN" +
-      "E_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017C" +
-      "USTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\010filename\030\021 \001(\t\"\226\002\n\023CropResultsSettings\022" +
+      "\024\n\014input_option\030\001 \001(\t\022\016\n\006border\030\002 \001(\001\022\t\n" +
+      "\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005 \001(\001\022\016\n\006he" +
+      "ight\030\006 \001(\001\022\025\n\rselect_region\030\007 \001(\010\022\017\n\007use" +
+      "_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022\024\n\014reset_o",
+      "rigin\030\n \001(\010\022\023\n\013output_name\030\013 \001(\t\022\023\n\013name" +
+      "_option\030\014 \001(\005\022\023\n\013name_suffix\030\r \001(\t\022\024\n\014na" +
+      "me_counter\030\016 \001(\005*O\n\014TemplateType\022\023\n\017INLI" +
+      "NE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017" +
+      "CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -32902,6 +34551,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor,
         new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", "ShowDepthOfFocus", "ShowPsf", "ZDistanceUnit", "SDistanceUnit", "CalibratedImage", "Filename", });
+    internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor =
+      getDescriptor().getMessageTypes().get(17);
+    internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor,
+        new java.lang.String[] { "InputOption", "Border", "X", "Y", "Width", "Height", "SelectRegion", "UseRoi", "RoiImage", "ResetOrigin", "OutputName", "NameOption", "NameSuffix", "NameCounter", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

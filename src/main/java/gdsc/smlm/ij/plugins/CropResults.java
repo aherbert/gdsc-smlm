@@ -14,11 +14,18 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.GUIProtos.CropResultsSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
@@ -26,7 +33,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
 import ij.plugin.PlugIn;
+import ij.process.FloatPolygon;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
@@ -34,15 +45,16 @@ import ij.plugin.PlugIn;
 public class CropResults implements PlugIn
 {
 	private static final String TITLE = "Crop Results";
-	private static String inputOption = "";
-	private static double border = 0;
-	private static double x = 0, y = 0, width = 0, height = 0;
-	private static boolean selectRegion, overwrite, useRoi;
-	private static String roiImage = "";
-	private static boolean resetOrigin = false;
-	private boolean myUseRoi;
+	private static final String[] NAME_OPTIONS = { "Name", "Suffix", "Sequence" };
+	private static final int NAME_OPTION_NAME = 0;
+	private static final int NAME_OPTION_SUFFIX = 1;
+	private static final int NAME_OPTION_SEQUENCE = 2;
 
+	private TurboList<String> titles;
+	private CropResultsSettings.Builder settings;
+	private boolean myUseRoi;
 	private MemoryPeakResults results;
+	private String outputName;
 
 	/*
 	 * (non-Javadoc)
@@ -59,35 +71,8 @@ public class CropResults implements PlugIn
 			return;
 		}
 
-		// Show a dialog allowing the results set to be filtered
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addMessage("Select a dataset to crop");
-		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return;
-		inputOption = ResultsManager.getInputSource(gd);
-		results = ResultsManager.loadInputResults(inputOption, false, null, null);
-		if (results == null || results.size() == 0)
-		{
-			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
-			return;
-		}
-
-		if (!showDialog())
-			return;
-
-		cropResults();
-	}
-
-	private boolean showDialog()
-	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addHelp(About.HELP_URL);
-
 		// Build a list of all images with a region ROI
-		TurboList<String> titles = new TurboList<String>(WindowManager.getWindowCount());
+		titles = new TurboList<String>(WindowManager.getWindowCount());
 		if (WindowManager.getWindowCount() > 0)
 		{
 			for (int imageID : WindowManager.getIDList())
@@ -97,44 +82,207 @@ public class CropResults implements PlugIn
 					titles.add(imp.getTitle());
 			}
 		}
+		boolean roiMode = "roi".equals(arg);
+		if (roiMode && titles.isEmpty())
+		{
+			IJ.error(TITLE, "No images with an ROI");
+			return;
+		}
+
+		settings = SettingsManager.readCropResultsSettings(0).toBuilder();
+
+		// Show a dialog allowing the results set to be filtered
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Select a dataset to crop");
+		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		settings.setInputOption(ResultsManager.getInputSource(gd));
+		results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
+		if (results == null || results.size() == 0)
+		{
+			IJ.error(TITLE, "No results could be loaded");
+			IJ.showStatus("");
+			return;
+		}
+
+		if (roiMode)
+		{
+			runRoiCrop();
+		}
+		else
+		{
+			runCrop();
+		}
+
+		SettingsManager.writeSettings(settings);
+	}
+
+	private void runCrop()
+	{
+		if (!showCropDialog())
+			return;
+		cropResults();
+	}
+
+	private boolean showCropDialog()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
 
 		Rectangle bounds = results.getBounds(true);
 
 		gd.addMessage(String.format("x=%d,y=%d,w=%d,h=%d", bounds.x, bounds.y, bounds.width, bounds.height));
-		gd.addNumericField("Border", border, 2);
-		gd.addCheckbox("Select_region", selectRegion);
-		gd.addNumericField("X", x, 2);
-		gd.addNumericField("Y", y, 2);
-		gd.addNumericField("Width", width, 2);
-		gd.addNumericField("Height", height, 2);
+		gd.addNumericField("Border", settings.getBorder(), 2);
+		gd.addCheckbox("Select_region", settings.getSelectRegion());
+		gd.addNumericField("X", settings.getX(), 2);
+		gd.addNumericField("Y", settings.getY(), 2);
+		gd.addNumericField("Width", settings.getWidth(), 2);
+		gd.addNumericField("Height", settings.getHeight(), 2);
 		if (!titles.isEmpty())
 		{
-			gd.addCheckbox("Use_ROI", useRoi);
+			gd.addCheckbox("Use_ROI", settings.getUseRoi());
 			String[] items = titles.toArray(new String[titles.size()]);
-			gd.addChoice("Image", items, roiImage);
+			gd.addChoice("Image", items, settings.getRoiImage());
 		}
-		gd.addCheckbox("Overwrite", overwrite);
-		gd.addCheckbox("Reset_origin", resetOrigin);
+		addOutputName(gd);
+		gd.addCheckbox("Reset_origin", settings.getResetOrigin());
 
 		gd.showDialog();
 
 		if (gd.wasCanceled())
 			return false;
 
-		border = Math.max(0, gd.getNextNumber());
-		selectRegion = gd.getNextBoolean();
-		x = gd.getNextNumber();
-		y = gd.getNextNumber();
-		width = Math.max(0, gd.getNextNumber());
-		height = Math.max(0, gd.getNextNumber());
+		settings.setBorder(Math.max(0, gd.getNextNumber()));
+		settings.setSelectRegion(gd.getNextBoolean());
+		settings.setX(gd.getNextNumber());
+		settings.setY(gd.getNextNumber());
+		settings.setWidth(Math.max(0, gd.getNextNumber()));
+		settings.setHeight(Math.max(0, gd.getNextNumber()));
 		if (!titles.isEmpty())
 		{
-			myUseRoi = useRoi = gd.getNextBoolean();
-			roiImage = gd.getNextChoice();
+			myUseRoi = gd.getNextBoolean();
+			settings.setUseRoi(myUseRoi);
+			settings.setRoiImage(gd.getNextChoice());
 		}
-		overwrite = gd.getNextBoolean();
-		resetOrigin = gd.getNextBoolean();
+		readOutputName(gd);
+		settings.setResetOrigin(gd.getNextBoolean());
 
+		gd.collectOptions();
+
+		return validateOutputName();
+	}
+
+	private void addOutputName(final ExtendedGenericDialog gd)
+	{
+		gd.addChoice("Name_option", NAME_OPTIONS, settings.getNameOption(), new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				settings.setNameOption(value);
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				if (settings.getNameOption() == NAME_OPTION_NAME)
+				{
+					String name = (TextUtils.isNullOrEmpty(settings.getOutputName())) ? (results.getName() + " Cropped")
+							: settings.getOutputName();
+					egd.addStringField("Output_name", name, Maths.clip(60, 120, name.length()));
+				}
+				else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
+				{
+					String name = (TextUtils.isNullOrEmpty(settings.getNameSuffix())) ? " Cropped"
+							: settings.getNameSuffix();
+					egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+				}
+				else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
+				{
+					String name = settings.getNameSuffix();
+					egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+					int c = settings.getNameCounter();
+					if (c < 1)
+						c = 1;
+					egd.addNumericField("Name_counter", c, 0);
+				}
+				else
+				{
+					throw new IllegalStateException("Unknown name option: " + settings.getNameOption());
+				}
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				if (settings.getNameOption() == NAME_OPTION_NAME)
+				{
+					settings.setOutputName(egd.getNextString());
+				}
+				else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
+				{
+					settings.setNameSuffix(egd.getNextString());
+				}
+				else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
+				{
+					settings.setNameSuffix(egd.getNextString());
+					settings.setNameCounter(Math.max(1, (int) egd.getNextNumber()));
+				}
+
+				return true;
+			}
+		});
+	}
+
+	private void readOutputName(ExtendedGenericDialog gd)
+	{
+		settings.setNameOption(gd.getNextChoiceIndex());
+	}
+
+	private boolean validateOutputName()
+	{
+		if (settings.getNameOption() == NAME_OPTION_NAME)
+		{
+			outputName = settings.getOutputName();
+			if (TextUtils.isNullOrEmpty(outputName))
+			{
+				IJ.error(TITLE, "No output name");
+				return false;
+			}
+		}
+		else if (settings.getNameOption() == NAME_OPTION_SUFFIX)
+		{
+			String suffix = settings.getNameSuffix();
+			if (TextUtils.isNullOrEmpty(suffix))
+			{
+				IJ.error(TITLE, "No output suffix");
+				return false;
+			}
+			//if (suffix.charAt(0) != ' ')
+			//	suffix = " " + suffix;
+			outputName = results.getName() + suffix;
+		}
+		else if (settings.getNameOption() == NAME_OPTION_SEQUENCE)
+		{
+			outputName = results.getName();
+			String suffix = settings.getNameSuffix();
+			if (!TextUtils.isNullOrEmpty(suffix))
+			{
+				//if (suffix.charAt(0) != ' ')
+				//	outputName += " " + suffix;
+				//else
+				outputName += suffix;
+			}
+			int c = settings.getNameCounter();
+			outputName += c;
+			settings.setNameCounter(c + 1); // Increment for next time
+		}
 		return true;
 	}
 
@@ -143,24 +291,26 @@ public class CropResults implements PlugIn
 	 */
 	private void cropResults()
 	{
-		final MemoryPeakResults newResults = new MemoryPeakResults();
+		final MemoryPeakResults newResults = createNewResults();
 
 		// These bounds are integer. But this is because the results are meant to come from an image.
-		Rectangle intergerBounds = results.getBounds(true);
+		Rectangle integerBounds = results.getBounds(true);
 
 		// The crop bounds can be floating point...
 
 		// Border
-		double xx = intergerBounds.x + border;
-		double yy = intergerBounds.y + border;
-		double w = Math.max(0, intergerBounds.width - 2 * border);
-		double h = Math.max(0, intergerBounds.height - 2 * border);
+		double border = settings.getBorder();
+		double xx = integerBounds.x + border;
+		double yy = integerBounds.y + border;
+		double w = Math.max(0, integerBounds.width - 2 * border);
+		double h = Math.max(0, integerBounds.height - 2 * border);
 		Rectangle2D pixelBounds = new Rectangle2D.Double(xx, yy, w, h);
 
 		// Bounding box
-		if (selectRegion)
+		if (settings.getSelectRegion())
 		{
-			Rectangle2D boxBounds = new Rectangle2D.Double(x, y, width, height);
+			Rectangle2D boxBounds = new Rectangle2D.Double(settings.getX(), settings.getY(), settings.getWidth(),
+					settings.getHeight());
 			pixelBounds = pixelBounds.createIntersection(boxBounds);
 		}
 
@@ -168,15 +318,15 @@ public class CropResults implements PlugIn
 		// and create another intersection
 		if (myUseRoi)
 		{
-			ImagePlus imp = WindowManager.getImage(roiImage);
+			ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
 			if (imp != null && imp.getRoi() != null)
 			{
 				Rectangle roi = imp.getRoi().getBounds();
 				int roiImageWidth = imp.getWidth();
 				int roiImageHeight = imp.getHeight();
 
-				double xscale = (double) roiImageWidth / intergerBounds.width;
-				double yscale = (double) roiImageHeight / intergerBounds.height;
+				double xscale = (double) roiImageWidth / integerBounds.width;
+				double yscale = (double) roiImageHeight / integerBounds.height;
 
 				Rectangle2D roiBounds = new Rectangle2D.Double(roi.x / xscale, roi.y / yscale, roi.width / xscale,
 						roi.height / yscale);
@@ -192,26 +342,152 @@ public class CropResults implements PlugIn
 			{
 				public void executeXYR(float x, float y, PeakResult result)
 				{
-					if (bounds.contains(result.getXPosition(), result.getYPosition()))
+					if (bounds.contains(x, y))
 						newResults.add(result);
 				}
 			});
 		}
 
-		newResults.copySettings(results);
 		newResults.setBounds(new Rectangle((int) Math.floor(bounds.getX()), (int) Math.floor(bounds.getY()),
 				(int) Math.ceil(bounds.getWidth()), (int) Math.ceil(bounds.getHeight())));
-		if (!overwrite)
+
+		if (settings.getResetOrigin())
 		{
-			newResults.setName(results.getName() + " Cropped");
-		}
-		MemoryPeakResults.addResults(newResults);
-		
-		if (resetOrigin)
-		{
-			Rectangle b = newResults.getBounds(); 
+			Rectangle b = newResults.getBounds();
 			newResults.translate(-b.x, -b.y);
 		}
+
+		IJ.showStatus(newResults.size() + " Cropped localisations");
+	}
+
+	private MemoryPeakResults createNewResults()
+	{
+		final MemoryPeakResults newResults = new MemoryPeakResults();
+		newResults.copySettings(results);
+		newResults.setName(outputName);
+		MemoryPeakResults.addResults(newResults);
+		return newResults;
+	}
+
+	private void runRoiCrop()
+	{
+		if (!showRoiCropDialog())
+			return;
+		roiCropResults();
+	}
+
+	private boolean showRoiCropDialog()
+	{
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addHelp(About.HELP_URL);
+
+		String[] items = titles.toArray(new String[titles.size()]);
+		gd.addMessage("Use ROI from ...");
+		gd.addChoice("Image", items, settings.getRoiImage());
+		addOutputName(gd);
+
+		gd.showDialog();
+
+		if (gd.wasCanceled())
+			return false;
+
+		settings.setRoiImage(gd.getNextChoice());
+		readOutputName(gd);
+
+		gd.collectOptions();
+
+		return validateOutputName();
+	}
+
+	private void roiCropResults()
+	{
+		final MemoryPeakResults newResults = createNewResults();
+
+		// These bounds are integer. But this is because the results are meant to come from an image.
+		Rectangle integerBounds = results.getBounds(true);
+
+		ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
+		if (imp == null)
+		{
+			IJ.error(TITLE, "No ROI image: " + settings.getRoiImage());
+			return;
+		}
+		final Roi roi = imp.getRoi();
+		if (roi == null || !roi.isArea() || !(roi.getFloatWidth() > 0 && roi.getFloatHeight() > 0))
+		{
+			IJ.error(TITLE, "Not an area ROI");
+			return;
+		}
+
+		// Scale the results to the size of the image with the ROI
+		int roiImageWidth = imp.getWidth();
+		int roiImageHeight = imp.getHeight();
+		final double xscale = (double) roiImageWidth / integerBounds.width;
+		final double yscale = (double) roiImageHeight / integerBounds.height;
+
+
+		// Process types separately
+		if (roi.getType() == Roi.RECTANGLE || roi.getType() == Roi.OVAL)
+		{
+			final Shape shape;
+			if (roi.getType() == Roi.OVAL)
+			{
+				shape = new Ellipse2D.Double(roi.getXBase(), roi.getYBase(), roi.getFloatWidth(), roi.getFloatHeight());
+			}
+			// Account for corners
+			else if (roi.getCornerDiameter() != 0)
+			{
+				shape = new RoundRectangle2D.Double(roi.getXBase(), roi.getYBase(), roi.getFloatWidth(),
+						roi.getFloatHeight(), roi.getCornerDiameter(), roi.getCornerDiameter());
+			}
+			else
+			{
+				shape = roi.getFloatBounds();
+			}
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
+			{
+				public void executeXYR(float x, float y, PeakResult result)
+				{
+					if (shape.contains(x * xscale, y * yscale))
+						newResults.add(result);
+				}
+			});
+		}
+		else if (roi.getType() == Roi.COMPOSITE)
+		{
+			// The composite shape is offset by the origin
+			final Rectangle bounds = roi.getBounds();
+			final Shape shape = ((ShapeRoi) roi).getShape();
+			final int ox = bounds.x;
+			final int oy = bounds.y;
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
+			{
+				public void executeXYR(float x, float y, PeakResult result)
+				{
+					if (shape.contains(x * xscale - ox, y * yscale - oy))
+						newResults.add(result);
+				}
+			});
+		}
+		else // Other area type: POLYGON, FREEROI, TRACED_ROI
+		{
+			// Base bounds for fast testing
+			final Rectangle2D.Double bounds = roi.getFloatBounds();
+			final FloatPolygon poly = roi.getFloatPolygon();
+			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
+			{
+				public void executeXYR(float x, float y, PeakResult result)
+				{
+					x *= xscale;
+					y *= yscale;
+					if (bounds.contains(x, y) && poly.contains(x, y))
+						newResults.add(result);
+				}
+			});
+		}
+
+		newResults.setBounds(null);
+		newResults.getBounds(true);
 
 		IJ.showStatus(newResults.size() + " Cropped localisations");
 	}

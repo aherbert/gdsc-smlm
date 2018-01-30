@@ -6,7 +6,6 @@ syntax = "proto3";
 package gdsc.smlm.data.config;
 
 option java_outer_classname = "GUIProtos";
-
 import "unit.proto";
 import "calibration.proto";
 import "fit.proto";
@@ -28,8 +27,7 @@ message GUIFilterSettings {
 }
 
 // Contain the settings for the PSF Calculator
-message PSFCalculatorSettings
-{
+message PSFCalculatorSettings {
 	double pixel_pitch = 1;
 	double magnification = 2;
 	double beam_expander = 3;
@@ -40,8 +38,7 @@ message PSFCalculatorSettings
 }
 
 // Contain the settings for the PSF Estimator
-message PSFEstimatorSettings
-{
+message PSFEstimatorSettings {
 	int32 number_of_peaks = 1;
 	double p_value = 2;
 	bool update_preferences = 3;
@@ -52,8 +49,7 @@ message PSFEstimatorSettings
 }
 
 // Contain the settings for the Create Data plugin
-message CreateDataSettings
-{
+message CreateDataSettings {
 	int32 size = 1;
 	double depth = 2;
 	bool fixed_Depth = 3;
@@ -124,7 +120,6 @@ message CreateDataSettings
 	double n_blinks_long = 54;
 	// Set to true to use a geometric distribution for the nBlinks. Default is to use a Poisson.
 	bool n_blinks_geometric_distribution = 55;
-
 	double min_photons = 56;
 	double min_snr_t1 = 57;
 	double min_snr_tN = 58;
@@ -136,12 +131,10 @@ message CreateDataSettings
 	string image_filename = 64;
 	string image_results_filename = 65;
 	string fluorophoresFilename = 66;
-
 	int32 cell_size = 67;
 	double probability_binary = 68;
 	double min_binary_distance = 69;
 	double max_binary_distance = 70;
-
 	bool show_histograms = 71;
 	bool choose_histograms = 72;
 	int32 histogram_bins = 73;
@@ -149,11 +142,10 @@ message CreateDataSettings
 	float density_radius = 75;
 	// The depth-of-field for analysis
 	float depth_of_field = 76;
-
 	double x_position = 77;
 	double y_position = 78;
 	double z_position = 79;
-	
+
 	// The camera type.
 	CameraType camera_type = 80;
 	// The camera model name. This should contain all the information required to 
@@ -171,14 +163,12 @@ message CreateDataSettings
 }
 
 // Settings for the Load Localisations plugin
-message LoadLocalisationsSettings
-{
+message LoadLocalisationsSettings {
 	string localisationsFilename = 1;
 }
 
 // Contain the settings for the clustering algorithm
-message ClusteringSettings
-{
+message ClusteringSettings {
 	double distance_threshold = 1;
 	double distance_exclusion = 2;
 	double time_threshold = 3;
@@ -220,8 +210,7 @@ message ClusteringSettings
 }
 
 // Contains the settings for the events in the OPTICS GUI
-message OpticsEventSettings
-{
+message OpticsEventSettings {
 	bool show_selection_table = 1;
 	bool table_create_selection = 2;
 	bool image_create_selection = 3;
@@ -232,18 +221,16 @@ message OpticsEventSettings
 }
 
 // Contain the settings for the OPTICS clustering algorithm
-message OpticsSettings
-{
-	// Affect creating the OPTICS manager
+message OpticsSettings {
+// Affect creating the OPTICS manager
 
-	// The input results dataset to use
+// The input results dataset to use
 	string input_option = 1;
 
 	// Affect running OPTICS
 
 	// The OPTICS algorithm to use.
 	int32 optics_mode = 2;
-
 	/** The number of splits to compute (if below 1 it will be auto-computed using the size of the data) */
 	int32 number_of_split_sets = 3;
 
@@ -253,10 +240,7 @@ message OpticsSettings
 
 	// Set to true to save all sets that are approximately min split size. The default is to only save sets smaller than
 	// min split size.
-	bool save_approximate_sets = 5;
-
-	/** The sample mode. */
-	int32 sample_mode = 6;
+	bool save_approximate_sets = 5; /** The sample mode. */ int32 sample_mode = 6;
 
 	// The generating distance, i.e. the distance to search for neighbours of a point. Set to zero to auto-calibrate
 	// using the expected density of uniformly spread random points.
@@ -325,31 +309,29 @@ message OpticsSettings
 	// The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
 	// Note that scores are monotonic with respect to Lambda so this value just effects the local contrast of outlier
 	// scores, not the actual ranking of outliers.
-	double lambda = 26;	
-	
+	double lambda = 26;
+
 	// Set to true to show a table of cluster statistics
 	bool show_table = 27;
-	
+
 	// The table sort mode
 	int32 table_sort_mode = 28;
-	
+
 	// Reverse sort the table
 	bool table_reverse_sort = 29;
-	
+
 	// Event settings
 	OpticsEventSettings optics_event_settings = 30;
 }
 
-enum TemplateType
-{
+enum TemplateType {
 	INLINE_TEMPLATE = 0;
 	RESOURCE_TEMPLATE = 1;
 	CUSTOM_TEMPLATE = 2;
 }
 
 // Contains settings for a default template
-message DefaultTemplate
-{
+message DefaultTemplate {
 	TemplateType template_type = 1;
 	string name = 2;
 	string filename = 3;
@@ -357,15 +339,13 @@ message DefaultTemplate
 }
 
 // Contains the default templates
-message DefaultTemplateSettings
-{
+message DefaultTemplateSettings {
 	repeated DefaultTemplate default_templates = 1;
 }
 
 // Contains settings for the configuration templates
-message ConfigurationTemplateSettings
-{
-	// The option for the Template Manager
+message ConfigurationTemplateSettings {
+// The option for the Template Manager
 	int32 option = 1;
 	// Set to true to select from a list of standard templates 
 	bool select_standard_templates = 2;
@@ -380,12 +360,11 @@ message ConfigurationTemplateSettings
 	// The template to view
 	string template = 7;
 	// Set to true to close the template when finished
-	bool close = 8;	
+	bool close = 8;
 }
 
 // Contains settings for the Nucleus Mask plugin
-message NucleusMaskSettings
-{
+message NucleusMaskSettings {
 	int32 mode = 1;
 	// Field width in pixels
 	int32 field_width = 2;
@@ -397,8 +376,7 @@ message NucleusMaskSettings
 }
 
 // Contains settings for the PSF Creator plugin
-message PSFCreatorSettings
-{
+message PSFCreatorSettings {
 	int32 mode = 1;
 	double radius = 2;
 	bool interactive_mode = 3;
@@ -407,7 +385,6 @@ message PSFCreatorSettings
 	// For the fitting mode
 	FitEngineSettings fit_engine_settings = 5;
 	PSF psf = 6;
-
 	double amplitude_fraction = 7;
 	int32 start_background_frames = 8;
 	int32 end_background_frames = 9;
@@ -418,7 +395,6 @@ message PSFCreatorSettings
 	int32 interpolation_method = 14;
 
 	// For the alignment mode
-	
 	int32 psfType = 15;
 	Calibration calibration = 16;
 	double analysis_window = 17;
@@ -448,8 +424,7 @@ message PSFCreatorSettings
 }
 
 // Contains settings for the Camera Model Manager plugin
-message CameraModelManagerSettings
-{
+message CameraModelManagerSettings {
 	int32 option = 1;
 	int32 origin_x = 2;
 	int32 origin_y = 3;
@@ -458,8 +433,7 @@ message CameraModelManagerSettings
 }
 
 // Contains settings for the Cubic Spline Manager plugin
-message CubicSplineManagerSettings
-{
+message CubicSplineManagerSettings {
 	int32 option = 1;
 	string selected = 2;
 	int32 magnification = 3;
@@ -469,10 +443,8 @@ message CubicSplineManagerSettings
 	double z_shift = 7;
 }
 
-
 // Contains settings for the Fail Count Manager plugin
-message FailCountManagerSettings
-{
+message FailCountManagerSettings {
 	int32 option = 1;
 	int32 max_frames = 2;
 	int32 fail_count_limit = 3;
@@ -507,16 +479,14 @@ message FailCountManagerSettings
 }
 
 // Contains settings for the Astigmatism Model Manager plugin
-message AstigmatismModelManagerSettings
-{
+message AstigmatismModelManagerSettings {
 	int32 option = 1;
-	
-	// For the fitting
 
+	// For the fitting
 	double nm_per_slice = 2;
 	FitEngineSettings fit_engine_settings = 3;
 	PSF psf = 4;
-	Calibration calibration = 5;	
+	Calibration calibration = 5;
 	double radius = 6;
 	bool log_fit_progress = 7;
 	double smoothing = 8;
@@ -526,9 +496,8 @@ message AstigmatismModelManagerSettings
 	string model_name = 12;
 	bool save_model = 14;
 	bool save_fit_width = 15;
-	
-	// For display
 
+	// For display
 	string selected = 13;
 	bool show_depth_of_focus = 16;
 	bool show_psf = 18;
@@ -538,4 +507,22 @@ message AstigmatismModelManagerSettings
 
 	// Filename for import/export
 	string filename = 17;
+}
+
+// Contains settings for the Crop Results plugin
+message CropResultsSettings {
+	string input_option = 1;
+	double border = 2;
+	double x = 3;
+	double y = 4;
+	double width = 5;
+	double height = 6;
+	bool select_region = 7;
+	bool use_roi = 8;
+	string roi_image = 9;
+	bool reset_origin = 10;
+	string output_name = 11;
+	int32 name_option = 12;
+	string name_suffix = 13;
+	int32 name_counter = 14;
 }
