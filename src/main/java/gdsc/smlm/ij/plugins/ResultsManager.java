@@ -144,6 +144,12 @@ public class ResultsManager implements PlugIn
 			return;
 		}
 
+		if ("save".equals(arg))
+		{
+			batchSave();
+			return;
+		}
+
 		if (arg != null && arg.startsWith("clear"))
 		{
 			Collection<MemoryPeakResults> allResults;
@@ -1493,5 +1499,87 @@ public class ResultsManager implements PlugIn
 				Recorder.saveCommand();
 			MemoryPeakResults.addResults(results);
 		}
+	}
+
+	/**
+	 * Batch save a set of results files.
+	 */
+	private void batchSave()
+	{
+		if (MemoryPeakResults.isMemoryEmpty())
+		{
+			IJ.error(TITLE, "No localisations in memory");
+			return;
+		}
+		MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
+		md.addSelected(selected);
+		md.showDialog();
+		if (md.wasCanceled())
+			return;
+		selected = md.getSelectedResults();
+		if (selected.isEmpty())
+			return;
+		resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		String dir = gd.getNextString();
+		resultsSettings.getResultsFileSettingsBuilder().setResultsDirectory(dir);
+		SettingsManager.writeSettings(resultsSettings);
+		if (dir == null || !new File(dir).exists())
+		{
+			IJ.error(TITLE, "Output directory does not exist");
+			return;
+		}
+		ResultsFileSettings resultsFileSettings = resultsSettings.getResultsFileSettings();
+		if (resultsFileSettings.getFileFormat().getNumber() <= 0)
+		{
+			IJ.error(TITLE, "No output file format");
+			return;
+		}
+		for (String name : selected)
+		{
+			MemoryPeakResults r = MemoryPeakResults.getResults(name);
+			if (r != null)
+				save(resultsFileSettings, r);
+		}
+	}
+
+	private void save(ResultsFileSettings resultsSettings, MemoryPeakResults source)
+	{
+		// Assume the directory exists
+		String resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
+				".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat());
+		PeakResults r;
+		switch (resultsSettings.getFileFormat())
+		{
+			case BINARY:
+				r = new BinaryFilePeakResults(resultsFilename, source.hasDeviations(), source.hasEndFrame(),
+						source.hasId(), resultsSettings.getShowPrecision());
+				break;
+			case TEXT:
+				TextFilePeakResults f = new TextFilePeakResults(resultsFilename, source.hasDeviations(),
+						source.hasEndFrame(), source.hasId(), resultsSettings.getShowPrecision());
+				f.setDistanceUnit(resultsSettings.getDistanceUnit());
+				f.setIntensityUnit(resultsSettings.getIntensityUnit());
+				f.setAngleUnit(resultsSettings.getAngleUnit());
+				f.setComputePrecision(true);
+				r = f;
+				break;
+			case MALK:
+				r = new MALKFilePeakResults(resultsFilename);
+				break;
+			case TSF:
+				r = new TSFPeakResultsWriter(resultsFilename);
+				break;
+			default:
+				throw new RuntimeException("Unsupported file format: " + resultsSettings.getFileFormat());
+		}
+		r.copySettings(source);
+		r.begin();
+		r.addAll(source.toArray());
+		r.end();
 	}
 }
