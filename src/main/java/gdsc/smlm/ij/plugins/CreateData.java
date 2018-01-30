@@ -73,6 +73,7 @@ import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -186,6 +187,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * The PSF model type. This is set when validating the PSF settings.
 	 */
 	private int psfModelType = -1;
+	private AstigmatismModel astigmatismModel = null;
 
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
@@ -2151,9 +2153,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
 		// Bounds are relative to the image source
 		results.setBounds(new Rectangle(settings.getSize(), settings.getSize()));
-		// Set the PSF as a Gaussian for now. In future this could be improved for other PSFs.
-		PSF.Builder psf = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
-		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
+		PSF.Builder psf; 
+		if (astigmatismModel != null)
+		{
+			psf = PSF.newBuilder();
+			psf.setAstigmatismModel(astigmatismModel);
+			psf.setPsfType(PSFType.ASTIGMATIC_GAUSSIAN_2D);
+		}
+		else
+		{
+			// Set the PSF as a Gaussian using the width at z=0. 
+			// In future this could be improved for other PSFs.S
+			psf = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
+			psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
+		}
 		results.setPSF(psf.build());
 		MemoryPeakResults.addResults(results);
 
@@ -2320,17 +2333,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (psfModelType == PSF_MODEL_ASTIGMATISM)
 		{
-			AstigmatismModel model = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
-			if (model == null)
+			astigmatismModel = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
+			if (astigmatismModel == null)
 				throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
 			// Convert for simulation
 			try
 			{
-				if (DoubleEquality.relativeError(model.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
+				if (DoubleEquality.relativeError(astigmatismModel.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
 				{
 					String message = String.format(
 							"Astigmatism model '%s' calibration (%s nm) does not match pixel pitch (%s nm)",
-							settings.getAstigmatismModel(), Utils.rounded(model.getNmPerPixel()),
+							settings.getAstigmatismModel(), Utils.rounded(astigmatismModel.getNmPerPixel()),
 							Utils.rounded(settings.getPixelPitch()));
 					// Optionally convert
 					GenericDialog gd = new GenericDialog(TITLE);
@@ -2341,14 +2354,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (gd.wasCanceled())
 						throw new IllegalArgumentException(message);
 					// Convert to nm
-					model = AstigmatismModelManager.convert(model, DistanceUnit.NM, DistanceUnit.NM);
+					astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.NM, DistanceUnit.NM);
 					// Reset pixel pitch. This will draw the spot using the correct size on the different size pixels.
-					model = model.toBuilder().setNmPerPixel(settings.getPixelPitch()).build();
+					astigmatismModel = astigmatismModel.toBuilder().setNmPerPixel(settings.getPixelPitch()).build();
 				}
 
 				// Convert for simulation in pixels
-				model = AstigmatismModelManager.convert(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
-				return new GaussianPSFModel(AstigmatismModelManager.create(model));
+				astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
+				return new GaussianPSFModel(AstigmatismModelManager.create(astigmatismModel));
 			}
 			catch (ConversionException e)
 			{
