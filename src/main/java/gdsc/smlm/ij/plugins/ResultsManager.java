@@ -11,6 +11,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -1525,8 +1526,11 @@ public class ResultsManager implements PlugIn
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
+		gd.collectOptions();
+		ResultsFileSettings.Builder b = resultsSettings.getResultsFileSettingsBuilder();
 		String dir = gd.getNextString();
-		resultsSettings.getResultsFileSettingsBuilder().setResultsDirectory(dir);
+		b.setFileFormatValue(gd.getNextChoiceIndex());
+		b.setResultsDirectory(dir);
 		SettingsManager.writeSettings(resultsSettings);
 		if (dir == null || !new File(dir).exists())
 		{
@@ -1539,19 +1543,30 @@ public class ResultsManager implements PlugIn
 			IJ.error(TITLE, "No output file format");
 			return;
 		}
+		int c = 0;
 		for (String name : selected)
 		{
 			MemoryPeakResults r = MemoryPeakResults.getResults(name);
-			if (r != null)
-				save(resultsFileSettings, r);
+			if (r != null && save(resultsFileSettings, r))
+				c++;
 		}
+		IJ.showStatus("Saved " + TextUtils.pleural(c, "dataset"));
 	}
 
-	private void save(ResultsFileSettings resultsSettings, MemoryPeakResults source)
+	private boolean save(ResultsFileSettings resultsSettings, MemoryPeakResults source)
 	{
 		// Assume the directory exists
-		String resultsFilename = resultsSettings.getResultsDirectory() + File.separatorChar + source.getName() +
-				".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat());
+		String resultsFilename;
+		try
+		{
+			resultsFilename = new File(resultsSettings.getResultsDirectory(),
+					source.getName() + ".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()))
+							.getCanonicalPath();
+		}
+		catch (IOException e)
+		{
+			return false;
+		}
 		PeakResults r;
 		switch (resultsSettings.getFileFormat())
 		{
@@ -1581,5 +1596,7 @@ public class ResultsManager implements PlugIn
 		r.begin();
 		r.addAll(source.toArray());
 		r.end();
+		Utils.log("Saved %s to %s", source.getName(), resultsFilename);
+		return true;
 	}
 }
