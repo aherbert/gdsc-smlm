@@ -268,7 +268,7 @@ public class DFastLog extends BaseFastLog
 	 * <ul>
 	 * <li>If the argument is NaN, then the result is incorrect.
 	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Float.MAX_VALUE)).
+	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Double.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 * 
