@@ -28,11 +28,24 @@ package gdsc.smlm.function;
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf</a>
  */
-public class FFastLog extends BaseFastLog
+public class FFastLog extends FastLog
 {
+	/** The base. */
 	private final double base;
-	private final int q, q_minus_1;
+	/** The number of bits to remove from a float mantissa. */
+	private final int q;
+	/** (q-1). */
+	private final int q_minus_1;
+	/** The number of bits to remove from a double mantissa. */
+	private final int qd;
+	/** (qd-1). */
+	private final int qd_minus_1;
+	/**
+	 * The table of the log2 value of binary number 1.0000... to 1.1111...., depending on the precision.
+	 * The table has had the float bias (127) and mantissa size (23) pre-subtracted (i.e. -150 in total).
+	 */
 	private final float[] data;
+	/** The scale used to convert the log2 to the logB (using the base). */
 	private final float scale;
 
 	/**
@@ -80,6 +93,8 @@ public class FFastLog extends BaseFastLog
 
 		q = 23 - n;
 		q_minus_1 = q - 1;
+		qd = 52 - n;
+		qd_minus_1 = qd - 1;
 		data = new float[size];
 
 		for (int i = 0; i < size; i++)
@@ -130,110 +145,40 @@ public class FFastLog extends BaseFastLog
 		//}
 	}
 
-	/**
-	 * Gets the base.
-	 *
-	 * @return the base
-	 */
+	@Override
 	public double getBase()
 	{
 		return base;
 	}
 
-	/**
-	 * Gets the scale to convert from log2 to logB (the base given in the constructor) by multiplication.
-	 *
-	 * @return the scale
-	 */
-	public float getScale()
+	@Override
+	public double getScale()
 	{
 		return scale;
 	}
 
-	/**
-	 * Gets the number of most significant bits to keep from the mantissa, i.e. the binary precision of the floating point number before
-	 * computing the log.
-	 *
-	 * @return the number of most significant bits to keep
-	 */
+	@Override
 	public int getN()
 	{
 		return 23 - q;
 	}
-	
-	/**
-	 * Gets the number of least signification bits to ignore from the mantissa of a float (23-bits).
-	 *
-	 * @return the number of least signification bits to ignore
-	 */
-	public int getQ()
-	{
-		return q;
-	}
 
-	/**
-	 * Calculate the logarithm using base 2. Requires the argument be finite and positive.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect.
-	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 * 
-	 * @param x
-	 *            the argument. must be positive!
-	 * @return log2( x )
-	 */
-	public float fastLog2(float x)
-	{
-		final int bits = Float.floatToRawIntBits(x);
-
-		// Note the documentation from Float.intBitsToFloat(int):
-		// int e = ((bits >> 23) & 0xff);
-		// int m = (e == 0) ?
-		//                 (bits & 0x7fffff) << 1 :
-		//                 (bits & 0x7fffff) | 0x800000;
-
-		final int e = (bits >> 23) & 0xff;
-		// raw mantissa, conversion is done with the bit shift to reduce precision
-		final int m = (bits & 0x7fffff);
-
-		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]);
-	}
-
-	/**
-	 * Calculate the logarithm using base 2, handling special cases.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN or less than zero, then the result is NaN.
-	 * <li>If the argument is positive infinity, then the result is positive infinity.
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 *
-	 * @param x
-	 *            the argument
-	 * @return log2( x )
-	 */
+	@Override
 	public float log2(float x)
 	{
-		// Basic implementation
-		//if (x > 0)
-		//	return (x == Float.POSITIVE_INFINITY) ? Float.POSITIVE_INFINITY : fastLog(x);
-		//return (x == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
-
-		// Re-implement to avoid float comparisons (which will be slower than int comparisons) 
 		final int bits = Float.floatToRawIntBits(x);
 
 		// Note the documentation from Float.intBitsToFloat(int):
+		// int s = ((bits >> 31) == 0) ? 1 : -1;
 		// int e = ((bits >> 23) & 0xff);
 		// int m = (e == 0) ?
 		//                 (bits & 0x7fffff) << 1 :
 		//                 (bits & 0x7fffff) | 0x800000;
+		// Then the floating-point result equals the value of the mathematical
+		// expression s x m x 2^(e-150):
+		// e-127 is the unbiased exponent. 23 is the mantissa precision
+		// = s x m x 2^(e-127-23) 
 
-		final boolean negative = (bits >>> 31) != 0;
 		final int e = (bits >> 23) & 0xff;
 		// raw mantissa, conversion is done with the bit shift to reduce precision
 		final int m = (bits & 0x7fffff);
@@ -244,53 +189,16 @@ public class FFastLog extends BaseFastLog
 			if (m != 0)
 				return Float.NaN;
 			// +/- Infinity
-			return (negative) ? Float.NaN : Float.POSITIVE_INFINITY;
+			return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
 		}
 
-		if (negative)
+		if ((bits >> 31) != 0)
+		{
 			// Only -0 is allowed
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
+		}
 
 		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]);
-	}
-
-	/**
-	 * Calculate the logarithm to the base given in the constructor. Requires the argument be finite and positive.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect.
-	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 * 
-	 * @param x
-	 *            the argument. must be positive!
-	 * @return log( x )
-	 */
-	public float fastLog(float x)
-	{
-		return fastLog2(x) * scale;
-	}
-
-	/**
-	 * Calculate the logarithm to the base given in the constructor, handling special cases.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN or less than zero, then the result is NaN.
-	 * <li>If the argument is positive infinity, then the result is positive infinity.
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 *
-	 * @param x
-	 *            the argument
-	 * @return log( x )
-	 */
-	public float log(float x)
-	{
-		return log2(x) * scale;
 	}
 
 	/**
@@ -298,40 +206,43 @@ public class FFastLog extends BaseFastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect.
-	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect (>fastLog2(Float.MAX_VALUE)).
+	 * <li>If the argument is negative, then the result is incorrect (fastLog2(-x)).
+	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 * 
 	 * @param x
 	 *            the argument. must be positive!
-	 * @return log( x )
+	 * @return log2( x )
 	 */
-	public double fastLog2(double x)
+	@Override
+	public float fastLog2(float x)
 	{
-		return fastLog2((float) x);
+		final int bits = Float.floatToRawIntBits(x);
+		final int e = (bits >> 23) & 0xff;
+		final int m = (bits & 0x7fffff);
+		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]);
 	}
 
-	/**
-	 * Calculate the logarithm using base 2, handling special cases.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN or less than zero, then the result is NaN.
-	 * <li>If the argument is positive infinity, then the result is positive infinity.
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 *
-	 * @param x
-	 *            the argument
-	 * @return log( x )
-	 */
-	public double log2(double x)
+	@Override
+	public float log(float x)
 	{
-		if (x > 0)
-			return (x == Double.POSITIVE_INFINITY) ? Double.POSITIVE_INFINITY : fastLog2((float) x);
-		return (x == 0) ? Double.NEGATIVE_INFINITY : Double.NaN;
+		// Re-implement to avoid float comparisons (which will be slower than int comparisons) 
+		final int bits = Float.floatToRawIntBits(x);
+		final int e = (bits >> 23) & 0xff;
+		final int m = (bits & 0x7fffff);
+		if (e == 255)
+		{
+			if (m != 0)
+				return Float.NaN;
+			return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
+		}
+		if ((bits >> 31) != 0)
+		{
+			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
+		}
+		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]) * scale;
 	}
 
 	/**
@@ -339,9 +250,9 @@ public class FFastLog extends BaseFastLog
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect.
-	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Float.MAX_VALUE)).
+	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
+	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
+	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 * 
@@ -349,29 +260,151 @@ public class FFastLog extends BaseFastLog
 	 *            the argument. must be positive!
 	 * @return log( x )
 	 */
-	public double fastLog(double x)
+	@Override
+	public float fastLog(float x)
 	{
-		return fastLog((float) x);
+		final int bits = Float.floatToRawIntBits(x);
+		final int e = (bits >> 23) & 0xff;
+		final int m = (bits & 0x7fffff);
+		return (e == 0 ? data[m >>> q_minus_1] : e + data[((m | 0x00800000) >>> q)]) * scale;
+	}
+
+	@Override
+	public float log2(double x)
+	{
+		final long bits = Double.doubleToLongBits(x);
+
+		// Note the documentation from Double.longBitsToDouble(int):
+		// int s = ((bits >> 63) == 0) ? 1 : -1;
+		// int e = (int)((bits >>> 52) & 0x7ffL);
+		// long m = (e == 0) ?
+		//                 (bits & 0xfffffffffffffL) << 1 :
+		//                 (bits & 0xfffffffffffffL) | 0x10000000000000L;
+		// Then the floating-point result equals the value of the mathematical
+		// expression s x m x 2^(e-1075):
+		// e-1023 is the unbiased exponent. 52 is the mantissa precision
+		// = s x m x 2^(e-1023-52) 
+
+		// Get the biased exponent
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		// Mantissa
+		final long m = (bits & 0xfffffffffffffL);
+
+		if (e == 2047)
+		{
+			// All bits set is a special case
+			if (m != 0)
+				return Float.NaN;
+			// +/- Infinity
+			return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+		}
+
+		// Check for negatives
+		if ((bits >> 63) != 0L)
+		{
+			// Only -0 is allowed
+			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
+		}
+
+		// We must subtract -1075 from the exponent.
+		// However -150 has been pre-subtracted in the table.
+		// and the mantissa has 29 more digits of significance.
+		// So take away 1075-150-29 = 896.
+		return (e == 0 ? data[(int) (m >>> qd_minus_1)] - 896
+				: e - 896 + data[(int) ((m | 0x10000000000000L) >>> qd)]);
 	}
 
 	/**
-	 * Calculate the logarithm to the base given in the constructor, handling special cases.
+	 * Calculate the logarithm using base 2. Requires the argument be finite and positive.
 	 * <p>
 	 * Special cases:
 	 * <ul>
-	 * <li>If the argument is NaN or less than zero, then the result is NaN.
-	 * <li>If the argument is positive infinity, then the result is positive infinity.
+	 * <li>If the argument is NaN, then the result is incorrect (>fastLog2(Float.MAX_VALUE)).
+	 * <li>If the argument is negative, then the result is incorrect (fastLog2(-x)).
+	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 *
+	 * 
 	 * @param x
-	 *            the argument
+	 *            the argument. must be positive!
 	 * @return log( x )
 	 */
-	public double log(double x)
+	@Override
+	public float fastLog2(double x)
 	{
-		if (x > 0)
-			return (x == Double.POSITIVE_INFINITY) ? Double.POSITIVE_INFINITY : fastLog((float) x);
-		return (x == 0) ? Double.NEGATIVE_INFINITY : Double.NaN;
+		final long bits = Double.doubleToLongBits(x);
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
+		return (e == 0 ? data[(int) (m >>> qd_minus_1)] - 896 : e - 896 + data[(int) ((m | 0x10000000000000L) >>> qd)]);
+	}
+
+	@Override
+	public float log(double x)
+	{
+		final long bits = Double.doubleToLongBits(x);
+
+		// Note the documentation from Double.longBitsToDouble(int):
+		// int s = ((bits >> 63) == 0) ? 1 : -1;
+		// int e = (int)((bits >>> 52) & 0x7ffL);
+		// long m = (e == 0) ?
+		//                 (bits & 0xfffffffffffffL) << 1 :
+		//                 (bits & 0xfffffffffffffL) | 0x10000000000000L;
+		// Then the floating-point result equals the value of the mathematical
+		// expression s x m x 2^(e-1075):
+		// e-1023 is the unbiased exponent. 52 is the mantissa precision
+		// = s x m x 2^(e-1023-52) 
+
+		// Get the biased exponent
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		// Mantissa
+		final long m = (bits & 0xfffffffffffffL);
+
+		if (e == 2047)
+		{
+			// All bits set is a special case
+			if (m != 0)
+				return Float.NaN;
+			// +/- Infinity
+			return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+		}
+
+		// Check for negatives
+		if ((bits >> 63) != 0L)
+		{
+			// Only -0 is allowed
+			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
+		}
+
+		// We must subtract -1075 from the exponent.
+		// However -150 has been pre-subtracted in the table.
+		// and the mantissa has 29 more digits of significance.
+		// So take away 1075-150-29 = 896.
+		return (e == 0 ? data[(int) (m >>> qd_minus_1)] - 896
+				: e - 896 + data[(int) ((m | 0x10000000000000L) >>> qd)]) * scale;
+	}
+
+	/**
+	 * Calculate the logarithm to the base given in the constructor. Requires the argument be finite and positive.
+	 * <p>
+	 * Special cases:
+	 * <ul>
+	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
+	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
+	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
+	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
+	 * </ul>
+	 * 
+	 * @param x
+	 *            the argument. must be positive!
+	 * @return log( x )
+	 */
+	@Override
+	public float fastLog(double x)
+	{
+		final long bits = Double.doubleToLongBits(x);
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
+		return (e == 0 ? data[(int) (m >>> qd_minus_1)] - 896
+				: e - 896 + data[(int) ((m | 0x10000000000000L) >>> qd)]) * scale;
 	}
 }

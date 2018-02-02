@@ -25,19 +25,28 @@ package gdsc.smlm.function;
  * adapted for use with double-precision data.
  * <p>
  * Note: log(float) is not provided as it is dynamically cast up to a double and float values can be represented as a
- * double. If your computation generates a float value to be logged then use {@link FFastLog }.
+ * double. If your computation generates a float value to be logged then use {@link FFastLog}.
  *
  * @see <a href=
  *      "https://www.javatips.net/api/Eisenkraut-master/src/main/java/de/sciss/eisenkraut/math/FastLog.java">https://www.javatips.net/api/Eisenkraut-master/src/main/java/de/sciss/eisenkraut/math/FastLog.java</a>
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf</a>
  */
-public class DFastLog extends BaseFastLog
+public class DFastLog extends FastLog
 {
+	/** The base. */
 	private final double base;
-	private final int q, q_minus_1;
+	/** The number of bits to remove from a float mantissa. */
+	private final int q;
+	/** (q-1). */
+	private final int q_minus_1;
+	/**
+	 * The table of the log2 value of binary number 1.0000... to 1.1111...., depending on the precision.
+	 * The table has had the float bias (1023) and mantissa size (52) pre-subtracted (i.e. -1075 in total).
+	 */
 	private final float[] data;
-	private final double scale;
+	/** The scale used to convert the log2 to the logB (using the base). */
+	private final float scale;
 
 	/**
 	 * Create a new natural logarithm calculation instance.
@@ -79,7 +88,7 @@ public class DFastLog extends BaseFastLog
 		// Note: A large table would be very costly to compute!
 		if (n < 0 || n > 30)
 			throw new IllegalArgumentException("N must be in the range 0<=n<=30");
-		scale = getScale(base);
+		scale = (float) getScale(base);
 		this.base = base;
 
 		final int size = 1 << (n + 1);
@@ -136,38 +145,24 @@ public class DFastLog extends BaseFastLog
 		//}
 	}
 
-
-	/**
-	 * Gets the base.
-	 *
-	 * @return the base
-	 */
+	@Override
 	public double getBase()
 	{
 		return base;
 	}
 
-	/**
-	 * Gets the scale to convert from log2 to logB (the base given in the constructor) by multiplication.
-	 *
-	 * @return the scale
-	 */
+	@Override
 	public double getScale()
 	{
 		return scale;
 	}
 
-	/**
-	 * Gets the number of most significant bits to keep from the mantissa, i.e. the binary precision of the floating point number before
-	 * computing the log.
-	 *
-	 * @return the number of most significant bits to keep
-	 */
+	@Override
 	public int getN()
 	{
 		return 52 - q;
 	}
-	
+
 	/**
 	 * Gets the number of least signification bits to ignore from the mantissa of a double (52-bits).
 	 *
@@ -177,70 +172,23 @@ public class DFastLog extends BaseFastLog
 	{
 		return q;
 	}
-	
-	/**
-	 * Calculate the logarithm to the base given in the constructor. Requires the argument be finite and positive.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN, then the result is incorrect.
-	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
-	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Double.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 * 
-	 * @param x
-	 *            the argument. must be positive!
-	 * @return log( x )
-	 */
-	public double fastLog2(double x)
+
+	@Override
+	public float log2(double x)
 	{
 		final long bits = Double.doubleToRawLongBits(x);
 
 		// Note the documentation from Double.longBitsToDouble(int):
+		// int s = ((bits >> 63) == 0) ? 1 : -1;
 		// int e = (int)((bits >>> 52) & 0x7ffL);
 		// long m = (e == 0) ?
 		//                 (bits & 0xfffffffffffffL) << 1 :
 		//                 (bits & 0xfffffffffffffL) | 0x10000000000000L;
+		// Then the floating-point result equals the value of the mathematical
+		// expression s x m x 2^(e-1075):
+		// e-1023 is the unbiased exponent. 52 is the mantissa precision
+		// = s x m x 2^(e-1023-52) 
 
-		final int e = (int) ((bits >>> 52) & 0x7ffL);
-		// raw mantissa, conversion is done with the bit shift to reduce precision
-		final long m = (bits & 0xfffffffffffffL);
-
-		return (e == 0 ? data[(int) (m >>> q_minus_1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
-	}
-
-	/**
-	 * Calculate the logarithm to the base given in the constructor, handling special cases.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN or less than zero, then the result is NaN.
-	 * <li>If the argument is positive infinity, then the result is positive infinity.
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 *
-	 * @param x
-	 *            the argument
-	 * @return log( x )
-	 */
-	public double log2(double x)
-	{
-		// Basic implementation
-		//if (x > 0)
-		//	return (x == Double.POSITIVE_INFINITY) ? Double.POSITIVE_INFINITY : fastLog(x);
-		//return (x == 0) ? Double.NEGATIVE_INFINITY : Double.NaN;
-
-		// Re-implement to avoid double comparisons (which will be slower than int comparisons) 
-		final long bits = Double.doubleToRawLongBits(x);
-
-		// Note the documentation from Double.longBitsToDouble(int):
-		// int e = (int)((bits >>> 52) & 0x7ffL);
-		// long m = (e == 0) ?
-		//                 (bits & 0xfffffffffffffL) << 1 :
-		//                 (bits & 0xfffffffffffffL) | 0x10000000000000L;
-
-		final boolean negative = (bits >>> 63) != 0;
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		// raw mantissa, conversion is done with the bit shift to reduce precision
 		final long m = (bits & 0xfffffffffffffL);
@@ -249,16 +197,57 @@ public class DFastLog extends BaseFastLog
 		{
 			// All bits set is a special case
 			if (m != 0)
-				return Double.NaN;
+				return Float.NaN;
 			// +/- Infinity
-			return (negative) ? Double.NaN : Double.POSITIVE_INFINITY;
+			return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
 		}
 
-		if (negative)
+		if ((bits >> 63) != 0L)
 			// Only -0 is allowed
-			return (e == 0 && m == 0) ? Double.NEGATIVE_INFINITY : Double.NaN;
+			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
 
 		return (e == 0 ? data[(int) (m >>> q_minus_1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
+	}
+
+	/**
+	 * Calculate the logarithm to base 2. Requires the argument be finite and positive.
+	 * <p>
+	 * Special cases:
+	 * <ul>
+	 * <li>If the argument is NaN, then the result is incorrect.
+	 * <li>If the argument is negative, then the result is incorrect (log(-x)).
+	 * <li>If the argument is positive infinity, then the result is incorrect (Math.log(Double.MAX_VALUE)).
+	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
+	 * </ul>
+	 * 
+	 * @param x
+	 *            the argument. must be positive!
+	 * @return log( x )
+	 */
+	@Override
+	public float fastLog2(double x)
+	{
+		final long bits = Double.doubleToRawLongBits(x);
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
+		return (e == 0 ? data[(int) (m >>> q_minus_1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]);
+	}
+
+	@Override
+	public float log(double x)
+	{
+		final long bits = Double.doubleToRawLongBits(x);
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
+		if (e == 2047)
+		{
+			if (m != 0)
+				return Float.NaN;
+			return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+		}
+		if ((bits >> 63) != 0L)
+			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
+		return (e == 0 ? data[(int) (m >>> q_minus_1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]) * scale;
 	}
 
 	/**
@@ -276,27 +265,38 @@ public class DFastLog extends BaseFastLog
 	 *            the argument. must be positive!
 	 * @return log( x )
 	 */
-	public double fastLog(double x)
+	@Override
+	public float fastLog(double x)
 	{
-		return fastLog2(x) * scale;
+		final long bits = Double.doubleToRawLongBits(x);
+		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
+		return (e == 0 ? data[(int) (m >>> q_minus_1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)]) * scale;
 	}
 
-	/**
-	 * Calculate the logarithm to the base given in the constructor, handling special cases.
-	 * <p>
-	 * Special cases:
-	 * <ul>
-	 * <li>If the argument is NaN or less than zero, then the result is NaN.
-	 * <li>If the argument is positive infinity, then the result is positive infinity.
-	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
-	 * </ul>
-	 *
-	 * @param x
-	 *            the argument
-	 * @return log( x )
-	 */
-	public double log(double x)
+	// Don't bother with float versions. Use FFastLog instead.
+	
+	@Override
+	public float log2(float x)
 	{
-		return log2(x) * scale;
+		return (float)log2((double)x);
+	}
+
+	@Override
+	public float fastLog2(float x)
+	{
+		return (float)fastLog2((double)x);
+	}
+
+	@Override
+	public float log(float x)
+	{
+		return (float)log((double)x);
+	}
+
+	@Override
+	public float fastLog(float x)
+	{
+		return (float)fastLog((double)x);
 	}
 }
