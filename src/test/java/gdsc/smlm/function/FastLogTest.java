@@ -208,7 +208,7 @@ public class FastLogTest
 				return;
 			if (e == o)
 				return;
-			//Assert.assertTrue(error < 1e-4);
+			Assert.assertTrue(error < 1e-4);
 		}
 	}
 
@@ -341,6 +341,7 @@ public class FastLogTest
 			pair.f = f.log(d[pair.i++]);
 			if (pair.f != Float.NEGATIVE_INFINITY)
 				return true;
+			System.out.printf("%g\n", d[pair.i - 1]);
 		}
 		return false;
 	}
@@ -351,7 +352,7 @@ public class FastLogTest
 		// All float values is a lot so we do a representative set
 		RandomGenerator r = new Well19937c(30051977);
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
-		double[] d = new double[100000];
+		double[] d = new double[10000000];
 		double[] logD = new double[d.length];
 		for (int i = 0; i < d.length; i++)
 		{
@@ -360,8 +361,8 @@ public class FastLogTest
 			logD[i] = Math.log(v);
 		}
 
-		int min = 0, max = 23;
-		//int min = 13, max = 13;
+		//int min = 0, max = 23;
+		int min = 13, max = 13;
 
 		for (int n = min; n <= max; n++)
 		{
@@ -419,6 +420,7 @@ public class FastLogTest
 			pair.f = f.log(d[pair.i++]);
 			if (pair.f != Double.NEGATIVE_INFINITY)
 				return true;
+			System.out.printf("%g\n", d[pair.i - 1]);
 		}
 		return false;
 	}
@@ -478,7 +480,8 @@ public class FastLogTest
 
 		TimingService ts = new TimingService(5);
 		ts.execute(new FloatTimingTask(new TestLog(new MathLog()), 0, x));
-		for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
+		for (int q : new int[] { 11 })
+		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
 			int n = 23 - q;
 			ICSIFastLog f = ICSIFastLog.create(n, DataType.FLOAT);
@@ -550,7 +553,8 @@ public class FastLogTest
 
 		TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
-		for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
+		for (int q : new int[] { 11 })
+		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
 			int n = 23 - q;
 			ICSIFastLog f = ICSIFastLog.create(n, DataType.DOUBLE);
