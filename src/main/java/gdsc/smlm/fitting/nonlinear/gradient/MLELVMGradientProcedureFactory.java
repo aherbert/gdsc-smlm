@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -43,5 +44,33 @@ public class MLELVMGradientProcedureFactory
 			default:
 				return new MLELVMGradientProcedure(y, func);
 		}
-	}	
+	}
+
+	/**
+	 * Create a new gradient procedure using a fast log function that discards insignificant bits from floating-point
+	 * values.
+	 *
+	 * @param y
+	 *            Data to fit
+	 * @param func
+	 *            Gradient function
+	 * @param fastLog
+	 *            the fast log instance
+	 * @return the gradient procedure
+	 */
+	public static MLELVMGradientProcedure create(final double[] y, final Gradient1Function func, FastLog fastLog)
+	{
+		switch (func.getNumberOfGradients())
+		{
+			//			case 5:
+			//				return new FastLogMLELVMGradientProcedure5(y, func, fastLog);
+			//			case 4:
+			//				return new FastLogMLELVMGradientProcedure4(y, func, fastLog);
+			//			case 6:
+			//				return new FastLogMLELVMGradientProcedure6(y, func, fastLog);
+
+			default:
+				return new FastLogMLELVMGradientProcedure(y, func, fastLog);
+		}
+	}
 }

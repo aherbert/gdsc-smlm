@@ -16,6 +16,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
+import gdsc.smlm.function.DFastLog;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
@@ -34,6 +35,14 @@ public class LVMGradientProcedureTest
 {
 	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
+	static DFastLog fastLog = null;
+
+	static DFastLog getFastLog()
+	{
+		if (fastLog == null)
+			fastLog = new DFastLog();
+		return fastLog;
+	}
 
 	int MAX_ITER = 20000;
 	int blockWidth = 10;
@@ -58,23 +67,27 @@ public class LVMGradientProcedureTest
 		LVMGradientProcedureFactory.Type MLE = LVMGradientProcedureFactory.Type.MLE;
 		LVMGradientProcedureFactory.Type WLSQ = LVMGradientProcedureFactory.Type.WLSQ;
 		LVMGradientProcedureFactory.Type LSQ = LVMGradientProcedureFactory.Type.LSQ;
+		LVMGradientProcedureFactory.Type FMLE = LVMGradientProcedureFactory.Type.FastLogMLE;
+
+		final DFastLog fl = getFastLog();
 
 		//@formatter:off
 		
 		// Generic factory
 		double[] y = new double[0];
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], LSQ).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], LSQ).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], LSQ).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], LSQ).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], MLE).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], MLE).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], MLE).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], MLE).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], WLSQ).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], WLSQ).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], WLSQ).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], WLSQ).getClass(), WLSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], LSQ, fl).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], LSQ, fl).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], LSQ, fl).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], LSQ, fl).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], MLE, fl).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], MLE, fl).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], MLE, fl).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], MLE, fl).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], WLSQ, fl).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], WLSQ, fl).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], WLSQ, fl).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], WLSQ, fl).getClass(), WLSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], FMLE, fl).getClass(), FastLogMLELVMGradientProcedure.class);
 		
 		// Dedicated factories
 		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[6]).getClass(), LSQLVMGradientProcedure6.class);
@@ -89,6 +102,7 @@ public class LVMGradientProcedureTest
 		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
 		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
 		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[1], fl).getClass(), FastLogMLELVMGradientProcedure.class);
 		
 		//@formatter:on
 	}
@@ -158,8 +172,8 @@ public class LVMGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func,
-					(mle) ? Type.MLE : Type.LSQ);
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, (mle) ? Type.MLE : Type.LSQ,
+					null);
 			p.gradient(paramsList.get(i));
 			double s = p.value;
 			double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
@@ -243,7 +257,7 @@ public class LVMGradientProcedureTest
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type);
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, null);
 			p.gradient(paramsList.get(i));
 		}
 
@@ -273,7 +287,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type);
+					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, null);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
@@ -325,6 +339,14 @@ public class LVMGradientProcedureTest
 	{
 		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.WLSQ, true);
 	}
+	
+	
+	// TODO - Start adding tests for the FastLogMLE:
+	// test unrolled is the same
+	// speed test unrolled
+	// test FastLog verses normal for computing the value or the gradient.
+	// test FastLog verses normal for speed of computing the value or the gradient.
+	
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(Type type, boolean precomputed)
 	{
@@ -350,13 +372,15 @@ public class LVMGradientProcedureTest
 			func = PrecomputedGradient1Function.wrapGradient1Function(func, b);
 		}
 
+		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+
 		String name = String.format("[%d] %b", nparams, type);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type);
+			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p2.gradient(paramsList.get(i));
 
 			// Exactly the same ...
@@ -424,12 +448,12 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(Type type, boolean precomputed)
 	{
-		gradientProcedureLinearIsFasterThanGradientProcedure(4, type, precomputed);
-		gradientProcedureLinearIsFasterThanGradientProcedure(5, type, precomputed);
-		gradientProcedureLinearIsFasterThanGradientProcedure(6, type, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(4, type, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(5, type, precomputed);
+		gradientProcedureIsFasterUnrolledThanGradientProcedure(6, type, precomputed);
 	}
 
-	private void gradientProcedureLinearIsFasterThanGradientProcedure(final int nparams, final Type type,
+	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final Type type,
 			final boolean precomputed)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
@@ -455,13 +479,15 @@ public class LVMGradientProcedureTest
 			func = fgf;
 		}
 
+		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			LVMGradientProcedure p1 = createProcedure(type, yList.get(i), func);
 			p1.gradient(paramsList.get(i));
 			p1.gradient(paramsList.get(i));
 
-			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type);
+			LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p2.gradient(paramsList.get(i));
 			p2.gradient(paramsList.get(i));
 
@@ -496,7 +522,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < paramsList.size(); i++)
 				{
-					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type);
+					LVMGradientProcedure p2 = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 					for (int j = loops; j-- > 0;)
 						p2.gradient(paramsList.get(k++ % iter));
 				}
@@ -568,6 +594,8 @@ public class LVMGradientProcedureTest
 		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
+		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			double[] y = yList.get(i);
@@ -583,10 +611,10 @@ public class LVMGradientProcedureTest
 					b[j] = y[j] * 0.5;
 				}
 				p = LVMGradientProcedureFactory.create(y, PrecomputedGradient1Function.wrapGradient1Function(func, b),
-						type);
+						type, fastLog);
 			}
 			else
-				p = LVMGradientProcedureFactory.create(y, func, type);
+				p = LVMGradientProcedureFactory.create(y, func, type, fastLog);
 			p.gradient(a);
 			//double s = p.value;
 			double[] beta = p.beta.clone();
@@ -666,6 +694,8 @@ public class LVMGradientProcedureTest
 		Gaussian2DFunction f3 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
+		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+
 		int nparams = f12.getNumberOfGradients();
 		int[] indices = f12.gradientIndices();
 		final double[] b = new double[f12.size()];
@@ -708,11 +738,11 @@ public class LVMGradientProcedureTest
 			});
 
 			// These should be the same
-			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type);
+			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type, fastLog);
 			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y,
-					PrecomputedGradient1Function.wrapGradient1Function(f12, b), type);
+					PrecomputedGradient1Function.wrapGradient1Function(f12, b), type, fastLog);
 			// This may be different
-			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type);
+			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
 
 			// Check they are the same
 			p123.gradient(a3peaks);

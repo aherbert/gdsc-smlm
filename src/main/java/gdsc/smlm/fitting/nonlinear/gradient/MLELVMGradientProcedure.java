@@ -59,16 +59,8 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 		{
 			final double xi = y[yi];
 
-			// We assume y[i] is positive
-			if (xi <= 0.0)
-			{
-				value += fi;
-				for (int k = 0; k < n; k++)
-				{
-					beta[k] -= dfi_da[k];
-				}
-			}
-			else
+			// We assume y[i] is positive but must handle zero
+			if (xi > 0.0)
 			{
 				value += (fi - xi - xi * Math.log(fi / xi));
 				final double xi_fi2 = xi / fi / fi;
@@ -79,6 +71,14 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 					final double w = dfi_da[k] * xi_fi2;
 					for (int l = 0; l <= k; l++)
 						alpha[i++] += w * dfi_da[l];
+				}
+			}
+			else
+			{
+				value += fi;
+				for (int k = 0; k < n; k++)
+				{
+					beta[k] -= dfi_da[k];
 				}
 			}
 		}
@@ -97,14 +97,14 @@ public class MLELVMGradientProcedure extends LSQLVMGradientProcedure
 		{
 			final double xi = y[yi];
 
-			// We assume y[i] is positive
-			if (xi <= 0.0)
+			// We assume y[i] is positive but must handle zero
+			if (xi > 0.0)
 			{
-				value += fi;
+				value += (fi - xi - xi * Math.log(fi / xi));
 			}
 			else
 			{
-				value += (fi - xi - xi * Math.log(fi / xi));
+				value += fi;
 			}
 		}
 	}

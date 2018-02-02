@@ -52,17 +52,8 @@ public class MLELVMGradientProcedure5 extends MLELVMGradientProcedure
 		{
 			final double xi = y[yi];
 
-			// We assume y[i] is positive
-			if (xi <= 0.0)
-			{
-				value += fi;
-				beta[0] -= dfi_da[0];
-				beta[1] -= dfi_da[1];
-				beta[2] -= dfi_da[2];
-				beta[3] -= dfi_da[3];
-				beta[4] -= dfi_da[4];
-			}
-			else
+			// We assume y[i] is positive but must handle zero
+			if (xi > 0.0)
 			{
 				value += (fi - xi - xi * Math.log(fi / xi));
 
@@ -95,6 +86,15 @@ public class MLELVMGradientProcedure5 extends MLELVMGradientProcedure
 				alpha[12] += w * dfi_da[2];
 				alpha[13] += w * dfi_da[3];
 				alpha[14] += w * dfi_da[4];
+			}
+			else
+			{
+				value += fi;
+				beta[0] -= dfi_da[0];
+				beta[1] -= dfi_da[1];
+				beta[2] -= dfi_da[2];
+				beta[3] -= dfi_da[3];
+				beta[4] -= dfi_da[4];
 			}
 		}
 	}

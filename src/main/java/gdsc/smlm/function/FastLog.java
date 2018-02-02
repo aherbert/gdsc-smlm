@@ -16,7 +16,7 @@ package gdsc.smlm.function;
 /**
  * Base class for an algorithm computing a fast approximation to the log function
  */
-abstract class FastLog
+public abstract class FastLog
 {
 	/**
 	 * Natural logarithm of 2

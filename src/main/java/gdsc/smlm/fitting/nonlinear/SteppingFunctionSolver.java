@@ -324,6 +324,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	protected boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
+		// TODO 
+		// If the yFit array is not null then wrap the gradient function. 
+		// Compute the value and the wrapper will store the values.
+		// Then reset the gradient function.
+		
 		gradientIndices = f.gradientIndices();
 		lastY = prepareFunctionValue(y, a);
 		//if (yFit == null)

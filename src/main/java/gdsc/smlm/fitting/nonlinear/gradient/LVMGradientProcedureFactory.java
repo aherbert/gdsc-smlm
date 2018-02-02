@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.function.DFastLog;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -22,7 +23,7 @@ public class LVMGradientProcedureFactory
 {
 	public enum Type
 	{
-		LSQ, MLE, WLSQ
+		LSQ, MLE, WLSQ, FastLogMLE
 	}
 
 	/**
@@ -34,9 +35,12 @@ public class LVMGradientProcedureFactory
 	 *            Gradient function
 	 * @param type
 	 *            the type
+	 * @param fastLog
+	 *            the fast log
 	 * @return the gradient procedure
 	 */
-	public static LVMGradientProcedure create(final double[] y, final Gradient1Function func, Type type)
+	public static LVMGradientProcedure create(final double[] y, final Gradient1Function func, Type type,
+			DFastLog fastLog)
 	{
 		switch (type)
 		{
@@ -46,8 +50,11 @@ public class LVMGradientProcedureFactory
 			case MLE:
 				return MLELVMGradientProcedureFactory.create(y, func);
 			case LSQ:
-			default:
 				return LSQLVMGradientProcedureFactory.create(y, func);
+			case FastLogMLE:
+				return MLELVMGradientProcedureFactory.create(y, func, fastLog);
+			default:
+				throw new IllegalStateException("Unknown type: " + type);
 		}
 	}
 }

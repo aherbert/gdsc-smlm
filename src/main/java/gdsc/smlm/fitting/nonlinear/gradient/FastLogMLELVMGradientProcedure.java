@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -25,19 +26,22 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedure4 extends MLELVMGradientProcedure
+public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure
 {
+	protected final FastLog fastLog;
+	
 	/**
 	 * @param y
 	 *            Data to fit (must be positive)
 	 * @param func
 	 *            Gradient function
 	 */
-	public MLELVMGradientProcedure4(final double[] y, final Gradient1Function func)
+	public FastLogMLELVMGradientProcedure(final double[] y, final Gradient1Function func, FastLog fastLog)
 	{
 		super(y, func);
-		if (n != 4)
-			throw new IllegalArgumentException("Function must compute 4 gradients");
+		if (fastLog == null)
+			throw new IllegalArgumentException("FastLog must not be null");
+		this.fastLog = fastLog;
 	}
 
 	/*
@@ -48,68 +52,69 @@ public class MLELVMGradientProcedure4 extends MLELVMGradientProcedure
 	public void execute(double fi, double[] dfi_da)
 	{
 		++yi;
+		// Function must produce a strictly positive output.
+		// ---
+		// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
+		// effectively ignores any function value below zero. This could lead to a 
+		// situation where the best chisq value can be achieved by setting the output
+		// function to produce 0 for all evaluations.
+		// Optimally the function should be bounded to always produce a positive number.
+		// ---
 		if (fi > 0.0)
 		{
 			final double xi = y[yi];
 
 			// We assume y[i] is positive but must handle zero
-			if (xi > 0)
+			if (xi > 0.0)
 			{
-				value += (fi - xi - xi * Math.log(fi / xi));
-
+				// We know fi & xi are positive so we can use fast log
+				// (i.e. no check for NaN or negatives)
+				// The edge case is that positive infinity will return the 
+				// value of log(Double.MAX_VALUE).
+				value += (fi - xi - xi * fastLog.fastLog(fi / xi));
 				final double xi_fi2 = xi / fi / fi;
 				final double e = 1 - (xi / fi);
-
-				beta[0] -= e * dfi_da[0];
-				beta[1] -= e * dfi_da[1];
-				beta[2] -= e * dfi_da[2];
-				beta[3] -= e * dfi_da[3];
-
-				alpha[0] += dfi_da[0] * xi_fi2 * dfi_da[0];
-				double w;
-				w = dfi_da[1] * xi_fi2;
-				alpha[1] += w * dfi_da[0];
-				alpha[2] += w * dfi_da[1];
-				w = dfi_da[2] * xi_fi2;
-				alpha[3] += w * dfi_da[0];
-				alpha[4] += w * dfi_da[1];
-				alpha[5] += w * dfi_da[2];
-				w = dfi_da[3] * xi_fi2;
-				alpha[6] += w * dfi_da[0];
-				alpha[7] += w * dfi_da[1];
-				alpha[8] += w * dfi_da[2];
-				alpha[9] += w * dfi_da[3];
+				for (int k = 0, i = 0; k < n; k++)
+				{
+					beta[k] -= e * dfi_da[k];
+					final double w = dfi_da[k] * xi_fi2;
+					for (int l = 0; l <= k; l++)
+						alpha[i++] += w * dfi_da[l];
+				}
 			}
 			else
 			{
 				value += fi;
-				beta[0] -= dfi_da[0];
-				beta[1] -= dfi_da[1];
-				beta[2] -= dfi_da[2];
-				beta[3] -= dfi_da[3];
+				for (int k = 0; k < n; k++)
+				{
+					beta[k] -= dfi_da[k];
+				}
 			}
 		}
 	}
 
-	@Override
-	protected void initialiseGradient()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
+	 */
+	public void execute(double fi)
 	{
-		GradientProcedureHelper.initialiseWorkingMatrix4(alpha);
-		beta[0] = 0;
-		beta[1] = 0;
-		beta[2] = 0;
-		beta[3] = 0;
-	}
+		++yi;
+		// Function must produce a strictly positive output.
+		if (fi > 0.0)
+		{
+			final double xi = y[yi];
 
-	@Override
-	public void getAlphaMatrix(double[][] alpha)
-	{
-		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
-	}
-
-	@Override
-	public void getAlphaLinear(double[] alpha)
-	{
-		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
+			// We assume y[i] is positive but must handle zero
+			if (xi > 0.0)
+			{
+				value += (fi - xi - xi * fastLog.log(fi / xi));
+			}
+			else
+			{
+				value += fi;
+			}
+		}
 	}
 }

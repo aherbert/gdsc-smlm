@@ -86,7 +86,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 			else
 			{
-				// We assume y[i] is positive
+				// We assume y[i] is positive but must handle zero
 				if (xi <= 0.0)
 				{
 					chisq += fi;
@@ -160,7 +160,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 			else
 			{
-				// We assume y[i] is positive
+				// We assume y[i] is positive but must handle zero
 				if (xi <= 0.0)
 					chisq += fi;
 				else
@@ -215,7 +215,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				}
 				else
 				{
-					// We assume y[i] is positive
+					// We assume y[i] is positive but must handle zero
 					if (xi <= 0.0)
 						chisq += fi;
 					else
@@ -248,7 +248,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				}
 				else
 				{
-					// We assume y[i] is positive
+					// We assume y[i] is positive but must handle zero
 					if (xi <= 0.0)
 						chisq += fi;
 					else
@@ -304,7 +304,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 			else
 			{
-				// We assume y[i] is positive
+				// We assume y[i] is positive but must handle zero
 				if (xi <= 0.0)
 				{
 					chisq += fi;
@@ -384,7 +384,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 			else
 			{
-				// We assume y[i] is positive
+				// We assume y[i] is positive but must handle zero
 				if (xi <= 0.0)
 					chisq += fi;
 				else
@@ -457,7 +457,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				}
 				else
 				{
-					// We assume y[i] is positive
+					// We assume y[i] is positive but must handle zero
 					if (xi <= 0.0)
 						chisq += fi;
 					else
@@ -490,7 +490,7 @@ public class MLEGradientCalculator extends GradientCalculator
 				}
 				else
 				{
-					// We assume y[i] is positive
+					// We assume y[i] is positive but must handle zero
 					if (xi <= 0.0)
 						chisq += fi;
 					else
@@ -698,7 +698,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 			else
 			{
-				// We assume y[i] is positive
+				// We assume y[i] is positive but must handle zero
 				if (xi <= 0.0)
 					chisq += fi;
 				else
