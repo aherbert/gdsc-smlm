@@ -22,7 +22,7 @@ import org.apache.commons.math3.util.FastMath;
 public class PoissonCalculator
 {
 	/** Avoid repeated computation of log of 2 PI */
-	private static final double HALF_LOG_2_PI = 0.5 * FastMath.log(2.0 * FastMath.PI);
+	private static final double HALF_LOG_2_PI = 0.5 * Math.log(2.0 * FastMath.PI);
 
 	/** The value of x where the instance method computes x! using an approximation. */
 	public static final double APPROXIMATION_X = 1.5;
@@ -57,7 +57,7 @@ public class PoissonCalculator
 	private void computePrefactors()
 	{
 		mll = 0;
-		
+
 		// The maximum log-likelihood (mll) is:
 		// mll = (x==0) ? 0 : x * Math.log(x) - x - logFactorial(x)
 
@@ -102,7 +102,8 @@ public class PoissonCalculator
 					// below 2.5. Above that it uses 2 calls. So the cost for this accuracy is an extra 
 					// Math.log() call.
 					//final double logXFactorial = Gamma.logGamma(x[i] + 1);
-					final double logXFactorial = -FastMath.log1p(Gamma.invGamma1pm1(x[i]));
+					// Note Math.log1p is faster than FastMath.log1p.
+					final double logXFactorial = -Math.log1p(Gamma.invGamma1pm1(x[i]));
 					sumLogXFactorial += logXFactorial;
 					mll += x[i] * logx - x[i] - logXFactorial;
 				}
@@ -125,7 +126,8 @@ public class PoissonCalculator
 	/**
 	 * Raise the value to the power 3
 	 *
-	 * @param value the value
+	 * @param value
+	 *            the value
 	 * @return value^3
 	 */
 	private static double pow3(double value)
@@ -265,7 +267,8 @@ public class PoissonCalculator
 	}
 
 	/**
-	 * Get the Poisson log likelihood ratio of the log likelihood. Note that the input must not be the pseudo log-likelihood
+	 * Get the Poisson log likelihood ratio of the log likelihood. Note that the input must not be the pseudo
+	 * log-likelihood
 	 *
 	 * @param logLikelihood
 	 *            the log likelihood
@@ -328,9 +331,70 @@ public class PoissonCalculator
 	 */
 	public static double logFactorial(double x)
 	{
-		if (x <= 1)
-			return 0.0;
-		return Gamma.logGamma(x + 1);
+		if (x > 1)
+		{
+			//return Gamma.logGamma(1 + x);
+			return logGamma(1 + x);
+		}
+		return 0.0;
+	}
+
+	/**
+	 * Copied from Apache Commons FastMath. Removed support for NaN and x < 0.5.
+	 * <p>
+	 * Returns the value of log&nbsp;&Gamma;(x) for x&nbsp;&gt;&nbsp;0.
+	 * </p>
+	 * <p>
+	 * For x &le; 8, the implementation is based on the double precision
+	 * implementation in the <em>NSWC Library of Mathematics Subroutines</em>,
+	 * {@code DGAMLN}. For x &gt; 8, the implementation is based on
+	 * </p>
+	 * <ul>
+	 * <li><a href="http://mathworld.wolfram.com/GammaFunction.html">Gamma
+	 * Function</a>, equation (28).</li>
+	 * <li><a href="http://mathworld.wolfram.com/LanczosApproximation.html">
+	 * Lanczos Approximation</a>, equations (1) through (5).</li>
+	 * <li><a href="http://my.fit.edu/~gabdo/gamma.txt">Paul Godfrey, A note on
+	 * the computation of the convergent Lanczos complex Gamma
+	 * approximation</a></li>
+	 * </ul>
+	 *
+	 * @param x
+	 *            Argument.
+	 * @return the value of {@code log(Gamma(x))}, {@code Double.NaN} if
+	 *         {@code x <= 0.0}.
+	 */
+	private static double logGamma(double x)
+	{
+		//		if (Double.isNaN(x) || (x <= 0.0))
+		//		{
+		//			return Double.NaN;
+		//		}
+		//		else if (x < 0.5)
+		//		{
+		//			return Gamma.logGamma1p(x) - Math.log(x);
+		//		}
+		//		else 
+		if (x <= 2.5)
+		{
+			return Gamma.logGamma1p((x - 0.5) - 0.5);
+		}
+		else if (x <= 8.0)
+		{
+			final int n = (int) FastMath.floor(x - 1.5);
+			double prod = 1.0;
+			for (int i = 1; i <= n; i++)
+			{
+				prod *= x - i;
+			}
+			return Gamma.logGamma1p(x - (n + 1)) + Math.log(prod);
+		}
+		else
+		{
+			double sum = Gamma.lanczos(x);
+			double tmp = x + Gamma.LANCZOS_G + .5;
+			return ((x + .5) * Math.log(tmp)) - tmp + HALF_LOG_2_PI + Math.log(sum / x);
+		}
 	}
 
 	/**
@@ -391,7 +455,8 @@ public class PoissonCalculator
 			// Note that the logGamma function uses only 1 Math.log() call when the input is 
 			// below 2.5. Above that it uses 2 calls so we switch to the approximation.
 			//return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
-			return x * Math.log(u) - u + FastMath.log1p(Gamma.invGamma1pm1(x));
+			// Note Math.log1p is faster than FastMath.log1p.
+			return x * Math.log(u) - u + Math.log1p(Gamma.invGamma1pm1(x));
 		}
 		else
 		{
@@ -441,7 +506,7 @@ public class PoissonCalculator
 	 */
 	public static double likelihood(double u, double x)
 	{
-		// This has a smaller range being computation fails:
+		// This has a smaller range before computation fails:
 		//return Math.pow(u, x) * FastMath.exp(-u) / factorial(x);
 		return FastMath.exp(logLikelihood(u, x));
 	}
