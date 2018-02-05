@@ -440,6 +440,11 @@ public class PoissonCalculator
 
 		// This makes:
 		// ll = x * log(u) - u - x * log(x) + x - O(ln(x))
+		
+		// Note: This can be rearranged:
+		// ll = x * (log(u) - log(x)) - u + x - O(ln(x))
+		// ll = x * log(u/x) - u + x - O(ln(x))
+		// However the log(x) is needed in the O(ln(x)) computation. 
 
 		// Use the Stirling approximation when appropriate
 		if (x <= 1)
