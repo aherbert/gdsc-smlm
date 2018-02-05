@@ -23,6 +23,8 @@ package gdsc.smlm.function;
  * <p>
  * When the unbiased exponent is zero a conversion from float to double is made to preserve the precision. If already a
  * double then the full Math.log function is used.
+ * <p>
+ * The relative error ((fastLog(x)-Math.log(x))/Math.log(x)) is large (e~0.76) when the input value x is close to 1.
  *
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-
@@ -331,7 +333,6 @@ public class TurboLog extends FastLog
 		return logMantissa[(int) (m >>> qd)] + logExpD[e];
 	}
 
-
 	@Override
 	public double logD(double x)
 	{
@@ -411,7 +412,7 @@ public class TurboLog extends FastLog
 		final long m = (bits & 0xfffffffffffffL);
 		return logMantissa[(int) (m >>> qd)] + logExpD[e];
 	}
-	
+
 	// We don't support other bases so do a simple conversion for log2 for the super-class method
 
 	@Override

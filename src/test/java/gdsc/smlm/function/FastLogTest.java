@@ -2,6 +2,7 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -78,6 +79,26 @@ public class FastLogTest
 		TestFastLog(FastLog fl) { super(fl); }
 		float log(float x) { return fl.fastLog(x); }
 		double log(double x) { return fl.fastLogD(x); }
+	}
+	// To test Math.log(1+x).
+	// This is what is used in the MLE LVM gradient calculator
+	private class Test1PLog extends BaseTestLog
+	{
+		Test1PLog(FastLog fl) { super(fl); }
+		float log(float x) { return (float) Math.log(1+x); }
+		double log(double x) { return Math.log(1+x); }
+	}
+	private class TestLog1P extends BaseTestLog
+	{
+		TestLog1P(FastLog fl) { super(fl); }
+		float log(float x) { return (float) Math.log1p(x); }
+		double log(double x) { return Math.log1p(x); }
+	}
+	private class TestLog1PApache extends BaseTestLog
+	{
+		TestLog1PApache(FastLog fl) { super(fl); }
+		float log(float x) { return (float) FastMath.log1p(x); }
+		double log(double x) { return FastMath.log1p(x); }
 	}
 	//@formatter:on
 
@@ -365,8 +386,8 @@ public class FastLogTest
 		//		{
 		//			System.out.printf("Big error: %f %f\n", v, d[pair.i-1]);
 		//		}
-		Stats s1 = new Stats(delta, d[pair.i-1]);
-		Stats s2 = new Stats(Math.abs(delta / v), d[pair.i-1]);
+		Stats s1 = new Stats(delta, d[pair.i - 1]);
+		Stats s2 = new Stats(Math.abs(delta / v), d[pair.i - 1]);
 		while (next(f, pair, d))
 		{
 			v = logD[pair.i - 1];
@@ -377,8 +398,8 @@ public class FastLogTest
 			//	System.out.printf("Big error: [%g] %f %f %f\n", d[pair.i - 1], v, pair.f,
 			//			v));
 			//}
-			s1.add(delta, d[pair.i-1]);
-			s2.add(Math.abs(delta / v), d[pair.i-1]);
+			s1.add(delta, d[pair.i - 1]);
+			s2.add(Math.abs(delta / v), d[pair.i - 1]);
 		}
 		System.out.printf("%s, n=%d, c=%d : %s : relative %s\n", f.name, f.getN(), s1.n, s1.summary(), s2.summary());
 	}
@@ -431,6 +452,25 @@ public class FastLogTest
 		}
 	}
 
+	@Test
+	public void canTestDoubleErrorLog1P()
+	{
+		// All float values is a lot so we do a representative set
+		RandomGenerator r = new Well19937c(30051977);
+		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
+		double[] d = new double[100000];
+		double[] logD = new double[d.length];
+		for (int i = 0; i < d.length; i++)
+		{
+			double v = nextUniformDouble(r);
+			d[i] = v;
+			logD[i] = Math.log1p(v);
+		}
+
+		canTestDoubleError(new Test1PLog(new MathLog()), d, logD);
+		canTestDoubleError(new TestLog1P(new MathLog()), d, logD);
+	}
+
 	private double nextUniformDouble(RandomGenerator r)
 	{
 		long u = r.nextLong();
@@ -455,15 +495,16 @@ public class FastLogTest
 		double v = logD[pair.i - 1];
 		double delta = v - pair.f;
 		delta = Math.abs(delta);
-		Stats s1 = new Stats(delta, d[pair.i-1]);
-		Stats s2 = new Stats(Math.abs(delta / v), d[pair.i-1]);
+		Stats s1 = new Stats(delta, d[pair.i - 1]);
+		Stats s2 = new Stats(Math.abs(delta / v), d[pair.i - 1]);
 		while (next(f, pair, d))
 		{
 			v = logD[pair.i - 1];
+			//System.out.printf("%g vs %g\n", v, pair.f);
 			delta = v - pair.f;
 			delta = Math.abs(delta);
-			s1.add(delta, d[pair.i-1]);
-			s2.add(Math.abs(delta / v), d[pair.i-1]);
+			s1.add(delta, d[pair.i - 1]);
+			s2.add(Math.abs(delta / v), d[pair.i - 1]);
 		}
 		System.out.printf("%s, n=%d, c=%d : %s : relative %s\n", f.name, f.getN(), s1.n, s1.summary(), s2.summary());
 	}
@@ -627,6 +668,33 @@ public class FastLogTest
 			ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
 		}
+
+		int size = ts.getSize();
+		ts.repeat(size);
+		ts.report(size);
+	}
+
+	@Test
+	public void canTestDoubleSpeedLog1P()
+	{
+		RandomGenerator r = new Well19937c(30051977);
+		double[] x = new double[1000000];
+		for (int i = 0; i < x.length; i++)
+		{
+			x[i] = nextUniformDouble(r);
+		}
+
+		MathLog f = new MathLog();
+		
+		TimingService ts = new TimingService(5);
+		//ts.execute(new DoubleTimingTask(new TestLog(f), 0, x));
+		ts.execute(new DoubleTimingTask(new Test1PLog(f), 0, x));
+		ts.execute(new DoubleTimingTask(new TestLog1P(f), 0, x));
+		ts.execute(new DoubleTimingTask(new TestLog1PApache(f), 0, x));
+		//ts.execute(new DoubleTimingTask(new TestLog(f), 0, x));
+		ts.execute(new DoubleTimingTask(new Test1PLog(f), 0, x));
+		ts.execute(new DoubleTimingTask(new TestLog1P(f), 0, x));
+		ts.execute(new DoubleTimingTask(new TestLog1PApache(f), 0, x));
 
 		int size = ts.getSize();
 		ts.repeat(size);
