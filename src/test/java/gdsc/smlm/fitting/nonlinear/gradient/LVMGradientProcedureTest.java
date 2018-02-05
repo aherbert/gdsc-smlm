@@ -19,9 +19,9 @@ import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.FastLog;
+import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PrecomputedGradient1Function;
-import gdsc.smlm.function.TurboLog;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -36,13 +36,10 @@ public class LVMGradientProcedureTest
 {
 	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
-	static FastLog fastLog = null;
 
 	static FastLog getFastLog()
 	{
-		if (fastLog == null)
-			fastLog = new TurboLog();
-		return fastLog;
+		return FastLogFactory.getFastLog();
 	}
 
 	int MAX_ITER = 20000;
@@ -75,35 +72,50 @@ public class LVMGradientProcedureTest
 		//@formatter:off
 		
 		// Generic factory
-		double[] y = new double[0];
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], LSQ, fl).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], LSQ, fl).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], LSQ, fl).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], LSQ, fl).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], MLE, fl).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], MLE, fl).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], MLE, fl).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], MLE, fl).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[6], WLSQ, fl).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[5], WLSQ, fl).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[4], WLSQ, fl).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], WLSQ, fl).getClass(), WLSQLVMGradientProcedure.class);
-		Assert.assertEquals(LVMGradientProcedureFactory.create(y, f[1], FMLE, fl).getClass(), FastLogMLELVMGradientProcedure.class);
+		double[] y0 = new double[1];
+		double[] y1 = new double[]{ 1 };
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[6], LSQ, fl).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[5], LSQ, fl).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[4], LSQ, fl).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[1], LSQ, fl).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[6], MLE, fl).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[5], MLE, fl).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[4], MLE, fl).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[1], MLE, fl).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[6], MLE, fl).getClass(), MLELVMGradientProcedureX6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[5], MLE, fl).getClass(), MLELVMGradientProcedureX5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[4], MLE, fl).getClass(), MLELVMGradientProcedureX4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y1, f[1], MLE, fl).getClass(), MLELVMGradientProcedureX.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[6], WLSQ, fl).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[5], WLSQ, fl).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[4], WLSQ, fl).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[1], WLSQ, fl).getClass(), WLSQLVMGradientProcedure.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[6], FMLE, fl).getClass(), FastLogMLELVMGradientProcedure6.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[5], FMLE, fl).getClass(), FastLogMLELVMGradientProcedure5.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[4], FMLE, fl).getClass(), FastLogMLELVMGradientProcedure4.class);
+		Assert.assertEquals(LVMGradientProcedureFactory.create(y0, f[1], FMLE, fl).getClass(), FastLogMLELVMGradientProcedure.class);
 		
 		// Dedicated factories
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[6]).getClass(), LSQLVMGradientProcedure6.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[5]).getClass(), LSQLVMGradientProcedure5.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[4]).getClass(), LSQLVMGradientProcedure4.class);
-		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y, f[1]).getClass(), LSQLVMGradientProcedure.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[6]).getClass(), MLELVMGradientProcedure6.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[5]).getClass(), MLELVMGradientProcedure5.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[4]).getClass(), MLELVMGradientProcedure4.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[1]).getClass(), MLELVMGradientProcedure.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
-		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
-		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y, f[1], fl).getClass(), FastLogMLELVMGradientProcedure.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y0, f[6]).getClass(), LSQLVMGradientProcedure6.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y0, f[5]).getClass(), LSQLVMGradientProcedure5.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y0, f[4]).getClass(), LSQLVMGradientProcedure4.class);
+		Assert.assertEquals(LSQLVMGradientProcedureFactory.create(y0, f[1]).getClass(), LSQLVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[6]).getClass(), MLELVMGradientProcedure6.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[5]).getClass(), MLELVMGradientProcedure5.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[4]).getClass(), MLELVMGradientProcedure4.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[1]).getClass(), MLELVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[6]).getClass(), MLELVMGradientProcedureX6.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[5]).getClass(), MLELVMGradientProcedureX5.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[4]).getClass(), MLELVMGradientProcedureX4.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y1, f[1]).getClass(), MLELVMGradientProcedureX.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y0, null, f[6]).getClass(), WLSQLVMGradientProcedure6.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y0, null, f[5]).getClass(), WLSQLVMGradientProcedure5.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y0, null, f[4]).getClass(), WLSQLVMGradientProcedure4.class);
+		Assert.assertEquals(WLSQLVMGradientProcedureFactory.create(y0, null, f[1]).getClass(), WLSQLVMGradientProcedure.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[6], fl).getClass(), FastLogMLELVMGradientProcedure6.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[5], fl).getClass(), FastLogMLELVMGradientProcedure5.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[4], fl).getClass(), FastLogMLELVMGradientProcedure4.class);
+		Assert.assertEquals(MLELVMGradientProcedureFactory.create(y0, f[1], fl).getClass(), FastLogMLELVMGradientProcedure.class);
 		
 		//@formatter:on
 	}
