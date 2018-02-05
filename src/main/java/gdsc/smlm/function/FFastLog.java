@@ -213,7 +213,7 @@ public class FFastLog extends FastLog
 	 * </ul>
 	 * 
 	 * @param x
-	 *            the argument. must be positive!
+	 *            the argument (must be strictly positive)
 	 * @return log2( x )
 	 */
 	@Override
@@ -257,7 +257,7 @@ public class FFastLog extends FastLog
 	 * </ul>
 	 * 
 	 * @param x
-	 *            the argument. must be positive!
+	 *            the argument (must be strictly positive)
 	 * @return log( x )
 	 */
 	@Override
@@ -326,7 +326,7 @@ public class FFastLog extends FastLog
 	 * </ul>
 	 * 
 	 * @param x
-	 *            the argument. must be positive!
+	 *            the argument (must be strictly positive)
 	 * @return log( x )
 	 */
 	@Override
@@ -395,7 +395,7 @@ public class FFastLog extends FastLog
 	 * </ul>
 	 * 
 	 * @param x
-	 *            the argument. must be positive!
+	 *            the argument (must be strictly positive)
 	 * @return log( x )
 	 */
 	@Override

@@ -221,7 +221,7 @@ public class DFastLog extends FastLog
 	 * </ul>
 	 * 
 	 * @param x
-	 *            the argument. must be positive!
+	 *            the argument (must be strictly positive)
 	 * @return log( x )
 	 */
 	@Override
@@ -262,7 +262,7 @@ public class DFastLog extends FastLog
 	 * </ul>
 	 * 
 	 * @param x
-	 *            the argument. must be positive!
+	 *            the argument (must be strictly positive)
 	 * @return log( x )
 	 */
 	@Override
