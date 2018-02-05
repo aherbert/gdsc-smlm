@@ -205,6 +205,9 @@ public class TurboLog extends FastLog
 			if (m == 0)
 				return Float.NEGATIVE_INFINITY;
 			//return fastLog((double) x);
+			
+			// TODO
+			// See FastMath.log for how to normalise the sub-normal number			
 
 			// Re-implement double version here as we assume that e will not be zero again.
 			final long lbits = Double.doubleToLongBits(x);
@@ -212,10 +215,16 @@ public class TurboLog extends FastLog
 			final long lm = (lbits & 0xfffffffffffffL);
 			return logMantissa[(int) (lm >>> qd)] + logExpD[le];
 		}
-		else
+
+		// TODO - fix this for the double version too
+		
+		// When the value is close to 1 then the relative error can be very large
+		if ((e == 126 || e == 127) && x < 1.01f && x > 0.99f)
 		{
-			return logMantissa[m >>> q] + logExpF[e];
+			return (float) Math.log(x);
 		}
+
+		return logMantissa[m >>> q] + logExpF[e];
 	}
 
 	/**
@@ -249,6 +258,13 @@ public class TurboLog extends FastLog
 			final long lm = (lbits & 0xfffffffffffffL);
 			return logMantissa[(int) (lm >>> qd)] + logExpD[le];
 		}
+
+		// When the value is close to 1 then the relative error can be very large
+		if ((e == 126 || e == 127) && x < 1.01f && x > 0.99f)
+		{
+			return (float) Math.log(x);
+		}
+
 		final int m = (bits & 0x7fffff);
 		return logMantissa[m >>> q] + logExpF[e];
 	}

@@ -4,6 +4,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.test.BaseTimingTask;
@@ -11,6 +12,8 @@ import gdsc.core.test.TimingService;
 import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.FloatEquality;
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.function.ICSIFastLog.DataType;
 
 @SuppressWarnings("unused")
@@ -277,15 +280,11 @@ public class FastLogTest
 	public void canTestFloatError()
 	{
 		// All float values is a lot so we do a representative set
-		RandomGenerator r = new Well19937c(30051977);
-		double lower = Float.MIN_VALUE, upper = Float.MAX_VALUE;
-		float[] d = new float[100000];
+		float[] d = generateRandomFloats(1000000);
 		float[] logD = new float[d.length];
 		for (int i = 0; i < d.length; i++)
 		{
-			float v = nextUniformFloat(r);
-			d[i] = v;
-			logD[i] = (float) Math.log(v);
+			logD[i] = (float) Math.log(d[i]);
 		}
 
 		//int min=0,max=23;
@@ -309,6 +308,15 @@ public class FastLogTest
 		}
 	}
 
+	private float[] generateRandomFloats(int n)
+	{
+		RandomGenerator r = new Well19937c(30051977);
+		float[] d = new float[n];
+		for (int i = 0; i < d.length; i++)
+			d[i] = nextUniformFloat(r);
+		return d;
+	}
+
 	private float nextUniformFloat(RandomGenerator r)
 	{
 		int u = r.nextInt();
@@ -316,6 +324,74 @@ public class FastLogTest
 		u = BitFlags.unset(u, 0x80000000 | 0x00800000);
 		//assert ((u >> 23) & 0xff) < 255;
 		return Float.intBitsToFloat(u);
+	}
+
+	@Test
+	public void canTestFloatErrorRange()
+	{
+		Assume.assumeTrue(true);
+
+		TurboList<TestFastLog> test = new TurboList<TestFastLog>();
+		int n = 13;
+		test.add(new TestFastLog(ICSIFastLog.create(n, DataType.FLOAT)));
+		test.add(new TestFastLog(new FFastLog(n)));
+		test.add(new TestFastLog(new DFastLog(n)));
+		test.add(new TestFastLog(new TurboLog(n)));
+
+		// Full range in blocks.
+		// Only when the number is around 1 or min value are there significant errors
+		float[] d = null, logD = null;
+		
+		// All
+		//testFloatErrorRange(test, n, d, logD, 0, 255, 0);
+		
+		// Only a problem around min value and x==1
+		//testFloatErrorRange(test, n, d, logD, 0, 2, 0);
+		testFloatErrorRange(test, n, d, logD, 125, 130, 0);
+		//testFloatErrorRange(test, n, d, logD, 253, 255, 0);
+	}
+
+	private void testFloatErrorRange(TurboList<TestFastLog> test, int n, float[] d, float[] logD, int mine, int maxe, int ee)
+	{
+		for (int e = mine; e < maxe; e += ee + 1)
+		{
+			d = generateFloats(e, e + ee, d);
+			if (logD == null || logD.length < n)
+				logD = new float[d.length];
+			for (int i = 0; i < d.length; i++)
+			{
+				logD[i] = (float) Math.log(d[i]);
+			}
+			System.out.printf("e=%d-%d\n", e, e + ee);
+			for (TestFastLog f : test)
+				canTestFloatError(f, d, logD);
+		}
+	}
+
+	private float[] generateFloats(int mine, int maxe, float[] d)
+	{
+		// Mantissa = 23-bit, Exponent = 8-bit
+		int mbits = 23;
+		mine = Maths.clip(0, 255, mine);
+		maxe = Maths.clip(0, 255, maxe);
+		if (mine > maxe)
+			throw new IllegalStateException();
+		int mn = (1 << mbits);
+		int n = mn * (maxe - mine + 1);
+		if (d == null || d.length < n)
+			d = new float[n];
+		int i = 0;
+		for (int m = 0; m < mn; m++)
+		{
+			for (int e = mine; e <= maxe; e++)
+			{
+				int bits = m | (e << 23);
+				float v = Float.intBitsToFloat(bits);
+				//System.out.printf("%g = %s\n", v, Integer.toBinaryString(bits));
+				d[i++] = v;
+			}
+		}
+		return d;
 	}
 
 	private class FPair
@@ -369,7 +445,7 @@ public class FastLogTest
 
 		String summary()
 		{
-			return String.format("min=%g (%g), max=%g (%g), mean=%g, sd=%g", min, minv, max, maxv, getMean(), getSD());
+			return String.format("min=%s (%s), max=%s (%s), mean=%s, sd=%g", min, minv, max, maxv, getMean(), getSD());
 		}
 	}
 
@@ -387,7 +463,7 @@ public class FastLogTest
 		//			System.out.printf("Big error: %f %f\n", v, d[pair.i-1]);
 		//		}
 		Stats s1 = new Stats(delta, d[pair.i - 1]);
-		Stats s2 = new Stats(Math.abs(delta / v), d[pair.i - 1]);
+		Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
 		while (next(f, pair, d))
 		{
 			v = logD[pair.i - 1];
@@ -399,7 +475,8 @@ public class FastLogTest
 			//			v));
 			//}
 			s1.add(delta, d[pair.i - 1]);
-			s2.add(Math.abs(delta / v), d[pair.i - 1]);
+			if (v != 0)
+				s2.add(Math.abs(delta / v), d[pair.i - 1]);
 		}
 		System.out.printf("%s, n=%d, c=%d : %s : relative %s\n", f.name, f.getN(), s1.n, s1.summary(), s2.summary());
 	}
@@ -408,7 +485,10 @@ public class FastLogTest
 	{
 		while (pair.i < d.length)
 		{
-			pair.f = f.log(d[pair.i++]);
+			float x = d[pair.i++];
+			if (x == 0)// Skip infinity
+				continue;
+			pair.f = f.log(x);
 			if (pair.f != Float.NEGATIVE_INFINITY)
 				return true;
 			//System.out.printf("%g\n", d[pair.i - 1]);
@@ -496,7 +576,7 @@ public class FastLogTest
 		double delta = v - pair.f;
 		delta = Math.abs(delta);
 		Stats s1 = new Stats(delta, d[pair.i - 1]);
-		Stats s2 = new Stats(Math.abs(delta / v), d[pair.i - 1]);
+		Stats s2 = (v != 0) ? new Stats(Math.abs(delta / v), d[pair.i - 1]) : new Stats(0, d[pair.i - 1]);
 		while (next(f, pair, d))
 		{
 			v = logD[pair.i - 1];
@@ -504,7 +584,8 @@ public class FastLogTest
 			delta = v - pair.f;
 			delta = Math.abs(delta);
 			s1.add(delta, d[pair.i - 1]);
-			s2.add(Math.abs(delta / v), d[pair.i - 1]);
+			if (v != 0)
+				s2.add(Math.abs(delta / v), d[pair.i - 1]);
 		}
 		System.out.printf("%s, n=%d, c=%d : %s : relative %s\n", f.name, f.getN(), s1.n, s1.summary(), s2.summary());
 	}
@@ -513,6 +594,9 @@ public class FastLogTest
 	{
 		while (pair.i < d.length)
 		{
+			double x = d[pair.i++];
+			if (x == 0)// Skip infinity
+				continue;
 			pair.f = f.log(d[pair.i++]);
 			if (pair.f != Double.NEGATIVE_INFINITY)
 				return true;
@@ -685,7 +769,7 @@ public class FastLogTest
 		}
 
 		MathLog f = new MathLog();
-		
+
 		TimingService ts = new TimingService(5);
 		//ts.execute(new DoubleTimingTask(new TestLog(f), 0, x));
 		ts.execute(new DoubleTimingTask(new Test1PLog(f), 0, x));
