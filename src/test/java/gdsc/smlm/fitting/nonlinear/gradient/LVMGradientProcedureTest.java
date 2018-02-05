@@ -16,11 +16,12 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
-import gdsc.smlm.function.DFastLog;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PrecomputedGradient1Function;
+import gdsc.smlm.function.TurboLog;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -35,12 +36,12 @@ public class LVMGradientProcedureTest
 {
 	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
-	static DFastLog fastLog = null;
+	static FastLog fastLog = null;
 
-	static DFastLog getFastLog()
+	static FastLog getFastLog()
 	{
 		if (fastLog == null)
-			fastLog = new DFastLog();
+			fastLog = new TurboLog();
 		return fastLog;
 	}
 
@@ -69,7 +70,7 @@ public class LVMGradientProcedureTest
 		LVMGradientProcedureFactory.Type LSQ = LVMGradientProcedureFactory.Type.LSQ;
 		LVMGradientProcedureFactory.Type FMLE = LVMGradientProcedureFactory.Type.FastLogMLE;
 
-		final DFastLog fl = getFastLog();
+		final FastLog fl = getFastLog();
 
 		//@formatter:off
 		
@@ -110,48 +111,65 @@ public class LVMGradientProcedureTest
 	@Test
 	public void gradientProcedureLSQComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(false);
+		gradientProcedureComputesSameAsGradientCalculator(Type.LSQ);
 	}
 
 	@Test
 	public void gradientProcedureMLEComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(true);
+		gradientProcedureComputesSameAsGradientCalculator(Type.MLE);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(boolean mle)
+	@Test
+	public void gradientProcedureFastLogMLEComputesSameAsGradientCalculator()
 	{
-		gradientProcedureComputesSameAsGradientCalculator(4, mle);
-		gradientProcedureComputesSameAsGradientCalculator(5, mle);
-		gradientProcedureComputesSameAsGradientCalculator(6, mle);
-		gradientProcedureComputesSameAsGradientCalculator(11, mle);
-		gradientProcedureComputesSameAsGradientCalculator(21, mle);
+		gradientProcedureComputesSameAsGradientCalculator(Type.FastLogMLE, 1e-3);
+	}
+
+	private void gradientProcedureComputesSameAsGradientCalculator(Type type)
+	{
+		gradientProcedureComputesSameAsGradientCalculator(type, 0);
+	}
+
+	private void gradientProcedureComputesSameAsGradientCalculator(Type type, double error)
+	{
+		gradientProcedureComputesSameAsGradientCalculator(4, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(5, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(6, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(11, type, error);
+		gradientProcedureComputesSameAsGradientCalculator(21, type, error);
 	}
 
 	@Test
 	public void gradientProcedureLSQIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(false);
+		gradientProcedureIsNotSlowerThanGradientCalculator(Type.LSQ);
 	}
 
 	@Test
 	public void gradientProcedureMLEIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(true);
+		gradientProcedureIsNotSlowerThanGradientCalculator(Type.MLE);
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(boolean mle)
+	@Test
+	public void gradientProcedureFastLogMLEIsNotSlowerThanGradientCalculator()
 	{
-		gradientProcedureIsNotSlowerThanGradientCalculator(4, mle);
-		gradientProcedureIsNotSlowerThanGradientCalculator(5, mle);
-		gradientProcedureIsNotSlowerThanGradientCalculator(6, mle);
-		// 2 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(11, mle);
-		// 4 peaks
-		gradientProcedureIsNotSlowerThanGradientCalculator(21, mle);
+		gradientProcedureIsNotSlowerThanGradientCalculator(Type.FastLogMLE);
 	}
 
-	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, boolean mle)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(Type type)
+	{
+		gradientProcedureIsNotSlowerThanGradientCalculator(4, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(5, type);
+		gradientProcedureIsNotSlowerThanGradientCalculator(6, type);
+		// 2 peaks
+		gradientProcedureIsNotSlowerThanGradientCalculator(11, type);
+		// 4 peaks
+		gradientProcedureIsNotSlowerThanGradientCalculator(21, type);
+	}
+
+	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, Type type, double error)
 	{
 		int iter = 10;
 		rdg = new RandomDataGenerator(new Well19937c(30051977));
@@ -166,19 +184,23 @@ public class LVMGradientProcedureTest
 		int n = x.length;
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
+		boolean mle = type != Type.LSQ;
+		FastLog fastLog = (type == Type.FastLogMLE) ? getFastLog() : null;
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		String name = String.format("[%d] %b", nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, (mle) ? Type.MLE : Type.LSQ,
-					null);
+			// Reference implementation
+			double s = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
+			// Procedure
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p.gradient(paramsList.get(i));
-			double s = p.value;
-			double s2 = calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
+			double s2 = p.value;
+			// Value may be different depending on log implementation
+			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, Math.abs(s2) * error);
 			// Exactly the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, 0);
 			Assert.assertArrayEquals(name + " Observations: Not same beta @ " + i, p.beta, beta, 0);
 
 			double[] al = p.getAlphaLinear();
@@ -232,7 +254,7 @@ public class LVMGradientProcedureTest
 		abstract void run();
 	}
 
-	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams, final boolean mle)
+	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams, final Type type)
 	{
 		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
 
@@ -248,16 +270,16 @@ public class LVMGradientProcedureTest
 		final int n = x.length;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
+		final boolean mle = type != Type.LSQ;
+		final FastLog fastLog = (type == Type.FastLogMLE) ? getFastLog() : null;
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, mle);
 
 		for (int i = 0; i < paramsList.size(); i++)
 			calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 
-		final Type type = (mle) ? Type.MLE : Type.LSQ;
-
 		for (int i = 0; i < paramsList.size(); i++)
 		{
-			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, null);
+			LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 			p.gradient(paramsList.get(i));
 		}
 
@@ -287,7 +309,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int i = 0, k = 0; i < iter; i++)
 				{
-					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, null);
+					LVMGradientProcedure p = LVMGradientProcedureFactory.create(yList.get(i), func, type, fastLog);
 					for (int j = loops; j-- > 0;)
 						p.gradient(paramsList.get(k++ % iter));
 				}
@@ -295,7 +317,7 @@ public class LVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("GradientCalculator = %d : LVMGradientProcedure %d %b = %d : %fx\n", time1, nparams, mle, time2,
+		log("GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n", time1, nparams, type, time2,
 				(1.0 * time1) / time2);
 		if (TestSettings.ASSERT_SPEED_TESTS)
 		{
@@ -339,14 +361,10 @@ public class LVMGradientProcedureTest
 	{
 		gradientProcedureUnrolledComputesSameAsGradientProcedure(Type.WLSQ, true);
 	}
-	
-	
-	// TODO - Start adding tests for the FastLogMLE:
-	// test unrolled is the same
-	// speed test unrolled
-	// test FastLog verses normal for computing the value or the gradient.
-	// test FastLog verses normal for speed of computing the value or the gradient.
-	
+
+	// Add test for the LVM MLE using FastLog / log1p:
+	// Test value is the same
+	// Test speed
 
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(Type type, boolean precomputed)
 	{
@@ -372,7 +390,7 @@ public class LVMGradientProcedureTest
 			func = PrecomputedGradient1Function.wrapGradient1Function(func, b);
 		}
 
-		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
 		String name = String.format("[%d] %b", nparams, type);
 		for (int i = 0; i < paramsList.size(); i++)
@@ -479,7 +497,7 @@ public class LVMGradientProcedureTest
 			func = fgf;
 		}
 
-		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -594,7 +612,7 @@ public class LVMGradientProcedureTest
 		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
-		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -694,7 +712,7 @@ public class LVMGradientProcedureTest
 		Gaussian2DFunction f3 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
 
-		final DFastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
+		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
 		int nparams = f12.getNumberOfGradients();
 		int[] indices = f12.gradientIndices();

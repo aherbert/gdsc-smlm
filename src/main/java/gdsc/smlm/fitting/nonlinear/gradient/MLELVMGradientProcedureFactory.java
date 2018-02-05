@@ -32,6 +32,22 @@ public class MLELVMGradientProcedureFactory
 	 */
 	public static MLELVMGradientProcedure create(final double[] y, final Gradient1Function func)
 	{
+		if (isStrictlyPositive(y))
+		{
+			switch (func.getNumberOfGradients())
+			{
+				case 5:
+					return new MLELVMGradientProcedureX5(y, func);
+				case 4:
+					return new MLELVMGradientProcedureX4(y, func);
+				case 6:
+					return new MLELVMGradientProcedureX6(y, func);
+
+				default:
+					return new MLELVMGradientProcedureX(y, func);
+			}
+		}
+
 		switch (func.getNumberOfGradients())
 		{
 			case 5:
@@ -60,17 +76,48 @@ public class MLELVMGradientProcedureFactory
 	 */
 	public static MLELVMGradientProcedure create(final double[] y, final Gradient1Function func, FastLog fastLog)
 	{
+		//		if (isStrictlyPositive(y))
+		//		{
+		//			switch (func.getNumberOfGradients())
+		//			{
+		//				case 5:
+		//					return new FastLogMLELVMGradientProcedure5(y, func, fastLog);
+		//				case 4:
+		//					return new FastLogMLELVMGradientProcedure4(y, func, fastLog);
+		//				case 6:
+		//					return new FastLogMLELVMGradientProcedure6(y, func, fastLog);
+		//
+		//				default:
+		//					return new FastLogMLELVMGradientProcedure(y, func, fastLog);
+		//			}
+		//		}
+
 		switch (func.getNumberOfGradients())
 		{
-			//			case 5:
-			//				return new FastLogMLELVMGradientProcedure5(y, func, fastLog);
-			//			case 4:
-			//				return new FastLogMLELVMGradientProcedure4(y, func, fastLog);
-			//			case 6:
-			//				return new FastLogMLELVMGradientProcedure6(y, func, fastLog);
+			case 5:
+				return new FastLogMLELVMGradientProcedure5(y, func, fastLog);
+			case 4:
+				return new FastLogMLELVMGradientProcedure4(y, func, fastLog);
+			case 6:
+				return new FastLogMLELVMGradientProcedure6(y, func, fastLog);
 
 			default:
 				return new FastLogMLELVMGradientProcedure(y, func, fastLog);
 		}
+	}
+
+	/**
+	 * Checks if is strictly positive (above zero). Ignores NaN or infinity checks.
+	 *
+	 * @param y
+	 *            the y
+	 * @return true, if is strictly positive
+	 */
+	private static boolean isStrictlyPositive(double[] y)
+	{
+		for (int i = 0; i < y.length; i++)
+			if (y[i] <= 0)
+				return false;
+		return true;
 	}
 }

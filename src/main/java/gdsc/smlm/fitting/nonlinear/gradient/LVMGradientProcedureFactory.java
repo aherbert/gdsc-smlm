@@ -1,6 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.function.DFastLog;
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -40,7 +40,7 @@ public class LVMGradientProcedureFactory
 	 * @return the gradient procedure
 	 */
 	public static LVMGradientProcedure create(final double[] y, final Gradient1Function func, Type type,
-			DFastLog fastLog)
+			FastLog fastLog)
 	{
 		switch (type)
 		{
