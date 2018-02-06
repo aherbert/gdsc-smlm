@@ -77,8 +77,8 @@ public class TurboLog extends FastLog
 		lowerBoundMantissa = Double.doubleToLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
 		upperBoundMantissa = Double.doubleToLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
 
-		assert ((Float.floatToIntBits((float) LOWER_ONE_BOUND) >> 52) - 127) == -1 : "lower bound exponent not -1";
-		assert ((Float.floatToIntBits((float) UPPER_ONE_BOUND) >> 52) - 127) == 0 : "upper bound exponent not 0";
+		assert ((Float.floatToIntBits((float) LOWER_ONE_BOUND) >> 23) - 127) == -1 : "lower bound exponent not -1";
+		assert ((Float.floatToIntBits((float) UPPER_ONE_BOUND) >> 23) - 127) == 0 : "upper bound exponent not 0";
 		lowerBoundMantissaF = Float.floatToIntBits((float) LOWER_ONE_BOUND) & 0x7fffff;
 		upperBoundMantissaF = Float.floatToIntBits((float) UPPER_ONE_BOUND) & 0x7fffff;
 	}
