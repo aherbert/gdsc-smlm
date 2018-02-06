@@ -9,6 +9,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.MLELVMGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
+import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.PrecomputedGradient1Function;
@@ -203,7 +204,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		if (lastyFit == null)
 			lastyFit = new double[size];
 		System.arraycopy(yFit, 0, lastyFit, 0, size);
-		
+
 		if (w != null)
 		{
 			// The function was wrapped to add the per-observation variances
@@ -244,14 +245,14 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		if (w != null)
 		{
 			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
-		}		
+		}
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(a);
 		if (p.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		return new FisherInformationMatrix(p.getLinear(), f.getNumberOfGradients());
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -269,7 +270,10 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 				super.computeValues(lastyFit);
 			}
 
-			ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);
+			//ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);
+			// This has a relative error of <1e-4 and is 50% faster than fastLogLikelihood.
+			// The value is only used for reporting and so high accuracy is not essential.
+			ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY, FastLogFactory.getFastLog());
 		}
 		return ll;
 	}
