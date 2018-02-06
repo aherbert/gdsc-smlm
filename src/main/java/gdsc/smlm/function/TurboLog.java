@@ -24,7 +24,8 @@ package gdsc.smlm.function;
  * When the unbiased exponent is zero a conversion from float to double is made to preserve the precision. If already a
  * double then the full Math.log function is used.
  * <p>
- * The relative error ((fastLog(x)-Math.log(x))/Math.log(x)) is large (e~0.76) when the input value x is close to 1.
+ * The relative error ((fastLog(x)-Math.log(x))/Math.log(x)) is large (e>>1) when the input value x is close to 1. So
+ * the algorithm detects values close to 1 and uses Math.log instead.
  *
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-
@@ -50,6 +51,22 @@ public class TurboLog extends FastLog
 	 */
 	private static final float[] logExpD;
 
+	/**
+	 * The bounds below 1 where the function switches to use Math.log. This results in a maximum relative error of
+	 * 0.00308 for float precision.
+	 */
+	public static final double LOWER_ONE_BOUND = 0.98;
+	/**
+	 * The bounds above 1 where the function switches to use Math.log. This results in a maximum relative error of
+	 * 0.00299 for float precision.
+	 */
+	public static final double UPPER_ONE_BOUND = 1.04;
+
+	private static final long lowerBoundMantissa;
+	private static final long upperBoundMantissa;
+	private static final int lowerBoundMantissaF;
+	private static final int upperBoundMantissaF;
+
 	static
 	{
 		// Note: the exponent is already in base 2. Just multiply by ln(2) to convert to base E
@@ -59,6 +76,17 @@ public class TurboLog extends FastLog
 		logExpD = new float[2048]; // 11-bit exponent
 		for (int i = 0; i < logExpD.length; i++)
 			logExpD[i] = (float) ((i - 1023) * LN2);
+
+		// Get the mantissa bounds
+		assert ((Double.doubleToLongBits(LOWER_ONE_BOUND) >> 52) - 1023) == -1 : "lower bound exponent not -1";
+		assert ((Double.doubleToLongBits(UPPER_ONE_BOUND) >> 52) - 1023) == 0 : "upper bound exponent not 0";
+		lowerBoundMantissa = Double.doubleToLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
+		upperBoundMantissa = Double.doubleToLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
+
+		assert ((Float.floatToIntBits((float) LOWER_ONE_BOUND) >> 52) - 127) == -1 : "lower bound exponent not -1";
+		assert ((Float.floatToIntBits((float) UPPER_ONE_BOUND) >> 52) - 127) == 0 : "upper bound exponent not 0";
+		lowerBoundMantissaF = Float.floatToIntBits((float) LOWER_ONE_BOUND) & 0x7fffff;
+		upperBoundMantissaF = Float.floatToIntBits((float) UPPER_ONE_BOUND) & 0x7fffff;
 	}
 
 	/**
@@ -130,9 +158,8 @@ public class TurboLog extends FastLog
 			logMantissa[i] = logv;
 			x += inc;
 
-			//assert gdsc.core.utils.FloatEquality.almostEqualRelativeOrAbsolute(logv, fastLog2(value), 1e-6f, 1e-16f)
-			assert logv == fastLog(value) : String.format("[%d] data[i](%g)  %g != %g  %g", i, value, logv,
-					fastLog2(value), gdsc.core.utils.FloatEquality.relativeError(logv, fastLog2(value)));
+			//assert logv == fastLog(value) : String.format("[%d] data[i](%g)  %g != %g  %g", i, value, logv,
+			//		fastLog2(value), gdsc.core.utils.FloatEquality.relativeError(logv, fastLog2(value)));
 		}
 	}
 
@@ -166,11 +193,11 @@ public class TurboLog extends FastLog
 		{
 			if (m != 0)
 				return Float.NaN;
-			return ((bits >>> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
+			return ((bits & 0x80000000) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
 		}
 
 		// Edge case for negatives
-		if ((bits >>> 31) != 0)
+		if ((bits & 0x80000000) != 0)
 		{
 			// Only allow -0
 			return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
@@ -196,30 +223,10 @@ public class TurboLog extends FastLog
 
 		// Check the exponent
 		if (e == 0)
-		{
-			// When the exponent is zero there in no assumed leading 1.
-			// So the look-up table is invalid. In this case a cast to a double
-			// should restore the leading 1 as the exponent has more precision.
-			// The only case when this is not true is if m==0 and thus the 
-			// value is zero.
-			if (m == 0)
-				return Float.NEGATIVE_INFINITY;
-			//return fastLog((double) x);
-			
-			// TODO
-			// See FastMath.log for how to normalise the sub-normal number			
+			return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
 
-			// Re-implement double version here as we assume that e will not be zero again.
-			final long lbits = Double.doubleToLongBits(x);
-			final int le = (int) ((lbits >>> 52) & 0x7ffL);
-			final long lm = (lbits & 0xfffffffffffffL);
-			return logMantissa[(int) (lm >>> qd)] + logExpD[le];
-		}
-
-		// TODO - fix this for the double version too
-		
 		// When the value is close to 1 then the relative error can be very large
-		if ((e == 126 || e == 127) && x < 1.01f && x > 0.99f)
+		if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF))
 		{
 			return (float) Math.log(x);
 		}
@@ -228,14 +235,42 @@ public class TurboLog extends FastLog
 	}
 
 	/**
-	 * Calculate the natural logarithm. Requires the argument be finite and strictly positive.
+	 * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is no assumed leading
+	 * 1.
+	 * <p>
+	 * Note that if the mantissa is zero this will fail!
+	 *
+	 * @param m
+	 *            the mantissa (already bit shifted by 1)
+	 * @return the log(x)
+	 */
+	private float computeSubnormal(int m)
+	{
+		// Normalize the subnormal number.
+		// The unbiased exponent starts at -127.
+		// Shift the mantissa until it is a binary number 
+		// with a leading 1: 1.10101010... 
+
+		int e = -127;
+		while ((m & 0x800000) == 0)
+		{
+			--e;
+			m <<= 1;
+		}
+
+		// Remove the leading 1
+		return logMantissa[(m & 0x7fffff) >>> q] + e * LN2F;
+	}
+
+	/**
+	 * Calculate the natural logarithm. Requires the argument be finite and positive.
 	 * <p>
 	 * Special cases:
 	 * <ul>
 	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
 	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
 	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Float.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is incorrect (fastLog((double)x)).
+	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 * 
 	 * @param x
@@ -244,28 +279,16 @@ public class TurboLog extends FastLog
 	 */
 	public float fastLog(float x)
 	{
+		// As above but no checks for NaN or infinity		
 		final int bits = Float.floatToRawIntBits(x);
 		final int e = ((bits >>> 23) & 0xff);
+		final int m = (bits & 0x7fffff);
 		if (e == 0)
-		{
-			// Maintain precision when there is no leading 1.
-			// Assume that x is strictly positive and do not check for zero.
-			//return fastLog((double) x);
-
-			// Re-implement double version here as we assume that e will not be zero again.
-			final long lbits = Double.doubleToLongBits(x);
-			final int le = (int) ((lbits >>> 52) & 0x7ffL);
-			final long lm = (lbits & 0xfffffffffffffL);
-			return logMantissa[(int) (lm >>> qd)] + logExpD[le];
-		}
-
-		// When the value is close to 1 then the relative error can be very large
-		if ((e == 126 || e == 127) && x < 1.01f && x > 0.99f)
+			return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
+		if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF))
 		{
 			return (float) Math.log(x);
 		}
-
-		final int m = (bits & 0x7fffff);
 		return logMantissa[m >>> q] + logExpF[e];
 	}
 
@@ -281,11 +304,11 @@ public class TurboLog extends FastLog
 		{
 			if (m != 0L)
 				return Float.NaN;
-			return ((bits >>> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+			return ((bits & 0x8000000000000000L) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
 		}
 
 		// Edge case for negatives
-		if ((bits >>> 63) != 0L)
+		if ((bits & 0x8000000000000000L) != 0L)
 		{
 			// Only allow -0
 			return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
@@ -310,15 +333,43 @@ public class TurboLog extends FastLog
 
 		// Check the exponent
 		if (e == 0)
+			return (m == 0L) ? Float.NEGATIVE_INFINITY : computeSubnormalF(m << 1);
+
+		// When the value is close to 1 then the relative error can be very large
+		if ((e == 1023 && m >= lowerBoundMantissa) || (e == 1024 && m <= upperBoundMantissa))
 		{
-			// When the exponent is zero there in no assumed leading 1.
-			// So the look-up table is invalid. In this case resort to full precision.
 			return (float) Math.log(x);
 		}
-		else
+
+		return logMantissa[(int) (m >>> qd)] + logExpD[e];
+	}
+
+	/**
+	 * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is no assumed leading
+	 * 1.
+	 * <p>
+	 * Note that if the mantissa is zero this will fail!
+	 *
+	 * @param m
+	 *            the mantissa (already bit shifted by 1)
+	 * @return the log(x)
+	 */
+	private float computeSubnormalF(long m)
+	{
+		// Normalize the subnormal number.
+		// The unbiased exponent starts at -1023.
+		// Shift the mantissa until it is a binary number 
+		// with a leading 1: 1.10101010... 
+
+		int e = -1023;
+		while ((m & 0x0010000000000000L) == 0)
 		{
-			return logMantissa[(int) (m >>> qd)] + logExpD[e];
+			--e;
+			m <<= 1;
 		}
+
+		// Remove the leading 1
+		return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2F;
 	}
 
 	/**
@@ -329,7 +380,7 @@ public class TurboLog extends FastLog
 	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
 	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
 	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is Double.NEGATIVE_INFINITY.
+	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 * 
 	 * @param x
@@ -338,14 +389,16 @@ public class TurboLog extends FastLog
 	 */
 	public float fastLog(double x)
 	{
+		// As above but no checks for NaN or infinity		
 		final long bits = Double.doubleToLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
 		if (e == 0)
+			return (m == 0L) ? Float.NEGATIVE_INFINITY : computeSubnormalF(m << 1);
+		if ((e == 1023 && m >= lowerBoundMantissa) || (e == 1024 && m <= upperBoundMantissa))
 		{
-			// Maintain precision when there is no leading 1.
 			return (float) Math.log(x);
 		}
-		final long m = (bits & 0xfffffffffffffL);
 		return logMantissa[(int) (m >>> qd)] + logExpD[e];
 	}
 
@@ -361,11 +414,11 @@ public class TurboLog extends FastLog
 		{
 			if (m != 0L)
 				return Double.NaN;
-			return ((bits >>> 63) != 0L) ? Double.NaN : Double.POSITIVE_INFINITY;
+			return ((bits & 0x8000000000000000L) != 0L) ? Double.NaN : Double.POSITIVE_INFINITY;
 		}
 
 		// Edge case for negatives
-		if ((bits >>> 63) != 0L)
+		if ((bits & 0x8000000000000000L) != 0L)
 		{
 			// Only allow -0
 			return (e == 0 && m == 0L) ? Double.NEGATIVE_INFINITY : Double.NaN;
@@ -390,15 +443,43 @@ public class TurboLog extends FastLog
 
 		// Check the exponent
 		if (e == 0)
+			return (m == 0L) ? Double.NEGATIVE_INFINITY : computeSubnormal(m << 1);
+
+		// When the value is close to 1 then the relative error can be very large
+		if ((e == 1023 && m >= lowerBoundMantissa) || (e == 1024 && m <= upperBoundMantissa))
 		{
-			// When the exponent is zero there in no assumed leading 1.
-			// So the look-up table is invalid. In this case resort to full precision.
 			return Math.log(x);
 		}
-		else
+
+		return logMantissa[(int) (m >>> qd)] + logExpD[e];
+	}
+
+	/**
+	 * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is no assumed leading
+	 * 1.
+	 * <p>
+	 * Note that if the mantissa is zero this will fail!
+	 *
+	 * @param m
+	 *            the mantissa (already bit shifted by 1)
+	 * @return the log(x)
+	 */
+	private double computeSubnormal(long m)
+	{
+		// Normalize the subnormal number.
+		// The unbiased exponent starts at -1023.
+		// Shift the mantissa until it is a binary number 
+		// with a leading 1: 1.10101010... 
+
+		int e = -1023;
+		while ((m & 0x0010000000000000L) == 0)
 		{
-			return logMantissa[(int) (m >>> qd)] + logExpD[e];
+			--e;
+			m <<= 1;
 		}
+
+		// Remove the leading 1
+		return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2;
 	}
 
 	/**
@@ -409,7 +490,7 @@ public class TurboLog extends FastLog
 	 * <li>If the argument is NaN, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
 	 * <li>If the argument is negative, then the result is incorrect (fastLog(-x)).
 	 * <li>If the argument is positive infinity, then the result is incorrect (>fastLog(Double.MAX_VALUE)).
-	 * <li>If the argument is positive zero or negative zero, then the result is Double.NEGATIVE_INFINITY.
+	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
 	 * 
 	 * @param x
@@ -418,14 +499,16 @@ public class TurboLog extends FastLog
 	 */
 	public double fastLogD(double x)
 	{
+		// As above but no checks for NaN or infinity		
 		final long bits = Double.doubleToLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
+		final long m = (bits & 0xfffffffffffffL);
 		if (e == 0)
+			return (m == 0L) ? Double.NEGATIVE_INFINITY : computeSubnormal(m << 1);
+		if ((e == 1023 && m >= lowerBoundMantissa) || (e == 1024 && m <= upperBoundMantissa))
 		{
-			// Maintain precision when there is no leading 1.
 			return Math.log(x);
 		}
-		final long m = (bits & 0xfffffffffffffL);
 		return logMantissa[(int) (m >>> qd)] + logExpD[e];
 	}
 
