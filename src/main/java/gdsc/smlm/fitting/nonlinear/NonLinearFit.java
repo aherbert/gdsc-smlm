@@ -645,7 +645,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	public double getChiSquared()
 	{
 		if (getType() == FunctionSolverType.WLSE)
-			// The weighted MLE will produce the chi-squared
+			// The weighted LSE will produce the chi-squared
 			return value;
 		throw new IllegalStateException();
 	}
