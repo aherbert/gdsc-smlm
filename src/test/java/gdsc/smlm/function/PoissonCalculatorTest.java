@@ -542,7 +542,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_FastLogLikelihood()
 	{
-		Assume.assumeTrue(true);
+		Assume.assumeTrue(false);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
