@@ -60,6 +60,15 @@ public class FastLogTest
 		@Override
 		public double fastLog2D(double x) { return log2(x); }
 	}
+	private class FastMathLog extends MathLog
+	{
+		@Override
+		public float log(float x) {	return (float) FastMath.log(x);	}
+		@Override
+		public float log(double x) { return (float) FastMath.log(x); }
+		@Override
+		public double logD(double x) { return FastMath.log(x); }
+	}
 	private abstract class BaseTestLog
 	{
 		FastLog fl;
@@ -341,22 +350,23 @@ public class FastLogTest
 		// Full range in blocks.
 		// Only when the number is around 1 or min value are there significant errors
 		float[] d = null, logD = null;
-		
+
 		// All
 		//testFloatErrorRange(test, n, d, logD, 0, 255, 0);
-		
+
 		// Only a problem around min value and x==1
 		//testFloatErrorRange(test, n, d, logD, 0, 2, 0);
 		testFloatErrorRange(test, n, d, logD, 125, 130, 0);
 		//testFloatErrorRange(test, n, d, logD, 253, 255, 0);
 	}
 
-	private void testFloatErrorRange(TurboList<TestFastLog> test, int n, float[] d, float[] logD, int mine, int maxe, int ee)
+	private void testFloatErrorRange(TurboList<TestFastLog> test, int n, float[] d, float[] logD, int mine, int maxe,
+			int ee)
 	{
 		for (int e = mine; e < maxe; e += ee + 1)
 		{
 			d = generateFloats(e, e + ee, d);
-			if (logD == null || logD.length < n)
+			if (logD == null || logD.length < d.length)
 				logD = new float[d.length];
 			for (int i = 0; i < d.length; i++)
 			{
@@ -491,7 +501,7 @@ public class FastLogTest
 			pair.f = f.log(x);
 			if (pair.f != Float.NEGATIVE_INFINITY)
 				return true;
-			//System.out.printf("%g\n", d[pair.i - 1]);
+			//System.out.printf("%g\n", x);
 		}
 		return false;
 	}
@@ -560,6 +570,75 @@ public class FastLogTest
 		return Double.longBitsToDouble(u);
 	}
 
+	@Test
+	public void canTestDoubleErrorRange()
+	{
+		Assume.assumeTrue(true);
+
+		RandomGenerator r = new Well19937c(30051977);
+
+		TurboList<TestFastLog> test = new TurboList<TestFastLog>();
+		int n = 13;
+		test.add(new TestFastLog(ICSIFastLog.create(n, DataType.DOUBLE)));
+		test.add(new TestFastLog(new FFastLog(n)));
+		test.add(new TestFastLog(new DFastLog(n)));
+		test.add(new TestFastLog(new TurboLog(n)));
+
+		// Full range in blocks.
+		// Only when the number is around 1 or min value are there significant errors
+		double[] d = new double[10000000], logD = null;
+
+		// All
+		//testDoubleErrorRange(test, n, d, logD, 0, 255, 0);
+
+		// Only a problem around min value and x==1
+		//testDoubleErrorRange(r, test, n, d, logD, 0, 2, 0);
+		testDoubleErrorRange(r, test, n, d, logD, 1021, 1026, 0);
+		testDoubleErrorRange(r, test, n, d, logD, 2045, 2047, 0);
+	}
+
+	private void testDoubleErrorRange(RandomGenerator r, TurboList<TestFastLog> test, int n, double[] d, double[] logD,
+			int mine, int maxe, int ee)
+	{
+		for (int e = mine; e < maxe; e += ee + 1)
+		{
+			d = generateDoubles(r, e, e + ee, d);
+			if (logD == null || logD.length < d.length)
+				logD = new double[d.length];
+			for (int i = 0; i < d.length; i++)
+			{
+				logD[i] = Math.log(d[i]);
+			}
+			System.out.printf("e=%d-%d\n", e, e + ee);
+			for (TestFastLog f : test)
+				canTestDoubleError(f, d, logD);
+		}
+	}
+
+	private double[] generateDoubles(RandomGenerator r, int mine, int maxe, double[] d)
+	{
+		// Mantissa = 52-bit, Exponent = 11-bit
+		mine = Maths.clip(0, 2047, mine);
+		maxe = Maths.clip(0, 2047, maxe);
+		if (mine > maxe)
+			throw new IllegalStateException();
+		int i = 0;
+		while (i < d.length)
+		{
+			// Only generate the mantissa
+			long m = r.nextLong() & 0xfffffffffffffL;
+
+			for (long e = mine; e <= maxe && i < d.length; e++)
+			{
+				long bits = m | (e << 52);
+				double v = Double.longBitsToDouble(bits);
+				//System.out.printf("%g = %s\n", v, Long.toBinaryString(bits));
+				d[i++] = v;
+			}
+		}
+		return d;
+	}
+
 	private class DPair
 	{
 		int i = 0;
@@ -597,10 +676,10 @@ public class FastLogTest
 			double x = d[pair.i++];
 			if (x == 0)// Skip infinity
 				continue;
-			pair.f = f.log(d[pair.i++]);
+			pair.f = f.log(x);
 			if (pair.f != Double.NEGATIVE_INFINITY)
 				return true;
-			//System.out.printf("%g\n", d[pair.i - 1]);
+			//System.out.printf("%g\n", x);
 		}
 		return false;
 	}
@@ -660,6 +739,7 @@ public class FastLogTest
 
 		TimingService ts = new TimingService(5);
 		ts.execute(new FloatTimingTask(new TestLog(new MathLog()), 0, x));
+		ts.execute(new FloatTimingTask(new TestLog(new FastMathLog()), 0, x));
 		for (int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
@@ -736,6 +816,7 @@ public class FastLogTest
 
 		TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
+		ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
 		for (int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
@@ -799,6 +880,7 @@ public class FastLogTest
 
 		TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
+		ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
 		for (int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
