@@ -662,7 +662,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			// The MLE version directly computes the log-likelihood ratio.
 			// We must compute the log likelihood for a Poisson MLE.
 			if (Double.isNaN(ll))
-				ll = PoissonCalculator.logLikelihood(lastyFit, lastY);
+				ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);
 			return ll;
 		}
 		throw new IllegalStateException();
