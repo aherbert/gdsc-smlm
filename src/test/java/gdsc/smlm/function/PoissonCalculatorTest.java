@@ -5,7 +5,7 @@ import java.math.MathContext;
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -51,7 +51,84 @@ public class PoissonCalculatorTest
 	}
 
 	@Test
+	public void canComputeFastLikelihoodForIntegerData()
+	{
+		for (double u : photons)
+		{
+			PoissonDistribution pd = new PoissonDistribution(u);
+			for (int x = 0; x < 100; x++)
+			{
+				double e = pd.probability(x);
+				double o = PoissonCalculator.fastLikelihood(u, x);
+				if (e > 1e-100)
+					Assert.assertEquals(e, o, e * 1e-4);
+				e = pd.logProbability(x);
+				o = PoissonCalculator.fastLogLikelihood(u, x);
+				Assert.assertEquals(e, o, Math.abs(e) * 1e-4);
+			}
+		}
+	}
+
+	@Test
+	public void canComputeFastLog_FastLikelihoodForIntegerData()
+	{
+		FastLog fastLog = FastLogFactory.getFastLog();
+		for (double u : photons)
+		{
+			PoissonDistribution pd = new PoissonDistribution(u);
+			for (int x = 0; x < 100; x++)
+			{
+				double e = pd.probability(x);
+				double o = PoissonCalculator.fastLikelihood(u, x, fastLog);
+				if (e > 1e-100)
+					Assert.assertEquals(e, o, e * 1e-4);
+				e = pd.logProbability(x);
+				o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
+				Assert.assertEquals(e, o, Math.abs(e) * 1e-4);
+			}
+		}
+	}
+
+	private abstract class PoissonFunction implements UnivariateFunction
+	{
+		double mu;
+
+		PoissonFunction(double mu)
+		{
+			this.mu = mu;
+		}
+
+		public double value(double x)
+		{
+			double v;
+			v = likelihood(mu, x);
+			//v = pgf.probability(x, mu);
+			//System.out.printf("x=%f, v=%f\n", x, v);
+			return v;
+		}
+
+		abstract double likelihood(double mu, double x);
+	}
+
+	@Test
 	public void cumulativeProbabilityIsOneWithRealDataForCountAbove4()
+	{
+		cumulativeProbabilityIsOneWithRealDataForCountAbove4(0);
+	}
+
+	@Test
+	public void fastLikelihoodCumulativeProbabilityIsOneWithRealDataForCountAbove4()
+	{
+		cumulativeProbabilityIsOneWithRealDataForCountAbove4(1);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void fastLog_fastLikelihoodCumulativeProbabilityIsNotOneWithRealDataForCountAbove4()
+	{
+		cumulativeProbabilityIsOneWithRealDataForCountAbove4(2);
+	}
+
+	private void cumulativeProbabilityIsOneWithRealDataForCountAbove4(int function)
 	{
 		for (double mu : photons)
 		{
@@ -62,32 +139,52 @@ public class PoissonCalculatorTest
 			double sd = Math.sqrt(mu);
 			double min = (int) Math.max(0, mu - 4 * sd);
 
-			cumulativeProbabilityIsOneWithRealData(mu, min, max, mu >= 4);
+			PoissonFunction f;
+			switch (function)
+			{
+				//@formatter:off
+				case 2:
+					f = new PoissonFunction(mu) { double likelihood(double mu, double x) {
+							return PoissonCalculator.fastLikelihood(mu, x, FastLogFactory.getFastLog());	} };
+					break;
+				case 1:
+					f = new PoissonFunction(mu) { double likelihood(double mu, double x) {
+							return PoissonCalculator.fastLikelihood(mu, x);	} };
+					break;
+				case 0:
+					f = new PoissonFunction(mu) { double likelihood(double mu, double x) {
+							return PoissonCalculator.likelihood(mu, x);	} };
+					break;
+				default:
+					throw new IllegalStateException();
+				//@formatter:on
+			}
+
+			cumulativeProbabilityIsOneWithRealData(min, max, mu >= 4, f);
 		}
 	}
 
-	private void cumulativeProbabilityIsOneWithRealData(final double mu, double min, double max, boolean test)
+	private void cumulativeProbabilityIsOneWithRealData(double min, double max, boolean test, PoissonFunction f)
 	{
 		double p = 0;
 
-		UnivariateIntegrator in = new SimpsonIntegrator();
+		int integrationPoints = 10;
+		final double relativeAccuracy = 1e-4;
+		final double absoluteAccuracy = 1e-8;
+		final int minimalIterationCount = 3;
+		final int maximalIterationCount = 32;
 
-		p = in.integrate(20000, new UnivariateFunction()
-		{
-			public double value(double x)
-			{
-				double v;
-				v = PoissonCalculator.likelihood(mu, x);
-				//v = pgf.probability(x, mu);
-				//System.out.printf("x=%f, v=%f\n", x, v);
-				return v;
-			}
-		}, min, max);
+		UnivariateIntegrator in = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+				absoluteAccuracy, minimalIterationCount, maximalIterationCount);
 
-		System.out.printf("mu=%f, p=%f\n", mu, p);
+		//new SimpsonIntegrator();
+
+		p = in.integrate(20000, f, min, max);
+
+		System.out.printf("mu=%f, p=%f\n", f.mu, p);
 		if (test)
 		{
-			Assert.assertEquals(String.format("mu=%f", mu), P_LIMIT, p, 0.02);
+			Assert.assertEquals(String.format("mu=%f", f.mu), P_LIMIT, p, 0.02);
 		}
 	}
 
@@ -241,6 +338,51 @@ public class PoissonCalculatorTest
 		}
 
 		Assert.assertEquals("max", 1, maxa, 0);
+	}
+
+	@Test
+	public void canComputeFastLog_LogLikelihoodRatio()
+	{
+		final double n2 = maxx * maxx * 0.5;
+		// Functions must produce a strictly positive output so add background
+		//@formatter:off
+		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Quadratic")
+		{
+			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
+		});		
+		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
+		{
+			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
+		});		
+		//@formatter:on
+	}
+
+	private void canComputeFastLog_LogLikelihoodRatio(BaseNonLinearFunction nlf)
+	{
+		System.out.println(nlf.name);
+
+		int n = maxx * maxx;
+
+		double[] a = new double[] { 1 };
+
+		// Simulate Poisson process
+		nlf.initialise(a);
+		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		double[] x = new double[n];
+		double[] u = new double[n];
+		for (int i = 0; i < n; i++)
+		{
+			u[i] = nlf.eval(i);
+			if (u[i] > 0)
+				x[i] = rdg.nextPoisson(u[i]);
+		}
+
+		// Only test the LLR
+		double llr = PoissonCalculator.logLikelihoodRatio(u, x);
+		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
+		System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
+		// Approximately equal
+		Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-3);
 	}
 
 	@Test
@@ -398,6 +540,70 @@ public class PoissonCalculatorTest
 	}
 
 	@Test
+	public void showRelativeErrorOfFastLog_FastLogLikelihood()
+	{
+		Assume.assumeTrue(true);
+
+		double d = 1.0;
+		for (int i = 1; i <= 100; i++)
+		{
+			d = Math.nextUp(d);
+			showRelativeErrorOfFastLog_FastLogLikelihood(d);
+		}
+		for (int i = 1; i <= 300; i++)
+			showRelativeErrorOfFastLog_FastLogLikelihood(1 + i / 100.0);
+
+		for (int i = 4; i <= 100; i++)
+			showRelativeErrorOfFastLog_FastLogLikelihood(i);
+	}
+
+	private void showRelativeErrorOfFastLog_FastLogLikelihood(double x)
+	{
+		FastLog fastLog = FastLogFactory.getFastLog();
+		for (double factor : new double[] { 0.5, 1, 2 })
+		{
+			double u = x * factor;
+			double e = PoissonCalculator.logLikelihood(u, x);
+			double o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
+			double error = DoubleEquality.relativeError(e, o);
+			System.out.printf("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
+					Double.toString(error));
+		}
+	}
+
+	@Test
+	public void showRelativeErrorOfFastLog_LogLikelihoodRatio()
+	{
+		Assume.assumeTrue(false);
+
+		double d = 1.0;
+		for (int i = 1; i <= 100; i++)
+		{
+			d = Math.nextUp(d);
+			showRelativeErrorOfFastLog_LogLikelihoodRatio(d);
+		}
+		for (int i = 1; i <= 300; i++)
+			showRelativeErrorOfFastLog_LogLikelihoodRatio(1 + i / 100.0);
+
+		for (int i = 4; i <= 100; i++)
+			showRelativeErrorOfFastLog_LogLikelihoodRatio(i);
+	}
+
+	private void showRelativeErrorOfFastLog_LogLikelihoodRatio(double x)
+	{
+		FastLog fastLog = FastLogFactory.getFastLog();
+		for (double factor : new double[] { 0.5, 1, 2 })
+		{
+			double u = x * factor;
+			double e = PoissonCalculator.logLikelihoodRatio(u, x);
+			double o = PoissonCalculator.logLikelihoodRatio(u, x, fastLog);
+			double error = DoubleEquality.relativeError(e, o);
+			System.out.printf("llr(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
+					Double.toString(error));
+		}
+	}
+
+	@Test
 	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod()
 	{
 		DoubleEquality eq = new DoubleEquality(3e-4, 0);
@@ -510,6 +716,26 @@ public class PoissonCalculatorTest
 		}
 	}
 
+	private class FastLogPCTimingTask extends PCTimingTask
+	{
+		FastLog fastLog = FastLogFactory.getFastLog();
+
+		public FastLogPCTimingTask(double[] x, double[] u, int ll, int llr)
+		{
+			super("fastLog", x, u, ll, llr);
+		}
+
+		public Object run(Object data)
+		{
+			double value = 0;
+			for (int i = 0; i < llr; i++)
+				value += PoissonCalculator.logLikelihoodRatio(u, x, fastLog);
+			for (int i = 0; i < ll; i++)
+				value += PoissonCalculator.fastLogLikelihood(u, x, fastLog);
+			return value;
+		}
+	}
+
 	private class InstancePCTimingTask extends PCTimingTask
 	{
 		int max;
@@ -566,6 +792,7 @@ public class PoissonCalculatorTest
 					continue;
 				ts.execute(new StaticPCTimingTask(x, u, ll, llr));
 				ts.execute(new FastPCTimingTask(x, u, ll, llr));
+				ts.execute(new FastLogPCTimingTask(x, u, ll, llr));
 				ts.execute(new InstancePCTimingTask(x, u, ll, llr));
 			}
 
