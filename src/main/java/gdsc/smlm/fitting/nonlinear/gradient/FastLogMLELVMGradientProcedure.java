@@ -75,13 +75,6 @@ public class FastLogMLELVMGradientProcedure extends MLELVMGradientProcedure
 				// (i.e. no check for NaN or negatives)
 				// The edge case is that positive infinity will return the 
 				// value of log(Double.MAX_VALUE).
-				// -=-=-=-
-				// Note: The fast log function computes a large relative error
-				// when the input value is close to 1. Since this means the function
-				// fi is close to the data xi it is likely to happen.
-				// This method is not recommended and so no further inlined classes
-				// have been created.
-				// -=-=-=-
 				value += (fi - xi - xi * fastLog.fastLog(fi / xi));
 				//value += (fi - xi * (1 + fastLog.log(fi / xi)));
 				final double xi_fi2 = xi / fi / fi;

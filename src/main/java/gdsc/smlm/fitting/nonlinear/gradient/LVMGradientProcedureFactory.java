@@ -23,7 +23,17 @@ public class LVMGradientProcedureFactory
 {
 	public enum Type
 	{
-		LSQ, MLE, WLSQ, FastLogMLE
+		//@formatter:off
+		LSQ, 
+		MLE { public boolean isMLE()	{return true;} },
+		WLSQ, 
+		FastLogMLE { public boolean isMLE()	{return true;} };
+		//@formatter:on
+
+		public boolean isMLE()
+		{
+			return false;
+		}
 	}
 
 	/**

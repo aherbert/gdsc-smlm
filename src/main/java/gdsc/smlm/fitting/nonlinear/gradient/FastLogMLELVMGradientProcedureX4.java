@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -25,18 +26,23 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedureX extends MLELVMGradientProcedure
+public class FastLogMLELVMGradientProcedureX4 extends FastLogMLELVMGradientProcedureX
 {
 	/**
+	 * Instantiates a new fast log MLELVM gradient procedure X 4.
+	 *
 	 * @param y
-	 *            Data to fit (assumed to be strictly positive)
+	 *            Data to fit (must be strictly positive)
 	 * @param func
 	 *            Gradient function
+	 * @param fastLog
+	 *            the fast log
 	 */
-	public MLELVMGradientProcedureX(final double[] y, final Gradient1Function func)
+	public FastLogMLELVMGradientProcedureX4(final double[] y, final Gradient1Function func, FastLog fastLog)
 	{
-		super(y, func);
-		// We could check that y is positive ...
+		super(y, func, fastLog);
+		if (n != 4)
+			throw new IllegalArgumentException("Function must compute 4 gradients");
 	}
 
 	/*
@@ -47,47 +53,57 @@ public class MLELVMGradientProcedureX extends MLELVMGradientProcedure
 	public void execute(double fi, double[] dfi_da)
 	{
 		++yi;
-		// Function must produce a strictly positive output.
-		// ---
-		// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// effectively ignores any function value below zero. This could lead to a 
-		// situation where the best chisq value can be achieved by setting the output
-		// function to produce 0 for all evaluations.
-		// Optimally the function should be bounded to always produce a positive number.
-		// ---
 		if (fi > 0.0)
 		{
 			final double xi = y[yi];
 
 			// We assume y[i] is strictly positive
-			value += (fi - xi - xi * Math.log(fi / xi));
+			value += (fi - xi - xi * fastLog.fastLog(fi / xi));
+
 			final double xi_fi2 = xi / fi / fi;
 			final double e = 1 - (xi / fi);
-			for (int k = 0, i = 0; k < n; k++)
-			{
-				beta[k] -= e * dfi_da[k];
-				final double w = dfi_da[k] * xi_fi2;
-				for (int l = 0; l <= k; l++)
-					alpha[i++] += w * dfi_da[l];
-			}
+
+			beta[0] -= e * dfi_da[0];
+			beta[1] -= e * dfi_da[1];
+			beta[2] -= e * dfi_da[2];
+			beta[3] -= e * dfi_da[3];
+
+			alpha[0] += dfi_da[0] * xi_fi2 * dfi_da[0];
+			double w;
+			w = dfi_da[1] * xi_fi2;
+			alpha[1] += w * dfi_da[0];
+			alpha[2] += w * dfi_da[1];
+			w = dfi_da[2] * xi_fi2;
+			alpha[3] += w * dfi_da[0];
+			alpha[4] += w * dfi_da[1];
+			alpha[5] += w * dfi_da[2];
+			w = dfi_da[3] * xi_fi2;
+			alpha[6] += w * dfi_da[0];
+			alpha[7] += w * dfi_da[1];
+			alpha[8] += w * dfi_da[2];
+			alpha[9] += w * dfi_da[3];
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	public void execute(double fi)
+	@Override
+	protected void initialiseGradient()
 	{
-		++yi;
-		// Function must produce a strictly positive output.
-		if (fi > 0.0)
-		{
-			final double xi = y[yi];
+		GradientProcedureHelper.initialiseWorkingMatrix4(alpha);
+		beta[0] = 0;
+		beta[1] = 0;
+		beta[2] = 0;
+		beta[3] = 0;
+	}
 
-			// We assume y[i] is strictly positive
-			value += (fi - xi - xi * Math.log(fi / xi));
-		}
+	@Override
+	public void getAlphaMatrix(double[][] alpha)
+	{
+		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
+	}
+
+	@Override
+	public void getAlphaLinear(double[] alpha)
+	{
+		GradientProcedureHelper.getMatrix4(this.alpha, alpha);
 	}
 }

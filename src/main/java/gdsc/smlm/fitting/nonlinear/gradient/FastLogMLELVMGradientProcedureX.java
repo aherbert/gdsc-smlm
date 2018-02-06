@@ -1,5 +1,6 @@
 package gdsc.smlm.fitting.nonlinear.gradient;
 
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
 /*----------------------------------------------------------------------------- 
@@ -25,17 +26,21 @@ import gdsc.smlm.function.Gradient1Function;
  * model. See Laurence & Chromy (2010) Efficient maximum likelihood estimator. Nature Methods 7, 338-339. The input data
  * must be Poisson distributed for this to be relevant.
  */
-public class MLELVMGradientProcedureX extends MLELVMGradientProcedure
+public class FastLogMLELVMGradientProcedureX extends FastLogMLELVMGradientProcedure
 {
 	/**
+	 * Instantiates a new fast log MLELVM gradient procedure X.
+	 *
 	 * @param y
 	 *            Data to fit (assumed to be strictly positive)
 	 * @param func
 	 *            Gradient function
+	 * @param fastLog
+	 *            the fast log
 	 */
-	public MLELVMGradientProcedureX(final double[] y, final Gradient1Function func)
+	public FastLogMLELVMGradientProcedureX(final double[] y, final Gradient1Function func, FastLog fastLog)
 	{
-		super(y, func);
+		super(y, func, fastLog);
 		// We could check that y is positive ...
 	}
 
@@ -60,7 +65,7 @@ public class MLELVMGradientProcedureX extends MLELVMGradientProcedure
 			final double xi = y[yi];
 
 			// We assume y[i] is strictly positive
-			value += (fi - xi - xi * Math.log(fi / xi));
+			value += (fi - xi - xi * fastLog.fastLog(fi / xi));
 			final double xi_fi2 = xi / fi / fi;
 			final double e = 1 - (xi / fi);
 			for (int k = 0, i = 0; k < n; k++)
@@ -87,7 +92,7 @@ public class MLELVMGradientProcedureX extends MLELVMGradientProcedure
 			final double xi = y[yi];
 
 			// We assume y[i] is strictly positive
-			value += (fi - xi - xi * Math.log(fi / xi));
+			value += (fi - xi - xi * fastLog.fastLog(fi / xi));
 		}
 	}
 }
