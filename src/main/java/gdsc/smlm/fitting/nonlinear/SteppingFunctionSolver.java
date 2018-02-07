@@ -5,6 +5,7 @@ import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient1FunctionStore;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.ValueFunction;
 import gdsc.smlm.function.ValueProcedure;
@@ -172,6 +173,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
 			{
 				log("%s Converged [%s]\n", name, tc.getIterations());
+				// TODO: A solver may compute both at the same time...
 				if (aDev != null)
 					computeDeviations(aDev);
 				if (yFit != null)
@@ -307,6 +309,9 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * Utility method to compute the function values using the preinitialised function.
 	 * Sub-classes may override this if they have cached the function values from the
 	 * last execution of a forEach procedure.
+	 * <p>
+	 * The base gradient function is used. If sub-classes wrap the function (e.g. with per-observation weights) then
+	 * these will be omitted.
 	 * 
 	 * @param yFit
 	 *            the y fit values
@@ -324,16 +329,32 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	protected boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
-		// TODO 
 		// If the yFit array is not null then wrap the gradient function. 
-		// Compute the value and the wrapper will store the values.
+		// Compute the value and the wrapper will store the values appropriately.
 		// Then reset the gradient function.
-		
+
+		// Note: If a sub class wraps the function with weights
+		// then the weights will not be stored in the function value.
+		// Only the value produced by the original function is stored:
+		// Wrapped (+weights) < FunctionStore < Function
+
+		// However if the base function is already wrapped then this will occur:
+		// Wrapped (+weights) < FunctionStore < Wrapped (+precomputed) < Function
+
 		gradientIndices = f.gradientIndices();
-		lastY = prepareFunctionValue(y, a);
-		//if (yFit == null)
-		//	yFit = new double[y.length];
-		value = computeFunctionValue(yFit, a);
+		if (yFit != null && yFit.length == ((Gradient1Function) f).size())
+		{
+			GradientFunction tmp = f;
+			f = new Gradient1FunctionStore((Gradient1Function) f, yFit, null);
+			lastY = prepareFunctionValue(y, a);
+			value = computeFunctionValue(a);
+			f = tmp;
+		}
+		else
+		{
+			lastY = prepareFunctionValue(y, a);
+			value = computeFunctionValue(a);
+		}
 		return true;
 	}
 
@@ -352,13 +373,11 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * Compute the function value. The y data is the same as that passed to
 	 * {@link #prepareFunctionValue(double[], double[])}
 	 *
-	 * @param yFit
-	 *            the y fit (this may be null)
 	 * @param a
 	 *            the parameters
 	 * @return the function value
 	 */
-	protected abstract double computeFunctionValue(double[] yFit, double[] a);
+	protected abstract double computeFunctionValue(double[] a);
 
 	/*
 	 * (non-Javadoc)

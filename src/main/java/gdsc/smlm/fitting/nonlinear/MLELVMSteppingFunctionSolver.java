@@ -203,16 +203,17 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		int size = f1.size();
 		if (lastyFit == null)
 			lastyFit = new double[size];
-		System.arraycopy(yFit, 0, lastyFit, 0, size);
-
 		if (w != null)
 		{
-			// The function was wrapped to add the per-observation variances
-			// to the computed value, these must be subtracted to get the actual value
-			for (int i = 0, n = w.length; i < n; i++)
+			// For the log-likelihood we must add the per observation weights
+			for (int i = 0; i < size; i++)
 			{
-				yFit[i] -= w[i];
+				lastyFit[i] = yFit[i] + w[i];
 			}
+		}
+		else
+		{
+			System.arraycopy(yFit, 0, lastyFit, 0, size);
 		}
 	}
 
@@ -268,6 +269,16 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 				int size = f1.size();
 				lastyFit = new double[size];
 				super.computeValues(lastyFit);
+				
+				if (w != null)
+				{
+					// For the log-likelihood we must add the per observation weights
+					for (int i = 0; i < w.length; i++)
+					{
+						lastyFit[i] += w[i];
+					}
+				}
+				
 			}
 
 			//ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);

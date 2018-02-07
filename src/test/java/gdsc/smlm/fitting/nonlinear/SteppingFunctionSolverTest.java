@@ -470,92 +470,184 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	@Test
 	public void canFitAndComputeDeviationsEMCCD_LSELVM()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.LSELVM, NoiseModel.EMCCD, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.LSELVM, NoiseModel.EMCCD, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_LSELVM()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.LSELVM, NoiseModel.SCMOS, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.LSELVM, NoiseModel.SCMOS, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsEMCCD_WLSELVM()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.WLSELVM, NoiseModel.EMCCD, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.WLSELVM, NoiseModel.EMCCD, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_WLSELVM()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_WLSELVM_Weighted()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, true);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, true);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsEMCCD_MLELVM()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.MLELVM, NoiseModel.EMCCD, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.MLELVM, NoiseModel.EMCCD, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_MLELVM()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_MLELVM_Weighted()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, true);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, true);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsEMCCD_FastMLE()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.FastMLE, NoiseModel.EMCCD, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.FastMLE, NoiseModel.EMCCD, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_FastMLE()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_FastMLE_Weighted()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, true);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, true);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsEMCCD_BTFastMLE()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.BTFastMLE, NoiseModel.EMCCD, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.BTFastMLE, NoiseModel.EMCCD, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_BTFastMLE()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, false);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, false);
 	}
 
 	@Test
 	public void canFitAndComputeDeviationsSCMOS_BTFastMLE_Weighted()
 	{
-		canFitAndComputeDeviationsLVM(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, true);
+		canFitAndComputeDeviations(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, true);
 	}
 
-	private void canFitAndComputeDeviationsLVM(SteppingFunctionSolverType type, NoiseModel noiseModel,
+	private void canFitAndComputeDeviations(SteppingFunctionSolverType type, NoiseModel noiseModel,
 			boolean useWeights)
 	{
 		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		fitAndComputeDeviationsMatch(solver1, solver2, noiseModel, useWeights);
+	}
+
+	@Test
+	public void canFitAndComputeValueEMCCD_LSELVM()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.LSELVM, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_LSELVM()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.LSELVM, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueEMCCD_WLSELVM()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.WLSELVM, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_WLSELVM()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_WLSELVM_Weighted()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.WLSELVM, NoiseModel.SCMOS, true);
+	}
+
+	@Test
+	public void canFitAndComputeValueEMCCD_MLELVM()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.MLELVM, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_MLELVM()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_MLELVM_Weighted()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.MLELVM, NoiseModel.SCMOS, true);
+	}
+
+	@Test
+	public void canFitAndComputeValueEMCCD_FastMLE()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.FastMLE, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_FastMLE()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_FastMLE_Weighted()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, true);
+	}
+
+	@Test
+	public void canFitAndComputeValueEMCCD_BTFastMLE()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.BTFastMLE, NoiseModel.EMCCD, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_BTFastMLE()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, false);
+	}
+
+	@Test
+	public void canFitAndComputeValueSCMOS_BTFastMLE_Weighted()
+	{
+		canFitAndComputeValue(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, true);
+	}
+
+	private void canFitAndComputeValue(SteppingFunctionSolverType type, NoiseModel noiseModel,
+			boolean useWeights)
+	{
+		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
+		fitAndComputeValueMatch(solver1, solver2, noiseModel, useWeights);
 	}
 }

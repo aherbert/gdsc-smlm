@@ -382,6 +382,28 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
+	 */
+	@Override
+	protected boolean computeValue(double[] y, double[] yFit, double[] a)
+	{
+		// This is over-ridden since the yFit values are computed 
+		// and stored by the gradient procedure. The super-class SteppingFunctionSolver 
+		// wraps the function with a Gradient1FunctionStore to store the 
+		// yFit. This is not a gradient 2 function so causes a run-time error
+		// in createGradientProcedure(double[])
+		
+		gradientIndices = f.gradientIndices();
+		lastY = prepareFunctionValue(y, a);
+		value = computeFunctionValue(a);
+		if (yFit != null)
+			copyFunctionValue(yFit);
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#prepareFunctionValue(double[], double[])
 	 */
 	@Override
@@ -395,15 +417,13 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFunctionValue(double[], double[])
+	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFunctionValue(double[])
 	 */
 	@Override
-	protected double computeFunctionValue(double[] yFit, double[] a)
+	protected double computeFunctionValue(double[] a)
 	{
 		ll = gradientProcedure.computeLogLikelihood(a);
 		isPseudoLogLikelihood = false;
-		if (yFit != null)
-			copyFunctionValue(yFit);
 		return ll;
 	}
 

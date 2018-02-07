@@ -108,7 +108,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 				solver.setBounds(getLB(), null);
 				break;
 			case JFastMLE:
-				FastMLESteppingFunctionSolver s = new FastMLESteppingFunctionSolver(f, tc, bounds);
+				ExtendedFastMLESteppingFunctionSolver s = new ExtendedFastMLESteppingFunctionSolver(f, tc, bounds);
 				s.enableJacobianSolution(true);
 				// MLE requires a positive function value so use a lower bound
 				solver = s;
