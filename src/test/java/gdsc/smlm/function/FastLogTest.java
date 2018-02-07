@@ -527,7 +527,7 @@ public class FastLogTest
 		}
 
 		//int min = 0, max = 23;
-		int min = 13, max = 13;
+		int min = 4, max = 13;
 
 		//		for (int n = min; n <= max; n++)
 		//		{
@@ -830,6 +830,10 @@ public class FastLogTest
 		TimingService ts = new TimingService(5);
 		ts.execute(new DoubleTimingTask(new TestLog(new MathLog()), 0, x));
 		ts.execute(new DoubleTimingTask(new TestLog(new FastMathLog()), 0, x));
+		//// Test min acceptable precision 
+		//TurboLog2 tf3 = new TurboLog2(8);
+		//ts.execute(new DoubleTimingTask(new TestLog(tf3), 15, x));
+		//ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
 		for (int q : new int[] { 11 })
 		//for (int q : new int[] { 0, 7, 8, 9, 10, 11, 12, 13 })
 		{
@@ -849,6 +853,11 @@ public class FastLogTest
 			TurboLog2 tf2 = new TurboLog2(n - 1);
 			ts.execute(new DoubleTimingTask(new TestLog(tf2), q + 1, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q + 1, x));
+
+			//// Min acceptable precision. This is usually the same speed
+			//// showing the precomputed table is optimally used for moderate n.
+			//ts.execute(new DoubleTimingTask(new TestLog(tf3), 15, x));
+			//ts.execute(new DoubleTimingTask(new TestFastLog(tf3), 15, x));
 		}
 
 		int size = ts.getSize();
