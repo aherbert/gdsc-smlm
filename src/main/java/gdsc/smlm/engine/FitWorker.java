@@ -1512,7 +1512,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final boolean smartFilter = fitConfig.isSmartFilter();
 			final boolean disableSimpleFilter = fitConfig.isDisableSimpleFilter();
 			final boolean computeDeviationsFlag = fitConfig.getComputeDeviationsFlag();
-			// Check if the filter requires deviations as we temporarily disable it
+			// Check if the filter requires deviations as we temporarily disable the 
+			// smart filter (so fitConfig.isComputeDeviations() could be false) but the 
+			// deviations will be required later
 			if (fitConfig.isComputeDeviations())
 				fitConfig.setComputeDeviations(true);
 			fitConfig.setSmartFilter(false);
