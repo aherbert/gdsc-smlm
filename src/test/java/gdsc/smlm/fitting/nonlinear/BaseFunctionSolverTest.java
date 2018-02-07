@@ -674,6 +674,21 @@ public abstract class BaseFunctionSolverTest
 		//System.out.println("o2="+Arrays.toString(o));
 		Assert.assertArrayEquals("Fit 2 peaks and deviations 2 peaks do not match", o, e, 0);
 
+		// Try again with y-fit values
+		a = p12.clone();
+		double[] o1 = new double[f2.size()];
+		double[] o2 = new double[o1.length];
+		solver1.fit(data, o1, a, e);
+		//System.out.println("a="+Arrays.toString(a));
+		solver2.computeValue(data, o2, a);
+		
+		Assert.assertArrayEquals("Fit 2 peaks with yFit and deviations 2 peaks do not match", o, e, 0);
+		
+		StandardValueProcedure p = new StandardValueProcedure();
+		double[] ev = p.getValues(f2, a);
+		Assert.assertArrayEquals("Fit 2 peaks yFit", ev, o1, 1e-8);
+		Assert.assertArrayEquals("computeValue 2 peaks yFit", ev, o2, 1e-8);
+		
 		if (solver1 instanceof SteppingFunctionSolver)
 		{
 			// fit with 1 peak + 1 precomputed using the known params.
@@ -709,6 +724,20 @@ public abstract class BaseFunctionSolverTest
 			}
 			if (fail > ok)
 				Assert.fail(sb.toString());
+			
+			// Try again with y-fit values
+			a = p1.clone();
+			Arrays.fill(o1,  0);
+			Arrays.fill(o2,  0);
+			o = new double[a.length];
+			solver1.fit(data, o1, a, o);
+			solver2.computeValue(data, o2, a2);
+			
+			Assert.assertArrayEquals("Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + 1 precomputed do not match", o, e, 1e-8);
+			
+			ev = p.getValues(pf1, a);
+			Assert.assertArrayEquals("Fit 1 peak + 1 precomputed yFit", ev, o1, 1e-8);
+			Assert.assertArrayEquals("computeValue 1 peak + 1 precomputed yFit", ev, o2, 1e-8);			
 		}
 	}
 

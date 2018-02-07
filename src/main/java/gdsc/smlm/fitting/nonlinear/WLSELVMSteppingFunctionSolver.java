@@ -122,8 +122,12 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
 	 */
 	@Override
-	protected FisherInformationMatrix computeFisherInformationMatrix()
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
 	{
+		// Get the values if necessary
+		if (yFit != null && yFit.length == ((Gradient1Function)f).size())
+			computeValues(yFit);
+		
 		// TODO. Check if these deviations are correct.
 		// Note: Huang et al (2015) compute:
 		// Iab = 1 / (uk + var/g^2) * duda * dudb

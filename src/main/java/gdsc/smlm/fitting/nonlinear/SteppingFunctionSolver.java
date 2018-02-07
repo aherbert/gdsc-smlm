@@ -173,10 +173,10 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			if (BitFlags.anySet(status, ToleranceChecker.STATUS_CONVERGED))
 			{
 				log("%s Converged [%s]\n", name, tc.getIterations());
-				// TODO: A solver may compute both at the same time...
+				// A solver may compute both at the same time...
 				if (aDev != null)
-					computeDeviations(aDev);
-				if (yFit != null)
+					computeDeviationsAndValues(aDev, yFit);
+				else if (yFit != null)
 					computeValues(yFit);
 				return FitStatus.OK;
 			}
@@ -276,16 +276,18 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/**
 	 * Compute the deviations for the parameters a from the last call to
-	 * {@link #computeFitValue(double[], double[])}.
+	 * {@link #computeFitValue(double[], double[])}. Optionally store the function values.
 	 *
 	 * @param aDev
 	 *            the parameter deviations
+	 * @param yFit
+	 *            the y fit (may be null)
 	 */
-	protected void computeDeviations(double[] aDev)
+	protected void computeDeviationsAndValues(double[] aDev, double[] yFit)
 	{
 		// Use a dedicated solver optimised for inverting the matrix diagonal. 
 		// The last Hessian matrix should be stored in the working alpha.
-		final FisherInformationMatrix m = computeFisherInformationMatrix();
+		final FisherInformationMatrix m = computeFisherInformationMatrix(yFit);
 
 		setDeviations(aDev, m);
 	}
@@ -295,12 +297,14 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * {@link #computeFitValue(double[], double[])}. This can be used to set the covariances for each of the fitted
 	 * parameters.
 	 * <p>
-	 * Alternatively a sub-class can override {@link #computeDeviations(double[])} directly and
+	 * Alternatively a sub-class can override {@link #computeDeviationsAndValues(double[], double[])} directly and
 	 * provide a dummy implementation of this function as it will not be used, e.g. throw an exception.
 	 *
+	 * @param yFit
+	 *            the y fit (may be null)
 	 * @return the Fisher Information matrix
 	 */
-	protected abstract FisherInformationMatrix computeFisherInformationMatrix();
+	protected abstract FisherInformationMatrix computeFisherInformationMatrix(double[] yFit);
 
 	/**
 	 * Compute the function y-values using the y and parameters a from the last call to

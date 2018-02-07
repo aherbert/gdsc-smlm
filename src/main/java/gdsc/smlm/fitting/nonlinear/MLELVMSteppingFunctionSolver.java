@@ -11,8 +11,10 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient2FunctionValueStore;
 import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.PrecomputedGradient1Function;
+import gdsc.smlm.function.PrecomputedGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -223,14 +225,27 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
 	 */
 	@Override
-	protected FisherInformationMatrix computeFisherInformationMatrix()
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
 	{
 		// The Hessian matrix refers to the log-likelihood ratio.
 		// Compute and invert a matrix related to the Poisson log-likelihood.
 		// This assumes this does achieve the maximum likelihood estimate for a 
 		// Poisson process.
+		Gradient1Function f1 = (Gradient1Function) f;
+		// Capture the y-values if necessary
+		if (yFit != null && yFit.length == f1.size())
+		{
+			f1 = new Gradient2FunctionValueStore(f1, yFit);
+		}
+		// Add the weights if necessary
+		if (w != null)
+		{
+			f1 = PrecomputedGradient2Function.wrapGradient1Function(f1, w);
+		}
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(lastA);
+		if (p.isNaNGradients())
+			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		p.getLinear(walpha); // Re-use space
 		return new FisherInformationMatrix(walpha, beta.length);
 	}

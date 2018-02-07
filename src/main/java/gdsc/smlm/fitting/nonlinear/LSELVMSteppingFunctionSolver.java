@@ -11,6 +11,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.LSQVarianceGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.LSQVarianceGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient2FunctionValueStore;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -127,24 +128,30 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	}
 
 	@Override
-	protected void computeDeviations(double[] aDev)
+	protected void computeDeviationsAndValues(double[] aDev, double[] yFit)
 	{
-		LSQVarianceGradientProcedure p = createVarianceProcedure();
+		Gradient1Function f1 = (Gradient1Function) this.f;
+		// Capture the y-values if necessary
+		if (yFit != null && yFit.length == f1.size())
+		{
+			f1 = new Gradient2FunctionValueStore(f1, yFit);
+		}
+		LSQVarianceGradientProcedure p = createVarianceProcedure(f1);
 		if (p.variance(null) == LSQVarianceGradientProcedure.STATUS_OK)
 			setDeviations(aDev, p.variance);
 	}
 
-	private LSQVarianceGradientProcedure createVarianceProcedure()
+	private LSQVarianceGradientProcedure createVarianceProcedure(Gradient1Function f)
 	{
 		if (inversionSolver == null)
 			inversionSolver = EJMLLinearSolver.createForInversion(1e-2);
-		return LSQVarianceGradientProcedureFactory.create((Gradient1Function) f, inversionSolver);
+		return LSQVarianceGradientProcedureFactory.create(f, inversionSolver);
 	}
 
 	@Override
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
-		LSQVarianceGradientProcedure p = createVarianceProcedure();
+		LSQVarianceGradientProcedure p = createVarianceProcedure((Gradient1Function) f);
 		if (p.variance(a) == LSQVarianceGradientProcedure.STATUS_OK)
 		{
 			setDeviations(aDev, p.variance);
@@ -154,7 +161,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	}
 
 	@Override
-	protected FisherInformationMatrix computeFisherInformationMatrix()
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
 	{
 		// This solver directly implements computation of the deviations
 		throw new NotImplementedException();

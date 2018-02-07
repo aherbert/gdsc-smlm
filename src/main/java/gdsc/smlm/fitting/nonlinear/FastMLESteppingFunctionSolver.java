@@ -14,6 +14,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
+import gdsc.smlm.function.Gradient2FunctionValueStore;
 import gdsc.smlm.function.PrecomputedGradient1Function;
 import gdsc.smlm.function.PrecomputedGradient2Function;
 
@@ -392,7 +393,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// wraps the function with a Gradient1FunctionStore to store the 
 		// yFit. This is not a gradient 2 function so causes a run-time error
 		// in createGradientProcedure(double[])
-		
+
 		gradientIndices = f.gradientIndices();
 		lastY = prepareFunctionValue(y, a);
 		value = computeFunctionValue(a);
@@ -460,20 +461,38 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		copyFunctionValue(yFit);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
-	 */
 	@Override
-	protected FisherInformationMatrix computeFisherInformationMatrix()
+	protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
 	{
+		Gradient2Function f2 = (Gradient2Function) f;
+		// Capture the y-values if necessary
+		if (yFit != null && yFit.length == f2.size())
+		{
+			f2 = new Gradient2FunctionValueStore(f2, yFit);
+		}
+		// Add the weights if necessary
+		if (w != null)
+		{
+			f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+		}
 		// The fisher information is that for a Poisson process
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
-		p.computeFisherInformation(null); // Assume preinitialised function
+		initialiseAndRun(p);
 		if (p.isNaNGradients())
 			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 		return new FisherInformationMatrix(p.getLinear(), p.n);
+	}
+
+	/**
+	 * Initialise and run the procedure using the fitted parameters. Provided to allow the backtracking sub-class to
+	 * initialise the function for gradients.
+	 *
+	 * @param p
+	 *            the procedure
+	 */
+	protected void initialiseAndRun(PoissonGradientProcedure p)
+	{
+		p.computeFisherInformation(null); // Assume preinitialised function
 	}
 
 	@Override

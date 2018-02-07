@@ -3,10 +3,8 @@ package gdsc.smlm.fitting.nonlinear;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
-import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
-import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.Gradient2Function;
 
 /*----------------------------------------------------------------------------- 
@@ -443,24 +441,14 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		this.maximumStepSize = (maximumStepSize >= 1) ? 0 : maximumStepSize;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.fitting.nonlinear.SteppingFunctionSolver#computeFisherInformationMatrix()
-	 */
 	@Override
-	protected FisherInformationMatrix computeFisherInformationMatrix()
+	protected void initialiseAndRun(PoissonGradientProcedure p)
 	{
 		// Note: This overrides the FastMLESteppingFunctionSolver because the function
 		// may not currently be initialised for gradients.
 		// If backtracking was done then initialisation has only been done for the value.
 		// Reinitialise using the current optimum.
 		
-		// The fisher information is that for a Poisson process
-		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
 		p.computeFisherInformation(aOld); // Use current optimum
-		if (p.isNaNGradients())
-			throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
-		return new FisherInformationMatrix(p.getLinear(), p.n);
 	}
 }
