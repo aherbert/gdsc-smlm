@@ -25,64 +25,16 @@ package gdsc.smlm.function;
  * <p>
  * Using look-up table the relative error ((fastLog(x)-Math.log(x))/Math.log(x)) is large (e>>1) when the input value x
  * is close to 1. So the algorithm detects values close to 1 and uses Math.log instead.
+ * <p>
+ * This is a copy of TurboLog but implements rounding on the mantissa. This allows this class to achieve the same error
+ * as TurboLog(n) using (n-1), i.e. half the table size.
  *
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-
  *      07-002.pdf</a>
  */
-public class TurboLog extends FastLog
+public class TurboLog2 extends TurboLog
 {
-	/**
-	 * The table of the log value of the unbaised float exponent (an integer from -127 to 128).
-	 */
-	protected static final float[] logExpF;
-	/**
-	 * The table of the log value of the unbaised double exponent (an integer from -1023 to 1024).
-	 */
-	protected static final float[] logExpD;
-
-	/**
-	 * The bounds below 1 where the function switches to use Math.log. This results in a maximum relative error of
-	 * 7.95e-4 for x below x.
-	 */
-	public static final double LOWER_ONE_BOUND = 0.92;
-	/**
-	 * The bounds above 1 where the function switches to use Math.log. This results in a maximum relative error of
-	 * 7.09e-4 for x above 1.
-	 */
-	public static final double UPPER_ONE_BOUND = 1.16;
-
-	/** The lower bound mantissa (for a double) below 1 where the function switches to use Math.log */
-	protected static final long lowerBoundMantissa;
-	/** The upper bound mantissa (for a double) above 1 where the function switches to use Math.log */
-	protected static final long upperBoundMantissa;
-	/** The lower bound mantissa (for a float) below 1 where the function switches to use Math.log */
-	protected static final int lowerBoundMantissaF;
-	/** The upper bound mantissa (for a float) above 1 where the function switches to use Math.log */
-	protected static final int upperBoundMantissaF;
-
-	static
-	{
-		// Note: the exponent is already in base 2. Just multiply by ln(2) to convert to base E
-		logExpF = new float[256]; // 8-bit exponent
-		for (int i = 0; i < logExpF.length; i++)
-			logExpF[i] = (float) ((i - 127) * LN2);
-		logExpD = new float[2048]; // 11-bit exponent
-		for (int i = 0; i < logExpD.length; i++)
-			logExpD[i] = (float) ((i - 1023) * LN2);
-
-		// Get the mantissa bounds
-		assert ((Double.doubleToLongBits(LOWER_ONE_BOUND) >> 52) - 1023) == -1 : "lower bound exponent not -1";
-		assert ((Double.doubleToLongBits(UPPER_ONE_BOUND) >> 52) - 1023) == 0 : "upper bound exponent not 0";
-		lowerBoundMantissa = Double.doubleToLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
-		upperBoundMantissa = Double.doubleToLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
-
-		assert ((Float.floatToIntBits((float) LOWER_ONE_BOUND) >> 23) - 127) == -1 : "lower bound exponent not -1";
-		assert ((Float.floatToIntBits((float) UPPER_ONE_BOUND) >> 23) - 127) == 0 : "upper bound exponent not 0";
-		lowerBoundMantissaF = Float.floatToIntBits((float) LOWER_ONE_BOUND) & 0x7fffff;
-		upperBoundMantissaF = Float.floatToIntBits((float) UPPER_ONE_BOUND) & 0x7fffff;
-	}
-
 	/** The number of bits to remove from a float mantissa. */
 	private final int q;
 	/** The number of bits to remove from a double mantissa. */
@@ -93,6 +45,11 @@ public class TurboLog extends FastLog
 	 */
 	private final float[] logMantissa;
 
+	/** The number to add to a float mantissa for rounding. */
+	private final int roundF;
+	/** The number to add to a double mantissa for rounding. */
+	private final long roundD;
+
 	/**
 	 * Create a new natural logarithm calculation instance. This will
 	 * hold the pre-calculated log values for base E
@@ -101,9 +58,10 @@ public class TurboLog extends FastLog
 	 * @param dataType
 	 *            the data type
 	 */
-	public TurboLog()
+	public TurboLog2()
 	{
-		this(N);
+		// Since rounding doubles the precision we can reduce the default table size
+		this(N - 1);
 	}
 
 	/**
@@ -117,7 +75,7 @@ public class TurboLog extends FastLog
 	 * @param dataType
 	 *            the data type
 	 */
-	public TurboLog(int n)
+	public TurboLog2(int n)
 	{
 		// Store log value of a range of floating point numbers using a limited
 		// precision mantissa (m). The purpose of this code is to enumerate all 
@@ -154,7 +112,8 @@ public class TurboLog extends FastLog
 		int inc = 1 << q; // Amount to increase the mantissa
 
 		final int size = 1 << n;
-		logMantissa = new float[size];
+		// Add an extra value in case the final mantissa is rounded up
+		logMantissa = new float[size + 1];
 		for (int i = 0; i < size; i++)
 		{
 			float value = Float.intBitsToFloat(x);
@@ -165,24 +124,29 @@ public class TurboLog extends FastLog
 			//assert logv == fastLog(value) : String.format("[%d] data[i](%g)  %g != %g  %g", i, value, logv,
 			//		fastLog2(value), gdsc.core.utils.FloatEquality.relativeError(logv, fastLog2(value)));
 		}
+		// For rounding the final mantissa up
+		logMantissa[size] = logMantissa[size - 1];
+
+		// To round a mantissa add a number corresponding to the first insignificant digit.
+		// E.g. for n=10, q=13, number to add is 1 << (q-1)
+		//   1101010101.............
+		// +           1000000000000
+		if (q != 0)
+		{
+			roundF = 1 << (q - 1);
+			roundD = 1L << (qd - 1);
+		}
+		else
+		{
+			roundF = 0;
+			roundD = 0;
+		}
 	}
 
 	@Override
 	public int getN()
 	{
 		return 23 - q;
-	}
-
-	@Override
-	public double getScale()
-	{
-		return LN2;
-	}
-
-	@Override
-	public double getBase()
-	{
-		return Math.E;
 	}
 
 	@Override
@@ -235,37 +199,8 @@ public class TurboLog extends FastLog
 			return (float) Math.log(x);
 		}
 
-		return logMantissa[m >>> q] + logExpF[e];
-	}
-
-	/**
-	 * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is no assumed leading
-	 * 1.
-	 * <p>
-	 * Note that if the mantissa is zero this will fail!
-	 * <p>
-	 * No rounding to be done on sub-normal as the mantissa is shifted << 1 so the least significant digit is always 0.
-	 *
-	 * @param m
-	 *            the mantissa (already bit shifted by 1)
-	 * @return the log(x)
-	 */
-	protected float computeSubnormal(int m)
-	{
-		// Normalize the subnormal number.
-		// The unbiased exponent starts at -127.
-		// Shift the mantissa until it is a binary number 
-		// with a leading 1: 1.10101010... 
-
-		int e = -127;
-		while ((m & 0x800000) == 0)
-		{
-			--e;
-			m <<= 1;
-		}
-
-		// Remove the leading 1
-		return logMantissa[(m & 0x7fffff) >>> q] + e * LN2F;
+		// Round the mantissa
+		return logMantissa[(m + roundF) >>> q] + logExpF[e];
 	}
 
 	/**
@@ -295,7 +230,7 @@ public class TurboLog extends FastLog
 		{
 			return (float) Math.log(x);
 		}
-		return logMantissa[m >>> q] + logExpF[e];
+		return logMantissa[(m + roundF) >>> q] + logExpF[e];
 	}
 
 	@Override
@@ -347,37 +282,8 @@ public class TurboLog extends FastLog
 			return (float) Math.log(x);
 		}
 
-		return logMantissa[(int) (m >>> qd)] + logExpD[e];
-	}
-
-	/**
-	 * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is no assumed leading
-	 * 1.
-	 * <p>
-	 * Note that if the mantissa is zero this will fail!
-	 * <p>
-	 * No rounding to be done on sub-normal as the mantissa is shifted << 1 so the least significant digit is always 0.
-	 *
-	 * @param m
-	 *            the mantissa (already bit shifted by 1)
-	 * @return the log(x)
-	 */
-	protected float computeSubnormalF(long m)
-	{
-		// Normalize the subnormal number.
-		// The unbiased exponent starts at -1023.
-		// Shift the mantissa until it is a binary number 
-		// with a leading 1: 1.10101010... 
-
-		int e = -1023;
-		while ((m & 0x0010000000000000L) == 0)
-		{
-			--e;
-			m <<= 1;
-		}
-
-		// Remove the leading 1
-		return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2F;
+		// Round the mantissa
+		return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
 	}
 
 	/**
@@ -407,7 +313,8 @@ public class TurboLog extends FastLog
 		{
 			return (float) Math.log(x);
 		}
-		return logMantissa[(int) (m >>> qd)] + logExpD[e];
+		// Round the mantissa
+		return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
 	}
 
 	@Override
@@ -459,38 +366,9 @@ public class TurboLog extends FastLog
 			return Math.log(x);
 		}
 
-		//return logMantissa[(int) (m >>> qd)] + logExpD[e];
-		return logMantissa[(int) (m >>> qd)] + (e - 1023) * LN2;
-	}
-
-	/**
-	 * Compute the log for a subnormal float-point number, i.e. where the exponent is 0 then there is no assumed leading
-	 * 1.
-	 * <p>
-	 * Note that if the mantissa is zero this will fail!
-	 * <p>
-	 * No rounding to be done on sub-normal as the mantissa is shifted << 1 so the least significant digit is always 0.
-	 *
-	 * @param m
-	 *            the mantissa (already bit shifted by 1)
-	 * @return the log(x)
-	 */
-	protected double computeSubnormal(long m)
-	{
-		// Normalize the subnormal number.
-		// The unbiased exponent starts at -1023.
-		// Shift the mantissa until it is a binary number 
-		// with a leading 1: 1.10101010... 
-
-		int e = -1023;
-		while ((m & 0x0010000000000000L) == 0)
-		{
-			--e;
-			m <<= 1;
-		}
-
-		// Remove the leading 1
-		return logMantissa[(int) ((m & 0xfffffffffffffL) >>> qd)] + e * LN2;
+		// Round the mantissa
+		//return logMantissa[(int) ((m+roundD) >>> qd)] + logExpD[e];
+		return logMantissa[(int) ((m + roundD) >>> qd)] + (e - 1023) * LN2;
 	}
 
 	/**
@@ -520,45 +398,7 @@ public class TurboLog extends FastLog
 		{
 			return Math.log(x);
 		}
-		//return logMantissa[(int) (m >>> qd)] + logExpD[e];
-		return logMantissa[(int) (m >>> qd)] + (e - 1023) * LN2;
-	}
-
-	// We don't support other bases so do a simple conversion for log2 for the super-class method
-
-	@Override
-	public float log2(float x)
-	{
-		return log(x) / LN2F;
-	}
-
-	@Override
-	public float fastLog2(float x)
-	{
-		return fastLog(x) / LN2F;
-	}
-
-	@Override
-	public double log2D(double x)
-	{
-		return log(x) / LN2;
-	}
-
-	@Override
-	public double fastLog2D(double x)
-	{
-		return fastLog(x) / LN2;
-	}
-
-	@Override
-	public float log2(double x)
-	{
-		return log(x) / LN2F;
-	}
-
-	@Override
-	public float fastLog2(double x)
-	{
-		return fastLog(x) / LN2F;
+		//return logMantissa[(int) ((m+roundD) >>> qd)] + logExpD[e];
+		return logMantissa[(int) ((m + roundD) >>> qd)] + (e - 1023) * LN2;
 	}
 }

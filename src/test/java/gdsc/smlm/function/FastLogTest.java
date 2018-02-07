@@ -296,17 +296,17 @@ public class FastLogTest
 			logD[i] = (float) Math.log(d[i]);
 		}
 
-		//int min=0,max=23;
-		int min = 13, max = 13;
+		int min = 0, max = 23;
+		//int min = 13, max = 13;
 
-		for (int n = min; n <= max; n++)
-		{
-			canTestFloatError(new TestFastLog(ICSIFastLog.create(n, DataType.FLOAT)), d, logD);
-		}
-		for (int n = min; n <= max; n++)
-		{
-			canTestFloatError(new TestFastLog(new FFastLog(n)), d, logD);
-		}
+		//		for (int n = min; n <= max; n++)
+		//		{
+		//			canTestFloatError(new TestFastLog(ICSIFastLog.create(n, DataType.FLOAT)), d, logD);
+		//		}
+		//		for (int n = min; n <= max; n++)
+		//		{
+		//			canTestFloatError(new TestFastLog(new FFastLog(n)), d, logD);
+		//		}
 		for (int n = min; n <= max; n++)
 		{
 			canTestFloatError(new TestFastLog(new DFastLog(n)), d, logD);
@@ -314,6 +314,10 @@ public class FastLogTest
 		for (int n = min; n <= max; n++)
 		{
 			canTestFloatError(new TestFastLog(new TurboLog(n)), d, logD);
+		}
+		for (int n = min; n <= max; n++)
+		{
+			canTestFloatError(new TestFastLog(new TurboLog2(n)), d, logD);
 		}
 	}
 
@@ -346,6 +350,7 @@ public class FastLogTest
 		test.add(new TestFastLog(new FFastLog(n)));
 		test.add(new TestFastLog(new DFastLog(n)));
 		test.add(new TestFastLog(new TurboLog(n)));
+		test.add(new TestFastLog(new TurboLog2(n)));
 
 		// Full range in blocks.
 		// Only when the number is around 1 or min value are there significant errors
@@ -539,6 +544,7 @@ public class FastLogTest
 		for (int n = min; n <= max; n++)
 		{
 			canTestDoubleError(new TestFastLog(new TurboLog(n)), d, logD);
+			canTestDoubleError(new TestFastLog(new TurboLog2(n)), d, logD);
 		}
 	}
 
@@ -756,6 +762,13 @@ public class FastLogTest
 			TurboLog tf = new TurboLog(n);
 			ts.execute(new FloatTimingTask(new TestLog(tf), q, x));
 			ts.execute(new FloatTimingTask(new TestFastLog(tf), q, x));
+			//TurboLog2 tf2 = new TurboLog2(n);
+			//ts.execute(new FloatTimingTask(new TestLog(tf2), q, x));
+			//ts.execute(new FloatTimingTask(new TestFastLog(tf2), q, x));
+			// For the same precision we can reduce n
+			TurboLog2 tf3 = new TurboLog2(n - 1);
+			ts.execute(new FloatTimingTask(new TestLog(tf3), q + 1, x));
+			ts.execute(new FloatTimingTask(new TestFastLog(tf3), q + 1, x));
 		}
 
 		int size = ts.getSize();
@@ -832,6 +845,10 @@ public class FastLogTest
 			TurboLog tf = new TurboLog(n);
 			ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
+			// Test same precision 
+			TurboLog2 tf2 = new TurboLog2(n - 1);
+			ts.execute(new DoubleTimingTask(new TestLog(tf2), q + 1, x));
+			ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q + 1, x));
 		}
 
 		int size = ts.getSize();
@@ -909,6 +926,14 @@ public class FastLogTest
 			ts.execute(new FloatTimingTask(new TestFastLog(tf), q, xf));
 			ts.execute(new DoubleTimingTask(new TestLog(tf), q, x));
 			ts.execute(new DoubleTimingTask(new TestFastLog(tf), q, x));
+
+			TurboLog2 tf2 = new TurboLog2(n);
+			ts.execute(new DoubleToFloatTimingTask(new TestLog(tf2), q, x, xf));
+			ts.execute(new DoubleToFloatTimingTask(new TestFastLog(tf2), q, x, xf));
+			ts.execute(new FloatTimingTask(new TestLog(tf2), q, xf));
+			ts.execute(new FloatTimingTask(new TestFastLog(tf2), q, xf));
+			ts.execute(new DoubleTimingTask(new TestLog(tf2), q, x));
+			ts.execute(new DoubleTimingTask(new TestFastLog(tf2), q, x));
 
 			// Slower as the look-up table is bigger
 			FFastLog f1 = new FFastLog(n);
