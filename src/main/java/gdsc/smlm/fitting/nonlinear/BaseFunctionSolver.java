@@ -488,10 +488,15 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 				if (i != 0)
 					// Copy the values that were positive
 					System.arraycopy(y, 0, y2, 0, i);
-				y2[i] = 0; // We know this was not positive
+				
+				// Note that java initialises the array to zero so only copy the positives
+				
+				//y2[i] = 0; // We know this was not positive so skip it
 				while (++i < n)
 				{
-					y2[i] = (y[i] < 0) ? 0 : y[i];
+					//y2[i] = (y[i] < 0) ? 0 : y[i];
+					if (y[i] > 0)
+						y2[i] = y[i];
 				}
 				return y2;
 			}
