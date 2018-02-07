@@ -78,10 +78,15 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 	public void forEach(ValueProcedure procedure)
 	{
 		i = 0;
-		if (values == null || values.length != f.size())
-			values = new double[f.size()];
+		createValues();
 		this.procedure = procedure;
 		f.forEach(this);
+	}
+
+	protected void createValues()
+	{
+		if (values == null || values.length != f.size())
+			values = new double[f.size()];
 	}
 
 	/*

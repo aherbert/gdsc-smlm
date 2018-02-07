@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -103,12 +102,16 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	public void forEach(Gradient1Procedure procedure)
 	{
 		i = 0;
-		if (values ==null || values.length != f.size())
-			values = new double[f.size()];
-		if (dyda==null || dyda.length != f.size())
-			dyda = new double[values.length][length];
+		createValues();
+		createDYDA();
 		this.procedure = procedure;
 		f.forEach((Gradient1Procedure) this);
+	}
+
+	protected void createDYDA()
+	{
+		if (dyda==null || dyda.length != f.size())
+			dyda = new double[values.length][length];
 	}
 
 	/*

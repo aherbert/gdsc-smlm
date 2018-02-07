@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -73,14 +72,17 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
 	public void forEach(Gradient2Procedure procedure)
 	{
 		i = 0;
-		if (values == null || values.length != f.size())
-			values = new double[f.size()];
-		if (dyda == null || dyda.length != f.size())
-			dyda = new double[values.length][length];
-		if (d2yda2 == null || d2yda2.length != f.size())
-			d2yda2 = new double[values.length][length];
+		createValues();
+		createDYDA();
+		createD2YDA2();
 		this.procedure = procedure;
 		f.forEach((Gradient2Procedure) this);
+	}
+
+	protected void createD2YDA2()
+	{
+		if (d2yda2 == null || d2yda2.length != f.size())
+			d2yda2 = new double[values.length][length];
 	}
 
 	/*
