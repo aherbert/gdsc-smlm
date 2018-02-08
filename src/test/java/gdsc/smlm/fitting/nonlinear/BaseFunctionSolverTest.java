@@ -231,7 +231,11 @@ public abstract class BaseFunctionSolverTest
 				gp.computeFisherInformation(expected);
 				FisherInformationMatrix f = new FisherInformationMatrix(gp.getLinear(), gp.n);
 				crlb = f.crlbSqrt();
-				// Compute the deviations
+				// Compute the deviations.
+				// Note this is not the same as the CRLB as the fit is repeated 
+				// against the same data.
+				// It should be repeated against different data generated with constant
+				// parameters and variable noise.
 				m = new SimpleArrayMoment();
 			}
 			double[] data = drawGaussian(expected, noise, noiseModel);
@@ -413,12 +417,12 @@ public abstract class BaseFunctionSolverTest
 					printBetterDetails);
 			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], printBetterDetails);
 		}
-		test(name2, name, String.format("All (eval [%d] [%d]) : ", i2, i1), better, total, true);
+		test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, true);
 	}
 
 	private void test(String name2, String name, String statName, int better, int total, boolean print)
 	{
-		double p = 100.0 * better / total;
+		double p = (total == 0) ? 0 : 100.0 * better / total;
 		String msg = String.format("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p);
 		if (print)
 			System.out.println(msg);
@@ -492,8 +496,8 @@ public abstract class BaseFunctionSolverTest
 		params = params.clone();
 		FitStatus status = solver.fit(data, null, params, null);
 		if (status != FitStatus.OK)
-			Assert.assertTrue(String.format("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
-					Arrays.toString(params), Arrays.toString(expected)), false);
+			Assert.fail(String.format("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
+					Arrays.toString(params), Arrays.toString(expected)));
 		return params;
 	}
 
@@ -681,14 +685,14 @@ public abstract class BaseFunctionSolverTest
 		solver1.fit(data, o1, a, e);
 		//System.out.println("a="+Arrays.toString(a));
 		solver2.computeValue(data, o2, a);
-		
+
 		Assert.assertArrayEquals("Fit 2 peaks with yFit and deviations 2 peaks do not match", o, e, 0);
-		
+
 		StandardValueProcedure p = new StandardValueProcedure();
 		double[] ev = p.getValues(f2, a);
 		Assert.assertArrayEquals("Fit 2 peaks yFit", ev, o1, 1e-8);
 		Assert.assertArrayEquals("computeValue 2 peaks yFit", ev, o2, 1e-8);
-		
+
 		if (solver1 instanceof SteppingFunctionSolver)
 		{
 			// fit with 1 peak + 1 precomputed using the known params.
@@ -724,20 +728,22 @@ public abstract class BaseFunctionSolverTest
 			}
 			if (fail > ok)
 				Assert.fail(sb.toString());
-			
+
 			// Try again with y-fit values
 			a = p1.clone();
-			Arrays.fill(o1,  0);
-			Arrays.fill(o2,  0);
+			Arrays.fill(o1, 0);
+			Arrays.fill(o2, 0);
 			o = new double[a.length];
 			solver1.fit(data, o1, a, o);
 			solver2.computeValue(data, o2, a2);
-			
-			Assert.assertArrayEquals("Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + 1 precomputed do not match", o, e, 1e-8);
-			
+
+			Assert.assertArrayEquals(
+					"Fit 1 peak + 1 precomputed with yFit and deviations 1 peak + 1 precomputed do not match", o, e,
+					1e-8);
+
 			ev = p.getValues(pf1, a);
 			Assert.assertArrayEquals("Fit 1 peak + 1 precomputed yFit", ev, o1, 1e-8);
-			Assert.assertArrayEquals("computeValue 1 peak + 1 precomputed yFit", ev, o2, 1e-8);			
+			Assert.assertArrayEquals("computeValue 1 peak + 1 precomputed yFit", ev, o2, 1e-8);
 		}
 	}
 

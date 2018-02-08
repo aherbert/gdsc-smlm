@@ -9,6 +9,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.MLELVMGradientProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
+import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2FunctionValueStore;
@@ -56,6 +57,9 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * using the LLR sCMOS method of Huang, et al (2015).
 	 */
 	protected Gradient1Function f1;
+
+	/** The fast log instance for the fast log version of the procedure. */
+	private FastLog fastLog = null;
 
 	/**
 	 * Create a new stepping function solver.
@@ -180,6 +184,8 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		{
 			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
 		}
+		if (isFastLog())
+			return MLELVMGradientProcedureFactory.create(y, f1, fastLog);
 		return MLELVMGradientProcedureFactory.create(y, f1);
 	}
 
@@ -284,7 +290,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 				int size = f1.size();
 				lastyFit = new double[size];
 				super.computeValues(lastyFit);
-				
+
 				if (w != null)
 				{
 					// For the log-likelihood we must add the per observation weights
@@ -293,7 +299,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 						lastyFit[i] += w[i];
 					}
 				}
-				
+
 			}
 
 			//ll = PoissonCalculator.fastLogLikelihood(lastyFit, lastY);
@@ -325,5 +331,37 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// Wilks theorum states the LLR approaches the chi-squared distribution for large n.
 		return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),
 				getNumberOfFittedPoints() - getNumberOfFittedParameters());
+	}
+
+	/**
+	 * Gets the fast log instance.
+	 *
+	 * @return the fast log
+	 */
+	public FastLog getFastLog()
+	{
+		return fastLog;
+	}
+
+	/**
+	 * Checks if is using a fast log instance.
+	 *
+	 * @return true, if using a fast log instance
+	 */
+	public boolean isFastLog()
+	{
+		return fastLog != null;
+	}
+
+	/**
+	 * Sets the fast log instance to use for the MLE LVM procedure. This may decrease stability on convergence (since
+	 * the function value has less precision) and should be used with caution.
+	 *
+	 * @param fastLog
+	 *            the new fast log instance
+	 */
+	public void setFastLog(FastLog fastLog)
+	{
+		this.fastLog = fastLog;
 	}
 }

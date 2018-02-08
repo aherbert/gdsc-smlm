@@ -1,6 +1,7 @@
 package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.core.utils.NotImplementedException;
+import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
@@ -30,7 +31,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	enum SteppingFunctionSolverType
 	{
 		// Enum names should al be uppercase but this is just for a test so ignore that convention
-		MLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BTFastMLE
+		MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BTFastMLE
 	}
 
 	// For convenience declare variables of the enum type
@@ -38,6 +39,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	static final SteppingFunctionSolverClamp CLAMP = SteppingFunctionSolverClamp.CLAMP;
 	static final SteppingFunctionSolverClamp DYNAMIC_CLAMP = SteppingFunctionSolverClamp.DYNAMIC_CLAMP;
 	static final SteppingFunctionSolverType MLELVM = SteppingFunctionSolverType.MLELVM;
+	static final SteppingFunctionSolverType FastLogMLELVM = SteppingFunctionSolverType.FastLogMLELVM;
 	static final SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
 	static final SteppingFunctionSolverType WLSELVM = SteppingFunctionSolverType.WLSELVM;
 	static final SteppingFunctionSolverType FastMLE = SteppingFunctionSolverType.FastMLE;
@@ -45,31 +47,32 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 	static final SteppingFunctionSolverType BTFastMLE = SteppingFunctionSolverType.BTFastMLE;
 	static final boolean BOUNDED = true;
 	static final boolean NO_BOUND = false;
-	
+
 	static class NoToleranceChecker extends ToleranceChecker
 	{
 		public NoToleranceChecker()
 		{
 			super(0, 0);
 		}
-		
+
 		@Override
 		public int converged(double previousValue, double[] previousParameters, double currentValue,
 				double[] currentParameters)
 		{
 			return STATUS_VALUE;
-		}		
+		}
 	}
-	
+
 	static NoToleranceChecker noToleranceChecker = new NoToleranceChecker();
 
 	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type)
 	{
 		return getSolver(clamp, type, new ToleranceChecker(1e-5, 1e-5, 0, 0, 100));
 	}
-	
+
 	@SuppressWarnings("deprecation")
-	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type, ToleranceChecker tc)
+	SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp, SteppingFunctionSolverType type,
+			ToleranceChecker tc)
 	{
 		ErfGaussian2DFunction f = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
 		ParameterBounds bounds = new ParameterBounds(f);
@@ -90,9 +93,14 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 				solver = new LSELVMSteppingFunctionSolver(f, tc, bounds);
 				break;
 			case MLELVM:
-				solver = new MLELVMSteppingFunctionSolver(f, tc, bounds);
+			case FastLogMLELVM:
+				MLELVMSteppingFunctionSolver mleSolver = new MLELVMSteppingFunctionSolver(f, tc, bounds);
+				solver = mleSolver;
 				// MLE requires a positive function value so use a lower bound
 				solver.setBounds(getLB(), null);
+				// For testing the fast log version
+				if (type == FastLogMLELVM)
+					mleSolver.setFastLog(FastLogFactory.getFastLog());
 				break;
 			case WLSELVM:
 				solver = new WLSELVMSteppingFunctionSolver(f, tc, bounds);
@@ -108,10 +116,10 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 				solver.setBounds(getLB(), null);
 				break;
 			case JFastMLE:
-				ExtendedFastMLESteppingFunctionSolver s = new ExtendedFastMLESteppingFunctionSolver(f, tc, bounds);
-				s.enableJacobianSolution(true);
+				ExtendedFastMLESteppingFunctionSolver efmSolver = new ExtendedFastMLESteppingFunctionSolver(f, tc, bounds);
+				efmSolver.enableJacobianSolution(true);
 				// MLE requires a positive function value so use a lower bound
-				solver = s;
+				solver = efmSolver;
 				solver.setBounds(getLB(), null);
 				break;
 			default:
