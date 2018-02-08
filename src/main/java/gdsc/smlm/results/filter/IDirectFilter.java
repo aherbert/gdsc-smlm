@@ -125,6 +125,11 @@ public interface IDirectFilter
 	 * Disable filtering using the shift of the result
 	 */
 	final static int NO_SHIFT = 0x000000002;
+	
+	/**
+	 * Enable filtering both X and Y widths
+	 */
+	final static int XY_WIDTH = 0x000000004;	
 
 	/**
 	 * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the
@@ -134,6 +139,15 @@ public interface IDirectFilter
 	 */
 	int getValidationFlags();
 
+	// TODO - Change this to allow a filter to be set-up, modified then 
+	// reset to the previous state.
+	// Change void setup(final FilterSetupData... filterSetupData);
+	
+	// setup(int) will initialise the filter.
+	// Update can modify the initialised filter.
+	// void update(final FilterSetupData... filterSetupData);
+	// Reset to the initialised state by calling with no arguments.
+	
 	/**
 	 * Called before the accept method is called for PreprocessedPeakResult
 	 * <p>

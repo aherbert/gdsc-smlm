@@ -142,22 +142,25 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
-		setup(true, true);
+		setup(true, true, false);
 	}
 
 	@Override
 	public void setup(int flags)
 	{
-		setup(!areSet(flags, DirectFilter.NO_WIDTH), !areSet(flags, DirectFilter.NO_SHIFT));
+		setup(!areSet(flags, DirectFilter.NO_WIDTH), !areSet(flags, DirectFilter.NO_SHIFT),
+				areSet(flags, DirectFilter.XY_WIDTH));
 	}
 
-	private void setup(final boolean widthEnabled, final boolean shiftEnabled)
+	private void setup(final boolean widthEnabled, final boolean shiftEnabled, final boolean xyWidths)
 	{
 		if (components_Width_Shift == null)
 		{
 			// Create the components we require
 			final MultiFilterComponent[] components1 = new MultiFilterComponent[7];
 			int s1 = 0;
+			Class<? extends MultiFilterComponent> widthComponentClass = null;
+			Class<? extends MultiFilterComponent> shiftComponentClass = null;
 
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
 			// SNR, Max Width, Precision, Shift, Min width
@@ -167,7 +170,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			}
 			if (maxWidth != 0 || minWidth != 0)
 			{
-				components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
+				// Handle the width being 1/2 axis variable.
+				if (xyWidths)
+					components1[s1++] = new MultiFilterXYWidthComponent(minWidth, maxWidth);
+				else
+					components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
+				widthComponentClass = components1[s1 - 1].getClass();
 			}
 			if (precision != 0)
 			{
@@ -176,6 +184,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			if (shift != 0)
 			{
 				components1[s1++] = new MultiFilterShiftComponent(shift);
+				shiftComponentClass = components1[s1 - 1].getClass();
 			}
 			if (signal != 0)
 			{
@@ -190,13 +199,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
 			}
 
-			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1,
-					MultiFilterWidthComponent.class);
-			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1,
-					MultiFilterShiftComponent.class);
+			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1, widthComponentClass);
+			final MultiFilterComponent[] components3 = MultiFilter.remove(components1, s1, shiftComponentClass);
 
 			final MultiFilterComponent[] components4 = MultiFilter.remove(components2, components2.length,
-					MultiFilterShiftComponent.class);
+					shiftComponentClass);
 
 			components_Width_Shift = MultiFilterComponentSetFactory.create(components1, s1);
 			components_NoWidth_Shift = MultiFilterComponentSetFactory.create(components2, components2.length);
@@ -235,8 +242,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		return new MultiFilterVarianceComponent(precision);
 	}
 
-	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size, @SuppressWarnings("rawtypes") Class clazz)
+	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size,
+			Class<? extends MultiFilterComponent> clazz)
 	{
+		if (clazz == null)
+			return in;
 		MultiFilterComponent[] out = new MultiFilterComponent[size];
 		int length = 0;
 		for (int i = 0; i < size; i++)
@@ -250,7 +260,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(FilterSetupData... filterSetupData)
 	{
-		setup(true, true);
+		setup(true, true, false);
 		for (int i = filterSetupData.length; i-- > 0;)
 		{
 			if (filterSetupData[i] instanceof ShiftFilterSetupData)
@@ -306,7 +316,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 		return true;
 	}
-	
+
 	protected double getVariance(PeakResult peak)
 	{
 		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
@@ -494,7 +504,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				return ParameterType.MAX_Z;
 		}
 	}
-	
+
 	protected ParameterType getPrecisionParamaterType()
 	{
 		return ParameterType.PRECISION;

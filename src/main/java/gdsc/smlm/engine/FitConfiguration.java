@@ -3366,6 +3366,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		else
 		{
+			int flags = 0;
 			double shiftFactor = getCoordinateShiftFactor();
 			for (int i = filterSetupData.length; i-- > 0;)
 			{

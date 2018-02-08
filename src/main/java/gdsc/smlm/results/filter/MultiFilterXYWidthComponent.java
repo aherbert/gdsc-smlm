@@ -3,7 +3,7 @@ package gdsc.smlm.results.filter;
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2016 Alex Herbert
+ * Copyright (C) 2018 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -14,16 +14,16 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Filter results using Width. Assumes XY width are the same.
+ * Filter results using Width. Assume XY width are different.
  */
-public class MultiFilterWidthComponent extends MultiFilterComponent
+public class MultiFilterXYWidthComponent extends MultiFilterComponent
 {
 	final float lowerSigmaThreshold, upperSigmaThreshold;
 
-	public MultiFilterWidthComponent(double minWidth, double maxWidth)
+	public MultiFilterXYWidthComponent(double minWidth, double maxWidth)
 	{
-		this.lowerSigmaThreshold = (float) minWidth;
-		this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+		lowerSigmaThreshold = (float) (minWidth * minWidth);
+		upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
 	}
 
 	/*
@@ -33,8 +33,8 @@ public class MultiFilterWidthComponent extends MultiFilterComponent
 	 */
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
-		final float xsdf = peak.getXSDFactor();
-		return (xsdf > upperSigmaThreshold || xsdf < lowerSigmaThreshold);
+		final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
+		return (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold);
 	}
 
 	/*
@@ -44,6 +44,6 @@ public class MultiFilterWidthComponent extends MultiFilterComponent
 	 */
 	public int getType()
 	{
-		return IDirectFilter.V_X_SD_FACTOR;
+		return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;
 	}
 }
