@@ -49,6 +49,7 @@ public abstract class XStreamWrapper
 				addAlias(HysteresisFilter.class);
 				addAlias(MultiFilter.class);
 				addAlias(MultiFilter2.class);
+				addAlias(MultiFilterCRLB.class);
 				addAlias(MultiHysteresisFilter.class);
 				addAlias(MultiHysteresisFilter2.class);
 				addAlias(MultiPathFilter.class);
@@ -67,6 +68,7 @@ public abstract class XStreamWrapper
 				addAlias(TraceFilter.class);
 				addAlias(WidthFilter.class);
 				addAlias(WidthFilter2.class);
+				addAlias(ZCoordinateFilter.class);
 
 				// Removed dependency on reflections since this has other jar dependencies
 				//Reflections reflections = new Reflections("gdsc.smlm.results.filter");

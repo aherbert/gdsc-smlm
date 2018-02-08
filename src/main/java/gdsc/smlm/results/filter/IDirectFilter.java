@@ -112,6 +112,11 @@ public interface IDirectFilter
 	final static int V_LOCATION_VARIANCE_CRLB = 0x000020000;
 
 	/**
+	 * Validation flag for the z position
+	 */
+	final static int V_Z = 0x000040000;
+	
+	/**
 	 * Disable filtering using the width of the result
 	 */
 	final static int NO_WIDTH = 0x000000001;

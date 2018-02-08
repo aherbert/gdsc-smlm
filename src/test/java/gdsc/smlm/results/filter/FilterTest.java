@@ -22,6 +22,7 @@ import org.junit.Test;
 import gdsc.core.test.TimingResult;
 import gdsc.core.test.TimingService;
 import gdsc.core.test.TimingTask;
+import gdsc.core.utils.XmlUtils;
 
 public class FilterTest
 {
@@ -29,7 +30,7 @@ public class FilterTest
 	public void canCompareMultiFilter()
 	{
 		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-		MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0);
+		MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
 			MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
@@ -44,7 +45,7 @@ public class FilterTest
 	public void canCompareMultiFilter2()
 	{
 		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-		MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0);
+		MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
 			MultiFilter2 f1 = (MultiFilter2) f.create(random(f.getNumberOfParameters(), randomGenerator));
@@ -59,8 +60,8 @@ public class FilterTest
 	public void directCompareMultiFilterIsFaster()
 	{
 		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0);
-		final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0);
+		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		final double[][][] data = new double[1000][][];
 		for (int i = data.length; i-- > 0;)
@@ -214,5 +215,28 @@ public class FilterTest
 		while (n-- > 0)
 			p[n] = r.nextInt(3);
 		return p;
+	}
+	
+	@Test
+	public void canSerialiseMultiFilter()
+	{
+		// Check the XStream serialisation supports inheritance
+		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
+		testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
+		testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
+	}
+
+	private void testSerialisation(MultiFilter f, RandomGenerator randomGenerator)
+	{
+		for (int i = 10; i-- > 0;)
+		{
+			MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
+			String xml = f1.toXML();
+			System.out.println(XmlUtils.prettyPrintXml(xml));
+			MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
+			Assert.assertTrue(f1.getClass().equals(f2.getClass()));
+			Assert.assertEquals(f1, f2);
+		}
 	}
 }

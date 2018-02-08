@@ -47,7 +47,10 @@ public enum ParameterType implements NamedObject
 	MIN_X("Min X"),
 	MAX_X("Max X"),
 	MIN_Y("Min Y"),
-	MAX_Y("Max Y");
+	MAX_Y("Max Y"),
+	MIN_Z("Min Z"),
+	MAX_Z("Max Z"),
+	;
 	
 	//@formatter:on
 

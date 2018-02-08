@@ -32,6 +32,7 @@ public class MultiFilterComponentSetFactory
 			case 4: return new MultiFilterComponentSet4(components); 
 			case 5: return new MultiFilterComponentSet5(components); 
 			case 6: return new MultiFilterComponentSet6(components); 
+			case 7: return new MultiFilterComponentSet7(components); 
 			//@formatter:on
 		}
 		return new MultiFilterComponentSetDefault(Arrays.copyOf(components, size));

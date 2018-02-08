@@ -19,19 +19,36 @@ import gdsc.smlm.results.PeakResult;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
- * Filter results using a signal-to-noise ratio (SNR) threshold
+ * Filter results using a z-coordinate range
  */
-public class SNRFilter extends DirectFilter implements IMultiFilter
+public class ZCoordinateFilter extends DirectFilter
 {
-	public static final double DEFAULT_INCREMENT = 1;
+	// Assuming units are in pixels with 100nm/px set the default range as +/- 1000nm
+	public static final double DEFAULT_INCREMENT = 0.1;
 	public static final double DEFAULT_RANGE = 10;
+	public static final double UPPER_LIMIT = 50; // This may need to be changed
 
 	@XStreamAsAttribute
-	final float snr;
+	final float minZ;
+	@XStreamAsAttribute
+	final float maxZ;
 
-	public SNRFilter(float snr)
+	public ZCoordinateFilter(float minZ, float maxZ)
 	{
-		this.snr = Math.max(0, snr);
+		if (maxZ < minZ)
+		{
+			float f = maxZ;
+			maxZ = minZ;
+			minZ = f;
+		}
+		this.minZ = minZ;
+		this.maxZ = maxZ;
+	}
+
+	@Override
+	protected String generateName()
+	{
+		return "Z " + minZ + "-" + maxZ;
 	}
 
 	@Override
@@ -42,25 +59,20 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getSNR(peak) >= this.snr;
+		return peak.getZPosition() >= minZ && peak.getZPosition() <= maxZ;
 	}
 
 	public int getValidationFlags()
 	{
-		return V_SNR;
+		return V_Z;
 	}
 
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
-		if (peak.getSNR() < this.snr)
-			return V_SNR;
+		if (peak.getZ() < minZ || peak.getZ() > maxZ)
+			return V_Z;
 		return 0;
-	}
-
-	static float getSNR(PeakResult peak)
-	{
-		return (peak.getNoise() > 0) ? peak.getSignal() / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 
 	/*
@@ -71,7 +83,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using a lower SNR threshold.";
+		return "Filter results using a z-coordinate range.";
 	}
 
 	/*
@@ -82,7 +94,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int getNumberOfParameters()
 	{
-		return 1;
+		return 2;
 	}
 
 	/*
@@ -93,7 +105,13 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	protected double getParameterValueInternal(int index)
 	{
-		return snr;
+		switch (index)
+		{
+			case 0:
+				return minZ;
+			default:
+				return maxZ;
+		}
 	}
 
 	/*
@@ -105,7 +123,25 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	public double getParameterIncrement(int index)
 	{
 		checkIndex(index);
-		return SNRFilter.DEFAULT_INCREMENT;
+		return DEFAULT_INCREMENT;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#getDisabledParameterValue(int)
+	 */
+	@Override
+	public double getDisabledParameterValue(int index)
+	{
+		checkIndex(index);
+		switch (index)
+		{
+			case 0:
+				return Double.NEGATIVE_INFINITY;
+			default:
+				return Double.POSITIVE_INFINITY;
+		}
 	}
 
 	/*
@@ -117,7 +153,13 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	public ParameterType getParameterType(int index)
 	{
 		checkIndex(index);
-		return ParameterType.SNR;
+		switch (index)
+		{
+			case 0:
+				return ParameterType.MIN_Z;
+			default:
+				return ParameterType.MAX_Z;
+		}
 	}
 
 	/*
@@ -129,7 +171,13 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		return new SNRFilter(updateParameter(snr, delta, DEFAULT_RANGE));
+		switch (index)
+		{
+			case 0:
+				return new ZCoordinateFilter(updateParameter(minZ, delta, DEFAULT_RANGE), maxZ);
+			default:
+				return new ZCoordinateFilter(minZ, updateParameter(maxZ, delta, DEFAULT_RANGE));
+		}
 	}
 
 	/*
@@ -140,7 +188,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public Filter create(double... parameters)
 	{
-		return new SNRFilter((float) parameters[0]);
+		return new ZCoordinateFilter((float) parameters[0], (float) parameters[1]);
 	}
 
 	/*
@@ -151,7 +199,40 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void weakestParameters(double[] parameters)
 	{
-		setMin(parameters, 0, snr);
+		setMin(parameters, 0, minZ);
+		setMax(parameters, 1, maxZ);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
+	 */
+	@Override
+	public int lowerBoundOrientation(int index)
+	{
+		return (index == 1) ? 1 : -1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#length()
+	 */
+	public int length()
+	{
+		return 2;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ga.Chromosome#sequence()
+	 */
+	public double[] sequence()
+	{
+		// Ignore the mode parameters
+		return new double[] { minZ, maxZ };
 	}
 
 	/*
@@ -161,56 +242,6 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	 */
 	public double[] mutationStepRange()
 	{
-		return new double[] { DEFAULT_RANGE };
-	}
-
-	public double getSignal()
-	{
-		return 0;
-	}
-
-	public double getSNR()
-	{
-		return snr;
-	}
-
-	public double getMinWidth()
-	{
-		return 0;
-	}
-
-	public double getMaxWidth()
-	{
-		return 0;
-	}
-
-	public double getShift()
-	{
-		return 0;
-	}
-
-	public double getEShift()
-	{
-		return 0;
-	}
-
-	public double getPrecision()
-	{
-		return 0;
-	}
-
-	public PrecisionType getPrecisionType()
-	{
-		return PrecisionType.NONE;
-	}
-
-	public double getMinZ()
-	{
-		return 0;
-	}
-
-	public double getMaxZ()
-	{
-		return 0;
+		return new double[] { DEFAULT_RANGE, DEFAULT_RANGE };
 	}
 }

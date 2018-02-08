@@ -14,10 +14,11 @@ package gdsc.smlm.results.filter;
  *---------------------------------------------------------------------------*/
 
 /**
- * Returns the settings of the filter for multiple thresholds: Signal, SNR, width, coordinate shift and precision.
+ * Returns the settings of the filter for multiple thresholds: Signal, SNR, width, coordinate shift, precision and
+ * z-depth.
  */
 public interface IMultiFilter
-{	
+{
 	/**
 	 * Gets the signal.
 	 *
@@ -73,4 +74,20 @@ public interface IMultiFilter
 	 * @return the precision type
 	 */
 	PrecisionType getPrecisionType();
+
+	/**
+	 * Gets the min allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
+	 * assumed that depth filtering is disabled.
+	 *
+	 * @return the min z depth
+	 */
+	double getMinZ();
+
+	/**
+	 * Gets the max allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
+	 * assumed that depth filtering is disabled.
+	 *
+	 * @return the max z depth
+	 */
+	double getMaxZ();
 }

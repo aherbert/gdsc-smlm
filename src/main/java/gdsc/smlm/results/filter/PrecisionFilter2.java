@@ -248,4 +248,14 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	{
 		return PrecisionType.ESTIMATE_USING_LOCAL_BACKGROUND;
 	}
+
+	public double getMinZ()
+	{
+		return 0;
+	}
+
+	public double getMaxZ()
+	{
+		return 0;
+	}
 }

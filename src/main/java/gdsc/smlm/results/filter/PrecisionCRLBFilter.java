@@ -245,4 +245,14 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 	{
 		return PrecisionType.CRLB;
 	}
+
+	public double getMinZ()
+	{
+		return 0;
+	}
+
+	public double getMaxZ()
+	{
+		return 0;
+	}
 }

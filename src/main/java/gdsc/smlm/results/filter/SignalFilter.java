@@ -203,4 +203,14 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	{
 		return PrecisionType.NONE;
 	}
+
+	public double getMinZ()
+	{
+		return 0;
+	}
+
+	public double getMaxZ()
+	{
+		return 0;
+	}
 }

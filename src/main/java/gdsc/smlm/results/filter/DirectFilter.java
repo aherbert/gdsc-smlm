@@ -154,6 +154,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		if (areSet(flags, V_ANGLE))                  append(sb, "Angle",            peak.getAngle());
 		if (areSet(flags, V_X))                      append(sb, "X",                peak.getX());
 		if (areSet(flags, V_Y))                      append(sb, "Y",                peak.getY());
+		if (areSet(flags, V_Z))                      append(sb, "Z",                peak.getZ());
 		if (areSet(flags, V_X_RELATIVE_SHIFT))       append(sb, "X Relative Shift", Math.sqrt(peak.getXRelativeShift2()));
 		if (areSet(flags, V_Y_RELATIVE_SHIFT))       append(sb, "Y Relative Shift", Math.sqrt(peak.getYRelativeShift2()));
 		if (areSet(flags, V_X_SD))                   append(sb, "X SD",             peak.getXSD());
@@ -199,6 +200,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 		if (areSet(flags, V_ANGLE))                  append(sb, "Angle");
 		if (areSet(flags, V_X))                      append(sb, "X");
 		if (areSet(flags, V_Y))                      append(sb, "Y");
+		if (areSet(flags, V_Z))                      append(sb, "Z");
 		if (areSet(flags, V_X_RELATIVE_SHIFT))       append(sb, "X Relative Shift");
 		if (areSet(flags, V_Y_RELATIVE_SHIFT))       append(sb, "Y Relative Shift");
 		if (areSet(flags, V_X_SD))                   append(sb, "X SD");

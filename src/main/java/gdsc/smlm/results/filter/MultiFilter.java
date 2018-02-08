@@ -26,7 +26,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift and precision
+ * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift, precision and z-depth.
  */
 public class MultiFilter extends DirectFilter implements IMultiFilter
 {
@@ -44,6 +44,10 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	final double eshift;
 	@XStreamAsAttribute
 	final double precision;
+	@XStreamAsAttribute
+	final float minZ;
+	@XStreamAsAttribute
+	final float maxZ;
 
 	@XStreamOmitField
 	float signalThreshold;
@@ -58,9 +62,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	double variance;
 	@XStreamOmitField
-	private Gaussian2DPeakResultCalculator calculator;
+	Gaussian2DPeakResultCalculator calculator;
 	@XStreamOmitField
 	boolean widthEnabled;
+	@XStreamOmitField
+	boolean zEnabled;
 	@XStreamOmitField
 	MultiFilterComponentSet components = null;
 	@XStreamOmitField
@@ -75,7 +81,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	MultiFilterComponentSet components_Shift0 = null;
 
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
-			double precision)
+			double precision, float minZ, float maxZ)
 	{
 		this.signal = Math.max(0, signal);
 		this.snr = Math.max(0, snr);
@@ -91,20 +97,22 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		this.shift = Math.max(0, shift);
 		this.eshift = Math.max(0, eshift);
 		this.precision = Math.max(0, precision);
+		this.minZ = minZ;
+		this.maxZ = maxZ;
 	}
 
 	@Override
 	protected String generateName()
 	{
-		return String.format("Multi: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f",
-				signal, snr, minWidth, maxWidth, shift, eshift, precision);
+		return String.format(
+				"Multi: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, Precision=%.1f, Width=%.2f-%.2f",
+				signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 	}
 
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.LSE_PRECISION);
+		setupCalculator(peakResults);
 
 		signalThreshold = (float) (signal);
 
@@ -121,6 +129,14 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
+
+		zEnabled = (minZ != 0 || maxZ != 0);
+	}
+
+	protected void setupCalculator(MemoryPeakResults peakResults)
+	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
 	}
 
 	@Override
@@ -140,7 +156,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		if (components_Width_Shift == null)
 		{
 			// Create the components we require
-			final MultiFilterComponent[] components1 = new MultiFilterComponent[6];
+			final MultiFilterComponent[] components1 = new MultiFilterComponent[7];
 			int s1 = 0;
 
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
@@ -155,7 +171,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			}
 			if (precision != 0)
 			{
-				components1[s1++] = new MultiFilterVarianceComponent(precision);
+				components1[s1++] = createPrecisionComponent();
 			}
 			if (shift != 0)
 			{
@@ -168,6 +184,10 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			if (eshift != 0)
 			{
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
+			}
+			if (minZ != 0 || maxZ != 0)
+			{
+				components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
 			}
 
 			final MultiFilterComponent[] components2 = MultiFilter.remove(components1, s1,
@@ -208,6 +228,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		//		offset = Filter.getUpperSquaredLimit(shift);
 		//		eoffset = Filter.getUpperSquaredLimit(eshift);
 		//		variance = Filter.getDUpperSquaredLimit(precision);
+	}
+
+	protected MultiFilterComponent createPrecisionComponent()
+	{
+		return new MultiFilterVarianceComponent(precision);
 	}
 
 	static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size, @SuppressWarnings("rawtypes") Class clazz)
@@ -260,7 +285,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			return false;
 
 		// Precision
-		if (calculator.getLSEVariance(peak.getParameters(), peak.getNoise()) > variance)
+		if (getVariance(peak) > variance)
 			return false;
 
 		// Shift
@@ -268,6 +293,9 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			return false;
 
 		if (peak.getSignal() < signalThreshold)
+			return false;
+
+		if (zEnabled && (peak.getZPosition() < minZ || peak.getZPosition() > maxZ))
 			return false;
 
 		// Euclidian shift
@@ -278,12 +306,17 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 		return true;
 	}
+	
+	protected double getVariance(PeakResult peak)
+	{
+		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
+	}
 
 	public int getValidationFlags()
 	{
 		return components.getValidationFlags();
 	}
-	
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
@@ -347,7 +380,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public String getDescription()
 	{
-		return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift and precision";
+		return "Filter results using multiple thresholds: Signal, SNR, width, shift, Euclidian shift, precision and Z-depth";
 	}
 
 	/*
@@ -358,7 +391,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int getNumberOfParameters()
 	{
-		return 7;
+		return 9;
 	}
 
 	/*
@@ -383,15 +416,19 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				return shift;
 			case 5:
 				return eshift;
-			default:
+			case 6:
 				return precision;
+			case 7:
+				return minZ;
+			default:
+				return maxZ;
 		}
 	}
 
 	@Override
 	public double[] getParameters()
 	{
-		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
+		return new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ };
 	}
 
 	/*
@@ -417,8 +454,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				return ShiftFilter.DEFAULT_INCREMENT;
 			case 5:
 				return EShiftFilter.DEFAULT_INCREMENT;
-			default:
+			case 6:
 				return PrecisionFilter.DEFAULT_INCREMENT;
+			case 7:
+				return ZCoordinateFilter.DEFAULT_INCREMENT;
+			default:
+				return ZCoordinateFilter.DEFAULT_INCREMENT;
 		}
 	}
 
@@ -445,14 +486,24 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				return ParameterType.SHIFT;
 			case 5:
 				return ParameterType.ESHIFT;
+			case 6:
+				return getPrecisionParamaterType();
+			case 7:
+				return ParameterType.MIN_Z;
 			default:
-				return ParameterType.PRECISION;
+				return ParameterType.MAX_Z;
 		}
+	}
+	
+	protected ParameterType getPrecisionParamaterType()
+	{
+		return ParameterType.PRECISION;
 	}
 
 	static double[] defaultRange = new double[] { SignalFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE,
 			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
-			EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE };
+			EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
+			ZCoordinateFilter.DEFAULT_RANGE };
 
 	/*
 	 * (non-Javadoc)
@@ -463,9 +514,10 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public Filter adjustParameter(int index, double delta)
 	{
 		checkIndex(index);
-		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision };
+		double[] params = new double[] { signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ };
 		params[index] = updateParameter(params[index], delta, defaultRange[index]);
-		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6]);
+		return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5], params[6],
+				(float) params[7], (float) params[8]);
 	}
 
 	/*
@@ -477,7 +529,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public Filter create(double... parameters)
 	{
 		return new MultiFilter(parameters[0], (float) parameters[1], parameters[2], parameters[3], parameters[4],
-				parameters[5], parameters[6]);
+				parameters[5], parameters[6], (float) parameters[7], (float) parameters[8]);
 	}
 
 	/*
@@ -495,6 +547,8 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		setMax(parameters, 4, shift);
 		setMax(parameters, 5, eshift);
 		setMax(parameters, 6, precision);
+		setMin(parameters, 7, minZ);
+		setMax(parameters, 8, maxZ);
 	}
 
 	/*
@@ -505,7 +559,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int lowerBoundOrientation(int index)
 	{
-		return (index >= 3) ? 1 : -1;
+		return (index < 3 || index == 7) ? -1 : 1;
 	}
 
 	/**
@@ -531,7 +585,9 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
     		compareMax(maxWidth, o.maxWidth) +
     		compareMax(shift, o.shift) +
     		compareMax(eshift, o.eshift) + 
-    		compareMax(precision, o.precision);
+    		compareMax(precision, o.precision) +
+    		compareMin(minZ, o.minZ) +
+    		compareMax(maxZ, o.maxZ);
 		//@formatter:on
 	}
 
@@ -544,8 +600,8 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public double[] upperLimit()
 	{
 		return new double[] { Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, WidthFilter.UPPER_LIMIT,
-				WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT, EShiftFilter.UPPER_LIMIT,
-				PrecisionFilter.UPPER_LIMIT };
+				WidthFilter.UPPER_LIMIT, ShiftFilter.UPPER_LIMIT, EShiftFilter.UPPER_LIMIT, PrecisionFilter.UPPER_LIMIT,
+				ZCoordinateFilter.UPPER_LIMIT, ZCoordinateFilter.UPPER_LIMIT };
 	}
 
 	/*
@@ -596,6 +652,16 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.ESTIMATE;
+	}
+
+	public double getMinZ()
+	{
+		return minZ;
+	}
+
+	public double getMaxZ()
+	{
+		return maxZ;
 	}
 
 	/*
