@@ -22,6 +22,7 @@ import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.PrecomputedGradient1Function;
+import gdsc.smlm.function.TurboLog2;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -36,10 +37,14 @@ public class LVMGradientProcedureTest
 {
 	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
+	static FastLog fastLog = null;
 
 	static FastLog getFastLog()
 	{
-		return FastLogFactory.getFastLog();
+		if (fastLog == null)
+			// Default
+			fastLog = FastLogFactory.getFastLog();
+		return fastLog;
 	}
 
 	int MAX_ITER = 20000;
@@ -616,6 +621,33 @@ public class LVMGradientProcedureTest
 				Type.FastLogMLE, false);
 	}
 
+	@Test(expected = AssertionError.class)
+	public void gradientProcedureFastLogMLECannotComputeGradientWithHighPrecision()
+	{
+		// Try different precision
+		for (int n = TurboLog2.N; n < 23; n++)
+		{
+			try
+			{
+				//System.out.printf("Precision n=%d\n", n);
+				fastLog = new TurboLog2(n);
+				gradientProcedureComputesGradient(new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth),
+						Type.FastLogMLE, false);
+			}
+			catch (AssertionError e)
+			{
+				continue;
+			}
+			finally
+			{
+				// Reset
+				fastLog = null;
+			}
+			return;
+		}
+		Assert.fail();
+	}
+
 	@Test
 	public void gradientProcedureWLSQComputesGradient()
 	{
@@ -727,7 +759,7 @@ public class LVMGradientProcedureTest
 	{
 		gradientProcedureSupportsPrecomputed(Type.MLE);
 	}
-	
+
 	@Test
 	public void gradientProcedureFastLogMLESupportsPrecomputed()
 	{
