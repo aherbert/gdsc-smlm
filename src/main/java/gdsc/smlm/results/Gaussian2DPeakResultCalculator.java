@@ -29,6 +29,16 @@ public interface Gaussian2DPeakResultCalculator
 	public float getStandardDeviation(float[] params);
 
 	/**
+	 * Gets the single Gaussian 2D standard deviation squared from independent x and y standard deviations. s2 =
+	 * abs(sx*sy).
+	 *
+	 * @param params
+	 *            the params
+	 * @return the single Gaussian 2D standard deviation squared
+	 */
+	public float getStandardDeviation2(float[] params);
+
+	/**
 	 * Get the amplitude of a Gaussian 2D PSF. Amplitude = intensity / (2*pi*sx*sy).
 	 *
 	 * @param params

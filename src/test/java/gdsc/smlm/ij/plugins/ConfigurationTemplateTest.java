@@ -39,7 +39,7 @@ public class ConfigurationTemplateTest
 		fitConfig.setMinWidthFactor(0.2);
 		fitConfig.setMinWidthFactor(5);
 		fitConfig.setSmartFilter(true);
-		fitConfig.setDirectFilter(new MultiFilter2(0, 22, 0.56, 2.55, 3.3, 0, 31));
+		fitConfig.setDirectFilter(new MultiFilter2(0, 22, 0.56, 2.55, 3.3, 0, 31, 0, 0));
 		config.setSearch(0.607);
 		config.setBorder(1);
 		config.setFitting(3);

@@ -3694,6 +3694,24 @@ public final class FitProtos {
      * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
      */
     gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod();
+
+    /**
+     * <pre>
+     * The minimum z-depth
+     * </pre>
+     *
+     * <code>double min_z = 12;</code>
+     */
+    double getMinZ();
+
+    /**
+     * <pre>
+     * The maximum z-depth
+     * </pre>
+     *
+     * <code>double max_z = 13;</code>
+     */
+    double getMaxZ();
   }
   /**
    * <pre>
@@ -3721,6 +3739,8 @@ public final class FitProtos {
       smartFilter_ = false;
       smartFilterString_ = "";
       precisionMethod_ = 0;
+      minZ_ = 0D;
+      maxZ_ = 0D;
     }
 
     @java.lang.Override
@@ -3798,6 +3818,16 @@ public final class FitProtos {
               int rawValue = input.readEnum();
 
               precisionMethod_ = rawValue;
+              break;
+            }
+            case 97: {
+
+              minZ_ = input.readDouble();
+              break;
+            }
+            case 105: {
+
+              maxZ_ = input.readDouble();
               break;
             }
           }
@@ -3993,6 +4023,32 @@ public final class FitProtos {
       return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
     }
 
+    public static final int MIN_Z_FIELD_NUMBER = 12;
+    private double minZ_;
+    /**
+     * <pre>
+     * The minimum z-depth
+     * </pre>
+     *
+     * <code>double min_z = 12;</code>
+     */
+    public double getMinZ() {
+      return minZ_;
+    }
+
+    public static final int MAX_Z_FIELD_NUMBER = 13;
+    private double maxZ_;
+    /**
+     * <pre>
+     * The maximum z-depth
+     * </pre>
+     *
+     * <code>double max_z = 13;</code>
+     */
+    public double getMaxZ() {
+      return maxZ_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -4034,6 +4090,12 @@ public final class FitProtos {
       }
       if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
         output.writeEnum(11, precisionMethod_);
+      }
+      if (minZ_ != 0D) {
+        output.writeDouble(12, minZ_);
+      }
+      if (maxZ_ != 0D) {
+        output.writeDouble(13, maxZ_);
       }
     }
 
@@ -4080,6 +4142,14 @@ public final class FitProtos {
       if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(11, precisionMethod_);
+      }
+      if (minZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(12, minZ_);
+      }
+      if (maxZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(13, maxZ_);
       }
       memoizedSize = size;
       return size;
@@ -4128,6 +4198,14 @@ public final class FitProtos {
       result = result && getSmartFilterString()
           .equals(other.getSmartFilterString());
       result = result && precisionMethod_ == other.precisionMethod_;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinZ())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinZ()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMaxZ())
+          == java.lang.Double.doubleToLongBits(
+              other.getMaxZ()));
       return result;
     }
 
@@ -4166,6 +4244,12 @@ public final class FitProtos {
       hash = (53 * hash) + getSmartFilterString().hashCode();
       hash = (37 * hash) + PRECISION_METHOD_FIELD_NUMBER;
       hash = (53 * hash) + precisionMethod_;
+      hash = (37 * hash) + MIN_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinZ()));
+      hash = (37 * hash) + MAX_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMaxZ()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4319,6 +4403,10 @@ public final class FitProtos {
 
         precisionMethod_ = 0;
 
+        minZ_ = 0D;
+
+        maxZ_ = 0D;
+
         return this;
       }
 
@@ -4351,6 +4439,8 @@ public final class FitProtos {
         result.smartFilter_ = smartFilter_;
         result.smartFilterString_ = smartFilterString_;
         result.precisionMethod_ = precisionMethod_;
+        result.minZ_ = minZ_;
+        result.maxZ_ = maxZ_;
         onBuilt();
         return result;
       }
@@ -4422,6 +4512,12 @@ public final class FitProtos {
         }
         if (other.precisionMethod_ != 0) {
           setPrecisionMethodValue(other.getPrecisionMethodValue());
+        }
+        if (other.getMinZ() != 0D) {
+          setMinZ(other.getMinZ());
+        }
+        if (other.getMaxZ() != 0D) {
+          setMaxZ(other.getMaxZ());
         }
         onChanged();
         return this;
@@ -4902,6 +4998,82 @@ public final class FitProtos {
       public Builder clearPrecisionMethod() {
         
         precisionMethod_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double minZ_ ;
+      /**
+       * <pre>
+       * The minimum z-depth
+       * </pre>
+       *
+       * <code>double min_z = 12;</code>
+       */
+      public double getMinZ() {
+        return minZ_;
+      }
+      /**
+       * <pre>
+       * The minimum z-depth
+       * </pre>
+       *
+       * <code>double min_z = 12;</code>
+       */
+      public Builder setMinZ(double value) {
+        
+        minZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The minimum z-depth
+       * </pre>
+       *
+       * <code>double min_z = 12;</code>
+       */
+      public Builder clearMinZ() {
+        
+        minZ_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double maxZ_ ;
+      /**
+       * <pre>
+       * The maximum z-depth
+       * </pre>
+       *
+       * <code>double max_z = 13;</code>
+       */
+      public double getMaxZ() {
+        return maxZ_;
+      }
+      /**
+       * <pre>
+       * The maximum z-depth
+       * </pre>
+       *
+       * <code>double max_z = 13;</code>
+       */
+      public Builder setMaxZ(double value) {
+        
+        maxZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The maximum z-depth
+       * </pre>
+       *
+       * <code>double max_z = 13;</code>
+       */
+      public Builder clearMaxZ() {
+        
+        maxZ_ = 0D;
         onChanged();
         return this;
       }
@@ -10963,7 +11135,7 @@ public final class FitProtos {
       "ing\030\020 \001(\010\022\034\n\024use_dynamic_clamping\030\021 \001(\010\022" +
       "\024\n\014clamp_values\030\022 \003(\001\022C\n\022line_search_met" +
       "hod\030\023 \001(\0162\'.gdsc.smlm.data.config.LineSe" +
-      "archMethod\"\333\002\n\016FilterSettings\022\024\n\014shift_f" +
+      "archMethod\"\371\002\n\016FilterSettings\022\024\n\014shift_f" +
       "actor\030\001 \001(\001\022\027\n\017signal_strength\030\002 \001(\001\022\023\n\013" +
       "min_photons\030\003 \001(\001\022\033\n\023precision_threshold",
       "\030\004 \001(\001\022\030\n\020min_width_factor\030\006 \001(\001\022\030\n\020max_" +
@@ -10971,58 +11143,58 @@ public final class FitProtos {
       "ter\030\010 \001(\010\022\024\n\014smart_filter\030\t \001(\010\022\033\n\023smart" +
       "_filter_string\030\n \001(\t\022@\n\020precision_method" +
       "\030\013 \001(\0162&.gdsc.smlm.data.config.Precision" +
-      "MethodJ\004\010\005\020\006R\032precision_using_background" +
-      "\"\224\001\n\013FitSettings\022E\n\023fit_solver_settings\030" +
-      "\001 \001(\0132(.gdsc.smlm.data.config.FitSolverS" +
-      "ettings\022>\n\017filter_settings\030\002 \001(\0132%.gdsc." +
-      "smlm.data.config.FilterSettings\"4\n\021Relat",
-      "iveParameter\022\r\n\005value\030\001 \001(\001\022\020\n\010absolute\030" +
-      "\002 \001(\010\"\217\001\n\nDataFilter\022C\n\022data_filter_meth" +
-      "od\030\001 \001(\0162\'.gdsc.smlm.data.config.DataFil" +
-      "terMethod\022<\n\nparameters\030\002 \003(\0132(.gdsc.sml" +
-      "m.data.config.RelativeParameter\"\216\001\n\022Data" +
-      "FilterSettings\022?\n\020data_filter_type\030\001 \001(\016" +
-      "2%.gdsc.smlm.data.config.DataFilterType\022" +
-      "7\n\014data_filters\030\002 \003(\0132!.gdsc.smlm.data.c" +
-      "onfig.DataFilter\"\326\004\n\021FitEngineSettings\0228" +
-      "\n\014fit_settings\030\001 \001(\0132\".gdsc.smlm.data.co",
-      "nfig.FitSettings\022A\n\014noise_method\030\002 \001(\0162+" +
-      ".gdsc.smlm.data.config.NoiseEstimatorMet" +
-      "hod\022G\n\024data_filter_settings\030\003 \001(\0132).gdsc" +
-      ".smlm.data.config.DataFilterSettings\0228\n\006" +
-      "search\030\004 \001(\0132(.gdsc.smlm.data.config.Rel" +
-      "ativeParameter\0228\n\006border\030\005 \001(\0132(.gdsc.sm" +
-      "lm.data.config.RelativeParameter\0229\n\007fitt" +
-      "ing\030\006 \001(\0132(.gdsc.smlm.data.config.Relati" +
-      "veParameter\022\032\n\022include_neighbours\030\007 \001(\010\022" +
-      "\"\n\032neighbour_height_threshold\030\010 \001(\001\022\033\n\023r",
-      "esiduals_threshold\030\t \001(\001\022D\n\022duplicate_di" +
-      "stance\030\n \001(\0132(.gdsc.smlm.data.config.Rel" +
-      "ativeParameter\022\026\n\016failures_limit\030\013 \001(\005\022\021" +
-      "\n\tpass_rate\030\014 \001(\001*e\n\tFitSolver\022\013\n\007LVM_LS" +
-      "E\020\000\022\013\n\007LVM_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022" +
-      "\014\n\010FAST_MLE\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005" +
-      "*\231\001\n\014SearchMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n" +
-      "\006POWELL\020\001\022\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020" +
-      "\003\022\t\n\005CMAES\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022" +
-      "\031\n\025CONJUGATE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020",
-      "LineSearchMethod\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022" +
-      "\n\016PARTIAL_IGNORE\020\002*k\n\017PrecisionMethod\022\027\n" +
-      "\023PRECISION_METHOD_NA\020\000\022\r\n\tMORTENSEN\020\001\022\036\n" +
-      "\032MORTENSEN_LOCAL_BACKGROUND\020\002\022\020\n\014POISSON" +
-      "_CRLB\020\003*6\n\016DataFilterType\022\n\n\006SINGLE\020\000\022\016\n" +
-      "\nDIFFERENCE\020\001\022\010\n\004JURY\020\002*Y\n\020DataFilterMet" +
-      "hod\022\010\n\004MEAN\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULA" +
-      "R_MEAN\020\002\022\014\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024N" +
-      "oiseEstimatorMethod\022\016\n\nALL_PIXELS\020\000\022\021\n\rL" +
-      "OWEST_PIXELS\020\001\022%\n!RESIDUALS_LEAST_MEDIAN",
-      "_OF_SQUARES\020\002\022&\n\"RESIDUALS_LEAST_TRIMMED" +
-      "_OF_SQUARES\020\003\022#\n\037RESIDUALS_LEAST_MEAN_OF" +
-      "_SQUARES\020\004\022+\n\'QUICK_RESIDUALS_LEAST_MEDI" +
-      "AN_OF_SQUARES\020\005\022,\n(QUICK_RESIDUALS_LEAST" +
-      "_TRIMMED_OF_SQUARES\020\006\022)\n%QUICK_RESIDUALS" +
-      "_LEAST_MEAN_OF_SQUARES\020\007B\013B\tFitProtosb\006p" +
-      "roto3"
+      "Method\022\r\n\005min_z\030\014 \001(\001\022\r\n\005max_z\030\r \001(\001J\004\010\005" +
+      "\020\006R\032precision_using_background\"\224\001\n\013FitSe" +
+      "ttings\022E\n\023fit_solver_settings\030\001 \001(\0132(.gd" +
+      "sc.smlm.data.config.FitSolverSettings\022>\n" +
+      "\017filter_settings\030\002 \001(\0132%.gdsc.smlm.data.",
+      "config.FilterSettings\"4\n\021RelativeParamet" +
+      "er\022\r\n\005value\030\001 \001(\001\022\020\n\010absolute\030\002 \001(\010\"\217\001\n\n" +
+      "DataFilter\022C\n\022data_filter_method\030\001 \001(\0162\'" +
+      ".gdsc.smlm.data.config.DataFilterMethod\022" +
+      "<\n\nparameters\030\002 \003(\0132(.gdsc.smlm.data.con" +
+      "fig.RelativeParameter\"\216\001\n\022DataFilterSett" +
+      "ings\022?\n\020data_filter_type\030\001 \001(\0162%.gdsc.sm" +
+      "lm.data.config.DataFilterType\0227\n\014data_fi" +
+      "lters\030\002 \003(\0132!.gdsc.smlm.data.config.Data" +
+      "Filter\"\326\004\n\021FitEngineSettings\0228\n\014fit_sett",
+      "ings\030\001 \001(\0132\".gdsc.smlm.data.config.FitSe" +
+      "ttings\022A\n\014noise_method\030\002 \001(\0162+.gdsc.smlm" +
+      ".data.config.NoiseEstimatorMethod\022G\n\024dat" +
+      "a_filter_settings\030\003 \001(\0132).gdsc.smlm.data" +
+      ".config.DataFilterSettings\0228\n\006search\030\004 \001" +
+      "(\0132(.gdsc.smlm.data.config.RelativeParam" +
+      "eter\0228\n\006border\030\005 \001(\0132(.gdsc.smlm.data.co" +
+      "nfig.RelativeParameter\0229\n\007fitting\030\006 \001(\0132" +
+      "(.gdsc.smlm.data.config.RelativeParamete" +
+      "r\022\032\n\022include_neighbours\030\007 \001(\010\022\"\n\032neighbo",
+      "ur_height_threshold\030\010 \001(\001\022\033\n\023residuals_t" +
+      "hreshold\030\t \001(\001\022D\n\022duplicate_distance\030\n \001" +
+      "(\0132(.gdsc.smlm.data.config.RelativeParam" +
+      "eter\022\026\n\016failures_limit\030\013 \001(\005\022\021\n\tpass_rat" +
+      "e\030\014 \001(\001*e\n\tFitSolver\022\013\n\007LVM_LSE\020\000\022\013\n\007LVM" +
+      "_MLE\020\001\022\014\n\010LVM_WLSE\020\002\022\007\n\003MLE\020\003\022\014\n\010FAST_ML" +
+      "E\020\004\022\031\n\025BACKTRACKING_FAST_MLE\020\005*\231\001\n\014Searc" +
+      "hMethod\022\022\n\016POWELL_BOUNDED\020\000\022\n\n\006POWELL\020\001\022" +
+      "\022\n\016POWELL_ADAPTER\020\002\022\n\n\006BOBYQA\020\003\022\t\n\005CMAES" +
+      "\020\004\022\031\n\025CONJUGATE_GRADIENT_FR\020\005\022\031\n\025CONJUGA",
+      "TE_GRADIENT_PR\020\006\022\010\n\004BFGS\020\007*<\n\020LineSearch" +
+      "Method\022\010\n\004NONE\020\000\022\n\n\006IGNORE\020\001\022\022\n\016PARTIAL_" +
+      "IGNORE\020\002*k\n\017PrecisionMethod\022\027\n\023PRECISION" +
+      "_METHOD_NA\020\000\022\r\n\tMORTENSEN\020\001\022\036\n\032MORTENSEN" +
+      "_LOCAL_BACKGROUND\020\002\022\020\n\014POISSON_CRLB\020\003*6\n" +
+      "\016DataFilterType\022\n\n\006SINGLE\020\000\022\016\n\nDIFFERENC" +
+      "E\020\001\022\010\n\004JURY\020\002*Y\n\020DataFilterMethod\022\010\n\004MEA" +
+      "N\020\000\022\016\n\nBLOCK_MEAN\020\001\022\021\n\rCIRCULAR_MEAN\020\002\022\014" +
+      "\n\010GAUSSIAN\020\003\022\n\n\006MEDIAN\020\004*\263\002\n\024NoiseEstima" +
+      "torMethod\022\016\n\nALL_PIXELS\020\000\022\021\n\rLOWEST_PIXE",
+      "LS\020\001\022%\n!RESIDUALS_LEAST_MEDIAN_OF_SQUARE" +
+      "S\020\002\022&\n\"RESIDUALS_LEAST_TRIMMED_OF_SQUARE" +
+      "S\020\003\022#\n\037RESIDUALS_LEAST_MEAN_OF_SQUARES\020\004" +
+      "\022+\n\'QUICK_RESIDUALS_LEAST_MEDIAN_OF_SQUA" +
+      "RES\020\005\022,\n(QUICK_RESIDUALS_LEAST_TRIMMED_O" +
+      "F_SQUARES\020\006\022)\n%QUICK_RESIDUALS_LEAST_MEA" +
+      "N_OF_SQUARES\020\007B\013B\tFitProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -11047,7 +11219,7 @@ public final class FitProtos {
     internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FilterSettings_descriptor,
-        new java.lang.String[] { "ShiftFactor", "SignalStrength", "MinPhotons", "PrecisionThreshold", "MinWidthFactor", "MaxWidthFactor", "DisableSimpleFilter", "SmartFilter", "SmartFilterString", "PrecisionMethod", });
+        new java.lang.String[] { "ShiftFactor", "SignalStrength", "MinPhotons", "PrecisionThreshold", "MinWidthFactor", "MaxWidthFactor", "DisableSimpleFilter", "SmartFilter", "SmartFilterString", "PrecisionMethod", "MinZ", "MaxZ", });
     internal_static_gdsc_smlm_data_config_FitSettings_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable = new

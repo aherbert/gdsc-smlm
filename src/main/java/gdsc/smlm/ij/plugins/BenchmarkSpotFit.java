@@ -219,6 +219,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static final int FILTER_PRECISION = 6;
 	private static final int FILTER_ITERATIONS = 7;
 	private static final int FILTER_EVALUATIONS = 8;
+	
+	// TODO - Add support for optimising z-depth during 3D fitting
 
 	private FilterCriteria[] createFilterCriteria()
 	{
@@ -332,11 +334,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Add a filter to use for storing the slice results:
 		// Use the standard configuration to ensure sensible fits are stored as the current slice results.
 		FitConfiguration tmp = new FitConfiguration();
-		PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND; 
-		tmp.setPrecisionMethod(precisionMethod );
+		PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
+		tmp.setPrecisionMethod(precisionMethod);
 
 		// Add a minimum filter to use for storing estimates
-		minimalFilter = FitWorker.createMinimalFilter(precisionMethod );
+		minimalFilter = FitWorker.createMinimalFilter(precisionMethod);
 
 		final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
 
@@ -2123,10 +2125,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<Filter>(3);
-			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
-			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
-			filters.add(new MultiFilter2(increment[0], (float) increment[1], increment[2], increment[3], increment[4],
-					increment[5], increment[6]));
+			MultiFilter2 mf = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
+			filters.add(mf.create(lower));
+			filters.add(mf.create(upper));
+			filters.add(mf.create(increment));
 			if (saveFilters(filename, filters))
 				SettingsManager.writeSettings(filterSettings);
 
@@ -2135,31 +2137,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			min[FILTER_SIGNAL] = Math.max(min[FILTER_SIGNAL], 30);
 			max[FILTER_PRECISION] = Math.min(max[FILTER_PRECISION], 100);
 
-			// Commented this out so that the 4-set filters are the same as the 3-set filters.
-			// The difference leads to differences when optimising.
-			//			// Use half the initial bounds (hoping this is a good starting guess for the optimum)
-			//			final boolean[] limitToLower = new boolean[min.length];
-			//			limitToLower[FILTER_SIGNAL] = true;
-			//			limitToLower[FILTER_SNR] = true;
-			//			limitToLower[FILTER_MIN_WIDTH] = true;
-			//			limitToLower[FILTER_MAX_WIDTH] = false;
-			//			limitToLower[FILTER_SHIFT] = false;
-			//			limitToLower[FILTER_ESHIFT] = false;
-			//			limitToLower[FILTER_PRECISION] = true;
-			//			for (int i = 0; i < limitToLower.length; i++)
-			//			{
-			//				final double range = (upper[i] - lower[i]) / 2;
-			//				if (limitToLower[i])
-			//					upper[i] = lower[i] + range;
-			//				else
-			//					lower[i] = upper[i] - range;
-			//			}
+			// Make the 4-set filters the same as the 3-set filters.
 
 			filters = new ArrayList<Filter>(4);
-			filters.add(new MultiFilter2(min[0], (float) min[1], min[2], min[3], min[4], min[5], min[6]));
-			filters.add(new MultiFilter2(lower[0], (float) lower[1], lower[2], lower[3], lower[4], lower[5], lower[6]));
-			filters.add(new MultiFilter2(upper[0], (float) upper[1], upper[2], upper[3], upper[4], upper[5], upper[6]));
-			filters.add(new MultiFilter2(max[0], (float) max[1], max[2], max[3], max[4], max[5], max[6]));
+			filters.add(mf.create(min));
+			filters.add(mf.create(lower));
+			filters.add(mf.create(upper));
+			filters.add(mf.create(max));
 			saveFilters(Utils.replaceExtension(filename, ".4.xml"), filters);
 		}
 	}

@@ -1910,8 +1910,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 */
 		private void updateResult(FitResult result)
 		{
-			fitConfig.updateVariance(result.getParameterDeviations());			
-			
+			fitConfig.updateVariance(result.getParameterDeviations());
+
 			// The error is now set by the function solver. Not all function solvers can compute 
 			// the sum-of-squares so we can no longer update the error to be the independent
 			// of the solver.
@@ -2818,7 +2818,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			{
 				fitConfig.setup(new ShiftFilterSetupData(coordinateShift / fitConfig.getWidthMax()));
 			}
-			
+
 			// We assume that residuals calculation is on but just in case something else turned it off we get the state.
 			final boolean isComputeResiduals = gf.isComputeResiduals();
 			gf.setComputeResiduals(false);
@@ -4276,14 +4276,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		double shift = 2;
 		double eshift = 0;
 		double precision = 60;
+		// No Z-filtering
+		float minZ = 0, maxZ = 0;
 		switch (precisionMethod)
 		{
 			case MORTENSEN:
-				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 			case MORTENSEN_LOCAL_BACKGROUND:
-				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 			case POISSON_CRLB:
-				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 			default:
 				throw new IllegalArgumentException("Unknown preciosn method: " + precisionMethod);
 		}

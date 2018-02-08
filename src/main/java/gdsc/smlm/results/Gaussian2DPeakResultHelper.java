@@ -106,6 +106,11 @@ public class Gaussian2DPeakResultHelper
 					: (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy]);
 		}
 
+		public float getStandardDeviation2(float[] params)
+		{
+			return (oneAxisSD) ? params[isx] * params[isx] : Math.abs(params[isx] * params[isy]);
+		}
+
 		public float getAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -418,6 +423,12 @@ public class Gaussian2DPeakResultHelper
 		{
 			return (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy]);
 		}
+
+		@Override
+		public float getStandardDeviation2(float[] params)
+		{
+			return Math.abs(params[isx] * params[isy]);
+		}
 	}
 
 	/**
@@ -435,6 +446,12 @@ public class Gaussian2DPeakResultHelper
 		public float getStandardDeviation(float[] params)
 		{
 			return params[isx];
+		}
+
+		@Override
+		public float getStandardDeviation2(float[] params)
+		{
+			return params[isx] * params[isx];
 		}
 	}
 
@@ -1009,6 +1026,21 @@ public class Gaussian2DPeakResultHelper
 	public static double getStandardDeviation(double sx, double sy)
 	{
 		return Math.sqrt(Math.abs(sx * sy));
+	}
+
+	/**
+	 * Gets the single Gaussian 2D standard deviation squared from independent x and y standard deviations. s2 =
+	 * abs(sx*sy). This avoids a sqrt in the computation of {@link #getStandardDeviation(double, double)}.
+	 *
+	 * @param sx
+	 *            the sx
+	 * @param sy
+	 *            the sy
+	 * @return the single Gaussian 2D standard deviation squared
+	 */
+	public static double getStandardDeviation2(double sx, double sy)
+	{
+		return Math.abs(sx * sy);
 	}
 
 	/**

@@ -184,7 +184,10 @@ message FilterSettings {
 	string smart_filter_string = 10;
 	// The type of precision filter
 	PrecisionMethod precision_method = 11;
-	
+	// The minimum z-depth
+	double min_z = 12;
+	// The maximum z-depth
+	double max_z = 13;
 }
 	
 // Define the settings for fitting. These settings are used to fit a PSF to an 

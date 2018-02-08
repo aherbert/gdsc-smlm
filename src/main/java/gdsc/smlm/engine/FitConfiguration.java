@@ -107,6 +107,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private double minWidthFactor = 0.5;
 	private double widthFactor = 2;
 	private boolean computeResiduals = true;
+	private boolean zEnabled = false;
 
 	// Options for clamping
 	private double[] clampValues;
@@ -128,7 +129,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private double[] precomputedFunctionValues = null, observationWeights = null;
 	private CameraModel cameraModel = null;
-	
+
 	private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
 
 	/**
@@ -556,6 +557,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		updateCoordinateShift();
 		updateWidthThreshold();
 		updateMinWidthThreshold();
+		updateZFilter();
 	}
 
 	/*
@@ -612,7 +614,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		cameraModel = other.cameraModel;
 		varianceSelector = other.varianceSelector;
-		
+
 		return this;
 	}
 
@@ -1550,6 +1552,56 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Sets the min Z. If both min and max z are zero then depth filtering is disabled.
+	 *
+	 * @param minZ
+	 *            The minimum z depth
+	 */
+	public void setMinZ(double minZ)
+	{
+		filterSettings.setMinZ(minZ);
+		updateZFilter();
+	}
+
+	/**
+	 * Gets the min Z.
+	 *
+	 * @return the min Z
+	 */
+	public double getMinZ()
+	{
+		return filterSettings.getMinZ();
+	}
+
+	/**
+	 * Sets the max Z. If both min and max z are zero then depth filtering is disabled.
+	 *
+	 * @param maxZ
+	 *            The maximum z depth
+	 */
+	public void setMaxZ(double maxZ)
+	{
+		filterSettings.setMaxZ(maxZ);
+		updateZFilter();
+	}
+
+	/**
+	 * Gets the max Z.
+	 *
+	 * @return the max Z
+	 */
+	public double getMaxZ()
+	{
+		return filterSettings.getMaxZ();
+	}
+
+	private void updateZFilter()
+	{
+		// TODO - This could check if the PSF is 3D
+		zEnabled = (getMaxZ() != 0 || getMinZ() != 0);
+	}
+
+	/**
 	 * @param lambda
 	 *            the lambda to start the Levenberg-Marquardt fitting process
 	 */
@@ -2118,6 +2170,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return setValidationResult(FitStatus.COORDINATES_MOVED, new double[] { xShift, yShift });
 		}
 
+		if (zEnabled)
+		{
+			double z = params[Gaussian2DFunction.Z_POSITION + offset];
+			if (z < getMinZ() || z > getMaxZ())
+				return setValidationResult(FitStatus.Z_MOVED, z);
+		}
+		
 		// Check signal threshold. 
 		// The threshold should be set in the same units as those used during fitting. 
 		final double signal = params[Gaussian2DFunction.SIGNAL + offset];
@@ -3188,15 +3247,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double shift = getCoordinateShiftFactor();
 		double eshift = 0;
 		double precision = getPrecisionThreshold();
+		float minZ = (float) getMinZ();
+		float maxZ = (float) getMaxZ();
 
 		switch (getPrecisionMethodValue())
 		{
 			case PrecisionMethod.MORTENSEN_VALUE:
-				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+				return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 			case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
-				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+				return new MultiFilter2(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 			case PrecisionMethod.POISSON_CRLB_VALUE:
-				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision);
+				return new MultiFilterCRLB(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
 			default:
 				throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
 		}
@@ -3419,6 +3480,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Do not support Euclidian shift
 		//if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > offset)
 		//	return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+		
+		if (zEnabled)
+		{
+			double z = peak.getZ();
+			if (z < getMinZ() || z > getMaxZ())
+				return V_Z;
+		}
 
 		switch (getPrecisionMethodValue())
 		{
@@ -3437,6 +3505,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			default:
 				throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
 		}
+		
 		return 0;
 	}
 

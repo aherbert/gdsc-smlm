@@ -33,6 +33,7 @@ public enum FitStatus
 	OUTSIDE_FIT_REGION{ public String getName() { return "Outside fit region"; }},
 	INSUFFICIENT_SIGNAL{ public String getName() { return "Insufficient signal"; }},
 	WIDTH_DIVERGED{ public String getName() { return "Width diverged"; }},
+	Z_MOVED{ public String getName() { return "Z-coordinate moved"; }},
 	INSUFFICIENT_PRECISION{ public String getName() { return "Insufficient precision"; }},
 	NEIGHBOUR_OVERLAP{ public String getName() { return "Neighbour overlap"; }},
 	FAILED_SMART_FILTER{ public String getName() { return "Failed smart filter"; }},
