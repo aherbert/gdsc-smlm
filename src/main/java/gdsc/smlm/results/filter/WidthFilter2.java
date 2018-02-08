@@ -24,7 +24,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
 /**
- * Filter results using a width range
+ * Filter results using a width range. Assumes width is identical on the X and Y axis.
  */
 public class WidthFilter2 extends DirectFilter implements IMultiFilter
 {
@@ -43,7 +43,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	boolean widthEnabled;
 
 	@XStreamOmitField
-	private Gaussian2DPeakResultCalculator calculator;
+	Gaussian2DPeakResultCalculator calculator;
 
 	public WidthFilter2(double minWidth, double maxWidth)
 	{
@@ -89,7 +89,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 		setup(!areSet(flags, DirectFilter.NO_WIDTH));
 	}
 
-	private void setup(final boolean widthEnabled)
+	void setup(final boolean widthEnabled)
 	{
 		this.widthEnabled = widthEnabled;
 		if (widthEnabled)

@@ -68,6 +68,8 @@ public abstract class XStreamWrapper
 				addAlias(TraceFilter.class);
 				addAlias(WidthFilter.class);
 				addAlias(WidthFilter2.class);
+				addAlias(XYWidthFilter.class);
+				addAlias(XYWidthFilter2.class);
 				addAlias(ZCoordinateFilter.class);
 
 				// Removed dependency on reflections since this has other jar dependencies

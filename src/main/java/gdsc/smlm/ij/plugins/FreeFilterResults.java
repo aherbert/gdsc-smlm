@@ -45,6 +45,8 @@ import gdsc.smlm.results.filter.SignalFilter;
 import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
+import gdsc.smlm.results.filter.XYWidthFilter;
+import gdsc.smlm.results.filter.XYWidthFilter2;
 import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
@@ -182,6 +184,8 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		IJ.log("");
 		demo(new WidthFilter(2));
 		demo(new WidthFilter2(0.7, 2));
+		demo(new XYWidthFilter(2));
+		demo(new XYWidthFilter2(0.7, 2));
 		demo(new SBRFilter(15));
 		demo(new ShiftFilter(0.7));
 		demo(new EShiftFilter(0.8));
@@ -196,8 +200,8 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new PrecisionHysteresisFilter(2, 0, 1, 0, 20, 30));
 		demo(new TraceFilter(0.5, 1));
 		demo(new CoordinateFilter(15.5f, 234.5f, 80.99f, 133f));
-		demo(new MultiFilter(30, 45f, 0.7, 1.5, 0.5, 0.6, 45));
-		demo(new MultiFilter2(30, 45f, 0.7, 1.5, 0.5, 0.6, 45));
+		demo(new MultiFilter(30, 45f, 0.7, 1.5, 0.5, 0.6, 45, -10, 10));
+		demo(new MultiFilter2(30, 45f, 0.7, 1.5, 0.5, 0.6, 45, -10, 10));
 		demo(new MultiHysteresisFilter(2, 0, 1, 0, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
 		demo(new MultiHysteresisFilter2(2, 0, 2, 1, 20, 10, 40f, 20f, 0.8, 0.2, 1.2, 0.4, 0.3, 0.8, 20, 30));
 
