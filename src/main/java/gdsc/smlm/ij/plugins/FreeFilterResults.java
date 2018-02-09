@@ -23,7 +23,6 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.filter.ANRFilter;
-import gdsc.smlm.results.filter.ANRFilter2;
 import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.CoordinateFilter;
 import gdsc.smlm.results.filter.EShiftFilter;
@@ -191,7 +190,6 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new SignalFilter(1000));
 		demo(new SNRFilter(10));
 		demo(new ANRFilter(11));
-		demo(new ANRFilter2(11, 0.75, 1.95));
 		demo(new PrecisionFilter(30));
 		demo(new PrecisionFilter2(30));
 		demo(new SNRHysteresisFilter(50, 1, 2, 1, 10, 20));

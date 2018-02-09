@@ -40,7 +40,6 @@ public abstract class XStreamWrapper
 				// Add aliases for all Filter classes
 				addAlias(AndFilter.class);
 				addAlias(ANRFilter.class);
-				addAlias(ANRFilter2.class);
 				addAlias(CombinedFilter.class);
 				addAlias(CoordinateFilter.class);
 				addAlias(DirectFilter.class);
