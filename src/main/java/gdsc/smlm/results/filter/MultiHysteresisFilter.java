@@ -82,7 +82,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	double weakVariance;
 
 	@XStreamOmitField
-	private Gaussian2DPeakResultCalculator calculator;
+	Gaussian2DPeakResultCalculator calculator;
 
 	/**
 	 * @param searchDistance
@@ -136,8 +136,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
-				Gaussian2DPeakResultHelper.LSE_PRECISION);
+		setupCalculator(peakResults);
 
 		// Set the signal limit using the gain
 		strictSignalThreshold = (float) (strictSignal);
@@ -167,6 +166,13 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		super.setup(peakResults);
 	}
 
+
+	protected void setupCalculator(MemoryPeakResults peakResults)
+	{
+		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
+				Gaussian2DPeakResultHelper.LSE_PRECISION);
+	}
+	
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
@@ -181,7 +187,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			return PeakStatus.REJECT;
 		if (Math.abs(result.getXPosition()) > weakOffset || Math.abs(result.getYPosition()) > weakOffset)
 			return PeakStatus.REJECT;
-		final double variance = calculator.getLSEVariance(result.getParameters(), result.getNoise());
+		final double variance = getVariance(result);
 		if (variance > weakVariance)
 			return PeakStatus.REJECT;
 
@@ -200,6 +206,11 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		return PeakStatus.OK;
 	}
 
+	protected double getVariance(PeakResult result)
+	{
+		return calculator.getLSEVariance(result.getParameters(), result.getNoise());
+	}
+	
 	@Override
 	public double getNumericalValue()
 	{
@@ -347,42 +358,27 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			case 9:
 				return ParameterType.SHIFT_RANGE;
 			case 10:
-				return ParameterType.PRECISION;
+				return getPrecisionParamaterType();
 			default:
-				return ParameterType.PRECISION_RANGE;
+				return getPrecisionRangeParamaterType();
 		}
 	}
 
+	protected ParameterType getPrecisionParamaterType()
+	{
+		return ParameterType.PRECISION;
+	}
+
+	protected ParameterType getPrecisionRangeParamaterType()
+	{
+		return ParameterType.PRECISION_RANGE;
+	}
+	
 	static double[] defaultRange = new double[] { 0, 0, 0, 0, SignalFilter.DEFAULT_RANGE, SignalFilter.DEFAULT_RANGE,
 			SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE,
 			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, WidthFilter.DEFAULT_RANGE,
 			ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
 			PrecisionFilter.DEFAULT_RANGE };
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
-	 */
-	@Override
-	public Filter adjustParameter(int index, double delta)
-	{
-		checkIndex(index);
-		// No adjustment of the mode parameters
-		if (index == 1 || index == 3)
-			return this;
-		double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
-				strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
-				rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision };
-		if (index == 0)
-			parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
-		else if (index == 2)
-			parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
-		else
-			parameters[index] = updateParameter(parameters[index], delta, defaultRange[index]);
-		return create(parameters);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
