@@ -38,7 +38,6 @@ import gdsc.smlm.results.filter.PrecisionFilter2;
 import gdsc.smlm.results.filter.PrecisionHysteresisFilter;
 import gdsc.smlm.results.filter.SBRFilter;
 import gdsc.smlm.results.filter.SNRFilter;
-import gdsc.smlm.results.filter.SNRFilter2;
 import gdsc.smlm.results.filter.SNRHysteresisFilter;
 import gdsc.smlm.results.filter.ShiftFilter;
 import gdsc.smlm.results.filter.SignalFilter;
@@ -191,7 +190,6 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		demo(new EShiftFilter(0.8));
 		demo(new SignalFilter(1000));
 		demo(new SNRFilter(10));
-		demo(new SNRFilter2(10, 0.7, 2));
 		demo(new ANRFilter(11));
 		demo(new ANRFilter2(11, 0.75, 1.95));
 		demo(new PrecisionFilter(30));
