@@ -17,7 +17,6 @@ import gdsc.smlm.results.count.ConsecutiveFailCounter;
 import gdsc.smlm.results.count.FailCounter;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -348,6 +347,93 @@ public class MultiPathFilter implements Cloneable
 	@XStreamAsAttribute
 	final public double residualsThreshold;
 
+	private class FilterSetupState
+	{
+		/** Store the initial state of the filter flags */
+		int setupFlags;
+
+		FilterSetupState(int flags)
+		{
+			this.setupFlags = flags;
+		}
+
+		void restoreState()
+		{
+			filter.setup(setupFlags);
+		}
+	}
+
+	private class FilterSetupDataState extends FilterSetupState
+	{
+		/** Store the initial state of the filter setup data */
+		FilterSetupData[] setupData;
+
+		FilterSetupDataState(int flags, FilterSetupData[] setupData)
+		{
+			super(flags);
+			this.setupData = setupData;
+		}
+
+		@Override
+		void restoreState()
+		{
+			filter.setup(setupFlags, setupData);
+		}
+	}
+
+	private FilterSetupState filterSetupState;
+
+	/**
+	 * Save the initial setup state of the main filter.
+	 */
+	private void saveState()
+	{
+		int setupFlags = filter.getFilterSetupFlags();
+		FilterSetupData[] setupData = filter.getFilterSetupData();
+		filterSetupState = (setupData == null) ? new FilterSetupState(setupFlags)
+				: new FilterSetupDataState(setupFlags, setupData);
+	}
+
+	/**
+	 * Sets up the main filter.
+	 *
+	 * @param flags
+	 *            the filter flags
+	 */
+	private void setupFilter(int flags)
+	{
+		//if (filterSetupState == null)
+		//	saveState();
+		filter.setup(flags);
+	}
+
+	/**
+	 * Sets up the main filter.
+	 *
+	 * @param flags
+	 *            the filter flags
+	 * @param setupData
+	 *            the setup data
+	 */
+	@SuppressWarnings("unused")
+	private void setupFilter(int flags, FilterSetupData setupData)
+	{
+		//if (filterSetupState == null)
+		//	saveState();
+		filter.setup(flags, setupData);
+	}
+
+	/**
+	 * Restore the initial setup state of the main filter.
+	 */
+	private void restoreFilterState()
+	{
+		if (filterSetupState == null)
+			throw new NullPointerException(
+					"Unknown initial filter state. setup(...) must be called before using the filter methods.");
+		filterSetupState.restoreState();
+	}
+
 	/**
 	 * Create a new MultiPathFilter.
 	 *
@@ -455,7 +541,8 @@ public class MultiPathFilter implements Cloneable
 
 	/**
 	 * Called before the accept method is called for PreprocessedPeakResult. This calls the setup() method in the
-	 * DirectFilter.
+	 * DirectFilter. It also saves the initial state of the filter so that it can be restored when the filter is
+	 * updated, for example disabling
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.
 	 * 
@@ -466,6 +553,7 @@ public class MultiPathFilter implements Cloneable
 		filter.setup();
 		if (minFilter != null)
 			minFilter.setup();
+		saveState();
 	}
 
 	/**
@@ -484,6 +572,28 @@ public class MultiPathFilter implements Cloneable
 		filter.setup(flags);
 		if (minFilter != null)
 			minFilter.setup(flags);
+		saveState();
+	}
+
+	/**
+	 * Called before the accept method is called for PreprocessedPeakResult. The flags can control the type of filtering
+	 * requested. Filters are asked to respect the flags defined in this class. This calls the setup(int) method in the
+	 * DirectFilter.
+	 * <p>
+	 * This should be called once to initialise the filter before processing a batch of results.
+	 *
+	 * @param flags
+	 *            Flags used to control the filter
+	 * @param data
+	 *            the data used to control the filter
+	 * @see #accept(PreprocessedPeakResult)
+	 */
+	public void setup(final int flags, FilterSetupData... data)
+	{
+		filter.setup(flags, data);
+		if (minFilter != null)
+			minFilter.setup(flags, data);
+		saveState();
 	}
 
 	/**
@@ -650,10 +760,10 @@ public class MultiPathFilter implements Cloneable
 		if (doDoublet)
 		{
 			// We must validate the spot without shift filtering. Doublets may drift further than single spot candidates.
-			filter.setup(DirectFilter.NO_SHIFT);
+			setupFilter(DirectFilter.NO_SHIFT);
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
 					store, precomputed);
-			filter.setup();
+			restoreFilterState();
 			if (singleDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -880,10 +990,10 @@ public class MultiPathFilter implements Cloneable
 		if (doDoublet)
 		{
 			// We must validate the spot without shift filtering. Doublets may drift further than single spot candidates.
-			filter.setup(DirectFilter.NO_SHIFT);
+			setupFilter(DirectFilter.NO_SHIFT);
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
 					store);
-			filter.setup();
+			restoreFilterState();
 			if (singleDoubletResults != null)
 			{
 				// Check we have a new result for the candidate
@@ -962,7 +1072,7 @@ public class MultiPathFilter implements Cloneable
 			return false;
 
 		// We must validate the spot without width filtering. Do not change the min filter.
-		filter.setup(DirectFilter.NO_WIDTH);
+		setupFilter(DirectFilter.NO_WIDTH);
 
 		try
 		{
@@ -973,7 +1083,7 @@ public class MultiPathFilter implements Cloneable
 		finally
 		{
 			// reset
-			filter.setup();
+			restoreFilterState();
 		}
 
 		return true;
@@ -1581,7 +1691,7 @@ public class MultiPathFilter implements Cloneable
 		final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
 		final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
 
-		filter.setup(DirectFilter.NO_SHIFT);
+		setupFilter(DirectFilter.NO_SHIFT);
 
 		validationResults = new int[results.length];
 		for (int i = 0; i < nDoublets; i++)
@@ -1589,7 +1699,7 @@ public class MultiPathFilter implements Cloneable
 			validationResults[i] = filter.validate(results[i]);
 		}
 
-		filter.setup();
+		restoreFilterState();
 
 		for (int i = nDoublets; i < results.length; i++)
 		{
@@ -2063,7 +2173,7 @@ public class MultiPathFilter implements Cloneable
 				// is removed that could be used.
 				checkIsValid(multiPathResult.getSingleFitResult(), store);
 				checkIsValid(multiPathResult.getMultiFitResult(), store);
-				filter.setup(DirectFilter.NO_SHIFT);
+				setupFilter(DirectFilter.NO_SHIFT);
 				checkIsValid(multiPathResult.getDoubletFitResult(), store);
 
 				// Fix to only disable shift filtering for the doublet results...
@@ -2075,12 +2185,12 @@ public class MultiPathFilter implements Cloneable
 					final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
 					final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
 					checkIsValid(results, store, 0, nDoublets);
-					filter.setup();
+					restoreFilterState();
 					checkIsValid(results, store, nDoublets, results.length);
 				}
 				else
 				{
-					filter.setup();
+					restoreFilterState();
 				}
 
 				// This has valid results so add to the output subset 
