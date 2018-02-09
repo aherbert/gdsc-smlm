@@ -2,7 +2,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.data.NamedObject;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 

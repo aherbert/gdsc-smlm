@@ -8,7 +8,6 @@ import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.results.PeakResult;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
