@@ -49,31 +49,79 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the shift limit
-		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
-		eoffset = getUpperSquaredLimit(s * eshift);
+		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		eoffset = getUpperLimit(s[0] * s[1] * eshift * eshift);
 	}
 
 	@Override
 	public void setup()
 	{
-		setup(true);
+		setup(eshift);
 	}
 
 	@Override
 	public void setup(int flags)
 	{
-		setup(!areSet(flags, DirectFilter.NO_SHIFT));
+		if (areSet(flags, DirectFilter.NO_SHIFT))
+			shiftEnabled = false;
+		else
+			setup(eshift);
 	}
 
-	private void setup(final boolean shiftEnabled)
+	@Override
+	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
-		this.shiftEnabled = shiftEnabled;
-		if (shiftEnabled)
+		if (areSet(flags, DirectFilter.NO_SHIFT))
 		{
-			eshift2 = getUpperSquaredLimit(eshift);
+			shiftEnabled = false;
+			return;
 		}
+
+		for (int i = filterSetupData.length; i-- > 0;)
+		{
+			if (filterSetupData[i] instanceof ShiftFilterSetupData)
+			{
+				// Convert standard shift to Euclidian for a 2D?
+				// Leaving it creates a circle with radius at the box edge.
+				// Updating it creates a circle with radius at the box corner.
+				double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
+				// Leave for now
+				//shift = Math.sqrt(shift * shift * 2);
+				setup(shift);
+				return;
+			}
+		}
+		// Default
+		setup(eshift);
 	}
 
+	private void setup(final double eshift)
+	{
+		eshift2 = getUpperSquaredLimit(eshift);
+		shiftEnabled = (eshift2 != Float.POSITIVE_INFINITY);
+	}
+	
+	@Override
+	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+	{
+		if (shiftEnabled && eshift2 != Float.POSITIVE_INFINITY)
+		{
+			if (eshift2 == getUpperSquaredLimit(eshift))
+			{
+				// This is the default so ignore
+				return null;
+			}
+			return getFilterSetupData(new ShiftFilterSetupData(Math.sqrt(eshift2)));
+		}
+		return null;
+	}
+
+	@Override
+	public int getFilterSetupFlags() throws IllegalStateException
+	{
+		return (shiftEnabled) ? 0 : DirectFilter.NO_SHIFT;
+	}
+	
 	@Override
 	public boolean accept(PeakResult peak)
 	{
@@ -92,7 +140,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	{
 		if (shiftEnabled)
 		{
-			if (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eshift2)
+			if ((peak.getXRelativeShift2() + peak.getYRelativeShift2()) > eshift2)
 				return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
 		}
 		return 0;

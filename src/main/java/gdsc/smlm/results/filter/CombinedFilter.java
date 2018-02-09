@@ -211,6 +211,71 @@ public abstract class CombinedFilter extends DirectFilter
 			dfilter2.setup(flags);
 	}
 
+	@Override
+	public void setup(int flags, FilterSetupData... filterSetupData)
+	{
+		if (dfilter1 != null)
+			dfilter1.setup(flags, filterSetupData);
+		if (dfilter2 != null)
+			dfilter2.setup(flags, filterSetupData);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * The method from the combined filter doesn't throw, leaving that to the underlying filters.
+	 * This does mean that a combined filter can be created from
+	 * two already initialised filters and the flags returned may not
+	 * exactly recreate the state, since they are joined.
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
+	 */
+	@Override
+	public int getFilterSetupFlags() throws IllegalStateException
+	{
+		int flags = 0;
+		if (dfilter1 != null)
+			flags |= dfilter1.getFilterSetupFlags();
+		if (dfilter2 != null)
+			flags |= dfilter2.getFilterSetupFlags();
+		return flags;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * The method from the combined filter doesn't throw, leaving that to the underlying filters.
+	 * This does mean that a combined filter can be created from
+	 * two already initialised filters and the data returned may not
+	 * exactly recreate the state, since they are joined.
+	 * 
+	 * @see gdsc.smlm.results.filter.DirectFilter#getFilterSetupData()
+	 */
+	@Override
+	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+	{
+		FilterSetupData[] data1 = (dfilter1 == null) ? null : dfilter1.getFilterSetupData();
+		if (data1 != null)
+		{
+			if (dfilter2 != null)
+			{
+				FilterSetupData[] data2 = dfilter1.getFilterSetupData();
+				if (data2 != null)
+				{
+					// Merge
+					int size = data1.length + data2.length;
+					FilterSetupData[] merge = Arrays.copyOf(data1, size);
+					System.arraycopy(data2, 0, merge, data1.length, data2.length);
+					return merge;
+				}
+			}
+			return data1;
+		}
+		if (dfilter2 != null)
+			return dfilter2.getFilterSetupData();
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

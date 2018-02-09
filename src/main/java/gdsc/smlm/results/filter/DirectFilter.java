@@ -49,10 +49,42 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(gdsc.smlm.results.filter.FilterSetupData[])
+	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int, gdsc.smlm.results.filter.FilterSetupData[])
 	 */
-	public void setup(FilterSetupData... filterSetupData)
+	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getFlags()
+	 */
+	public int getFilterSetupFlags() throws IllegalStateException
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
+	 */
+	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+	{
+		return null;
+	}
+
+	/**
+	 * Convenience method to convert variable input data to ann array.
+	 *
+	 * @param data
+	 *            the data
+	 * @return the filter setup data
+	 */
+	protected static FilterSetupData[] getFilterSetupData(FilterSetupData... data)
+	{
+		return data;
 	}
 
 	/**

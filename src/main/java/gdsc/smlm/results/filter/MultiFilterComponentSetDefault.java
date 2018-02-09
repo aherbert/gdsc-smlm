@@ -49,4 +49,14 @@ public class MultiFilterComponentSetDefault extends MultiFilterComponentSet
 		if (components.length > 0)
 			components[0] = c;
 	}
+	
+	@Override
+	public MultiFilterComponentSet clone()
+	{
+		// Copy the array
+		MultiFilterComponent[] c = new MultiFilterComponent[components.length];
+		if (c.length > 0)
+			System.arraycopy(components, 0, c, 0, c.length);
+		return new MultiFilterComponentSetDefault(c);
+	}
 }

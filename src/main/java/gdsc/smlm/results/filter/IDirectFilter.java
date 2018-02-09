@@ -115,7 +115,7 @@ public interface IDirectFilter
 	 * Validation flag for the z position
 	 */
 	final static int V_Z = 0x000040000;
-	
+
 	/**
 	 * Disable filtering using the width of the result
 	 */
@@ -125,11 +125,11 @@ public interface IDirectFilter
 	 * Disable filtering using the shift of the result
 	 */
 	final static int NO_SHIFT = 0x000000002;
-	
+
 	/**
 	 * Enable filtering both X and Y widths
 	 */
-	final static int XY_WIDTH = 0x000000004;	
+	final static int XY_WIDTH = 0x000000004;
 
 	/**
 	 * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the
@@ -139,15 +139,6 @@ public interface IDirectFilter
 	 */
 	int getValidationFlags();
 
-	// TODO - Change this to allow a filter to be set-up, modified then 
-	// reset to the previous state.
-	// Change void setup(final FilterSetupData... filterSetupData);
-	
-	// setup(int) will initialise the filter.
-	// Update can modify the initialised filter.
-	// void update(final FilterSetupData... filterSetupData);
-	// Reset to the initialised state by calling with no arguments.
-	
 	/**
 	 * Called before the accept method is called for PreprocessedPeakResult
 	 * <p>
@@ -181,7 +172,27 @@ public interface IDirectFilter
 	 *            Data used to control the filter
 	 * @see #validate(PreprocessedPeakResult)
 	 */
-	void setup(final FilterSetupData... filterSetupData);
+	void setup(final int flags, final FilterSetupData... filterSetupData);
+
+	/**
+	 * Gets the flags required to reinitialise the current filter state using {@link #setup(int)} or
+	 * {@link #setup(int, FilterSetupData...)}
+	 *
+	 * @return the flags
+	 * @throws IllegalStateException
+	 *             If setup has not been called and the flags cannot be created
+	 */
+	int getFilterSetupFlags() throws IllegalStateException;
+
+	/**
+	 * Gets the filter setup data required to reinitialise the current filter state using
+	 * {@link #setup(int, FilterSetupData...)}
+	 *
+	 * @return the filter setup data (can be null)
+	 * @throws IllegalStateException
+	 *             If setup has not been called and the data cannot be created
+	 */
+	FilterSetupData[] getFilterSetupData() throws IllegalStateException;
 
 	/**
 	 * Filter the peak result.

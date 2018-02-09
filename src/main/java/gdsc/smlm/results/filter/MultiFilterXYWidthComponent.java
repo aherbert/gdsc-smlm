@@ -22,10 +22,13 @@ public class MultiFilterXYWidthComponent extends MultiFilterComponent
 
 	public MultiFilterXYWidthComponent(double minWidth, double maxWidth)
 	{
-		lowerSigmaThreshold = (float) (minWidth * minWidth);
+		if (minWidth > 0 && minWidth < 1)
+			lowerSigmaThreshold = (float) (minWidth * minWidth);
+		else
+			lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

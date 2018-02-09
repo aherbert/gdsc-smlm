@@ -16,7 +16,7 @@ package gdsc.smlm.results.filter;
 /**
  * Contains a set of components of the multi filter.
  */
-public abstract class MultiFilterComponentSet
+public abstract class MultiFilterComponentSet implements Cloneable
 {
 	/**
 	 * Gets the validation flags. These are possible return flags from the {@link #validate(PreprocessedPeakResult)}
@@ -42,4 +42,22 @@ public abstract class MultiFilterComponentSet
 	 *            the replacement component
 	 */
 	abstract void replace0(MultiFilterComponent c);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public MultiFilterComponentSet clone()
+	{
+		try
+		{
+			return (MultiFilterComponentSet) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+	}
 }

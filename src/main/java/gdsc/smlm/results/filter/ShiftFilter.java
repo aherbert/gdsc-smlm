@@ -34,7 +34,9 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	@XStreamAsAttribute
 	final double shift;
 	@XStreamOmitField
-	float offset;
+	float offsetx;
+	@XStreamOmitField
+	float offsety;
 	@XStreamOmitField
 	float shift2;
 	@XStreamOmitField
@@ -49,51 +51,78 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter
 	public void setup(MemoryPeakResults peakResults)
 	{
 		// Set the shift limit
-		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
-		offset = getUpperLimit(s * shift);
+		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		offsetx = getUpperLimit(s[0] * shift);
+		offsety = getUpperLimit(s[1] * shift);
 	}
 
 	@Override
 	public void setup()
 	{
-		setup(true);
+		setup(shift);
 	}
 
 	@Override
 	public void setup(int flags)
 	{
-		setup(!areSet(flags, DirectFilter.NO_SHIFT));
+		if (areSet(flags, DirectFilter.NO_SHIFT))
+			shiftEnabled = false;
+		else
+			setup(shift);
 	}
 
 	@Override
-	public void setup(FilterSetupData... filterSetupData)
+	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
+		if (areSet(flags, DirectFilter.NO_SHIFT))
+		{
+			shiftEnabled = false;
+			return;
+		}
+
 		for (int i = filterSetupData.length; i-- > 0;)
 		{
 			if (filterSetupData[i] instanceof ShiftFilterSetupData)
 			{
-				shift2 = getUpperSquaredLimit(((ShiftFilterSetupData) filterSetupData[i]).shift);
-				shiftEnabled = (shift2 != Float.POSITIVE_INFINITY);
+				setup(((ShiftFilterSetupData) filterSetupData[i]).shift);
 				return;
 			}
 		}
 		// Default
-		setup(true);
+		setup(shift);
 	}
 
-	private void setup(final boolean shiftEnabled)
+	private void setup(final double shift)
 	{
-		this.shiftEnabled = shiftEnabled;
-		if (shiftEnabled)
+		shift2 = getUpperSquaredLimit(shift);
+		shiftEnabled = (shift2 != Float.POSITIVE_INFINITY);
+	}
+
+	@Override
+	public int getFilterSetupFlags() throws IllegalStateException
+	{
+		return (shiftEnabled) ? 0 : DirectFilter.NO_SHIFT;
+	}
+
+	@Override
+	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+	{
+		if (shiftEnabled && shift2 != Float.POSITIVE_INFINITY)
 		{
-			shift2 = getUpperSquaredLimit(shift);
+			if (shift2 == getUpperSquaredLimit(shift))
+			{
+				// This is the default so ignore
+				return null;
+			}
+			return getFilterSetupData(new ShiftFilterSetupData(Math.sqrt(shift2)));
 		}
+		return null;
 	}
 
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return Math.abs(peak.getXShift()) <= offset && Math.abs(peak.getYShift()) <= offset;
+		return Math.abs(peak.getXShift()) <= offsetx && Math.abs(peak.getYShift()) <= offsety;
 	}
 
 	public int getValidationFlags()

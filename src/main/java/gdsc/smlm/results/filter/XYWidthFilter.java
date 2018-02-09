@@ -41,13 +41,10 @@ public class XYWidthFilter extends WidthFilter implements IMultiFilter
 	}
 
 	@Override
-	void setup(final boolean widthEnabled)
+	void setup(final double width)
 	{
-		this.widthEnabled = widthEnabled;
-		if (widthEnabled)
-		{
-			upperSigmaThreshold = Filter.getUpperLimit(width * width);
-		}
+		upperSigmaThreshold = Filter.getUpperLimit(width * width);
+		widthEnabled = (width != Float.POSITIVE_INFINITY);
 	}
 
 	@Override

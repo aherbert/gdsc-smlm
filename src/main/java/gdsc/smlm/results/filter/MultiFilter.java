@@ -56,7 +56,9 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	float upperSigmaThreshold;
 	@XStreamOmitField
-	float offset;
+	float offsetx;
+	@XStreamOmitField
+	float offsety;
 	@XStreamOmitField
 	float eoffset;
 	@XStreamOmitField
@@ -65,6 +67,8 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	Gaussian2DPeakResultCalculator calculator;
 	@XStreamOmitField
 	boolean widthEnabled;
+	@XStreamOmitField
+	boolean xyWidths;
 	@XStreamOmitField
 	boolean zEnabled;
 	@XStreamOmitField
@@ -79,6 +83,10 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	MultiFilterComponentSet components_Width_NoShift = null;
 	@XStreamOmitField
 	MultiFilterComponentSet components_Shift0 = null;
+	@XStreamOmitField
+	private int filterSetupFlags;
+	@XStreamOmitField
+	private FilterSetupData[] filterSetupData;
 
 	public MultiFilter(double signal, float snr, double minWidth, double maxWidth, double shift, double eshift,
 			double precision, float minZ, float maxZ)
@@ -119,13 +127,16 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		// Set the width limit
 		lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Float.POSITIVE_INFINITY;
-		// Set the shift limit
-		double s = PSFHelper.getGaussian2DWx(peakResults.getPSF());
-		lowerSigmaThreshold = (float) (s * minWidth);
-		upperSigmaThreshold = Filter.getUpperLimit(s * maxWidth);
-		offset = Filter.getUpperLimit(s * shift);
+		// Set the shift limit. The calculator can support both 1/2 axis widths
+		// when extracting the Standard Deviation from the parameters.
+		double[] s = PSFHelper.getGaussian2DWxWy(peakResults.getPSF());
+		double s0 = (s[0] == s[1]) ? s[0] : Gaussian2DPeakResultHelper.getStandardDeviation(s[0], s[1]);
+		lowerSigmaThreshold = (float) (s0 * minWidth);
+		upperSigmaThreshold = Filter.getUpperLimit(s0 * maxWidth);
+		offsetx = getUpperLimit(s[0] * shift);
+		offsety = getUpperLimit(s[1] * shift);
 		// Convert to squared distance
-		eoffset = Filter.getUpperSquaredLimit(s * eshift);
+		eoffset = Filter.getUpperSquaredLimit(s0 * eshift);
 
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
@@ -142,20 +153,27 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
+		filterSetupFlags = 0;
+		this.filterSetupData = null;
 		setup(true, true, false);
 	}
 
 	@Override
 	public void setup(int flags)
 	{
+		filterSetupFlags = flags;
+		this.filterSetupData = null;
 		setup(!areSet(flags, DirectFilter.NO_WIDTH), !areSet(flags, DirectFilter.NO_SHIFT),
 				areSet(flags, DirectFilter.XY_WIDTH));
 	}
 
 	private void setup(final boolean widthEnabled, final boolean shiftEnabled, final boolean xyWidths)
 	{
-		if (components_Width_Shift == null)
+		if (components_Width_Shift == null || this.xyWidths != xyWidths)
 		{
+			// Store this in case the filter is setup with different width filtering 
+			this.xyWidths = xyWidths;
+
 			// Create the components we require
 			final MultiFilterComponent[] components1 = new MultiFilterComponent[7];
 			int s1 = 0;
@@ -164,11 +182,11 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 			// Current order of filter power obtained from BenchmarkFilterAnalysis:
 			// SNR, Max Width, Precision, Shift, Min width
-			if (snr != 0)
+			if (isFiniteStrictlyPositive(snr))
 			{
 				components1[s1++] = new MultiFilterSNRComponent(snr);
 			}
-			if (maxWidth != 0 || minWidth != 0)
+			if ((maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY) || (minWidth > 0 && minWidth < 1))
 			{
 				// Handle the width being 1/2 axis variable.
 				if (xyWidths)
@@ -177,24 +195,24 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 					components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
 				widthComponentClass = components1[s1 - 1].getClass();
 			}
-			if (precision != 0)
+			if (isFiniteStrictlyPositive(precision))
 			{
 				components1[s1++] = createPrecisionComponent();
 			}
-			if (shift != 0)
+			if (isFiniteStrictlyPositive(shift))
 			{
 				components1[s1++] = new MultiFilterShiftComponent(shift);
 				shiftComponentClass = components1[s1 - 1].getClass();
 			}
-			if (signal != 0)
+			if (isFiniteStrictlyPositive(signal))
 			{
 				components1[s1++] = new MultiFilterSignalComponent(signal);
 			}
-			if (eshift != 0)
+			if (isFiniteStrictlyPositive(eshift))
 			{
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
 			}
-			if (minZ != 0 || maxZ != 0)
+			if (isFiniteStrictlyPositive(maxZ) || isFiniteStrictlyNegative(minZ))
 			{
 				components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
 			}
@@ -258,13 +276,14 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	}
 
 	@Override
-	public void setup(FilterSetupData... filterSetupData)
+	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
-		setup(true, true, false);
+		setup(flags);
 		for (int i = filterSetupData.length; i-- > 0;)
 		{
 			if (filterSetupData[i] instanceof ShiftFilterSetupData)
 			{
+				this.filterSetupData = getFilterSetupData(filterSetupData[i]);
 				double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
 				if (shift > 0)
 				{
@@ -278,6 +297,18 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 				return;
 			}
 		}
+	}
+
+	@Override
+	public int getFilterSetupFlags() throws IllegalStateException
+	{
+		return filterSetupFlags;
+	}
+
+	@Override
+	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
+	{
+		return filterSetupData;
 	}
 
 	@Override
@@ -299,7 +330,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			return false;
 
 		// Shift
-		if (Math.abs(peak.getXPosition()) > offset || Math.abs(peak.getYPosition()) > offset)
+		if (Math.abs(peak.getXShift()) > offsetx || Math.abs(peak.getYShift()) > offsety)
 			return false;
 
 		if (peak.getSignal() < signalThreshold)
@@ -682,6 +713,18 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@Override
 	protected void initialiseState()
 	{
-		components_Width_Shift = null;
+		// This is run after a clone() occurs.
+		// Q. Can the setup state be maintained?
+
+		//components_Width_Shift = null;
+
+		// Replace any object that is manipulated by the instance
+		if (components_Shift0 != null)
+		{
+			boolean update = components == components_Shift0;
+			components_Shift0 = components_Shift0.clone();
+			if (update)
+				components = components_Shift0;
+		}
 	}
 }

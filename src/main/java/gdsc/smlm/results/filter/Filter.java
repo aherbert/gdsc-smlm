@@ -1096,7 +1096,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	{
 		return false;
 	}
-	
+
 	/**
 	 * @return An XML representation of this object
 	 */
@@ -1693,6 +1693,30 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			return value * value;
 		else
 			return Double.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * Checks if is finite strictly positive.
+	 *
+	 * @param value
+	 *            the value
+	 * @return true, if is finite strictly positive
+	 */
+	public static boolean isFiniteStrictlyPositive(double value)
+	{
+		return value > 0 && value != Double.POSITIVE_INFINITY;
+	}
+
+	/**
+	 * Checks if is finite strictly negative.
+	 *
+	 * @param value
+	 *            the value
+	 * @return true, if is finite strictly negative
+	 */
+	public static boolean isFiniteStrictlyNegative(double value)
+	{
+		return value < 0 && value != Double.NEGATIVE_INFINITY;
 	}
 
 	/**

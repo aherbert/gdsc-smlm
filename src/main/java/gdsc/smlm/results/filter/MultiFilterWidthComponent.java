@@ -22,7 +22,10 @@ public class MultiFilterWidthComponent extends MultiFilterComponent
 
 	public MultiFilterWidthComponent(double minWidth, double maxWidth)
 	{
-		this.lowerSigmaThreshold = (float) minWidth;
+		if (minWidth > 0 && minWidth < 1)
+			this.lowerSigmaThreshold = (float) minWidth;
+		else
+			lowerSigmaThreshold = 0;
 		this.upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
 	}
 

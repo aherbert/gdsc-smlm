@@ -119,6 +119,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	// Used for fitting
 	private FitEngineConfiguration config;
 	private FitConfiguration fitConfig;
+	private MultiPathFilter filter;
 
 	private PeakResults results;
 	private PSFType psfType;
@@ -621,9 +622,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 			else
 			{
-				// Filter using the configuration
-				filter = new MultiPathFilter(fitConfig, createMinimalFilter(fitConfig.getPrecisionMethod()),
-						config.getResidualsThreshold());
+				// Filter using the configuration.
+				if (this.filter == null)
+				{
+					// This can be cached. Q. Clone the config?
+					this.filter = new MultiPathFilter(fitConfig, createMinimalFilter(fitConfig.getPrecisionMethod()),
+							config.getResidualsThreshold());
+				}
+				filter = this.filter;
 			}
 
 			// If we are benchmarking then do not generate results dynamically since we will store all 
@@ -2816,7 +2822,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Also change the shift in a smart filter
 			if (fitConfig.isDirectFilter())
 			{
-				fitConfig.setup(new ShiftFilterSetupData(coordinateShift / fitConfig.getWidthMax()));
+				fitConfig.setup(0, new ShiftFilterSetupData(coordinateShift / fitConfig.getWidthMax()));
 			}
 
 			// We assume that residuals calculation is on but just in case something else turned it off we get the state.

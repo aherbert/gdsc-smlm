@@ -80,23 +80,47 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup()
 	{
-		setup(true);
+		setup(minWidth, maxWidth);
 	}
 
 	@Override
 	public void setup(int flags)
 	{
-		setup(!areSet(flags, DirectFilter.NO_WIDTH));
+		if (areSet(flags, DirectFilter.NO_WIDTH))
+			widthEnabled = false;
+		else
+			setup(minWidth, maxWidth);
 	}
 
-	void setup(final boolean widthEnabled)
+	@Override
+	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
-		this.widthEnabled = widthEnabled;
-		if (widthEnabled)
+		setup(flags);
+	}
+
+	void setup(final double minWidth, double maxWidth)
+	{
+		widthEnabled = false;
+		if (maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY)
 		{
-			lowerSigmaThreshold = (float) minWidth;
 			upperSigmaThreshold = Filter.getUpperLimit(maxWidth);
+			widthEnabled = upperSigmaThreshold != Float.POSITIVE_INFINITY;
 		}
+		else
+			upperSigmaThreshold = Float.POSITIVE_INFINITY;
+		if (minWidth < 1)
+		{
+			widthEnabled = true;
+			lowerSigmaThreshold = (float) minWidth;
+		}
+		else
+			lowerSigmaThreshold = 0f;		
+	}
+
+	@Override
+	public int getFilterSetupFlags() throws IllegalStateException
+	{
+		return (widthEnabled) ? 0 : DirectFilter.NO_WIDTH;
 	}
 
 	@Override
