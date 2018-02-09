@@ -379,6 +379,31 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, WidthFilter.DEFAULT_RANGE,
 			ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
 			PrecisionFilter.DEFAULT_RANGE };
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
+	 */
+	@Override
+	public Filter adjustParameter(int index, double delta)
+	{
+		checkIndex(index);
+		// No adjustment of the mode parameters
+		if (index == 1 || index == 3)
+			return this;
+		double[] parameters = new double[] { searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode,
+				strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth, rangeMinWidth, strictMaxWidth,
+				rangeMaxWidth, strictShift, rangeShift, strictPrecision, rangePrecision };
+		if (index == 0)
+			parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
+		else if (index == 2)
+			parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
+		else
+			parameters[index] = updateParameter(parameters[index], delta, defaultRange[index]);
+		return create(parameters);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
