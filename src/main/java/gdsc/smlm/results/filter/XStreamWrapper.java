@@ -63,7 +63,6 @@ public abstract class XStreamWrapper
 				addAlias(ShiftFilter.class);
 				addAlias(SignalFilter.class);
 				addAlias(SNRFilter.class);
-				addAlias(SNRFilter2.class);
 				addAlias(SNRHysteresisFilter.class);
 				addAlias(TraceFilter.class);
 				addAlias(WidthFilter.class);
