@@ -12,6 +12,7 @@ import java.util.Vector;
 import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.PSFProtos.PSF;
@@ -94,7 +95,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	{
 		this.config = fitEngineConfiguration;
 		fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		CalibrationReader calibrationReader = fitConfig.getCalibrationReader();
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -103,9 +104,9 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		PeakFit.addCameraOptions(gd, calibration);
-		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
-		gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
+		PeakFit.addCameraOptions(gd, fitConfig);
+		gd.addNumericField("Calibration (nm/px)", calibrationReader.getNmPerPixel(), 2);
+		gd.addNumericField("Exposure_time (ms)", calibrationReader.getExposureTime(), 2);
 
 		gd.addMessage("--- Gaussian parameters ---");
 		PeakFit.addPSFOptions(gd, fitConfig);
@@ -198,15 +199,16 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 		if (gd.wasCanceled())
 			return false;
 
-		// In case a template update the calibration
-		calibration = fitConfig.getCalibrationWriter();
+		// In case a template updated the calibration
+		CalibrationWriter calibrationWriter = fitConfig.getCalibrationWriter();
 
 		// Ignore the template
 		gd.getNextChoice();
 
-		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
-		calibration.setNmPerPixel(gd.getNextNumber());
-		calibration.setExposureTime(gd.getNextNumber());
+		calibrationWriter.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+		calibrationWriter.setNmPerPixel(gd.getNextNumber());
+		calibrationWriter.setExposureTime(gd.getNextNumber());
+		fitConfig.setCalibration(calibrationWriter.getCalibration());
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setDataFilterType(gd.getNextChoiceIndex());
 		config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
@@ -238,8 +240,8 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 		// Check arguments
 		try
 		{
-			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
+			Parameters.isAboveZero("nm per pixel", calibrationWriter.getNmPerPixel());
+			Parameters.isAboveZero("Exposure time", calibrationWriter.getExposureTime());
 			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
 			if (fitConfig.getPSF().getParametersCount() > 1)
 			{
@@ -273,7 +275,9 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 			return false;
 
 		int flags = PeakFit.FLAG_NO_SAVE;
-		if (!PeakFit.configureSmartFilter(config, flags))
+		if (!PeakFit.configurePSFModel(config, flags))
+			return false;
+		if (!PeakFit.configureResultsFilter(config, flags))
 			return false;
 		if (!PeakFit.configureDataFilter(config, flags))
 			return false;
@@ -439,7 +443,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 
 		// Do not use set() as we support merging a partial calibration
 		fitConfig.mergeCalibration(cal);
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		CalibrationReader calibration = fitConfig.getCalibrationReader();
 
 		textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
 		if (calibration.hasNmPerPixel())

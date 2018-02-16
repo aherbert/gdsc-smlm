@@ -73,7 +73,6 @@ import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtos.PSF;
-import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -2153,21 +2152,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		results.setName(CREATE_DATA_IMAGE_TITLE + " (" + TITLE + ")");
 		// Bounds are relative to the image source
 		results.setBounds(new Rectangle(settings.getSize(), settings.getSize()));
-		PSF.Builder psf; 
+
+		PSF psf;
 		if (astigmatismModel != null)
 		{
-			psf = PSF.newBuilder();
-			psf.setAstigmatismModel(astigmatismModel);
-			psf.setPsfType(PSFType.ASTIGMATIC_GAUSSIAN_2D);
+			psf = PSFProtosHelper.createPSF(astigmatismModel, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
 		}
 		else
 		{
+			PSF.Builder psfBuilder;
 			// Set the PSF as a Gaussian using the width at z=0. 
 			// In future this could be improved for other PSFs.S
-			psf = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
-			psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
+			psfBuilder = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
+			psfBuilder.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
+			psf = psfBuilder.build();
 		}
-		results.setPSF(psf.build());
+		results.setPSF(psf);
 		MemoryPeakResults.addResults(results);
 
 		setBenchmarkResults(imp, results);
@@ -2354,13 +2354,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (gd.wasCanceled())
 						throw new IllegalArgumentException(message);
 					// Convert to nm
-					astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.NM, DistanceUnit.NM);
+					astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.NM,
+							DistanceUnit.NM);
 					// Reset pixel pitch. This will draw the spot using the correct size on the different size pixels.
 					astigmatismModel = astigmatismModel.toBuilder().setNmPerPixel(settings.getPixelPitch()).build();
 				}
 
 				// Convert for simulation in pixels
-				astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
+				astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL,
+						DistanceUnit.PIXEL);
 				return new GaussianPSFModel(AstigmatismModelManager.create(astigmatismModel));
 			}
 			catch (ConversionException e)

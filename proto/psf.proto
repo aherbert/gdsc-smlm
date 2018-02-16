@@ -86,8 +86,9 @@ message PSF {
 	// parameters array. The names of the non-standard parameters, in order, can be defined here.
 	repeated PSFParameter parameters = 2;
 	
-	// The astigmatism model for a Gaussian 2D PSF. This can map the z-coordinate to the XY widths.
-	AstigmatismModel astigmatism_model = 3;
+	// The PSF model name. This should contain all the information required to
+	// load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+	string model_name = 3;
 }
 
 // Define the offset for slice alignment correction

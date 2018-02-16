@@ -27,6 +27,7 @@ import javax.swing.JFileChooser;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.SeriesOpener;
@@ -38,6 +39,7 @@ import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -48,6 +50,7 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -767,7 +770,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		EnumSet<PSFType> d = EnumSet.of(
 				PSFType.ONE_AXIS_GAUSSIAN_2D, 
 				PSFType.TWO_AXIS_GAUSSIAN_2D, 
-				PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+				PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D,
+				PSFType.ASTIGMATIC_GAUSSIAN_2D);
 		//@formatter:on
 		_PSFTypeValues = d.toArray(new PSFType[d.size()]);
 		_PSFTypeNames = new String[_PSFTypeValues.length];
@@ -814,13 +818,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("Template", templates, templates[0]);
 
 		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
-		addCameraOptions(gd, 0, new CalibrationProvider()
-		{
-			public CalibrationWriter getCalibrationWriter()
-			{
-				return fitConfig.getCalibrationWriter();
-			}
-		});
+		addCameraOptions(gd, 0, fitConfig);
 		gd.addNumericField("Calibration", calibration.getNmPerPixel(), 2, 6, "nm/px");
 		gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
 
@@ -888,6 +886,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
 			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
 			addPrecisionOptions(gd, fitConfigurationProvider);
+			// Q. Add dynamically displayed options for z-filtering here?
 		}
 
 		gd.addMessage("--- Results ---");
@@ -1086,11 +1085,19 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public interface CalibrationProvider
 	{
 		/**
-		 * Gets the calibration writer.
+		 * Gets the calibration.
 		 *
-		 * @return the calibration writer
+		 * @return the calibration
 		 */
-		public CalibrationWriter getCalibrationWriter();
+		public Calibration getCalibration();
+
+		/**
+		 * Save the calibration. This is used to save changes to the calibration back to the provider.
+		 *
+		 * @param calibration
+		 *            the calibration
+		 */
+		public void saveCalibration(Calibration calibration);
 	}
 
 	/**
@@ -1098,19 +1105,12 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *
 	 * @param gd
 	 *            the gd
-	 * @param calibration
-	 *            the calibration
-	 * @param b
+	 * @param fitConfig
+	 *            the fit config
 	 */
-	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationWriter calibration)
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final FitConfiguration fitConfig)
 	{
-		addCameraOptions(gd, 0, new CalibrationProvider()
-		{
-			public CalibrationWriter getCalibrationWriter()
-			{
-				return calibration;
-			}
-		});
+		addCameraOptions(gd, 0, fitConfig);
 	}
 
 	/**
@@ -1120,17 +1120,62 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *            the gd
 	 * @param options
 	 *            the options
-	 * @param calibration
-	 *            the calibration
+	 * @param fitConfig
+	 *            the fit config
 	 */
 	public static void addCameraOptions(final ExtendedGenericDialog gd, final int options,
-			final CalibrationWriter calibration)
+			final FitConfiguration fitConfig)
 	{
 		addCameraOptions(gd, options, new CalibrationProvider()
 		{
-			public CalibrationWriter getCalibrationWriter()
+			public Calibration getCalibration()
 			{
-				return calibration;
+				return fitConfig.getCalibration();
+			}
+
+			public void saveCalibration(Calibration calibration)
+			{
+				fitConfig.mergeCalibration(calibration);
+			}
+		});
+	}
+
+	/**
+	 * Adds the camera options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param calibrationWriter
+	 *            the calibration writer
+	 */
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final CalibrationWriter calibrationWriter)
+	{
+		addCameraOptions(gd, 0, calibrationWriter);
+	}
+
+	/**
+	 * Adds the camera options.
+	 *
+	 * @param gd
+	 *            the gd
+	 * @param options
+	 *            the options
+	 * @param calibrationWriter
+	 *            the calibration writer
+	 */
+	public static void addCameraOptions(final ExtendedGenericDialog gd, final int options,
+			final CalibrationWriter calibrationWriter)
+	{
+		addCameraOptions(gd, options, new PeakFit.CalibrationProvider()
+		{
+			public Calibration getCalibration()
+			{
+				return calibrationWriter.getCalibration();
+			}
+
+			public void saveCalibration(Calibration calibration)
+			{
+				calibrationWriter.mergeCalibration(calibration);
 			}
 		});
 	}
@@ -1155,15 +1200,20 @@ public class PeakFit implements PlugInFilter, ItemListener
 	public static void addCameraOptions(final ExtendedGenericDialog gd, final int options,
 			final CalibrationProvider calibrationProvider)
 	{
-		CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
+		CalibrationReader calibration = new CalibrationReader(calibrationProvider.getCalibration());
 
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Integer>()
 				{
 					public boolean collectOptions(Integer field)
 					{
-						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
-						calibration.setCameraType(SettingsManager.getCameraTypeValues()[field]);
+						CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
+						CameraType t = SettingsManager.getCameraTypeValues()[field];
+						if (calibration.getCameraType() != t)
+						{
+							calibration.setCameraType(t);
+							calibrationProvider.saveCalibration(calibration.getCalibration());
+						}
 						boolean result = collectOptions(false);
 						return result;
 					}
@@ -1175,7 +1225,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 					private boolean collectOptions(boolean silent)
 					{
-						CalibrationWriter calibration = calibrationProvider.getCalibrationWriter();
+						CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
 						ExtendedGenericDialog egd = new ExtendedGenericDialog("Camera type options", null);
 						if (calibration.isCCDCamera())
 						{
@@ -1227,7 +1277,11 @@ public class PeakFit implements PlugInFilter, ItemListener
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));
 						}
-						return !old.equals(calibration.getCalibration());
+						Calibration current = calibration.getCalibration();
+						boolean changed = !old.equals(current);
+						if (changed)
+							calibrationProvider.saveCalibration(current);
+						return changed;
 					}
 				});
 	}
@@ -1290,6 +1344,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Adds the PSF options.
+	 * <p>
+	 * Note that if an astigmatic PSF is selected then the model must be created with
+	 * {@link #configurePSFModel(FitEngineConfiguration, int)}.
 	 *
 	 * @param gd
 	 *            the gd
@@ -1303,6 +1360,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 	/**
 	 * Adds the PSF options.
+	 * <p>
+	 * Note that if an astigmatic PSF is selected  then the model must be created with
+	 * {@link #configurePSFModel(FitEngineConfiguration, int)}.
 	 *
 	 * @param gd
 	 *            the gd
@@ -1334,33 +1394,55 @@ public class PeakFit implements PlugInFilter, ItemListener
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
 						PSFType psfType = fitConfig.getPSFType();
 						ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
-						PSF oldPsf = fitConfig.getPSF();
-						for (int i = 0; i < oldPsf.getParametersCount(); i++)
+						PSF oldPsf = null;
+						if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D)
 						{
-							PSFParameter p = oldPsf.getParameters(i);
-							egd.addNumericField(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
-									p.getValue(), 3);
+							// The PSF is entirely defined in the model
+							String[] list = AstigmatismModelManager.listAstigmatismModels(false,
+									fitConfig.getCalibrationReader().getNmPerPixel(), 0.1);
+							egd.addChoice("Z-model", list, fitConfig.getPSFModelName());
 						}
-						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
-							egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
+						else
+						{
+							// Collect the PSF parameters
+							oldPsf = fitConfig.getPSF();
+							for (int i = 0; i < oldPsf.getParametersCount(); i++)
+							{
+								PSFParameter p = oldPsf.getParameters(i);
+								egd.addNumericField(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
+										p.getValue(), 3);
+							}
+							if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
+								egd.addCheckbox("Fixed", fitConfig.isFixedPSF());
+						}
+
 						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
-						PSF.Builder b = oldPsf.toBuilder();
-						int n = b.getParametersCount();
-						for (int i = 0; i < n; i++)
-							b.getParametersBuilder(i).setValue(egd.getNextNumber());
-						PSF newPsf = b.build();
-						fitConfig.setPSF(newPsf);
-						boolean changed = !oldPsf.equals(newPsf);
-						if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
+						if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D)
 						{
-							boolean newFixed = egd.getNextBoolean();
-							changed = changed || (newFixed != fitConfig.isFixedPSF());
-							fitConfig.setFixedPSF(newFixed);
+							// The PSF is entirely defined in the model
+							fitConfig.setPSFModelName(egd.getNextChoice());
+							return true;
 						}
-						return changed;
+						else
+						{
+							PSF.Builder b = oldPsf.toBuilder();
+							int n = b.getParametersCount();
+							for (int i = 0; i < n; i++)
+								b.getParametersBuilder(i).setValue(egd.getNextNumber());
+							PSF newPsf = b.build();
+							fitConfig.setPSF(newPsf);
+							boolean changed = !oldPsf.equals(newPsf);
+							if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D)
+							{
+								boolean newFixed = egd.getNextBoolean();
+								changed = changed || (newFixed != fitConfig.isFixedPSF());
+								fitConfig.setFixedPSF(newFixed);
+							}
+							return changed;
+						}
 					}
 				});
 	}
@@ -2237,7 +2319,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// If precision filtering then we need the camera bias
 		if (!maximaIdentification)
 		{
-			if (!configureSmartFilter(config, flags))
+			if (!configurePSFModel(config, flags))
+				return false;
+
+			if (!configureResultsFilter(config, flags))
 				return false;
 		}
 
@@ -2299,6 +2384,118 @@ public class PeakFit implements PlugInFilter, ItemListener
 	}
 
 	/**
+	 * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
+	 * <p>
+	 * If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
+	 *
+	 * @param config
+	 *            the config
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean configurePSFModel(FitEngineConfiguration config, int flags)
+	{
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
+			return true;
+
+		// Get the astigmatism z-model
+		AstigmatismModel model = AstigmatismModelManager.getModel(fitConfig.getPSFModelName());
+		if (model == null)
+		{
+			IJ.error(TITLE, "Failed to load the model: " + fitConfig.getPSFModelName());
+			return false;
+		}
+
+		// Conversion to the correct units in pixels is done within the FitConfiguration object.
+		fitConfig.setAstigmatismModel(model);
+
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
+		{
+			SettingsManager.writeSettings(config, 0);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Show a dialog to configure the results filter. The updated settings are saved to the settings file.
+	 * <p>
+	 * If the configuration is for a 3D PSF then a dialog to configure the z range for the results is shown (see
+	 * {@link #configureZFilter(FitEngineConfiguration, int)}).
+	 * <p>
+	 * If the configuration is for a smart filter then a dialog to configure the smart filter is shown (see
+	 * {@link #configureSmartFilter(FitEngineConfiguration, int)}).
+	 *
+	 * @param config
+	 *            the config
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean configureResultsFilter(FitEngineConfiguration config, int flags)
+	{
+		boolean result = configureZFilter(config, flags);
+		result = result && configureSmartFilter(config, flags);
+		return result;
+	}
+
+	/**
+	 * Show a dialog to configure the results z filter. The updated settings are saved to the settings file.
+	 * <p>
+	 * If the fit configuration PSF is not 3D or the simple filter is disabled then this method returns true. If it is
+	 * enabled then a dialog is shown to input the configuration for the z filter.
+	 * <p>
+	 * Note: The PSF and any z-model must be correctly configured for fitting in pixel units.
+	 *
+	 * @param config
+	 *            the config
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
+	public static boolean configureZFilter(FitEngineConfiguration config, int flags)
+	{
+		FitConfiguration fitConfig = config.getFitConfiguration();
+		if (fitConfig.isDisableSimpleFilter() || !fitConfig.is3D())
+			return true;
+
+		// Create a converter to map the model units in pixels to nm for the dialog.
+		TypeConverter<DistanceUnit> c = fitConfig.getCalibrationWriter().getDistanceConverter(DistanceUnit.NM);
+
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+
+		gd.addMessage("3D filter");
+		gd.addNumericField("Min_z", c.convert(fitConfig.getMinZ()), 0, 6, "nm");
+		gd.addNumericField("Max_z", c.convert(fitConfig.getMaxZ()), 0, 6, "nm");
+
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+
+		double minZ = gd.getNextNumber();
+		double maxZ = gd.getNextNumber();
+
+		if (gd.invalidNumber() || minZ > maxZ)
+		{
+			IJ.error(TITLE, "Min Z must be equal or below the max Z");
+			return false;
+		}
+
+		// Map back
+		fitConfig.setMinZ(c.convertBack(minZ));
+		fitConfig.setMaxZ(c.convertBack(maxZ));
+
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SAVE))
+		{
+			SettingsManager.writeSettings(config, 0);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Show a dialog to configure the smart filter. The updated settings are saved to the settings file.
 	 * <p>
 	 * If the fit configuration isSmartFilter is not enabled then this method returns true. If it is enabled then a
@@ -2357,7 +2554,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * The updated settings are saved to the settings file. An error message is shown if the dialog is cancelled or the
 	 * configuration is invalid.
 	 * <p>
-	 * If the configuration is for a per-pixel camera type (e.g. sCMOS) then the camera model will loaded using the
+	 * If the configuration is for a per-pixel camera type (e.g. sCMOS) then the camera model will be loaded using the
 	 * configured camera model name. This will be used to validate the filter to check the filter supports the per-pixel
 	 * camera type.
 	 *

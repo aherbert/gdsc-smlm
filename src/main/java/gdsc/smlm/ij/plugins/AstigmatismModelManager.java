@@ -24,7 +24,6 @@ import org.apache.commons.math3.util.Precision;
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
-import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJLogger;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -42,7 +41,6 @@ import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
-import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
@@ -166,12 +164,31 @@ public class AstigmatismModelManager implements PlugIn
 	 */
 	public static String[] listAstigmatismModels(boolean includeNone, double nmPerPixel)
 	{
+		return listAstigmatismModels(includeNone, nmPerPixel, 0);
+	}
+
+	/**
+	 * List the astigmatism models with the correct pixel scale within an error margin.
+	 *
+	 * @param includeNone
+	 *            Set to true to include an empty string
+	 * @param nmPerPixel
+	 *            the nm per pixel
+	 * @param error
+	 *            the error margin
+	 * @return the list
+	 */
+	public static String[] listAstigmatismModels(boolean includeNone, double nmPerPixel, double error)
+	{
 		AstigmatismModelSettings.Builder settings = getSettings();
 		List<String> list = createList(includeNone);
+		error = Math.abs(error);
+		double low = nmPerPixel - error;
+		double high = nmPerPixel + error;
 		for (Map.Entry<String, AstigmatismModel> entry : settings.getAstigmatismModelResourcesMap().entrySet())
 		{
 			AstigmatismModel resource = entry.getValue();
-			if (resource.getNmPerPixel() == nmPerPixel)
+			if (resource.getNmPerPixel() >= low && resource.getNmPerPixel() <= high)
 				list.add(entry.getKey());
 		}
 		return list.toArray(new String[list.size()]);
@@ -503,7 +520,7 @@ public class AstigmatismModelManager implements PlugIn
 		gd.addHelp(About.HELP_URL);
 		gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
-		PeakFit.addCameraOptions(gd, calibration);
+		PeakFit.addCameraOptions(gd, fitConfig);
 		gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
 		//gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
@@ -538,6 +555,7 @@ public class AstigmatismModelManager implements PlugIn
 		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(gd.getNextNumber());
 		calibration.setExposureTime(100); // Arbitrary
+		fitConfig.setCalibration(calibration.getCalibration());
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
@@ -1281,7 +1299,7 @@ public class AstigmatismModelManager implements PlugIn
 			model.setBy(parameters[P_BY]);
 			model.setZDistanceUnit(DistanceUnit.UM);
 			model.setSDistanceUnit(DistanceUnit.PIXEL);
-			model.setNmPerPixel(fitConfig.getCalibrationWriter().getNmPerPixel());
+			model.setNmPerPixel(fitConfig.getCalibrationReader().getNmPerPixel());
 			return save(name, model);
 		}
 		return true;
@@ -1637,31 +1655,7 @@ public class AstigmatismModelManager implements PlugIn
 	public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
 			DistanceUnit sDistanceUnit) throws ConversionException
 	{
-		if (model.getZDistanceUnitValue() == zDistanceUnit.getNumber() &&
-				model.getSDistanceUnitValue() == sDistanceUnit.getNumber())
-			return model;
-
-		AstigmatismModel.Builder builder = model.toBuilder();
-		TypeConverter<DistanceUnit> zc = UnitConverterFactory.createConverter(model.getZDistanceUnit(), zDistanceUnit,
-				model.getNmPerPixel());
-		TypeConverter<DistanceUnit> sc = UnitConverterFactory.createConverter(model.getSDistanceUnit(), sDistanceUnit,
-				model.getNmPerPixel());
-		builder.setZDistanceUnitValue(zDistanceUnit.getNumber());
-		builder.setSDistanceUnitValue(sDistanceUnit.getNumber());
-
-		// Convert the input units 
-		builder.setGamma(zc.convert(model.getGamma()));
-		builder.setD(zc.convert(model.getD()));
-		builder.setAx(zc.convertBack(model.getAx()));
-		builder.setAy(zc.convertBack(model.getAy()));
-		builder.setBx(zc.convertBack(zc.convertBack(model.getBx())));
-		builder.setBy(zc.convertBack(zc.convertBack(model.getBy())));
-
-		// Convert the output units
-		builder.setS0X(sc.convert(model.getS0X()));
-		builder.setS0Y(sc.convert(model.getS0Y()));
-
-		return builder.build();
+		return PSFProtosHelper.convert(model, zDistanceUnit, sDistanceUnit);
 	}
 
 	private void deleteModel()

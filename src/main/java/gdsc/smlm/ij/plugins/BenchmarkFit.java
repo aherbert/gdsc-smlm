@@ -593,7 +593,7 @@ public class BenchmarkFit implements PlugIn
 			return false;
 
 		// Initialise the correct calibration
-		CalibrationWriter calibration = CalibrationWriter.create(fitConfig.getCalibration());
+		CalibrationWriter calibration = new CalibrationWriter(fitConfig.getCalibration());
 		calibration.setNmPerPixel(benchmarkParameters.a);
 		calibration.setCountPerPhoton(benchmarkParameters.gain);
 		calibration.setQuantumEfficiency(benchmarkParameters.qe);

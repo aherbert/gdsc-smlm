@@ -89,8 +89,7 @@ message ResultDataCalibration {
 // Define the calibration for the results. The calibration contains details of the 
 // results units and how to convert them. Note that data can be loaded without knowledge
 // of the camera used so the distance, time and intensity calibration are separate.
-message Calibration
-{
+message Calibration {
 	// The distance calibration.
 	DistanceCalibration distance_calibration = 1;
 
@@ -111,8 +110,7 @@ message Calibration
 }
 
 // Define a camera model resource that can be loaded
-message CameraModelResource
-{
+message CameraModelResource {
 	// The x origin of the camera pixel data
 	int32 x = 1;
 	// The y origin of the camera pixel data
@@ -126,7 +124,6 @@ message CameraModelResource
 }
 
 // Define the camera model settings
-message CameraModelSettings
-{
+message CameraModelSettings {
 	map<string, CameraModelResource> camera_model_resources = 1;
 }

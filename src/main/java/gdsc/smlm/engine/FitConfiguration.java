@@ -1,13 +1,16 @@
 package gdsc.smlm.engine;
 
+import gdsc.core.data.utils.ConversionException;
 import gdsc.core.logging.Logger;
 import gdsc.core.match.FractionalAssignment;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
+import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.FitProtos.FilterSettings;
@@ -19,11 +22,13 @@ import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
+import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitConfiguration;
@@ -44,6 +49,7 @@ import gdsc.smlm.function.PrecomputedFunctionFactory;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.model.camera.NullCameraModel;
@@ -254,7 +260,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (dynamicPeakResult == null)
 			dynamicPeakResult = new DynamicPeakResult();
 		updateCalibration();
-		updatePSF();
+		updatePSF(true);
 		updateFitSolverSettings();
 		updateFilterSettings();
 	}
@@ -304,13 +310,33 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Gets the calibration writer.
+	 * Gets a reference to the current calibration writer.
+	 *
+	 * @return the calibration writer
+	 */
+	CalibrationWriter getCalibrationWriterReference()
+	{
+		return calibration;
+	}
+
+	/**
+	 * Gets a new calibration writer.
 	 *
 	 * @return the calibration writer
 	 */
 	public CalibrationWriter getCalibrationWriter()
 	{
-		return calibration;
+		return new CalibrationWriter(calibration.getCalibration());
+	}
+
+	/**
+	 * Gets a new calibration reader.
+	 *
+	 * @return the calibration reader
+	 */
+	public CalibrationReader getCalibrationReader()
+	{
+		return new CalibrationReader(calibration.getCalibrationOrBuilder());
 	}
 
 	/**
@@ -383,7 +409,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void mergePSF(PSF psf)
 	{
 		this.psf.mergeFrom(psf);
-		updatePSF();
+		updatePSF(true);
 	}
 
 	/**
@@ -395,10 +421,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setPSF(PSF psf)
 	{
 		this.psf.clear().mergeFrom(psf);
-		updatePSF();
+		updatePSF(true);
 	}
 
-	private void updatePSF()
+	private void updatePSF(boolean resetAstigmatismModel)
 	{
 		invalidateGaussianFunction();
 
@@ -448,7 +474,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 
 		// Ensure we have enough parameters
-		if (psf.getParametersCount() == 0)
+		if (psf.getParametersCount() == 0 && nParams > 0)
 		{
 			// Create a dummy Sx
 			PSFParameter.Builder p = psf.addParametersBuilder();
@@ -478,7 +504,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 
 		updateCoordinateShift();
-		// These depend on the 1/2 axis Gaussian flag
+		// These depend on the 2-axis Gaussian flag
 		updateWidthThreshold();
 		updateMinWidthThreshold();
 	}
@@ -738,28 +764,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Gets the astigmatism Z model. This is only valid if the PSF type is an astigmatic Gaussian 2D.
-	 *
-	 * @return the astigmatism Z model (or null)
-	 * @throws ConfigurationException
-	 *             if the model cannot be created
-	 */
-	public AstigmatismZModel getAstigmatismZModel() throws ConfigurationException
-	{
-		if (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
-		{
-			if (astigmatismZModel == null)
-			{
-				// TODO - support this within the configuration proto object. 
-				// This could be added to the PSF proto.
-				// astigmatismZModel = ... create dynamically from this.psf
-			}
-			return astigmatismZModel;
-		}
-		return null;
-	}
-
-	/**
 	 * @param log
 	 *            the log to set. Used to output fit evaluations for each iteration
 	 */
@@ -828,7 +832,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setPSFType(PSFType psfType)
 	{
 		psf.setPsfType(psfType);
-		updatePSF();
+		updatePSF(true);
 	}
 
 	/**
@@ -1110,7 +1114,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setFixedPSF(boolean fixed)
 	{
 		fitSolverSettings.setFixedPsf(fixed);
-		updatePSF();
+		updatePSF(true);
 	}
 
 	/**
@@ -3399,7 +3403,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			flags |= IDirectFilter.XY_WIDTH;
 		filterSetupFlags = flags;
 		this.filterSetupData = null;
-		
+
 		if (directFilter != null)
 		{
 			directFilter.setup(flags);
@@ -3432,7 +3436,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			flags |= IDirectFilter.XY_WIDTH;
 		filterSetupFlags = flags;
 		this.filterSetupData = filterSetupData;
-		
+
 		if (directFilter != null)
 		{
 			directFilter.setup(flags, filterSetupData);
@@ -4039,5 +4043,101 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public String getCameraModelName()
 	{
 		return calibration.getCameraModelName();
+	}
+
+	/**
+	 * Sets the PSF model name. This should contain all the information required to load the PSF model, e.g. in
+	 * the case of an astigmatic Gaussian 2D PSF.
+	 * <p>
+	 * This settings is saved to the underlying configuration. If a PSF model is used (e.g. for an astigmatic Gaussian
+	 * 2D PSF) then {@link #setAstigmatismModel(AstigmatismModel)} should be called after setting the new PSF model
+	 * name.
+	 *
+	 * @param psfModelName
+	 *            the new PSF model name
+	 */
+	public void setPSFModelName(String psfModelName)
+	{
+		psf.setModelName(psfModelName);
+	}
+
+	/**
+	 * Gets the PSF model name.
+	 *
+	 * @return the PSF model name
+	 */
+	public String getPSFModelName()
+	{
+		return psf.getModelName();
+	}
+
+	/**
+	 * Sets the astigmatism model. This has the effect of changing the PSF to an astigmatic Gaussian 2D function.
+	 *
+	 * @param model
+	 *            the new astigmatism model
+	 * @throws ConfigurationException
+	 *             if the model pixel pitch does not match the calibration
+	 * @throws ConversionException
+	 *             if the model cannot be converted to pixel units
+	 */
+	public void setAstigmatismModel(AstigmatismModel model) throws ConfigurationException, ConversionException
+	{
+		// Check the calibration
+		if (DoubleEquality.relativeError(model.getNmPerPixel(), calibration.getNmPerPixel()) > 1e-3)
+		{
+			throw new ConfigurationException(
+					String.format("The astigmatism model pixel pitch (%s) does not match the calibration (%s)",
+							model.getNmPerPixel(), calibration.getNmPerPixel()));
+		}
+
+		// Convert to pixels
+		model = PSFProtosHelper.convert(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
+
+		// Create the working model
+		astigmatismZModel = HoltzerAstigmatismZModel.create(model.getS0X(), model.getS0Y(), model.getGamma(),
+				model.getD(), model.getAx(), model.getBx(), model.getAy(), model.getBy());
+
+		// Store the parameters in the PSF
+		String modelName = getPSFModelName();
+		psf.clear().mergeFrom(PSFProtosHelper.createPSF(model, DistanceUnit.PIXEL, DistanceUnit.PIXEL));
+		psf.setModelName(modelName);
+		updatePSF(false);
+	}
+
+	/**
+	 * Gets the astigmatism Z model. This is only valid if the PSF type is an astigmatic Gaussian 2D and the parameters
+	 * are correctly configured.
+	 *
+	 * @return the astigmatism Z model (or null)
+	 * @throws ConfigurationException
+	 *             if the model cannot be created from the parameters
+	 */
+	public AstigmatismZModel getAstigmatismZModel() throws ConfigurationException
+	{
+		if (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
+		{
+			if (astigmatismZModel == null)
+			{
+				// Use the helper to convert the PSF parameters back to a model
+				AstigmatismModel model = PSFProtosHelper.createModel(getPSF(), DistanceUnit.PIXEL, DistanceUnit.PIXEL,
+						calibration.getNmPerPixel());
+				astigmatismZModel = HoltzerAstigmatismZModel.create(model.getS0X(), model.getS0Y(), model.getGamma(),
+						model.getD(), model.getAx(), model.getBx(), model.getAy(), model.getBy());
+			}
+			return astigmatismZModel;
+		}
+		return null;
+	}
+
+	/**
+	 * Checks if the PSF is 3D. Currently only an Astigmatic 2D Gaussian is supported. A check is made for a valid
+	 * astigmatism z-model.
+	 *
+	 * @return true, if is 3D
+	 */
+	public boolean is3D()
+	{
+		return (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) ? getAstigmatismZModel() != null : false;
 	}
 }

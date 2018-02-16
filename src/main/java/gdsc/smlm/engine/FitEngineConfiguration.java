@@ -1198,7 +1198,7 @@ public class FitEngineConfiguration implements Cloneable
 	{
 		FitConfiguration fitConfig = getFitConfiguration();
 		// If there is no calibration then the writer will just have the defaults
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		CalibrationWriter calibration = fitConfig.getCalibrationWriterReference();
 
 		// Fitting is always done pixels and radians
 		calibration.setDistanceUnit(DistanceUnit.PIXEL);

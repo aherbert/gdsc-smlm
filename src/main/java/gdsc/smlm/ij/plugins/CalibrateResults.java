@@ -96,7 +96,7 @@ public class CalibrateResults implements PlugIn
 			gd.addMessage("No calibration found, using defaults");
 		}
 
-		CalibrationWriter cw = results.getCalibrationWriterSafe();
+		final CalibrationWriter cw = results.getCalibrationWriterSafe();
 
 		gd.addStringField("Name", results.getName(), Math.max(Math.min(results.getName().length(), 60), 20));
 		if (existingCalibration)

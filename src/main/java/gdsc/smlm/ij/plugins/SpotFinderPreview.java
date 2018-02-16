@@ -349,6 +349,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			setLabel("");
 			this.imp.setOverlay(o);
 		}
+		// For astigmatism PSF.
+		// TODO - See if this is slowing the preview down. If so only do if the PSF type changes.
+		if (!PeakFit.configurePSFModel(config, PeakFit.FLAG_NO_SAVE))
+			return false;
 		return result;
 	}
 

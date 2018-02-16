@@ -177,7 +177,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		gd.addCheckbox("Show_histograms", settings.getShowHistograms());
 		gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
 
-		PeakFit.addCameraOptions(gd, fitConfig.getCalibrationWriter());
+		PeakFit.addCameraOptions(gd, fitConfig);
 		PeakFit.addPSFOptions(gd, fitConfig);
 		PeakFit.SimpleFitEngineConfigurationProvider provider = new PeakFit.SimpleFitEngineConfigurationProvider(
 				config);
