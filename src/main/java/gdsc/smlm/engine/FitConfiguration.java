@@ -437,7 +437,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			case ASTIGMATIC_GAUSSIAN_2D:
 				flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
-				nParams = 2;
+				//nParams = 2; // Store Sx and Sy
+				nParams = 8; // The PSF stores the full astigmatism model
 				break;
 			case ONE_AXIS_GAUSSIAN_2D:
 				if (isFixedPSF())
@@ -844,6 +845,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev);
 		if (isTwoAxisGaussian2D)
 			psf.getParametersBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev);
+		astigmatismZModel = null;
 		updateCoordinateShift();
 	}
 
@@ -858,6 +860,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setInitialPeakStdDev0(double initialPeakStdDev0)
 	{
 		psf.getParametersBuilder(PSFHelper.INDEX_SX).setValue(initialPeakStdDev0);
+		astigmatismZModel = null;
 		updateCoordinateShift();
 	}
 
@@ -876,6 +879,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public double getInitialXSD()
 	{
+		if (getAstigmatismZModel() != null)
+			return astigmatismZModel.getSx(0);
 		return psf.getParameters(PSFHelper.INDEX_SX).getValue();
 	}
 
@@ -892,6 +897,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (!isTwoAxisGaussian2D)
 			throw new IllegalStateException("Not a 2 axis Gaussian 2D PSF");
 		psf.getParametersBuilder(PSFHelper.INDEX_SY).setValue(initialPeakStdDev1);
+		astigmatismZModel = null;
 		updateCoordinateShift();
 	}
 
@@ -900,6 +906,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public double getInitialYSD()
 	{
+		if (getAstigmatismZModel() != null)
+			return astigmatismZModel.getSy(0);
 		if (isTwoAxisGaussian2D)
 			return psf.getParameters(PSFHelper.INDEX_SY).getValue();
 		return getInitialXSD();
@@ -2250,15 +2258,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
 		}
 
-		double xsd = params[Gaussian2DFunction.X_SD + offset];
-		double ysd = params[Gaussian2DFunction.Y_SD + offset];
-		// Map the width parameters using the z-model
-		// TODO - check the PSF type
+		double xsd, ysd;
+		// Map the width parameters using the z-model if present
 		if (getAstigmatismZModel() != null)
 		{
 			double z = params[Gaussian2DFunction.Z_POSITION + offset];
-			xsd *= astigmatismZModel.getSx(z);
-			ysd *= astigmatismZModel.getSy(z);
+			xsd = astigmatismZModel.getSx(z);
+			ysd = astigmatismZModel.getSy(z);
+		}
+		else
+		{
+			xsd = params[Gaussian2DFunction.X_SD + offset];
+			ysd = params[Gaussian2DFunction.Y_SD + offset];
 		}
 
 		// Check widths
@@ -2515,14 +2526,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			this.offsetx = offsetx;
 			this.offsety = offsety;
 			var = var2 = varCRLB = -1;
-			xsd = params[Gaussian2DFunction.X_SD + offset];
-			ysd = params[Gaussian2DFunction.Y_SD + offset];
 			// Map the width parameters using the z-model
 			if (getAstigmatismZModel() != null)
 			{
 				double z = getZ();
-				xsd *= astigmatismZModel.getSx(z);
-				ysd *= astigmatismZModel.getSy(z);
+				xsd = astigmatismZModel.getSx(z);
+				ysd = astigmatismZModel.getSy(z);
+			}
+			else
+			{
+				xsd = params[Gaussian2DFunction.X_SD + offset];
+				ysd = params[Gaussian2DFunction.Y_SD + offset];
 			}
 		}
 
@@ -2887,13 +2901,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		final double z = parameters[offset + Gaussian2DFunction.Z_POSITION];
 		final double x0 = initialParameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y0 = initialParameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
-		double xsd = parameters[offset + Gaussian2DFunction.X_SD];
-		double ysd = parameters[offset + Gaussian2DFunction.Y_SD];
+		double xsd, ysd;
 		// Map the width parameters using the z-model
 		if (getAstigmatismZModel() != null)
 		{
-			xsd *= astigmatismZModel.getSx(z);
-			ysd *= astigmatismZModel.getSy(z);
+			xsd = astigmatismZModel.getSx(z);
+			ysd = astigmatismZModel.getSy(z);
+		}
+		else
+		{
+			xsd = parameters[offset + Gaussian2DFunction.X_SD];
+			ysd = parameters[offset + Gaussian2DFunction.Y_SD];
 		}
 		final double xsd0 = initialParameters[offset + Gaussian2DFunction.X_SD];
 		final double ysd0 = initialParameters[offset + Gaussian2DFunction.Y_SD];
@@ -2914,24 +2932,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				xsd0, ysd0, variance, variance2, varianceCRLB, resultType);
 	}
 
-	/**
-	 * Unmap the width parameters using the Z model. This assumes the parameters are for a single peak.
-	 * <p>
-	 * Note that this is unnecessary if the original widths are known (i.e. at z=0) since they should be identical to
-	 * the current widths unmapped using the current z.
-	 *
-	 * @param params
-	 *            the params
-	 */
-	public void unmapZModel(double[] params)
-	{
-		if (getAstigmatismZModel() != null)
-		{
-			final double z = params[Gaussian2DFunction.Z_POSITION];
-			params[Gaussian2DFunction.X_SD] /= astigmatismZModel.getSx(z);
-			params[Gaussian2DFunction.Y_SD] /= astigmatismZModel.getSy(z);
-		}
-	}
+	// The model now entirely defines the width so no unmapping is necessary
+	//	/**
+	//	 * Unmap the width parameters using the Z model. This assumes the parameters are for a single peak.
+	//	 * <p>
+	//	 * Note that this is unnecessary if the original widths are known (i.e. at z=0) since they should be identical to
+	//	 * the current widths unmapped using the current z.
+	//	 *
+	//	 * @param params
+	//	 *            the params
+	//	 */
+	//	public void unmapZModel(double[] params)
+	//	{
+	//		if (getAstigmatismZModel() != null)
+	//		{
+	//			final double z = params[Gaussian2DFunction.Z_POSITION];
+	//			params[Gaussian2DFunction.X_SD] /= astigmatismZModel.getSx(z);
+	//			params[Gaussian2DFunction.Y_SD] /= astigmatismZModel.getSy(z);
+	//		}
+	//	}
 
 	/**
 	 * @return Set to true if fitting requires the camera counts, i.e. amplification is explicitly modelled during
@@ -4135,8 +4154,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * astigmatism z-model.
 	 *
 	 * @return true, if is 3D
+	 * @throws ConfigurationException
+	 *             if the 3D model cannot be created
 	 */
-	public boolean is3D()
+	public boolean is3D() throws ConfigurationException
 	{
 		return (getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) ? getAstigmatismZModel() != null : false;
 	}

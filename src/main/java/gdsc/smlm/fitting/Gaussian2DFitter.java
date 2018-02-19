@@ -521,14 +521,28 @@ public class Gaussian2DFitter
 			//double[] params2 = params.clone();
 
 			// Re-assemble all the parameters
-			if (!fitConfiguration.isYSDFitting() && fitConfiguration.isXSDFitting())
+			if (fitConfiguration.isXSDFitting())
 			{
-				// Ensure Y width is updated with the fitted X width
-				for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+				if (fitConfiguration.isYSDFitting())
 				{
-					params[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.X_SD];
-					if (paramsDev != null)
-						paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
+					// Ensure widths are positive
+					for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+					{
+						params[j + Gaussian2DFunction.X_SD] = Math.abs(params[j + Gaussian2DFunction.X_SD]);
+						params[j + Gaussian2DFunction.Y_SD] = Math.abs(params[j + Gaussian2DFunction.Y_SD]);
+					}
+				}
+				else
+				{
+					// Ensure Y width is updated with the fitted X width
+					for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
+					{
+						// Ensure width is positive
+						params[j + Gaussian2DFunction.X_SD] = Math.abs(params[j + Gaussian2DFunction.X_SD]);
+						params[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.X_SD];
+						if (paramsDev != null)
+							paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
+					}
 				}
 			}
 			if (fitConfiguration.isAngleFitting())
@@ -538,12 +552,6 @@ public class Gaussian2DFitter
 				{
 					correctAngle(i, params, paramsDev);
 				}
-			}
-			// Ensure widths are positive
-			for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
-			{
-				params[j + Gaussian2DFunction.X_SD] = Math.abs(params[j + Gaussian2DFunction.X_SD]);
-				params[j + Gaussian2DFunction.Y_SD] = Math.abs(params[j + Gaussian2DFunction.Y_SD]);
 			}
 
 			Object statusData = null;
@@ -580,74 +588,92 @@ public class Gaussian2DFitter
 		final int[] cumul_region = new int[] { 1, maxx, ySize };
 		for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak)
 		{
+			// ----
+			// Check all input parameters and estimate them if necessary
+			// ----
+
 			// Get the parameters
 			double signal = params[j + Gaussian2DFunction.SIGNAL];
 			double xpos = params[j + Gaussian2DFunction.X_POSITION];
 			double ypos = params[j + Gaussian2DFunction.Y_POSITION];
-			double sx = params[j + Gaussian2DFunction.X_SD];
-			double sy = params[j + Gaussian2DFunction.Y_SD];
-			double angle = params[j + Gaussian2DFunction.ANGLE];
-
-			// ----
-			// Check all input parameters and estimate them if necessary
-			// ----
 
 			// Set-up for estimating peak width at half maximum 
 			position[0] = (int) Math.round(xpos);
 			position[1] = (int) Math.round(ypos);
 			int index = position[1] * maxx + position[0];
 
-			if (sx == 0)
+			double sx, sy, angle;
+			if (fitConfiguration.isZFitting())
 			{
-				if (fitConfiguration.getInitialXSD() > 0)
-				{
-					sx = fitConfiguration.getInitialXSD();
-				}
-				else
-				{
-					// Fail if the width cannot be estimated due to out of bounds
-					if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
-						return false;
-
-					sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
-				}
+				// Use the widths at z=0. 
+				// These are used to determine the centre-of-mass range search.
+				// It does not matter if they are negative as we use max(1, sx+sy)
+				// to search for the centre. It will also effect the conversion of 
+				// amplitudes to signal.
+				sx = fitConfiguration.getInitialXSD();
+				sy = fitConfiguration.getInitialYSD();
+				angle = 0;
 			}
-
-			if (sy == 0)
+			else
 			{
-				if (fitConfiguration.isYSDFitting())
+
+				sx = params[j + Gaussian2DFunction.X_SD];
+				sy = params[j + Gaussian2DFunction.Y_SD];
+				angle = params[j + Gaussian2DFunction.ANGLE];
+
+				if (sx == 0)
 				{
-					if (fitConfiguration.getInitialYSD() > 0)
+					if (fitConfiguration.getInitialXSD() > 0)
 					{
-						sy = fitConfiguration.getInitialYSD();
+						sx = fitConfiguration.getInitialXSD();
 					}
 					else
 					{
-						// Fail if the width cannot be estimated
+						// Fail if the width cannot be estimated due to out of bounds
 						if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
 							return false;
 
-						sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
+						sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumul_region, background));
 					}
 				}
-				else
-				{
-					sy = sx;
-				}
-			}
 
-			// Guess the initial angle if input angle is out-of-bounds
-			if (angle == 0)
-			{
-				if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI &&
-						fitConfiguration.getInitialAngle() <= -Math.PI)
+				if (sy == 0)
 				{
-					if (sx != sy)
+					if (fitConfiguration.isYSDFitting())
 					{
-						// There is no angle gradient information if the widths are equal. Zero and it will be ignored
-						angle = fitConfiguration.getInitialAngle();
+						if (fitConfiguration.getInitialYSD() > 0)
+						{
+							sy = fitConfiguration.getInitialYSD();
+						}
+						else
+						{
+							// Fail if the width cannot be estimated
+							if (position[0] < 0 || position[0] > maxx || position[1] < 0 || position[1] > maxy)
+								return false;
+
+							sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumul_region, background));
+						}
+					}
+					else
+					{
+						sy = sx;
 					}
 				}
+
+				// Guess the initial angle if input angle is out-of-bounds
+				if (angle == 0)
+				{
+					if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI &&
+							fitConfiguration.getInitialAngle() <= -Math.PI)
+					{
+						if (sx != sy)
+						{
+							// There is no angle gradient information if the widths are equal. Zero and it will be ignored
+							angle = fitConfiguration.getInitialAngle();
+						}
+					}
+				}
+
 			}
 
 			// If the position is on the integer grid then use a centre-of-mass approximation
@@ -673,6 +699,8 @@ public class Gaussian2DFitter
 			params[j + Gaussian2DFunction.X_SD] = sx;
 			params[j + Gaussian2DFunction.Y_SD] = sy;
 			params[j + Gaussian2DFunction.ANGLE] = angle;
+			// Leave the z-position (i.e. do not reset to zero)
+			//params[j + Gaussian2DFunction.Z_POSITION] = 0;
 		}
 
 		return true;
@@ -779,8 +807,19 @@ public class Gaussian2DFitter
 
 		// Configure the bounds for the width.
 		// The factors are less strict than the fit configuration to allow some search space when fitting close to the limits.
-		final double min_wf = getMinWidthFactor();
-		final double max_wf = getMaxWidthFactor();
+		final double min_wf, max_wf;
+		final boolean isZFitting = fitConfiguration.isZFitting();
+		if (isZFitting)
+		{
+			min_wf = 0;
+			max_wf = Double.MAX_VALUE;
+		}
+		else
+		{
+			min_wf = getMinWidthFactor();
+			max_wf = getMaxWidthFactor();
+		}
+
 		// Get the upper bounds for the width factor. This is just used to estimate the upper bounds for the signal
 		// So it does not matter if it is too wrong.
 		final double wf = (max_wf < Double.MAX_VALUE) ? fitConfiguration.getMaxWidthFactor() : 3;
@@ -848,17 +887,19 @@ public class Gaussian2DFitter
 				lower[j + Gaussian2DFunction.ANGLE] = -Math.PI;
 				upper[j + Gaussian2DFunction.ANGLE] = Math.PI;
 			}
-			// TODO - Add support for z-depth fitting			
-			if (fitConfiguration.isZFitting())
+			// TODO - Add support for z-depth fitting. Currently this is unbounded.			
+			if (isZFitting)
 			{
 				lower[j + Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 				upper[j + Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
 			}
-
-			lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
-			upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
-			lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
-			upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
+			else
+			{
+				lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
+				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
+				lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
+				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
+			}
 		}
 
 		if (solver.isStrictlyPositiveFunction())
@@ -871,10 +912,13 @@ public class Gaussian2DFitter
 			{
 				if (lower[j + Gaussian2DFunction.SIGNAL] <= 0)
 					lower[j + Gaussian2DFunction.SIGNAL] = 0.1;
-				if (lower[j + Gaussian2DFunction.X_SD] <= 0)
-					lower[j + Gaussian2DFunction.X_SD] = 0.01;
-				if (lower[j + Gaussian2DFunction.Y_SD] <= 0)
-					lower[j + Gaussian2DFunction.Y_SD] = 0.01;
+				if (!isZFitting)
+				{
+					if (lower[j + Gaussian2DFunction.X_SD] <= 0)
+						lower[j + Gaussian2DFunction.X_SD] = 0.01;
+					if (lower[j + Gaussian2DFunction.Y_SD] <= 0)
+						lower[j + Gaussian2DFunction.Y_SD] = 0.01;
+				}
 			}
 		}
 

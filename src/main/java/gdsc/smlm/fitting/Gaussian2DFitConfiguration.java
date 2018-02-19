@@ -83,6 +83,11 @@ public interface Gaussian2DFitConfiguration
 
 	/**
 	 * Checks if is z fitting.
+	 * <p>
+	 * If z fitting then it is assumed that the function is not fitting X SD or Y SD and the widths are entirely defined
+	 * by the z position. However the configuration should still return a value for the initial X SD and Y SD, for
+	 * example the width at z=0. This can be used to estimate the centre of the Gaussian using its approximate size, or
+	 * convert amplitude estimates to signal (total volume of the Gaussian).
 	 *
 	 * @return true, if is z fitting
 	 */
