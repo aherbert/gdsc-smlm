@@ -500,6 +500,7 @@ message AstigmatismModelManagerSettings {
 	// For display
 	string selected = 13;
 	bool show_depth_of_focus = 16;
+	bool show_combined_width = 22;
 	bool show_psf = 18;
 	DistanceUnit z_distance_unit = 19;
 	DistanceUnit s_distance_unit = 20;

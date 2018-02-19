@@ -69,6 +69,7 @@ import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.GaussianPSFModel;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.SynchronizedPeakResults;
@@ -1407,6 +1408,7 @@ public class AstigmatismModelManager implements PlugIn
 		gd.addChoice("z_distance_unit", SettingsManager.getDistanceUnitNames(), pluginSettings.getZDistanceUnitValue());
 		gd.addChoice("s_distance_unit", SettingsManager.getDistanceUnitNames(), pluginSettings.getSDistanceUnitValue());
 		gd.addCheckbox("Show_depth_of_focus", pluginSettings.getShowDepthOfFocus());
+		gd.addCheckbox("Show_combined_width", pluginSettings.getShowCombinedWidth());
 		gd.addCheckbox("Show_PSF", pluginSettings.getShowPsf());
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -1416,6 +1418,7 @@ public class AstigmatismModelManager implements PlugIn
 		pluginSettings.setZDistanceUnitValue(gd.getNextChoiceIndex());
 		pluginSettings.setSDistanceUnitValue(gd.getNextChoiceIndex());
 		pluginSettings.setShowDepthOfFocus(gd.getNextBoolean());
+		pluginSettings.setShowCombinedWidth(gd.getNextBoolean());
 		pluginSettings.setShowPsf(gd.getNextBoolean());
 
 		// Try and get the named resource
@@ -1489,9 +1492,21 @@ public class AstigmatismModelManager implements PlugIn
 			plot.drawDottedLine(z0y - d, miny, z0y - d, maxy, 4);
 			plot.drawDottedLine(z0y + d, miny, z0y + d, maxy, 4);
 		}
+		String legend = "Sx\nSy";
+		if (pluginSettings.getShowCombinedWidth())
+		{
+			double [] s = new double[z.length];
+			for (int i = 0; i < z.length; i++)
+			{
+				s[i] = Gaussian2DPeakResultHelper.getStandardDeviation(sx[i], sy[i]);
+			}
+			plot.setColor(Color.GREEN);
+			plot.addPoints(z, s, Plot.LINE);
+			legend += "\tS";
+		}
 
 		plot.setColor(Color.BLACK);
-		plot.addLegend("Sx\nSy");
+		plot.addLegend(legend);
 		plot.addLabel(0, 0, String.format("Model = %s (%s nm/pixel)", name, Utils.rounded(model.getNmPerPixel())));
 		Utils.display(title, plot);
 

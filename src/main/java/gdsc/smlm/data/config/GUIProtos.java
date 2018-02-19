@@ -30099,6 +30099,11 @@ public final class GUIProtos {
     boolean getShowDepthOfFocus();
 
     /**
+     * <code>bool show_combined_width = 22;</code>
+     */
+    boolean getShowCombinedWidth();
+
+    /**
      * <code>bool show_psf = 18;</code>
      */
     boolean getShowPsf();
@@ -30173,6 +30178,7 @@ public final class GUIProtos {
       saveFitWidth_ = false;
       selected_ = "";
       showDepthOfFocus_ = false;
+      showCombinedWidth_ = false;
       showPsf_ = false;
       zDistanceUnit_ = 0;
       sDistanceUnit_ = 0;
@@ -30338,6 +30344,11 @@ public final class GUIProtos {
             case 168: {
 
               calibratedImage_ = input.readBool();
+              break;
+            }
+            case 176: {
+
+              showCombinedWidth_ = input.readBool();
               break;
             }
           }
@@ -30630,6 +30641,15 @@ public final class GUIProtos {
       return showDepthOfFocus_;
     }
 
+    public static final int SHOW_COMBINED_WIDTH_FIELD_NUMBER = 22;
+    private boolean showCombinedWidth_;
+    /**
+     * <code>bool show_combined_width = 22;</code>
+     */
+    public boolean getShowCombinedWidth() {
+      return showCombinedWidth_;
+    }
+
     public static final int SHOW_PSF_FIELD_NUMBER = 18;
     private boolean showPsf_;
     /**
@@ -30797,6 +30817,9 @@ public final class GUIProtos {
       if (calibratedImage_ != false) {
         output.writeBool(21, calibratedImage_);
       }
+      if (showCombinedWidth_ != false) {
+        output.writeBool(22, showCombinedWidth_);
+      }
     }
 
     public int getSerializedSize() {
@@ -30884,6 +30907,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(21, calibratedImage_);
       }
+      if (showCombinedWidth_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(22, showCombinedWidth_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -30947,6 +30974,8 @@ public final class GUIProtos {
           .equals(other.getSelected());
       result = result && (getShowDepthOfFocus()
           == other.getShowDepthOfFocus());
+      result = result && (getShowCombinedWidth()
+          == other.getShowCombinedWidth());
       result = result && (getShowPsf()
           == other.getShowPsf());
       result = result && zDistanceUnit_ == other.zDistanceUnit_;
@@ -31012,6 +31041,9 @@ public final class GUIProtos {
       hash = (37 * hash) + SHOW_DEPTH_OF_FOCUS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShowDepthOfFocus());
+      hash = (37 * hash) + SHOW_COMBINED_WIDTH_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowCombinedWidth());
       hash = (37 * hash) + SHOW_PSF_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShowPsf());
@@ -31201,6 +31233,8 @@ public final class GUIProtos {
 
         showDepthOfFocus_ = false;
 
+        showCombinedWidth_ = false;
+
         showPsf_ = false;
 
         zDistanceUnit_ = 0;
@@ -31261,6 +31295,7 @@ public final class GUIProtos {
         result.saveFitWidth_ = saveFitWidth_;
         result.selected_ = selected_;
         result.showDepthOfFocus_ = showDepthOfFocus_;
+        result.showCombinedWidth_ = showCombinedWidth_;
         result.showPsf_ = showPsf_;
         result.zDistanceUnit_ = zDistanceUnit_;
         result.sDistanceUnit_ = sDistanceUnit_;
@@ -31357,6 +31392,9 @@ public final class GUIProtos {
         }
         if (other.getShowDepthOfFocus() != false) {
           setShowDepthOfFocus(other.getShowDepthOfFocus());
+        }
+        if (other.getShowCombinedWidth() != false) {
+          setShowCombinedWidth(other.getShowCombinedWidth());
         }
         if (other.getShowPsf() != false) {
           setShowPsf(other.getShowPsf());
@@ -32246,6 +32284,32 @@ public final class GUIProtos {
       public Builder clearShowDepthOfFocus() {
         
         showDepthOfFocus_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean showCombinedWidth_ ;
+      /**
+       * <code>bool show_combined_width = 22;</code>
+       */
+      public boolean getShowCombinedWidth() {
+        return showCombinedWidth_;
+      }
+      /**
+       * <code>bool show_combined_width = 22;</code>
+       */
+      public Builder setShowCombinedWidth(boolean value) {
+        
+        showCombinedWidth_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_combined_width = 22;</code>
+       */
+      public Builder clearShowCombinedWidth() {
+        
+        showCombinedWidth_ = false;
         onChanged();
         return this;
       }
@@ -34405,7 +34469,7 @@ public final class GUIProtos {
       "max_allowed_counts\030\034 \001(\005\022\'\n\037pass_rate_co" +
       "unter_min_pass_rate\030\035 \001(\001\022\'\n\037pass_rate_c" +
       "ounter_max_pass_rate\030\036 \001(\001\022\'\n\037pass_rate_" +
-      "counter_inc_pass_rate\030\037 \001(\001\"\231\005\n\037Astigmat" +
+      "counter_inc_pass_rate\030\037 \001(\001\"\266\005\n\037Astigmat" +
       "ismModelManagerSettings\022\016\n\006option\030\001 \001(\005\022",
       "\024\n\014nm_per_slice\030\002 \001(\001\022E\n\023fit_engine_sett" +
       "ings\030\003 \001(\0132(.gdsc.smlm.data.config.FitEn" +
@@ -34417,21 +34481,22 @@ public final class GUIProtos {
       "w_estimated_curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022" +
       "\n\nmodel_name\030\014 \001(\t\022\022\n\nsave_model\030\016 \001(\010\022\026" +
       "\n\016save_fit_width\030\017 \001(\010\022\020\n\010selected\030\r \001(\t",
-      "\022\033\n\023show_depth_of_focus\030\020 \001(\010\022\020\n\010show_ps" +
-      "f\030\022 \001(\010\022<\n\017z_distance_unit\030\023 \001(\0162#.gdsc." +
-      "smlm.data.config.DistanceUnit\022<\n\017s_dista" +
-      "nce_unit\030\024 \001(\0162#.gdsc.smlm.data.config.D" +
-      "istanceUnit\022\030\n\020calibrated_image\030\025 \001(\010\022\020\n" +
-      "\010filename\030\021 \001(\t\"\226\002\n\023CropResultsSettings\022" +
-      "\024\n\014input_option\030\001 \001(\t\022\016\n\006border\030\002 \001(\001\022\t\n" +
-      "\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005 \001(\001\022\016\n\006he" +
-      "ight\030\006 \001(\001\022\025\n\rselect_region\030\007 \001(\010\022\017\n\007use" +
-      "_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022\024\n\014reset_o",
-      "rigin\030\n \001(\010\022\023\n\013output_name\030\013 \001(\t\022\023\n\013name" +
-      "_option\030\014 \001(\005\022\023\n\013name_suffix\030\r \001(\t\022\024\n\014na" +
-      "me_counter\030\016 \001(\005*O\n\014TemplateType\022\023\n\017INLI" +
-      "NE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017" +
-      "CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\022\033\n\023show_depth_of_focus\030\020 \001(\010\022\033\n\023show_co" +
+      "mbined_width\030\026 \001(\010\022\020\n\010show_psf\030\022 \001(\010\022<\n\017" +
+      "z_distance_unit\030\023 \001(\0162#.gdsc.smlm.data.c" +
+      "onfig.DistanceUnit\022<\n\017s_distance_unit\030\024 " +
+      "\001(\0162#.gdsc.smlm.data.config.DistanceUnit" +
+      "\022\030\n\020calibrated_image\030\025 \001(\010\022\020\n\010filename\030\021" +
+      " \001(\t\"\226\002\n\023CropResultsSettings\022\024\n\014input_op" +
+      "tion\030\001 \001(\t\022\016\n\006border\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n" +
+      "\001y\030\004 \001(\001\022\r\n\005width\030\005 \001(\001\022\016\n\006height\030\006 \001(\001\022" +
+      "\025\n\rselect_region\030\007 \001(\010\022\017\n\007use_roi\030\010 \001(\010\022",
+      "\021\n\troi_image\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010" +
+      "\022\023\n\013output_name\030\013 \001(\t\022\023\n\013name_option\030\014 \001" +
+      "(\005\022\023\n\013name_suffix\030\r \001(\t\022\024\n\014name_counter\030" +
+      "\016 \001(\005*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE" +
+      "\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMP" +
+      "LATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -34550,7 +34615,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor,
-        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", "ShowDepthOfFocus", "ShowPsf", "ZDistanceUnit", "SDistanceUnit", "CalibratedImage", "Filename", });
+        new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", "ShowDepthOfFocus", "ShowCombinedWidth", "ShowPsf", "ZDistanceUnit", "SDistanceUnit", "CalibratedImage", "Filename", });
     internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(17);
     internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable = new
