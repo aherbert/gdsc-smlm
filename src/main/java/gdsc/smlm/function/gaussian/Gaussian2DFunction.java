@@ -6,6 +6,7 @@ import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.ExtendedNonLinearFunction;
 import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.NamedFunction;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.ValueProcedure;
@@ -33,7 +34,7 @@ import gdsc.smlm.function.ValueProcedure;
  * <p>
  * The class provides an index of the position in the parameter array where the parameter is expected.
  */
-public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, Gradient1Function
+public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, Gradient1Function, NamedFunction
 {
 	/**
 	 * The factor for converting a Gaussian standard deviation to Full Width at Half Maxima (FWHM)
@@ -93,6 +94,16 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 			default: return "Unknown: "+index;
 			//@formatter:on
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.NamedFunction#getParameterName(int)
+	 */
+	public String getParameterName(int i)
+	{
+		return getName(i);
 	}
 
 	/**
