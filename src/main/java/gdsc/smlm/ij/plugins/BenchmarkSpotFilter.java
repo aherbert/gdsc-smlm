@@ -417,8 +417,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		final PSFSpot[] actual;
 		final boolean[] actualAssignment;
 
-		public FilterResult(int frame, FractionClassificationResult result,
-				ScoredSpot[] spots, PSFSpot[] actual, boolean[] actualAssignment)
+		public FilterResult(int frame, FractionClassificationResult result, ScoredSpot[] spots, PSFSpot[] actual,
+				boolean[] actualAssignment)
 		{
 			this.frame = frame;
 			this.result = result;
@@ -539,7 +539,8 @@ public class BenchmarkSpotFilter implements PlugIn
 							params[Gaussian2DFunction.X_POSITION] = cx;
 							params[Gaussian2DFunction.Y_POSITION] = cy;
 							params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sa[i];
-							overlapAnalysis = new GaussianOverlapAnalysis(flags, null, params, 2);
+							int maxx = GaussianOverlapAnalysis.getRange(sa[i], 2);
+							overlapAnalysis = new GaussianOverlapAnalysis(flags, null, params, maxx, maxx);
 						}
 
 						// Accumulate the function for j

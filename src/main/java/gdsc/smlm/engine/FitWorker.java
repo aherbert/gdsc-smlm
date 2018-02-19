@@ -1824,7 +1824,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		private double getLocalBackground(int n, int npeaks, double[] params, final int flags)
 		{
-			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, null, extractSpotParams(params, n), 2);
+			double[] spotParams = extractSpotParams(params, n);
+			// Do not evaluate over a region larger than the fit region
+			int maxx = Math.min(GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 2), width);
+			int maxy = Math.min(GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 2), height);
+			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
 			overlap.add(extractOtherParams(params, n, npeaks), true);
 			double[] overlapData = overlap.getOverlapData();
 			return overlapData[1] + params[Gaussian2DFunction.BACKGROUND];
@@ -1921,7 +1925,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Q. Should the parameters be mapped using the z-model. Currently the validatePeak(...)
 			// method of the FitConfiguration handles this dynamically and then the results are
 			// converted to PreProcessedPeakResults which also handles the mapping.			
-			
+
 			// The error is now set by the function solver. Not all function solvers can compute 
 			// the sum-of-squares so we can no longer update the error to be the independent
 			// of the solver.
