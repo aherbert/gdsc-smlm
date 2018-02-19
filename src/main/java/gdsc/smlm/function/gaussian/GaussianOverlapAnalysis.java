@@ -1,8 +1,9 @@
 package gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Sort;
+import gdsc.smlm.function.Erf;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -26,19 +27,16 @@ import gdsc.core.utils.Sort;
  */
 public class GaussianOverlapAnalysis
 {
-	private static final double[] p;
-	static
-	{
-		p = new double[20];
-		final NormalDistribution d = new NormalDistribution();
-		for (int x = 1; x < p.length; x++)
-			p[x] = d.probability(-x, x);
-	}
+	/**
+	 * A constant holding the maximum value an {@code int} can
+	 * have, 2<sup>31</sup>-1.
+	 */
+	private static final long MAX_VALUE_MINUS_1 = Integer.MAX_VALUE - 1;
+	private static final double SQRT2 = FastMath.sqrt(2.0);
 
 	private final int flags;
 	private final AstigmatismZModel zModel;
 	private final double[] params0;
-	private final double range;
 
 	private final int maxx, maxy, size;
 	private final double centrex, centrey;
@@ -52,40 +50,53 @@ public class GaussianOverlapAnalysis
 	 * @param flags
 	 *            The flags describing the Gaussian2DFunction function (see GaussianFunctionFactory)
 	 * @param zModel
-	 *            the z model
+	 *            the z model (used to create the widths from the z position)
 	 * @param params
 	 *            The parameters for the Gaussian (assumes a single peak)
-	 * @param range
-	 *            The range over which to compute the function (factor of the standard deviation). The standard
-	 *            deviation for the range will be expended by the z-model if provided.
+	 * @param maxx
+	 *            The x-range over which to compute the function (assumed to be strictly positive)
+	 * @param maxy
+	 *            The y-range over which to compute the function (assumed to be strictly positive)
 	 */
-	public GaussianOverlapAnalysis(int flags, AstigmatismZModel zModel, double[] params, double range)
+	public GaussianOverlapAnalysis(int flags, AstigmatismZModel zModel, double[] params, int maxx, int maxy)
 	{
 		this.flags = flags;
 		this.zModel = zModel;
 		this.params0 = params.clone();
-		this.range = range;
 
-		double sx = (params[Gaussian2DFunction.X_SD] == 0) ? 1 : params[Gaussian2DFunction.X_SD];
-		double sy = (params[Gaussian2DFunction.Y_SD] == 0) ? sx : params[Gaussian2DFunction.Y_SD];
-
-		// Use the z-model to expand the widths
-		if (zModel != null)
-		{
-			final double z = params[Gaussian2DFunction.Z_POSITION];
-			// Limit this to prevent a massive function range (in-case the z-model is bad)
-			sx = sx * Math.min(3, zModel.getSx(z));
-			sy = sy * Math.min(3, zModel.getSy(z));
-		}
-
-		maxx = 2 * ((int) Math.ceil(sx * range)) + 1;
-		maxy = 2 * ((int) Math.ceil(sy * range)) + 1;
+		this.maxx = Math.max(1, maxx);
+		this.maxy = Math.max(1, maxy);
 		size = maxx * maxy;
+		if (size < 0)
+			throw new IllegalArgumentException("Input range is too large: maxx * maxy = " + ((long) maxx) * maxy);
+		if (size > 1000)
+			System.out.printf("maxx=%d, maxy=%d, size=%d\n", maxx, maxy, size);
 		// We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
 		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
 		// centred in the middle of a pixel we need to adjust each centre 
 		centrex = maxx * 0.5 - 0.5;
 		centrey = maxy * 0.5 - 0.5;
+	}
+
+	/**
+	 * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
+	 * <p>
+	 * The range is clipped to 1 to Integer.MAX_VALUE.
+	 *
+	 * @param s
+	 *            the standard deviation
+	 * @param range
+	 *            the range factor
+	 * @return the range
+	 */
+	public static int getRange(double s, double range)
+	{
+		long l = (long) Math.ceil(2 * s * range);
+		if (l < 1L)
+			return 1;
+		if (l > MAX_VALUE_MINUS_1)
+			return Integer.MAX_VALUE;
+		return (int) l + 1;
 	}
 
 	/**
@@ -144,8 +155,30 @@ public class GaussianOverlapAnalysis
 			params0[Gaussian2DFunction.X_POSITION] = cx;
 			params0[Gaussian2DFunction.Y_POSITION] = cy;
 
-			// Compute the expected sum in the range 
-			final double expected = getArea(range) * params0[Gaussian2DFunction.SIGNAL];
+			// Compute the expected sum in the range.
+			double sx, sy;
+
+			// Find the input function widths
+			if (zModel != null)
+			{
+				final double z = params0[Gaussian2DFunction.Z_POSITION];
+				sx = zModel.getSx(z);
+				sy = zModel.getSy(z);
+			}
+			else
+			{
+				sx = (params0[Gaussian2DFunction.X_SD] == 0) ? 1 : params0[Gaussian2DFunction.X_SD];
+				sy = (params0[Gaussian2DFunction.Y_SD] == 0) ? sx : params0[Gaussian2DFunction.Y_SD];
+			}
+
+			// Determine how much of the function was evaluated. This involves mapping the 
+			// range evaluated relative to the standard deviation. 
+
+			// Since we are computing the integral in a pixel range with a centre in the 
+			// middle the width of the function evaluated is maxx or maxy.
+			final double rangex = maxx / (2 * sx);
+			final double rangey = maxy / (2 * sy);
+			final double expected = getArea(rangex) * getArea(rangey) * params0[Gaussian2DFunction.SIGNAL];
 
 			Sort.sort(indices, data);
 			double sum = 0, last = 0;
@@ -288,13 +321,19 @@ public class GaussianOverlapAnalysis
 	 * Get the probability of a standard Gaussian within the given range x, i.e. P(-x < X <= x)
 	 * 
 	 * @param x
+	 *            (must be positive)
 	 * @return The probability (0-1)
 	 */
 	public static double getArea(double x)
 	{
-		if ((int) x == x && x < p.length)
-			return p[(int) x];
-		final NormalDistribution d = new NormalDistribution();
-		return d.probability(-x, x);
+		//final NormalDistribution d = new NormalDistribution();
+		//return d.probability(-x, x);
+
+		// Since this is symmetrical then we only evaluate half of the error function.
+		//return 0.5 * Erf.erf(-x / SQRT2, x / SQRT2);
+		//return 0.5 * (Erf.erf(x / SQRT2) - Erf.erf(-x / SQRT2));
+
+		// This only need to be approximate so use a fast error function
+		return Erf.erf(x / SQRT2);
 	}
 }

@@ -16,7 +16,7 @@ package gdsc.smlm.function;
 /**
  * Wraps a value function to add pre-computed values to the forEach procedure
  */
-public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
+public class PrecomputedValueFunction implements ValueFunction, ValueProcedure, NamedFunction
 {
 	protected final ValueFunction f;
 	protected final double[] values;
@@ -108,5 +108,19 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure
 			return new PrecomputedValueFunction(func, b);
 		}
 		return func;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.NamedFunction#getParameterName(int)
+	 */
+	public String getParameterName(int i)
+	{
+		if (f instanceof NamedFunction)
+		{
+			return ((NamedFunction) f).getParameterName(i);
+		}
+		return "Unknown";
 	}
 }

@@ -7,7 +7,7 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.function.GradientFunction;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.NamedFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -448,9 +448,9 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 */
 	public String getName(int i)
 	{
-		if (f instanceof Gaussian2DFunction)
+		if (f instanceof NamedFunction)
 		{
-			return Gaussian2DFunction.getName(i);
+			return ((NamedFunction) f).getParameterName(i);
 		}
 		return "Unknown";
 	}
@@ -488,9 +488,9 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 				if (i != 0)
 					// Copy the values that were positive
 					System.arraycopy(y, 0, y2, 0, i);
-				
+
 				// Note that java initialises the array to zero so only copy the positives
-				
+
 				//y2[i] = 0; // We know this was not positive so skip it
 				while (++i < n)
 				{
