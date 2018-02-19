@@ -320,7 +320,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Gets a new calibration writer.
+	 * Gets a new calibration writer. Any changes to the writer must be saved using
+	 * {@link #setCalibration(Calibration)}.
 	 *
 	 * @return the calibration writer
 	 */
@@ -429,7 +430,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		invalidateGaussianFunction();
 
 		// Reset the astigmatism model. It will be dynamically created from the PSF settings.
-		astigmatismZModel = null;
+		if (resetAstigmatismModel)
+			astigmatismZModel = null;
 
 		int nParams;
 		PSFType psfType = psf.getPsfType();
@@ -504,10 +506,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			p.setUnit(PSFParameterUnit.ANGLE);
 		}
 
-		updateCoordinateShift();
 		// These depend on the 2-axis Gaussian flag
 		updateWidthThreshold();
 		updateMinWidthThreshold();
+
+		// This depends on the width. 
+		updateCoordinateShift();
 	}
 
 	/**
@@ -826,6 +830,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Sets the PSF type.
+	 * <p>
+	 * If the type is astigmatism and the astigmatism model cannot be constructed from the current PSF parameters then
+	 * the result filtering state may be incorrect. It is safer to call {@link #setAstigmatismModel(AstigmatismModel)}
+	 * which also updates the PSF type to astigmatism.
 	 *
 	 * @param psfType
 	 *            the new PSF type
@@ -865,9 +873,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the initial peak std dev.
+	 *
 	 * @return An estimate for the combined peak standard deviation
+	 * @throws ConfigurationException
+	 *             if the PSF type is astigmatism and the model cannot be constructed
 	 */
-	public double getInitialPeakStdDev()
+	public double getInitialPeakStdDev() throws ConfigurationException
 	{
 		if (isTwoAxisGaussian2D)
 			return Gaussian2DPeakResultHelper.getStandardDeviation(getInitialXSD(), getInitialYSD());
@@ -875,9 +887,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the initial XSD.
+	 *
 	 * @return An estimate for the peak standard deviation used to initialise the fit for dimension 0
+	 * @throws ConfigurationException
+	 *             if the PSF type is astigmatism and the model cannot be constructed
 	 */
-	public double getInitialXSD()
+	public double getInitialXSD() throws ConfigurationException
 	{
 		if (getAstigmatismZModel() != null)
 			return astigmatismZModel.getSx(0);
@@ -902,9 +918,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Gets the initial YSD.
+	 *
 	 * @return An estimate for the peak standard deviation used to initialise the fit for dimension 1
+	 * @throws ConfigurationException
+	 *             if the PSF type is astigmatism and the model cannot be constructed
 	 */
-	public double getInitialYSD()
+	public double getInitialYSD() throws ConfigurationException
 	{
 		if (getAstigmatismZModel() != null)
 			return astigmatismZModel.getSy(0);
@@ -1184,7 +1204,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double shiftFactor = getCoordinateShiftFactor();
 		if (shiftFactor > 0)
 		{
-			double widthMax = getWidthMax();
+			// It may throw if a model cannot be created for the astigmatism type.
+			double widthMax;
+			try
+			{
+				widthMax = getWidthMax();
+			}
+			catch (ConfigurationException e)
+			{
+				if (getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
+					throw e;
+				// This is OK as the full astigmatism model may not have been set yet.
+				// Just use a dummy value of 1
+				widthMax = 1;
+			}
 			if (widthMax > 0)
 			{
 				setCoordinateShift(shiftFactor * widthMax);
@@ -1198,8 +1231,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Gets the maximum of the initial X and Y widths.
 	 *
 	 * @return the width max
+	 * @throws ConfigurationException
+	 *             if the PSF type is astigmatism and the model cannot be constructed
 	 */
-	public double getWidthMax()
+	public double getWidthMax() throws ConfigurationException
 	{
 		double widthMax = getInitialXSD();
 		if (isTwoAxisGaussian2D)
@@ -1663,8 +1698,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private void updateZFilter()
 	{
-		// TODO - This could check if the PSF is 3D
-		zEnabled = (getMaxZ() != 0 || getMinZ() != 0);
+		// Check if the PSF is 3D but avoid exceptions from creating the z-model
+		zEnabled = getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
+		//is3D() // This can throw
+				&& (getMaxZ() != 0 || getMinZ() != 0);
 	}
 
 	/**
@@ -2265,6 +2302,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			double z = params[Gaussian2DFunction.Z_POSITION + offset];
 			xsd = astigmatismZModel.getSx(z);
 			ysd = astigmatismZModel.getSy(z);
+
+			// Check widths. This may be the only filter used even if z-fitting 
+			// (i.e. a z-depth filter is not used)
+			double xFactor = xsd / initialParams[Gaussian2DFunction.X_SD + offset];
+			double yFactor = ysd / initialParams[Gaussian2DFunction.Y_SD + offset];
+			final double s2 = xFactor * yFactor;
+
+			if (s2 > widthFactor || s2 < minWidthFactor)
+			{
+				if (log != null)
+				{
+					log.info("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n, xFactor, yFactor);
+				}
+				return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] { xFactor, yFactor });
+			}
 		}
 		else
 		{

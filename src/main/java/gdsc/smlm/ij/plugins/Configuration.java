@@ -16,6 +16,7 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.PSFProtos.PSF;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
@@ -242,10 +243,13 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 		{
 			Parameters.isAboveZero("nm per pixel", calibrationWriter.getNmPerPixel());
 			Parameters.isAboveZero("Exposure time", calibrationWriter.getExposureTime());
-			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-			if (fitConfig.getPSF().getParametersCount() > 1)
+			if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
 			{
-				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+				Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
+				if (fitConfig.getPSF().getParametersCount() > 1)
+				{
+					Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+				}
 			}
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());

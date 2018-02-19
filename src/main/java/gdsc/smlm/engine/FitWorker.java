@@ -1918,6 +1918,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			fitConfig.updateVariance(result.getParameterDeviations());
 
+			// Q. Should the parameters be mapped using the z-model. Currently the validatePeak(...)
+			// method of the FitConfiguration handles this dynamically and then the results are
+			// converted to PreProcessedPeakResults which also handles the mapping.			
+			
 			// The error is now set by the function solver. Not all function solvers can compute 
 			// the sum-of-squares so we can no longer update the error to be the independent
 			// of the solver.

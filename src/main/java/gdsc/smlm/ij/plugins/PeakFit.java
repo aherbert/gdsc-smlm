@@ -817,7 +817,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		String[] templates = ConfigurationTemplate.getTemplateNames(true);
 		gd.addChoice("Template", templates, templates[0]);
 
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		CalibrationReader calibration = fitConfig.getCalibrationReader();
 		addCameraOptions(gd, 0, fitConfig);
 		gd.addNumericField("Calibration", calibration.getNmPerPixel(), 2, 6, "nm/px");
 		gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
@@ -1361,7 +1361,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	/**
 	 * Adds the PSF options.
 	 * <p>
-	 * Note that if an astigmatic PSF is selected  then the model must be created with
+	 * Note that if an astigmatic PSF is selected then the model must be created with
 	 * {@link #configurePSFModel(FitEngineConfiguration, int)}.
 	 *
 	 * @param gd
@@ -1400,6 +1400,9 @@ public class PeakFit implements PlugInFilter, ItemListener
 							// The PSF is entirely defined in the model
 							String[] list = AstigmatismModelManager.listAstigmatismModels(false,
 									fitConfig.getCalibrationReader().getNmPerPixel(), 0.1);
+							// In case the calibration has not been updated
+							if (list.length == 0)
+								list = AstigmatismModelManager.listAstigmatismModels(false, true);
 							egd.addChoice("Z-model", list, fitConfig.getPSFModelName());
 						}
 						else
@@ -1881,6 +1884,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		Utils.log("PSF width = %s", Utils.rounded(fitConfig.getInitialXSD(), 4));
 
 		// Save
+		fitConfig.setCalibration(calibration.getCalibration());
 		saveFitEngineSettings();
 		SettingsManager.writeSettings(resultsSettings.build());
 
@@ -2174,6 +2178,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 		calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 		calibration.setExposureTime(Math.abs(gd.getNextNumber()));
+		fitConfig.setCalibration(calibration.getCalibration());
 
 		// Note: The bias and read noise will just end up being what was in the configuration file
 		// One fix for this is to save/load only the settings that are required from the configuration file
@@ -2254,10 +2259,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
 			Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-			Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
-			if (fitConfig.getPSF().getParametersCount() > 1)
+			if (fitConfig.getPSFTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE)
 			{
-				Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+				Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSD());
+				if (fitConfig.getPSF().getParametersCount() > 1)
+				{
+					Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSD());
+				}
 			}
 			Parameters.isAboveZero("Search_width", config.getSearch());
 			Parameters.isAboveZero("Fitting_width", config.getFitting());
@@ -2462,7 +2470,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return true;
 
 		// Create a converter to map the model units in pixels to nm for the dialog.
-		TypeConverter<DistanceUnit> c = fitConfig.getCalibrationWriter().getDistanceConverter(DistanceUnit.NM);
+		TypeConverter<DistanceUnit> c = fitConfig.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
@@ -2692,7 +2700,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			saveFitEngineSettings(config);
 
 		FitConfiguration fitConfig = config.getFitConfiguration();
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		CalibrationReader calibration = fitConfig.getCalibrationReader();
 		if (calibration.isSCMOS())
 		{
 			fitConfig.setCameraModel(CameraModelManager.load(fitConfig.getCameraModelName()));
@@ -2789,6 +2797,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				calibration.setReadNoise(Math.abs(gd.getNextNumber()));
 				calibration.setQuantumEfficiency(Math.abs(gd.getNextNumber()));
 				calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
+				fitConfig.setCalibration(calibration.getCalibration());
 			}
 			fitConfig.setSearchMethod(gd.getNextChoiceIndex());
 			fitConfig.setRelativeThreshold(getThresholdNumber(gd));
@@ -2943,6 +2952,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 				{
 					calibration.setBias(Math.abs(gd.getNextNumber()));
 					calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
+					fitConfig.setCalibration(calibration.getCalibration());
 				}
 			}
 
@@ -3025,13 +3035,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle sourceBounds, Rectangle cropBounds,
 			boolean initialise)
 	{
-		if (fitConfig.getCalibrationWriter().isSCMOS() && sourceBounds != null)
+		CalibrationReader calibration = fitConfig.getCalibrationReader();
+		if (calibration.isSCMOS() && sourceBounds != null)
 		{
 			CameraModel cameraModel = fitConfig.getCameraModel();
 			if (cameraModel == null)
 			{
-				throw new IllegalStateException(
-						"No camera model for camera type: " + fitConfig.getCalibrationWriter().getCameraType());
+				throw new IllegalStateException("No camera model for camera type: " + calibration.getCameraType());
 			}
 
 			// The camera model origin must be reset to the be relative to the source bounds origin
@@ -3783,7 +3793,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		// Do not use set() as we support merging a partial calibration
 		fitConfig.mergeCalibration(cal);
-		CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+		CalibrationReader calibration = fitConfig.getCalibrationReader();
 
 		textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
 		if (calibration.hasNmPerPixel())

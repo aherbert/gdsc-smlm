@@ -889,6 +889,10 @@ public class Gaussian2DFitter
 			{
 				lower[j + Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
 				upper[j + Gaussian2DFunction.Z_POSITION] = Double.POSITIVE_INFINITY;
+				// The widths are not fit but set simple limits 
+				// to avoid errors when checking the limits
+				upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD];
+				upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD];
 			}
 			else
 			{
