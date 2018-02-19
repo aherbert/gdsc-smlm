@@ -2713,6 +2713,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			System.arraycopy(params, 1 + offset, p, 1, Gaussian2DFunction.PARAMETERS_PER_PEAK);
 			p[Gaussian2DFunction.X_POSITION] += offsetx;
 			p[Gaussian2DFunction.Y_POSITION] += offsety;
+			// In case of astigmatism
+			p[Gaussian2DFunction.X_SD] = xsd;
+			p[Gaussian2DFunction.Y_SD] = ysd;
 			return p;
 		}
 

@@ -483,10 +483,6 @@ public class Gaussian2DFitter
 					0, null, 0, 0);
 		}
 
-		// Input configured bounds
-		double[] lower = this.lower;
-		double[] upper = this.upper;
-
 		// Re-copy the parameters now they have all been set
 		initialParams = params.clone();
 
@@ -500,7 +496,8 @@ public class Gaussian2DFitter
 		// Bounds are more restrictive than constraints
 		if (solver.isBounded())
 		{
-			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, lower, upper);
+			// Input configured bounds
+			setBounds(maxx, maxy, npeaks, params, y, ySize, paramsPerPeak, this.lower, this.upper);
 		}
 		else if (solver.isConstrained())
 		{
