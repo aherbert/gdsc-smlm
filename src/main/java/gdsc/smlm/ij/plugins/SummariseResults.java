@@ -91,7 +91,7 @@ public class SummariseResults implements PlugIn
 		{
 			StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
 			// Calibration
-			sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\tPrecision Method");
+			sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");
 			for (String statName : new String[] { "Precision (nm)", "SNR" })
 			{
 				sb.append("\tAv ").append(statName);
@@ -231,6 +231,12 @@ public class SummariseResults implements PlugIn
 		{
 			sb.append("\t\t\t\t\t");
 		}
+		
+		if (result.is3D())
+			sb.append("\tY");
+		else
+			sb.append("\tN");
+			
 		sb.append("\t").append(FitProtosHelper.getName(precisionMethod));
 		if (stored)
 			sb.append(" (Stored)");
