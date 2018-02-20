@@ -1139,6 +1139,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean computedMulti = false;
 		double[] residualsMulti = null;
 		double valueMulti = 0;
+		double localBackgroundMulti = 0;
 		MultiPathFitResult.FitResult resultDoubletMulti = null;
 		boolean computedDoubletMulti = false;
 		QuadrantAnalysis qaMulti = null;
@@ -1785,8 +1786,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						fitConfig.getAstigmatismZModel(), frozenParams);
 
 				// Note: This could be the current candidate or drift to another candidate
+				localBackgroundMulti = getLocalBackground(0, npeaks, frozenParams, flags);
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
-						fitParamStdDevs, getLocalBackground(0, npeaks, frozenParams, flags), resultType);
+						fitParamStdDevs, localBackgroundMulti, resultType);
 
 				// Neighbours
 				int n = 1;
@@ -1822,17 +1824,41 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return false;
 		}
 
+		/**
+		 * Gets the local background for the given peak.
+		 *
+		 * @param n
+		 *            the peak number
+		 * @param npeaks
+		 *            the total number of peaks (must be above 1)
+		 * @param params
+		 *            the params
+		 * @param flags
+		 *            the function flags
+		 * @return the local background
+		 */
 		private double getLocalBackground(int n, int npeaks, double[] params, final int flags)
 		{
+			// Note: This does not include any precomputed peaks. 
+			// These will be outside the fit region but may have an effect on peaks near
+			// the edge of the fit region.
+
 			double[] spotParams = extractSpotParams(params, n);
-			// Do not evaluate over a region larger than the fit region
-			int maxx = Math.min(GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 2), width);
-			int maxy = Math.min(GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 2), height);
+			// Do not evaluate over a large region for speed. 
+			// Use only +/- 1 SD as this is 68% of the Gaussian volume or 5 pixels.
+			int maxx = GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 1, 5);
+			int maxy = GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 1, 5);
 			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
 			overlap.add(extractOtherParams(params, n, npeaks), true);
 			double[] overlapData = overlap.getOverlapData();
 			return overlapData[1] + params[Gaussian2DFunction.BACKGROUND];
 		}
+
+		// TODO: Get all the fit params and the precomputed peaks for the region.
+		// If n peaks is above 1
+		// Evaluate each peak in the region.
+		// Build the local background using all but the peak of interest summed 
+		// from a small region around the peak.
 
 		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close)
 		{
@@ -2125,7 +2151,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//				}
 
 			resultDoubletMulti = fitAsDoublet(fitResult, region, precomputedFunctionValues, residualsThreshold,
-					neighbours, peakNeighbours2, qaMulti, singleValue, 0);
+					neighbours, peakNeighbours2, qaMulti, singleValue, localBackgroundMulti);
 
 			//			if (resultMultiDoublet != null && resultMultiDoublet.status == FitStatus.BAD_PARAMETERS.ordinal())
 			//			{

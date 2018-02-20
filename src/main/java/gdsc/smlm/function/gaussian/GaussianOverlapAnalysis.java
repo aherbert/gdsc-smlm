@@ -28,10 +28,10 @@ import gdsc.smlm.function.Erf;
 public class GaussianOverlapAnalysis
 {
 	/**
-	 * A constant holding 1 less than the maximum value an {@code int} can
-	 * have, 2<sup>31</sup>-2.
+	 * A constant holding  the maximum value an {@code int} can
+	 * have, 2<sup>31</sup>-1.
 	 */
-	private static final long MAX_VALUE_MINUS_1 = Integer.MAX_VALUE - 1;
+	private static final long MAX_VALUE = Integer.MAX_VALUE;
 	private static final double SQRT2 = FastMath.sqrt(2.0);
 
 	private final int flags;
@@ -94,8 +94,31 @@ public class GaussianOverlapAnalysis
 		long l = (long) Math.ceil(2 * s * range);
 		if (l < 1L)
 			return 1;
-		if (l > MAX_VALUE_MINUS_1)
+		if (l >= MAX_VALUE)
 			return Integer.MAX_VALUE;
+		return (int) l + 1;
+	}
+
+	/**
+	 * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
+	 * <p>
+	 * The range is clipped to 1 to max.
+	 *
+	 * @param s
+	 *            the standard deviation
+	 * @param range
+	 *            the range factor
+	 * @param max
+	 *            the max value to return
+	 * @return the range
+	 */
+	public static int getRange(double s, double range, int max)
+	{
+		long l = (long) Math.ceil(2 * s * range);
+		if (l < 1L)
+			return 1;
+		if (l >= max)
+			return max;
 		return (int) l + 1;
 	}
 

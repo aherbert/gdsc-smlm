@@ -2626,7 +2626,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		public float getNoise()
 		{
-			// Comment this out to use the configured local background.
+			// Comment this out to use the configured local background, i.e. this.localBackground.
 			// If uncommented then the background will be either the local background or the fitted background.
 			final double localBackground = getLocalBackground();
 
