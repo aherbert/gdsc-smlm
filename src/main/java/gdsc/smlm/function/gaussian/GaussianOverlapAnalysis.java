@@ -28,8 +28,8 @@ import gdsc.smlm.function.Erf;
 public class GaussianOverlapAnalysis
 {
 	/**
-	 * A constant holding the maximum value an {@code int} can
-	 * have, 2<sup>31</sup>-1.
+	 * A constant holding 1 less than the maximum value an {@code int} can
+	 * have, 2<sup>31</sup>-2.
 	 */
 	private static final long MAX_VALUE_MINUS_1 = Integer.MAX_VALUE - 1;
 	private static final double SQRT2 = FastMath.sqrt(2.0);
