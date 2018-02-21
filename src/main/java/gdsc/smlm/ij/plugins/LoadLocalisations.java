@@ -152,14 +152,14 @@ public class LoadLocalisations implements PlugIn
 				}
 				results.setPSF(PSFHelper.create(psfType));
 
-				float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
-				float x = (float) (l.x);
-				float y = (float) (l.y);
-				float z = (float) (l.z);
-
 				for (int i = 0; i < size(); i++)
 				{
 					l = get(i);
+					float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
+					float x = (float) (l.x);
+					float y = (float) (l.y);
+					float z = (float) (l.z);
+					
 					float[] params;
 					switch (psfType)
 					{
