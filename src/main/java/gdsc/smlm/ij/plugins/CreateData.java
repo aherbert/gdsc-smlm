@@ -525,7 +525,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private static String benchmarkFile = "";
 	private static String benchmarkImage = "";
-	private static boolean benchmarkAuto = true;
+	private static boolean benchmarkAuto = false;
 	private static int benchmarkImageId = 0;
 	private static String benchmarkResultsName = "";
 
@@ -5865,6 +5865,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		String[] images = Utils.getImageList(Utils.GREY_SCALE);
 		gd.addChoice("Image", images, benchmarkImage);
 		gd.addFilenameField("Results_file", benchmarkFile);
+		gd.addMessage(
+				TextUtils.wrap("Specify if the results are preprocessed. This is true only if the simulation was " +
+						"previously loaded and then saved to a GDSC SMLM file format from memory. Set to false " +
+						"to load using a universal results loader.", 80));
 		gd.addCheckbox("Preprocessed_results", benchmarkAuto);
 
 		gd.showDialog();
