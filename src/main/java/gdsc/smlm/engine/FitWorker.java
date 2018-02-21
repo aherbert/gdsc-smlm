@@ -55,7 +55,6 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.FastGaussianOverlapAnalysis;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.AttributePeakResult;
@@ -1861,8 +1860,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			double[] spotParams = extractSpotParams(params, n);
 			// Do not evaluate over a large region for speed. 
 			// Use only +/- 1 SD as this is 68% of the Gaussian volume or 5 pixels.
-			int maxx = GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 1, 5);
-			int maxy = GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 1, 5);
+			int maxx = FastGaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 1, 5);
+			int maxy = FastGaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 1, 5);
 
 			FastGaussianOverlapAnalysis overlap = new FastGaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
 			overlap.add(extractOtherParams(params, n, npeaks));
@@ -2672,10 +2671,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Add the contribution from the precomputed neighbours 
 					localBackgroundSingle = fitParams[Gaussian2DFunction.BACKGROUND] +
 							getBackgroundContribution(getPrecomputedFittedNeighbours(), fitParams);
-					// Debug if this ever adds a significant amount
-					System.out.printf("Background=%f, Neighbours=%f (%f)\n", fitParams[Gaussian2DFunction.BACKGROUND],
-							localBackgroundSingle - fitParams[Gaussian2DFunction.BACKGROUND],
-							localBackgroundSingle / fitParams[Gaussian2DFunction.BACKGROUND]);
+					//// Debug if this ever adds a significant amount
+					//System.out.printf("Background=%f, Neighbours=%f (%f)\n", fitParams[Gaussian2DFunction.BACKGROUND],
+					//		localBackgroundSingle - fitParams[Gaussian2DFunction.BACKGROUND],
+					//		localBackgroundSingle / fitParams[Gaussian2DFunction.BACKGROUND]);
 				}
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
 						fitParamDevs, localBackgroundSingle, resultType);
