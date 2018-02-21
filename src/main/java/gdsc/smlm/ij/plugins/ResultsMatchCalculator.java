@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import gdsc.core.data.utils.Rounder;
+import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.BasePoint;
 import gdsc.core.match.Coordinate;
@@ -65,6 +67,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	private static TextWindow resultsWindow = null;
 	private static TextWindow pairsWindow = null;
 	private static ImageROIPainter pairPainter = null;
+
+	private Rounder rounder = RounderFactory.create(4);
 
 	/*
 	 * (non-Javadoc)
@@ -223,11 +227,15 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				for (PointPair pair : matches)
 				{
 					PeakResult p = ((PeakResultPoint) pair.getPoint2()).peakResult;
+					p = p.clone();
+					p.setOrigValue(1);
 					fileResults.add(p);
 				}
 				for (Coordinate c : FP)
 				{
 					PeakResult p = ((PeakResultPoint) c).peakResult;
+					p = p.clone();
+					p.setOrigValue(0);
 					fileResults.add(p);
 				}
 			}
@@ -477,19 +485,21 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			{
 				public void execute(PeakResult p)
 				{
-					final float x, y;
+					final float x, y, z;
 					if (integerCoordinates)
 					{
 						x = (int) p.getXPosition();
 						y = (int) p.getYPosition();
+						z = (int) p.getZPosition();
 					}
 					else
 					{
 						x = p.getXPosition();
 						y = p.getYPosition();
+						z = p.getZPosition();
 					}
 					for (int t = p.getFrame() - minT, i = p.getEndFrame() - p.getFrame() + 1; i-- > 0; t++)
-						tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, p));
+						tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, z, p));
 				}
 			});
 
@@ -608,24 +618,24 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		StringBuilder sb = new StringBuilder();
 		sb.append(i1).append('\t');
 		sb.append(i2).append('\t');
-		sb.append(IJ.d2s(dThrehsold, 2)).append('\t');
+		sb.append(rounder.round(dThrehsold)).append('\t');
 		sb.append(result.getNumberPredicted()).append('\t');
 		sb.append(result.getTruePositives()).append('\t');
 		sb.append(result.getFalsePositives()).append('\t');
 		sb.append(result.getFalseNegatives()).append('\t');
-		sb.append(IJ.d2s(result.getJaccard(), 4)).append('\t');
-		sb.append(IJ.d2s(result.getRMSD(), 4)).append('\t');
-		sb.append(IJ.d2s(result.getPrecision(), 4)).append('\t');
-		sb.append(IJ.d2s(result.getRecall(), 4)).append('\t');
-		sb.append(IJ.d2s(result.getFScore(0.5), 4)).append('\t');
-		sb.append(IJ.d2s(result.getFScore(1.0), 4)).append('\t');
-		sb.append(IJ.d2s(result.getFScore(2.0), 4)).append('\t');
-		sb.append(IJ.d2s(result.getFScore(beta), 4));
+		sb.append(rounder.round(result.getJaccard())).append('\t');
+		sb.append(rounder.round(result.getRMSD())).append('\t');
+		sb.append(rounder.round(result.getPrecision())).append('\t');
+		sb.append(rounder.round(result.getRecall())).append('\t');
+		sb.append(rounder.round(result.getFScore(0.5))).append('\t');
+		sb.append(rounder.round(result.getFScore(1.0))).append('\t');
+		sb.append(rounder.round(result.getFScore(2.0))).append('\t');
+		sb.append(rounder.round(result.getFScore(beta)));
 		if (idResult1 != null)
 		{
 			sb.append('\t').append(idResult1.getNumberPredicted());
 			sb.append('\t').append(idResult1.getTruePositives());
-			sb.append('\t').append(IJ.d2s(idResult1.getRecall(), 4));
+			sb.append('\t').append(rounder.round(idResult1.getRecall()));
 		}
 		else if (idResult2 != null)
 		{
@@ -635,7 +645,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		{
 			sb.append('\t').append(idResult2.getNumberPredicted());
 			sb.append('\t').append(idResult2.getTruePositives());
-			sb.append('\t').append(IJ.d2s(idResult2.getRecall(), 4));
+			sb.append('\t').append(rounder.round(idResult2.getRecall()));
 		}
 		else if (idResult1 != null)
 		{
@@ -702,7 +712,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		addPoint(sb, p2);
 		double d = pair.getXYDistance();
 		if (d >= 0)
-			sb.append(Utils.rounded(d, 4)).append('\t');
+			sb.append(rounder.round(d)).append('\t');
 		else
 			sb.append("-\t");
 		return sb.toString();
@@ -716,9 +726,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		}
 		else
 		{
-			sb.append(IJ.d2s(p.getX())).append('\t');
-			sb.append(IJ.d2s(p.getY())).append('\t');
-			sb.append(IJ.d2s(p.getZ())).append('\t');
+			sb.append(rounder.round(p.getX())).append('\t');
+			sb.append(rounder.round(p.getY())).append('\t');
+			sb.append(rounder.round(p.getZ())).append('\t');
 		}
 	}
 
@@ -759,9 +769,9 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		int t;
 		PeakResult peakResult;
 
-		public PeakResultPoint(int t, float x, float y, PeakResult peakResult)
+		public PeakResultPoint(int t, float x, float y, float z, PeakResult peakResult)
 		{
-			super(x, y);
+			super(x, y, z);
 			this.t = t;
 			this.peakResult = peakResult;
 		}
