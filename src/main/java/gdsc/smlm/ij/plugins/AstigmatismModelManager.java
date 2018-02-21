@@ -417,8 +417,6 @@ public class AstigmatismModelManager implements PlugIn
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		pluginSettings = SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
-
 		guessScale();
 
 		gd.addMessage("Use Gaussian 2D PSF fitting to create an astigmatism z-model");
@@ -1267,8 +1265,10 @@ public class AstigmatismModelManager implements PlugIn
 	private boolean saveModel()
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Save the model");
 		gd.addCheckbox("Save_model", pluginSettings.getSaveModel());
 		gd.addStringField("Model_name", pluginSettings.getModelName());
+		gd.addMessage("Save the model width to this plugin's settings, e.g. to use\non another selected PSF when creating a model.");
 		gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
 		//gd.setCancelLabel(" No ");
 		gd.showDialog();
