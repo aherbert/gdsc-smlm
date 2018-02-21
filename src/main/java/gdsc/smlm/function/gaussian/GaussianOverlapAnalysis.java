@@ -21,14 +21,14 @@ import gdsc.smlm.function.Erf;
 /**
  * Compute the overlap between 2D Gaussian functions.
  * <p>
- * Given an input 2D Gaussian a region is created that covers a range of the function (relative to the SD). The square
- * region is masked using the expected sum of the function within the range. The overlap of other functions within this
- * region can be computed.
+ * Given an input 2D Gaussian a region is created that covers a range of the function. The square
+ * region is masked using a fraction of the expected sum of the function within the range. The overlap of other
+ * functions within this region can be computed.
  */
 public class GaussianOverlapAnalysis
 {
 	/**
-	 * A constant holding  the maximum value an {@code int} can
+	 * A constant holding the maximum value an {@code int} can
 	 * have, 2<sup>31</sup>-1.
 	 */
 	private static final long MAX_VALUE = Integer.MAX_VALUE;
@@ -43,6 +43,8 @@ public class GaussianOverlapAnalysis
 
 	private double[] data = null, overlap = null;
 	private boolean[] mask = null;
+
+	private double fraction = 0.95;
 
 	/**
 	 * Create a new overlap analysis object.
@@ -69,8 +71,6 @@ public class GaussianOverlapAnalysis
 		size = maxx * maxy;
 		if (size < 0)
 			throw new IllegalArgumentException("Input range is too large: maxx * maxy = " + ((long) maxx) * maxy);
-		if (size > 1000)
-			System.out.printf("maxx=%d, maxy=%d, size=%d\n", maxx, maxy, size);
 		// We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
 		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
 		// centred in the middle of a pixel we need to adjust each centre 
@@ -167,64 +167,48 @@ public class GaussianOverlapAnalysis
 			params0[Gaussian2DFunction.Y_POSITION] = centrey;
 
 			f.initialise(params0);
-			final int[] indices = new int[size];
 			for (int k = 0; k < size; k++)
 			{
-				final double v = f.eval(k);
-				data[k] = v;
-				indices[k] = k;
+				data[k] = f.eval(k);
 			}
 			// Reset
 			params0[Gaussian2DFunction.X_POSITION] = cx;
 			params0[Gaussian2DFunction.Y_POSITION] = cy;
 
-			// Compute the expected sum in the range.
-			double sx, sy;
-
-			// Find the input function widths
-			if (zModel != null)
+			if (fraction < 1)
 			{
-				final double z = params0[Gaussian2DFunction.Z_POSITION];
-				sx = zModel.getSx(z);
-				sy = zModel.getSy(z);
-			}
-			else
-			{
-				sx = (params0[Gaussian2DFunction.X_SD] == 0) ? 1 : params0[Gaussian2DFunction.X_SD];
-				sy = (params0[Gaussian2DFunction.Y_SD] == 0) ? sx : params0[Gaussian2DFunction.Y_SD];
-			}
-
-			// Determine how much of the function was evaluated. This involves mapping the 
-			// range evaluated relative to the standard deviation. 
-
-			// Since we are computing the integral in a pixel range with a centre in the 
-			// middle the width of the function evaluated is maxx or maxy.
-			final double rangex = maxx / (2 * sx);
-			final double rangey = maxy / (2 * sy);
-			final double expected = getArea(rangex) * getArea(rangey) * params0[Gaussian2DFunction.SIGNAL];
-
-			Sort.sort(indices, data);
-			double sum = 0, last = 0;
-			boolean useMask = false;
-			mask = new boolean[data.length];
-			for (int i = 0; i < data.length; i++)
-			{
-				final double v = data[indices[i]];
-				// Note: We track the value since the Gaussian is symmetric and we want to include
-				// all pixels with the same value
-				final double newSum = sum + v;
-				if (newSum >= expected && last != v)
+				// Create a mask with a fraction of the function value
+				double sum = 0;
+				final int[] indices = new int[size];
+				for (int k = 0; k < size; k++)
 				{
-					// This is a new value that takes us over the expected signal
-					useMask = true;
-					break;
+					sum += data[k];
+					indices[k] = k;
 				}
-				sum = newSum;
-				mask[indices[i]] = true;
-				last = v;
+				Sort.sort(indices, data);
+				double expected = sum * fraction;
+				double last = 0;
+				boolean useMask = false;
+				mask = new boolean[data.length];
+				for (int i = 0; i < data.length; i++)
+				{
+					final double v = data[indices[i]];
+					// Note: We track the value since the Gaussian is symmetric and we want to include
+					// all pixels with the same value
+					final double newSum = sum + v;
+					if (newSum >= expected && last != v)
+					{
+						// This is a new value that takes us over the expected signal
+						useMask = true;
+						break;
+					}
+					sum = newSum;
+					mask[indices[i]] = true;
+					last = v;
+				}
+				if (!useMask)
+					mask = null;
 			}
-			if (!useMask)
-				mask = null;
 		}
 
 		// Add the function to the overlap
@@ -358,5 +342,29 @@ public class GaussianOverlapAnalysis
 
 		// This only need to be approximate so use a fast error function
 		return Erf.erf(x / SQRT2);
+	}
+
+	/**
+	 * Gets the fraction of the function value to use to create the mask region.
+	 *
+	 * @return the fraction
+	 */
+	public double getFraction()
+	{
+		return fraction;
+	}
+
+	/**
+	 * Sets the fraction of the function value to use to create the mask region. Since a Gaussian 2D function can be
+	 * circular this can help ignore the corners of the function as it is evaluated on a rectangular region.
+	 *
+	 * @param fraction
+	 *            the new fraction
+	 */
+	public void setFraction(double fraction)
+	{
+		if (fraction > 1 || fraction < 0)
+			throw new IllegalArgumentException("Fraction must be in the range 0-1");
+		this.fraction = fraction;
 	}
 }
