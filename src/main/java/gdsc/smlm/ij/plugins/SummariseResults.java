@@ -14,29 +14,38 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import ij.IJ;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+import ij.plugin.WindowOrganiser;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 
 /**
  * Produces a summary table of the results that are stored in memory.
  */
-public class SummariseResults implements PlugIn
+public class SummariseResults implements PlugIn, MouseListener
 {
 	private static final String TITLE = "Summarise Results";
 
@@ -101,6 +110,8 @@ public class SummariseResults implements PlugIn
 			}
 			summary = new TextWindow("Peak Results Summary", sb.toString(), "", 800, 300);
 			summary.setVisible(true);
+
+			summary.getTextPanel().addMouseListener(this);
 		}
 		// This could be optional but at current there is no dialog and it seems unnecessary
 		clearSummaryTable();
@@ -231,12 +242,12 @@ public class SummariseResults implements PlugIn
 		{
 			sb.append("\t\t\t\t\t");
 		}
-		
+
 		if (result.is3D())
 			sb.append("\tY");
 		else
 			sb.append("\tN");
-			
+
 		sb.append("\t").append(FitProtosHelper.getName(precisionMethod));
 		if (stored)
 			sb.append(" (Stored)");
@@ -255,5 +266,162 @@ public class SummariseResults implements PlugIn
 			}
 		}
 		sb.append("\n");
+	}
+
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getClickCount() > 1)
+		{
+			showStatistics();
+			e.consume();
+		}
+	}
+
+	private void showStatistics()
+	{
+		TextPanel textPanel = summary.getTextPanel();
+		int selectedIndex = textPanel.getSelectionStart();
+		if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
+			return;
+		String line = textPanel.getLine(selectedIndex);
+		int endIndex = line.indexOf('\t');
+		if (endIndex == -1)
+			return;
+		String name = line.substring(0, endIndex);
+		final MemoryPeakResults result = MemoryPeakResults.getResults(name);
+		if (result == null)
+			return;
+
+		System.out.printf("Show stats on %s\n", name);
+
+		// Do this is a thread so the click-event does not block
+		new Thread(new Runnable()
+		{
+			public void run()
+			{
+				showStatistics(result);
+			}
+		}).run();
+	}
+
+	private void showStatistics(MemoryPeakResults result)
+	{
+		SummariseResultsSettings.Builder settings = SettingsManager.readSummariseResultsSettings(0).toBuilder();
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addMessage("Show histograms of the results properties (if available)");
+		gd.addCheckbox("Plot_background", settings.getPlotBackground());
+		gd.addCheckbox("Plot_signal", settings.getPlotSignal());
+		gd.addCheckbox("Plot_x", settings.getPlotX());
+		gd.addCheckbox("Plot_y", settings.getPlotY());
+		gd.addCheckbox("Plot_z", settings.getPlotZ());
+		gd.addCheckbox("Plot_noise", settings.getPlotNoise());
+		gd.addCheckbox("Plot_SNR", settings.getPlotSnr());
+		gd.addCheckbox("Plot_precision", settings.getPlotPrecision());
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		settings.setPlotBackground(gd.getNextBoolean());
+		settings.setPlotSignal(gd.getNextBoolean());
+		settings.setPlotX(gd.getNextBoolean());
+		settings.setPlotY(gd.getNextBoolean());
+		settings.setPlotZ(gd.getNextBoolean());
+		settings.setPlotNoise(gd.getNextBoolean());
+		settings.setPlotSnr(gd.getNextBoolean());
+		settings.setPlotPrecision(gd.getNextBoolean());
+		SettingsManager.writeSettings(settings);
+
+		WindowOrganiser wo = new WindowOrganiser();
+		
+		if (settings.getPlotBackground())
+			plot(wo,"Background", result, PeakResult.BACKGROUND);
+		if (settings.getPlotSignal())
+			plot(wo,"Signal", result, PeakResult.INTENSITY);
+		if (settings.getPlotX())
+			plot(wo,"X", result, PeakResult.X);
+		if (settings.getPlotY())
+			plot(wo,"Y", result, PeakResult.Y);
+		if (settings.getPlotZ())
+			plot(wo,"Z", result, PeakResult.Z);
+		if ((settings.getPlotNoise() || settings.getPlotSnr()) && result.hasNoise())
+		{
+			final Counter counter = new Counter();
+			final float[] snr = new float[result.size()];
+			final float[] noise = new float[snr.length];
+			result.forEach(new PeakResultProcedure()
+			{
+				public void execute(PeakResult peakResult)
+				{
+					int i = counter.getAndIncrement();
+					snr[i] = peakResult.getSignal() / peakResult.getNoise();
+					noise[i] = peakResult.getNoise();
+				}
+			});
+			if (settings.getPlotNoise())
+				plot(wo,"Noise", noise);
+			if (settings.getPlotSnr())
+				plot(wo,"SNR", snr);
+		}
+		if (settings.getPlotPrecision())
+		{
+			// Precision 
+			try
+			{
+				PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
+				// Use stored precision if possible
+				boolean stored = result.hasPrecision();
+				PrecisionMethod precisionMethod = pp.getPrecision(stored);
+				String name = FitProtosHelper.getName(precisionMethod);
+				if (stored)
+					name += " (Stored)";
+				plot(wo,"Precision: " + name, new StoredDataStatistics(pp.precision));
+			}
+			catch (DataException e)
+			{
+				// Ignore
+			}
+		}
+		
+		wo.tile();
+	}
+
+	private void plot(WindowOrganiser wo, String title, MemoryPeakResults result, final int index)
+	{
+		final StoredDataStatistics data = new StoredDataStatistics(result.size());
+		result.forEach(new PeakResultProcedure()
+		{
+			public void execute(PeakResult peakResult)
+			{
+				data.add(peakResult.getParameter(index));
+			}
+		});
+		plot(wo, title, data);
+	}
+
+	private void plot(WindowOrganiser wo,String title, float[] data)
+	{
+		plot(wo,title, new StoredDataStatistics(data));
+	}
+
+	private void plot(WindowOrganiser wo, String title, StoredDataStatistics data)
+	{
+		int id = Utils.showHistogram(TITLE, data, title, 0, 0, 0);
+		if (Utils.isNewWindow())
+			wo.add(id);
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+
+	public void mouseExited(MouseEvent e)
+	{
 	}
 }
