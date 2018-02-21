@@ -1347,6 +1347,7 @@ public class ResultsManager implements PlugIn
 			calibration.setIntensityUnit(SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()]);
 			calibration.setNmPerPixel(Math.abs(gd.getNextNumber()));
 			calibration.setExposureTime(Math.abs(gd.getNextNumber()));
+			calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 
 			gd.collectOptions();
 
