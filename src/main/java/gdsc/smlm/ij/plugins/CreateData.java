@@ -524,6 +524,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	static SimulationParameters simulationParameters = null;
 
 	private static String benchmarkFile = "";
+	private static LoadLocalisationsSettings.Builder loadSettings = null;
 	private static String benchmarkImage = "";
 	private static boolean benchmarkAuto = false;
 	private static int benchmarkImageId = 0;
@@ -5580,11 +5581,19 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Load using a universal text file
-		LocalisationList localisations = LoadLocalisations.loadLocalisations(benchmarkFile);
+		if (loadSettings == null)
+			loadSettings = SettingsManager.readLoadLocalisationsSettings(0).toBuilder();
+		//String tmp = loadSettings.getLocalisationsFilename();
+		loadSettings.setLocalisationsFilename(benchmarkFile);
+		// TODO - This could be configurable to ignore fields that are not required, 
+		// e.g. the dataset name
+		LocalisationList localisations = LoadLocalisations.loadLocalisations(loadSettings);
+		//loadSettings.setLocalisationsFilename(tmp);
+		SettingsManager.writeSettings(loadSettings.build());
 		if (localisations == null || localisations.isEmpty())
 			return null;
 
-		return localisations.toPeakResults();
+		return localisations.toPeakResults("Dummy");
 	}
 
 	private SimulationParameters showSimulationParametersDialog(ImagePlus imp, MemoryPeakResults results)

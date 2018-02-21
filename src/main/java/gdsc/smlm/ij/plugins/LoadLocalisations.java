@@ -108,15 +108,7 @@ public class LoadLocalisations implements PlugIn
 			this.precisionMethod = precisionMethod;
 		}
 
-		private LocalisationList(int timeUnit, int distanceUnit, int intensityUnit, double gain, double pixelPitch,
-				double exposureTime, int precisionMethod)
-		{
-			this(TimeUnit.forNumber(timeUnit), DistanceUnit.forNumber(distanceUnit),
-					IntensityUnit.forNumber(intensityUnit), gain, pixelPitch, exposureTime,
-					PrecisionMethod.forNumber(precisionMethod));
-		}
-
-		public MemoryPeakResults toPeakResults()
+		public MemoryPeakResults toPeakResults(String name)
 		{
 			// Convert exposure time to milliseconds
 			TypeConverter<TimeUnit> timeConverter = UnitConverterFactory.createConverter(timeUnit, TimeUnit.MILLISECOND,
@@ -159,7 +151,7 @@ public class LoadLocalisations implements PlugIn
 					float x = (float) (l.x);
 					float y = (float) (l.y);
 					float z = (float) (l.z);
-					
+
 					float[] params;
 					switch (psfType)
 					{
@@ -203,31 +195,31 @@ public class LoadLocalisations implements PlugIn
 	}
 
 	private static final String TITLE = "Load Localisations";
-	private static boolean limitZ = false;
+	//private static boolean limitZ = false;
 	private boolean myLimitZ = false;
-	private static double minz = -5;
-	private static double maxz = 5;
+	//private static double minz = -5;
+	//private static double maxz = 5;
 
-	private static int it = 0;
-	private static int iid = -1;
-	private static int ix = 1;
-	private static int iy = 2;
-	private static int iz = -1;
-	private static int ii = 3;
-	private static int isx = -1;
-	private static int isy = -1;
-	private static int ip = -1;
-	private static int header = 1;
-	private static String comment = "#";
-	private static String delimiter = "\\s+";
-	private static String name = "Localisations";
-	private static int timeUnit = 0;
-	private static int distanceUnit = 0;
-	private static int intensityUnit = 0;
-	private static double gain;
-	private static double pixelPitch;
-	private static double exposureTime;
-	private static int precisionMethod = 0;
+	//	private static int it = 0;
+	//	private static int iid = -1;
+	//	private static int ix = 1;
+	//	private static int iy = 2;
+	//	private static int iz = -1;
+	//	private static int ii = 3;
+	//	private static int isx = -1;
+	//	private static int isy = -1;
+	//	private static int ip = -1;
+	//	private static int header = 1;
+	//	private static String comment = "#";
+	//	private static String delimiter = "\\s+";
+	//	private static String name = "Localisations";
+	//	private static int timeUnit = 0;
+	//	private static int distanceUnit = 0;
+	//	private static int intensityUnit = 0;
+	//	private static double gain;
+	//	private static double pixelPitch;
+	//	private static double exposureTime;
+	//	private static int precisionMethod = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -246,9 +238,10 @@ public class LoadLocalisations implements PlugIn
 			return;
 
 		settings.setLocalisationsFilename(chooser.getDirectory() + chooser.getFileName());
-		SettingsManager.writeSettings(settings.build());
 
-		LocalisationList localisations = loadLocalisations(settings.getLocalisationsFilename());
+		LocalisationList localisations = loadLocalisations(settings);
+
+		SettingsManager.writeSettings(settings.build());
 
 		if (localisations == null)
 			// Cancelled
@@ -260,16 +253,19 @@ public class LoadLocalisations implements PlugIn
 			return;
 		}
 
-		MemoryPeakResults results = localisations.toPeakResults();
+		MemoryPeakResults results = localisations.toPeakResults(settings.getName());
 
 		// Ask the user what depth to use to create the in-memory results
-		if (!getZDepth(results))
+		if (!getZDepth(results, settings))
 			return;
+		final double minz, maxz;
 		if (myLimitZ)
 		{
 			final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
-			results2.setName(name);
+			results2.setName(settings.getName());
 			results2.copySettings(results);
+			minz = settings.getMinZ();
+			maxz = settings.getMaxZ();
 
 			results.forEach(new PeakResultProcedure()
 			{
@@ -280,6 +276,10 @@ public class LoadLocalisations implements PlugIn
 				}
 			});
 			results = results2;
+		}
+		else
+		{
+			minz = maxz = 0;
 		}
 
 		// Create the in-memory results
@@ -308,7 +308,7 @@ public class LoadLocalisations implements PlugIn
 		}
 	}
 
-	private boolean getZDepth(MemoryPeakResults results)
+	private boolean getZDepth(MemoryPeakResults results, LoadLocalisationsSettings.Builder settings)
 	{
 		final ZResultProcedure p = new ZResultProcedure();
 		results.forEachNative(p);
@@ -320,8 +320,8 @@ public class LoadLocalisations implements PlugIn
 		if (min == max && min == 0)
 			return true;
 
-		maxz = FastMath.min(maxz, max);
-		minz = FastMath.max(minz, min);
+		double maxz = FastMath.min(settings.getMaxZ(), max);
+		double minz = FastMath.max(settings.getMinZ(), min);
 
 		// Display in nm
 		TypeConverter<DistanceUnit> c = new IdentityTypeConverter<DistanceUnit>(null);
@@ -351,7 +351,7 @@ public class LoadLocalisations implements PlugIn
 
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addMessage(msg);
-		gd.addCheckbox("Limit Z-depth", limitZ);
+		gd.addCheckbox("Limit Z-depth", settings.getLimitZ());
 		gd.addSlider("minZ", min, max, c.convert(minz));
 		gd.addSlider("maxZ", min, max, c.convert(maxz));
 		gd.showDialog();
@@ -359,33 +359,45 @@ public class LoadLocalisations implements PlugIn
 		{
 			return false;
 		}
-		myLimitZ = limitZ = gd.getNextBoolean();
-		minz = c.convertBack(gd.getNextNumber());
-		maxz = c.convertBack(gd.getNextNumber());
+		myLimitZ = gd.getNextBoolean();
+		settings.setLimitZ(myLimitZ);
+		settings.setMinZ(c.convertBack(gd.getNextNumber()));
+		settings.setMaxZ(c.convertBack(gd.getNextNumber()));
 		return true;
 	}
 
-	static LocalisationList loadLocalisations(String filename)
+	static LocalisationList loadLocalisations(LoadLocalisationsSettings.Builder settings)
 	{
-		if (!getFields())
+		if (!getFields(settings))
 			return null;
 
 		LocalisationList localisations = new LocalisationList(
 				// The time units used a truncated list
-				tUnitValues[timeUnit].getNumber(), distanceUnit, intensityUnit, gain, pixelPitch, exposureTime,
-				precisionMethod);
+				tUnitValues[settings.getTimeUnit()], settings.getDistanceUnit(), settings.getIntensityUnit(),
+				settings.getGain(), settings.getPixelSize(), settings.getExposureTime(), settings.getPrecisionMethod());
 
+		final String comment = settings.getComment();
 		final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
 		int errors = 0;
 		int count = 0;
-		int h = Math.max(0, header);
+		int h = Math.max(0, settings.getHeaderLines());
 
 		BufferedReader input = null;
 		try
 		{
-			FileInputStream fis = new FileInputStream(filename);
+			FileInputStream fis = new FileInputStream(settings.getLocalisationsFilename());
 			input = new BufferedReader(new UnicodeReader(fis, null));
-			Pattern p = Pattern.compile(delimiter);
+			Pattern p = Pattern.compile(settings.getDelimiter());
+
+			final int it = settings.getFieldT();
+			final int iid = settings.getFieldId();
+			final int ix = settings.getFieldX();
+			final int iy = settings.getFieldY();
+			final int iz = settings.getFieldZ();
+			final int ii = settings.getFieldI();
+			final int isx = settings.getFieldSx();
+			final int isy = settings.getFieldSy();
+			final int ip = settings.getFieldPrecision();
 
 			String line;
 			while ((line = input.readLine()) != null)
@@ -459,39 +471,40 @@ public class LoadLocalisations implements PlugIn
 		return localisations;
 	}
 
-	private static boolean getFields()
+	private static boolean getFields(LoadLocalisationsSettings.Builder settings)
 	{
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
 		gd.addMessage("Load delimited localisations");
-		gd.addStringField("Dataset_name", name, 30);
+		gd.addStringField("Dataset_name", settings.getName(), 30);
 
 		gd.addMessage("Calibration:");
-		gd.addNumericField("Pixel_size", pixelPitch, 3, 8, "nm");
-		gd.addNumericField("Gain", gain, 3, 8, "Count/photon");
-		gd.addNumericField("Exposure_time", exposureTime, 3, 8, "");
+		// TODO - Update this to support the camera type ...
+		gd.addNumericField("Pixel_size", settings.getPixelSize(), 3, 8, "nm");
+		gd.addNumericField("Gain", settings.getGain(), 3, 8, "Count/photon");
+		gd.addNumericField("Exposure_time", settings.getExposureTime(), 3, 8, "");
 
 		// This is the unit for the exposure time (used to convert the exposure time to milliseconds).
-		gd.addChoice("Time_unit", tUnits, timeUnit);
+		gd.addChoice("Time_unit", tUnits, settings.getTimeUnit());
 
 		gd.addMessage("Records:");
-		gd.addNumericField("Header_lines", header, 0);
-		gd.addStringField("Comment", comment);
-		gd.addStringField("Delimiter", delimiter);
-		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), distanceUnit);
-		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(), intensityUnit);
+		gd.addNumericField("Header_lines", settings.getHeaderLines(), 0);
+		gd.addStringField("Comment", settings.getComment());
+		gd.addStringField("Delimiter", settings.getDelimiter());
+		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), settings.getDistanceUnitValue());
+		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(), settings.getIntensityUnitValue());
 
 		gd.addMessage("Define the fields:");
-		gd.addNumericField("T", it, 0);
-		gd.addNumericField("ID", iid, 0);
-		gd.addNumericField("X", ix, 0);
-		gd.addNumericField("Y", iy, 0);
-		gd.addNumericField("Z", iz, 0);
-		gd.addNumericField("Intensity", ii, 0);
-		gd.addNumericField("Sx", isx, 0);
-		gd.addNumericField("Sy", isy, 0);
-		gd.addNumericField("Precision", ip, 0);
-		gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), precisionMethod);
+		gd.addNumericField("T", settings.getFieldT(), 0);
+		gd.addNumericField("ID", settings.getFieldId(), 0);
+		gd.addNumericField("X", settings.getFieldX(), 0);
+		gd.addNumericField("Y", settings.getFieldY(), 0);
+		gd.addNumericField("Z", settings.getFieldZ(), 0);
+		gd.addNumericField("Intensity", settings.getFieldI(), 0);
+		gd.addNumericField("Sx", settings.getFieldSx(), 0);
+		gd.addNumericField("Sy", settings.getFieldSy(), 0);
+		gd.addNumericField("Precision", settings.getFieldPrecision(), 0);
+		gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), settings.getPrecisionMethodValue());
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -499,18 +512,18 @@ public class LoadLocalisations implements PlugIn
 			return false;
 		}
 
-		name = getNextString(gd, name);
-		pixelPitch = gd.getNextNumber();
-		gain = gd.getNextNumber();
-		exposureTime = gd.getNextNumber();
-		timeUnit = gd.getNextChoiceIndex();
+		settings.setName(getNextString(gd, settings.getName()));
+		settings.setPixelSize(gd.getNextNumber());
+		settings.setGain(gd.getNextNumber());
+		settings.setExposureTime(gd.getNextNumber());
+		settings.setTimeUnit(gd.getNextChoiceIndex());
 
-		header = (int) gd.getNextNumber();
-		comment = gd.getNextString();
-		delimiter = getNextString(gd, delimiter);
+		settings.setHeaderLines((int) gd.getNextNumber());
+		settings.setComment(gd.getNextString());
+		settings.setDelimiter(getNextString(gd, settings.getDelimiter()));
 
-		distanceUnit = gd.getNextChoiceIndex();
-		intensityUnit = gd.getNextChoiceIndex();
+		settings.setDistanceUnitValue(gd.getNextChoiceIndex());
+		settings.setIntensityUnitValue(gd.getNextChoiceIndex());
 
 		int[] columns = new int[9];
 		for (int i = 0; i < columns.length; i++)
@@ -518,18 +531,18 @@ public class LoadLocalisations implements PlugIn
 
 		{
 			int i = 0;
-			it = columns[i++];
-			iid = columns[i++];
-			ix = columns[i++];
-			iy = columns[i++];
-			iz = columns[i++];
-			ii = columns[i++];
-			isx = columns[i++];
-			isy = columns[i++];
-			ip = columns[i++];
+			settings.setFieldI(columns[i++]);
+			settings.setFieldId(columns[i++]);
+			settings.setFieldX(columns[i++]);
+			settings.setFieldY(columns[i++]);
+			settings.setFieldZ(columns[i++]);
+			settings.setFieldI(columns[i++]);
+			settings.setFieldSx(columns[i++]);
+			settings.setFieldSy(columns[i++]);
+			settings.setFieldPrecision(columns[i++]);
 		}
 
-		precisionMethod = gd.getNextChoiceIndex();
+		settings.setPrecisionMethodValue(gd.getNextChoiceIndex());
 
 		// Validate after reading the dialog (so the static fields store the last entered values)
 
@@ -553,12 +566,12 @@ public class LoadLocalisations implements PlugIn
 				}
 			}
 		}
-		if (gain <= 0 || pixelPitch <= 0)
+		if (settings.getGain() <= 0 || settings.getPixelSize() <= 0)
 		{
 			IJ.error(TITLE, "Require positive gain and pixel pitch");
 			return false;
 		}
-		if (ix < 0 || iy < 0)
+		if (settings.getFieldX() < 0 || settings.getFieldY() < 0)
 		{
 			IJ.error(TITLE, "Require valid X and Y indices");
 			return false;

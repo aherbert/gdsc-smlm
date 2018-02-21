@@ -165,6 +165,32 @@ message CreateDataSettings {
 // Settings for the Load Localisations plugin
 message LoadLocalisationsSettings {
 	string localisationsFilename = 1;
+	double pixel_size = 2;
+	double gain = 3;
+	double exposure_time = 4;
+	// The time unit for loading localisations uses a truncated list of the TimeUnit
+	// enum since it is being used to express only the exposure time where frames is
+	// not relevant.
+	int32 time_unit = 5;
+	int32 header_lines = 6;
+	string comment = 7;
+	string delimiter = 8;
+	DistanceUnit distance_unit = 9;
+	IntensityUnit intensity_unit = 10;
+	int32 field_t = 11;
+	int32 field_id = 12;
+	int32 field_x = 13;
+	int32 field_y = 14;
+	int32 field_z = 15;
+	int32 field_i = 16;
+	int32 field_sx = 17;
+	int32 field_sy = 18;
+	int32 field_precision = 19;
+	PrecisionMethod precision_method = 20;
+	string name = 21;
+	bool limit_z = 22;
+	double min_z = 23;
+	double max_z = 24;
 }
 
 // Contain the settings for the clustering algorithm
@@ -526,4 +552,16 @@ message CropResultsSettings {
 	int32 name_option = 12;
 	string name_suffix = 13;
 	int32 name_counter = 14;
+}
+
+// Contains settings for the Summarise Results plugin
+message SummariseResultsSettings {
+	bool plot_background = 1;
+	bool plot_signal = 2;
+	bool plot_x = 3;
+	bool plot_y = 4;
+	bool plot_z = 5;
+	bool plot_noise = 6;
+	bool plot_snr = 7;
+	bool plot_precision = 8;
 }

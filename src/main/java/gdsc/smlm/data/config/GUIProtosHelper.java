@@ -132,8 +132,24 @@ public class GUIProtosHelper
 	}
 
 	/** The default LoadLocalisationsSettings */
-	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings = LoadLocalisationsSettings
-			.getDefaultInstance();
+	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings;
+	static {
+		LoadLocalisationsSettings.Builder builder = LoadLocalisationsSettings.newBuilder();
+		builder.setFieldT(0);
+		builder.setFieldId(-1);
+		builder.setFieldX(1);
+		builder.setFieldY(2);
+		builder.setFieldZ(-1);
+		builder.setFieldI(3);
+		builder.setFieldSx(-1);
+		builder.setFieldSy(-1);
+		builder.setFieldPrecision(-1);
+		builder.setHeaderLines(1);
+		builder.setComment("#");
+		builder.setDelimiter("\\s+");
+		builder.setName("Localisations");
+		defaultLoadLocalisationsSettings = builder.build();
+	}
 
 	/** The default ClusteringSettings */
 	public static final ClusteringSettings defaultClusteringSettings;

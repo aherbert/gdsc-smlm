@@ -49,6 +49,7 @@ import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
+import gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
@@ -1006,7 +1007,8 @@ public class SettingsManager
 	 */
 	public static AstigmatismModelSettings readAstigmatismModelSettings(int flags)
 	{
-		return new ConfigurationReader<AstigmatismModelSettings>(AstigmatismModelSettings.getDefaultInstance()).read(flags);
+		return new ConfigurationReader<AstigmatismModelSettings>(AstigmatismModelSettings.getDefaultInstance())
+				.read(flags);
 	}
 
 	/**
@@ -1018,8 +1020,8 @@ public class SettingsManager
 	 */
 	public static AstigmatismModelManagerSettings readAstigmatismModelManagerSettings(int flags)
 	{
-		return new ConfigurationReader<AstigmatismModelManagerSettings>(GUIProtosHelper.defaultAstigmatismModelManagerSettings)
-				.read(flags);
+		return new ConfigurationReader<AstigmatismModelManagerSettings>(
+				GUIProtosHelper.defaultAstigmatismModelManagerSettings).read(flags);
 	}
 
 	/**
@@ -1033,7 +1035,20 @@ public class SettingsManager
 	{
 		return new ConfigurationReader<CropResultsSettings>(CropResultsSettings.getDefaultInstance()).read(flags);
 	}
-	
+
+	/**
+	 * Read the SummariseResultsSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the SummariseResultsSettings
+	 */
+	public static SummariseResultsSettings readSummariseResultsSettings(int flags)
+	{
+		return new ConfigurationReader<SummariseResultsSettings>(SummariseResultsSettings.getDefaultInstance())
+				.read(flags);
+	}
+
 	/**
 	 * Write to a settings file in the settings directory.
 	 *
