@@ -52,6 +52,7 @@ import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.function.StandardValueProcedure;
+import gdsc.smlm.function.gaussian.FastGaussianOverlapAnalysis;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
@@ -1786,7 +1787,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						fitConfig.getAstigmatismZModel(), frozenParams);
 
 				// Note: This could be the current candidate or drift to another candidate
-				localBackgroundMulti = getLocalBackground(0, npeaks, frozenParams, flags);
+				localBackgroundMulti = getLocalBackground(0, npeaks, frozenParams, flags,
+						precomputedFittedNeighboursMulti);
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
 						fitParamStdDevs, localBackgroundMulti, resultType);
 
@@ -1796,7 +1798,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					final Candidate candidateNeighbour = candidateNeighbours[i];
 					results[n] = resultFactory.createPreprocessedPeakResult(candidateNeighbour.index, n, initialParams,
-							fitParams, fitParamStdDevs, getLocalBackground(n, npeaks, frozenParams, flags),
+							fitParams, fitParamStdDevs,
+							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
 							ResultType.CANDIDATE);
 					n++;
 				}
@@ -1808,7 +1811,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						continue;
 					int candidateId = fittedNeighbours[i].index;
 					results[n] = resultFactory.createPreprocessedPeakResult(candidateId, n, initialParams, fitParams,
-							fitParamStdDevs, getLocalBackground(n, npeaks, frozenParams, flags), ResultType.EXISTING);
+							fitParamStdDevs,
+							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
+							ResultType.EXISTING);
 					n++;
 				}
 			}
@@ -1835,30 +1840,81 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 *            the params
 		 * @param flags
 		 *            the function flags
+		 * @param precomputedFunction
+		 *            the precomputed function
 		 * @return the local background
 		 */
-		private double getLocalBackground(int n, int npeaks, double[] params, final int flags)
+		private double getLocalBackground(int n, int npeaks, double[] params, final int flags,
+				double[] precomputedFunction)
 		{
 			// Note: This does not include any precomputed peaks. 
 			// These will be outside the fit region but may have an effect on peaks near
-			// the edge of the fit region.
+			// the edge of the fit region. They are added separately.
+
+			// Note: This computes each function around the target point. This will scale poorly
+			// when the density is high (n(n-1)), e.g. 4 peaks in the fit region = 12 evaluations.
+			// An alternative is to evaluate each peak in the region.
+			// Build the local background using all but the peak of interest summed 
+			// from a small region around the peak.
+			// This will scale linearly with the number of peaks.			
 
 			double[] spotParams = extractSpotParams(params, n);
 			// Do not evaluate over a large region for speed. 
 			// Use only +/- 1 SD as this is 68% of the Gaussian volume or 5 pixels.
 			int maxx = GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.X_SD], 1, 5);
 			int maxy = GaussianOverlapAnalysis.getRange(spotParams[Gaussian2DFunction.Y_SD], 1, 5);
-			GaussianOverlapAnalysis overlap = new GaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
-			overlap.add(extractOtherParams(params, n, npeaks), true);
-			double[] overlapData = overlap.getOverlapData();
-			return overlapData[1] + params[Gaussian2DFunction.BACKGROUND];
+
+			FastGaussianOverlapAnalysis overlap = new FastGaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
+			overlap.add(extractOtherParams(params, n, npeaks));
+			double o = overlap.getOverlap();
+
+			// XXX Test verses the standard overlap analysis
+			//GaussianOverlapAnalysis overlap2 = new GaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
+			//overlap2.setFraction(1);
+			//overlap2.add(extractOtherParams(params, n, npeaks), true);
+			//double[] overlapData = overlap2.getOverlapData();
+			//double o2 = overlapData[1];
+
+			//System.out.printf("Overlap %f vs %f\n", o, o2);
+
+			return o + params[Gaussian2DFunction.BACKGROUND] +
+					getBackgroundContribution(precomputedFunction, spotParams);
 		}
 
-		// TODO: Get all the fit params and the precomputed peaks for the region.
-		// If n peaks is above 1
-		// Evaluate each peak in the region.
-		// Build the local background using all but the peak of interest summed 
-		// from a small region around the peak.
+		/**
+		 * Gets the background contribution from the precomputed function
+		 *
+		 * @param precomputedFunction
+		 *            the precomputed function
+		 * @param params
+		 *            the params
+		 * @return the background contribution
+		 */
+		private double getBackgroundContribution(double[] precomputedFunction, double[] params)
+		{
+			if (precomputedFunction == null)
+				return 0;
+
+			// Find the centre pixel. 
+			int cx = (int) (params[Gaussian2DFunction.X_POSITION] + 0.5);
+			int cy = (int) (params[Gaussian2DFunction.Y_POSITION] + 0.5);
+
+			// Use a 3x3 region around it.
+			Rectangle r = new Rectangle(width, height).intersection(new Rectangle(cx - 1, cy - 1, 3, 3));
+			if (r.width == 0 || r.height == 0)
+				return 0;
+
+			double sum = 0;
+			for (int y = 0; y < r.height; y++)
+			{
+				for (int x = 0, i = (r.y + y) * width + r.x; x < r.width; x++, i++)
+				{
+					sum += precomputedFunction[i];
+				}
+			}
+
+			return sum;
+		}
 
 		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close)
 		{
@@ -2218,7 +2274,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					PreprocessedPeakResult r = resultDoubletMulti.results[i];
 					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
-							initialParams, params, paramDevs, getLocalBackground(n, npeaks, frozenParams, flags),
+							initialParams, params, paramDevs,
+							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
 							(r.isExistingResult()) ? ResultType.EXISTING
 									: (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 					n++;
@@ -2230,7 +2287,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// Increment the ID by one since the position in the parameters array is moved to 
 					// accommodate 2 preceding peaks and not 1 
 					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId() + 1,
-							initialParams, params, paramDevs, getLocalBackground(n, npeaks, frozenParams, flags),
+							initialParams, params, paramDevs,
+							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
 							(r.isExistingResult()) ? ResultType.EXISTING
 									: (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 					n++;
@@ -2595,7 +2653,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					final double[] frozenParams = functionParamsSingle.clone();
 					final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
 							fitConfig.getAstigmatismZModel(), frozenParams);
-					localBackgroundSingle = getLocalBackground(0, npeaks, frozenParams, flags);
+					localBackgroundSingle = getLocalBackground(0, npeaks, frozenParams, flags,
+							getPrecomputedFittedNeighbours());
 
 					if (fitParamDevs != null)
 					{
@@ -2607,6 +2666,16 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							System.arraycopy(paramDevs1, 0, fitParamDevs, 0, fitParamDevs.length);
 						fitConfig.setPrecomputedFunctionValues(null);
 					}
+				}
+				else if (precomputedFittedNeighbourCount != 0)
+				{
+					// Add the contribution from the precomputed neighbours 
+					localBackgroundSingle = fitParams[Gaussian2DFunction.BACKGROUND] +
+							getBackgroundContribution(getPrecomputedFittedNeighbours(), fitParams);
+					// Debug if this ever adds a significant amount
+					System.out.printf("Background=%f, Neighbours=%f (%f)\n", fitParams[Gaussian2DFunction.BACKGROUND],
+							localBackgroundSingle - fitParams[Gaussian2DFunction.BACKGROUND],
+							localBackgroundSingle / fitParams[Gaussian2DFunction.BACKGROUND]);
 				}
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
 						fitParamDevs, localBackgroundSingle, resultType);
