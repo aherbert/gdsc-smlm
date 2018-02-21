@@ -642,11 +642,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 		results.setPSF(fitConfig.getPSF());
 		results.setConfiguration(SettingsManager.toJSON(config.getFitEngineSettings()));
 
+		// This is added first as it cannot be closed. If the table is closed then the
+		// number of results at the end is reported incorrectly.
+		addMemoryResults(results, false);
+		
 		addTableResults(results);
 		ResultsManager.addImageResults(results, resultsSettings.getResultsImageSettings(), bounds,
 				(extraOptions) ? ResultsManager.FLAG_EXTRA_OPTIONS : 0);
 		addFileResults(results);
-		addMemoryResults(results, false);
 		addDefaultResults(results);
 
 		results.begin();
