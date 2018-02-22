@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -230,10 +231,10 @@ public class CameraModelManager implements PlugIn
 
 	//@formatter:off
 	private static String[] OPTIONS = { 
-			"Print all model details", 
-			"View a camera model", 
 			"Load a camera model",
 			"Load from directory",
+			"Print all model details", 
+			"View a camera model", 
 			"Delete a camera model",
 			"Filter an image" };
 	//@formatter:on
@@ -248,17 +249,17 @@ public class CameraModelManager implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
+		String[] options = OPTIONS;
 		CameraModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
 		if (settings.getCameraModelResourcesCount() == 0)
 		{
-			IJ.error(TITLE, "No camera models found");
-			return;
+			options = Arrays.copyOf(OPTIONS, 2);
 		}
 
 		pluginSettings = SettingsManager.readCameraModelManagerSettings(0).toBuilder();
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-		gd.addChoice("Option", OPTIONS, pluginSettings.getOption());
+		gd.addChoice("Option", options, pluginSettings.getOption());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -273,16 +274,17 @@ public class CameraModelManager implements PlugIn
 				deleteCameraModel();
 				break;
 			case 3:
-				loadFromDirectory();
-				break;
-			case 2:
-				loadFromFile();
-				break;
-			case 1:
 				viewCameraModel();
 				break;
-			default:
+			case 2:
 				printCameraModels();
+				break;
+			case 1:
+				loadFromDirectory();
+				break;
+			case 0:
+			default:
+				loadFromFile();
 		}
 
 		SettingsManager.writeSettings(pluginSettings);
