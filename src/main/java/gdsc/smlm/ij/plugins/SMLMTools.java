@@ -1,18 +1,15 @@
 package gdsc.smlm.ij.plugins;
 
-import ij.Executer;
-import ij.IJ;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GUI;
-import ij.plugin.frame.PlugInFrame;
-
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.Point;
+import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -26,6 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import gdsc.core.utils.UnicodeReader;
+import ij.Executer;
+import ij.IJ;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GUI;
+import ij.plugin.frame.PlugInFrame;
 
 /**
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in gdsc/smlm/plugins.config. Also add these
@@ -38,6 +41,13 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	private static final String OPT_LOCATION = "SMLM_Plugins.location";
 
 	private static PlugInFrame instance;
+
+	// Store the screen dimension
+	private static Dimension screenDimension;
+	static
+	{
+		screenDimension = IJ.getScreenSize();
+	}
 
 	private HashMap<String, String[]> plugins = new HashMap<String, String[]>();
 	private boolean addSpacer = false;
@@ -200,12 +210,11 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		if (plugins.isEmpty())
 			return false;
 
-		// Arrange on a grid
+		// Arrange on a grid.
 		Panel mainPanel = new Panel();
 		GridBagLayout grid = new GridBagLayout();
 
 		mainPanel.setLayout(grid);
-		add(mainPanel);
 
 		addSpacer = false;
 		int col = 0, row = 0;
@@ -222,6 +231,40 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 				row = addPlugin(mainPanel, grid, plugin[0], plugin[1], col, row);
 		}
 
+		// Allow scrollbars to handle small screens.
+		// Appropriately size the scrollpane from the default of 100x100.
+		// The preferred size is only obtained if the panel is packed.
+		add(mainPanel);
+		pack();
+		Dimension d = mainPanel.getPreferredSize();
+		remove(0); // Assume this is the only component
+		
+		ScrollPane scroll = new ScrollPane();
+		scroll.getHAdjustable().setUnitIncrement(16);
+		scroll.getVAdjustable().setUnitIncrement(16);
+		scroll.add(mainPanel);
+		add(scroll, BorderLayout.CENTER);
+
+		// Scale to the screen size
+		d.width = Math.min(d.width, screenDimension.width - 100);
+		d.height = Math.min(d.height, screenDimension.height - 150);
+
+		Insets insets = scroll.getInsets();
+		d.width += insets.left + insets.right;
+		d.height += insets.top + insets.bottom;
+
+		if (IJ.isMacintosh())
+		{
+			// This is needed as the OSX scroll pane adds scrollbars when the panel 
+			// is close in size to the scroll pane
+			int padding = 15;
+			d.width += padding;
+			d.height += padding;
+		}
+
+		scroll.setPreferredSize(d);
+		scroll.setSize(d);
+		
 		return true;
 	}
 
