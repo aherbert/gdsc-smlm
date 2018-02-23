@@ -93,6 +93,9 @@ public class ImagePeakResultsFactory
 			case DRAW_FIT_ERROR:
 				flags |= IJImagePeakResults.DISPLAY_ERROR;
 				break;
+			case DRAW_Z_POSITION:
+				flags |= IJImagePeakResults.DISPLAY_Z_POSITION;
+				break;
 			default:
 				// Nothing to do for the other cases
 				break;

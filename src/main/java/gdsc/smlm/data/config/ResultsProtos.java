@@ -108,6 +108,14 @@ public final class ResultsProtos {
      * <code>DRAW_FIT_ERROR = 9;</code>
      */
     DRAW_FIT_ERROR(9),
+    /**
+     * <pre>
+     * Draw each localisation using the z-position as the intensity (providing crude 3D rendering)
+     * </pre>
+     *
+     * <code>DRAW_Z_POSITION = 10;</code>
+     */
+    DRAW_Z_POSITION(10),
     UNRECOGNIZED(-1),
     ;
 
@@ -195,6 +203,14 @@ public final class ResultsProtos {
      * <code>DRAW_FIT_ERROR = 9;</code>
      */
     public static final int DRAW_FIT_ERROR_VALUE = 9;
+    /**
+     * <pre>
+     * Draw each localisation using the z-position as the intensity (providing crude 3D rendering)
+     * </pre>
+     *
+     * <code>DRAW_Z_POSITION = 10;</code>
+     */
+    public static final int DRAW_Z_POSITION_VALUE = 10;
 
 
     public final int getNumber() {
@@ -225,6 +241,7 @@ public final class ResultsProtos {
         case 7: return DRAW_LOCALISATIONS_AVERAGE_PRECISION;
         case 8: return DRAW_INTENSITY_AVERAGE_PRECISION;
         case 9: return DRAW_FIT_ERROR;
+        case 10: return DRAW_Z_POSITION;
         default: return null;
       }
     }
@@ -6137,18 +6154,19 @@ public final class ResultsProtos {
       "\030\005 \001(\0132+.gdsc.smlm.data.config.ResultsTa" +
       "bleSettings\022R\n\032results_in_memory_setting" +
       "s\030\006 \001(\0132..gdsc.smlm.data.config.ResultsI" +
-      "nMemorySettings*\235\002\n\020ResultsImageType\022\r\n\t" +
+      "nMemorySettings*\262\002\n\020ResultsImageType\022\r\n\t" +
       "DRAW_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016D" +
       "RAW_INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023" +
       "\n\017DRAW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISATION" +
       "S_PRECISION\020\005\022\034\n\030DRAW_INTENSITY_PRECISIO" +
       "N\020\006\022(\n$DRAW_LOCALISATIONS_AVERAGE_PRECIS" +
       "ION\020\007\022$\n DRAW_INTENSITY_AVERAGE_PRECISIO",
-      "N\020\010\022\022\n\016DRAW_FIT_ERROR\020\t*C\n\020ResultsImageM" +
-      "ode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLACE\020\001\022\r\n" +
-      "\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022\r\n\tFIL" +
-      "E_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003TSF\020\003\022" +
-      "\010\n\004MALK\020\004B\017B\rResultsProtosb\006proto3"
+      "N\020\010\022\022\n\016DRAW_FIT_ERROR\020\t\022\023\n\017DRAW_Z_POSITI" +
+      "ON\020\n*C\n\020ResultsImageMode\022\r\n\tIMAGE_ADD\020\000\022" +
+      "\021\n\rIMAGE_REPLACE\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021Res" +
+      "ultsFileFormat\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022" +
+      "\n\n\006BINARY\020\002\022\007\n\003TSF\020\003\022\010\n\004MALK\020\004B\017B\rResult" +
+      "sProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

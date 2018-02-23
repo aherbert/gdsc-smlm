@@ -4,11 +4,13 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.InfinityMappedImageStack;
 import ij.MappedImageStack;
 import ij.WindowManager;
 import ij.gui.Roi;
@@ -18,6 +20,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
+import ij.process.InfinityMappedFloatProcessor;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -41,46 +44,49 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/**
 	 * Display the signal of the peak in the image. The default is a count of 1.
 	 */
-	public static final int DISPLAY_SIGNAL = 1;
+	public static final int DISPLAY_SIGNAL = 0x01;
 	/**
 	 * Interpolate the value over multiple pixels. Depending on the location in the containing pixel this is usually the
 	 * 3 closest 8-connected neighbours and the containing pixel. It may be less if the containing pixel is at the image
 	 * bounds.
 	 */
-	public static final int DISPLAY_WEIGHTED = 2;
+	public static final int DISPLAY_WEIGHTED = 0x02;
 	/**
 	 * Equalise the histogram of the output image. Allows showing a high dynamic range by limiting bright pixels.
 	 */
-	public static final int DISPLAY_EQUALIZED = 4;
+	public static final int DISPLAY_EQUALIZED = 0x04;
 	/**
-	 * Display the peak number in the image. The default is a count of 1.
+	 * Display the peak number in the image. The default is a count of 1. When this is used the weighted option is
+	 * disabled and the max option enabled.
 	 */
-	public static final int DISPLAY_PEAK = 8;
+	public static final int DISPLAY_PEAK = 0x08;
 	/**
-	 * Display the peak error in the image. The default is a count of 1.
+	 * Display the peak error in the image. The default is a count of 1. When this is used the weighted option is
+	 * disabled and the max and display negatives options are enabled.
 	 */
-	public static final int DISPLAY_ERROR = 16;
+	public static final int DISPLAY_ERROR = 0x10;
 
 	/**
-	 * Replace the pixels with the new value. This should not be used with {@link #DISPLAY_WEIGHTED} to avoid the value
-	 * being interpolated over multiple pixels.
+	 * Replace the pixels with the new value (the default is to sum the values). This should not be used with
+	 * {@link #DISPLAY_WEIGHTED} to avoid the value being interpolated over multiple pixels. This overrides the max
+	 * option.
 	 */
-	public static final int DISPLAY_REPLACE = 32;
+	public static final int DISPLAY_REPLACE = 0x20;
 	/**
-	 * Use the maximum value. This should not be used with {@link #DISPLAY_WEIGHTED} to avoid the value being
-	 * interpolated over multiple pixels.
+	 * Use the maximum value (the default is to sum the values). This should not be used with {@link #DISPLAY_WEIGHTED}
+	 * to avoid the value being interpolated over multiple pixels.
 	 */
-	public static final int DISPLAY_MAX = 64;
+	public static final int DISPLAY_MAX = 0x40;
 	/**
 	 * Use this to support negative values
 	 */
-	public static final int DISPLAY_NEGATIVES = 128;
+	public static final int DISPLAY_NEGATIVES = 0x80;
 	/**
 	 * Mapped all non-zero values to 1-255 in the 8-bit displayed image. Zero and below are mapped to 0 in the LUT.
 	 * <p>
 	 * This cannot be used with {@link #DISPLAY_EQUALIZED} or {@link #DISPLAY_NEGATIVES}.
 	 */
-	public static final int DISPLAY_MAPPED = 256;
+	public static final int DISPLAY_MAPPED = 0x0100;
 	/**
 	 * Mapped even zero to 1-255 in the 8-bit displayed image. -0.0f and below is mapped to 0 in the LUT. This can be
 	 * used for example to display the result of a probability calculation where 0 is a valid display value but must be
@@ -88,7 +94,12 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * <p>
 	 * Must be used with {@link #DISPLAY_MAPPED}.
 	 */
-	public static final int DISPLAY_MAP_ZERO = 512;
+	public static final int DISPLAY_MAP_ZERO = 0x0200;
+	/**
+	 * Display the z position in the image. The default is a count of 1. When this is used the weighted option is
+	 * disabled and the max and display negatives options are enabled.
+	 */
+	public static final int DISPLAY_Z_POSITION = 0x0400;
 
 	/** The empty value. */
 	private double EMPTY = 0.0;
@@ -114,7 +125,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	private int nextRepaintSize = 0;
 	private long nextPaintTime = 0;
 	private Object pixels;
-	private boolean imageLock = false;
+	private SimpleLock imageLock = new SimpleLock();
 	private double repaintInterval = 0.1;
 	private long repaintDelay = 1000;
 	private int currentFrame;
@@ -151,14 +162,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 		ox = bounds.x;
 		oy = bounds.y;
-		
+
 		setBounds(bounds);
 
 		// Set the limits used to check if a coordinate has 4 neighbour cells
 		xlimit = imageWidth - 1;
 		ylimit = imageHeight - 1;
 	}
-	
+
 	/**
 	 * Gets the scale.
 	 *
@@ -210,12 +221,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		lastPaintSize = 0;
 		nextRepaintSize = 20; // Let some results appear before drawing
 		nextPaintTime = System.currentTimeMillis() + repaintDelay;
-		imageLock = false;
 		data = new double[w * h];
 
 		// Use negative zero so that we know when positive zero has been written to the array.
 		if ((displayFlags & (DISPLAY_MAPPED | DISPLAY_MAP_ZERO)) == (DISPLAY_MAPPED | DISPLAY_MAP_ZERO))
 			EMPTY = -0.0f;
+		if ((displayFlags & DISPLAY_NEGATIVES) != 0)
+			EMPTY = Double.NaN;
 
 		resetData();
 		imp = WindowManager.getImage(title);
@@ -313,11 +325,15 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			displayFlags &= ~DISPLAY_EQUALIZED;
 		}
 
-		// Display peaks cannot use weighting and should show the exact frame number so use replace
-		if ((displayFlags & DISPLAY_PEAK) != 0)
+		// The following cannot use weighting and should show the exact value so use replace
+		if ((displayFlags & (DISPLAY_PEAK | DISPLAY_ERROR | DISPLAY_Z_POSITION)) != 0)
 		{
 			displayFlags &= ~DISPLAY_WEIGHTED;
-			displayFlags |= DISPLAY_REPLACE;
+			displayFlags |= DISPLAY_MAX;
+
+			// z position will probably have negatives
+			if ((displayFlags & (DISPLAY_ERROR | DISPLAY_Z_POSITION)) != 0)
+				displayFlags |= DISPLAY_NEGATIVES;
 		}
 
 		// Mapped values (above zero) cannot use equalisation or be negative
@@ -348,6 +364,13 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 				fp.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
 				return fp;
 			}
+			// -Infinity is mapped to 0 in the LUT.
+			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
+			{
+				InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels,
+						null);
+				return fp;
+			}
 
 			return new FloatProcessor(imageWidth, imageHeight, (float[]) pixels, null);
 		}
@@ -359,6 +382,11 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		{
 			MappedImageStack stack = new MappedImageStack(w, h);
 			stack.setMapZero((displayFlags & DISPLAY_MAP_ZERO) != 0);
+			return stack;
+		}
+		if ((displayFlags & DISPLAY_NEGATIVES) != 0)
+		{
+			InfinityMappedImageStack stack = new InfinityMappedImageStack(w, h);
 			return stack;
 		}
 		return new ImageStack(w, h);
@@ -456,24 +484,66 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		{
 			// 32-bit image. Just copy the data but find the maximum
 			float[] pixels = (float[]) this.pixels;
-			double max = data[0];
-			double min = 0;
-			for (int i = 0; i < data.length; i++)
-			{
-				if (max < data[i])
-					max = data[i];
-				pixels[i] = (float) data[i];
-			}
+			double max, min;
 
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
 			{
-				for (float f : pixels)
-					if (min > f)
-						min = f;
+				// We use NaN to mark the data as empty. 
+				// This cannot be displayed in ImageJ so we use -Infinity in the 
+				// data as a special value. This is ignored by ImageJ for most 
+				// FloatProcessor functionality.
+				int i = findNonNaNIndex(data);
+				if (i == -1)
+				{
+					max = 1;
+					min = 0;
+					Arrays.fill(pixels, Float.NEGATIVE_INFINITY);
+				}
+				else
+				{
+					Arrays.fill(pixels, 0, i, Float.NEGATIVE_INFINITY);
+					max = min = data[i];
+					while (i < data.length)
+					{
+						// Check for NaN
+						if (data[i] != data[i])
+						{
+							pixels[i] = Float.NEGATIVE_INFINITY;
+						}
+						else
+						{
+							if (max < data[i])
+								max = data[i];
+							else if (min > data[i])
+								min = data[i];
+							pixels[i] = (float) data[i];
+						}
+						i++;
+					}
+				}
+			}
+			else
+			{
+				max = data[0];
+				min = 0;
+				for (int i = 0; i < data.length; i++)
+				{
+					if (max < data[i])
+						max = data[i];
+					pixels[i] = (float) data[i];
+				}
 			}
 
 			imp.setDisplayRange(min, max);
 		}
+	}
+
+	private static int findNonNaNIndex(double[] data)
+	{
+		for (int i = 0; i < data.length; i++)
+			if (!(data[i] != data[i]))
+				return i;
+		return -1;
 	}
 
 	/*
@@ -521,7 +591,6 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			}
 			else if ((displayFlags & DISPLAY_MAX) != 0)
 			{
-				// Use the highest value
 				for (int i = nValues; i-- > 0;)
 					data[indices[i]] = max(data[indices[i]], values[i]);
 			}
@@ -600,6 +669,11 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		else if ((displayFlags & DISPLAY_PEAK) != 0)
 		{
 			v = peak;
+		}
+		// Use the peak number for the count
+		else if ((displayFlags & DISPLAY_Z_POSITION) != 0)
+		{
+			v = params[PeakResult.Z];
 		}
 		// Use the peak number for the count
 		else if ((displayFlags & DISPLAY_ERROR) != 0)
@@ -829,7 +903,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
 
-		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
+		// Not sure why the image was forced to update with replace
+		//boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
@@ -863,7 +938,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			nPoints++;
 
-			if (nValues > limit || replace)
+			if (nValues > limit) // || replace)
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
@@ -905,7 +980,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
 
-		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
+		//boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
@@ -930,7 +1005,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			nPoints++;
 
-			if (nValues > limit || replace)
+			if (nValues > limit) // || replace)
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
@@ -1021,8 +1096,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 */
 	public void add(PeakResult result)
 	{
-		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-				result.getParameters(), null);
+		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+				result.getNoise(), result.getParameters(), null);
 	}
 
 	/*
@@ -1045,7 +1120,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		int[] allIndices = new int[100];
 		float[] allValues = new float[allIndices.length];
 
-		boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
+		//boolean replace = ((displayFlags & DISPLAY_REPLACE) != 0);
 
 		// We add at most 4 indices for each peak
 		int limit = allIndices.length - 4;
@@ -1078,7 +1153,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 			nPoints++;
 
-			if (nValues > limit || replace)
+			if (nValues > limit) // || replace)
 			{
 				addData(nPoints, nValues, allIndices, allValues);
 				nPoints = 0;
@@ -1158,7 +1233,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 
 	private void drawImage()
 	{
-		if (aquireLock())
+		if (imageLock.acquire())
 		{
 			try
 			{
@@ -1173,23 +1248,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			}
 			finally
 			{
-				releaseLock();
+				imageLock.release();
 			}
 		}
-	}
-
-	private synchronized boolean aquireLock()
-	{
-		if (imageLock)
-			return false;
-
-		imageLock = true;
-		return true;
-	}
-
-	private synchronized void releaseLock()
-	{
-		imageLock = false;
 	}
 
 	/*
@@ -1210,7 +1271,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	public void end()
 	{
 		// Wait for previous image to finish rendering
-		while (!aquireLock())
+		while (!imageLock.acquire())
 		{
 			try
 			{
@@ -1223,9 +1284,16 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			}
 		}
 
-		releaseLock();
-
-		drawImage();
+		// We have the lock
+		try
+		{
+			createImage();
+			imp.updateAndDraw();
+		}
+		finally
+		{
+			imageLock.release();
+		}
 
 		if (rollingWindowSize > 0)
 		{

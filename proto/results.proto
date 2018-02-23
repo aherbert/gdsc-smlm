@@ -35,6 +35,8 @@ enum ResultsImageType {
 	DRAW_INTENSITY_AVERAGE_PRECISION = 8; 
 	// Draw each localisation using the fit error as the intensity
 	DRAW_FIT_ERROR = 9;
+	// Draw each localisation using the z-position as the intensity (providing crude 3D rendering)
+	DRAW_Z_POSITION = 10;
 }
 
 // The mode for the results image

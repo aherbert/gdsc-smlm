@@ -141,6 +141,8 @@ public class ResultsProtosHelper
 				return "Localisations (width=precision)";
 			case DRAW_NONE:
 				return "None";
+			case DRAW_Z_POSITION:
+				return "Z position";
 			case UNRECOGNIZED:
 				return "Unknown";
 			default:
