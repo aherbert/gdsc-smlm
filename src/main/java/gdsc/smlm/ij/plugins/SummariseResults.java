@@ -48,8 +48,11 @@ import ij.text.TextWindow;
 public class SummariseResults implements PlugIn, MouseListener
 {
 	private static final String TITLE = "Summarise Results";
+	private static final String[] REMOVE_OUTLIERS = { "None", "1.5x IQR", "Top 2%" };
 
 	private static TextWindow summary = null;
+	private int histgramBins;
+	private int removeOutliers;
 
 	/*
 	 * (non-Javadoc)
@@ -292,8 +295,6 @@ public class SummariseResults implements PlugIn, MouseListener
 		if (result == null)
 			return;
 
-		System.out.printf("Show stats on %s\n", name);
-
 		// Do this is a thread so the click-event does not block
 		new Thread(new Runnable()
 		{
@@ -317,6 +318,8 @@ public class SummariseResults implements PlugIn, MouseListener
 		gd.addCheckbox("Plot_noise", settings.getPlotNoise());
 		gd.addCheckbox("Plot_SNR", settings.getPlotSnr());
 		gd.addCheckbox("Plot_precision", settings.getPlotPrecision());
+		gd.addNumericField("Histgram_bins", settings.getHistgramBins(), 0);
+		gd.addChoice("Remove_outliers", REMOVE_OUTLIERS, settings.getRemoveOutliers());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -328,20 +331,24 @@ public class SummariseResults implements PlugIn, MouseListener
 		settings.setPlotNoise(gd.getNextBoolean());
 		settings.setPlotSnr(gd.getNextBoolean());
 		settings.setPlotPrecision(gd.getNextBoolean());
+		histgramBins = Math.max(0, (int) gd.getNextNumber());
+		removeOutliers = gd.getNextChoiceIndex();
+		settings.setHistgramBins(histgramBins);
+		settings.setRemoveOutliers(removeOutliers);
 		SettingsManager.writeSettings(settings);
 
 		WindowOrganiser wo = new WindowOrganiser();
-		
+
 		if (settings.getPlotBackground())
-			plot(wo,"Background", result, PeakResult.BACKGROUND);
+			plot(wo, "Background", result, PeakResult.BACKGROUND);
 		if (settings.getPlotSignal())
-			plot(wo,"Signal", result, PeakResult.INTENSITY);
+			plot(wo, "Signal", result, PeakResult.INTENSITY);
 		if (settings.getPlotX())
-			plot(wo,"X", result, PeakResult.X);
+			plot(wo, "X", result, PeakResult.X);
 		if (settings.getPlotY())
-			plot(wo,"Y", result, PeakResult.Y);
+			plot(wo, "Y", result, PeakResult.Y);
 		if (settings.getPlotZ())
-			plot(wo,"Z", result, PeakResult.Z);
+			plot(wo, "Z", result, PeakResult.Z);
 		if ((settings.getPlotNoise() || settings.getPlotSnr()) && result.hasNoise())
 		{
 			final Counter counter = new Counter();
@@ -357,9 +364,9 @@ public class SummariseResults implements PlugIn, MouseListener
 				}
 			});
 			if (settings.getPlotNoise())
-				plot(wo,"Noise", noise);
+				plot(wo, "Noise", noise);
 			if (settings.getPlotSnr())
-				plot(wo,"SNR", snr);
+				plot(wo, "SNR", snr);
 		}
 		if (settings.getPlotPrecision())
 		{
@@ -373,14 +380,14 @@ public class SummariseResults implements PlugIn, MouseListener
 				String name = FitProtosHelper.getName(precisionMethod);
 				if (stored)
 					name += " (Stored)";
-				plot(wo,"Precision: " + name, new StoredDataStatistics(pp.precision));
+				plot(wo, "Precision: " + name, new StoredDataStatistics(pp.precision));
 			}
 			catch (DataException e)
 			{
 				// Ignore
 			}
 		}
-		
+
 		wo.tile();
 	}
 
@@ -397,14 +404,14 @@ public class SummariseResults implements PlugIn, MouseListener
 		plot(wo, title, data);
 	}
 
-	private void plot(WindowOrganiser wo,String title, float[] data)
+	private void plot(WindowOrganiser wo, String title, float[] data)
 	{
-		plot(wo,title, new StoredDataStatistics(data));
+		plot(wo, title, new StoredDataStatistics(data));
 	}
 
 	private void plot(WindowOrganiser wo, String title, StoredDataStatistics data)
 	{
-		int id = Utils.showHistogram(TITLE, data, title, 0, 0, 0);
+		int id = Utils.showHistogram(TITLE, data, title, 0, removeOutliers, histgramBins);
 		if (Utils.isNewWindow())
 			wo.add(id);
 	}

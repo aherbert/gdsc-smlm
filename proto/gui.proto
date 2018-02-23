@@ -564,4 +564,6 @@ message SummariseResultsSettings {
 	bool plot_noise = 6;
 	bool plot_snr = 7;
 	bool plot_precision = 8;
+	int32 histgram_bins = 9;
+	int32 remove_outliers = 10;
 }

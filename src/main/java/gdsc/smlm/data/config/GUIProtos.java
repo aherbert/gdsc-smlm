@@ -36019,6 +36019,16 @@ public final class GUIProtos {
      * <code>bool plot_precision = 8;</code>
      */
     boolean getPlotPrecision();
+
+    /**
+     * <code>int32 histgram_bins = 9;</code>
+     */
+    int getHistgramBins();
+
+    /**
+     * <code>int32 remove_outliers = 10;</code>
+     */
+    int getRemoveOutliers();
   }
   /**
    * <pre>
@@ -36044,6 +36054,8 @@ public final class GUIProtos {
       plotNoise_ = false;
       plotSnr_ = false;
       plotPrecision_ = false;
+      histgramBins_ = 0;
+      removeOutliers_ = 0;
     }
 
     @java.lang.Override
@@ -36109,6 +36121,16 @@ public final class GUIProtos {
             case 64: {
 
               plotPrecision_ = input.readBool();
+              break;
+            }
+            case 72: {
+
+              histgramBins_ = input.readInt32();
+              break;
+            }
+            case 80: {
+
+              removeOutliers_ = input.readInt32();
               break;
             }
           }
@@ -36206,6 +36228,24 @@ public final class GUIProtos {
       return plotPrecision_;
     }
 
+    public static final int HISTGRAM_BINS_FIELD_NUMBER = 9;
+    private int histgramBins_;
+    /**
+     * <code>int32 histgram_bins = 9;</code>
+     */
+    public int getHistgramBins() {
+      return histgramBins_;
+    }
+
+    public static final int REMOVE_OUTLIERS_FIELD_NUMBER = 10;
+    private int removeOutliers_;
+    /**
+     * <code>int32 remove_outliers = 10;</code>
+     */
+    public int getRemoveOutliers() {
+      return removeOutliers_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -36241,6 +36281,12 @@ public final class GUIProtos {
       }
       if (plotPrecision_ != false) {
         output.writeBool(8, plotPrecision_);
+      }
+      if (histgramBins_ != 0) {
+        output.writeInt32(9, histgramBins_);
+      }
+      if (removeOutliers_ != 0) {
+        output.writeInt32(10, removeOutliers_);
       }
     }
 
@@ -36281,6 +36327,14 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, plotPrecision_);
       }
+      if (histgramBins_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, histgramBins_);
+      }
+      if (removeOutliers_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(10, removeOutliers_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -36313,6 +36367,10 @@ public final class GUIProtos {
           == other.getPlotSnr());
       result = result && (getPlotPrecision()
           == other.getPlotPrecision());
+      result = result && (getHistgramBins()
+          == other.getHistgramBins());
+      result = result && (getRemoveOutliers()
+          == other.getRemoveOutliers());
       return result;
     }
 
@@ -36347,6 +36405,10 @@ public final class GUIProtos {
       hash = (37 * hash) + PLOT_PRECISION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getPlotPrecision());
+      hash = (37 * hash) + HISTGRAM_BINS_FIELD_NUMBER;
+      hash = (53 * hash) + getHistgramBins();
+      hash = (37 * hash) + REMOVE_OUTLIERS_FIELD_NUMBER;
+      hash = (53 * hash) + getRemoveOutliers();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -36496,6 +36558,10 @@ public final class GUIProtos {
 
         plotPrecision_ = false;
 
+        histgramBins_ = 0;
+
+        removeOutliers_ = 0;
+
         return this;
       }
 
@@ -36526,6 +36592,8 @@ public final class GUIProtos {
         result.plotNoise_ = plotNoise_;
         result.plotSnr_ = plotSnr_;
         result.plotPrecision_ = plotPrecision_;
+        result.histgramBins_ = histgramBins_;
+        result.removeOutliers_ = removeOutliers_;
         onBuilt();
         return result;
       }
@@ -36590,6 +36658,12 @@ public final class GUIProtos {
         }
         if (other.getPlotPrecision() != false) {
           setPlotPrecision(other.getPlotPrecision());
+        }
+        if (other.getHistgramBins() != 0) {
+          setHistgramBins(other.getHistgramBins());
+        }
+        if (other.getRemoveOutliers() != 0) {
+          setRemoveOutliers(other.getRemoveOutliers());
         }
         onChanged();
         return this;
@@ -36821,6 +36895,58 @@ public final class GUIProtos {
       public Builder clearPlotPrecision() {
         
         plotPrecision_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int histgramBins_ ;
+      /**
+       * <code>int32 histgram_bins = 9;</code>
+       */
+      public int getHistgramBins() {
+        return histgramBins_;
+      }
+      /**
+       * <code>int32 histgram_bins = 9;</code>
+       */
+      public Builder setHistgramBins(int value) {
+        
+        histgramBins_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 histgram_bins = 9;</code>
+       */
+      public Builder clearHistgramBins() {
+        
+        histgramBins_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int removeOutliers_ ;
+      /**
+       * <code>int32 remove_outliers = 10;</code>
+       */
+      public int getRemoveOutliers() {
+        return removeOutliers_;
+      }
+      /**
+       * <code>int32 remove_outliers = 10;</code>
+       */
+      public Builder setRemoveOutliers(int value) {
+        
+        removeOutliers_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 remove_outliers = 10;</code>
+       */
+      public Builder clearRemoveOutliers() {
+        
+        removeOutliers_ = 0;
         onChanged();
         return this;
       }
@@ -37213,14 +37339,16 @@ public final class GUIProtos {
       "gion\030\007 \001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\troi_image" +
       "\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010\022\023\n\013output_n" +
       "ame\030\013 \001(\t\022\023\n\013name_option\030\014 \001(\005\022\023\n\013name_s" +
-      "uffix\030\r \001(\t\022\024\n\014name_counter\030\016 \001(\005\"\266\001\n\030Su" +
+      "uffix\030\r \001(\t\022\024\n\014name_counter\030\016 \001(\005\"\346\001\n\030Su" +
       "mmariseResultsSettings\022\027\n\017plot_backgroun" +
       "d\030\001 \001(\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003" +
       " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n",
       "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
-      "ot_precision\030\010 \001(\010*O\n\014TemplateType\022\023\n\017IN" +
-      "LINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023" +
-      "\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
+      "\005\022\027\n\017remove_outliers\030\n \001(\005*O\n\014TemplateTy" +
+      "pe\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMP" +
+      "LATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtos" +
+      "b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -37351,7 +37479,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor,
-        new java.lang.String[] { "PlotBackground", "PlotSignal", "PlotX", "PlotY", "PlotZ", "PlotNoise", "PlotSnr", "PlotPrecision", });
+        new java.lang.String[] { "PlotBackground", "PlotSignal", "PlotX", "PlotY", "PlotZ", "PlotNoise", "PlotSnr", "PlotPrecision", "HistgramBins", "RemoveOutliers", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
