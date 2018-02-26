@@ -10842,73 +10842,54 @@ public final class GUIProtos {
         getLocalisationsFilenameBytes();
 
     /**
-     * <code>double pixel_size = 2;</code>
-     */
-    double getPixelSize();
-
-    /**
-     * <code>double gain = 3;</code>
-     */
-    double getGain();
-
-    /**
-     * <code>double exposure_time = 4;</code>
-     */
-    double getExposureTime();
-
-    /**
-     * <pre>
-     * The time unit for loading localisations uses a truncated list of the TimeUnit
-     * enum since it is being used to express only the exposure time where frames is
-     * not relevant.
-     * </pre>
-     *
-     * <code>int32 time_unit = 5;</code>
-     */
-    int getTimeUnit();
-
-    /**
-     * <code>int32 header_lines = 6;</code>
+     * <code>int32 header_lines = 2;</code>
      */
     int getHeaderLines();
 
     /**
-     * <code>string comment = 7;</code>
+     * <code>string comment = 3;</code>
      */
     java.lang.String getComment();
     /**
-     * <code>string comment = 7;</code>
+     * <code>string comment = 3;</code>
      */
     com.google.protobuf.ByteString
         getCommentBytes();
 
     /**
-     * <code>string delimiter = 8;</code>
+     * <code>string delimiter = 4;</code>
      */
     java.lang.String getDelimiter();
     /**
-     * <code>string delimiter = 8;</code>
+     * <code>string delimiter = 4;</code>
      */
     com.google.protobuf.ByteString
         getDelimiterBytes();
 
     /**
-     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+     * <pre>
+     * The calibration for the results
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    int getDistanceUnitValue();
+    boolean hasCalibration();
     /**
-     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+     * <pre>
+     * The calibration for the results
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit();
-
+    gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration();
     /**
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
+     * <pre>
+     * The calibration for the results
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    int getIntensityUnitValue();
-    /**
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
-     */
-    gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit();
+    gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder();
 
     /**
      * <code>int32 field_t = 11;</code>
@@ -10956,15 +10937,6 @@ public final class GUIProtos {
     int getFieldPrecision();
 
     /**
-     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-     */
-    int getPrecisionMethodValue();
-    /**
-     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-     */
-    gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod();
-
-    /**
      * <code>string name = 21;</code>
      */
     java.lang.String getName();
@@ -11006,15 +10978,9 @@ public final class GUIProtos {
     }
     private LoadLocalisationsSettings() {
       localisationsFilename_ = "";
-      pixelSize_ = 0D;
-      gain_ = 0D;
-      exposureTime_ = 0D;
-      timeUnit_ = 0;
       headerLines_ = 0;
       comment_ = "";
       delimiter_ = "";
-      distanceUnit_ = 0;
-      intensityUnit_ = 0;
       fieldT_ = 0;
       fieldId_ = 0;
       fieldX_ = 0;
@@ -11024,7 +10990,6 @@ public final class GUIProtos {
       fieldSx_ = 0;
       fieldSy_ = 0;
       fieldPrecision_ = 0;
-      precisionMethod_ = 0;
       name_ = "";
       limitZ_ = false;
       minZ_ = 0D;
@@ -11062,53 +11027,34 @@ public final class GUIProtos {
               localisationsFilename_ = s;
               break;
             }
-            case 17: {
-
-              pixelSize_ = input.readDouble();
-              break;
-            }
-            case 25: {
-
-              gain_ = input.readDouble();
-              break;
-            }
-            case 33: {
-
-              exposureTime_ = input.readDouble();
-              break;
-            }
-            case 40: {
-
-              timeUnit_ = input.readInt32();
-              break;
-            }
-            case 48: {
+            case 16: {
 
               headerLines_ = input.readInt32();
               break;
             }
-            case 58: {
+            case 26: {
               java.lang.String s = input.readStringRequireUtf8();
 
               comment_ = s;
               break;
             }
-            case 66: {
+            case 34: {
               java.lang.String s = input.readStringRequireUtf8();
 
               delimiter_ = s;
               break;
             }
-            case 72: {
-              int rawValue = input.readEnum();
+            case 42: {
+              gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder subBuilder = null;
+              if (calibration_ != null) {
+                subBuilder = calibration_.toBuilder();
+              }
+              calibration_ = input.readMessage(gdsc.smlm.data.config.CalibrationProtos.Calibration.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(calibration_);
+                calibration_ = subBuilder.buildPartial();
+              }
 
-              distanceUnit_ = rawValue;
-              break;
-            }
-            case 80: {
-              int rawValue = input.readEnum();
-
-              intensityUnit_ = rawValue;
               break;
             }
             case 88: {
@@ -11154,12 +11100,6 @@ public final class GUIProtos {
             case 152: {
 
               fieldPrecision_ = input.readInt32();
-              break;
-            }
-            case 160: {
-              int rawValue = input.readEnum();
-
-              precisionMethod_ = rawValue;
               break;
             }
             case 170: {
@@ -11240,61 +11180,19 @@ public final class GUIProtos {
       }
     }
 
-    public static final int PIXEL_SIZE_FIELD_NUMBER = 2;
-    private double pixelSize_;
-    /**
-     * <code>double pixel_size = 2;</code>
-     */
-    public double getPixelSize() {
-      return pixelSize_;
-    }
-
-    public static final int GAIN_FIELD_NUMBER = 3;
-    private double gain_;
-    /**
-     * <code>double gain = 3;</code>
-     */
-    public double getGain() {
-      return gain_;
-    }
-
-    public static final int EXPOSURE_TIME_FIELD_NUMBER = 4;
-    private double exposureTime_;
-    /**
-     * <code>double exposure_time = 4;</code>
-     */
-    public double getExposureTime() {
-      return exposureTime_;
-    }
-
-    public static final int TIME_UNIT_FIELD_NUMBER = 5;
-    private int timeUnit_;
-    /**
-     * <pre>
-     * The time unit for loading localisations uses a truncated list of the TimeUnit
-     * enum since it is being used to express only the exposure time where frames is
-     * not relevant.
-     * </pre>
-     *
-     * <code>int32 time_unit = 5;</code>
-     */
-    public int getTimeUnit() {
-      return timeUnit_;
-    }
-
-    public static final int HEADER_LINES_FIELD_NUMBER = 6;
+    public static final int HEADER_LINES_FIELD_NUMBER = 2;
     private int headerLines_;
     /**
-     * <code>int32 header_lines = 6;</code>
+     * <code>int32 header_lines = 2;</code>
      */
     public int getHeaderLines() {
       return headerLines_;
     }
 
-    public static final int COMMENT_FIELD_NUMBER = 7;
+    public static final int COMMENT_FIELD_NUMBER = 3;
     private volatile java.lang.Object comment_;
     /**
-     * <code>string comment = 7;</code>
+     * <code>string comment = 3;</code>
      */
     public java.lang.String getComment() {
       java.lang.Object ref = comment_;
@@ -11309,7 +11207,7 @@ public final class GUIProtos {
       }
     }
     /**
-     * <code>string comment = 7;</code>
+     * <code>string comment = 3;</code>
      */
     public com.google.protobuf.ByteString
         getCommentBytes() {
@@ -11325,10 +11223,10 @@ public final class GUIProtos {
       }
     }
 
-    public static final int DELIMITER_FIELD_NUMBER = 8;
+    public static final int DELIMITER_FIELD_NUMBER = 4;
     private volatile java.lang.Object delimiter_;
     /**
-     * <code>string delimiter = 8;</code>
+     * <code>string delimiter = 4;</code>
      */
     public java.lang.String getDelimiter() {
       java.lang.Object ref = delimiter_;
@@ -11343,7 +11241,7 @@ public final class GUIProtos {
       }
     }
     /**
-     * <code>string delimiter = 8;</code>
+     * <code>string delimiter = 4;</code>
      */
     public com.google.protobuf.ByteString
         getDelimiterBytes() {
@@ -11359,36 +11257,37 @@ public final class GUIProtos {
       }
     }
 
-    public static final int DISTANCE_UNIT_FIELD_NUMBER = 9;
-    private int distanceUnit_;
+    public static final int CALIBRATION_FIELD_NUMBER = 5;
+    private gdsc.smlm.data.config.CalibrationProtos.Calibration calibration_;
     /**
-     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+     * <pre>
+     * The calibration for the results
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public int getDistanceUnitValue() {
-      return distanceUnit_;
+    public boolean hasCalibration() {
+      return calibration_ != null;
     }
     /**
-     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+     * <pre>
+     * The calibration for the results
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
-      return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
-    }
-
-    public static final int INTENSITY_UNIT_FIELD_NUMBER = 10;
-    private int intensityUnit_;
-    /**
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
-     */
-    public int getIntensityUnitValue() {
-      return intensityUnit_;
+    public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+      return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
     }
     /**
-     * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
+     * <pre>
+     * The calibration for the results
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
      */
-    public gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit() {
-      gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
-      return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
+    public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+      return getCalibration();
     }
 
     public static final int FIELD_T_FIELD_NUMBER = 11;
@@ -11472,22 +11371,6 @@ public final class GUIProtos {
       return fieldPrecision_;
     }
 
-    public static final int PRECISION_METHOD_FIELD_NUMBER = 20;
-    private int precisionMethod_;
-    /**
-     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-     */
-    public int getPrecisionMethodValue() {
-      return precisionMethod_;
-    }
-    /**
-     * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-     */
-    public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
-      gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
-      return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
-    }
-
     public static final int NAME_FIELD_NUMBER = 21;
     private volatile java.lang.Object name_;
     /**
@@ -11564,32 +11447,17 @@ public final class GUIProtos {
       if (!getLocalisationsFilenameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, localisationsFilename_);
       }
-      if (pixelSize_ != 0D) {
-        output.writeDouble(2, pixelSize_);
-      }
-      if (gain_ != 0D) {
-        output.writeDouble(3, gain_);
-      }
-      if (exposureTime_ != 0D) {
-        output.writeDouble(4, exposureTime_);
-      }
-      if (timeUnit_ != 0) {
-        output.writeInt32(5, timeUnit_);
-      }
       if (headerLines_ != 0) {
-        output.writeInt32(6, headerLines_);
+        output.writeInt32(2, headerLines_);
       }
       if (!getCommentBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, comment_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, comment_);
       }
       if (!getDelimiterBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, delimiter_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, delimiter_);
       }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(9, distanceUnit_);
-      }
-      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        output.writeEnum(10, intensityUnit_);
+      if (calibration_ != null) {
+        output.writeMessage(5, getCalibration());
       }
       if (fieldT_ != 0) {
         output.writeInt32(11, fieldT_);
@@ -11618,9 +11486,6 @@ public final class GUIProtos {
       if (fieldPrecision_ != 0) {
         output.writeInt32(19, fieldPrecision_);
       }
-      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
-        output.writeEnum(20, precisionMethod_);
-      }
       if (!getNameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 21, name_);
       }
@@ -11643,39 +11508,19 @@ public final class GUIProtos {
       if (!getLocalisationsFilenameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, localisationsFilename_);
       }
-      if (pixelSize_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, pixelSize_);
-      }
-      if (gain_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, gain_);
-      }
-      if (exposureTime_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, exposureTime_);
-      }
-      if (timeUnit_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, timeUnit_);
-      }
       if (headerLines_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(6, headerLines_);
+          .computeInt32Size(2, headerLines_);
       }
       if (!getCommentBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, comment_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, comment_);
       }
       if (!getDelimiterBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, delimiter_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, delimiter_);
       }
-      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+      if (calibration_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(9, distanceUnit_);
-      }
-      if (intensityUnit_ != gdsc.smlm.data.config.UnitProtos.IntensityUnit.INTENSITY_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(10, intensityUnit_);
+          .computeMessageSize(5, getCalibration());
       }
       if (fieldT_ != 0) {
         size += com.google.protobuf.CodedOutputStream
@@ -11713,10 +11558,6 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(19, fieldPrecision_);
       }
-      if (precisionMethod_ != gdsc.smlm.data.config.FitProtos.PrecisionMethod.PRECISION_METHOD_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(20, precisionMethod_);
-      }
       if (!getNameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, name_);
       }
@@ -11750,28 +11591,17 @@ public final class GUIProtos {
       boolean result = true;
       result = result && getLocalisationsFilename()
           .equals(other.getLocalisationsFilename());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getPixelSize())
-          == java.lang.Double.doubleToLongBits(
-              other.getPixelSize()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getGain())
-          == java.lang.Double.doubleToLongBits(
-              other.getGain()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getExposureTime())
-          == java.lang.Double.doubleToLongBits(
-              other.getExposureTime()));
-      result = result && (getTimeUnit()
-          == other.getTimeUnit());
       result = result && (getHeaderLines()
           == other.getHeaderLines());
       result = result && getComment()
           .equals(other.getComment());
       result = result && getDelimiter()
           .equals(other.getDelimiter());
-      result = result && distanceUnit_ == other.distanceUnit_;
-      result = result && intensityUnit_ == other.intensityUnit_;
+      result = result && (hasCalibration() == other.hasCalibration());
+      if (hasCalibration()) {
+        result = result && getCalibration()
+            .equals(other.getCalibration());
+      }
       result = result && (getFieldT()
           == other.getFieldT());
       result = result && (getFieldId()
@@ -11790,7 +11620,6 @@ public final class GUIProtos {
           == other.getFieldSy());
       result = result && (getFieldPrecision()
           == other.getFieldPrecision());
-      result = result && precisionMethod_ == other.precisionMethod_;
       result = result && getName()
           .equals(other.getName());
       result = result && (getLimitZ()
@@ -11815,27 +11644,16 @@ public final class GUIProtos {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + LOCALISATIONSFILENAME_FIELD_NUMBER;
       hash = (53 * hash) + getLocalisationsFilename().hashCode();
-      hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getPixelSize()));
-      hash = (37 * hash) + GAIN_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getGain()));
-      hash = (37 * hash) + EXPOSURE_TIME_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getExposureTime()));
-      hash = (37 * hash) + TIME_UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + getTimeUnit();
       hash = (37 * hash) + HEADER_LINES_FIELD_NUMBER;
       hash = (53 * hash) + getHeaderLines();
       hash = (37 * hash) + COMMENT_FIELD_NUMBER;
       hash = (53 * hash) + getComment().hashCode();
       hash = (37 * hash) + DELIMITER_FIELD_NUMBER;
       hash = (53 * hash) + getDelimiter().hashCode();
-      hash = (37 * hash) + DISTANCE_UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + distanceUnit_;
-      hash = (37 * hash) + INTENSITY_UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + intensityUnit_;
+      if (hasCalibration()) {
+        hash = (37 * hash) + CALIBRATION_FIELD_NUMBER;
+        hash = (53 * hash) + getCalibration().hashCode();
+      }
       hash = (37 * hash) + FIELD_T_FIELD_NUMBER;
       hash = (53 * hash) + getFieldT();
       hash = (37 * hash) + FIELD_ID_FIELD_NUMBER;
@@ -11854,8 +11672,6 @@ public final class GUIProtos {
       hash = (53 * hash) + getFieldSy();
       hash = (37 * hash) + FIELD_PRECISION_FIELD_NUMBER;
       hash = (53 * hash) + getFieldPrecision();
-      hash = (37 * hash) + PRECISION_METHOD_FIELD_NUMBER;
-      hash = (53 * hash) + precisionMethod_;
       hash = (37 * hash) + NAME_FIELD_NUMBER;
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + LIMIT_Z_FIELD_NUMBER;
@@ -12002,24 +11818,18 @@ public final class GUIProtos {
         super.clear();
         localisationsFilename_ = "";
 
-        pixelSize_ = 0D;
-
-        gain_ = 0D;
-
-        exposureTime_ = 0D;
-
-        timeUnit_ = 0;
-
         headerLines_ = 0;
 
         comment_ = "";
 
         delimiter_ = "";
 
-        distanceUnit_ = 0;
-
-        intensityUnit_ = 0;
-
+        if (calibrationBuilder_ == null) {
+          calibration_ = null;
+        } else {
+          calibration_ = null;
+          calibrationBuilder_ = null;
+        }
         fieldT_ = 0;
 
         fieldId_ = 0;
@@ -12037,8 +11847,6 @@ public final class GUIProtos {
         fieldSy_ = 0;
 
         fieldPrecision_ = 0;
-
-        precisionMethod_ = 0;
 
         name_ = "";
 
@@ -12071,15 +11879,14 @@ public final class GUIProtos {
       public gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings buildPartial() {
         gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings result = new gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings(this);
         result.localisationsFilename_ = localisationsFilename_;
-        result.pixelSize_ = pixelSize_;
-        result.gain_ = gain_;
-        result.exposureTime_ = exposureTime_;
-        result.timeUnit_ = timeUnit_;
         result.headerLines_ = headerLines_;
         result.comment_ = comment_;
         result.delimiter_ = delimiter_;
-        result.distanceUnit_ = distanceUnit_;
-        result.intensityUnit_ = intensityUnit_;
+        if (calibrationBuilder_ == null) {
+          result.calibration_ = calibration_;
+        } else {
+          result.calibration_ = calibrationBuilder_.build();
+        }
         result.fieldT_ = fieldT_;
         result.fieldId_ = fieldId_;
         result.fieldX_ = fieldX_;
@@ -12089,7 +11896,6 @@ public final class GUIProtos {
         result.fieldSx_ = fieldSx_;
         result.fieldSy_ = fieldSy_;
         result.fieldPrecision_ = fieldPrecision_;
-        result.precisionMethod_ = precisionMethod_;
         result.name_ = name_;
         result.limitZ_ = limitZ_;
         result.minZ_ = minZ_;
@@ -12139,18 +11945,6 @@ public final class GUIProtos {
           localisationsFilename_ = other.localisationsFilename_;
           onChanged();
         }
-        if (other.getPixelSize() != 0D) {
-          setPixelSize(other.getPixelSize());
-        }
-        if (other.getGain() != 0D) {
-          setGain(other.getGain());
-        }
-        if (other.getExposureTime() != 0D) {
-          setExposureTime(other.getExposureTime());
-        }
-        if (other.getTimeUnit() != 0) {
-          setTimeUnit(other.getTimeUnit());
-        }
         if (other.getHeaderLines() != 0) {
           setHeaderLines(other.getHeaderLines());
         }
@@ -12162,11 +11956,8 @@ public final class GUIProtos {
           delimiter_ = other.delimiter_;
           onChanged();
         }
-        if (other.distanceUnit_ != 0) {
-          setDistanceUnitValue(other.getDistanceUnitValue());
-        }
-        if (other.intensityUnit_ != 0) {
-          setIntensityUnitValue(other.getIntensityUnitValue());
+        if (other.hasCalibration()) {
+          mergeCalibration(other.getCalibration());
         }
         if (other.getFieldT() != 0) {
           setFieldT(other.getFieldT());
@@ -12194,9 +11985,6 @@ public final class GUIProtos {
         }
         if (other.getFieldPrecision() != 0) {
           setFieldPrecision(other.getFieldPrecision());
-        }
-        if (other.precisionMethod_ != 0) {
-          setPrecisionMethodValue(other.getPrecisionMethodValue());
         }
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
@@ -12306,137 +12094,15 @@ public final class GUIProtos {
         return this;
       }
 
-      private double pixelSize_ ;
-      /**
-       * <code>double pixel_size = 2;</code>
-       */
-      public double getPixelSize() {
-        return pixelSize_;
-      }
-      /**
-       * <code>double pixel_size = 2;</code>
-       */
-      public Builder setPixelSize(double value) {
-        
-        pixelSize_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double pixel_size = 2;</code>
-       */
-      public Builder clearPixelSize() {
-        
-        pixelSize_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double gain_ ;
-      /**
-       * <code>double gain = 3;</code>
-       */
-      public double getGain() {
-        return gain_;
-      }
-      /**
-       * <code>double gain = 3;</code>
-       */
-      public Builder setGain(double value) {
-        
-        gain_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double gain = 3;</code>
-       */
-      public Builder clearGain() {
-        
-        gain_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double exposureTime_ ;
-      /**
-       * <code>double exposure_time = 4;</code>
-       */
-      public double getExposureTime() {
-        return exposureTime_;
-      }
-      /**
-       * <code>double exposure_time = 4;</code>
-       */
-      public Builder setExposureTime(double value) {
-        
-        exposureTime_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double exposure_time = 4;</code>
-       */
-      public Builder clearExposureTime() {
-        
-        exposureTime_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private int timeUnit_ ;
-      /**
-       * <pre>
-       * The time unit for loading localisations uses a truncated list of the TimeUnit
-       * enum since it is being used to express only the exposure time where frames is
-       * not relevant.
-       * </pre>
-       *
-       * <code>int32 time_unit = 5;</code>
-       */
-      public int getTimeUnit() {
-        return timeUnit_;
-      }
-      /**
-       * <pre>
-       * The time unit for loading localisations uses a truncated list of the TimeUnit
-       * enum since it is being used to express only the exposure time where frames is
-       * not relevant.
-       * </pre>
-       *
-       * <code>int32 time_unit = 5;</code>
-       */
-      public Builder setTimeUnit(int value) {
-        
-        timeUnit_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The time unit for loading localisations uses a truncated list of the TimeUnit
-       * enum since it is being used to express only the exposure time where frames is
-       * not relevant.
-       * </pre>
-       *
-       * <code>int32 time_unit = 5;</code>
-       */
-      public Builder clearTimeUnit() {
-        
-        timeUnit_ = 0;
-        onChanged();
-        return this;
-      }
-
       private int headerLines_ ;
       /**
-       * <code>int32 header_lines = 6;</code>
+       * <code>int32 header_lines = 2;</code>
        */
       public int getHeaderLines() {
         return headerLines_;
       }
       /**
-       * <code>int32 header_lines = 6;</code>
+       * <code>int32 header_lines = 2;</code>
        */
       public Builder setHeaderLines(int value) {
         
@@ -12445,7 +12111,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>int32 header_lines = 6;</code>
+       * <code>int32 header_lines = 2;</code>
        */
       public Builder clearHeaderLines() {
         
@@ -12456,7 +12122,7 @@ public final class GUIProtos {
 
       private java.lang.Object comment_ = "";
       /**
-       * <code>string comment = 7;</code>
+       * <code>string comment = 3;</code>
        */
       public java.lang.String getComment() {
         java.lang.Object ref = comment_;
@@ -12471,7 +12137,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>string comment = 7;</code>
+       * <code>string comment = 3;</code>
        */
       public com.google.protobuf.ByteString
           getCommentBytes() {
@@ -12487,7 +12153,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>string comment = 7;</code>
+       * <code>string comment = 3;</code>
        */
       public Builder setComment(
           java.lang.String value) {
@@ -12500,7 +12166,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>string comment = 7;</code>
+       * <code>string comment = 3;</code>
        */
       public Builder clearComment() {
         
@@ -12509,7 +12175,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>string comment = 7;</code>
+       * <code>string comment = 3;</code>
        */
       public Builder setCommentBytes(
           com.google.protobuf.ByteString value) {
@@ -12525,7 +12191,7 @@ public final class GUIProtos {
 
       private java.lang.Object delimiter_ = "";
       /**
-       * <code>string delimiter = 8;</code>
+       * <code>string delimiter = 4;</code>
        */
       public java.lang.String getDelimiter() {
         java.lang.Object ref = delimiter_;
@@ -12540,7 +12206,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>string delimiter = 8;</code>
+       * <code>string delimiter = 4;</code>
        */
       public com.google.protobuf.ByteString
           getDelimiterBytes() {
@@ -12556,7 +12222,7 @@ public final class GUIProtos {
         }
       }
       /**
-       * <code>string delimiter = 8;</code>
+       * <code>string delimiter = 4;</code>
        */
       public Builder setDelimiter(
           java.lang.String value) {
@@ -12569,7 +12235,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>string delimiter = 8;</code>
+       * <code>string delimiter = 4;</code>
        */
       public Builder clearDelimiter() {
         
@@ -12578,7 +12244,7 @@ public final class GUIProtos {
         return this;
       }
       /**
-       * <code>string delimiter = 8;</code>
+       * <code>string delimiter = 4;</code>
        */
       public Builder setDelimiterBytes(
           com.google.protobuf.ByteString value) {
@@ -12592,92 +12258,157 @@ public final class GUIProtos {
         return this;
       }
 
-      private int distanceUnit_ = 0;
+      private gdsc.smlm.data.config.CalibrationProtos.Calibration calibration_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> calibrationBuilder_;
       /**
-       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public int getDistanceUnitValue() {
-        return distanceUnit_;
+      public boolean hasCalibration() {
+        return calibrationBuilder_ != null || calibration_ != null;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public Builder setDistanceUnitValue(int value) {
-        distanceUnit_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
-       */
-      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
-        return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
-       */
-      public Builder setDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
+      public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+        if (calibrationBuilder_ == null) {
+          return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
+        } else {
+          return calibrationBuilder_.getMessage();
         }
-        
-        distanceUnit_ = value.getNumber();
-        onChanged();
-        return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 9;</code>
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public Builder clearDistanceUnit() {
-        
-        distanceUnit_ = 0;
-        onChanged();
-        return this;
-      }
+      public Builder setCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
+        if (calibrationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          calibration_ = value;
+          onChanged();
+        } else {
+          calibrationBuilder_.setMessage(value);
+        }
 
-      private int intensityUnit_ = 0;
-      /**
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
-       */
-      public int getIntensityUnitValue() {
-        return intensityUnit_;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
-       */
-      public Builder setIntensityUnitValue(int value) {
-        intensityUnit_ = value;
-        onChanged();
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public gdsc.smlm.data.config.UnitProtos.IntensityUnit getIntensityUnit() {
-        gdsc.smlm.data.config.UnitProtos.IntensityUnit result = gdsc.smlm.data.config.UnitProtos.IntensityUnit.valueOf(intensityUnit_);
-        return result == null ? gdsc.smlm.data.config.UnitProtos.IntensityUnit.UNRECOGNIZED : result;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
-       */
-      public Builder setIntensityUnit(gdsc.smlm.data.config.UnitProtos.IntensityUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
+      public Builder setCalibration(
+          gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder builderForValue) {
+        if (calibrationBuilder_ == null) {
+          calibration_ = builderForValue.build();
+          onChanged();
+        } else {
+          calibrationBuilder_.setMessage(builderForValue.build());
         }
-        
-        intensityUnit_ = value.getNumber();
-        onChanged();
+
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.IntensityUnit intensity_unit = 10;</code>
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
        */
-      public Builder clearIntensityUnit() {
-        
-        intensityUnit_ = 0;
-        onChanged();
+      public Builder mergeCalibration(gdsc.smlm.data.config.CalibrationProtos.Calibration value) {
+        if (calibrationBuilder_ == null) {
+          if (calibration_ != null) {
+            calibration_ =
+              gdsc.smlm.data.config.CalibrationProtos.Calibration.newBuilder(calibration_).mergeFrom(value).buildPartial();
+          } else {
+            calibration_ = value;
+          }
+          onChanged();
+        } else {
+          calibrationBuilder_.mergeFrom(value);
+        }
+
         return this;
+      }
+      /**
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
+       */
+      public Builder clearCalibration() {
+        if (calibrationBuilder_ == null) {
+          calibration_ = null;
+          onChanged();
+        } else {
+          calibration_ = null;
+          calibrationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder getCalibrationBuilder() {
+        
+        onChanged();
+        return getCalibrationFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
+       */
+      public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+        if (calibrationBuilder_ != null) {
+          return calibrationBuilder_.getMessageOrBuilder();
+        } else {
+          return calibration_ == null ?
+              gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
+        }
+      }
+      /**
+       * <pre>
+       * The calibration for the results
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.Calibration calibration = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> 
+          getCalibrationFieldBuilder() {
+        if (calibrationBuilder_ == null) {
+          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>(
+                  getCalibration(),
+                  getParentForChildren(),
+                  isClean());
+          calibration_ = null;
+        }
+        return calibrationBuilder_;
       }
 
       private int fieldT_ ;
@@ -12910,50 +12641,6 @@ public final class GUIProtos {
       public Builder clearFieldPrecision() {
         
         fieldPrecision_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int precisionMethod_ = 0;
-      /**
-       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-       */
-      public int getPrecisionMethodValue() {
-        return precisionMethod_;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-       */
-      public Builder setPrecisionMethodValue(int value) {
-        precisionMethod_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-       */
-      public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
-        gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
-        return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-       */
-      public Builder setPrecisionMethod(gdsc.smlm.data.config.FitProtos.PrecisionMethod value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        precisionMethod_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 20;</code>
-       */
-      public Builder clearPrecisionMethod() {
-        
-        precisionMethod_ = 0;
         onChanged();
         return this;
       }
@@ -37174,181 +36861,176 @@ public final class GUIProtos {
       "ype\022\031\n\021camera_model_name\030Q \001(\t\022\023\n\013random" +
       "_crop\030R \001(\010\022\020\n\010origin_x\030S \001(\005\022\020\n\010origin_",
       "y\030T \001(\005\022\026\n\016depth_of_focus\030U \001(\001\022\031\n\021astig" +
-      "matism_model\030V \001(\t\"\335\004\n\031LoadLocalisations" +
+      "matism_model\030V \001(\t\"\216\003\n\031LoadLocalisations" +
       "Settings\022\035\n\025localisationsFilename\030\001 \001(\t\022" +
-      "\022\n\npixel_size\030\002 \001(\001\022\014\n\004gain\030\003 \001(\001\022\025\n\rexp" +
-      "osure_time\030\004 \001(\001\022\021\n\ttime_unit\030\005 \001(\005\022\024\n\014h" +
-      "eader_lines\030\006 \001(\005\022\017\n\007comment\030\007 \001(\t\022\021\n\tde" +
-      "limiter\030\010 \001(\t\022:\n\rdistance_unit\030\t \001(\0162#.g" +
-      "dsc.smlm.data.config.DistanceUnit\022<\n\016int" +
-      "ensity_unit\030\n \001(\0162$.gdsc.smlm.data.confi" +
-      "g.IntensityUnit\022\017\n\007field_t\030\013 \001(\005\022\020\n\010fiel",
-      "d_id\030\014 \001(\005\022\017\n\007field_x\030\r \001(\005\022\017\n\007field_y\030\016" +
-      " \001(\005\022\017\n\007field_z\030\017 \001(\005\022\017\n\007field_i\030\020 \001(\005\022\020" +
-      "\n\010field_sx\030\021 \001(\005\022\020\n\010field_sy\030\022 \001(\005\022\027\n\017fi" +
-      "eld_precision\030\023 \001(\005\022@\n\020precision_method\030" +
-      "\024 \001(\0162&.gdsc.smlm.data.config.PrecisionM" +
-      "ethod\022\014\n\004name\030\025 \001(\t\022\017\n\007limit_z\030\026 \001(\010\022\r\n\005" +
-      "min_z\030\027 \001(\001\022\r\n\005max_z\030\030 \001(\001\"\220\007\n\022Clusterin" +
-      "gSettings\022\032\n\022distance_threshold\030\001 \001(\001\022\032\n" +
-      "\022distance_exclusion\030\002 \001(\001\022\026\n\016time_thresh" +
-      "old\030\003 \001(\001\0222\n\ttime_unit\030\004 \001(\0162\037.gdsc.smlm",
-      ".data.config.TimeUnit\022\022\n\ntrace_mode\030\005 \001(" +
-      "\005\022\034\n\024clustering_algorithm\030\006 \001(\005\022\026\n\016pulse" +
-      "_interval\030\007 \001(\005\022\024\n\014pulse_window\030\010 \001(\005\022\024\n" +
-      "\014split_pulses\030\t \001(\010\022\025\n\rblinking_rate\030\n \001" +
-      "(\001\022\020\n\010optimise\030\013 \001(\010\022\036\n\026min_distance_thr" +
-      "eshold\030\014 \001(\001\022\036\n\026max_distance_threshold\030\r" +
-      " \001(\001\022\032\n\022min_time_threshold\030\016 \001(\005\022\032\n\022max_" +
-      "time_threshold\030\017 \001(\005\022\027\n\017optimiser_steps\030" +
-      "\020 \001(\005\022\026\n\016optimiser_plot\030\021 \001(\005\022\023\n\013save_tr" +
-      "aces\030\022 \001(\010\022\027\n\017show_histograms\030\023 \001(\010\022\027\n\017s",
-      "ave_trace_data\030\024 \001(\010\022\034\n\024trace_data_direc" +
-      "tory\030\025 \001(\t\022\026\n\016histogram_bins\030\026 \001(\005\022\027\n\017re" +
-      "move_outliers\030\027 \001(\010\022\024\n\014refit_option\030\030 \001(" +
-      "\010\022\034\n\024minimum_trace_length\030\031 \001(\005\022\020\n\010trunc" +
-      "ate\030\032 \001(\010\022\032\n\022internal_distances\030\033 \001(\010\022\035\n" +
-      "\025sub_sampled_distances\030\034 \001(\010\022\023\n\013ignore_e" +
-      "nds\030\035 \001(\010\022\034\n\024precision_correction\030\036 \001(\010\022" +
-      "\026\n\016msd_correction\030\037 \001(\010\022\013\n\003mle\030  \001(\010\022\022\n\n" +
-      "fit_length\030! \001(\005\022\024\n\014fit_restarts\030\" \001(\005\022\025" +
-      "\n\rjump_distance\030# \001(\005\"\353\001\n\023OpticsEventSet",
-      "tings\022\034\n\024show_selection_table\030\001 \001(\010\022\036\n\026t" +
-      "able_create_selection\030\002 \001(\010\022\036\n\026image_cre" +
-      "ate_selection\030\003 \001(\010\022\035\n\025plot_create_selec" +
-      "tion\030\004 \001(\010\022\034\n\024table_show_selection\030\005 \001(\010" +
-      "\022\034\n\024image_show_selection\030\006 \001(\010\022\033\n\023plot_s" +
-      "how_selection\030\007 \001(\010\"\337\005\n\016OpticsSettings\022\024" +
-      "\n\014input_option\030\001 \001(\t\022\023\n\013optics_mode\030\002 \001(" +
-      "\005\022\034\n\024number_of_split_sets\030\003 \001(\005\022\032\n\022use_r" +
-      "andom_vectors\030\004 \001(\010\022\035\n\025save_approximate_" +
-      "sets\030\005 \001(\010\022\023\n\013sample_mode\030\006 \001(\005\022\033\n\023gener",
-      "ating_distance\030\007 \001(\001\022\022\n\nmin_points\030\010 \001(\005" +
-      "\022\027\n\017clustering_mode\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n" +
-      "\010topLevel\030\013 \001(\010\022\023\n\013upper_limit\030\014 \001(\001\022\023\n\013" +
-      "lower_limit\030\r \001(\001\022\017\n\007samples\030\016 \001(\005\022\027\n\017sa" +
-      "mple_fraction\030\017 \001(\001\022\026\n\016fraction_noise\030\020 " +
-      "\001(\001\022\033\n\023clustering_distance\030\021 \001(\001\022\014\n\004core" +
-      "\030\022 \001(\010\022\023\n\013image_scale\030\023 \001(\001\022\022\n\nimage_mod" +
-      "e\030\024 \001(\005\022\020\n\010weighted\030\025 \001(\010\022\021\n\tequalised\030\026" +
-      " \001(\010\022\021\n\tplot_mode\030\027 \001(\005\022\024\n\014outline_mode\030" +
-      "\030 \001(\005\022\032\n\022spanning_tree_mode\030\031 \001(\005\022\016\n\006lam",
-      "bda\030\032 \001(\001\022\022\n\nshow_table\030\033 \001(\010\022\027\n\017table_s" +
-      "ort_mode\030\034 \001(\005\022\032\n\022table_reverse_sort\030\035 \001" +
-      "(\010\022I\n\025optics_event_settings\030\036 \001(\0132*.gdsc" +
-      ".smlm.data.config.OpticsEventSettings\"\203\001" +
-      "\n\017DefaultTemplate\022:\n\rtemplate_type\030\001 \001(\016" +
-      "2#.gdsc.smlm.data.config.TemplateType\022\014\n" +
-      "\004name\030\002 \001(\t\022\020\n\010filename\030\003 \001(\t\022\024\n\014tif_fil" +
-      "ename\030\004 \001(\t\"\\\n\027DefaultTemplateSettings\022A" +
-      "\n\021default_templates\030\001 \003(\0132&.gdsc.smlm.da" +
-      "ta.config.DefaultTemplate\"\375\001\n\035Configurat",
-      "ionTemplateSettings\022\016\n\006option\030\001 \001(\005\022!\n\031s" +
-      "elect_standard_templates\030\002 \001(\010\022\037\n\027select" +
-      "_custom_directory\030\003 \001(\010\022\037\n\027configuration" +
-      "_directory\030\004 \001(\t\022#\n\033selected_standard_te" +
-      "mplates\030\005 \003(\t\022!\n\031selected_custom_templat" +
-      "es\030\006 \003(\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(" +
-      "\010\"\232\001\n\023NucleusMaskSettings\022\014\n\004mode\030\001 \001(\005\022" +
-      "\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022\020" +
-      "\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024" +
-      "\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"\274",
-      "\010\n\022PSFCreatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006r" +
-      "adius\030\002 \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024\n" +
-      "\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engine_settin" +
-      "gs\030\005 \001(\0132(.gdsc.smlm.data.config.FitEngi" +
-      "neSettings\022\'\n\003psf\030\006 \001(\0132\032.gdsc.smlm.data" +
-      ".config.PSF\022\032\n\022amplitude_fraction\030\007 \001(\001\022" +
-      "\037\n\027start_background_frames\030\010 \001(\005\022\035\n\025end_" +
-      "background_frames\030\t \001(\005\022\025\n\rmagnification" +
-      "\030\n \001(\005\022\021\n\tsmoothing\030\013 \001(\001\022\031\n\021centre_each" +
-      "_slice\030\014 \001(\010\022\023\n\013com_cut_off\030\r \001(\001\022\034\n\024int",
-      "erpolation_method\030\016 \001(\005\022\017\n\007psfType\030\017 \001(\005" +
-      "\0227\n\013calibration\030\020 \001(\0132\".gdsc.smlm.data.c" +
-      "onfig.Calibration\022\027\n\017analysis_window\030\021 \001" +
-      "(\001\022\022\n\ncom_window\030\022 \001(\005\022\037\n\027alignment_magn" +
-      "ification\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005\022\030" +
-      "\n\020check_alignments\030\025 \001(\010\022\031\n\021psf_magnific" +
-      "ation\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_st" +
-      "ack_signal\030\030 \001(\010\022\030\n\020single_precision\030\031 \001" +
-      "(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_start\030\033 " +
-      "\001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_magnifica",
-      "tion\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013output" +
-      "_type\030\037 \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030\n\020" +
-      "crop_to_z_centre\030! \001(\010\022\026\n\016alignment_mode" +
-      "\030\" \001(\005\022\032\n\022alignment_z_radius\030# \001(\001\022\022\n\nup" +
-      "date_roi\030$ \001(\010\022\033\n\023sub_pixel_precision\030% " +
-      "\001(\001\022\031\n\021rmsd_xy_threshold\030& \001(\001\022\030\n\020rmsd_z" +
-      "_threshold\030\' \001(\001\022\033\n\023com_shift_threshold\030" +
-      "( \001(\001\"q\n\032CameraModelManagerSettings\022\016\n\006o" +
-      "ption\030\001 \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_" +
-      "y\030\003 \001(\005\022\r\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t",
-      "\"\227\001\n\032CubicSplineManagerSettings\022\016\n\006optio" +
-      "n\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnificati" +
-      "on\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001" +
-      "\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030F" +
-      "ailCountManagerSettings\022\016\n\006option\030\001 \001(\005\022" +
-      "\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_count_limit\030" +
-      "\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(\010\022\034\n\024tar" +
-      "get_pass_fraction\030\005 \001(\001\022\020\n\010filename\030\006 \001(" +
-      "\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rolling_win" +
-      "dow\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020p",
-      "lot_fail_weight\030\n \001(\005\022\033\n\023plot_reset_frac" +
-      "tion\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010\022\023\n" +
-      "\013table_top_n\030\r \001(\005\022,\n$rolling_counter_mi" +
-      "n_allowed_failures\030\016 \001(\005\022,\n$rolling_coun" +
-      "ter_max_allowed_failures\030\017 \001(\005\022\"\n\032rollin" +
-      "g_counter_min_window\030\020 \001(\005\022\"\n\032rolling_co" +
-      "unter_max_window\030\021 \001(\005\022-\n%weighted_count" +
-      "er_min_allowed_failures\030\022 \001(\005\022-\n%weighte" +
-      "d_counter_max_allowed_failures\030\023 \001(\005\022+\n#" +
-      "weighted_counter_min_pass_decrement\030\024 \001(",
-      "\005\022+\n#weighted_counter_max_pass_decrement" +
-      "\030\025 \001(\005\022.\n&resetting_counter_min_allowed_" +
-      "failures\030\026 \001(\005\022.\n&resetting_counter_max_" +
-      "allowed_failures\030\027 \001(\005\022,\n$resetting_coun" +
-      "ter_min_reset_fraction\030\030 \001(\001\022,\n$resettin" +
-      "g_counter_max_reset_fraction\030\031 \001(\001\022,\n$re" +
-      "setting_counter_inc_reset_fraction\030\032 \001(\001" +
-      "\022,\n$pass_rate_counter_min_allowed_counts" +
-      "\030\033 \001(\005\022,\n$pass_rate_counter_max_allowed_" +
-      "counts\030\034 \001(\005\022\'\n\037pass_rate_counter_min_pa",
-      "ss_rate\030\035 \001(\001\022\'\n\037pass_rate_counter_max_p" +
-      "ass_rate\030\036 \001(\001\022\'\n\037pass_rate_counter_inc_" +
-      "pass_rate\030\037 \001(\001\"\266\005\n\037AstigmatismModelMana" +
-      "gerSettings\022\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_sl" +
-      "ice\030\002 \001(\001\022E\n\023fit_engine_settings\030\003 \001(\0132(" +
-      ".gdsc.smlm.data.config.FitEngineSettings" +
-      "\022\'\n\003psf\030\004 \001(\0132\032.gdsc.smlm.data.config.PS" +
-      "F\0227\n\013calibration\030\005 \001(\0132\".gdsc.smlm.data." +
-      "config.Calibration\022\016\n\006radius\030\006 \001(\001\022\030\n\020lo" +
-      "g_fit_progress\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001\022",
-      "\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_estimated_" +
-      "curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmodel_name" +
-      "\030\014 \001(\t\022\022\n\nsave_model\030\016 \001(\010\022\026\n\016save_fit_w" +
-      "idth\030\017 \001(\010\022\020\n\010selected\030\r \001(\t\022\033\n\023show_dep" +
-      "th_of_focus\030\020 \001(\010\022\033\n\023show_combined_width" +
-      "\030\026 \001(\010\022\020\n\010show_psf\030\022 \001(\010\022<\n\017z_distance_u" +
-      "nit\030\023 \001(\0162#.gdsc.smlm.data.config.Distan" +
-      "ceUnit\022<\n\017s_distance_unit\030\024 \001(\0162#.gdsc.s" +
-      "mlm.data.config.DistanceUnit\022\030\n\020calibrat" +
-      "ed_image\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t\"\226\002\n\023Cro",
-      "pResultsSettings\022\024\n\014input_option\030\001 \001(\t\022\016" +
-      "\n\006border\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005" +
-      "width\030\005 \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n\rselect_re" +
-      "gion\030\007 \001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\troi_image" +
-      "\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010\022\023\n\013output_n" +
-      "ame\030\013 \001(\t\022\023\n\013name_option\030\014 \001(\005\022\023\n\013name_s" +
-      "uffix\030\r \001(\t\022\024\n\014name_counter\030\016 \001(\005\"\346\001\n\030Su" +
-      "mmariseResultsSettings\022\027\n\017plot_backgroun" +
-      "d\030\001 \001(\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003" +
-      " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n",
-      "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
-      "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
-      "\005\022\027\n\017remove_outliers\030\n \001(\005*O\n\014TemplateTy" +
-      "pe\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMP" +
-      "LATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtos" +
-      "b\006proto3"
+      "\024\n\014header_lines\030\002 \001(\005\022\017\n\007comment\030\003 \001(\t\022\021" +
+      "\n\tdelimiter\030\004 \001(\t\0227\n\013calibration\030\005 \001(\0132\"" +
+      ".gdsc.smlm.data.config.Calibration\022\017\n\007fi" +
+      "eld_t\030\013 \001(\005\022\020\n\010field_id\030\014 \001(\005\022\017\n\007field_x" +
+      "\030\r \001(\005\022\017\n\007field_y\030\016 \001(\005\022\017\n\007field_z\030\017 \001(\005" +
+      "\022\017\n\007field_i\030\020 \001(\005\022\020\n\010field_sx\030\021 \001(\005\022\020\n\010f" +
+      "ield_sy\030\022 \001(\005\022\027\n\017field_precision\030\023 \001(\005\022\014",
+      "\n\004name\030\025 \001(\t\022\017\n\007limit_z\030\026 \001(\010\022\r\n\005min_z\030\027" +
+      " \001(\001\022\r\n\005max_z\030\030 \001(\001\"\220\007\n\022ClusteringSettin" +
+      "gs\022\032\n\022distance_threshold\030\001 \001(\001\022\032\n\022distan" +
+      "ce_exclusion\030\002 \001(\001\022\026\n\016time_threshold\030\003 \001" +
+      "(\001\0222\n\ttime_unit\030\004 \001(\0162\037.gdsc.smlm.data.c" +
+      "onfig.TimeUnit\022\022\n\ntrace_mode\030\005 \001(\005\022\034\n\024cl" +
+      "ustering_algorithm\030\006 \001(\005\022\026\n\016pulse_interv" +
+      "al\030\007 \001(\005\022\024\n\014pulse_window\030\010 \001(\005\022\024\n\014split_" +
+      "pulses\030\t \001(\010\022\025\n\rblinking_rate\030\n \001(\001\022\020\n\010o" +
+      "ptimise\030\013 \001(\010\022\036\n\026min_distance_threshold\030",
+      "\014 \001(\001\022\036\n\026max_distance_threshold\030\r \001(\001\022\032\n" +
+      "\022min_time_threshold\030\016 \001(\005\022\032\n\022max_time_th" +
+      "reshold\030\017 \001(\005\022\027\n\017optimiser_steps\030\020 \001(\005\022\026" +
+      "\n\016optimiser_plot\030\021 \001(\005\022\023\n\013save_traces\030\022 " +
+      "\001(\010\022\027\n\017show_histograms\030\023 \001(\010\022\027\n\017save_tra" +
+      "ce_data\030\024 \001(\010\022\034\n\024trace_data_directory\030\025 " +
+      "\001(\t\022\026\n\016histogram_bins\030\026 \001(\005\022\027\n\017remove_ou" +
+      "tliers\030\027 \001(\010\022\024\n\014refit_option\030\030 \001(\010\022\034\n\024mi" +
+      "nimum_trace_length\030\031 \001(\005\022\020\n\010truncate\030\032 \001" +
+      "(\010\022\032\n\022internal_distances\030\033 \001(\010\022\035\n\025sub_sa",
+      "mpled_distances\030\034 \001(\010\022\023\n\013ignore_ends\030\035 \001" +
+      "(\010\022\034\n\024precision_correction\030\036 \001(\010\022\026\n\016msd_" +
+      "correction\030\037 \001(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_len" +
+      "gth\030! \001(\005\022\024\n\014fit_restarts\030\" \001(\005\022\025\n\rjump_" +
+      "distance\030# \001(\005\"\353\001\n\023OpticsEventSettings\022\034" +
+      "\n\024show_selection_table\030\001 \001(\010\022\036\n\026table_cr" +
+      "eate_selection\030\002 \001(\010\022\036\n\026image_create_sel" +
+      "ection\030\003 \001(\010\022\035\n\025plot_create_selection\030\004 " +
+      "\001(\010\022\034\n\024table_show_selection\030\005 \001(\010\022\034\n\024ima" +
+      "ge_show_selection\030\006 \001(\010\022\033\n\023plot_show_sel",
+      "ection\030\007 \001(\010\"\337\005\n\016OpticsSettings\022\024\n\014input" +
+      "_option\030\001 \001(\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n\024nu" +
+      "mber_of_split_sets\030\003 \001(\005\022\032\n\022use_random_v" +
+      "ectors\030\004 \001(\010\022\035\n\025save_approximate_sets\030\005 " +
+      "\001(\010\022\023\n\013sample_mode\030\006 \001(\005\022\033\n\023generating_d" +
+      "istance\030\007 \001(\001\022\022\n\nmin_points\030\010 \001(\005\022\027\n\017clu" +
+      "stering_mode\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010topLev" +
+      "el\030\013 \001(\010\022\023\n\013upper_limit\030\014 \001(\001\022\023\n\013lower_l" +
+      "imit\030\r \001(\001\022\017\n\007samples\030\016 \001(\005\022\027\n\017sample_fr" +
+      "action\030\017 \001(\001\022\026\n\016fraction_noise\030\020 \001(\001\022\033\n\023",
+      "clustering_distance\030\021 \001(\001\022\014\n\004core\030\022 \001(\010\022" +
+      "\023\n\013image_scale\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005" +
+      "\022\020\n\010weighted\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n" +
+      "\tplot_mode\030\027 \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032" +
+      "\n\022spanning_tree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001" +
+      "(\001\022\022\n\nshow_table\030\033 \001(\010\022\027\n\017table_sort_mod" +
+      "e\030\034 \001(\005\022\032\n\022table_reverse_sort\030\035 \001(\010\022I\n\025o" +
+      "ptics_event_settings\030\036 \001(\0132*.gdsc.smlm.d" +
+      "ata.config.OpticsEventSettings\"\203\001\n\017Defau" +
+      "ltTemplate\022:\n\rtemplate_type\030\001 \001(\0162#.gdsc",
+      ".smlm.data.config.TemplateType\022\014\n\004name\030\002" +
+      " \001(\t\022\020\n\010filename\030\003 \001(\t\022\024\n\014tif_filename\030\004" +
+      " \001(\t\"\\\n\027DefaultTemplateSettings\022A\n\021defau" +
+      "lt_templates\030\001 \003(\0132&.gdsc.smlm.data.conf" +
+      "ig.DefaultTemplate\"\375\001\n\035ConfigurationTemp" +
+      "lateSettings\022\016\n\006option\030\001 \001(\005\022!\n\031select_s" +
+      "tandard_templates\030\002 \001(\010\022\037\n\027select_custom" +
+      "_directory\030\003 \001(\010\022\037\n\027configuration_direct" +
+      "ory\030\004 \001(\t\022#\n\033selected_standard_templates" +
+      "\030\005 \003(\t\022!\n\031selected_custom_templates\030\006 \003(",
+      "\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023N" +
+      "ucleusMaskSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013fiel" +
+      "d_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dit" +
+      "her\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_pe" +
+      "r_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"\274\010\n\022PSFC" +
+      "reatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006radius\030\002" +
+      " \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024\n\014nm_per" +
+      "_slice\030\004 \001(\001\022E\n\023fit_engine_settings\030\005 \001(" +
+      "\0132(.gdsc.smlm.data.config.FitEngineSetti" +
+      "ngs\022\'\n\003psf\030\006 \001(\0132\032.gdsc.smlm.data.config",
+      ".PSF\022\032\n\022amplitude_fraction\030\007 \001(\001\022\037\n\027star" +
+      "t_background_frames\030\010 \001(\005\022\035\n\025end_backgro" +
+      "und_frames\030\t \001(\005\022\025\n\rmagnification\030\n \001(\005\022" +
+      "\021\n\tsmoothing\030\013 \001(\001\022\031\n\021centre_each_slice\030" +
+      "\014 \001(\010\022\023\n\013com_cut_off\030\r \001(\001\022\034\n\024interpolat" +
+      "ion_method\030\016 \001(\005\022\017\n\007psfType\030\017 \001(\005\0227\n\013cal" +
+      "ibration\030\020 \001(\0132\".gdsc.smlm.data.config.C" +
+      "alibration\022\027\n\017analysis_window\030\021 \001(\001\022\022\n\nc" +
+      "om_window\030\022 \001(\005\022\037\n\027alignment_magnificati" +
+      "on\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005\022\030\n\020check",
+      "_alignments\030\025 \001(\010\022\031\n\021psf_magnification\030\026" +
+      " \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_stack_sig" +
+      "nal\030\030 \001(\010\022\030\n\020single_precision\030\031 \001(\010\022\023\n\013c" +
+      "rop_border\030\032 \001(\005\022\022\n\ncrop_start\030\033 \001(\005\022\020\n\010" +
+      "crop_end\030\034 \001(\005\022\033\n\023psf_z_magnification\030\035 " +
+      "\001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013output_type\030\037" +
+      " \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030\n\020crop_to" +
+      "_z_centre\030! \001(\010\022\026\n\016alignment_mode\030\" \001(\005\022" +
+      "\032\n\022alignment_z_radius\030# \001(\001\022\022\n\nupdate_ro" +
+      "i\030$ \001(\010\022\033\n\023sub_pixel_precision\030% \001(\001\022\031\n\021",
+      "rmsd_xy_threshold\030& \001(\001\022\030\n\020rmsd_z_thresh" +
+      "old\030\' \001(\001\022\033\n\023com_shift_threshold\030( \001(\001\"q" +
+      "\n\032CameraModelManagerSettings\022\016\n\006option\030\001" +
+      " \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005" +
+      "\022\r\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cu" +
+      "bicSplineManagerSettings\022\016\n\006option\030\001 \001(\005" +
+      "\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(" +
+      "\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_s" +
+      "hift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030FailCoun" +
+      "tManagerSettings\022\016\n\006option\030\001 \001(\005\022\022\n\nmax_",
+      "frames\030\002 \001(\005\022\030\n\020fail_count_limit\030\003 \001(\005\022\032" +
+      "\n\022save_after_fitting\030\004 \001(\010\022\034\n\024target_pas" +
+      "s_fraction\030\005 \001(\001\022\020\n\010filename\030\006 \001(\t\022\021\n\tpl" +
+      "ot_item\030\007 \001(\005\022\033\n\023plot_rolling_window\030\010 \001" +
+      "(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020plot_fai" +
+      "l_weight\030\n \001(\005\022\033\n\023plot_reset_fraction\030\013 " +
+      "\001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010\022\023\n\013table_" +
+      "top_n\030\r \001(\005\022,\n$rolling_counter_min_allow" +
+      "ed_failures\030\016 \001(\005\022,\n$rolling_counter_max" +
+      "_allowed_failures\030\017 \001(\005\022\"\n\032rolling_count",
+      "er_min_window\030\020 \001(\005\022\"\n\032rolling_counter_m" +
+      "ax_window\030\021 \001(\005\022-\n%weighted_counter_min_" +
+      "allowed_failures\030\022 \001(\005\022-\n%weighted_count" +
+      "er_max_allowed_failures\030\023 \001(\005\022+\n#weighte" +
+      "d_counter_min_pass_decrement\030\024 \001(\005\022+\n#we" +
+      "ighted_counter_max_pass_decrement\030\025 \001(\005\022" +
+      ".\n&resetting_counter_min_allowed_failure" +
+      "s\030\026 \001(\005\022.\n&resetting_counter_max_allowed" +
+      "_failures\030\027 \001(\005\022,\n$resetting_counter_min" +
+      "_reset_fraction\030\030 \001(\001\022,\n$resetting_count",
+      "er_max_reset_fraction\030\031 \001(\001\022,\n$resetting" +
+      "_counter_inc_reset_fraction\030\032 \001(\001\022,\n$pas" +
+      "s_rate_counter_min_allowed_counts\030\033 \001(\005\022" +
+      ",\n$pass_rate_counter_max_allowed_counts\030" +
+      "\034 \001(\005\022\'\n\037pass_rate_counter_min_pass_rate" +
+      "\030\035 \001(\001\022\'\n\037pass_rate_counter_max_pass_rat" +
+      "e\030\036 \001(\001\022\'\n\037pass_rate_counter_inc_pass_ra" +
+      "te\030\037 \001(\001\"\266\005\n\037AstigmatismModelManagerSett" +
+      "ings\022\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_slice\030\002 \001" +
+      "(\001\022E\n\023fit_engine_settings\030\003 \001(\0132(.gdsc.s",
+      "mlm.data.config.FitEngineSettings\022\'\n\003psf" +
+      "\030\004 \001(\0132\032.gdsc.smlm.data.config.PSF\0227\n\013ca" +
+      "libration\030\005 \001(\0132\".gdsc.smlm.data.config." +
+      "Calibration\022\016\n\006radius\030\006 \001(\001\022\030\n\020log_fit_p" +
+      "rogress\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001\022\024\n\014weig" +
+      "hted_fit\030\t \001(\010\022\034\n\024show_estimated_curve\030\n" +
+      " \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmodel_name\030\014 \001(\t\022" +
+      "\022\n\nsave_model\030\016 \001(\010\022\026\n\016save_fit_width\030\017 " +
+      "\001(\010\022\020\n\010selected\030\r \001(\t\022\033\n\023show_depth_of_f" +
+      "ocus\030\020 \001(\010\022\033\n\023show_combined_width\030\026 \001(\010\022",
+      "\020\n\010show_psf\030\022 \001(\010\022<\n\017z_distance_unit\030\023 \001" +
+      "(\0162#.gdsc.smlm.data.config.DistanceUnit\022" +
+      "<\n\017s_distance_unit\030\024 \001(\0162#.gdsc.smlm.dat" +
+      "a.config.DistanceUnit\022\030\n\020calibrated_imag" +
+      "e\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t\"\226\002\n\023CropResult" +
+      "sSettings\022\024\n\014input_option\030\001 \001(\t\022\016\n\006borde" +
+      "r\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005" +
+      " \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n\rselect_region\030\007 " +
+      "\001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022" +
+      "\024\n\014reset_origin\030\n \001(\010\022\023\n\013output_name\030\013 \001",
+      "(\t\022\023\n\013name_option\030\014 \001(\005\022\023\n\013name_suffix\030\r" +
+      " \001(\t\022\024\n\014name_counter\030\016 \001(\005\"\346\001\n\030Summarise" +
+      "ResultsSettings\022\027\n\017plot_background\030\001 \001(\010" +
+      "\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016\n" +
+      "\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplot_no" +
+      "ise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_prec" +
+      "ision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027\n\017re" +
+      "move_outliers\030\n \001(\005*O\n\014TemplateType\022\023\n\017I" +
+      "NLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022" +
+      "\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto",
+      "3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -37395,7 +37077,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_LoadLocalisationsSettings_descriptor,
-        new java.lang.String[] { "LocalisationsFilename", "PixelSize", "Gain", "ExposureTime", "TimeUnit", "HeaderLines", "Comment", "Delimiter", "DistanceUnit", "IntensityUnit", "FieldT", "FieldId", "FieldX", "FieldY", "FieldZ", "FieldI", "FieldSx", "FieldSy", "FieldPrecision", "PrecisionMethod", "Name", "LimitZ", "MinZ", "MaxZ", });
+        new java.lang.String[] { "LocalisationsFilename", "HeaderLines", "Comment", "Delimiter", "Calibration", "FieldT", "FieldId", "FieldX", "FieldY", "FieldZ", "FieldI", "FieldSx", "FieldSy", "FieldPrecision", "Name", "LimitZ", "MinZ", "MaxZ", });
     internal_static_gdsc_smlm_data_config_ClusteringSettings_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_gdsc_smlm_data_config_ClusteringSettings_fieldAccessorTable = new

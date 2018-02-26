@@ -165,18 +165,11 @@ message CreateDataSettings {
 // Settings for the Load Localisations plugin
 message LoadLocalisationsSettings {
 	string localisationsFilename = 1;
-	double pixel_size = 2;
-	double gain = 3;
-	double exposure_time = 4;
-	// The time unit for loading localisations uses a truncated list of the TimeUnit
-	// enum since it is being used to express only the exposure time where frames is
-	// not relevant.
-	int32 time_unit = 5;
-	int32 header_lines = 6;
-	string comment = 7;
-	string delimiter = 8;
-	DistanceUnit distance_unit = 9;
-	IntensityUnit intensity_unit = 10;
+	int32 header_lines = 2;
+	string comment = 3;
+	string delimiter = 4;
+	// The calibration for the results
+	Calibration calibration = 5;
 	int32 field_t = 11;
 	int32 field_id = 12;
 	int32 field_x = 13;
@@ -186,7 +179,6 @@ message LoadLocalisationsSettings {
 	int32 field_sx = 17;
 	int32 field_sy = 18;
 	int32 field_precision = 19;
-	PrecisionMethod precision_method = 20;
 	string name = 21;
 	bool limit_z = 22;
 	double min_z = 23;

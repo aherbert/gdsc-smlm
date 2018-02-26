@@ -36,8 +36,8 @@ import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
-import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -88,46 +88,40 @@ public class LoadLocalisations implements PlugIn
 	{
 		private static final long serialVersionUID = 6616011992365324247L;
 
-		public final TimeUnit timeUnit;
-		public final DistanceUnit distanceUnit;
-		public final IntensityUnit intensityUnit;
-		public final double gain;
-		public final double pixelPitch;
-		public final double exposureTime;
-		public final PrecisionMethod precisionMethod;
+		public final Calibration calibration;
 
-		public LocalisationList(TimeUnit timeUnit, DistanceUnit distanceUnit, IntensityUnit intensityUnit, double gain,
-				double pixelPitch, double exposureTime, PrecisionMethod precisionMethod)
+		/**
+		 * Instantiates a new localisation list.
+		 * <p>
+		 * The time unit for the calibration is expected to be the exposure time in a valid unit of time (e.g. seconds
+		 * and not frames)
+		 *
+		 * @param calibration
+		 *            the calibration
+		 */
+		public LocalisationList(Calibration calibration)
 		{
-			this.timeUnit = timeUnit;
-			this.distanceUnit = distanceUnit;
-			this.intensityUnit = intensityUnit;
-			this.gain = gain;
-			this.pixelPitch = pixelPitch;
-			this.exposureTime = exposureTime;
-			this.precisionMethod = precisionMethod;
+			this.calibration = calibration;
 		}
 
 		public MemoryPeakResults toPeakResults(String name)
 		{
+			CalibrationWriter calibrationWriter = new CalibrationWriter(this.calibration);
+
 			// Convert exposure time to milliseconds
-			TypeConverter<TimeUnit> timeConverter = UnitConverterFactory.createConverter(timeUnit, TimeUnit.MILLISECOND,
-					1);
+			TypeConverter<TimeUnit> timeConverter = calibrationWriter.getTimeConverter(TimeUnit.MILLISECOND);
+			calibrationWriter.setExposureTime(timeConverter.convert(calibrationWriter.getExposureTime()));
+			// This is currently not a method as it is assumed to be milliseconds.
+			//calibration.setTimeUnit(TimeUnit.MILLISECOND);
+
 			// Convert precision to nm
-			TypeConverter<DistanceUnit> distanceConverter = UnitConverterFactory.createConverter(distanceUnit,
-					DistanceUnit.NM, pixelPitch);
+			TypeConverter<DistanceUnit> distanceConverter = calibrationWriter.getDistanceConverter(DistanceUnit.NM);
 
 			MemoryPeakResults results = new MemoryPeakResults();
 			results.setName(name);
-			CalibrationWriter calibration = new CalibrationWriter();
-			calibration.setNmPerPixel(pixelPitch);
-			calibration.setCountPerPhoton(gain);
-			calibration.setExposureTime(timeConverter.convert(exposureTime));
-			calibration.setDistanceUnit(distanceUnit);
-			calibration.setIntensityUnit(intensityUnit);
-			if (hasPrecision())
-				calibration.setPrecisionMethod(precisionMethod);
-			results.setCalibration(calibration.getCalibration());
+			if (!hasPrecision())
+				calibrationWriter.setPrecisionMethod(null);
+			results.setCalibration(calibrationWriter.getCalibration());
 
 			if (size() > 0)
 			{
@@ -195,31 +189,7 @@ public class LoadLocalisations implements PlugIn
 	}
 
 	private static final String TITLE = "Load Localisations";
-	//private static boolean limitZ = false;
 	private boolean myLimitZ = false;
-	//private static double minz = -5;
-	//private static double maxz = 5;
-
-	//	private static int it = 0;
-	//	private static int iid = -1;
-	//	private static int ix = 1;
-	//	private static int iy = 2;
-	//	private static int iz = -1;
-	//	private static int ii = 3;
-	//	private static int isx = -1;
-	//	private static int isy = -1;
-	//	private static int ip = -1;
-	//	private static int header = 1;
-	//	private static String comment = "#";
-	//	private static String delimiter = "\\s+";
-	//	private static String name = "Localisations";
-	//	private static int timeUnit = 0;
-	//	private static int distanceUnit = 0;
-	//	private static int intensityUnit = 0;
-	//	private static double gain;
-	//	private static double pixelPitch;
-	//	private static double exposureTime;
-	//	private static int precisionMethod = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -371,10 +341,7 @@ public class LoadLocalisations implements PlugIn
 		if (!getFields(settings))
 			return null;
 
-		LocalisationList localisations = new LocalisationList(
-				// The time units used a truncated list
-				tUnitValues[settings.getTimeUnit()], settings.getDistanceUnit(), settings.getIntensityUnit(),
-				settings.getGain(), settings.getPixelSize(), settings.getExposureTime(), settings.getPrecisionMethod());
+		LocalisationList localisations = new LocalisationList(settings.getCalibration());
 
 		final String comment = settings.getComment();
 		final boolean hasComment = !TextUtils.isNullOrEmpty(comment);
@@ -479,20 +446,25 @@ public class LoadLocalisations implements PlugIn
 		gd.addStringField("Dataset_name", settings.getName(), 30);
 
 		gd.addMessage("Calibration:");
-		// TODO - Update this to support the camera type ...
-		gd.addNumericField("Pixel_size", settings.getPixelSize(), 3, 8, "nm");
-		gd.addNumericField("Gain", settings.getGain(), 3, 8, "Count/photon");
-		gd.addNumericField("Exposure_time", settings.getExposureTime(), 3, 8, "");
+		// Allow the full camera type top be captured
+		Calibration.Builder calibrationBuilder = settings.getCalibrationBuilder();
+		CalibrationWriter cw = new CalibrationWriter(calibrationBuilder);
+		PeakFit.addCameraOptions(gd, 0, cw);
+		// Only primitive support for other calibration
+		gd.addNumericField("Pixel_size", cw.getNmPerPixel(), 3, 8, "nm");
+		gd.addNumericField("Exposure_time", cw.getExposureTime(), 3, 8, "");
 
 		// This is the unit for the exposure time (used to convert the exposure time to milliseconds).
-		gd.addChoice("Time_unit", tUnits, settings.getTimeUnit());
+		// Use the name as the list is a truncated list of the full enum.
+		TimeUnit t = calibrationBuilder.getTimeCalibration().getTimeUnit();
+		gd.addChoice("Time_unit", tUnits, SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t)));
 
 		gd.addMessage("Records:");
 		gd.addNumericField("Header_lines", settings.getHeaderLines(), 0);
 		gd.addStringField("Comment", settings.getComment());
 		gd.addStringField("Delimiter", settings.getDelimiter());
-		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), settings.getDistanceUnitValue());
-		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(), settings.getIntensityUnitValue());
+		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), cw.getDistanceUnitValue());
+		gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(), cw.getIntensityUnitValue());
 
 		gd.addMessage("Define the fields:");
 		gd.addNumericField("T", settings.getFieldT(), 0);
@@ -504,7 +476,7 @@ public class LoadLocalisations implements PlugIn
 		gd.addNumericField("Sx", settings.getFieldSx(), 0);
 		gd.addNumericField("Sy", settings.getFieldSy(), 0);
 		gd.addNumericField("Precision", settings.getFieldPrecision(), 0);
-		gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), settings.getPrecisionMethodValue());
+		gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), cw.getPrecisionMethodValue());
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -513,17 +485,19 @@ public class LoadLocalisations implements PlugIn
 		}
 
 		settings.setName(getNextString(gd, settings.getName()));
-		settings.setPixelSize(gd.getNextNumber());
-		settings.setGain(gd.getNextNumber());
-		settings.setExposureTime(gd.getNextNumber());
-		settings.setTimeUnit(gd.getNextChoiceIndex());
+		cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+		cw.setNmPerPixel(gd.getNextNumber());
+		cw.setExposureTime(gd.getNextNumber());
+
+		// The time units used a truncated list so look-up the value from the index
+		calibrationBuilder.getTimeCalibrationBuilder().setTimeUnit(tUnitValues[gd.getNextChoiceIndex()]);
 
 		settings.setHeaderLines((int) gd.getNextNumber());
 		settings.setComment(gd.getNextString());
 		settings.setDelimiter(getNextString(gd, settings.getDelimiter()));
 
-		settings.setDistanceUnitValue(gd.getNextChoiceIndex());
-		settings.setIntensityUnitValue(gd.getNextChoiceIndex());
+		cw.setDistanceUnit(DistanceUnit.forNumber(gd.getNextChoiceIndex()));
+		cw.setIntensityUnit(IntensityUnit.forNumber(gd.getNextChoiceIndex()));
 
 		int[] columns = new int[9];
 		for (int i = 0; i < columns.length; i++)
@@ -542,15 +516,18 @@ public class LoadLocalisations implements PlugIn
 			settings.setFieldPrecision(columns[i++]);
 		}
 
-		settings.setPrecisionMethodValue(gd.getNextChoiceIndex());
+		cw.setPrecisionMethod(PrecisionMethod.forNumber(gd.getNextChoiceIndex()));
 
-		// Validate after reading the dialog (so the static fields store the last entered values)
+		// Collect the camera calibration
+		gd.collectOptions();
 
+		// Validate after reading the dialog (so we store the last entered values)
 		if (gd.invalidNumber())
 		{
 			IJ.error(TITLE, "Invalid number in input fields");
 			return false;
 		}
+
 		for (int i = 0; i < columns.length; i++)
 		{
 			if (columns[i] < 0)
@@ -566,10 +543,22 @@ public class LoadLocalisations implements PlugIn
 				}
 			}
 		}
-		if (settings.getGain() <= 0 || settings.getPixelSize() <= 0)
+		if (cw.getNmPerPixel() <= 0)
 		{
-			IJ.error(TITLE, "Require positive gain and pixel pitch");
+			IJ.error(TITLE, "Require positive pixel pitch");
 			return false;
+		}
+		if (cw.isCCDCamera())
+		{
+			if (!cw.hasCountPerPhoton())
+			{
+				IJ.error(TITLE, "Require positive count/photon for CCD camera type");
+				return false;
+			}
+		}
+		else
+		{
+			// Q.Validate other camera types?
 		}
 		if (settings.getFieldX() < 0 || settings.getFieldY() < 0)
 		{
