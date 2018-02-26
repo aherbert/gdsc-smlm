@@ -32,6 +32,7 @@ import gdsc.smlm.ij.plugins.OPTICS.OutlineMode;
 import gdsc.smlm.ij.plugins.OPTICS.PlotMode;
 import gdsc.smlm.ij.plugins.OPTICS.SpanningTreeMode;
 import gdsc.smlm.results.TraceManager.TraceMode;
+import ij.process.LUTHelper.LutColour;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -363,6 +364,7 @@ public class GUIProtosHelper
 		ImageJ3DResultsViewerSettings.Builder builder = ImageJ3DResultsViewerSettings.newBuilder();
 		builder.setSize(5);
 		builder.setTransparency(0.5);
+		builder.setLut(LutColour.FIRE.ordinal());
 		defaultImageJ3DResultsViewerSettings = builder.build();
 	}
 }
