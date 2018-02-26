@@ -36686,6 +36686,723 @@ public final class GUIProtos {
 
   }
 
+  public interface ImageJ3DResultsViewerSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ImageJ3DResultsViewerSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    java.lang.String getInputOption();
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getInputOptionBytes();
+
+    /**
+     * <code>double size = 2;</code>
+     */
+    double getSize();
+
+    /**
+     * <code>double transparency = 3;</code>
+     */
+    double getTransparency();
+
+    /**
+     * <code>int32 lut = 4;</code>
+     */
+    int getLut();
+  }
+  /**
+   * <pre>
+   * Contains settings for the ImageJ 3d Results Viewer plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.ImageJ3DResultsViewerSettings}
+   */
+  public  static final class ImageJ3DResultsViewerSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.ImageJ3DResultsViewerSettings)
+      ImageJ3DResultsViewerSettingsOrBuilder {
+    // Use ImageJ3DResultsViewerSettings.newBuilder() to construct.
+    private ImageJ3DResultsViewerSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ImageJ3DResultsViewerSettings() {
+      inputOption_ = "";
+      size_ = 0D;
+      transparency_ = 0D;
+      lut_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private ImageJ3DResultsViewerSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              inputOption_ = s;
+              break;
+            }
+            case 17: {
+
+              size_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              transparency_ = input.readDouble();
+              break;
+            }
+            case 32: {
+
+              lut_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.class, gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder.class);
+    }
+
+    public static final int INPUT_OPTION_FIELD_NUMBER = 1;
+    private volatile java.lang.Object inputOption_;
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    public java.lang.String getInputOption() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        inputOption_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInputOptionBytes() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        inputOption_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SIZE_FIELD_NUMBER = 2;
+    private double size_;
+    /**
+     * <code>double size = 2;</code>
+     */
+    public double getSize() {
+      return size_;
+    }
+
+    public static final int TRANSPARENCY_FIELD_NUMBER = 3;
+    private double transparency_;
+    /**
+     * <code>double transparency = 3;</code>
+     */
+    public double getTransparency() {
+      return transparency_;
+    }
+
+    public static final int LUT_FIELD_NUMBER = 4;
+    private int lut_;
+    /**
+     * <code>int32 lut = 4;</code>
+     */
+    public int getLut() {
+      return lut_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getInputOptionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      }
+      if (size_ != 0D) {
+        output.writeDouble(2, size_);
+      }
+      if (transparency_ != 0D) {
+        output.writeDouble(3, transparency_);
+      }
+      if (lut_ != 0) {
+        output.writeInt32(4, lut_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getInputOptionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      }
+      if (size_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, size_);
+      }
+      if (transparency_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, transparency_);
+      }
+      if (lut_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, lut_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings other = (gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) obj;
+
+      boolean result = true;
+      result = result && getInputOption()
+          .equals(other.getInputOption());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSize())
+          == java.lang.Double.doubleToLongBits(
+              other.getSize()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getTransparency())
+          == java.lang.Double.doubleToLongBits(
+              other.getTransparency()));
+      result = result && (getLut()
+          == other.getLut());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getInputOption().hashCode();
+      hash = (37 * hash) + SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSize()));
+      hash = (37 * hash) + TRANSPARENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getTransparency()));
+      hash = (37 * hash) + LUT_FIELD_NUMBER;
+      hash = (53 * hash) + getLut();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the ImageJ 3d Results Viewer plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.ImageJ3DResultsViewerSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.ImageJ3DResultsViewerSettings)
+        gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.class, gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        inputOption_ = "";
+
+        size_ = 0D;
+
+        transparency_ = 0D;
+
+        lut_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings build() {
+        gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings result = new gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings(this);
+        result.inputOption_ = inputOption_;
+        result.size_ = size_;
+        result.transparency_ = transparency_;
+        result.lut_ = lut_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.getDefaultInstance()) return this;
+        if (!other.getInputOption().isEmpty()) {
+          inputOption_ = other.inputOption_;
+          onChanged();
+        }
+        if (other.getSize() != 0D) {
+          setSize(other.getSize());
+        }
+        if (other.getTransparency() != 0D) {
+          setTransparency(other.getTransparency());
+        }
+        if (other.getLut() != 0) {
+          setLut(other.getLut());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object inputOption_ = "";
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public java.lang.String getInputOption() {
+        java.lang.Object ref = inputOption_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          inputOption_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInputOptionBytes() {
+        java.lang.Object ref = inputOption_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          inputOption_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOption(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder clearInputOption() {
+        
+        inputOption_ = getDefaultInstance().getInputOption();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double size_ ;
+      /**
+       * <code>double size = 2;</code>
+       */
+      public double getSize() {
+        return size_;
+      }
+      /**
+       * <code>double size = 2;</code>
+       */
+      public Builder setSize(double value) {
+        
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double size = 2;</code>
+       */
+      public Builder clearSize() {
+        
+        size_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double transparency_ ;
+      /**
+       * <code>double transparency = 3;</code>
+       */
+      public double getTransparency() {
+        return transparency_;
+      }
+      /**
+       * <code>double transparency = 3;</code>
+       */
+      public Builder setTransparency(double value) {
+        
+        transparency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double transparency = 3;</code>
+       */
+      public Builder clearTransparency() {
+        
+        transparency_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int lut_ ;
+      /**
+       * <code>int32 lut = 4;</code>
+       */
+      public int getLut() {
+        return lut_;
+      }
+      /**
+       * <code>int32 lut = 4;</code>
+       */
+      public Builder setLut(int value) {
+        
+        lut_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 lut = 4;</code>
+       */
+      public Builder clearLut() {
+        
+        lut_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.ImageJ3DResultsViewerSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.ImageJ3DResultsViewerSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ImageJ3DResultsViewerSettings>
+        PARSER = new com.google.protobuf.AbstractParser<ImageJ3DResultsViewerSettings>() {
+      public ImageJ3DResultsViewerSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ImageJ3DResultsViewerSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ImageJ3DResultsViewerSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ImageJ3DResultsViewerSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -36781,6 +37498,11 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -37027,10 +37749,12 @@ public final class GUIProtos {
       "\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplot_no" +
       "ise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_prec" +
       "ision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027\n\017re" +
-      "move_outliers\030\n \001(\005*O\n\014TemplateType\022\023\n\017I" +
-      "NLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022" +
-      "\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto",
-      "3"
+      "move_outliers\030\n \001(\005\"f\n\035ImageJ3DResultsVi" +
+      "ewerSettings\022\024\n\014input_option\030\001 \001(\t\022\014\n\004si" +
+      "ze\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003lut\030\004 ",
+      "\001(\005*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000" +
+      "\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLA" +
+      "TE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -37162,6 +37886,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor,
         new java.lang.String[] { "PlotBackground", "PlotSignal", "PlotX", "PlotY", "PlotZ", "PlotNoise", "PlotSnr", "PlotPrecision", "HistgramBins", "RemoveOutliers", });
+    internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor =
+      getDescriptor().getMessageTypes().get(19);
+    internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

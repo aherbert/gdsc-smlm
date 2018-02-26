@@ -84,8 +84,8 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<excludes>
-                    <exclude>**/binary/**</exclude>
-                </excludes>
+					<exclude>**/binary/**</exclude>
+				</excludes>
 			</resource>
 			<resource>
 				<directory>src/main/resources/binary</directory>
@@ -179,6 +179,12 @@
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/sc.fiji/3D_Viewer -->
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>3D_Viewer</artifactId>
+			<version>4.0.2</version>
 		</dependency>
 	</dependencies>
 

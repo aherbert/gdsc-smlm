@@ -559,3 +559,11 @@ message SummariseResultsSettings {
 	int32 histgram_bins = 9;
 	int32 remove_outliers = 10;
 }
+
+// Contains settings for the ImageJ 3d Results Viewer plugin
+message ImageJ3DResultsViewerSettings {
+	string input_option = 1;
+	double size = 2;
+	double transparency = 3;
+	int32 lut = 4;
+}

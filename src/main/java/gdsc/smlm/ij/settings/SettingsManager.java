@@ -42,6 +42,7 @@ import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
@@ -1047,6 +1048,19 @@ public class SettingsManager
 	{
 		return new ConfigurationReader<SummariseResultsSettings>(SummariseResultsSettings.getDefaultInstance())
 				.read(flags);
+	}
+
+	/**
+	 * Read the ImageJ3DResultsViewerSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the ImageJ3DResultsViewerSettings
+	 */
+	public static ImageJ3DResultsViewerSettings readImageJ3DResultsViewerSettings(int flags)
+	{
+		return new ConfigurationReader<ImageJ3DResultsViewerSettings>(
+				GUIProtosHelper.defaultImageJ3DResultsViewerSettings).read(flags);
 	}
 
 	/**

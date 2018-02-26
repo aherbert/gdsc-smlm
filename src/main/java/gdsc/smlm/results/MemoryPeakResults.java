@@ -29,6 +29,7 @@ import gdsc.smlm.results.procedures.HResultProcedure;
 import gdsc.smlm.results.procedures.IResultProcedure;
 import gdsc.smlm.results.procedures.IXYRResultProcedure;
 import gdsc.smlm.results.procedures.IXYResultProcedure;
+import gdsc.smlm.results.procedures.IXYZRResultProcedure;
 import gdsc.smlm.results.procedures.IXYZResultProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionBProcedure;
 import gdsc.smlm.results.procedures.LSEPrecisionProcedure;
@@ -43,7 +44,9 @@ import gdsc.smlm.results.procedures.WResultProcedure;
 import gdsc.smlm.results.procedures.WxWyResultProcedure;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
+import gdsc.smlm.results.procedures.XYZRResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
+import gdsc.smlm.results.procedures.ZResultProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -1616,6 +1619,42 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
 	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(IntensityUnit intensityUnit, DistanceUnit distanceUnit, IXYZRResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		TypeConverter<DistanceUnit> dc = getCalibrationReader().getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getfX(i);
+			//@formatter:off
+			procedure.executeIXYZR(
+					ic.convert(r.getSignal()), 
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()),
+					dc.convert(r.getZPosition()),
+					r);
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
 	 * @param procedure
 	 *            the procedure
 	 * @throws ConversionException
@@ -1858,6 +1897,64 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(DistanceUnit distanceUnit, XYZRResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			//@formatter:off
+			procedure.executeXYZR(
+					dc.convert(r.getXPosition()),
+					dc.convert(r.getYPosition()),
+					dc.convert(r.getZPosition()),
+					r);
+			//@formatter:on
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param distanceUnit
+	 *            the distance unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(DistanceUnit distanceUnit, ZResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		TypeConverter<DistanceUnit> dc = getDistanceConverter(distanceUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			procedure.executeZ(dc.convert(r.getZPosition()));
+		}
+	}
+	
+	/**
 	 * For each result execute the procedure
 	 * <p>
 	 * Note the precision may not be stored in the results. The default precision for a result is NaN.
@@ -1873,6 +1970,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			procedure.executeStoredPrecision(r.getPrecision());
 		}
 	}
+
 	/**
 	 * For each result execute the procedure
 	 * <p>

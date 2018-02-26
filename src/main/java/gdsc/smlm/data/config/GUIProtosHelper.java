@@ -15,6 +15,7 @@ import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
@@ -353,5 +354,15 @@ public class GUIProtosHelper
 		builder.setPsf(PSFProtosHelper.defaultTwoAxisGaussian2DPSF);
 
 		defaultAstigmatismModelManagerSettings = builder.build();
+	}
+
+	/** The default ImageJ3DResultsViewerSettings */
+	public static final ImageJ3DResultsViewerSettings defaultImageJ3DResultsViewerSettings;
+	static
+	{
+		ImageJ3DResultsViewerSettings.Builder builder = ImageJ3DResultsViewerSettings.newBuilder();
+		builder.setSize(5);
+		builder.setTransparency(0.5);
+		defaultImageJ3DResultsViewerSettings = builder.build();
 	}
 }

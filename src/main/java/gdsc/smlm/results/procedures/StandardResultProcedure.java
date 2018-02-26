@@ -35,7 +35,8 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		TXYResultProcedure, 
 		XYResultProcedure, 
 		XYRResultProcedure, 
-		XYZResultProcedure
+		XYZResultProcedure,
+		ZResultProcedure
 //@formatter:on
 {
 	/** The frame. */
@@ -391,6 +392,24 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		this.y[i] = y;
 		this.z[i] = z;
 		i++;
+	}
+
+	/**
+	 * Gets the Z data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getZ() throws DataException
+	{
+		i = 0;
+		allocateZ();
+		results.forEach(getDistanceUnit(), (ZResultProcedure) this);
+	}
+
+	public void executeZ(float z)
+	{
+		this.z[i++] = z;
 	}
 
 	private void allocateT()
