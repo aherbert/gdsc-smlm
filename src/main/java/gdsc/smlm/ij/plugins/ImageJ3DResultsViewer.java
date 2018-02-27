@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomTransparentTriangleMesh;
 import gdsc.core.ij.IJTrackProgress;
@@ -62,6 +64,17 @@ import ij3d.UniverseListener;
 public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseListener
 {
 	private final static String TITLE = "ImageJ 3D Results Viewer";
+
+	//@formatter:off
+	private final static String[] RENDERING = { 
+		"Tetrahedron (F=4)",
+		"Octahedron (F=8)",
+		"Icosahedron (F=20)",
+		"Low Res Sphere (F=240)",
+		"High Res Sphere (F=960)",
+	};
+	//@formatter:on
+
 	// Prevent processing massive mesh objects. 
 	// Arrays are used to store vertices that may be 2x larger than the number 
 	// of mesh coords input so we could use 1<<30. Make it lower just in case.
@@ -118,6 +131,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
+		gd.addChoice("Rendering", RENDERING, settings.getRendering());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -126,6 +140,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setSize(gd.getNextNumber());
 		settings.setTransparency(gd.getNextNumber());
 		settings.setLut(gd.getNextChoiceIndex());
+		settings.setRendering(gd.getNextChoiceIndex());
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -150,10 +165,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Adapted from Image3DUniverse.addIcospheres.
 
 		// We create a grainy unit sphere. This is then scaled and translated for each localisation.
-		final List<Point3f> point = createSphere();
+		final List<Point3f> point = createLocalisationObject(settings.getRendering());
 		final List<Point3f> allPoints = new TurboList<Point3f>();
 
 		final int singlePointSize = point.size();
+		System.out.println(singlePointSize);
 		long size = (long) results.size() * singlePointSize;
 		if (size > 10000000L)
 		{
@@ -170,6 +186,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final float pointSize = (settings.getSize() > 0) ? (float) settings.getSize() : 1f;
 		results.forEach(DistanceUnit.NM, new XYZRResultProcedure()
 		{
+			//int MAX_SIZE = 1; // For debugging
 			public void executeXYZR(float x, float y, float z, PeakResult result)
 			{
 				// Note sure what the limits are for the graphics library.
@@ -186,8 +203,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// Default color
 		final Color3f color = new Color3f(1, 1, 1);
-
-		univ.removeContent(name);
 
 		float transparency = Maths.clip(0, 1, (float) settings.getTransparency());
 		// Do not allow fully transparent objects
@@ -216,14 +231,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
 			// Create 256 Colors
 			Color4f[] colors = new Color4f[256];
+			final float w = 1 - transparency;
 			for (int i = 0; i < 256; i++)
 			{
 				Color c = new Color(lut.getRGB(i));
 				colors[i] = new Color4f(c);
-				colors[i].setW(transparency);
+				colors[i].setW(w);
 			}
 
-			for (int i = 0, j = 0, total = p.z.length; i < total; i++)
+			for (int i = 0, j = 0, total = (int) ticker.getCurrent(); i < total; i++)
 			{
 				float value = p.z[i];
 				value = value - minimum;
@@ -232,7 +248,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				int ivalue = (int) ((value * scale) + 0.5f);
 				if (ivalue > 255)
 					ivalue = 255;
-				for (int k = singlePointSize; k-- > 0; )
+				for (int k = singlePointSize; k-- > 0;)
 					allColors[j++] = colors[ivalue];
 			}
 			mesh.setTransparentColor(Arrays.asList(allColors));
@@ -242,8 +258,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		Content content = univ.createContent(mesh, name);
 
 		IJ.showStatus("Drawing 3D content ...");
+
+		// Preserve orientation on the content
 		boolean auto = univ.getAutoAdjustView();
-		univ.setAutoAdjustView(true);
+		if (univ.getContent(name) == null)
+		{
+			univ.setAutoAdjustView(true);
+		}
+		else
+		{
+			univ.removeContent(name);
+			univ.setAutoAdjustView(false);
+		}
 		univ.addContent(content);
 		univ.setAutoAdjustView(auto);
 
@@ -264,8 +290,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ImageWindow3D w = univ.getWindow();
 			if (w != null && w.isVisible() && title.equals(w.getTitle()))
 			{
-				univ.removeAllContents();
-				univ.resetView();
+				//univ.removeAllContents();
+				//univ.resetView();
 				return univ;
 			}
 		}
@@ -301,7 +327,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		add.add(reset);
 
 		//add.addSeparator();
-		
+
 		return add;
 	}
 
@@ -319,15 +345,89 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	/**
-	 * Creates the sphere used to draw a single localisation.
+	 * Creates the object used to draw a single localisation.
+	 * 
+	 * @param rendering
 	 *
-	 * @return the list of triangle vertices for the sphere
+	 * @return the list of triangle vertices for the object
 	 */
-	private static List<Point3f> createSphere()
+	private static List<Point3f> createLocalisationObject(int rendering)
 	{
-		final int subdivisions = 0;
-		final float radius = 1;
-		return customnode.MeshMaker.createIcosahedron(subdivisions, radius);
+		switch (rendering)
+		{
+			case 0:
+				return createTetrahedron();
+			case 1:
+				return createOctahedron();
+		}
+		// All spheres based on icosahedron
+		final int subdivisions = rendering - 2;
+		return customnode.MeshMaker.createIcosahedron(subdivisions, 1);
+	}
+
+	// Note: The triangles are rendered on both sides so the handedness 
+	// does not matter for the vertices to define the faces.
+
+	// https://en.m.wikipedia.org/wiki/Tetrahedron
+	// based on alternated cube
+	static final private float[][] tetrahedron = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+	// The triangles are rendered on both sides so the handedness does not matter
+	static final private int[][] tetrafaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
+
+	// https://en.m.wikipedia.org/wiki/Octahedron
+	static final private float[][] octahedron = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
+			{ 0, 0, -1 }, };
+	static final private int[][] octafaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
+			{ 1, 3, 5 }, { 2, 1, 5 }, { 0, 2, 5 }, };
+
+	/**
+	 * Creates the tetrahedron with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createTetrahedron()
+	{
+		return createSolid(tetrahedron, tetrafaces);
+	}
+
+	/**
+	 * Creates the octahedron with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createOctahedron()
+	{
+		return createSolid(octahedron, octafaces);
+	}
+
+	/**
+	 * Creates the solid with the defined faces and vertices on a unit sphere.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param faces
+	 *            the faces
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSolid(float[][] vertices, int[][] faces)
+	{
+		List<Point3f> ps = new ArrayList<Point3f>();
+		for (int i = 0; i < faces.length; i++)
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				ps.add(new Point3f(vertices[faces[i][k]]));
+			}
+		}
+		// Project all vertices to the surface of a sphere of radius 1
+		final Vector3f v = new Vector3f();
+		for (final Point3f p : ps)
+		{
+			v.set(p);
+			v.normalize();
+			p.set(v);
+		}
+		return ps;
 	}
 
 	/**
