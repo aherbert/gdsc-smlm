@@ -45,7 +45,7 @@ runtime libraries for Open GL.
 2. Extract all the files
 3. Copy jogl-all.jar and gluegen-rt.jar to a folder
 4. Copy the 'natives' jars for the current platform to the same location,
-   e.g. gluegen-rt-2.3.2-natives-linux-amd64.jar
+   e.g. jogl-all-natives-linux-amd64.jar and gluegen-rt-natives-linux-amd64.jar
 5. Add the jogl-all.jar and gluegen-rt.jar as external jars to the build path in the 
    Eclipse project
 ---
