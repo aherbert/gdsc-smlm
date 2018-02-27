@@ -68,18 +68,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private final static int MAX_SIZE = 1 << 28;
 
 	// To debug this from Eclipse relies on being able to find the native 
-	// runtime libraries for Open GL.
-
-	// Linux
-	// sudo aptitude install libgluegen2-rt-java libgluegen2-build-java libjogl2-java libjogl2-jni libjogl2-toolkits
-
-	// I have tried adding the /usr/lib/jni folder to the Eclipse project properties
-	// build path. This did not work.	
-
-	// This did work:
-	// Created [GDSC SMLM]natives/linux-amd64 and put the following links in:
-	// ln -s /usr/lib/jni/libgluegen2-rt.so libgluegen-rt.so
-	// ln -s /usr/lib/jni/libnativewindow_awt.so
+	// runtime libraries for Open GL. See the README in the eclipse project folder.
 
 	private static String version = "";
 	static
