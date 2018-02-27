@@ -77,8 +77,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		"Tetrahedron (F=4)",
 		"Octahedron (F=8)",
 		"Icosahedron (F=20)",
-		"Low Res Sphere (F=80)",
-		"High Res Sphere (F=320)",
+		"Low Resolution Sphere (F=80)",
+		"High Resolution Sphere (F=320)",
 	};
 
 	/**
