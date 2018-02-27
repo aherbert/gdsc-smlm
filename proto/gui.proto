@@ -567,4 +567,5 @@ message ImageJ3DResultsViewerSettings {
 	double transparency = 3;
 	int32 lut = 4;
 	int32 rendering = 5;
+	bool shaded = 6;
 }

@@ -36719,6 +36719,11 @@ public final class GUIProtos {
      * <code>int32 rendering = 5;</code>
      */
     int getRendering();
+
+    /**
+     * <code>bool shaded = 6;</code>
+     */
+    boolean getShaded();
   }
   /**
    * <pre>
@@ -36741,6 +36746,7 @@ public final class GUIProtos {
       transparency_ = 0D;
       lut_ = 0;
       rendering_ = 0;
+      shaded_ = false;
     }
 
     @java.lang.Override
@@ -36792,6 +36798,11 @@ public final class GUIProtos {
             case 40: {
 
               rendering_ = input.readInt32();
+              break;
+            }
+            case 48: {
+
+              shaded_ = input.readBool();
               break;
             }
           }
@@ -36887,6 +36898,15 @@ public final class GUIProtos {
       return rendering_;
     }
 
+    public static final int SHADED_FIELD_NUMBER = 6;
+    private boolean shaded_;
+    /**
+     * <code>bool shaded = 6;</code>
+     */
+    public boolean getShaded() {
+      return shaded_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -36914,6 +36934,9 @@ public final class GUIProtos {
       if (rendering_ != 0) {
         output.writeInt32(5, rendering_);
       }
+      if (shaded_ != false) {
+        output.writeBool(6, shaded_);
+      }
     }
 
     public int getSerializedSize() {
@@ -36939,6 +36962,10 @@ public final class GUIProtos {
       if (rendering_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, rendering_);
+      }
+      if (shaded_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, shaded_);
       }
       memoizedSize = size;
       return size;
@@ -36970,6 +36997,8 @@ public final class GUIProtos {
           == other.getLut());
       result = result && (getRendering()
           == other.getRendering());
+      result = result && (getShaded()
+          == other.getShaded());
       return result;
     }
 
@@ -36992,6 +37021,9 @@ public final class GUIProtos {
       hash = (53 * hash) + getLut();
       hash = (37 * hash) + RENDERING_FIELD_NUMBER;
       hash = (53 * hash) + getRendering();
+      hash = (37 * hash) + SHADED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShaded());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37135,6 +37167,8 @@ public final class GUIProtos {
 
         rendering_ = 0;
 
+        shaded_ = false;
+
         return this;
       }
 
@@ -37162,6 +37196,7 @@ public final class GUIProtos {
         result.transparency_ = transparency_;
         result.lut_ = lut_;
         result.rendering_ = rendering_;
+        result.shaded_ = shaded_;
         onBuilt();
         return result;
       }
@@ -37218,6 +37253,9 @@ public final class GUIProtos {
         }
         if (other.getRendering() != 0) {
           setRendering(other.getRendering());
+        }
+        if (other.getShaded() != false) {
+          setShaded(other.getShaded());
         }
         onChanged();
         return this;
@@ -37414,6 +37452,32 @@ public final class GUIProtos {
       public Builder clearRendering() {
         
         rendering_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean shaded_ ;
+      /**
+       * <code>bool shaded = 6;</code>
+       */
+      public boolean getShaded() {
+        return shaded_;
+      }
+      /**
+       * <code>bool shaded = 6;</code>
+       */
+      public Builder setShaded(boolean value) {
+        
+        shaded_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool shaded = 6;</code>
+       */
+      public Builder clearShaded() {
+        
+        shaded_ = false;
         onChanged();
         return this;
       }
@@ -37812,13 +37876,13 @@ public final class GUIProtos {
       "\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplot_no" +
       "ise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_prec" +
       "ision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027\n\017re" +
-      "move_outliers\030\n \001(\005\"y\n\035ImageJ3DResultsVi" +
-      "ewerSettings\022\024\n\014input_option\030\001 \001(\t\022\014\n\004si" +
-      "ze\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003lut\030\004 ",
-      "\001(\005\022\021\n\trendering\030\005 \001(\005*O\n\014TemplateType\022\023" +
-      "\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE" +
-      "\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006pr" +
-      "oto3"
+      "move_outliers\030\n \001(\005\"\211\001\n\035ImageJ3DResultsV" +
+      "iewerSettings\022\024\n\014input_option\030\001 \001(\t\022\014\n\004s" +
+      "ize\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003lut\030\004",
+      " \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded\030\006 \001(\010*" +
+      "O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021" +
+      "RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002" +
+      "B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -37955,7 +38019,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
