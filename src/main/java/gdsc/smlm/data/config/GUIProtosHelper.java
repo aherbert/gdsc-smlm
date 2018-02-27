@@ -366,6 +366,7 @@ public class GUIProtosHelper
 		builder.setTransparency(0.5);
 		builder.setLut(LutColour.FIRE.ordinal());
 		builder.setRendering(3); // Octahedron
+		builder.setShaded(true);
 		defaultImageJ3DResultsViewerSettings = builder.build();
 	}
 }
