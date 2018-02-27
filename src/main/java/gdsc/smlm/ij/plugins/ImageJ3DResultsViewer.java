@@ -5,17 +5,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
+import customnode.CustomMeshNode;
 import customnode.CustomTransparentTriangleMesh;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.logging.Ticker;
@@ -36,6 +39,7 @@ import gdsc.core.utils.Maths;
 
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
+import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -51,6 +55,7 @@ import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
 import ij3d.Content;
+import ij3d.ContentInstant;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
@@ -67,12 +72,38 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	//@formatter:off
 	private final static String[] RENDERING = { 
+		"Triangle (F=1)",
+		"Square (F=2)",
 		"Tetrahedron (F=4)",
 		"Octahedron (F=8)",
 		"Icosahedron (F=20)",
-		"Low Res Sphere (F=240)",
-		"High Res Sphere (F=960)",
+		"Low Res Sphere (F=80)",
+		"High Res Sphere (F=320)",
 	};
+
+	/**
+	 * Gets the number of vertices for each rendering shape.
+	 *
+	 * @param rendering
+	 *            the rendering
+	 * @return the number of vertices
+	 */
+	private static int getNumberOfVertices(int rendering)
+	{
+		// This is just the F number (faces) multiplied by 3
+		switch (rendering)
+		{
+			case 0:	return 4;
+			case 1:	return 8;
+			case 2:	return 12;
+			case 3:	return 24;
+			case 4:	return 60;
+			case 5:	return 240;
+			case 6:	return 960;
+			default:
+				throw new IllegalStateException("Unknown rendering");
+		}
+	}
 	//@formatter:on
 
 	// Prevent processing massive mesh objects. 
@@ -98,8 +129,21 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
+	private static class ResultsMetaData
+	{
+		final ImageJ3DResultsViewerSettings settings;
+		final int resultsSize;
+
+		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, int resultsSize)
+		{
+			this.settings = settings;
+			this.resultsSize = resultsSize;
+		}
+	}
+
 	private Image3DUniverse univ;
-	private JMenuItem reset;
+	private JMenuItem changeColour;
+	private JMenuItem changeShading;
 
 	/*
 	 * (non-Javadoc)
@@ -158,7 +202,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// 1. the localisation precision.
 		// 2. use configured input.
 		// 3. any other (e.g. intensity, local density, etc)
-		// Q. Can spheres be translucent so higher density makes it more opaque?
 
 		univ = getImage3DUniverse(TITLE);
 
@@ -169,7 +212,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final List<Point3f> allPoints = new TurboList<Point3f>();
 
 		final int singlePointSize = point.size();
-		System.out.println(singlePointSize);
 		long size = (long) results.size() * singlePointSize;
 		if (size > 10000000L)
 		{
@@ -204,10 +246,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Default color
 		final Color3f color = new Color3f(1, 1, 1);
 
-		float transparency = Maths.clip(0, 1, (float) settings.getTransparency());
-		// Do not allow fully transparent objects
-		if (transparency == 1)
-			transparency = 0;
+		float transparency = getTransparency(settings);
 		CustomTransparentTriangleMesh mesh;
 		mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
 		//mesh = new CustomTransparentTriangleMesh(null, color, transparency);
@@ -219,43 +258,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// So we can create a colour for each localisation and duplicate it across the 
 		// size of the single point.
 
-		// Color by z
-		if (results.is3D())
-		{
-			Color4f[] allColors = new Color4f[allPoints.size()];
-			StandardResultProcedure p = new StandardResultProcedure(results);
-			p.getZ();
-			float[] limits = Maths.limits(p.z);
-			final float minimum = limits[0], maximum = limits[1];
-			final float scale = 255f / (maximum - minimum);
-			LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
-			// Create 256 Colors
-			Color4f[] colors = new Color4f[256];
-			final float w = 1 - transparency;
-			for (int i = 0; i < 256; i++)
-			{
-				Color c = new Color(lut.getRGB(i));
-				colors[i] = new Color4f(c);
-				colors[i].setW(w);
-			}
+		ResultsMetaData data = new ResultsMetaData(settings.build(), results.size());
 
-			for (int i = 0, j = 0, total = (int) ticker.getCurrent(); i < total; i++)
-			{
-				float value = p.z[i];
-				value = value - minimum;
-				if (value < 0f)
-					value = 0f;
-				int ivalue = (int) ((value * scale) + 0.5f);
-				if (ivalue > 255)
-					ivalue = 255;
-				for (int k = singlePointSize; k-- > 0;)
-					allColors[j++] = colors[ivalue];
-			}
-			mesh.setTransparentColor(Arrays.asList(allColors));
-		}
+		changeColour(mesh, results, data.settings);
+
+		mesh.setShaded(true);
 
 		IJ.showStatus("Creating 3D content ...");
 		Content content = univ.createContent(mesh, name);
+
+		content.setUserData(data);
 
 		IJ.showStatus("Drawing 3D content ...");
 
@@ -274,6 +286,58 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.setAutoAdjustView(auto);
 
 		IJ.showStatus("");
+	}
+
+	private float getTransparency(ImageJ3DResultsViewerSettingsOrBuilder settings)
+	{
+		float transparency = Maths.clip(0, 1, (float) settings.getTransparency());
+		// Do not allow fully transparent objects
+		if (transparency == 1)
+			transparency = 0;
+		return transparency;
+	}
+
+	private void changeColour(CustomTransparentTriangleMesh mesh, MemoryPeakResults results,
+			ImageJ3DResultsViewerSettingsOrBuilder settings)
+	{
+		// Colour by z
+		if (results.is3D())
+		{
+			final GeometryArray ga = (GeometryArray) mesh.getGeometry();
+			final int N = ga.getValidVertexCount();
+
+			Color4f[] allColors = new Color4f[N];
+			StandardResultProcedure p = new StandardResultProcedure(results);
+			p.getZ();
+			float[] limits = Maths.limits(p.z);
+			final float minimum = limits[0], maximum = limits[1];
+			final float scale = 255f / (maximum - minimum);
+			LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
+			// Create 256 Colors
+			Color4f[] colors = new Color4f[256];
+			final float w = 1 - getTransparency(settings);
+			for (int i = 0; i < 256; i++)
+			{
+				Color c = new Color(lut.getRGB(i));
+				colors[i] = new Color4f(c);
+				colors[i].setW(w);
+			}
+
+			int vertices = getNumberOfVertices(settings.getRendering());
+			for (int i = 0, j = 0, localisations = N / vertices; i < localisations; i++)
+			{
+				float value = p.z[i];
+				value = value - minimum;
+				if (value < 0f)
+					value = 0f;
+				int ivalue = (int) ((value * scale) + 0.5f);
+				if (ivalue > 255)
+					ivalue = 255;
+				for (int k = vertices; k-- > 0;)
+					allColors[j++] = colors[ivalue];
+			}
+			mesh.setTransparentColor(Arrays.asList(allColors));
+		}
 	}
 
 	/**
@@ -322,9 +386,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		final JMenu add = new JMenu("GDSC SMLM");
 
-		reset = new JMenuItem("Reset");
-		reset.addActionListener(this);
-		add.add(reset);
+		changeColour = new JMenuItem("Change Colour");
+		changeColour.addActionListener(this);
+		add.add(changeColour);
+
+		changeShading = new JMenuItem("Toggle Shading");
+		changeShading.addActionListener(this);
+		add.add(changeShading);
 
 		//add.addSeparator();
 
@@ -336,12 +404,71 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * 
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@SuppressWarnings("unchecked")
 	public void actionPerformed(ActionEvent e)
 	{
 		final Object src = e.getSource();
 
-		if (src == reset)
-			univ.resetView();
+		if (src == changeShading)
+		{
+			for (Iterator<Content> it = univ.contents(); it.hasNext();)
+			{
+				Content c = it.next();
+				Object o = c.getUserData();
+				if (o instanceof ResultsMetaData)
+				{
+					c.setShaded(!c.isShaded());
+				}
+			}
+		}
+		else if (src == changeColour)
+		{
+			ImageJ3DResultsViewerSettings.Builder settings = null;
+
+			for (Iterator<Content> it = univ.contents(); it.hasNext();)
+			{
+				Content c = it.next();
+				Object o = c.getUserData();
+				if (o instanceof ResultsMetaData)
+				{
+					ResultsMetaData data = (ResultsMetaData) o;
+
+					MemoryPeakResults results = ResultsManager.loadInputResults(data.settings.getInputOption(), false,
+							null, null);
+					// Results must be the same size
+					if (results == null || results.size() != data.resultsSize)
+					{
+						IJ.error(TITLE, "Results are not the same size as when the mesh was constructed: " +
+								data.settings.getInputOption());
+						continue;
+					}
+
+					final ContentInstant content = c.getInstant(0);
+					CustomMeshNode node = (CustomMeshNode) content.getContent();
+					CustomTransparentTriangleMesh mesh = (CustomTransparentTriangleMesh) node.getMesh();
+
+					// Change the colour
+					if (settings == null)
+					{
+						// Use the latest settings
+						settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
+						ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+						gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
+						gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
+						gd.showDialog();
+						if (gd.wasCanceled())
+							return;
+						settings.setTransparency(gd.getNextNumber());
+						settings.setLut(gd.getNextChoiceIndex());
+						SettingsManager.writeSettings(settings);
+					}
+
+					// Restore original object rendering
+					settings.setRendering(data.settings.getRendering());
+					changeColour(mesh, results, settings);
+				}
+			}
+		}
 	}
 
 	/**
@@ -356,29 +483,65 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		switch (rendering)
 		{
 			case 0:
-				return createTetrahedron();
+				return createTriangle();
 			case 1:
+				return createSquare();
+			case 2:
+				return createTetrahedron();
+			case 3:
 				return createOctahedron();
 		}
-		// All spheres based on icosahedron
-		final int subdivisions = rendering - 2;
+		// All spheres based on icosahedron for speed
+		final int subdivisions = rendering - 4;
 		return customnode.MeshMaker.createIcosahedron(subdivisions, 1);
 	}
 
 	// Note: The triangles are rendered on both sides so the handedness 
 	// does not matter for the vertices to define the faces.
 
+	private static float sqrt(double d)
+	{
+		return (float) Math.sqrt(d);
+	}
+
+	static final private float[][] triVertices = { { sqrt(8d / 9), 0, 0 }, { -sqrt(2d / 9), sqrt(2d / 3), 0 },
+			{ -sqrt(2d / 9), -sqrt(2d / 3), 0 } };
+	static final private int[][] triFaces = { { 0, 1, 2 } };
+
+	static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { 1, -1, 0 }, { -1, -1, 0 } };
+	static final private int[][] squareFaces = { { 0, 1, 2 }, { 1, 2, 3 } };
+
 	// https://en.m.wikipedia.org/wiki/Tetrahedron
 	// based on alternated cube
-	static final private float[][] tetrahedron = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+	static final private float[][] tetraVertices = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
 	// The triangles are rendered on both sides so the handedness does not matter
-	static final private int[][] tetrafaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
+	static final private int[][] tetraFaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
 
 	// https://en.m.wikipedia.org/wiki/Octahedron
-	static final private float[][] octahedron = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
+	static final private float[][] octaVertices = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
 			{ 0, 0, -1 }, };
-	static final private int[][] octafaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
+	static final private int[][] octaFaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
 			{ 1, 3, 5 }, { 2, 1, 5 }, { 0, 2, 5 }, };
+
+	/**
+	 * Creates the triangle with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createTriangle()
+	{
+		return createSolid(triVertices, triFaces);
+	}
+
+	/**
+	 * Creates the square with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSquare()
+	{
+		return createSolid(squareVertices, squareFaces);
+	}
 
 	/**
 	 * Creates the tetrahedron with vertices on a unit sphere.
@@ -387,7 +550,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	private static List<Point3f> createTetrahedron()
 	{
-		return createSolid(tetrahedron, tetrafaces);
+		return createSolid(tetraVertices, tetraFaces);
 	}
 
 	/**
@@ -397,7 +560,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	private static List<Point3f> createOctahedron()
 	{
-		return createSolid(octahedron, octafaces);
+		return createSolid(octaVertices, octaFaces);
 	}
 
 	/**
