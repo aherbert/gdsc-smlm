@@ -176,6 +176,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering());
+		gd.addCheckbox("Shaded", settings.getShaded());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -185,6 +186,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setTransparency(gd.getNextNumber());
 		settings.setLut(gd.getNextChoiceIndex());
 		settings.setRendering(gd.getNextChoiceIndex());
+		settings.setShaded(gd.getNextBoolean());
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -248,21 +250,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		float transparency = getTransparency(settings);
 		CustomTransparentTriangleMesh mesh;
-		mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
-		//mesh = new CustomTransparentTriangleMesh(null, color, transparency);
-		//mesh.setMesh(allPoints);
-
-		// Better colour options.
-		// call CustomTransparentTriangleMesh.setTransparentColor(). 
-		// Each vertex of the triangles can have a colour. 
-		// So we can create a colour for each localisation and duplicate it across the 
-		// size of the single point.
+		//mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
+		// This avoids computing the volume
+		mesh = new CustomTransparentTriangleMesh(null, color, transparency);
+		mesh.setMesh(allPoints);
 
 		ResultsMetaData data = new ResultsMetaData(settings.build(), results.size());
 
+		mesh.setShaded(settings.getShaded());
 		changeColour(mesh, results, data.settings);
-
-		mesh.setShaded(true);
 
 		IJ.showStatus("Creating 3D content ...");
 		Content content = univ.createContent(mesh, name);
