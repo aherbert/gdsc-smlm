@@ -218,7 +218,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// TODO - 
 		// Get a list of the window titles available. Allow the user to select 
-		// an existing window or a new one.
+		// an existing window or a new one. New one will have the first available 
+		// counter appended to the title.
 		univ = getImage3DUniverse(TITLE, settings.getNewWindow());
 
 		// Adapted from Image3DUniverse.addIcospheres.
