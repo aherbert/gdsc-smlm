@@ -36920,6 +36920,11 @@ public final class GUIProtos {
      * <code>bool shaded = 6;</code>
      */
     boolean getShaded();
+
+    /**
+     * <code>bool newWindow = 7;</code>
+     */
+    boolean getNewWindow();
   }
   /**
    * <pre>
@@ -36943,6 +36948,7 @@ public final class GUIProtos {
       lut_ = 0;
       rendering_ = 0;
       shaded_ = false;
+      newWindow_ = false;
     }
 
     @java.lang.Override
@@ -36999,6 +37005,11 @@ public final class GUIProtos {
             case 48: {
 
               shaded_ = input.readBool();
+              break;
+            }
+            case 56: {
+
+              newWindow_ = input.readBool();
               break;
             }
           }
@@ -37103,6 +37114,15 @@ public final class GUIProtos {
       return shaded_;
     }
 
+    public static final int NEWWINDOW_FIELD_NUMBER = 7;
+    private boolean newWindow_;
+    /**
+     * <code>bool newWindow = 7;</code>
+     */
+    public boolean getNewWindow() {
+      return newWindow_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37133,6 +37153,9 @@ public final class GUIProtos {
       if (shaded_ != false) {
         output.writeBool(6, shaded_);
       }
+      if (newWindow_ != false) {
+        output.writeBool(7, newWindow_);
+      }
     }
 
     public int getSerializedSize() {
@@ -37162,6 +37185,10 @@ public final class GUIProtos {
       if (shaded_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(6, shaded_);
+      }
+      if (newWindow_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, newWindow_);
       }
       memoizedSize = size;
       return size;
@@ -37195,6 +37222,8 @@ public final class GUIProtos {
           == other.getRendering());
       result = result && (getShaded()
           == other.getShaded());
+      result = result && (getNewWindow()
+          == other.getNewWindow());
       return result;
     }
 
@@ -37220,6 +37249,9 @@ public final class GUIProtos {
       hash = (37 * hash) + SHADED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShaded());
+      hash = (37 * hash) + NEWWINDOW_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getNewWindow());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37365,6 +37397,8 @@ public final class GUIProtos {
 
         shaded_ = false;
 
+        newWindow_ = false;
+
         return this;
       }
 
@@ -37393,6 +37427,7 @@ public final class GUIProtos {
         result.lut_ = lut_;
         result.rendering_ = rendering_;
         result.shaded_ = shaded_;
+        result.newWindow_ = newWindow_;
         onBuilt();
         return result;
       }
@@ -37452,6 +37487,9 @@ public final class GUIProtos {
         }
         if (other.getShaded() != false) {
           setShaded(other.getShaded());
+        }
+        if (other.getNewWindow() != false) {
+          setNewWindow(other.getNewWindow());
         }
         onChanged();
         return this;
@@ -37674,6 +37712,32 @@ public final class GUIProtos {
       public Builder clearShaded() {
         
         shaded_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean newWindow_ ;
+      /**
+       * <code>bool newWindow = 7;</code>
+       */
+      public boolean getNewWindow() {
+        return newWindow_;
+      }
+      /**
+       * <code>bool newWindow = 7;</code>
+       */
+      public Builder setNewWindow(boolean value) {
+        
+        newWindow_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool newWindow = 7;</code>
+       */
+      public Builder clearNewWindow() {
+        
+        newWindow_ = false;
         onChanged();
         return this;
       }
@@ -38073,13 +38137,14 @@ public final class GUIProtos {
       " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n" +
       "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
       "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
-      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\211\001\n\035ImageJ3DR" +
+      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\234\001\n\035ImageJ3DR" +
       "esultsViewerSettings\022\024\n\014input_option\030\001 \001",
       "(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013" +
       "\n\003lut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded" +
-      "\030\006 \001(\010*O\n\014TemplateType\022\023\n\017INLINE_TEMPLAT" +
-      "E\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEM" +
-      "PLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010*O\n\014TemplateTyp" +
+      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
+      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb" +
+      "\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -38216,7 +38281,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

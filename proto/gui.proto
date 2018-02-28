@@ -571,4 +571,5 @@ message ImageJ3DResultsViewerSettings {
 	int32 lut = 4;
 	int32 rendering = 5;
 	bool shaded = 6;
+	bool newWindow = 7;
 }

@@ -186,6 +186,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering());
 		gd.addCheckbox("Shaded", settings.getShaded());
+		gd.addCheckbox("New_window", settings.getNewWindow());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -196,6 +197,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setLut(gd.getNextChoiceIndex());
 		settings.setRendering(gd.getNextChoiceIndex());
 		settings.setShaded(gd.getNextBoolean());
+		settings.setNewWindow(gd.getNextBoolean());
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -214,7 +216,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// 2. use configured input.
 		// 3. any other (e.g. intensity, local density, etc)
 
-		univ = getImage3DUniverse(TITLE);
+		// TODO - 
+		// Get a list of the window titles available. Allow the user to select 
+		// an existing window or a new one.
+		univ = getImage3DUniverse(TITLE, settings.getNewWindow());
 
 		// Adapted from Image3DUniverse.addIcospheres.
 
@@ -350,20 +355,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 *
 	 * @param title
 	 *            the title
+	 * @param newWindow
+	 *            the new window
 	 * @return the image 3D universe
 	 */
-	private Image3DUniverse getImage3DUniverse(String title)
+	private Image3DUniverse getImage3DUniverse(String title, boolean newWindow)
 	{
-		for (Image3DUniverse univ : Image3DUniverse.universes)
+		if (!newWindow)
 		{
-			ImageWindow3D w = univ.getWindow();
-			if (w != null && w.isVisible() && title.equals(w.getTitle()))
+			for (Image3DUniverse univ : Image3DUniverse.universes)
 			{
-				//univ.removeAllContents();
-				//univ.resetView();
-				return univ;
+				ImageWindow3D w = univ.getWindow();
+				if (w != null && w.isVisible() && title.equals(w.getTitle()))
+				{
+					//univ.removeAllContents();
+					//univ.resetView();
+					return univ;
+				}
 			}
 		}
+		
 		Image3DUniverse univ = new Image3DUniverse();
 		univ.show();
 		ImageWindow3D w = univ.getWindow();
@@ -375,7 +386,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		//System.out.println(univ.getViewer().getView().getFrontClipDistance());
 
 		// Add a new menu for SMLM functionality
-		Image3DMenubar menubar = (Image3DMenubar)univ.getMenuBar();
+		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
 		menubar.add(createSMLMMenuBar());
 		univ.setMenubar(menubar);
 
@@ -406,11 +417,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		add.add(resetZoom);
 
 		add.addSeparator();
-		
+
 		resetAll = new JMenuItem("Reset All");
 		resetAll.addActionListener(this);
 		add.add(resetAll);
-		
+
 		add.addSeparator();
 
 		changeColour = new JMenuItem("Change Colour");
@@ -420,7 +431,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		toggleShading = new JMenuItem("Toggle Shading");
 		toggleShading.addActionListener(this);
 		add.add(toggleShading);
-		
+
 		resetSelectedView = new JMenuItem("Reset Selected");
 		resetSelectedView.addActionListener(this);
 		add.add(resetSelectedView);
@@ -506,7 +517,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return 0;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
