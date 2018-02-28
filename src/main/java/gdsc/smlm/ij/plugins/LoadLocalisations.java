@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
-import org.apache.commons.math3.util.FastMath;
-
-import gdsc.core.data.utils.ConversionException;
-import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
 
 /*----------------------------------------------------------------------------- 
@@ -30,14 +26,13 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.data.config.CalibrationHelper;
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitHelper;
-import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -46,8 +41,6 @@ import gdsc.smlm.results.AttributePeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.procedures.BIXYZResultProcedure;
-import gdsc.smlm.results.procedures.PeakResultProcedure;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
@@ -189,7 +182,6 @@ public class LoadLocalisations implements PlugIn
 	}
 
 	private static final String TITLE = "Load Localisations";
-	private boolean myLimitZ = false;
 
 	/*
 	 * (non-Javadoc)
@@ -225,115 +217,15 @@ public class LoadLocalisations implements PlugIn
 
 		MemoryPeakResults results = localisations.toPeakResults(settings.getName());
 
-		// Ask the user what depth to use to create the in-memory results
-		if (!getZDepth(results, settings))
-			return;
-		final double minz, maxz;
-		if (myLimitZ)
-		{
-			final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
-			results2.setName(settings.getName());
-			results2.copySettings(results);
-			minz = settings.getMinZ();
-			maxz = settings.getMaxZ();
-
-			results.forEach(new PeakResultProcedure()
-			{
-				public void execute(PeakResult peak)
-				{
-					if (peak.getZPosition() >= minz && peak.getZPosition() <= maxz)
-						results2.add(peak);
-				}
-			});
-			results = results2;
-		}
-		else
-		{
-			minz = maxz = 0;
-		}
-
 		// Create the in-memory results
 		if (results.size() > 0)
 		{
 			MemoryPeakResults.addResults(results);
 		}
 
-		IJ.showStatus(String.format("Loaded %d localisations", results.size()));
-		if (myLimitZ)
-			Utils.log("Loaded %d localisations, z between %.2f - %.2f", results.size(), minz, maxz);
-		else
-			Utils.log("Loaded %d localisations", results.size());
-	}
-
-	private class ZResultProcedure implements BIXYZResultProcedure
-	{
-		float min, max;
-
-		public void executeBIXYZ(float background, float intensity, float x, float y, float z)
-		{
-			if (min > z)
-				min = z;
-			if (max < z)
-				max = z;
-		}
-	}
-
-	private boolean getZDepth(MemoryPeakResults results, LoadLocalisationsSettings.Builder settings)
-	{
-		final ZResultProcedure p = new ZResultProcedure();
-		results.forEachNative(p);
-
-		double min = p.min;
-		double max = p.max;
-
-		// No z-depth
-		if (min == max && min == 0)
-			return true;
-
-		double maxz = FastMath.min(settings.getMaxZ(), max);
-		double minz = FastMath.max(settings.getMinZ(), min);
-
-		// Display in nm
-		TypeConverter<DistanceUnit> c = new IdentityTypeConverter<DistanceUnit>(null);
-		String unit = "";
-
-		DistanceUnit nativeUnit = results.getDistanceUnit();
-		if (nativeUnit != null)
-		{
-			unit = UnitHelper.getShortName(nativeUnit);
-			try
-			{
-				c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
-				unit = UnitHelper.getShortName(DistanceUnit.NM);
-			}
-			catch (ConversionException e)
-			{
-
-			}
-		}
-		min = c.convert(min);
-		max = c.convert(max);
-
-		String msg = String.format("%d localisations with %.2f <= z <= %.2f (%s)", results.size(), min, max, unit);
-
-		min = Math.floor(min);
-		max = Math.ceil(max);
-
-		GenericDialog gd = new GenericDialog(TITLE);
-		gd.addMessage(msg);
-		gd.addCheckbox("Limit Z-depth", settings.getLimitZ());
-		gd.addSlider("minZ", min, max, c.convert(minz));
-		gd.addSlider("maxZ", min, max, c.convert(maxz));
-		gd.showDialog();
-		if (gd.wasCanceled() || gd.invalidNumber())
-		{
-			return false;
-		}
-		myLimitZ = gd.getNextBoolean();
-		settings.setLimitZ(myLimitZ);
-		settings.setMinZ(c.convertBack(gd.getNextNumber()));
-		settings.setMaxZ(c.convertBack(gd.getNextNumber()));
-		return true;
+		String msg = "Loaded " + TextUtils.pleural(results.size(), "localisations");
+		IJ.showStatus(msg);
+		Utils.log(msg);
 	}
 
 	static LocalisationList loadLocalisations(LoadLocalisationsSettings.Builder settings)

@@ -544,6 +544,9 @@ message CropResultsSettings {
 	int32 name_option = 12;
 	string name_suffix = 13;
 	int32 name_counter = 14;
+	bool limit_z = 15;
+	double min_z = 16;
+	double max_z = 17;
 }
 
 // Contains settings for the Summarise Results plugin

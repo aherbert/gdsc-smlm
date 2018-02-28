@@ -19,15 +19,27 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.IdentityTypeConverter;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.GUIProtos.CropResultsSettings;
+import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.predicates.MinMaxPeakResultPredicate;
+import gdsc.smlm.results.predicates.PassPeakResultPredicate;
+import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.procedures.MinMaxResultProcedure;
+import gdsc.smlm.results.procedures.PeakResultParameterValue;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
 import ij.IJ;
 import ij.ImagePlus;
@@ -55,6 +67,9 @@ public class CropResults implements PlugIn
 	private boolean myUseRoi;
 	private MemoryPeakResults results;
 	private String outputName;
+	private MinMaxResultProcedure minMax;
+	private TypeConverter<DistanceUnit> c;
+	private boolean myLimitZ = false;
 
 	/*
 	 * (non-Javadoc)
@@ -107,6 +122,10 @@ public class CropResults implements PlugIn
 			return;
 		}
 
+		// Allow z-filtering
+		if (results.is3D())
+			minMax = new MinMaxResultProcedure(results, new PeakResultParameterValue(PeakResult.Z));
+
 		if (roiMode)
 		{
 			runRoiCrop();
@@ -132,6 +151,7 @@ public class CropResults implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		Rectangle bounds = results.getBounds(true);
+		results.is3D();
 
 		gd.addMessage(String.format("x=%d,y=%d,w=%d,h=%d", bounds.x, bounds.y, bounds.width, bounds.height));
 		gd.addNumericField("Border", settings.getBorder(), 2);
@@ -146,7 +166,7 @@ public class CropResults implements PlugIn
 			String[] items = titles.toArray(new String[titles.size()]);
 			gd.addChoice("Image", items, settings.getRoiImage());
 		}
-		addOutputName(gd);
+		addStandardFields(gd);
 		gd.addCheckbox("Reset_origin", settings.getResetOrigin());
 
 		gd.showDialog();
@@ -166,7 +186,7 @@ public class CropResults implements PlugIn
 			settings.setUseRoi(myUseRoi);
 			settings.setRoiImage(gd.getNextChoice());
 		}
-		readOutputName(gd);
+		readStandardFields(gd);
 		settings.setResetOrigin(gd.getNextBoolean());
 
 		gd.collectOptions();
@@ -174,8 +194,49 @@ public class CropResults implements PlugIn
 		return validateOutputName();
 	}
 
-	private void addOutputName(final ExtendedGenericDialog gd)
+	private void addStandardFields(final ExtendedGenericDialog gd)
 	{
+		if (minMax != null)
+		{
+			// 3D crop options 
+			double min = minMax.getMinimum();
+			double max = minMax.getMaximum();
+
+			double maxz = FastMath.min(settings.getMaxZ(), max);
+			double minz = FastMath.max(settings.getMinZ(), min);
+
+			// Display in nm
+			c = new IdentityTypeConverter<DistanceUnit>(null);
+			String unit = "";
+
+			DistanceUnit nativeUnit = results.getDistanceUnit();
+			if (nativeUnit != null)
+			{
+				unit = UnitHelper.getShortName(nativeUnit);
+				try
+				{
+					c = CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+					unit = UnitHelper.getShortName(DistanceUnit.NM);
+				}
+				catch (ConversionException e)
+				{
+
+				}
+			}
+			min = c.convert(min);
+			max = c.convert(max);
+
+			String msg = String.format("%.2f <= z <= %.2f (%s)", min, max, unit);
+
+			min = Math.floor(min);
+			max = Math.ceil(max);
+
+			gd.addMessage(msg);
+			gd.addCheckbox("Limit Z-depth", settings.getLimitZ());
+			gd.addSlider("minZ", min, max, c.convert(minz));
+			gd.addSlider("maxZ", min, max, c.convert(maxz));
+		}
+
 		gd.addChoice("Name_option", NAME_OPTIONS, settings.getNameOption(), new OptionListener<Integer>()
 		{
 			public boolean collectOptions(Integer value)
@@ -240,8 +301,17 @@ public class CropResults implements PlugIn
 		});
 	}
 
-	private void readOutputName(ExtendedGenericDialog gd)
+	private void readStandardFields(ExtendedGenericDialog gd)
 	{
+		if (minMax != null)
+		{
+			// 3D crop options 
+			myLimitZ = gd.getNextBoolean();
+			settings.setLimitZ(myLimitZ);
+			settings.setMinZ(c.convertBack(gd.getNextNumber()));
+			settings.setMaxZ(c.convertBack(gd.getNextNumber()));
+		}
+
 		settings.setNameOption(gd.getNextChoiceIndex());
 	}
 
@@ -336,13 +406,15 @@ public class CropResults implements PlugIn
 
 		final Rectangle2D bounds = pixelBounds;
 
+		final PeakResultPredicate testZ = getZFilter();
+
 		if (bounds.getWidth() > 0 && bounds.getHeight() > 0)
 		{
 			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
 				public void executeXYR(float x, float y, PeakResult result)
 				{
-					if (bounds.contains(x, y))
+					if (bounds.contains(x, y) && testZ.test(result))
 						newResults.add(result);
 				}
 			});
@@ -358,6 +430,21 @@ public class CropResults implements PlugIn
 		}
 
 		IJ.showStatus(newResults.size() + " Cropped localisations");
+	}
+
+	/**
+	 * Gets the z filter if cropping the z coordinate range.
+	 *
+	 * @return the z filter
+	 */
+	private PeakResultPredicate getZFilter()
+	{
+		if (myLimitZ)
+		{
+			return new MinMaxPeakResultPredicate((float) settings.getMinZ(), (float) settings.getMaxZ(),
+					new PeakResultParameterValue(PeakResult.Z));
+		}
+		return new PassPeakResultPredicate();
 	}
 
 	private MemoryPeakResults createNewResults()
@@ -384,7 +471,7 @@ public class CropResults implements PlugIn
 		String[] items = titles.toArray(new String[titles.size()]);
 		gd.addMessage("Use ROI from ...");
 		gd.addChoice("Image", items, settings.getRoiImage());
-		addOutputName(gd);
+		addStandardFields(gd);
 
 		gd.showDialog();
 
@@ -392,7 +479,7 @@ public class CropResults implements PlugIn
 			return false;
 
 		settings.setRoiImage(gd.getNextChoice());
-		readOutputName(gd);
+		readStandardFields(gd);
 
 		gd.collectOptions();
 
@@ -425,7 +512,8 @@ public class CropResults implements PlugIn
 		final double xscale = (double) roiImageWidth / integerBounds.width;
 		final double yscale = (double) roiImageHeight / integerBounds.height;
 
-
+		final PeakResultPredicate testZ = getZFilter();
+		
 		// Process types separately
 		if (roi.getType() == Roi.RECTANGLE || roi.getType() == Roi.OVAL)
 		{
@@ -448,7 +536,7 @@ public class CropResults implements PlugIn
 			{
 				public void executeXYR(float x, float y, PeakResult result)
 				{
-					if (shape.contains(x * xscale, y * yscale))
+					if (shape.contains(x * xscale, y * yscale) && testZ.test(result))
 						newResults.add(result);
 				}
 			});
@@ -464,7 +552,7 @@ public class CropResults implements PlugIn
 			{
 				public void executeXYR(float x, float y, PeakResult result)
 				{
-					if (shape.contains(x * xscale - ox, y * yscale - oy))
+					if (shape.contains(x * xscale - ox, y * yscale - oy) && testZ.test(result))
 						newResults.add(result);
 				}
 			});
@@ -480,7 +568,7 @@ public class CropResults implements PlugIn
 				{
 					x *= xscale;
 					y *= yscale;
-					if (bounds.contains(x, y) && poly.contains(x, y))
+					if (bounds.contains(x, y) && poly.contains(x, y) && testZ.test(result))
 						newResults.add(result);
 				}
 			});

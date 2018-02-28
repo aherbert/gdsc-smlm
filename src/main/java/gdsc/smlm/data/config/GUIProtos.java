@@ -34175,6 +34175,21 @@ public final class GUIProtos {
      * <code>int32 name_counter = 14;</code>
      */
     int getNameCounter();
+
+    /**
+     * <code>bool limit_z = 15;</code>
+     */
+    boolean getLimitZ();
+
+    /**
+     * <code>double min_z = 16;</code>
+     */
+    double getMinZ();
+
+    /**
+     * <code>double max_z = 17;</code>
+     */
+    double getMaxZ();
   }
   /**
    * <pre>
@@ -34206,6 +34221,9 @@ public final class GUIProtos {
       nameOption_ = 0;
       nameSuffix_ = "";
       nameCounter_ = 0;
+      limitZ_ = false;
+      minZ_ = 0D;
+      maxZ_ = 0D;
     }
 
     @java.lang.Override
@@ -34305,6 +34323,21 @@ public final class GUIProtos {
             case 112: {
 
               nameCounter_ = input.readInt32();
+              break;
+            }
+            case 120: {
+
+              limitZ_ = input.readBool();
+              break;
+            }
+            case 129: {
+
+              minZ_ = input.readDouble();
+              break;
+            }
+            case 137: {
+
+              maxZ_ = input.readDouble();
               break;
             }
           }
@@ -34556,6 +34589,33 @@ public final class GUIProtos {
       return nameCounter_;
     }
 
+    public static final int LIMIT_Z_FIELD_NUMBER = 15;
+    private boolean limitZ_;
+    /**
+     * <code>bool limit_z = 15;</code>
+     */
+    public boolean getLimitZ() {
+      return limitZ_;
+    }
+
+    public static final int MIN_Z_FIELD_NUMBER = 16;
+    private double minZ_;
+    /**
+     * <code>double min_z = 16;</code>
+     */
+    public double getMinZ() {
+      return minZ_;
+    }
+
+    public static final int MAX_Z_FIELD_NUMBER = 17;
+    private double maxZ_;
+    /**
+     * <code>double max_z = 17;</code>
+     */
+    public double getMaxZ() {
+      return maxZ_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -34609,6 +34669,15 @@ public final class GUIProtos {
       }
       if (nameCounter_ != 0) {
         output.writeInt32(14, nameCounter_);
+      }
+      if (limitZ_ != false) {
+        output.writeBool(15, limitZ_);
+      }
+      if (minZ_ != 0D) {
+        output.writeDouble(16, minZ_);
+      }
+      if (maxZ_ != 0D) {
+        output.writeDouble(17, maxZ_);
       }
     }
 
@@ -34669,6 +34738,18 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, nameCounter_);
       }
+      if (limitZ_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(15, limitZ_);
+      }
+      if (minZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(16, minZ_);
+      }
+      if (maxZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(17, maxZ_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -34723,6 +34804,16 @@ public final class GUIProtos {
           .equals(other.getNameSuffix());
       result = result && (getNameCounter()
           == other.getNameCounter());
+      result = result && (getLimitZ()
+          == other.getLimitZ());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinZ())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinZ()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMaxZ())
+          == java.lang.Double.doubleToLongBits(
+              other.getMaxZ()));
       return result;
     }
 
@@ -34769,6 +34860,15 @@ public final class GUIProtos {
       hash = (53 * hash) + getNameSuffix().hashCode();
       hash = (37 * hash) + NAME_COUNTER_FIELD_NUMBER;
       hash = (53 * hash) + getNameCounter();
+      hash = (37 * hash) + LIMIT_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getLimitZ());
+      hash = (37 * hash) + MIN_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinZ()));
+      hash = (37 * hash) + MAX_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMaxZ()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -34930,6 +35030,12 @@ public final class GUIProtos {
 
         nameCounter_ = 0;
 
+        limitZ_ = false;
+
+        minZ_ = 0D;
+
+        maxZ_ = 0D;
+
         return this;
       }
 
@@ -34966,6 +35072,9 @@ public final class GUIProtos {
         result.nameOption_ = nameOption_;
         result.nameSuffix_ = nameSuffix_;
         result.nameCounter_ = nameCounter_;
+        result.limitZ_ = limitZ_;
+        result.minZ_ = minZ_;
+        result.maxZ_ = maxZ_;
         onBuilt();
         return result;
       }
@@ -35052,6 +35161,15 @@ public final class GUIProtos {
         }
         if (other.getNameCounter() != 0) {
           setNameCounter(other.getNameCounter());
+        }
+        if (other.getLimitZ() != false) {
+          setLimitZ(other.getLimitZ());
+        }
+        if (other.getMinZ() != 0D) {
+          setMinZ(other.getMinZ());
+        }
+        if (other.getMaxZ() != 0D) {
+          setMaxZ(other.getMaxZ());
         }
         onChanged();
         return this;
@@ -35611,6 +35729,84 @@ public final class GUIProtos {
       public Builder clearNameCounter() {
         
         nameCounter_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean limitZ_ ;
+      /**
+       * <code>bool limit_z = 15;</code>
+       */
+      public boolean getLimitZ() {
+        return limitZ_;
+      }
+      /**
+       * <code>bool limit_z = 15;</code>
+       */
+      public Builder setLimitZ(boolean value) {
+        
+        limitZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool limit_z = 15;</code>
+       */
+      public Builder clearLimitZ() {
+        
+        limitZ_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double minZ_ ;
+      /**
+       * <code>double min_z = 16;</code>
+       */
+      public double getMinZ() {
+        return minZ_;
+      }
+      /**
+       * <code>double min_z = 16;</code>
+       */
+      public Builder setMinZ(double value) {
+        
+        minZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_z = 16;</code>
+       */
+      public Builder clearMinZ() {
+        
+        minZ_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double maxZ_ ;
+      /**
+       * <code>double max_z = 17;</code>
+       */
+      public double getMaxZ() {
+        return maxZ_;
+      }
+      /**
+       * <code>double max_z = 17;</code>
+       */
+      public Builder setMaxZ(double value) {
+        
+        maxZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double max_z = 17;</code>
+       */
+      public Builder clearMaxZ() {
+        
+        maxZ_ = 0D;
         onChanged();
         return this;
       }
@@ -37863,26 +38059,27 @@ public final class GUIProtos {
       "(\0162#.gdsc.smlm.data.config.DistanceUnit\022" +
       "<\n\017s_distance_unit\030\024 \001(\0162#.gdsc.smlm.dat" +
       "a.config.DistanceUnit\022\030\n\020calibrated_imag" +
-      "e\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t\"\226\002\n\023CropResult" +
+      "e\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t\"\305\002\n\023CropResult" +
       "sSettings\022\024\n\014input_option\030\001 \001(\t\022\016\n\006borde" +
       "r\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005" +
       " \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n\rselect_region\030\007 " +
       "\001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022" +
       "\024\n\014reset_origin\030\n \001(\010\022\023\n\013output_name\030\013 \001",
       "(\t\022\023\n\013name_option\030\014 \001(\005\022\023\n\013name_suffix\030\r" +
-      " \001(\t\022\024\n\014name_counter\030\016 \001(\005\"\346\001\n\030Summarise" +
-      "ResultsSettings\022\027\n\017plot_background\030\001 \001(\010" +
-      "\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016\n" +
-      "\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplot_no" +
-      "ise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_prec" +
-      "ision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027\n\017re" +
-      "move_outliers\030\n \001(\005\"\211\001\n\035ImageJ3DResultsV" +
-      "iewerSettings\022\024\n\014input_option\030\001 \001(\t\022\014\n\004s" +
-      "ize\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003lut\030\004",
-      " \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded\030\006 \001(\010*" +
-      "O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021" +
-      "RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002" +
-      "B\013B\tGUIProtosb\006proto3"
+      " \001(\t\022\024\n\014name_counter\030\016 \001(\005\022\017\n\007limit_z\030\017 " +
+      "\001(\010\022\r\n\005min_z\030\020 \001(\001\022\r\n\005max_z\030\021 \001(\001\"\346\001\n\030Su" +
+      "mmariseResultsSettings\022\027\n\017plot_backgroun" +
+      "d\030\001 \001(\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003" +
+      " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n" +
+      "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
+      "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
+      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\211\001\n\035ImageJ3DR" +
+      "esultsViewerSettings\022\024\n\014input_option\030\001 \001",
+      "(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013" +
+      "\n\003lut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded" +
+      "\030\006 \001(\010*O\n\014TemplateType\022\023\n\017INLINE_TEMPLAT" +
+      "E\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEM" +
+      "PLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -38007,7 +38204,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Border", "X", "Y", "Width", "Height", "SelectRegion", "UseRoi", "RoiImage", "ResetOrigin", "OutputName", "NameOption", "NameSuffix", "NameCounter", });
+        new java.lang.String[] { "InputOption", "Border", "X", "Y", "Width", "Height", "SelectRegion", "UseRoi", "RoiImage", "ResetOrigin", "OutputName", "NameOption", "NameSuffix", "NameCounter", "LimitZ", "MinZ", "MaxZ", });
     internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(18);
     internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable = new
