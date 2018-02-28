@@ -12,10 +12,13 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.Transform3D;
 import org.scijava.java3d.View;
+import org.scijava.vecmath.AxisAngle4d;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomMeshNode;
@@ -56,6 +59,7 @@ import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
 import ij3d.Content;
 import ij3d.ContentInstant;
+import ij3d.Image3DMenubar;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
@@ -93,8 +97,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// This is just the F number (faces) multiplied by 3
 		switch (rendering)
 		{
-			case 0:	return 4;
-			case 1:	return 8;
+			case 0:	return 3;
+			case 1:	return 6;
 			case 2:	return 12;
 			case 3:	return 24;
 			case 4:	return 60;
@@ -142,8 +146,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	private Image3DUniverse univ;
+	private JMenuItem resetRotation;
+	private JMenuItem resetTranslation;
+	private JMenuItem resetZoom;
+	private JMenuItem resetAll;
 	private JMenuItem changeColour;
-	private JMenuItem changeShading;
+	private JMenuItem toggleShading;
+	private JMenuItem resetSelectedView;
 
 	/*
 	 * (non-Javadoc)
@@ -284,7 +293,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		IJ.showStatus("");
 	}
 
-	private float getTransparency(ImageJ3DResultsViewerSettingsOrBuilder settings)
+	private static float getTransparency(ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		float transparency = Maths.clip(0, 1, (float) settings.getTransparency());
 		// Do not allow fully transparent objects
@@ -293,7 +302,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return transparency;
 	}
 
-	private void changeColour(CustomTransparentTriangleMesh mesh, MemoryPeakResults results,
+	private static void changeColour(CustomTransparentTriangleMesh mesh, MemoryPeakResults results,
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		// Colour by z
@@ -366,7 +375,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		//System.out.println(univ.getViewer().getView().getFrontClipDistance());
 
 		// Add a new menu for SMLM functionality
-		univ.getMenuBar().add(createSMLMMenuBar());
+		Image3DMenubar menubar = (Image3DMenubar)univ.getMenuBar();
+		menubar.add(createSMLMMenuBar());
+		univ.setMenubar(menubar);
 
 		univ.addUniverseListener(this);
 
@@ -382,19 +393,120 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		final JMenu add = new JMenu("GDSC SMLM");
 
+		resetRotation = new JMenuItem("Reset Global Rotation");
+		resetRotation.addActionListener(this);
+		add.add(resetRotation);
+
+		resetTranslation = new JMenuItem("Reset Global Translation");
+		resetTranslation.addActionListener(this);
+		add.add(resetTranslation);
+
+		resetZoom = new JMenuItem("Reset Global Zoom");
+		resetZoom.addActionListener(this);
+		add.add(resetZoom);
+
+		add.addSeparator();
+		
+		resetAll = new JMenuItem("Reset All");
+		resetAll.addActionListener(this);
+		add.add(resetAll);
+		
+		add.addSeparator();
+
 		changeColour = new JMenuItem("Change Colour");
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
-		changeShading = new JMenuItem("Toggle Shading");
-		changeShading.addActionListener(this);
-		add.add(changeShading);
-
-		//add.addSeparator();
+		toggleShading = new JMenuItem("Toggle Shading");
+		toggleShading.addActionListener(this);
+		add.add(toggleShading);
+		
+		resetSelectedView = new JMenuItem("Reset Selected");
+		resetSelectedView.addActionListener(this);
+		add.add(resetSelectedView);
 
 		return add;
 	}
 
+	private interface ContentAction
+	{
+		/**
+		 * Run the action
+		 * 
+		 * @param c
+		 *            The content
+		 * @return 0 negative for error. No further content can be processed.
+		 */
+		public int run(Content c);
+	}
+
+	private static class ToggleShadedContentAction implements ContentAction
+	{
+		public int run(Content c)
+		{
+			c.setShaded(!c.isShaded());
+			return 0;
+		}
+	}
+
+	private static class ChangeColourContentAction implements ContentAction
+	{
+		ImageJ3DResultsViewerSettings.Builder settings = null;
+
+		public int run(Content c)
+		{
+			if (!(c.getUserData() instanceof ResultsMetaData))
+				return 0;
+
+			ResultsMetaData data = (ResultsMetaData) c.getUserData();
+
+			MemoryPeakResults results = ResultsManager.loadInputResults(data.settings.getInputOption(), false, null,
+					null);
+			// Results must be the same size
+			if (results == null || results.size() != data.resultsSize)
+			{
+				IJ.error(TITLE, "Results are not the same size as when the mesh was constructed: " +
+						data.settings.getInputOption());
+				return 1;
+			}
+
+			final ContentInstant content = c.getInstant(0);
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomTransparentTriangleMesh mesh = (CustomTransparentTriangleMesh) node.getMesh();
+
+			// Change the colour
+			if (settings == null)
+			{
+				// Use the latest settings
+				settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
+				ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+				gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
+				gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return -1;
+				settings.setTransparency(gd.getNextNumber());
+				settings.setLut(gd.getNextChoiceIndex());
+				SettingsManager.writeSettings(settings);
+			}
+
+			// Restore original object rendering
+			settings.setRendering(data.settings.getRendering());
+			changeColour(mesh, results, settings);
+			return 0;
+		}
+	}
+
+	private static class ResetViewContentAction implements ContentAction
+	{
+		public int run(Content c)
+		{
+			final Transform3D t = new Transform3D();
+			c.setTransform(t);
+			return 0;
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -405,65 +517,78 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		final Object src = e.getSource();
 
-		if (src == changeShading)
+		// Universe actions
+		// Adapted from univ.resetView();
+		if (src == resetRotation)
 		{
-			for (Iterator<Content> it = univ.contents(); it.hasNext();)
-			{
-				Content c = it.next();
-				Object o = c.getUserData();
-				if (o instanceof ResultsMetaData)
-				{
-					c.setShaded(!c.isShaded());
-				}
-			}
+			univ.fireTransformationStarted();
+			// rotate so that y shows downwards
+			final Transform3D t = new Transform3D();
+			final AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
+			t.set(aa);
+			univ.getRotationTG().setTransform(t);
+			univ.fireTransformationFinished();
+			return;
+		}
+		if (src == resetTranslation)
+		{
+			univ.fireTransformationStarted();
+			final Transform3D t = new Transform3D();
+			univ.getTranslateTG().setTransform(t);
+			univ.recalculateGlobalMinMax();
+			univ.getViewPlatformTransformer().centerAt(univ.getGlobalCenterPoint());
+			univ.fireTransformationFinished();
+			return;
+		}
+		if (src == resetZoom)
+		{
+			univ.fireTransformationStarted();
+			final Transform3D t = new Transform3D();
+			univ.getZoomTG().setTransform(t);
+			Point3d max = new Point3d();
+			Point3d min = new Point3d();
+			univ.getGlobalMaxPoint(max);
+			univ.getGlobalMinPoint(min);
+			float range = (float) (max.x - min.x);
+			final double d = (range) / Math.tan(Math.PI / 8);
+			univ.getViewPlatformTransformer().zoomTo(d);
+			univ.fireTransformationFinished();
+			return;
+		}
+
+		// Actions to perform on content
+		ContentAction action = null;
+		if (src == toggleShading)
+		{
+			action = new ToggleShadedContentAction();
 		}
 		else if (src == changeColour)
 		{
-			ImageJ3DResultsViewerSettings.Builder settings = null;
+			action = new ChangeColourContentAction();
+		}
+		else if (src == resetAll)
+		{
+			univ.resetView();
+			univ.select(null);
+			action = new ResetViewContentAction();
+		}
+		else if (src == resetSelectedView)
+		{
+			action = new ResetViewContentAction();
+		}
+		if (action == null)
+			return;
 
-			for (Iterator<Content> it = univ.contents(); it.hasNext();)
-			{
-				Content c = it.next();
-				Object o = c.getUserData();
-				if (o instanceof ResultsMetaData)
-				{
-					ResultsMetaData data = (ResultsMetaData) o;
+		if (univ.getSelected() != null)
+		{
+			action.run(univ.getSelected());
+			return;
+		}
 
-					MemoryPeakResults results = ResultsManager.loadInputResults(data.settings.getInputOption(), false,
-							null, null);
-					// Results must be the same size
-					if (results == null || results.size() != data.resultsSize)
-					{
-						IJ.error(TITLE, "Results are not the same size as when the mesh was constructed: " +
-								data.settings.getInputOption());
-						continue;
-					}
-
-					final ContentInstant content = c.getInstant(0);
-					CustomMeshNode node = (CustomMeshNode) content.getContent();
-					CustomTransparentTriangleMesh mesh = (CustomTransparentTriangleMesh) node.getMesh();
-
-					// Change the colour
-					if (settings == null)
-					{
-						// Use the latest settings
-						settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
-						ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-						gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
-						gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
-						gd.showDialog();
-						if (gd.wasCanceled())
-							return;
-						settings.setTransparency(gd.getNextNumber());
-						settings.setLut(gd.getNextChoiceIndex());
-						SettingsManager.writeSettings(settings);
-					}
-
-					// Restore original object rendering
-					settings.setRendering(data.settings.getRendering());
-					changeColour(mesh, results, settings);
-				}
-			}
+		for (Iterator<Content> it = univ.contents(); it.hasNext();)
+		{
+			if (action.run(it.next()) < 0)
+				return;
 		}
 	}
 
