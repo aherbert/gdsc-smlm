@@ -34,6 +34,22 @@ Running the code
 
 Build the project.
 
+---
+Optional:
+
+To debug the ImageJ 3D Viewer from Eclipse relies on being able to find the native 
+runtime libraries for Open GL.
+
+1. Download JOGL
+   http://jogamp.org/wiki/index.php/Downloading_and_installing_JOGL
+2. Extract all the files
+3. Copy jogl-all.jar and gluegen-rt.jar to a folder
+4. Copy the 'natives' jars for the current platform to the same location,
+   e.g. jogl-all-natives-linux-amd64.jar and gluegen-rt-natives-linux-amd64.jar
+5. Add the jogl-all.jar and gluegen-rt.jar as external jars to the build path in the 
+   Eclipse project
+---
+
 Create a symbolic link on the filesystem to set-up the folders that are expected by ImageJ.
 
 Windows:
