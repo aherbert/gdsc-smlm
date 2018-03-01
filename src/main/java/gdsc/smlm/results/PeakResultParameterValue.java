@@ -1,7 +1,4 @@
-package gdsc.smlm.results.procedures;
-
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultValue;
+package gdsc.smlm.results;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
