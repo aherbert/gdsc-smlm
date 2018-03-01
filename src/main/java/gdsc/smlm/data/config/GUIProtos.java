@@ -122,6 +122,143 @@ public final class GUIProtos {
     // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.TemplateType)
   }
 
+  /**
+   * <pre>
+   * The drawing mode for the 3D image
+   * </pre>
+   *
+   * Protobuf enum {@code gdsc.smlm.data.config.Image3DDrawingMode}
+   */
+  public enum Image3DDrawingMode
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Draw using a fixed size
+     * </pre>
+     *
+     * <code>DRAW_3D_FIXED_SIZE = 0;</code>
+     */
+    DRAW_3D_FIXED_SIZE(0),
+    /**
+     * <pre>
+     * Draw using the XY precision for the size. This is to
+     * support rendering of 2D datasets.
+     * </pre>
+     *
+     * <code>DRAW_3D_XY_PRECISION = 1;</code>
+     */
+    DRAW_3D_XY_PRECISION(1),
+    /**
+     * <pre>
+     * Draw using the XYZ parameter deviations for the size
+     * </pre>
+     *
+     * <code>DRAW_3D_XYZ_DEVIATIONS = 2;</code>
+     */
+    DRAW_3D_XYZ_DEVIATIONS(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Draw using a fixed size
+     * </pre>
+     *
+     * <code>DRAW_3D_FIXED_SIZE = 0;</code>
+     */
+    public static final int DRAW_3D_FIXED_SIZE_VALUE = 0;
+    /**
+     * <pre>
+     * Draw using the XY precision for the size. This is to
+     * support rendering of 2D datasets.
+     * </pre>
+     *
+     * <code>DRAW_3D_XY_PRECISION = 1;</code>
+     */
+    public static final int DRAW_3D_XY_PRECISION_VALUE = 1;
+    /**
+     * <pre>
+     * Draw using the XYZ parameter deviations for the size
+     * </pre>
+     *
+     * <code>DRAW_3D_XYZ_DEVIATIONS = 2;</code>
+     */
+    public static final int DRAW_3D_XYZ_DEVIATIONS_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Image3DDrawingMode valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Image3DDrawingMode forNumber(int value) {
+      switch (value) {
+        case 0: return DRAW_3D_FIXED_SIZE;
+        case 1: return DRAW_3D_XY_PRECISION;
+        case 2: return DRAW_3D_XYZ_DEVIATIONS;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Image3DDrawingMode>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Image3DDrawingMode> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Image3DDrawingMode>() {
+            public Image3DDrawingMode findValueByNumber(int number) {
+              return Image3DDrawingMode.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final Image3DDrawingMode[] VALUES = values();
+
+    public static Image3DDrawingMode valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private Image3DDrawingMode(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.Image3DDrawingMode)
+  }
+
   public interface GUIFilterSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.GUIFilterSettings)
       com.google.protobuf.MessageOrBuilder {
@@ -36925,10 +37062,19 @@ public final class GUIProtos {
      * <code>bool newWindow = 7;</code>
      */
     boolean getNewWindow();
+
+    /**
+     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+     */
+    int getDrawingModeValue();
+    /**
+     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+     */
+    gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode();
   }
   /**
    * <pre>
-   * Contains settings for the ImageJ 3d Results Viewer plugin
+   * Contains settings for the ImageJ 3D Results Viewer plugin
    * </pre>
    *
    * Protobuf type {@code gdsc.smlm.data.config.ImageJ3DResultsViewerSettings}
@@ -36949,6 +37095,7 @@ public final class GUIProtos {
       rendering_ = 0;
       shaded_ = false;
       newWindow_ = false;
+      drawingMode_ = 0;
     }
 
     @java.lang.Override
@@ -37010,6 +37157,12 @@ public final class GUIProtos {
             case 56: {
 
               newWindow_ = input.readBool();
+              break;
+            }
+            case 64: {
+              int rawValue = input.readEnum();
+
+              drawingMode_ = rawValue;
               break;
             }
           }
@@ -37123,6 +37276,22 @@ public final class GUIProtos {
       return newWindow_;
     }
 
+    public static final int DRAWING_MODE_FIELD_NUMBER = 8;
+    private int drawingMode_;
+    /**
+     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+     */
+    public int getDrawingModeValue() {
+      return drawingMode_;
+    }
+    /**
+     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+     */
+    public gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode() {
+      gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode result = gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.valueOf(drawingMode_);
+      return result == null ? gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37155,6 +37324,9 @@ public final class GUIProtos {
       }
       if (newWindow_ != false) {
         output.writeBool(7, newWindow_);
+      }
+      if (drawingMode_ != gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.DRAW_3D_FIXED_SIZE.getNumber()) {
+        output.writeEnum(8, drawingMode_);
       }
     }
 
@@ -37190,6 +37362,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, newWindow_);
       }
+      if (drawingMode_ != gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.DRAW_3D_FIXED_SIZE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(8, drawingMode_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -37224,6 +37400,7 @@ public final class GUIProtos {
           == other.getShaded());
       result = result && (getNewWindow()
           == other.getNewWindow());
+      result = result && drawingMode_ == other.drawingMode_;
       return result;
     }
 
@@ -37252,6 +37429,8 @@ public final class GUIProtos {
       hash = (37 * hash) + NEWWINDOW_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getNewWindow());
+      hash = (37 * hash) + DRAWING_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + drawingMode_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37347,7 +37526,7 @@ public final class GUIProtos {
     }
     /**
      * <pre>
-     * Contains settings for the ImageJ 3d Results Viewer plugin
+     * Contains settings for the ImageJ 3D Results Viewer plugin
      * </pre>
      *
      * Protobuf type {@code gdsc.smlm.data.config.ImageJ3DResultsViewerSettings}
@@ -37399,6 +37578,8 @@ public final class GUIProtos {
 
         newWindow_ = false;
 
+        drawingMode_ = 0;
+
         return this;
       }
 
@@ -37428,6 +37609,7 @@ public final class GUIProtos {
         result.rendering_ = rendering_;
         result.shaded_ = shaded_;
         result.newWindow_ = newWindow_;
+        result.drawingMode_ = drawingMode_;
         onBuilt();
         return result;
       }
@@ -37490,6 +37672,9 @@ public final class GUIProtos {
         }
         if (other.getNewWindow() != false) {
           setNewWindow(other.getNewWindow());
+        }
+        if (other.drawingMode_ != 0) {
+          setDrawingModeValue(other.getDrawingModeValue());
         }
         onChanged();
         return this;
@@ -37738,6 +37923,50 @@ public final class GUIProtos {
       public Builder clearNewWindow() {
         
         newWindow_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int drawingMode_ = 0;
+      /**
+       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       */
+      public int getDrawingModeValue() {
+        return drawingMode_;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       */
+      public Builder setDrawingModeValue(int value) {
+        drawingMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       */
+      public gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode() {
+        gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode result = gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.valueOf(drawingMode_);
+        return result == null ? gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       */
+      public Builder setDrawingMode(gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        drawingMode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       */
+      public Builder clearDrawingMode() {
+        
+        drawingMode_ = 0;
         onChanged();
         return this;
       }
@@ -38137,14 +38366,18 @@ public final class GUIProtos {
       " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n" +
       "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
       "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
-      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\234\001\n\035ImageJ3DR" +
+      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\335\001\n\035ImageJ3DR" +
       "esultsViewerSettings\022\024\n\014input_option\030\001 \001",
       "(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013" +
       "\n\003lut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded" +
-      "\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010*O\n\014TemplateTyp" +
-      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
-      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb" +
-      "\006proto3"
+      "\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010\022?\n\014drawing_mod" +
+      "e\030\010 \001(\0162).gdsc.smlm.data.config.Image3DD" +
+      "rawingMode*O\n\014TemplateType\022\023\n\017INLINE_TEM" +
+      "PLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM" +
+      "_TEMPLATE\020\002*b\n\022Image3DDrawingMode\022\026\n\022DRA" +
+      "W_3D_FIXED_SIZE\020\000\022\030\n\024DRAW_3D_XY_PRECISIO" +
+      "N\020\001\022\032\n\026DRAW_3D_XYZ_DEVIATIONS\020\002B\013B\tGUIPr" +
+      "otosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -38281,7 +38514,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

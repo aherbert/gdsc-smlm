@@ -563,7 +563,18 @@ message SummariseResultsSettings {
 	int32 remove_outliers = 10;
 }
 
-// Contains settings for the ImageJ 3d Results Viewer plugin
+// The drawing mode for the 3D image
+enum Image3DDrawingMode {
+	// Draw using a fixed size
+	DRAW_3D_FIXED_SIZE = 0;
+	// Draw using the XY precision for the size. This is to
+	// support rendering of 2D datasets.
+	DRAW_3D_XY_PRECISION = 1;
+	// Draw using the XYZ parameter deviations for the size
+	DRAW_3D_XYZ_DEVIATIONS = 2;
+}
+
+// Contains settings for the ImageJ 3D Results Viewer plugin
 message ImageJ3DResultsViewerSettings {
 	string input_option = 1;
 	double size = 2;
@@ -572,4 +583,5 @@ message ImageJ3DResultsViewerSettings {
 	int32 rendering = 5;
 	bool shaded = 6;
 	bool newWindow = 7;
+	Image3DDrawingMode drawing_mode = 8;
 }

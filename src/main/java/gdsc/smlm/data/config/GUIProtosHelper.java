@@ -15,6 +15,7 @@ import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
@@ -356,6 +357,23 @@ public class GUIProtosHelper
 
 		defaultAstigmatismModelManagerSettings = builder.build();
 	}
+	
+	public static String getName(Image3DDrawingMode value)
+	{
+		switch (value)
+		{
+			case DRAW_3D_FIXED_SIZE:
+				return "Fixed size";
+			case DRAW_3D_XYZ_DEVIATIONS:
+				return "XYZ Deviations";
+			case DRAW_3D_XY_PRECISION:
+				return "XY Precision";
+			case UNRECOGNIZED:
+				return "Unknown";
+			default:
+				throw new IllegalStateException("Unknown name: " + value);
+		}
+	}	
 
 	/** The default ImageJ3DResultsViewerSettings */
 	public static final ImageJ3DResultsViewerSettings defaultImageJ3DResultsViewerSettings;
@@ -367,6 +385,7 @@ public class GUIProtosHelper
 		builder.setLut(LutColour.FIRE.ordinal());
 		builder.setRendering(3); // Octahedron
 		builder.setShaded(true);
+		builder.setDrawingModeValue(Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE);
 		defaultImageJ3DResultsViewerSettings = builder.build();
 	}
 }
