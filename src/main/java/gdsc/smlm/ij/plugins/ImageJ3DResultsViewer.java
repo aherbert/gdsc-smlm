@@ -23,9 +23,12 @@ import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomMeshNode;
 import customnode.CustomTransparentTriangleMesh;
+import gdsc.core.data.DataException;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.logging.Ticker;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -41,17 +44,24 @@ import gdsc.core.utils.Maths;
  *---------------------------------------------------------------------------*/
 
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
+import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
+import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.procedures.PeakResultProcedureX;
+import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYZRResultProcedure;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GUI;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
@@ -178,7 +188,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return;
 		}
 
-		ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
+		final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
 				.toBuilder();
 
 		// Get a list of the window titles available. Allow the user to select 
@@ -190,7 +200,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		buildWindowList(title, univList, titleList);
 		String[] titles = titleList.toArray(new String[titleList.size()]);
 
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to display");
 		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
 		gd.addChoice("Window", titles, lastWindow);
@@ -198,9 +208,45 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering());
 		gd.addCheckbox("Shaded", settings.getShaded());
-		
-		gd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
-		
+		gd.addChoice("Drawing_mode", SettingsManager.getImage3DDrawingModeNames(), settings.getDrawingModeValue(),
+				new OptionListener<Integer>()
+				{
+					public boolean collectOptions(Integer value)
+					{
+						settings.setDrawingModeValue(value);
+						return collectOptions(false);
+					}
+
+					public boolean collectOptions()
+					{
+						return collectOptions(true);
+					}
+
+					private boolean collectOptions(boolean silent)
+					{
+						ExtendedGenericDialog egd = new ExtendedGenericDialog("Drawing mode options", null);
+						int mode = settings.getDrawingModeValue();
+						if (mode == Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE)
+						{
+							egd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
+						}
+						else
+						{
+							// Other modes do not require options
+							return false;
+						}
+						egd.setSilent(silent);
+						egd.showDialog(true, gd);
+						if (egd.wasCanceled())
+							return false;
+						if (mode == Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE)
+						{
+							settings.setSize(egd.getNextNumber());
+						}
+						return true;
+					}
+				});
+
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -212,9 +258,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setLut(gd.getNextChoiceIndex());
 		settings.setRendering(gd.getNextChoiceIndex());
 		settings.setShaded(gd.getNextBoolean());
-		
-		settings.setSize(gd.getNextNumber());
-		
+		settings.setDrawingModeValue(gd.getNextChoiceIndex());
+		gd.collectOptions();
+
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -224,22 +270,20 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return;
 		}
 
+		// Determine if the drawing mode is supported and compute the point size
+		final float[] sphereSize = createSphereSize(results, settings);
+		if (sphereSize == null)
+			return;
+
 		// Create a 3D viewer.
 		if (windowChoice == 0)
 			univ = createImage3DUniverse(title, titleList);
 		else
 			univ = univList.get(windowChoice - 1); // Ignore the new window
 
-		// TODO:
-		// Configure the units used for display.
-		// Make the sphere size depend on:
-		// 1. the localisation precision.
-		// 2. use configured input.
-		// 3. any other (e.g. intensity, local density, etc)
-
-		// Adapted from Image3DUniverse.addIcospheres.
-
-		// We create a grainy unit sphere. This is then scaled and translated for each localisation.
+		// Adapted from Image3DUniverse.addIcospheres:
+		// We create a grainy unit sphere an the origin. 
+		// This is then scaled and translated for each localisation.
 		final List<Point3f> point = createLocalisationObject(settings.getRendering());
 		final List<Point3f> allPoints = new TurboList<Point3f>();
 
@@ -247,20 +291,21 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		long size = (long) results.size() * singlePointSize;
 		if (size > 10000000L)
 		{
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("The results will generate a large mesh of " + size +
+			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			egd.addMessage("The results will generate a large mesh of " + size +
 					" vertices.\nThis may take a long time to render and may run out of memory.");
-			gd.setOKLabel("Continue");
-			gd.showDialog();
-			if (gd.wasCanceled())
+			egd.setOKLabel("Continue");
+			egd.showDialog();
+			if (egd.wasCanceled())
 				return;
 		}
 
 		IJ.showStatus("Creating 3D objects ...");
 		final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
-		final float pointSize = (settings.getSize() > 0) ? (float) settings.getSize() : 1f;
 		results.forEach(DistanceUnit.NM, new XYZRResultProcedure()
 		{
+			int i = 0; // For the sphere size array
+
 			//int MAX_SIZE = 1; // For debugging
 			public void executeXYZR(float x, float y, float z, PeakResult result)
 			{
@@ -268,7 +313,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// Assume it can support a max array.
 				if (allPoints.size() > MAX_SIZE)
 					return;
-				allPoints.addAll(copyScaledTranslated(point, pointSize, pointSize, pointSize, x, y, z));
+				allPoints.addAll(
+						copyScaledTranslated(point, sphereSize[i], sphereSize[i + 1], sphereSize[i + 2], x, y, z));
+				i += 3;
 				ticker.tick();
 			}
 		});
@@ -315,6 +362,88 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.setAutoAdjustView(auto);
 
 		IJ.showStatus("");
+	}
+
+	private float[] createSphereSize(MemoryPeakResults results, Builder settings)
+	{
+		// Store XYZ size for each localisation
+		switch (settings.getDrawingMode())
+		{
+			case DRAW_3D_FIXED_SIZE:
+				final float size = (settings.getSize() > 0) ? (float) settings.getSize() : 1f;
+				return SimpleArrayUtils.newFloatArray(results.size() * 3, size);
+			case DRAW_3D_XYZ_DEVIATIONS:
+				return createSphereSizeFromDeviations(results);
+			case DRAW_3D_XY_PRECISION:
+				return createSphereSizeFromPrecision(results);
+			case UNRECOGNIZED:
+			default:
+				break;
+		}
+		return null;
+	}
+
+	private float[] createSphereSizeFromDeviations(MemoryPeakResults results)
+	{
+		if (!results.hasDeviations())
+		{
+			IJ.error(TITLE, "The results have no deviations");
+			return null;
+		}
+		// Currently the rendering is in nm
+		final TypeConverter<DistanceUnit> dc = results.getDistanceConverter(DistanceUnit.NM);
+
+		final float[] size = new float[results.size() * 3];
+		boolean failed = results.forEach(new PeakResultProcedureX()
+		{
+			int i = 0;
+
+			public boolean execute(PeakResult peakResult)
+			{
+				float x = peakResult.getParameterDeviation(PeakResult.X);
+				float y = peakResult.getParameterDeviation(PeakResult.Y);
+				float z = peakResult.getParameterDeviation(PeakResult.Z);
+				// Check x & y are not zero. 
+				// This should be OK as 2D fitting should provide these.
+				if (x == 0 || y == 0)
+					return true;
+				if (z == 0)
+				{
+					z = (float) Math.sqrt((x * x + y * y) / 2); // Mean variance
+					//z = (x + y) / 2; // Mean Std Dev
+				}
+				size[i++] = dc.convert(x);
+				size[i++] = dc.convert(y);
+				size[i++] = dc.convert(z);
+				return false;
+			}
+		});
+		return (failed) ? null : size;
+	}
+
+	private float[] createSphereSizeFromPrecision(MemoryPeakResults results)
+	{
+		PrecisionResultProcedure p = new PrecisionResultProcedure(results);
+		try
+		{
+			PrecisionMethod m = p.getPrecision();
+			IJ.log("Using precision method " + FitProtosHelper.getName(m));
+			final float[] size = new float[results.size() * 3];
+			for (int i = 0, j = 0; i < p.precision.length; i++)
+			{
+				// Precision is in NM which matches the rendering
+				final float v = (float) p.precision[i];
+				size[j++] = v;
+				size[j++] = v;
+				size[j++] = v;
+			}
+			return size;
+		}
+		catch (DataException e)
+		{
+			IJ.error(TITLE, "The results have no precision: " + e.getMessage());
+			return null;
+		}
 	}
 
 	private static float getTransparency(ImageJ3DResultsViewerSettingsOrBuilder settings)
