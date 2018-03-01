@@ -62,6 +62,7 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.ResultsProtosHelper;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
+import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngine;
@@ -2473,7 +2474,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return true;
 
 		// Create a converter to map the model units in pixels to nm for the dialog.
-		TypeConverter<DistanceUnit> c = fitConfig.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
+		// Note the output units of pixels may not yet be set in the calibration so we assume it is pixels.
+		//TypeConverter<DistanceUnit> c = fitConfig.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
+		TypeConverter<DistanceUnit> c = UnitConverterFactory.createConverter(DistanceUnit.PIXEL, DistanceUnit.NM,
+				fitConfig.getCalibrationReader().getNmPerPixel());
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
