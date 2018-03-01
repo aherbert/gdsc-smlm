@@ -17,8 +17,8 @@ import org.scijava.java3d.View;
 import org.scijava.vecmath.AxisAngle4d;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
-import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Point3d;
+import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomMeshNode;
@@ -145,6 +145,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
+	// No ned to store this in settings as when the plugin is first run there are no windows 
+	private static String lastWindow = "";
+
 	private Image3DUniverse univ;
 	private JMenuItem resetRotation;
 	private JMenuItem resetTranslation;
@@ -178,26 +181,36 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
 				.toBuilder();
 
+		// Get a list of the window titles available. Allow the user to select 
+		// an existing window or a new one.
+		String title = TITLE;
+		List<Image3DUniverse> univList = new TurboList<Image3DUniverse>();
+		List<String> titleList = new TurboList<String>();
+		titleList.add("New window");
+		buildWindowList(title, univList, titleList);
+		String[] titles = titleList.toArray(new String[titleList.size()]);
+
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to display");
 		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
+		gd.addChoice("Window", titles, lastWindow);
 		gd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering());
 		gd.addCheckbox("Shaded", settings.getShaded());
-		gd.addCheckbox("New_window", settings.getNewWindow());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 		final String name = ResultsManager.getInputSource(gd);
+		int windowChoice = gd.getNextChoiceIndex();
+		lastWindow = titles[windowChoice];
 		settings.setInputOption(name);
 		settings.setSize(gd.getNextNumber());
 		settings.setTransparency(gd.getNextNumber());
 		settings.setLut(gd.getNextChoiceIndex());
 		settings.setRendering(gd.getNextChoiceIndex());
 		settings.setShaded(gd.getNextBoolean());
-		settings.setNewWindow(gd.getNextBoolean());
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -207,7 +220,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return;
 		}
 
-		// Create a 3D viewer ...
+		// Create a 3D viewer.
+		if (windowChoice == 0)
+			univ = createImage3DUniverse(title, titleList);
+		else
+			univ = univList.get(windowChoice - 1); // Ignore the new window
 
 		// TODO:
 		// Configure the units used for display.
@@ -215,12 +232,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// 1. the localisation precision.
 		// 2. use configured input.
 		// 3. any other (e.g. intensity, local density, etc)
-
-		// TODO - 
-		// Get a list of the window titles available. Allow the user to select 
-		// an existing window or a new one. New one will have the first available 
-		// counter appended to the title.
-		univ = getImage3DUniverse(TITLE, settings.getNewWindow());
 
 		// Adapted from Image3DUniverse.addIcospheres.
 
@@ -233,7 +244,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (size > 10000000L)
 		{
 			gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("The results will generate a large mesh: " + size);
+			gd.addMessage("The results will generate a large mesh of " + size +
+					" vertices.\nThis may take a long time to render and may run out of memory.");
 			gd.setOKLabel("Continue");
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -273,6 +285,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		ResultsMetaData data = new ResultsMetaData(settings.build(), results.size());
 
 		mesh.setShaded(settings.getShaded());
+
+		IJ.showStatus("Creating 3D mesh colour ...");
 		changeColour(mesh, results, data.settings);
 
 		IJ.showStatus("Creating 3D content ...");
@@ -352,35 +366,52 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	/**
-	 * Gets the image 3D universe, reusing if possible the same window.
+	 * Builds the window list of all visible windows starting with the title prefix.
+	 *
+	 * @param titlePrefix
+	 *            the title prefix
+	 * @param univList
+	 *            the univ list
+	 * @param titleList
+	 *            the title list
+	 */
+	private void buildWindowList(String titlePrefix, List<Image3DUniverse> univList, List<String> titleList)
+	{
+		for (Image3DUniverse univ : Image3DUniverse.universes)
+		{
+			ImageWindow3D w = univ.getWindow();
+			if (w != null && w.isVisible() && w.getTitle().startsWith(titlePrefix))
+			{
+				univList.add(univ);
+				titleList.add(w.getTitle());
+			}
+		}
+	}
+
+	/**
+	 * Creates the image 3D universe with a unique name
 	 *
 	 * @param title
 	 *            the title
-	 * @param newWindow
-	 *            the new window
+	 * @param titleList
+	 *            the title list (of titles to ignore)
 	 * @return the image 3D universe
 	 */
-	private Image3DUniverse getImage3DUniverse(String title, boolean newWindow)
+	private Image3DUniverse createImage3DUniverse(String title, List<String> titleList)
 	{
-		if (!newWindow)
+		// Get a unique name by appending numbers to the end
+		String title2 = title;
+		int counter = 2;
+		while (titleList.contains(title2))
 		{
-			for (Image3DUniverse univ : Image3DUniverse.universes)
-			{
-				ImageWindow3D w = univ.getWindow();
-				if (w != null && w.isVisible() && title.equals(w.getTitle()))
-				{
-					//univ.removeAllContents();
-					//univ.resetView();
-					return univ;
-				}
-			}
+			title2 = title + " " + (counter++);
 		}
-		
+
 		Image3DUniverse univ = new Image3DUniverse();
 		univ.show();
 		ImageWindow3D w = univ.getWindow();
 		GUI.center(w);
-		w.setTitle(title);
+		w.setTitle(title2);
 
 		// See what these are initialised as ...
 		//System.out.println(univ.getViewer().getView().getBackClipDistance());
@@ -539,6 +570,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
 			t.set(aa);
 			univ.getRotationTG().setTransform(t);
+			univ.fireTransformationUpdated();
 			univ.fireTransformationFinished();
 			return;
 		}
@@ -549,6 +581,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			univ.getTranslateTG().setTransform(t);
 			univ.recalculateGlobalMinMax();
 			univ.getViewPlatformTransformer().centerAt(univ.getGlobalCenterPoint());
+			univ.fireTransformationUpdated();
 			univ.fireTransformationFinished();
 			return;
 		}
@@ -564,6 +597,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			float range = (float) (max.x - min.x);
 			final double d = (range) / Math.tan(Math.PI / 8);
 			univ.getViewPlatformTransformer().zoomTo(d);
+			univ.fireTransformationUpdated();
 			univ.fireTransformationFinished();
 			return;
 		}
@@ -647,7 +681,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	// https://en.m.wikipedia.org/wiki/Tetrahedron
 	// based on alternated cube
 	static final private float[][] tetraVertices = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
-	// The triangles are rendered on both sides so the handedness does not matter
 	static final private int[][] tetraFaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
 
 	// https://en.m.wikipedia.org/wiki/Octahedron
@@ -751,10 +784,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final float sz, final float dx, final float dy, final float dz)
 	{
 		final TurboList<Point3f> verts = new TurboList<Point3f>(ps.size());
+
+		//		// Reuse points to save memory and scaling time
+		//		final HashMap<Point3f, Point3f> m = new HashMap<Point3f, Point3f>();
+		//		for (final Point3f p : ps)
+		//		{
+		//			Point3f p2 = m.get(p);
+		//			if (null == p2)
+		//			{
+		//				p2 = new Point3f(p.x * sx + dx, p.y * sy + dy, p.z * sz + dz);
+		//				m.put(p, p2);
+		//			}
+		//			verts.addf(p2);
+		//		}
+
+		// Duplicate all points
 		for (final Point3f p : ps)
 		{
 			verts.addf(new Point3f(p.x * sx + dx, p.y * sy + dy, p.z * sz + dz));
 		}
+
 		return verts;
 	}
 
