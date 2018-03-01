@@ -194,11 +194,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addMessage("Select a dataset to display");
 		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
 		gd.addChoice("Window", titles, lastWindow);
-		gd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering());
 		gd.addCheckbox("Shaded", settings.getShaded());
+		
+		gd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
+		
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -206,11 +208,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		int windowChoice = gd.getNextChoiceIndex();
 		lastWindow = titles[windowChoice];
 		settings.setInputOption(name);
-		settings.setSize(gd.getNextNumber());
 		settings.setTransparency(gd.getNextNumber());
 		settings.setLut(gd.getNextChoiceIndex());
 		settings.setRendering(gd.getNextChoiceIndex());
 		settings.setShaded(gd.getNextBoolean());
+		
+		settings.setSize(gd.getNextNumber());
+		
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
