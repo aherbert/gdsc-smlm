@@ -1301,6 +1301,7 @@ public class AstigmatismModelManager implements PlugIn
 			model.setZDistanceUnit(DistanceUnit.UM);
 			model.setSDistanceUnit(DistanceUnit.PIXEL);
 			model.setNmPerPixel(fitConfig.getCalibrationReader().getNmPerPixel());
+			model.setZ0(parameters[P_Z0]);
 			return save(name, model);
 		}
 		return true;
