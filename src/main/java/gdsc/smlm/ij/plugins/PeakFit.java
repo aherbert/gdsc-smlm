@@ -888,7 +888,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						config.getNoiseMethod().ordinal());
 			}
 			gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
-			gd.addSlider("Width_factor", 1.01, 5, fitConfig.getMaxWidthFactor());
+			gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
 			addPrecisionOptions(gd, fitConfigurationProvider);
 			// Q. Add dynamically displayed options for z-filtering here?
 		}

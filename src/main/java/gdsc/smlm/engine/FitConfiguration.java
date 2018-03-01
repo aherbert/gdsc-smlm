@@ -604,6 +604,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		updateZFilter();
 
 		// Recreate the smart filter
+		if (!filterSettings.getSmartFilter())
+			return;
 		String xml = filterSettings.getSmartFilterString();
 		if (TextUtils.isNullOrEmpty(xml))
 			return;
