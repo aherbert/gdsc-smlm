@@ -3416,6 +3416,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		runTime = System.nanoTime();
 		boolean shutdown = false;
 		int slice = 0;
+		String format = String.format("Slice: %%d / %d (Results=%%d)", totalFrames);
 		while (!shutdown)
 		{
 			// Noise can optionally be estimated from the entire frame
@@ -3425,7 +3426,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 			if (++slice % step == 0)
 			{
-				if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+				if (Utils.showStatus(String.format(format, slice, results.size())))
 					IJ.showProgress(slice, totalFrames);
 			}
 
