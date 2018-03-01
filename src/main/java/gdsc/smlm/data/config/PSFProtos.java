@@ -1159,6 +1159,16 @@ public final class PSFProtos {
      * <code>double nm_per_pixel = 11;</code>
      */
     double getNmPerPixel();
+
+    /**
+     * <pre>
+     * The z-centre. This is assumed to be zero but can be used to store the results
+     * of curve fitting where the z-centre is a parameter.
+     * </pre>
+     *
+     * <code>double z0 = 12;</code>
+     */
+    double getZ0();
   }
   /**
    * <pre>
@@ -1194,6 +1204,7 @@ public final class PSFProtos {
       zDistanceUnit_ = 0;
       sDistanceUnit_ = 0;
       nmPerPixel_ = 0D;
+      z0_ = 0D;
     }
 
     @java.lang.Override
@@ -1276,6 +1287,11 @@ public final class PSFProtos {
             case 89: {
 
               nmPerPixel_ = input.readDouble();
+              break;
+            }
+            case 97: {
+
+              z0_ = input.readDouble();
               break;
             }
           }
@@ -1474,6 +1490,20 @@ public final class PSFProtos {
       return nmPerPixel_;
     }
 
+    public static final int Z0_FIELD_NUMBER = 12;
+    private double z0_;
+    /**
+     * <pre>
+     * The z-centre. This is assumed to be zero but can be used to store the results
+     * of curve fitting where the z-centre is a parameter.
+     * </pre>
+     *
+     * <code>double z0 = 12;</code>
+     */
+    public double getZ0() {
+      return z0_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1518,6 +1548,9 @@ public final class PSFProtos {
       }
       if (nmPerPixel_ != 0D) {
         output.writeDouble(11, nmPerPixel_);
+      }
+      if (z0_ != 0D) {
+        output.writeDouble(12, z0_);
       }
     }
 
@@ -1569,6 +1602,10 @@ public final class PSFProtos {
       if (nmPerPixel_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(11, nmPerPixel_);
+      }
+      if (z0_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(12, z0_);
       }
       memoizedSize = size;
       return size;
@@ -1624,6 +1661,10 @@ public final class PSFProtos {
           java.lang.Double.doubleToLongBits(getNmPerPixel())
           == java.lang.Double.doubleToLongBits(
               other.getNmPerPixel()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getZ0())
+          == java.lang.Double.doubleToLongBits(
+              other.getZ0()));
       return result;
     }
 
@@ -1665,6 +1706,9 @@ public final class PSFProtos {
       hash = (37 * hash) + NM_PER_PIXEL_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getNmPerPixel()));
+      hash = (37 * hash) + Z0_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getZ0()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1827,6 +1871,8 @@ public final class PSFProtos {
 
         nmPerPixel_ = 0D;
 
+        z0_ = 0D;
+
         return this;
       }
 
@@ -1860,6 +1906,7 @@ public final class PSFProtos {
         result.zDistanceUnit_ = zDistanceUnit_;
         result.sDistanceUnit_ = sDistanceUnit_;
         result.nmPerPixel_ = nmPerPixel_;
+        result.z0_ = z0_;
         onBuilt();
         return result;
       }
@@ -1933,6 +1980,9 @@ public final class PSFProtos {
         }
         if (other.getNmPerPixel() != 0D) {
           setNmPerPixel(other.getNmPerPixel());
+        }
+        if (other.getZ0() != 0D) {
+          setZ0(other.getZ0());
         }
         onChanged();
         return this;
@@ -2450,6 +2500,47 @@ public final class PSFProtos {
       public Builder clearNmPerPixel() {
         
         nmPerPixel_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double z0_ ;
+      /**
+       * <pre>
+       * The z-centre. This is assumed to be zero but can be used to store the results
+       * of curve fitting where the z-centre is a parameter.
+       * </pre>
+       *
+       * <code>double z0 = 12;</code>
+       */
+      public double getZ0() {
+        return z0_;
+      }
+      /**
+       * <pre>
+       * The z-centre. This is assumed to be zero but can be used to store the results
+       * of curve fitting where the z-centre is a parameter.
+       * </pre>
+       *
+       * <code>double z0 = 12;</code>
+       */
+      public Builder setZ0(double value) {
+        
+        z0_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The z-centre. This is assumed to be zero but can be used to store the results
+       * of curve fitting where the z-centre is a parameter.
+       * </pre>
+       *
+       * <code>double z0 = 12;</code>
+       */
+      public Builder clearZ0() {
+        
+        z0_ = 0D;
         onChanged();
         return this;
       }
@@ -8209,49 +8300,49 @@ public final class PSFProtos {
       "\n\tpsf.proto\022\025gdsc.smlm.data.config\032\nunit" +
       ".proto\"b\n\014PSFParameter\022\014\n\004name\030\001 \001(\t\0225\n\004" +
       "unit\030\002 \001(\0162\'.gdsc.smlm.data.config.PSFPa" +
-      "rameterUnit\022\r\n\005value\030\003 \001(\001\"\210\002\n\020Astigmati" +
+      "rameterUnit\022\r\n\005value\030\003 \001(\001\"\224\002\n\020Astigmati" +
       "smModel\022\r\n\005gamma\030\001 \001(\001\022\t\n\001d\030\002 \001(\001\022\n\n\002ax\030" +
       "\003 \001(\001\022\n\n\002bx\030\004 \001(\001\022\n\n\002ay\030\005 \001(\001\022\n\n\002by\030\006 \001(" +
       "\001\022\013\n\003s0x\030\007 \001(\001\022\013\n\003s0y\030\010 \001(\001\022<\n\017z_distanc" +
       "e_unit\030\t \001(\0162#.gdsc.smlm.data.config.Dis" +
       "tanceUnit\022<\n\017s_distance_unit\030\n \001(\0162#.gds" +
       "c.smlm.data.config.DistanceUnit\022\024\n\014nm_pe",
-      "r_pixel\030\013 \001(\001\"\372\001\n\030AstigmatismModelSettin" +
-      "gs\022s\n\033astigmatism_model_resources\030\001 \003(\0132" +
-      "N.gdsc.smlm.data.config.AstigmatismModel" +
-      "Settings.AstigmatismModelResourcesEntry\032" +
-      "i\n\036AstigmatismModelResourcesEntry\022\013\n\003key" +
-      "\030\001 \001(\t\0226\n\005value\030\002 \001(\0132\'.gdsc.smlm.data.c" +
-      "onfig.AstigmatismModel:\0028\001\"\204\001\n\003PSF\0220\n\010ps" +
-      "f_type\030\001 \001(\0162\036.gdsc.smlm.data.config.PSF" +
-      "Type\0227\n\nparameters\030\002 \003(\0132#.gdsc.smlm.dat" +
-      "a.config.PSFParameter\022\022\n\nmodel_name\030\003 \001(",
-      "\t\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002cy\030\003 \001(\001\"\231\003\n\010" +
-      "ImagePSF\022\023\n\013image_count\030\001 \001(\005\022\024\n\014centre_" +
-      "image\030\002 \001(\005\022\022\n\npixel_size\030\003 \001(\001\022\023\n\013pixel" +
-      "_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229\n\005notes\030\006 \003(" +
-      "\0132*.gdsc.smlm.data.config.ImagePSF.Notes" +
-      "Entry\022=\n\007offsets\030\007 \003(\0132,.gdsc.smlm.data." +
-      "config.ImagePSF.OffsetsEntry\022\020\n\010x_centre" +
-      "\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010z_centre\030\n \001" +
-      "(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002" +
-      " \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003key\030\001 \001(\005\022,\n",
-      "\005value\030\002 \001(\0132\035.gdsc.smlm.data.config.Off" +
-      "set:\0028\001\"=\n\023CubicSplineResource\022\020\n\010filena" +
-      "me\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001(\001\"\344\001\n\023Cubic" +
-      "SplineSettings\022d\n\026cubic_spline_resources" +
-      "\030\001 \003(\0132D.gdsc.smlm.data.config.CubicSpli" +
-      "neSettings.CubicSplineResourcesEntry\032g\n\031" +
-      "CubicSplineResourcesEntry\022\013\n\003key\030\001 \001(\t\0229" +
-      "\n\005value\030\002 \001(\0132*.gdsc.smlm.data.config.Cu" +
-      "bicSplineResource:\0028\001*\232\001\n\007PSFType\022\017\n\013PSF" +
-      "_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSSIAN_2D\020\001\022\030\n\024",
-      "TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TWO_AXIS_AND_T" +
-      "HETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGMATIC_GAUSSIA" +
-      "N_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFParameterUnit\022\031" +
-      "\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n\010DISTANCE\020\001\022" +
-      "\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B\tPSFProtosb\006" +
-      "proto3"
+      "r_pixel\030\013 \001(\001\022\n\n\002z0\030\014 \001(\001\"\372\001\n\030Astigmatis" +
+      "mModelSettings\022s\n\033astigmatism_model_reso" +
+      "urces\030\001 \003(\0132N.gdsc.smlm.data.config.Asti" +
+      "gmatismModelSettings.AstigmatismModelRes" +
+      "ourcesEntry\032i\n\036AstigmatismModelResources" +
+      "Entry\022\013\n\003key\030\001 \001(\t\0226\n\005value\030\002 \001(\0132\'.gdsc" +
+      ".smlm.data.config.AstigmatismModel:\0028\001\"\204" +
+      "\001\n\003PSF\0220\n\010psf_type\030\001 \001(\0162\036.gdsc.smlm.dat" +
+      "a.config.PSFType\0227\n\nparameters\030\002 \003(\0132#.g" +
+      "dsc.smlm.data.config.PSFParameter\022\022\n\nmod",
+      "el_name\030\003 \001(\t\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002c" +
+      "y\030\003 \001(\001\"\231\003\n\010ImagePSF\022\023\n\013image_count\030\001 \001(" +
+      "\005\022\024\n\014centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003 " +
+      "\001(\001\022\023\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229" +
+      "\n\005notes\030\006 \003(\0132*.gdsc.smlm.data.config.Im" +
+      "agePSF.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gds" +
+      "c.smlm.data.config.ImagePSF.OffsetsEntry" +
+      "\022\020\n\010x_centre\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010" +
+      "z_centre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(" +
+      "\t\022\r\n\005value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003",
+      "key\030\001 \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.dat" +
+      "a.config.Offset:\0028\001\"=\n\023CubicSplineResour" +
+      "ce\022\020\n\010filename\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001" +
+      "(\001\"\344\001\n\023CubicSplineSettings\022d\n\026cubic_spli" +
+      "ne_resources\030\001 \003(\0132D.gdsc.smlm.data.conf" +
+      "ig.CubicSplineSettings.CubicSplineResour" +
+      "cesEntry\032g\n\031CubicSplineResourcesEntry\022\013\n" +
+      "\003key\030\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.da" +
+      "ta.config.CubicSplineResource:\0028\001*\232\001\n\007PS" +
+      "FType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSS",
+      "IAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TW" +
+      "O_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGM" +
+      "ATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFPar" +
+      "ameterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n" +
+      "\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B" +
+      "\tPSFProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -8277,7 +8368,7 @@ public final class PSFProtos {
     internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor,
-        new java.lang.String[] { "Gamma", "D", "Ax", "Bx", "Ay", "By", "S0X", "S0Y", "ZDistanceUnit", "SDistanceUnit", "NmPerPixel", });
+        new java.lang.String[] { "Gamma", "D", "Ax", "Bx", "Ay", "By", "S0X", "S0Y", "ZDistanceUnit", "SDistanceUnit", "NmPerPixel", "Z0", });
     internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable = new

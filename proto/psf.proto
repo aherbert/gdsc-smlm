@@ -69,6 +69,9 @@ message AstigmatismModel
 	// light path is not recorded but the pixel size is stored. This can be used as 
 	// a quick validation of matching calibration, or to convert output width in pixels.
 	double nm_per_pixel = 11;
+	// The z-centre. This is assumed to be zero but can be used to store the results
+	// of curve fitting where the z-centre is a parameter.
+	double z0 = 12;
 }
 
 // Define the astigmatism model settings
