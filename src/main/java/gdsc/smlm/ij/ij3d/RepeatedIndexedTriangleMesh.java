@@ -158,9 +158,7 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			objectNormals = getNormals(objectVertices, objectFaces);
 
 		final Vector3f[] normals = new Vector3f[nVertices];
-		for (int i = 0; i < nVertices; i++)
-			normals[i] = new Vector3f();
-
+		
 		for (int i = 0, k = 0; i < points.length; i++)
 		{
 			for (int j = 0; j < objectNormals.length; j++)
