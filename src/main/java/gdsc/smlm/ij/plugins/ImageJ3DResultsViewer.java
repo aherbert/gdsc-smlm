@@ -3,6 +3,8 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -11,9 +13,16 @@ import java.util.List;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import org.scijava.java3d.BranchGroup;
+import org.scijava.java3d.Canvas3D;
 import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.IndexedGeometryArray;
+import org.scijava.java3d.PickInfo;
+import org.scijava.java3d.PickInfo.IntersectionInfo;
+import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Transform3D;
 import org.scijava.java3d.View;
+import org.scijava.java3d.utils.pickfast.PickCanvas;
 import org.scijava.vecmath.AxisAngle4d;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3d;
@@ -72,6 +81,7 @@ import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.Image3DMenubar;
 import ij3d.Image3DUniverse;
+import ij3d.ImageCanvas3D;
 import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
 import ij3d.UniverseListener;
@@ -276,6 +286,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return;
 		}
 
+		//		MemoryPeakResults results2 = results;
+		//		results = new MemoryPeakResults();
+		//		results.copySettings(results2);
+		//		results.add(results2.getFirst());
+		//		results.add(results2.getFirst().clone());
+		//		results.get(1).setZPosition(results.get(0).getZPosition() + 2);
+		//		results.add(results2.getFirst().clone());
+		//		results.get(2).setZPosition(results.get(0).getZPosition() - 2);
+
 		// Determine if the drawing mode is supported and compute the point size
 		final Point3f[] sphereSize = createSphereSize(results, settings);
 		if (sphereSize == null)
@@ -355,8 +374,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.addContent(content);
 		univ.setAutoAdjustView(auto);
 
-		// TODO - Capture a canvas mouse click/region and identify the coordinates.
-
 		IJ.showStatus("");
 	}
 
@@ -365,7 +382,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Special case for point rendering
 		if (settings.getRendering() == 0)
 		{
-			// XXX - change this to have its own size as it is always pixels
 			final float size = getFixedSize(settings.getPixelSize());
 			return new Point3f[] { new Point3f(size, size, size) };
 		}
@@ -477,6 +493,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Repeated indexed mesh creation is much faster as the normals are cached.
 		// There does not appear to be a difference in the speed the image responds
 		// to user interaction.
+
+		// TODO - When the indexed object is created the indices cannot be controlled
+		// and so the normals that are generated cannot be controlled.
+		// Make a RepeatedTriangleMesh object instead and so then the normals 
+		// will be controlled by the input order of the input object.
+
 		boolean indexed = true;
 		if (indexed)
 		{
@@ -639,7 +661,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			title2 = title + " " + (counter++);
 		}
 
-		Image3DUniverse univ = new Image3DUniverse();
+		final Image3DUniverse univ = new Image3DUniverse();
 		univ.show();
 		ImageWindow3D w = univ.getWindow();
 		GUI.center(w);
@@ -656,7 +678,128 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		univ.addUniverseListener(this);
 
+		// Capture a canvas mouse click/region and identify the coordinates.
+		final ImageCanvas3D canvas = (ImageCanvas3D) univ.getCanvas();
+		final BranchGroup scene = univ.getScene();
+		canvas.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(final MouseEvent e)
+			{
+				if (e.isConsumed())
+					return;
+				// This is expensive so require the user to hold down a modifier key
+				if (!(e.isControlDown() || e.isShiftDown() || e.isAltDown()))
+					return;
+				// This finds the vertex indices of the rendered object.
+				Pair<Content, IntersectionInfo> pair = getPickedContent(canvas, scene, e.getX(), e.getY());
+				if (pair == null)
+					return;
+
+				// Only process content added from localisations
+				Content c = pair.s;
+				if (!(c.getUserData() instanceof ResultsMetaData))
+					return;
+
+				ResultsMetaData data = (ResultsMetaData) c.getUserData();
+
+				MemoryPeakResults results = ResultsManager.loadInputResults(data.settings.getInputOption(), false, null,
+						null);
+				// Results must be the same size
+				if (results == null || results.size() != data.resultsSize)
+				{
+					IJ.error(TITLE, "Results are not the same size as when the mesh was constructed: " +
+							data.settings.getInputOption());
+					return;
+				}
+
+				// Look up the localisation from the clicked vertex
+				final ContentInstant content = c.getInstant(0);
+				CustomMeshNode node = (CustomMeshNode) content.getContent();
+				CustomMesh mesh = node.getMesh();
+				int nVertices;
+				GeometryArray ga = (GeometryArray) mesh.getGeometry();
+				if (ga instanceof IndexedGeometryArray)
+					// An indexed mesh has the correct number of vertex indices
+					nVertices = ((IndexedGeometryArray) ga).getValidIndexCount();
+				else
+					// Default to the number of vertices
+					nVertices = ga.getValidVertexCount();
+
+				int nPerLocalisation = nVertices / data.resultsSize;
+				
+				// Determine the localisation
+				int index = pair.r.getVertexIndices()[0] / nPerLocalisation;
+				//System.out.printf("n=%d [%d]  %s  %s\n", nPerLocalisation, index,
+				//		Arrays.toString(pair.r.getVertexIndices()), pair.r.getIntersectionPoint());
+
+				// TODO output the result to a table
+				// Have table settings in the settings.
+				// Allow it to be set in the GDSC SMLM menu.
+				// Just create a table and add to it.
+				PeakResult p = results.get(index);
+				System.out.printf("%f %f %f %f %f\n", p.getBackground(), p.getSignal(), p.getXPosition(),
+						p.getYPosition(), p.getZPosition());
+
+				//c.setSelected(false);
+				e.consume();
+			}
+
+			@Override
+			public void mousePressed(final MouseEvent e)
+			{
+			}
+
+			@Override
+			public void mouseReleased(final MouseEvent e)
+			{
+			}
+		});
+
 		return univ;
+	}
+
+	/**
+	 * Get the Content and closest intersection point at the specified canvas position
+	 * <p>
+	 * Adapted from Picker.getPickedContent(...).
+	 * 
+	 * @param x
+	 * @param y
+	 * @return the Content and closest intersection point
+	 */
+	private static Pair<Content, IntersectionInfo> getPickedContent(Canvas3D canvas, BranchGroup scene, final int x,
+			final int y)
+	{
+		final PickCanvas pickCanvas = new PickCanvas(canvas, scene);
+		pickCanvas.setMode(PickInfo.PICK_GEOMETRY);
+		pickCanvas.setFlags(PickInfo.SCENEGRAPHPATH |
+				//PickInfo.CLOSEST_INTERSECTION_POINT | 
+				PickInfo.CLOSEST_GEOM_INFO);
+		pickCanvas.setTolerance(3);
+		pickCanvas.setShapeLocation(x, y);
+		try
+		{
+			final PickInfo[] result = pickCanvas.pickAllSorted();
+			if (result == null)
+				return null;
+			for (int i = 0; i < result.length; i++)
+			{
+				final SceneGraphPath path = result[i].getSceneGraphPath();
+				Content c = null;
+				for (int j = path.nodeCount(); j-- > 0;)
+					if (path.getNode(j) instanceof Content)
+						c = (Content) path.getNode(j);
+				if (c == null)
+					continue;
+				return new Pair<Content, IntersectionInfo>(c, result[i].getIntersectionInfos()[0]);
+			}
+			return null;
+		}
+		catch (final Exception ex)
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -893,7 +1036,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	// Note: The triangles are rendered on both sides so the handedness 
-	// does not matter for the vertices to define the faces.
+	// does not matter for the vertices to define the faces. However 
+	// the handedness does matter for the vertices if using transparency.
+	// The orders below have been worked out by trial and error.
 
 	private static float sqrt(double d)
 	{
@@ -905,7 +1050,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	static final private int[][] triFaces = { { 0, 1, 2 } };
 
 	static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { 1, -1, 0 }, { -1, -1, 0 } };
-	static final private int[][] squareFaces = { { 0, 1, 2 }, { 1, 2, 3 } };
+	static final private int[][] squareFaces = { { 0, 1, 2 }, { 2, 1, 3 } };
 
 	// https://en.m.wikipedia.org/wiki/Tetrahedron
 	// based on alternated cube
@@ -936,6 +1081,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static List<Point3f> createSquare()
 	{
 		// Leave this to be unnormalised
+		int[][] squareFaces = { { 0, 1, 2 }, { 2, 1, 3 } };
+
 		return createSolid(squareVertices, squareFaces, false);
 	}
 
