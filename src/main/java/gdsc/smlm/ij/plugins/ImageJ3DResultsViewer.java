@@ -181,7 +181,41 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addChoice("Window", titles, lastWindow);
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
-		gd.addChoice("Rendering", RENDERING, settings.getRendering());
+		gd.addChoice("Rendering", RENDERING, settings.getRendering(), new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				settings.setRendering(value);
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Drawing mode options", null);
+				int rendering = settings.getRendering();
+				if (rendering == 0)
+				{
+					egd.addNumericField("Pixel_size", settings.getPixelSize(), 2, 6, "px");
+				}
+				else
+				{
+					// Other modes do not require options
+					return false;
+				}
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				settings.setPixelSize(egd.getNextNumber());
+				return true;
+			}
+		});
+		gd.addMessage("3D options");
 		gd.addCheckbox("Shaded", settings.getShaded());
 		gd.addChoice("Drawing_mode", SettingsManager.getImage3DDrawingModeNames(), settings.getDrawingModeValue(),
 				new OptionListener<Integer>()
@@ -214,10 +248,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
-						if (mode == Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE)
-						{
-							settings.setSize(egd.getNextNumber());
-						}
+						settings.setSize(egd.getNextNumber());
 						return true;
 					}
 				});
@@ -335,7 +366,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (settings.getRendering() == 0)
 		{
 			// XXX - change this to have its own size as it is always pixels
-			final float size = getFixedSize(settings.getSize());
+			final float size = getFixedSize(settings.getPixelSize());
 			return new Point3f[] { new Point3f(size, size, size) };
 		}
 
