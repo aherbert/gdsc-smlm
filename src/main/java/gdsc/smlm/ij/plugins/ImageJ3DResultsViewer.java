@@ -16,24 +16,17 @@ import org.scijava.java3d.Transform3D;
 import org.scijava.java3d.View;
 import org.scijava.vecmath.AxisAngle4d;
 import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
-import customnode.CustomIndexedTriangleMesh;
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
 import customnode.CustomPointMesh;
-import customnode.CustomQuadMesh;
-import customnode.CustomTransparentTriangleMesh;
 import customnode.CustomTriangleMesh;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
-import gdsc.core.ij.IJTrackProgress;
-import gdsc.core.logging.Ticker;
 import gdsc.core.utils.Maths;
-import gdsc.core.utils.SimpleArrayUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -64,7 +57,6 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
-import gdsc.smlm.results.procedures.XYZRResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -95,8 +87,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	//@formatter:off
 	private final static String[] RENDERING = {
-		// Add support for pixels
-		//"Point",
+		"Point",
 		"Triangle",
 		"Square",
 		"Tetrahedron",
@@ -301,91 +292,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		//				return;
 		//		}
 
-		CustomMesh mesh = null;
-		
-		// Support drawing as square pixels ...
-		
-
-		// Repeated indexed mesh creation is much faster as the normals are cached.
-		// There does not appear to be a difference in the speed the image responds
-		// to user interaction.
-		
-		boolean indexed = true;
-		if (indexed)
-		{
-			Pair<Point3f[], int[]> pair = createIndexedObject(settings.getRendering());
-			Point3f[] objectVertices = pair.s;
-			int[] objectFaces = pair.r;
-			long size = (long) results.size() * objectVertices.length;
-			long size2 = (long) results.size() * objectFaces.length;
-			if (size > 10000000L)
-			{
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-				egd.addMessage("The results will generate a large mesh of " + size + " vertices and " + size2 +
-						" faces.\nThis may take a long time to render and may run out of memory.");
-				egd.setOKLabel("Continue");
-				egd.showDialog();
-				if (egd.wasCanceled())
-					return;
-			}
-			final TurboList<Point3f> points = new TurboList<Point3f>(results.size());
-			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
-			{
-				public void executeXYZ(float x, float y, float z)
-				{
-					points.add(new Point3f(x, y, z));
-				}
-			});
-			mesh = new RepeatedIndexedTriangleMesh(objectVertices, objectFaces,
-					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
-		}
-		else
-		{
-			// Old method:		
-			// Adapted from Image3DUniverse.addIcospheres:
-			// We create a grainy unit sphere an the origin. 
-			// This is then scaled and translated for each localisation.
-			final List<Point3f> point = createLocalisationObject(settings.getRendering());
-			final List<Point3f> allPoints = new TurboList<Point3f>();
-
-			final int singlePointSize = point.size();
-			long size = (long) results.size() * singlePointSize;
-			if (size > 10000000L)
-			{
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-				egd.addMessage("The results will generate a large mesh of " + size +
-						" vertices.\nThis may take a long time to render and may run out of memory.");
-				egd.setOKLabel("Continue");
-				egd.showDialog();
-				if (egd.wasCanceled())
-					return;
-			}
-
-			IJ.showStatus("Creating 3D objects ...");
-			//final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
-			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
-			{
-				int i = 0; // For the sphere size array
-
-				public void executeXYZ(float x, float y, float z)
-				{
-					// Note sure what the limits are for the graphics library.
-					// Assume it can support a max array.
-					allPoints.addAll(
-							copyScaledTranslated(point, sphereSize[i].x, sphereSize[i].y, sphereSize[i].z, x, y, z));
-					i++;
-					//ticker.tick();
-				}
-			});
-			//ticker.stop();
-
-			IJ.showStatus("Creating 3D mesh ...");
-
-			//mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
-			// This avoids computing the volume
-			mesh = new CustomTriangleMesh(null, null, transparency);
-			((CustomTriangleMesh) mesh).setMesh(allPoints);
-		}
+		CustomMesh mesh = createMesh(settings, results, sphereSize, transparency);
+		if (mesh == null)
+			return;
 
 		ResultsMetaData data = new ResultsMetaData(settings.build(), results.size());
 
@@ -422,11 +331,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static Point3f[] createSphereSize(MemoryPeakResults results, Builder settings)
 	{
+		// Special case for point rendering
+		if (settings.getRendering() == 0)
+		{
+			// XXX - change this to have its own size as it is always pixels
+			final float size = getFixedSize(settings.getSize());
+			return new Point3f[] { new Point3f(size, size, size) };
+		}
+
 		// Store XYZ size for each localisation
 		switch (settings.getDrawingMode())
 		{
 			case DRAW_3D_FIXED_SIZE:
-				final float size = (settings.getSize() > 0) ? (float) settings.getSize() : 1f;
+				final float size = getFixedSize(settings.getSize());
 				Point3f[] sizes = new Point3f[results.size()];
 				Arrays.fill(sizes, new Point3f(size, size, size));
 				return sizes;
@@ -439,6 +356,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				break;
 		}
 		return null;
+	}
+
+	private static float getFixedSize(double size)
+	{
+		return (size > 0) ? (float) size : 1f;
 	}
 
 	private static Point3f[] createSphereSizeFromDeviations(MemoryPeakResults results)
@@ -507,6 +429,98 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (transparency == 1)
 			transparency = 0;
 		return transparency;
+	}
+
+	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettings.Builder settings,
+			MemoryPeakResults results, final Point3f[] sphereSize, float transparency)
+	{
+		// Support drawing as square pixels ...
+		if (settings.getRendering() == 0)
+		{
+			final TurboList<Point3f> points = getPoints(results);
+			CustomPointMesh mesh = new CustomPointMesh(points, null, transparency);
+			mesh.setPointSize(sphereSize[0].x);
+			return mesh;
+		}
+
+		// Repeated indexed mesh creation is much faster as the normals are cached.
+		// There does not appear to be a difference in the speed the image responds
+		// to user interaction.
+		boolean indexed = true;
+		if (indexed)
+		{
+			Pair<Point3f[], int[]> pair = createIndexedObject(settings.getRendering());
+			Point3f[] objectVertices = pair.s;
+			int[] objectFaces = pair.r;
+			long size = (long) results.size() * objectVertices.length;
+			long size2 = (long) results.size() * objectFaces.length;
+			if (size > 10000000L)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				egd.addMessage("The results will generate a large mesh of " + size + " vertices and " + size2 +
+						" faces.\nThis may take a long time to render and may run out of memory.");
+				egd.setOKLabel("Continue");
+				egd.showDialog();
+				if (egd.wasCanceled())
+					return null;
+			}
+			final TurboList<Point3f> points = getPoints(results);
+
+			IJ.showStatus("Creating 3D mesh ...");
+			return new RepeatedIndexedTriangleMesh(objectVertices, objectFaces,
+					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
+		}
+
+		// Old method:		
+		// Adapted from Image3DUniverse.addIcospheres:
+		// We create a grainy unit sphere an the origin. 
+		// This is then scaled and translated for each localisation.
+		final List<Point3f> point = createLocalisationObject(settings.getRendering());
+		final List<Point3f> allPoints = new TurboList<Point3f>();
+
+		final int singlePointSize = point.size();
+		long size = (long) results.size() * singlePointSize;
+		if (size > 10000000L)
+		{
+			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			egd.addMessage("The results will generate a large mesh of " + size +
+					" vertices.\nThis may take a long time to render and may run out of memory.");
+			egd.setOKLabel("Continue");
+			egd.showDialog();
+			if (egd.wasCanceled())
+				return null;
+		}
+
+		IJ.showStatus("Creating 3D objects ...");
+		final TurboList<Point3f> points = getPoints(results);
+		for (int i = 0; i < sphereSize.length; i++)
+		{
+			final Point3f p = points.getf(i);
+			allPoints.addAll(
+					copyScaledTranslated(point, sphereSize[i].x, sphereSize[i].y, sphereSize[i].z, p.x, p.y, p.z));
+		}
+
+		IJ.showStatus("Creating 3D mesh ...");
+
+		//mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
+		// This avoids computing the volume
+		CustomTriangleMesh mesh = new CustomTriangleMesh(null, null, transparency);
+		mesh.setMesh(allPoints);
+
+		return mesh;
+	}
+
+	private static TurboList<Point3f> getPoints(MemoryPeakResults results)
+	{
+		final TurboList<Point3f> points = new TurboList<Point3f>(results.size());
+		results.forEach(DistanceUnit.NM, new XYZResultProcedure()
+		{
+			public void executeXYZ(float x, float y, float z)
+			{
+				points.addf(new Point3f(x, y, z));
+			}
+		});
+		return points;
 	}
 
 	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
@@ -833,17 +847,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		switch (rendering)
 		{
-			case 0:
-				return createTriangle();
 			case 1:
-				return createSquare();
+				return createTriangle();
 			case 2:
-				return createTetrahedron();
+				return createSquare();
 			case 3:
+				return createTetrahedron();
+			case 4:
 				return createOctahedron();
 		}
 		// All spheres based on icosahedron for speed
-		final int subdivisions = rendering - 4;
+		final int subdivisions = rendering - 5;
 		return customnode.MeshMaker.createIcosahedron(subdivisions, 1);
 	}
 
