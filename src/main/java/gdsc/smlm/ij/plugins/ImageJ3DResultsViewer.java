@@ -21,8 +21,13 @@ import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
+import customnode.CustomIndexedTriangleMesh;
+import customnode.CustomMesh;
 import customnode.CustomMeshNode;
+import customnode.CustomPointMesh;
+import customnode.CustomQuadMesh;
 import customnode.CustomTransparentTriangleMesh;
+import customnode.CustomTriangleMesh;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
@@ -51,6 +56,7 @@ import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.ij.ij3d.RepeatedIndexedTriangleMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -59,6 +65,9 @@ import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYZRResultProcedure;
+import gdsc.smlm.results.procedures.XYZResultProcedure;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
@@ -85,45 +94,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private final static String TITLE = "ImageJ 3D Results Viewer";
 
 	//@formatter:off
-	private final static String[] RENDERING = { 
-		"Triangle (F=1)",
-		"Square (F=2)",
-		"Tetrahedron (F=4)",
-		"Octahedron (F=8)",
-		"Icosahedron (F=20)",
-		"Low Resolution Sphere (F=80)",
-		"High Resolution Sphere (F=320)",
+	private final static String[] RENDERING = {
+		// Add support for pixels
+		//"Point",
+		"Triangle",
+		"Square",
+		"Tetrahedron",
+		"Octahedron",
+		"Icosahedron",
+		"Low Resolution Sphere",
+		"High Resolution Sphere",
 	};
-
-	/**
-	 * Gets the number of vertices for each rendering shape.
-	 *
-	 * @param rendering
-	 *            the rendering
-	 * @return the number of vertices
-	 */
-	private static int getNumberOfVertices(int rendering)
-	{
-		// This is just the F number (faces) multiplied by 3
-		switch (rendering)
-		{
-			case 0:	return 3;
-			case 1:	return 6;
-			case 2:	return 12;
-			case 3:	return 24;
-			case 4:	return 60;
-			case 5:	return 240;
-			case 6:	return 960;
-			default:
-				throw new IllegalStateException("Unknown rendering");
-		}
-	}
 	//@formatter:on
-
-	// Prevent processing massive mesh objects. 
-	// Arrays are used to store vertices that may be 2x larger than the number 
-	// of mesh coords input so we could use 1<<30. Make it lower just in case.
-	private final static int MAX_SIZE = 1 << 28;
 
 	// To debug this from Eclipse relies on being able to find the native 
 	// runtime libraries for Open GL. See the README in the eclipse project folder.
@@ -145,7 +127,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ResultsMetaData
 	{
-		final ImageJ3DResultsViewerSettings settings;
+		ImageJ3DResultsViewerSettings settings;
+
+		/** The results size when the object mesh was constructed. */
 		final int resultsSize;
 
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, int resultsSize)
@@ -271,9 +255,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		// Determine if the drawing mode is supported and compute the point size
-		final float[] sphereSize = createSphereSize(results, settings);
+		final Point3f[] sphereSize = createSphereSize(results, settings);
 		if (sphereSize == null)
 			return;
+
+		float transparency = getTransparency(settings);
 
 		// Create a 3D viewer.
 		if (windowChoice == 0)
@@ -281,57 +267,125 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else
 			univ = univList.get(windowChoice - 1); // Ignore the new window
 
-		// Adapted from Image3DUniverse.addIcospheres:
-		// We create a grainy unit sphere an the origin. 
-		// This is then scaled and translated for each localisation.
-		final List<Point3f> point = createLocalisationObject(settings.getRendering());
-		final List<Point3f> allPoints = new TurboList<Point3f>();
+		//		{
+		//			// Testing what mesh to use
+		//			//@formatter:off
+        //			CustomPointMesh m1 = new CustomPointMesh(Arrays.asList(new Point3f(-2, -2, -2)));
+        //			m1.setPointSize(10);
+        //			CustomIndexedTriangleMesh m2 = new CustomIndexedTriangleMesh(
+        //					new Point3f[] { 
+        //							new Point3f(0, 0, 0), 
+        //							new Point3f(1, 0, 0), 
+        //							new Point3f(0, 1, 0) },
+        //					new int[] { 0, 1, 2 });
+        //			CustomQuadMesh m3 = new CustomQuadMesh(Arrays.asList(
+        //					new Point3f(2, 2, 2), 
+        //					new Point3f(3, 2, 2), 
+        //					new Point3f(3, 3, 2),
+        //					new Point3f(2, 3, 2)
+        //					));
+        //			RepeatedIndexedTriangleMesh m4 = new RepeatedIndexedTriangleMesh(
+        //					new Point3f[] {
+        //							new Point3f(-1, -1, 0), 
+        //							new Point3f(1, -1, 0), 
+        //							new Point3f(1, 1, 0),
+        //							new Point3f(-1, 1, 0)
+        //					}, new int[] {0,1,2,0,2,3}, 
+        //					new Point3f[]{new Point3f(5, 5, 0)}, null, null, 0);
+        //			//@formatter:on
+		//			univ.addContent(univ.createContent(m1, "m1"));
+		//			univ.addContent(univ.createContent(m2, "m2"));
+		//			univ.addContent(univ.createContent(m3, "m3"));
+		//			univ.addContent(univ.createContent(m4, "m4"));
+		//			if (true)
+		//				return;
+		//		}
 
-		final int singlePointSize = point.size();
-		long size = (long) results.size() * singlePointSize;
-		if (size > 10000000L)
+		CustomMesh mesh = null;
+		
+		// Support drawing as square pixels ...
+		
+
+		// Repeated indexed mesh creation is much faster as the normals are cached.
+		// There does not appear to be a difference in the speed the image responds
+		// to user interaction.
+		
+		boolean indexed = true;
+		if (indexed)
 		{
-			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-			egd.addMessage("The results will generate a large mesh of " + size +
-					" vertices.\nThis may take a long time to render and may run out of memory.");
-			egd.setOKLabel("Continue");
-			egd.showDialog();
-			if (egd.wasCanceled())
-				return;
-		}
-
-		IJ.showStatus("Creating 3D objects ...");
-		final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
-		results.forEach(DistanceUnit.NM, new XYZRResultProcedure()
-		{
-			int i = 0; // For the sphere size array
-
-			//int MAX_SIZE = 1; // For debugging
-			public void executeXYZR(float x, float y, float z, PeakResult result)
+			Pair<Point3f[], int[]> pair = createIndexedObject(settings.getRendering());
+			Point3f[] objectVertices = pair.s;
+			int[] objectFaces = pair.r;
+			long size = (long) results.size() * objectVertices.length;
+			long size2 = (long) results.size() * objectFaces.length;
+			if (size > 10000000L)
 			{
-				// Note sure what the limits are for the graphics library.
-				// Assume it can support a max array.
-				if (allPoints.size() > MAX_SIZE)
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				egd.addMessage("The results will generate a large mesh of " + size + " vertices and " + size2 +
+						" faces.\nThis may take a long time to render and may run out of memory.");
+				egd.setOKLabel("Continue");
+				egd.showDialog();
+				if (egd.wasCanceled())
 					return;
-				allPoints.addAll(
-						copyScaledTranslated(point, sphereSize[i], sphereSize[i + 1], sphereSize[i + 2], x, y, z));
-				i += 3;
-				ticker.tick();
 			}
-		});
-		ticker.stop();
+			final TurboList<Point3f> points = new TurboList<Point3f>(results.size());
+			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
+			{
+				public void executeXYZ(float x, float y, float z)
+				{
+					points.add(new Point3f(x, y, z));
+				}
+			});
+			mesh = new RepeatedIndexedTriangleMesh(objectVertices, objectFaces,
+					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
+		}
+		else
+		{
+			// Old method:		
+			// Adapted from Image3DUniverse.addIcospheres:
+			// We create a grainy unit sphere an the origin. 
+			// This is then scaled and translated for each localisation.
+			final List<Point3f> point = createLocalisationObject(settings.getRendering());
+			final List<Point3f> allPoints = new TurboList<Point3f>();
 
-		IJ.showStatus("Creating 3D mesh ...");
+			final int singlePointSize = point.size();
+			long size = (long) results.size() * singlePointSize;
+			if (size > 10000000L)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				egd.addMessage("The results will generate a large mesh of " + size +
+						" vertices.\nThis may take a long time to render and may run out of memory.");
+				egd.setOKLabel("Continue");
+				egd.showDialog();
+				if (egd.wasCanceled())
+					return;
+			}
 
-		// Default color
-		final Color3f color = new Color3f(1, 1, 1);
+			IJ.showStatus("Creating 3D objects ...");
+			//final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
+			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
+			{
+				int i = 0; // For the sphere size array
 
-		float transparency = getTransparency(settings);
-		CustomTransparentTriangleMesh mesh;
-		//mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
-		// This avoids computing the volume
-		mesh = new CustomTransparentTriangleMesh(null, color, transparency);
-		mesh.setMesh(allPoints);
+				public void executeXYZ(float x, float y, float z)
+				{
+					// Note sure what the limits are for the graphics library.
+					// Assume it can support a max array.
+					allPoints.addAll(
+							copyScaledTranslated(point, sphereSize[i].x, sphereSize[i].y, sphereSize[i].z, x, y, z));
+					i++;
+					//ticker.tick();
+				}
+			});
+			//ticker.stop();
+
+			IJ.showStatus("Creating 3D mesh ...");
+
+			//mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
+			// This avoids computing the volume
+			mesh = new CustomTriangleMesh(null, null, transparency);
+			((CustomTriangleMesh) mesh).setMesh(allPoints);
+		}
 
 		ResultsMetaData data = new ResultsMetaData(settings.build(), results.size());
 
@@ -361,17 +415,21 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.addContent(content);
 		univ.setAutoAdjustView(auto);
 
+		// TODO - Capture a canvas mouse click/region and identify the coordinates.
+
 		IJ.showStatus("");
 	}
 
-	private float[] createSphereSize(MemoryPeakResults results, Builder settings)
+	private static Point3f[] createSphereSize(MemoryPeakResults results, Builder settings)
 	{
 		// Store XYZ size for each localisation
 		switch (settings.getDrawingMode())
 		{
 			case DRAW_3D_FIXED_SIZE:
 				final float size = (settings.getSize() > 0) ? (float) settings.getSize() : 1f;
-				return SimpleArrayUtils.newFloatArray(results.size() * 3, size);
+				Point3f[] sizes = new Point3f[results.size()];
+				Arrays.fill(sizes, new Point3f(size, size, size));
+				return sizes;
 			case DRAW_3D_XYZ_DEVIATIONS:
 				return createSphereSizeFromDeviations(results);
 			case DRAW_3D_XY_PRECISION:
@@ -383,7 +441,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return null;
 	}
 
-	private float[] createSphereSizeFromDeviations(MemoryPeakResults results)
+	private static Point3f[] createSphereSizeFromDeviations(MemoryPeakResults results)
 	{
 		if (!results.hasDeviations())
 		{
@@ -393,7 +451,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Currently the rendering is in nm
 		final TypeConverter<DistanceUnit> dc = results.getDistanceConverter(DistanceUnit.NM);
 
-		final float[] size = new float[results.size() * 3];
+		final Point3f[] size = new Point3f[results.size()];
 		boolean failed = results.forEach(new PeakResultProcedureX()
 		{
 			int i = 0;
@@ -412,30 +470,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					z = (float) Math.sqrt((x * x + y * y) / 2); // Mean variance
 					//z = (x + y) / 2; // Mean Std Dev
 				}
-				size[i++] = dc.convert(x);
-				size[i++] = dc.convert(y);
-				size[i++] = dc.convert(z);
+				size[i++] = new Point3f(dc.convert(x), dc.convert(y), dc.convert(z));
 				return false;
 			}
 		});
 		return (failed) ? null : size;
 	}
 
-	private float[] createSphereSizeFromPrecision(MemoryPeakResults results)
+	private static Point3f[] createSphereSizeFromPrecision(MemoryPeakResults results)
 	{
 		PrecisionResultProcedure p = new PrecisionResultProcedure(results);
 		try
 		{
 			PrecisionMethod m = p.getPrecision();
 			IJ.log("Using precision method " + FitProtosHelper.getName(m));
-			final float[] size = new float[results.size() * 3];
+			final Point3f[] size = new Point3f[results.size()];
 			for (int i = 0, j = 0; i < p.precision.length; i++)
 			{
 				// Precision is in NM which matches the rendering
 				final float v = (float) p.precision[i];
-				size[j++] = v;
-				size[j++] = v;
-				size[j++] = v;
+				size[j++] = new Point3f(v, v, v);
 			}
 			return size;
 		}
@@ -455,16 +509,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return transparency;
 	}
 
-	private static void changeColour(CustomTransparentTriangleMesh mesh, MemoryPeakResults results,
+	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		// Colour by z
 		if (results.is3D())
 		{
-			final GeometryArray ga = (GeometryArray) mesh.getGeometry();
-			final int N = ga.getValidVertexCount();
+			GeometryArray ga = (GeometryArray) mesh.getGeometry();
 
-			Color4f[] allColors = new Color4f[N];
+			final int vertices = ga.getValidVertexCount();
+
+			Color3f[] allColors = new Color3f[vertices];
 			StandardResultProcedure p = new StandardResultProcedure(results);
 			p.getZ();
 			float[] limits = Maths.limits(p.z);
@@ -472,17 +527,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final float scale = 255f / (maximum - minimum);
 			LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
 			// Create 256 Colors
-			Color4f[] colors = new Color4f[256];
-			final float w = 1 - getTransparency(settings);
+			Color3f[] colors = new Color3f[256];
 			for (int i = 0; i < 256; i++)
 			{
 				Color c = new Color(lut.getRGB(i));
-				colors[i] = new Color4f(c);
-				colors[i].setW(w);
+				colors[i] = new Color3f(c);
 			}
 
-			int vertices = getNumberOfVertices(settings.getRendering());
-			for (int i = 0, j = 0, localisations = N / vertices; i < localisations; i++)
+			final int verticesPerLocalisation = vertices / results.size();
+			for (int i = 0, j = 0, size = results.size(); i < size; i++)
 			{
 				float value = p.z[i];
 				value = value - minimum;
@@ -491,10 +544,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				int ivalue = (int) ((value * scale) + 0.5f);
 				if (ivalue > 255)
 					ivalue = 255;
-				for (int k = vertices; k-- > 0;)
+				for (int k = verticesPerLocalisation; k-- > 0;)
 					allColors[j++] = colors[ivalue];
 			}
-			mesh.setTransparentColor(Arrays.asList(allColors));
+			mesh.setColor(Arrays.asList(allColors));
+			mesh.setTransparency(getTransparency(settings));
 		}
 	}
 
@@ -646,10 +700,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return 1;
 			}
 
-			final ContentInstant content = c.getInstant(0);
-			CustomMeshNode node = (CustomMeshNode) content.getContent();
-			CustomTransparentTriangleMesh mesh = (CustomTransparentTriangleMesh) node.getMesh();
-
 			// Change the colour
 			if (settings == null)
 			{
@@ -666,8 +716,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				SettingsManager.writeSettings(settings);
 			}
 
-			// Restore original object rendering
-			settings.setRendering(data.settings.getRendering());
+			final ContentInstant content = c.getInstant(0);
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomMesh mesh = node.getMesh();
 			changeColour(mesh, results, settings);
 			return 0;
 		}
@@ -829,7 +880,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	private static List<Point3f> createTriangle()
 	{
-		return createSolid(triVertices, triFaces);
+		return createSolid(triVertices, triFaces, true);
 	}
 
 	/**
@@ -839,7 +890,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	private static List<Point3f> createSquare()
 	{
-		return createSolid(squareVertices, squareFaces);
+		// Leave this to be unnormalised
+		return createSolid(squareVertices, squareFaces, false);
 	}
 
 	/**
@@ -849,7 +901,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	private static List<Point3f> createTetrahedron()
 	{
-		return createSolid(tetraVertices, tetraFaces);
+		return createSolid(tetraVertices, tetraFaces, true);
 	}
 
 	/**
@@ -859,7 +911,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	private static List<Point3f> createOctahedron()
 	{
-		return createSolid(octaVertices, octaFaces);
+		// This is already normalised
+		return createSolid(octaVertices, octaFaces, false);
 	}
 
 	/**
@@ -869,9 +922,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 *            the vertices
 	 * @param faces
 	 *            the faces
+	 * @param normalise
+	 *            the normalise
 	 * @return the list of vertices for the triangles
 	 */
-	private static List<Point3f> createSolid(float[][] vertices, int[][] faces)
+	private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise)
 	{
 		List<Point3f> ps = new ArrayList<Point3f>();
 		for (int i = 0; i < faces.length; i++)
@@ -882,14 +937,60 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 		}
 		// Project all vertices to the surface of a sphere of radius 1
-		final Vector3f v = new Vector3f();
-		for (final Point3f p : ps)
+		if (normalise)
 		{
-			v.set(p);
-			v.normalize();
-			p.set(v);
+			final Vector3f v = new Vector3f();
+			for (final Point3f p : ps)
+			{
+				v.set(p);
+				v.normalize();
+				p.set(v);
+			}
 		}
 		return ps;
+	}
+
+	/**
+	 * Creates the object used to draw a single localisation.
+	 * 
+	 * @param rendering
+	 *
+	 * @return the vertices and faces of the the object
+	 */
+	private static Pair<Point3f[], int[]> createIndexedObject(int rendering)
+	{
+		List<Point3f> list = createLocalisationObject(rendering);
+
+		// Compact the vertices to a set of vertices and faces
+		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<Point3f>(list.size(), 0.5f, -1);
+		TurboList<Point3f> vertices = new TurboList<Point3f>(list.size());
+		TIntArrayList faces = new TIntArrayList(list.size());
+		int index = 0;
+		// Process triangles
+		for (int i = 0; i < list.size(); i += 3)
+		{
+			index = addFace(m, vertices, faces, list.get(i), index);
+			index = addFace(m, vertices, faces, list.get(i + 1), index);
+			index = addFace(m, vertices, faces, list.get(i + 2), index);
+		}
+
+		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+	}
+
+	private static int addFace(TObjectIntHashMap<Point3f> m, TurboList<Point3f> vertices, TIntArrayList faces,
+			Point3f p, int index)
+	{
+		// Add the point if it is not in the set of vertices.
+		// Get the index associated with the vertex.
+		int value = m.putIfAbsent(p, index);
+		if (value == -1)
+		{
+			// Store the points in order
+			vertices.add(p);
+			value = index++;
+		}
+		faces.add(value);
+		return index;
 	}
 
 	/**
