@@ -37071,6 +37071,11 @@ public final class GUIProtos {
      * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
      */
     gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode();
+
+    /**
+     * <code>double pixel_size = 9;</code>
+     */
+    double getPixelSize();
   }
   /**
    * <pre>
@@ -37096,6 +37101,7 @@ public final class GUIProtos {
       shaded_ = false;
       newWindow_ = false;
       drawingMode_ = 0;
+      pixelSize_ = 0D;
     }
 
     @java.lang.Override
@@ -37163,6 +37169,11 @@ public final class GUIProtos {
               int rawValue = input.readEnum();
 
               drawingMode_ = rawValue;
+              break;
+            }
+            case 73: {
+
+              pixelSize_ = input.readDouble();
               break;
             }
           }
@@ -37292,6 +37303,15 @@ public final class GUIProtos {
       return result == null ? gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.UNRECOGNIZED : result;
     }
 
+    public static final int PIXEL_SIZE_FIELD_NUMBER = 9;
+    private double pixelSize_;
+    /**
+     * <code>double pixel_size = 9;</code>
+     */
+    public double getPixelSize() {
+      return pixelSize_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37327,6 +37347,9 @@ public final class GUIProtos {
       }
       if (drawingMode_ != gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.DRAW_3D_FIXED_SIZE.getNumber()) {
         output.writeEnum(8, drawingMode_);
+      }
+      if (pixelSize_ != 0D) {
+        output.writeDouble(9, pixelSize_);
       }
     }
 
@@ -37366,6 +37389,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(8, drawingMode_);
       }
+      if (pixelSize_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(9, pixelSize_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -37401,6 +37428,10 @@ public final class GUIProtos {
       result = result && (getNewWindow()
           == other.getNewWindow());
       result = result && drawingMode_ == other.drawingMode_;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPixelSize())
+          == java.lang.Double.doubleToLongBits(
+              other.getPixelSize()));
       return result;
     }
 
@@ -37431,6 +37462,9 @@ public final class GUIProtos {
           getNewWindow());
       hash = (37 * hash) + DRAWING_MODE_FIELD_NUMBER;
       hash = (53 * hash) + drawingMode_;
+      hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPixelSize()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37580,6 +37614,8 @@ public final class GUIProtos {
 
         drawingMode_ = 0;
 
+        pixelSize_ = 0D;
+
         return this;
       }
 
@@ -37610,6 +37646,7 @@ public final class GUIProtos {
         result.shaded_ = shaded_;
         result.newWindow_ = newWindow_;
         result.drawingMode_ = drawingMode_;
+        result.pixelSize_ = pixelSize_;
         onBuilt();
         return result;
       }
@@ -37675,6 +37712,9 @@ public final class GUIProtos {
         }
         if (other.drawingMode_ != 0) {
           setDrawingModeValue(other.getDrawingModeValue());
+        }
+        if (other.getPixelSize() != 0D) {
+          setPixelSize(other.getPixelSize());
         }
         onChanged();
         return this;
@@ -37967,6 +38007,32 @@ public final class GUIProtos {
       public Builder clearDrawingMode() {
         
         drawingMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double pixelSize_ ;
+      /**
+       * <code>double pixel_size = 9;</code>
+       */
+      public double getPixelSize() {
+        return pixelSize_;
+      }
+      /**
+       * <code>double pixel_size = 9;</code>
+       */
+      public Builder setPixelSize(double value) {
+        
+        pixelSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double pixel_size = 9;</code>
+       */
+      public Builder clearPixelSize() {
+        
+        pixelSize_ = 0D;
         onChanged();
         return this;
       }
@@ -38366,18 +38432,18 @@ public final class GUIProtos {
       " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n" +
       "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
       "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
-      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\335\001\n\035ImageJ3DR" +
+      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\361\001\n\035ImageJ3DR" +
       "esultsViewerSettings\022\024\n\014input_option\030\001 \001",
       "(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013" +
       "\n\003lut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded" +
       "\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010\022?\n\014drawing_mod" +
       "e\030\010 \001(\0162).gdsc.smlm.data.config.Image3DD" +
-      "rawingMode*O\n\014TemplateType\022\023\n\017INLINE_TEM" +
-      "PLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM" +
-      "_TEMPLATE\020\002*b\n\022Image3DDrawingMode\022\026\n\022DRA" +
-      "W_3D_FIXED_SIZE\020\000\022\030\n\024DRAW_3D_XY_PRECISIO" +
-      "N\020\001\022\032\n\026DRAW_3D_XYZ_DEVIATIONS\020\002B\013B\tGUIPr" +
-      "otosb\006proto3"
+      "rawingMode\022\022\n\npixel_size\030\t \001(\001*O\n\014Templa" +
+      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
+      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002*b\n\022Image" +
+      "3DDrawingMode\022\026\n\022DRAW_3D_FIXED_SIZE\020\000\022\030\n" +
+      "\024DRAW_3D_XY_PRECISION\020\001\022\032\n\026DRAW_3D_XYZ_D" +
+      "EVIATIONS\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -38514,7 +38580,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", "PixelSize", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

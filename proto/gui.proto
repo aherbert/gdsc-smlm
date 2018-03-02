@@ -584,4 +584,5 @@ message ImageJ3DResultsViewerSettings {
 	bool shaded = 6;
 	bool newWindow = 7;
 	Image3DDrawingMode drawing_mode = 8;
+	double pixel_size = 9;
 }

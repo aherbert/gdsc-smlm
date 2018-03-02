@@ -380,12 +380,13 @@ public class GUIProtosHelper
 	static
 	{
 		ImageJ3DResultsViewerSettings.Builder builder = ImageJ3DResultsViewerSettings.newBuilder();
-		builder.setSize(5);
+		builder.setSize(10); // NM units
 		builder.setTransparency(0.5);
 		builder.setLut(LutColour.FIRE.ordinal());
-		builder.setRendering(3); // Octahedron
+		builder.setRendering(4); // Octahedron
 		builder.setShaded(true);
 		builder.setDrawingModeValue(Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE);
+		builder.setPixelSize(2); // Like weighted 2D pixel rendering using 4 pixels
 		defaultImageJ3DResultsViewerSettings = builder.build();
 	}
 }
