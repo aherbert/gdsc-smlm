@@ -223,7 +223,7 @@ public class LoadLocalisations implements PlugIn
 			MemoryPeakResults.addResults(results);
 		}
 
-		String msg = "Loaded " + TextUtils.pleural(results.size(), "localisations");
+		String msg = "Loaded " + TextUtils.pleural(results.size(), "localisation");
 		IJ.showStatus(msg);
 		Utils.log(msg);
 	}
