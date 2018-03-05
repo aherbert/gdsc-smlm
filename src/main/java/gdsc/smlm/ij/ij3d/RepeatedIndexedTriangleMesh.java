@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.ij3d;
 
+import org.scijava.java3d.Appearance;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
@@ -63,6 +64,8 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 
 		this.objectVertices = objectVertices;
 		this.objectFaces = objectFaces;
+
+		checkFacets(objectVertices, objectFaces);
 
 		// Now build the actual vertices by repeating the points.
 		this.points = points;
@@ -145,6 +148,50 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	}
 
 	@Override
+	protected Appearance createAppearance()
+	{
+		return super.createAppearance();
+
+		//		final Appearance appearance = new Appearance();
+		//		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
+		//
+		//		final PolygonAttributes polyAttrib = new PolygonAttributes();
+		//		polyAttrib.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+		//		if (this.shaded)
+		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+		//		else
+		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+		//		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE);
+		//
+		//		// This is what makes the polygons look the same on both sides!
+		//		//polyAttrib.setBackFaceNormalFlip(true);
+		//
+		//		appearance.setPolygonAttributes(polyAttrib);
+		//
+		//		final ColoringAttributes colorAttrib = new ColoringAttributes();
+		//		colorAttrib.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+		//		if (null != color) // is null when colors are vertex-wise
+		//			colorAttrib.setColor(color);
+		//		appearance.setColoringAttributes(colorAttrib);
+		//
+		//		final TransparencyAttributes tr = new TransparencyAttributes();
+		//		final int mode = TransparencyAttributes.FASTEST;
+		//		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
+		//		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
+		//		tr.setTransparencyMode(mode);
+		//		tr.setTransparency(transparency);
+		//		appearance.setTransparencyAttributes(tr);
+		//
+		//		final Material material = new Material();
+		//		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
+		//		material.setAmbientColor(0.1f, 0.1f, 0.1f);
+		//		material.setSpecularColor(0.1f, 0.1f, 0.1f);
+		//		material.setDiffuseColor(0.1f, 0.1f, 0.1f);
+		//		appearance.setMaterial(material);
+		//		return appearance;
+	}
+
+	@Override
 	public Vector3f[] getNormals()
 	{
 		// Take advantage of the fact that the normals will all be the 
@@ -158,7 +205,7 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			objectNormals = getNormals(objectVertices, objectFaces);
 
 		final Vector3f[] normals = new Vector3f[nVertices];
-		
+
 		for (int i = 0, k = 0; i < points.length; i++)
 		{
 			for (int j = 0; j < objectNormals.length; j++)
@@ -170,13 +217,97 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 		return normals;
 	}
 
+	/**
+	 * Check the facet normals point out from the centre 0,0,0. If the normal points inwards then the vertices will be
+	 * swapped.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param faces
+	 *            the faces
+	 * @return the count of the number swapped
+	 */
+	public static int checkFacets(Point3f[] vertices, int[] faces)
+	{
+		int count = 0;
+		int nFaces = faces.length;
+		final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
+		for (int i = 0; i < nFaces; i += 3)
+		{
+			final int f1 = faces[i];
+			final int f2 = faces[i + 1];
+			final int f3 = faces[i + 2];
+
+			// Use the same order as that used to compute facet normals in 
+			// org.scijava.java3d.utils.geometry.NormalGenerator
+			v1.sub(vertices[f3], vertices[f2]);
+			v2.sub(vertices[f1], vertices[f2]);
+			v1.cross(v1, v2);
+			v1.normalize();
+
+			// Project point (x,y,z) to plane with normal (a,b,c) and point (d,e,f)
+			// t = (ad - ax + be - by + cd - cz) / (a^2 + b^2 + c^2)
+			// projected point = (x+ta,y+tb,z+tc)
+
+			// Project 0,0,0 to the facet
+			double a = v1.x;
+			double b = v1.y;
+			double c = v1.z;
+			double d = vertices[f1].x;
+			double e = vertices[f1].y;
+			double f = vertices[f1].z;
+			double t = a * d + b * e + c * f;
+			if (t < 0)
+			{
+				count++;
+				swap(faces, i + 2, i);
+			}
+		}
+		//System.out.printf("Swapped %d\n", count);
+		return count;
+	}
+
+	private static void swap(int[] faces, int i, int j)
+	{
+		int tmp = faces[i];
+		faces[i] = faces[j];
+		faces[j] = tmp;
+	}
+
+	/**
+	 * Gets the normals assuming triangle vertices on the given faces
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param faces
+	 *            the faces
+	 * @return the normals
+	 */
 	public static Vector3f[] getNormals(Point3f[] vertices, int[] faces)
 	{
 		int nVertices = vertices.length;
 		int nFaces = faces.length;
+
 		final Vector3f[] normals = new Vector3f[nVertices];
 		for (int i = 0; i < nVertices; i++)
 			normals[i] = new Vector3f();
+
+		//		final IndexedTriangleArray ta = new IndexedTriangleArray(vertices.length,
+		//				GeometryArray.COORDINATES | GeometryArray.NORMALS, faces.length);
+		//
+		//		ta.setValidIndexCount(nFaces);
+		//
+		//		ta.setCoordinates(0, vertices);
+		//		ta.setCoordinateIndices(0, faces);
+		//		final GeometryInfo gi = new GeometryInfo(ta);
+		//		final NormalGenerator ng = new NormalGenerator();
+		//		ng.generateNormals(gi);
+		//		final Vector3f[] n = gi.getNormals();
+		//
+		//		for (int i = 0; i < nFaces; i++)
+		//		{
+		//			normals[faces[i]].add(n[i]);
+		//		}
 
 		final Vector3f v1 = new Vector3f(), v2 = new Vector3f();
 		for (int i = 0; i < nFaces; i += 3)
@@ -185,16 +316,25 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			final int f2 = faces[i + 1];
 			final int f3 = faces[i + 2];
 
-			v1.sub(vertices[f2], vertices[f1]);
-			v2.sub(vertices[f3], vertices[f1]);
+			// Use the same order as that used to compute facet normals in 
+			// org.scijava.java3d.utils.geometry.NormalGenerator
+			v1.sub(vertices[f3], vertices[f2]);
+			v2.sub(vertices[f1], vertices[f2]);
 			v1.cross(v1, v2);
+			v1.normalize();
 
 			normals[f1].add(v1);
 			normals[f2].add(v1);
 			normals[f3].add(v1);
 		}
+
 		for (int i = 0; i < nVertices; i++)
 			normals[i].normalize();
+
+		//		for (int i = 0; i < nVertices; i++)
+		//		{
+		//			System.out.printf("[%d] %s\n", i, normals[i]);
+		//		}
 
 		return normals;
 	}
