@@ -535,7 +535,14 @@ public class ResultsManager implements PlugIn
 
 	public static void addTableResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
 	{
-		gd.addMessage("--- Table output ---");
+		addTableResultsOptions(gd, resultsSettings, 0);
+	}
+
+	public static void addTableResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
+			final int flags)
+	{
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+			gd.addMessage("--- Table output ---");
 		final ResultsTableSettings.Builder tableSettings = resultsSettings.getResultsTableSettingsBuilder();
 		gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Boolean>()
 		{
@@ -590,6 +597,8 @@ public class ResultsManager implements PlugIn
 	public static final int FLAG_RESULTS_DIRECTORY = 0x00000002;
 	/** Use this to add the results file to the file results dialog. */
 	public static final int FLAG_RESULTS_FILE = 0x00000004;
+	/** Use this to avoid adding the section header to the dialog. */
+	public static final int FLAG_NO_SECTION_HEADER = 0x00000008;
 
 	private void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
 	{
@@ -599,7 +608,8 @@ public class ResultsManager implements PlugIn
 	public static void addImageResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
 			final int flags)
 	{
-		gd.addMessage("--- Image output ---");
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+			gd.addMessage("--- Image output ---");
 		final ResultsImageSettings.Builder imageSettings = resultsSettings.getResultsImageSettingsBuilder();
 		final EnumSet<ResultsImageType> requirePrecision = EnumSet.of(
 				ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION,
@@ -658,7 +668,8 @@ public class ResultsManager implements PlugIn
 	public static void addFileResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
 			final int flags)
 	{
-		gd.addMessage("--- File output ---");
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+			gd.addMessage("--- File output ---");
 		final ResultsFileSettings.Builder fileSettings = resultsSettings.getResultsFileSettingsBuilder();
 		gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(),
 				fileSettings.getFileFormat().getNumber(), new OptionListener<Integer>()
@@ -726,7 +737,14 @@ public class ResultsManager implements PlugIn
 
 	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings)
 	{
-		gd.addMessage("--- Memory output ---");
+		addInMemoryResultsOptions(gd, resultsSettings, 0);
+	}
+
+	public static void addInMemoryResultsOptions(final ExtendedGenericDialog gd, final Builder resultsSettings,
+			int flags)
+	{
+		if (BitFlags.anyNotSet(flags, FLAG_NO_SECTION_HEADER))
+			gd.addMessage("--- Memory output ---");
 		final ResultsInMemorySettings.Builder memorySettings = resultsSettings.getResultsInMemorySettingsBuilder();
 		gd.addCheckbox("Save_to_memory", memorySettings.getInMemory());
 	}

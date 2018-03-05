@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import customnode.CustomPointMesh;
 import customnode.CustomTriangleMesh;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 
 /*----------------------------------------------------------------------------- 
@@ -59,11 +61,15 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder;
+import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.ij.ij3d.CustomMeshHelper;
 import gdsc.smlm.ij.ij3d.RepeatedIndexedTriangleMesh;
 import gdsc.smlm.ij.ij3d.RepeatedTriangleMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -74,6 +80,8 @@ import gdsc.smlm.results.procedures.XYZResultProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GUI;
@@ -169,6 +177,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	// No ned to store this in settings as when the plugin is first run there are no windows 
 	private static String lastWindow = "";
 
+	private static HashMap<String, IJTablePeakResults> resultsTables = new HashMap<String, IJTablePeakResults>();
+	private static ResultsTableSettings.Builder resultsTableSettings;
+
 	private Image3DUniverse univ;
 	private JMenuItem resetRotation;
 	private JMenuItem resetTranslation;
@@ -177,6 +188,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem changeColour;
 	private JMenuItem toggleShading;
 	private JMenuItem resetSelectedView;
+	private JMenuItem colourSurface;
+	private JMenuItem updateTableSettings;
 
 	/*
 	 * (non-Javadoc)
@@ -326,6 +339,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final Point3f[] sphereSize = createSphereSize(results, settings);
 		if (sphereSize == null)
 			return;
+
+		// Cache the table settings
+		resultsTableSettings = settings.getResultsTableSettingsBuilder();
 
 		float transparency = getTransparency(settings);
 
@@ -627,52 +643,52 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		// Colour by z
-		if (results.is3D())
+		//if (results.is3D())
+		//{
+		GeometryArray ga = (GeometryArray) mesh.getGeometry();
+
+		final int vertices = ga.getValidVertexCount();
+
+		Color3f[] allColors = new Color3f[vertices];
+		StandardResultProcedure p = new StandardResultProcedure(results);
+		p.getZ();
+		float[] limits = Maths.limits(p.z);
+		final float minimum = limits[0], maximum = limits[1];
+		final float range = maximum - minimum;
+		LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
+
+		if (range == 0)
 		{
-			GeometryArray ga = (GeometryArray) mesh.getGeometry();
-
-			final int vertices = ga.getValidVertexCount();
-
-			Color3f[] allColors = new Color3f[vertices];
-			StandardResultProcedure p = new StandardResultProcedure(results);
-			p.getZ();
-			float[] limits = Maths.limits(p.z);
-			final float minimum = limits[0], maximum = limits[1];
-			final float range = maximum - minimum;
-			LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
-
-			if (range == 0)
-			{
-				mesh.setColor(new Color3f(new Color(lut.getRGB(255))));
-			}
-			else
-			{
-				// Create 256 Colors
-				final float scale = 255f / range;
-				Color3f[] colors = new Color3f[256];
-				for (int i = 0; i < 256; i++)
-				{
-					Color c = new Color(lut.getRGB(i));
-					colors[i] = new Color3f(c);
-				}
-
-				final int verticesPerLocalisation = vertices / results.size();
-				for (int i = 0, j = 0, size = results.size(); i < size; i++)
-				{
-					float value = p.z[i];
-					value = value - minimum;
-					if (value < 0f)
-						value = 0f;
-					int ivalue = (int) ((value * scale) + 0.5f);
-					if (ivalue > 255)
-						ivalue = 255;
-					for (int k = verticesPerLocalisation; k-- > 0;)
-						allColors[j++] = colors[ivalue];
-				}
-				mesh.setColor(Arrays.asList(allColors));
-			}
-			mesh.setTransparency(getTransparency(settings));
+			mesh.setColor(new Color3f(new Color(lut.getRGB(255))));
 		}
+		else
+		{
+			// Create 256 Colors
+			final float scale = 255f / range;
+			Color3f[] colors = new Color3f[256];
+			for (int i = 0; i < 256; i++)
+			{
+				Color c = new Color(lut.getRGB(i));
+				colors[i] = new Color3f(c);
+			}
+
+			final int verticesPerLocalisation = vertices / results.size();
+			for (int i = 0, j = 0, size = results.size(); i < size; i++)
+			{
+				float value = p.z[i];
+				value = value - minimum;
+				if (value < 0f)
+					value = 0f;
+				int ivalue = (int) ((value * scale) + 0.5f);
+				if (ivalue > 255)
+					ivalue = 255;
+				for (int k = verticesPerLocalisation; k-- > 0;)
+					allColors[j++] = colors[ivalue];
+			}
+			mesh.setColor(Arrays.asList(allColors));
+		}
+		mesh.setTransparency(getTransparency(settings));
+		//}
 	}
 
 	/**
@@ -744,6 +760,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{
 				if (e.isConsumed())
 					return;
+				if (!resultsTableSettings.getShowTable())
+					return;
+
 				// This is expensive so require the user to hold down a modifier key
 				if (!(e.isControlDown() || e.isShiftDown() || e.isAltDown()))
 					return;
@@ -789,16 +808,47 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				//System.out.printf("n=%d [%d]  %s  %s\n", nPerLocalisation, index,
 				//		Arrays.toString(pair.r.getVertexIndices()), pair.r.getIntersectionPoint());
 
-				// TODO output the result to a table
-				// Have table settings in the settings.
-				// Allow it to be set in the GDSC SMLM menu.
+				// Output the result to a table.
 				// Just create a table and add to it.
 				PeakResult p = results.get(index);
-				System.out.printf("%f %f %f %f %f\n", p.getBackground(), p.getSignal(), p.getXPosition(),
-						p.getYPosition(), p.getZPosition());
+
+				IJTablePeakResults table = createTable(results);
+				table.add(p);
+				table.flush();
 
 				//c.setSelected(false);
 				e.consume();
+			}
+
+			private IJTablePeakResults createTable(MemoryPeakResults results)
+			{
+				String name = results.getName();
+				IJTablePeakResults table = resultsTables.get(name);
+				if (table == null || !table.getResultsWindow().isVisible())
+				{
+					// Have table settings in the settings.
+					// Allow it to be set in the GDSC SMLM menu.
+					table = new IJTablePeakResults(results.hasDeviations());
+					table.setTableTitle(TITLE + " " + name);
+					table.copySettings(results);
+					table.setDistanceUnit(resultsTableSettings.getDistanceUnit());
+					table.setIntensityUnit(resultsTableSettings.getIntensityUnit());
+					table.setAngleUnit(resultsTableSettings.getAngleUnit());
+					table.setShowPrecision(resultsTableSettings.getShowPrecision());
+					if (resultsTableSettings.getShowPrecision())
+						table.setComputePrecision(true);
+					table.setShowEndFrame(results.hasEndFrame());
+					table.setRoundingPrecision(resultsTableSettings.getRoundingPrecision());
+					table.setShowZ(results.is3D());
+					table.setShowFittingData(resultsTableSettings.getShowFittingData());
+					table.setShowNoiseData(resultsTableSettings.getShowNoiseData());
+					table.setShowId(results.hasId());
+					table.setAddCounter(true);
+					table.setHideSourceText(false);
+					table.begin();
+					resultsTables.put(name, table);
+				}
+				return table;
 			}
 
 			@Override
@@ -899,6 +949,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		resetSelectedView.addActionListener(this);
 		add.add(resetSelectedView);
 
+		add.addSeparator();
+
+		colourSurface = new JMenuItem("Colour surface from 2D image");
+		colourSurface.addActionListener(this);
+		add.add(colourSurface);
+
+		updateTableSettings = new JMenuItem("Update results table settings");
+		updateTableSettings.addActionListener(this);
+		add.add(updateTableSettings);
+
 		return add;
 	}
 
@@ -978,6 +1038,41 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
+	private static class ColourSurfaceContentAction implements ContentAction
+	{
+		static String title = "";
+		ImagePlus imp = null;
+
+		public int run(Content c)
+		{
+			if (!(c.getUserData() instanceof ResultsMetaData))
+				return 0;
+
+			if (imp == null)
+			{
+				ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+				String[] list = Utils.getImageList(Utils.SINGLE);
+				if (list.length == 0)
+					return -1;
+				gd.addChoice("Image", list, title);
+				gd.showDialog();
+				if (gd.wasCanceled())
+					return -1;
+				title = gd.getNextChoice();
+				imp = WindowManager.getImage(title);
+				if (imp == null)
+					return -1;
+			}
+
+			final ContentInstant content = c.getInstant(0);
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomMesh mesh = node.getMesh();
+			CustomMeshHelper helper = new CustomMeshHelper(mesh);
+			helper.loadSurfaceColorsFromImage2D(imp);
+			return 0;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1029,6 +1124,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			univ.fireTransformationFinished();
 			return;
 		}
+		if (src == updateTableSettings)
+		{
+			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			ResultsSettings.Builder s = ResultsSettings.newBuilder();
+			s.setResultsTableSettings(resultsTableSettings); // This is from the cache
+			gd.addMessage("Click on the image to view localisation data.\nShift/Ctrl/Alt key must be pressed.");
+			ResultsManager.addTableResultsOptions(gd, s, ResultsManager.FLAG_NO_SECTION_HEADER);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return;
+			resultsTableSettings = s.getResultsTableSettingsBuilder();
+			resultsTableSettings.setShowTable(gd.getNextBoolean());
+
+			// Save updated settings
+			final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
+					.toBuilder();
+			settings.setResultsTableSettings(resultsTableSettings);
+			SettingsManager.writeSettings(settings);
+			return;
+		}
 
 		// Actions to perform on content
 		ContentAction action = null;
@@ -1049,6 +1164,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else if (src == resetSelectedView)
 		{
 			action = new ResetViewContentAction();
+		}
+		else if (src == colourSurface)
+		{
+			action = new ColourSurfaceContentAction();
 		}
 		if (action == null)
 			return;

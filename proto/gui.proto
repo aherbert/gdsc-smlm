@@ -10,6 +10,7 @@ import "unit.proto";
 import "calibration.proto";
 import "fit.proto";
 import "psf.proto";
+import "results.proto";
 
 // Contain the settings for the result filtering
 message GUIFilterSettings {
@@ -585,4 +586,5 @@ message ImageJ3DResultsViewerSettings {
 	bool newWindow = 7;
 	Image3DDrawingMode drawing_mode = 8;
 	double pixel_size = 9;
+	ResultsTableSettings results_table_settings = 10;
 }

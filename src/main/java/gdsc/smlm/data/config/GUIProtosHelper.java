@@ -25,6 +25,8 @@ import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
 import gdsc.smlm.ij.plugins.OPTICS.ImageMode;
@@ -387,6 +389,9 @@ public class GUIProtosHelper
 		builder.setShaded(true);
 		builder.setDrawingModeValue(Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE);
 		builder.setPixelSize(2); // Like weighted 2D pixel rendering using 4 pixels
+		ResultsTableSettings.Builder resultsTableSettings = builder.getResultsTableSettingsBuilder();
+		resultsTableSettings.setDistanceUnit(DistanceUnit.NM);
+		resultsTableSettings.setShowTable(true);
 		defaultImageJ3DResultsViewerSettings = builder.build();
 	}
 }

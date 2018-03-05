@@ -37076,6 +37076,19 @@ public final class GUIProtos {
      * <code>double pixel_size = 9;</code>
      */
     double getPixelSize();
+
+    /**
+     * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+     */
+    boolean hasResultsTableSettings();
+    /**
+     * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+     */
+    gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings();
+    /**
+     * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+     */
+    gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder();
   }
   /**
    * <pre>
@@ -37174,6 +37187,19 @@ public final class GUIProtos {
             case 73: {
 
               pixelSize_ = input.readDouble();
+              break;
+            }
+            case 82: {
+              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder subBuilder = null;
+              if (resultsTableSettings_ != null) {
+                subBuilder = resultsTableSettings_.toBuilder();
+              }
+              resultsTableSettings_ = input.readMessage(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(resultsTableSettings_);
+                resultsTableSettings_ = subBuilder.buildPartial();
+              }
+
               break;
             }
           }
@@ -37312,6 +37338,27 @@ public final class GUIProtos {
       return pixelSize_;
     }
 
+    public static final int RESULTS_TABLE_SETTINGS_FIELD_NUMBER = 10;
+    private gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings resultsTableSettings_;
+    /**
+     * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+     */
+    public boolean hasResultsTableSettings() {
+      return resultsTableSettings_ != null;
+    }
+    /**
+     * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+     */
+    public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
+      return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
+    }
+    /**
+     * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+     */
+    public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
+      return getResultsTableSettings();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37350,6 +37397,9 @@ public final class GUIProtos {
       }
       if (pixelSize_ != 0D) {
         output.writeDouble(9, pixelSize_);
+      }
+      if (resultsTableSettings_ != null) {
+        output.writeMessage(10, getResultsTableSettings());
       }
     }
 
@@ -37393,6 +37443,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(9, pixelSize_);
       }
+      if (resultsTableSettings_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, getResultsTableSettings());
+      }
       memoizedSize = size;
       return size;
     }
@@ -37432,6 +37486,11 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getPixelSize())
           == java.lang.Double.doubleToLongBits(
               other.getPixelSize()));
+      result = result && (hasResultsTableSettings() == other.hasResultsTableSettings());
+      if (hasResultsTableSettings()) {
+        result = result && getResultsTableSettings()
+            .equals(other.getResultsTableSettings());
+      }
       return result;
     }
 
@@ -37465,6 +37524,10 @@ public final class GUIProtos {
       hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPixelSize()));
+      if (hasResultsTableSettings()) {
+        hash = (37 * hash) + RESULTS_TABLE_SETTINGS_FIELD_NUMBER;
+        hash = (53 * hash) + getResultsTableSettings().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37616,6 +37679,12 @@ public final class GUIProtos {
 
         pixelSize_ = 0D;
 
+        if (resultsTableSettingsBuilder_ == null) {
+          resultsTableSettings_ = null;
+        } else {
+          resultsTableSettings_ = null;
+          resultsTableSettingsBuilder_ = null;
+        }
         return this;
       }
 
@@ -37647,6 +37716,11 @@ public final class GUIProtos {
         result.newWindow_ = newWindow_;
         result.drawingMode_ = drawingMode_;
         result.pixelSize_ = pixelSize_;
+        if (resultsTableSettingsBuilder_ == null) {
+          result.resultsTableSettings_ = resultsTableSettings_;
+        } else {
+          result.resultsTableSettings_ = resultsTableSettingsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -37715,6 +37789,9 @@ public final class GUIProtos {
         }
         if (other.getPixelSize() != 0D) {
           setPixelSize(other.getPixelSize());
+        }
+        if (other.hasResultsTableSettings()) {
+          mergeResultsTableSettings(other.getResultsTableSettings());
         }
         onChanged();
         return this;
@@ -38036,6 +38113,123 @@ public final class GUIProtos {
         onChanged();
         return this;
       }
+
+      private gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings resultsTableSettings_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder> resultsTableSettingsBuilder_;
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public boolean hasResultsTableSettings() {
+        return resultsTableSettingsBuilder_ != null || resultsTableSettings_ != null;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings getResultsTableSettings() {
+        if (resultsTableSettingsBuilder_ == null) {
+          return resultsTableSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
+        } else {
+          return resultsTableSettingsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public Builder setResultsTableSettings(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings value) {
+        if (resultsTableSettingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          resultsTableSettings_ = value;
+          onChanged();
+        } else {
+          resultsTableSettingsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public Builder setResultsTableSettings(
+          gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder builderForValue) {
+        if (resultsTableSettingsBuilder_ == null) {
+          resultsTableSettings_ = builderForValue.build();
+          onChanged();
+        } else {
+          resultsTableSettingsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public Builder mergeResultsTableSettings(gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings value) {
+        if (resultsTableSettingsBuilder_ == null) {
+          if (resultsTableSettings_ != null) {
+            resultsTableSettings_ =
+              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.newBuilder(resultsTableSettings_).mergeFrom(value).buildPartial();
+          } else {
+            resultsTableSettings_ = value;
+          }
+          onChanged();
+        } else {
+          resultsTableSettingsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public Builder clearResultsTableSettings() {
+        if (resultsTableSettingsBuilder_ == null) {
+          resultsTableSettings_ = null;
+          onChanged();
+        } else {
+          resultsTableSettings_ = null;
+          resultsTableSettingsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder getResultsTableSettingsBuilder() {
+        
+        onChanged();
+        return getResultsTableSettingsFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
+        if (resultsTableSettingsBuilder_ != null) {
+          return resultsTableSettingsBuilder_.getMessageOrBuilder();
+        } else {
+          return resultsTableSettings_ == null ?
+              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.getDefaultInstance() : resultsTableSettings_;
+        }
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder> 
+          getResultsTableSettingsFieldBuilder() {
+        if (resultsTableSettingsBuilder_ == null) {
+          resultsTableSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder>(
+                  getResultsTableSettings(),
+                  getParentForChildren(),
+                  isClean());
+          resultsTableSettings_ = null;
+        }
+        return resultsTableSettingsBuilder_;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
@@ -38196,254 +38390,257 @@ public final class GUIProtos {
     java.lang.String[] descriptorData = {
       "\n\tgui.proto\022\025gdsc.smlm.data.config\032\nunit" +
       ".proto\032\021calibration.proto\032\tfit.proto\032\tps" +
-      "f.proto\"\212\002\n\021GUIFilterSettings\022\021\n\tmax_dri" +
-      "ft\030\001 \001(\002\022\022\n\nmin_signal\030\002 \001(\002\022\017\n\007min_snr\030" +
-      "\003 \001(\002\022\025\n\rmax_precision\030\004 \001(\001\022\021\n\tmax_widt" +
-      "h\030\005 \001(\002\022\021\n\tmin_width\030\006 \001(\002\022\022\n\nmask_title" +
-      "\030\007 \001(\t\022\023\n\013free_filter\030\010 \001(\t\022\027\n\017filter_te" +
-      "mplate\030\t \001(\t\022!\n\031filter_analysis_director" +
-      "y\030\n \001(\t\022\033\n\023filter_set_filename\030\013 \001(\t\"\314\001\n" +
-      "\025PSFCalculatorSettings\022\023\n\013pixel_pitch\030\001 ",
-      "\001(\001\022\025\n\rmagnification\030\002 \001(\001\022\025\n\rbeam_expan" +
-      "der\030\003 \001(\001\022\022\n\nwavelength\030\004 \001(\001\022\032\n\022numeric" +
-      "al_aperture\030\005 \001(\001\022 \n\030adjust_for_square_p" +
-      "ixels\030\006 \001(\010\022\036\n\026proportionality_factor\030\007 " +
-      "\001(\001\"\273\001\n\024PSFEstimatorSettings\022\027\n\017number_o" +
-      "f_peaks\030\001 \001(\005\022\017\n\007p_value\030\002 \001(\001\022\032\n\022update" +
-      "_preferences\030\003 \001(\010\022\033\n\023debug_psf_estimato" +
-      "r\030\004 \001(\010\022\017\n\007iterate\030\005 \001(\010\022\027\n\017show_histogr" +
-      "ams\030\006 \001(\010\022\026\n\016histogram_bins\030\007 \001(\005\"\266\020\n\022Cr" +
-      "eateDataSettings\022\014\n\004size\030\001 \001(\005\022\r\n\005depth\030",
-      "\002 \001(\001\022\023\n\013fixed_Depth\030\003 \001(\010\022\017\n\007seconds\030\004 " +
-      "\001(\001\022\025\n\rexposure_time\030\005 \001(\001\022\030\n\020steps_per_" +
-      "second\030\006 \001(\001\022\024\n\014illumination\030\007 \001(\t\022\030\n\020ba" +
-      "ckground_image\030\010 \001(\t\022\024\n\014distribution\030\t \001" +
-      "(\t\022\031\n\021distribution_mask\030\n \001(\t\022%\n\035distrib" +
-      "ution_mask_slice_depth\030\013 \001(\001\022\025\n\rpoisson_" +
-      "noise\030\014 \001(\010\022\022\n\nbackground\030\r \001(\001\022\017\n\007em_ga" +
-      "in\030\016 \001(\001\022\023\n\013camera_gain\030\017 \001(\001\022\032\n\022quantum" +
-      "_efficiency\030\020 \001(\001\022\022\n\nread_noise\030\021 \001(\001\022\014\n" +
-      "\004bias\030\022 \001(\005\022\021\n\tparticles\030\023 \001(\005\022\030\n\020sample",
-      "_per_frame\030\024 \001(\010\022\032\n\022photons_per_second\030\025" +
-      " \001(\001\022\"\n\032photons_per_second_maximum\030\026 \001(\001" +
-      "\022\033\n\023photon_distribution\030\027 \001(\t\022 \n\030photon_" +
-      "distribution_file\030\030 \001(\t\022\024\n\014photon_shape\030" +
-      "\031 \001(\001\022\023\n\013correlation\030\032 \001(\001\022\021\n\tpsf_model\030" +
-      "\033 \001(\t\022\026\n\016psf_image_name\030\034 \001(\t\022\023\n\013enter_w" +
-      "idth\030\035 \001(\010\022\022\n\nwavelength\030\036 \001(\001\022\032\n\022numeri" +
-      "cal_aperture\030\037 \001(\001\022\016\n\006psf_sd\030  \001(\001\022\023\n\013pi" +
-      "xel_pitch\030! \001(\001\022\017\n\007density\030\" \001(\001\022\026\n\016diff" +
-      "usion_rate\030# \001(\001\022\026\n\016diffusion_type\030$ \001(\005",
-      "\022\032\n\022compound_molecules\030% \001(\010\022\025\n\rcompound" +
-      "_text\030& \001(\t\022\022\n\ndiffuse_2D\030\' \001(\010\022\"\n\032rotat" +
-      "e_initial_orientation\030( \001(\010\022 \n\030rotate_du" +
-      "ring_simulation\030) \001(\010\022\021\n\trotate_2D\030* \001(\010" +
-      "\022\025\n\rfixedFraction\030+ \001(\001\022\023\n\013confinement\030," +
-      " \001(\t\022\030\n\020confinement_mask\030- \001(\t\022$\n\034confin" +
-      "ement_mask_slice_depth\030. \001(\001\022\032\n\022confinem" +
-      "ent_radius\030/ \001(\001\022\026\n\016pulse_interval\0300 \001(\005" +
-      "\022\023\n\013pulse_ratio\0301 \001(\001\022\014\n\004t_on\0302 \001(\001\022\023\n\013t" +
-      "_off_short\0303 \001(\001\022\022\n\nt_off_long\0304 \001(\001\022\026\n\016",
-      "n_blinks_short\0305 \001(\001\022\025\n\rn_blinks_long\0306 " +
-      "\001(\001\022\'\n\037n_blinks_geometric_distribution\0307" +
-      " \001(\010\022\023\n\013min_photons\0308 \001(\001\022\022\n\nmin_snr_t1\030" +
-      "9 \001(\001\022\022\n\nmin_snr_tN\030: \001(\001\022\021\n\traw_image\030;" +
-      " \001(\010\022\022\n\nsave_image\030< \001(\010\022\032\n\022save_image_r" +
-      "esults\030= \001(\010\022\032\n\022save_localisations\030> \001(\010" +
-      "\022\031\n\021save_fluorophores\030? \001(\010\022\026\n\016image_fil" +
-      "ename\030@ \001(\t\022\036\n\026image_results_filename\030A " +
-      "\001(\t\022\034\n\024fluorophoresFilename\030B \001(\t\022\021\n\tcel" +
-      "l_size\030C \001(\005\022\032\n\022probability_binary\030D \001(\001",
-      "\022\033\n\023min_binary_distance\030E \001(\001\022\033\n\023max_bin" +
-      "ary_distance\030F \001(\001\022\027\n\017show_histograms\030G " +
-      "\001(\010\022\031\n\021choose_histograms\030H \001(\010\022\026\n\016histog" +
-      "ram_bins\030I \001(\005\022\027\n\017remove_outliers\030J \001(\010\022" +
-      "\026\n\016density_radius\030K \001(\002\022\026\n\016depth_of_fiel" +
-      "d\030L \001(\002\022\022\n\nx_position\030M \001(\001\022\022\n\ny_positio" +
-      "n\030N \001(\001\022\022\n\nz_position\030O \001(\001\0226\n\013camera_ty" +
-      "pe\030P \001(\0162!.gdsc.smlm.data.config.CameraT" +
-      "ype\022\031\n\021camera_model_name\030Q \001(\t\022\023\n\013random" +
-      "_crop\030R \001(\010\022\020\n\010origin_x\030S \001(\005\022\020\n\010origin_",
-      "y\030T \001(\005\022\026\n\016depth_of_focus\030U \001(\001\022\031\n\021astig" +
-      "matism_model\030V \001(\t\"\216\003\n\031LoadLocalisations" +
-      "Settings\022\035\n\025localisationsFilename\030\001 \001(\t\022" +
-      "\024\n\014header_lines\030\002 \001(\005\022\017\n\007comment\030\003 \001(\t\022\021" +
-      "\n\tdelimiter\030\004 \001(\t\0227\n\013calibration\030\005 \001(\0132\"" +
-      ".gdsc.smlm.data.config.Calibration\022\017\n\007fi" +
-      "eld_t\030\013 \001(\005\022\020\n\010field_id\030\014 \001(\005\022\017\n\007field_x" +
-      "\030\r \001(\005\022\017\n\007field_y\030\016 \001(\005\022\017\n\007field_z\030\017 \001(\005" +
-      "\022\017\n\007field_i\030\020 \001(\005\022\020\n\010field_sx\030\021 \001(\005\022\020\n\010f" +
-      "ield_sy\030\022 \001(\005\022\027\n\017field_precision\030\023 \001(\005\022\014",
-      "\n\004name\030\025 \001(\t\022\017\n\007limit_z\030\026 \001(\010\022\r\n\005min_z\030\027" +
-      " \001(\001\022\r\n\005max_z\030\030 \001(\001\"\220\007\n\022ClusteringSettin" +
-      "gs\022\032\n\022distance_threshold\030\001 \001(\001\022\032\n\022distan" +
-      "ce_exclusion\030\002 \001(\001\022\026\n\016time_threshold\030\003 \001" +
-      "(\001\0222\n\ttime_unit\030\004 \001(\0162\037.gdsc.smlm.data.c" +
-      "onfig.TimeUnit\022\022\n\ntrace_mode\030\005 \001(\005\022\034\n\024cl" +
-      "ustering_algorithm\030\006 \001(\005\022\026\n\016pulse_interv" +
-      "al\030\007 \001(\005\022\024\n\014pulse_window\030\010 \001(\005\022\024\n\014split_" +
-      "pulses\030\t \001(\010\022\025\n\rblinking_rate\030\n \001(\001\022\020\n\010o" +
-      "ptimise\030\013 \001(\010\022\036\n\026min_distance_threshold\030",
-      "\014 \001(\001\022\036\n\026max_distance_threshold\030\r \001(\001\022\032\n" +
-      "\022min_time_threshold\030\016 \001(\005\022\032\n\022max_time_th" +
-      "reshold\030\017 \001(\005\022\027\n\017optimiser_steps\030\020 \001(\005\022\026" +
-      "\n\016optimiser_plot\030\021 \001(\005\022\023\n\013save_traces\030\022 " +
-      "\001(\010\022\027\n\017show_histograms\030\023 \001(\010\022\027\n\017save_tra" +
-      "ce_data\030\024 \001(\010\022\034\n\024trace_data_directory\030\025 " +
-      "\001(\t\022\026\n\016histogram_bins\030\026 \001(\005\022\027\n\017remove_ou" +
-      "tliers\030\027 \001(\010\022\024\n\014refit_option\030\030 \001(\010\022\034\n\024mi" +
-      "nimum_trace_length\030\031 \001(\005\022\020\n\010truncate\030\032 \001" +
-      "(\010\022\032\n\022internal_distances\030\033 \001(\010\022\035\n\025sub_sa",
-      "mpled_distances\030\034 \001(\010\022\023\n\013ignore_ends\030\035 \001" +
-      "(\010\022\034\n\024precision_correction\030\036 \001(\010\022\026\n\016msd_" +
-      "correction\030\037 \001(\010\022\013\n\003mle\030  \001(\010\022\022\n\nfit_len" +
-      "gth\030! \001(\005\022\024\n\014fit_restarts\030\" \001(\005\022\025\n\rjump_" +
-      "distance\030# \001(\005\"\353\001\n\023OpticsEventSettings\022\034" +
-      "\n\024show_selection_table\030\001 \001(\010\022\036\n\026table_cr" +
-      "eate_selection\030\002 \001(\010\022\036\n\026image_create_sel" +
-      "ection\030\003 \001(\010\022\035\n\025plot_create_selection\030\004 " +
-      "\001(\010\022\034\n\024table_show_selection\030\005 \001(\010\022\034\n\024ima" +
-      "ge_show_selection\030\006 \001(\010\022\033\n\023plot_show_sel",
-      "ection\030\007 \001(\010\"\337\005\n\016OpticsSettings\022\024\n\014input" +
-      "_option\030\001 \001(\t\022\023\n\013optics_mode\030\002 \001(\005\022\034\n\024nu" +
-      "mber_of_split_sets\030\003 \001(\005\022\032\n\022use_random_v" +
-      "ectors\030\004 \001(\010\022\035\n\025save_approximate_sets\030\005 " +
-      "\001(\010\022\023\n\013sample_mode\030\006 \001(\005\022\033\n\023generating_d" +
-      "istance\030\007 \001(\001\022\022\n\nmin_points\030\010 \001(\005\022\027\n\017clu" +
-      "stering_mode\030\t \001(\005\022\n\n\002xi\030\n \001(\001\022\020\n\010topLev" +
-      "el\030\013 \001(\010\022\023\n\013upper_limit\030\014 \001(\001\022\023\n\013lower_l" +
-      "imit\030\r \001(\001\022\017\n\007samples\030\016 \001(\005\022\027\n\017sample_fr" +
-      "action\030\017 \001(\001\022\026\n\016fraction_noise\030\020 \001(\001\022\033\n\023",
-      "clustering_distance\030\021 \001(\001\022\014\n\004core\030\022 \001(\010\022" +
-      "\023\n\013image_scale\030\023 \001(\001\022\022\n\nimage_mode\030\024 \001(\005" +
-      "\022\020\n\010weighted\030\025 \001(\010\022\021\n\tequalised\030\026 \001(\010\022\021\n" +
-      "\tplot_mode\030\027 \001(\005\022\024\n\014outline_mode\030\030 \001(\005\022\032" +
-      "\n\022spanning_tree_mode\030\031 \001(\005\022\016\n\006lambda\030\032 \001" +
-      "(\001\022\022\n\nshow_table\030\033 \001(\010\022\027\n\017table_sort_mod" +
-      "e\030\034 \001(\005\022\032\n\022table_reverse_sort\030\035 \001(\010\022I\n\025o" +
-      "ptics_event_settings\030\036 \001(\0132*.gdsc.smlm.d" +
-      "ata.config.OpticsEventSettings\"\203\001\n\017Defau" +
-      "ltTemplate\022:\n\rtemplate_type\030\001 \001(\0162#.gdsc",
-      ".smlm.data.config.TemplateType\022\014\n\004name\030\002" +
-      " \001(\t\022\020\n\010filename\030\003 \001(\t\022\024\n\014tif_filename\030\004" +
-      " \001(\t\"\\\n\027DefaultTemplateSettings\022A\n\021defau" +
-      "lt_templates\030\001 \003(\0132&.gdsc.smlm.data.conf" +
-      "ig.DefaultTemplate\"\375\001\n\035ConfigurationTemp" +
-      "lateSettings\022\016\n\006option\030\001 \001(\005\022!\n\031select_s" +
-      "tandard_templates\030\002 \001(\010\022\037\n\027select_custom" +
-      "_directory\030\003 \001(\010\022\037\n\027configuration_direct" +
-      "ory\030\004 \001(\t\022#\n\033selected_standard_templates" +
-      "\030\005 \003(\t\022!\n\031selected_custom_templates\030\006 \003(",
-      "\t\022\020\n\010template\030\007 \001(\t\022\r\n\005close\030\010 \001(\010\"\232\001\n\023N" +
-      "ucleusMaskSettings\022\014\n\004mode\030\001 \001(\005\022\023\n\013fiel" +
-      "d_width\030\002 \001(\005\022\020\n\010y_dither\030\003 \001(\001\022\020\n\010z_dit" +
-      "her\030\004 \001(\001\022\024\n\014nm_per_pixel\030\005 \001(\001\022\024\n\014nm_pe" +
-      "r_slice\030\006 \001(\001\022\020\n\010diameter\030\007 \001(\001\"\274\010\n\022PSFC" +
-      "reatorSettings\022\014\n\004mode\030\001 \001(\005\022\016\n\006radius\030\002" +
-      " \001(\001\022\030\n\020interactive_mode\030\003 \001(\010\022\024\n\014nm_per" +
-      "_slice\030\004 \001(\001\022E\n\023fit_engine_settings\030\005 \001(" +
-      "\0132(.gdsc.smlm.data.config.FitEngineSetti" +
-      "ngs\022\'\n\003psf\030\006 \001(\0132\032.gdsc.smlm.data.config",
-      ".PSF\022\032\n\022amplitude_fraction\030\007 \001(\001\022\037\n\027star" +
-      "t_background_frames\030\010 \001(\005\022\035\n\025end_backgro" +
-      "und_frames\030\t \001(\005\022\025\n\rmagnification\030\n \001(\005\022" +
-      "\021\n\tsmoothing\030\013 \001(\001\022\031\n\021centre_each_slice\030" +
-      "\014 \001(\010\022\023\n\013com_cut_off\030\r \001(\001\022\034\n\024interpolat" +
-      "ion_method\030\016 \001(\005\022\017\n\007psfType\030\017 \001(\005\0227\n\013cal" +
-      "ibration\030\020 \001(\0132\".gdsc.smlm.data.config.C" +
-      "alibration\022\027\n\017analysis_window\030\021 \001(\001\022\022\n\nc" +
-      "om_window\030\022 \001(\005\022\037\n\027alignment_magnificati" +
-      "on\030\023 \001(\005\022\025\n\rmaxIterations\030\024 \001(\005\022\030\n\020check",
-      "_alignments\030\025 \001(\010\022\031\n\021psf_magnification\030\026" +
-      " \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023smooth_stack_sig" +
-      "nal\030\030 \001(\010\022\030\n\020single_precision\030\031 \001(\010\022\023\n\013c" +
-      "rop_border\030\032 \001(\005\022\022\n\ncrop_start\030\033 \001(\005\022\020\n\010" +
-      "crop_end\030\034 \001(\005\022\033\n\023psf_z_magnification\030\035 " +
-      "\001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023\n\013output_type\030\037" +
-      " \001(\005\022\027\n\017spline_filename\030  \001(\t\022\030\n\020crop_to" +
-      "_z_centre\030! \001(\010\022\026\n\016alignment_mode\030\" \001(\005\022" +
-      "\032\n\022alignment_z_radius\030# \001(\001\022\022\n\nupdate_ro" +
-      "i\030$ \001(\010\022\033\n\023sub_pixel_precision\030% \001(\001\022\031\n\021",
-      "rmsd_xy_threshold\030& \001(\001\022\030\n\020rmsd_z_thresh" +
-      "old\030\' \001(\001\022\033\n\023com_shift_threshold\030( \001(\001\"q" +
-      "\n\032CameraModelManagerSettings\022\016\n\006option\030\001" +
-      " \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n\010origin_y\030\003 \001(\005" +
-      "\022\r\n\005image\030\004 \001(\t\022\020\n\010selected\030\005 \001(\t\"\227\001\n\032Cu" +
-      "bicSplineManagerSettings\022\016\n\006option\030\001 \001(\005" +
-      "\022\020\n\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(" +
-      "\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_s" +
-      "hift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030FailCoun" +
-      "tManagerSettings\022\016\n\006option\030\001 \001(\005\022\022\n\nmax_",
-      "frames\030\002 \001(\005\022\030\n\020fail_count_limit\030\003 \001(\005\022\032" +
-      "\n\022save_after_fitting\030\004 \001(\010\022\034\n\024target_pas" +
-      "s_fraction\030\005 \001(\001\022\020\n\010filename\030\006 \001(\t\022\021\n\tpl" +
-      "ot_item\030\007 \001(\005\022\033\n\023plot_rolling_window\030\010 \001" +
-      "(\005\022\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020plot_fai" +
-      "l_weight\030\n \001(\005\022\033\n\023plot_reset_fraction\030\013 " +
-      "\001(\001\022\031\n\021plot_fixed_x_axis\030\014 \001(\010\022\023\n\013table_" +
-      "top_n\030\r \001(\005\022,\n$rolling_counter_min_allow" +
-      "ed_failures\030\016 \001(\005\022,\n$rolling_counter_max" +
-      "_allowed_failures\030\017 \001(\005\022\"\n\032rolling_count",
-      "er_min_window\030\020 \001(\005\022\"\n\032rolling_counter_m" +
-      "ax_window\030\021 \001(\005\022-\n%weighted_counter_min_" +
-      "allowed_failures\030\022 \001(\005\022-\n%weighted_count" +
-      "er_max_allowed_failures\030\023 \001(\005\022+\n#weighte" +
-      "d_counter_min_pass_decrement\030\024 \001(\005\022+\n#we" +
-      "ighted_counter_max_pass_decrement\030\025 \001(\005\022" +
-      ".\n&resetting_counter_min_allowed_failure" +
-      "s\030\026 \001(\005\022.\n&resetting_counter_max_allowed" +
-      "_failures\030\027 \001(\005\022,\n$resetting_counter_min" +
-      "_reset_fraction\030\030 \001(\001\022,\n$resetting_count",
-      "er_max_reset_fraction\030\031 \001(\001\022,\n$resetting" +
-      "_counter_inc_reset_fraction\030\032 \001(\001\022,\n$pas" +
-      "s_rate_counter_min_allowed_counts\030\033 \001(\005\022" +
-      ",\n$pass_rate_counter_max_allowed_counts\030" +
-      "\034 \001(\005\022\'\n\037pass_rate_counter_min_pass_rate" +
-      "\030\035 \001(\001\022\'\n\037pass_rate_counter_max_pass_rat" +
-      "e\030\036 \001(\001\022\'\n\037pass_rate_counter_inc_pass_ra" +
-      "te\030\037 \001(\001\"\266\005\n\037AstigmatismModelManagerSett" +
-      "ings\022\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_slice\030\002 \001" +
-      "(\001\022E\n\023fit_engine_settings\030\003 \001(\0132(.gdsc.s",
-      "mlm.data.config.FitEngineSettings\022\'\n\003psf" +
-      "\030\004 \001(\0132\032.gdsc.smlm.data.config.PSF\0227\n\013ca" +
-      "libration\030\005 \001(\0132\".gdsc.smlm.data.config." +
-      "Calibration\022\016\n\006radius\030\006 \001(\001\022\030\n\020log_fit_p" +
-      "rogress\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001\022\024\n\014weig" +
-      "hted_fit\030\t \001(\010\022\034\n\024show_estimated_curve\030\n" +
-      " \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmodel_name\030\014 \001(\t\022" +
-      "\022\n\nsave_model\030\016 \001(\010\022\026\n\016save_fit_width\030\017 " +
-      "\001(\010\022\020\n\010selected\030\r \001(\t\022\033\n\023show_depth_of_f" +
-      "ocus\030\020 \001(\010\022\033\n\023show_combined_width\030\026 \001(\010\022",
-      "\020\n\010show_psf\030\022 \001(\010\022<\n\017z_distance_unit\030\023 \001" +
-      "(\0162#.gdsc.smlm.data.config.DistanceUnit\022" +
-      "<\n\017s_distance_unit\030\024 \001(\0162#.gdsc.smlm.dat" +
-      "a.config.DistanceUnit\022\030\n\020calibrated_imag" +
-      "e\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t\"\305\002\n\023CropResult" +
-      "sSettings\022\024\n\014input_option\030\001 \001(\t\022\016\n\006borde" +
-      "r\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005" +
-      " \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n\rselect_region\030\007 " +
-      "\001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022" +
-      "\024\n\014reset_origin\030\n \001(\010\022\023\n\013output_name\030\013 \001",
-      "(\t\022\023\n\013name_option\030\014 \001(\005\022\023\n\013name_suffix\030\r" +
-      " \001(\t\022\024\n\014name_counter\030\016 \001(\005\022\017\n\007limit_z\030\017 " +
-      "\001(\010\022\r\n\005min_z\030\020 \001(\001\022\r\n\005max_z\030\021 \001(\001\"\346\001\n\030Su" +
-      "mmariseResultsSettings\022\027\n\017plot_backgroun" +
-      "d\030\001 \001(\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003" +
-      " \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\n" +
-      "plot_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016pl" +
-      "ot_precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(" +
-      "\005\022\027\n\017remove_outliers\030\n \001(\005\"\361\001\n\035ImageJ3DR" +
-      "esultsViewerSettings\022\024\n\014input_option\030\001 \001",
-      "(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013" +
-      "\n\003lut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded" +
-      "\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010\022?\n\014drawing_mod" +
-      "e\030\010 \001(\0162).gdsc.smlm.data.config.Image3DD" +
-      "rawingMode\022\022\n\npixel_size\030\t \001(\001*O\n\014Templa" +
-      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
-      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002*b\n\022Image" +
-      "3DDrawingMode\022\026\n\022DRAW_3D_FIXED_SIZE\020\000\022\030\n" +
-      "\024DRAW_3D_XY_PRECISION\020\001\022\032\n\026DRAW_3D_XYZ_D" +
-      "EVIATIONS\020\002B\013B\tGUIProtosb\006proto3"
+      "f.proto\032\rresults.proto\"\212\002\n\021GUIFilterSett" +
+      "ings\022\021\n\tmax_drift\030\001 \001(\002\022\022\n\nmin_signal\030\002 " +
+      "\001(\002\022\017\n\007min_snr\030\003 \001(\002\022\025\n\rmax_precision\030\004 " +
+      "\001(\001\022\021\n\tmax_width\030\005 \001(\002\022\021\n\tmin_width\030\006 \001(" +
+      "\002\022\022\n\nmask_title\030\007 \001(\t\022\023\n\013free_filter\030\010 \001" +
+      "(\t\022\027\n\017filter_template\030\t \001(\t\022!\n\031filter_an" +
+      "alysis_directory\030\n \001(\t\022\033\n\023filter_set_fil" +
+      "ename\030\013 \001(\t\"\314\001\n\025PSFCalculatorSettings\022\023\n",
+      "\013pixel_pitch\030\001 \001(\001\022\025\n\rmagnification\030\002 \001(" +
+      "\001\022\025\n\rbeam_expander\030\003 \001(\001\022\022\n\nwavelength\030\004" +
+      " \001(\001\022\032\n\022numerical_aperture\030\005 \001(\001\022 \n\030adju" +
+      "st_for_square_pixels\030\006 \001(\010\022\036\n\026proportion" +
+      "ality_factor\030\007 \001(\001\"\273\001\n\024PSFEstimatorSetti" +
+      "ngs\022\027\n\017number_of_peaks\030\001 \001(\005\022\017\n\007p_value\030" +
+      "\002 \001(\001\022\032\n\022update_preferences\030\003 \001(\010\022\033\n\023deb" +
+      "ug_psf_estimator\030\004 \001(\010\022\017\n\007iterate\030\005 \001(\010\022" +
+      "\027\n\017show_histograms\030\006 \001(\010\022\026\n\016histogram_bi" +
+      "ns\030\007 \001(\005\"\266\020\n\022CreateDataSettings\022\014\n\004size\030",
+      "\001 \001(\005\022\r\n\005depth\030\002 \001(\001\022\023\n\013fixed_Depth\030\003 \001(" +
+      "\010\022\017\n\007seconds\030\004 \001(\001\022\025\n\rexposure_time\030\005 \001(" +
+      "\001\022\030\n\020steps_per_second\030\006 \001(\001\022\024\n\014illuminat" +
+      "ion\030\007 \001(\t\022\030\n\020background_image\030\010 \001(\t\022\024\n\014d" +
+      "istribution\030\t \001(\t\022\031\n\021distribution_mask\030\n" +
+      " \001(\t\022%\n\035distribution_mask_slice_depth\030\013 " +
+      "\001(\001\022\025\n\rpoisson_noise\030\014 \001(\010\022\022\n\nbackground" +
+      "\030\r \001(\001\022\017\n\007em_gain\030\016 \001(\001\022\023\n\013camera_gain\030\017" +
+      " \001(\001\022\032\n\022quantum_efficiency\030\020 \001(\001\022\022\n\nread" +
+      "_noise\030\021 \001(\001\022\014\n\004bias\030\022 \001(\005\022\021\n\tparticles\030",
+      "\023 \001(\005\022\030\n\020sample_per_frame\030\024 \001(\010\022\032\n\022photo" +
+      "ns_per_second\030\025 \001(\001\022\"\n\032photons_per_secon" +
+      "d_maximum\030\026 \001(\001\022\033\n\023photon_distribution\030\027" +
+      " \001(\t\022 \n\030photon_distribution_file\030\030 \001(\t\022\024" +
+      "\n\014photon_shape\030\031 \001(\001\022\023\n\013correlation\030\032 \001(" +
+      "\001\022\021\n\tpsf_model\030\033 \001(\t\022\026\n\016psf_image_name\030\034" +
+      " \001(\t\022\023\n\013enter_width\030\035 \001(\010\022\022\n\nwavelength\030" +
+      "\036 \001(\001\022\032\n\022numerical_aperture\030\037 \001(\001\022\016\n\006psf" +
+      "_sd\030  \001(\001\022\023\n\013pixel_pitch\030! \001(\001\022\017\n\007densit" +
+      "y\030\" \001(\001\022\026\n\016diffusion_rate\030# \001(\001\022\026\n\016diffu",
+      "sion_type\030$ \001(\005\022\032\n\022compound_molecules\030% " +
+      "\001(\010\022\025\n\rcompound_text\030& \001(\t\022\022\n\ndiffuse_2D" +
+      "\030\' \001(\010\022\"\n\032rotate_initial_orientation\030( \001" +
+      "(\010\022 \n\030rotate_during_simulation\030) \001(\010\022\021\n\t" +
+      "rotate_2D\030* \001(\010\022\025\n\rfixedFraction\030+ \001(\001\022\023" +
+      "\n\013confinement\030, \001(\t\022\030\n\020confinement_mask\030" +
+      "- \001(\t\022$\n\034confinement_mask_slice_depth\030. " +
+      "\001(\001\022\032\n\022confinement_radius\030/ \001(\001\022\026\n\016pulse" +
+      "_interval\0300 \001(\005\022\023\n\013pulse_ratio\0301 \001(\001\022\014\n\004" +
+      "t_on\0302 \001(\001\022\023\n\013t_off_short\0303 \001(\001\022\022\n\nt_off",
+      "_long\0304 \001(\001\022\026\n\016n_blinks_short\0305 \001(\001\022\025\n\rn" +
+      "_blinks_long\0306 \001(\001\022\'\n\037n_blinks_geometric" +
+      "_distribution\0307 \001(\010\022\023\n\013min_photons\0308 \001(\001" +
+      "\022\022\n\nmin_snr_t1\0309 \001(\001\022\022\n\nmin_snr_tN\030: \001(\001" +
+      "\022\021\n\traw_image\030; \001(\010\022\022\n\nsave_image\030< \001(\010\022" +
+      "\032\n\022save_image_results\030= \001(\010\022\032\n\022save_loca" +
+      "lisations\030> \001(\010\022\031\n\021save_fluorophores\030? \001" +
+      "(\010\022\026\n\016image_filename\030@ \001(\t\022\036\n\026image_resu" +
+      "lts_filename\030A \001(\t\022\034\n\024fluorophoresFilena" +
+      "me\030B \001(\t\022\021\n\tcell_size\030C \001(\005\022\032\n\022probabili",
+      "ty_binary\030D \001(\001\022\033\n\023min_binary_distance\030E" +
+      " \001(\001\022\033\n\023max_binary_distance\030F \001(\001\022\027\n\017sho" +
+      "w_histograms\030G \001(\010\022\031\n\021choose_histograms\030" +
+      "H \001(\010\022\026\n\016histogram_bins\030I \001(\005\022\027\n\017remove_" +
+      "outliers\030J \001(\010\022\026\n\016density_radius\030K \001(\002\022\026" +
+      "\n\016depth_of_field\030L \001(\002\022\022\n\nx_position\030M \001" +
+      "(\001\022\022\n\ny_position\030N \001(\001\022\022\n\nz_position\030O \001" +
+      "(\001\0226\n\013camera_type\030P \001(\0162!.gdsc.smlm.data" +
+      ".config.CameraType\022\031\n\021camera_model_name\030" +
+      "Q \001(\t\022\023\n\013random_crop\030R \001(\010\022\020\n\010origin_x\030S",
+      " \001(\005\022\020\n\010origin_y\030T \001(\005\022\026\n\016depth_of_focus" +
+      "\030U \001(\001\022\031\n\021astigmatism_model\030V \001(\t\"\216\003\n\031Lo" +
+      "adLocalisationsSettings\022\035\n\025localisations" +
+      "Filename\030\001 \001(\t\022\024\n\014header_lines\030\002 \001(\005\022\017\n\007" +
+      "comment\030\003 \001(\t\022\021\n\tdelimiter\030\004 \001(\t\0227\n\013cali" +
+      "bration\030\005 \001(\0132\".gdsc.smlm.data.config.Ca" +
+      "libration\022\017\n\007field_t\030\013 \001(\005\022\020\n\010field_id\030\014" +
+      " \001(\005\022\017\n\007field_x\030\r \001(\005\022\017\n\007field_y\030\016 \001(\005\022\017" +
+      "\n\007field_z\030\017 \001(\005\022\017\n\007field_i\030\020 \001(\005\022\020\n\010fiel" +
+      "d_sx\030\021 \001(\005\022\020\n\010field_sy\030\022 \001(\005\022\027\n\017field_pr",
+      "ecision\030\023 \001(\005\022\014\n\004name\030\025 \001(\t\022\017\n\007limit_z\030\026" +
+      " \001(\010\022\r\n\005min_z\030\027 \001(\001\022\r\n\005max_z\030\030 \001(\001\"\220\007\n\022C" +
+      "lusteringSettings\022\032\n\022distance_threshold\030" +
+      "\001 \001(\001\022\032\n\022distance_exclusion\030\002 \001(\001\022\026\n\016tim" +
+      "e_threshold\030\003 \001(\001\0222\n\ttime_unit\030\004 \001(\0162\037.g" +
+      "dsc.smlm.data.config.TimeUnit\022\022\n\ntrace_m" +
+      "ode\030\005 \001(\005\022\034\n\024clustering_algorithm\030\006 \001(\005\022" +
+      "\026\n\016pulse_interval\030\007 \001(\005\022\024\n\014pulse_window\030" +
+      "\010 \001(\005\022\024\n\014split_pulses\030\t \001(\010\022\025\n\rblinking_" +
+      "rate\030\n \001(\001\022\020\n\010optimise\030\013 \001(\010\022\036\n\026min_dist",
+      "ance_threshold\030\014 \001(\001\022\036\n\026max_distance_thr" +
+      "eshold\030\r \001(\001\022\032\n\022min_time_threshold\030\016 \001(\005" +
+      "\022\032\n\022max_time_threshold\030\017 \001(\005\022\027\n\017optimise" +
+      "r_steps\030\020 \001(\005\022\026\n\016optimiser_plot\030\021 \001(\005\022\023\n" +
+      "\013save_traces\030\022 \001(\010\022\027\n\017show_histograms\030\023 " +
+      "\001(\010\022\027\n\017save_trace_data\030\024 \001(\010\022\034\n\024trace_da" +
+      "ta_directory\030\025 \001(\t\022\026\n\016histogram_bins\030\026 \001" +
+      "(\005\022\027\n\017remove_outliers\030\027 \001(\010\022\024\n\014refit_opt" +
+      "ion\030\030 \001(\010\022\034\n\024minimum_trace_length\030\031 \001(\005\022" +
+      "\020\n\010truncate\030\032 \001(\010\022\032\n\022internal_distances\030",
+      "\033 \001(\010\022\035\n\025sub_sampled_distances\030\034 \001(\010\022\023\n\013" +
+      "ignore_ends\030\035 \001(\010\022\034\n\024precision_correctio" +
+      "n\030\036 \001(\010\022\026\n\016msd_correction\030\037 \001(\010\022\013\n\003mle\030 " +
+      " \001(\010\022\022\n\nfit_length\030! \001(\005\022\024\n\014fit_restarts" +
+      "\030\" \001(\005\022\025\n\rjump_distance\030# \001(\005\"\353\001\n\023Optics" +
+      "EventSettings\022\034\n\024show_selection_table\030\001 " +
+      "\001(\010\022\036\n\026table_create_selection\030\002 \001(\010\022\036\n\026i" +
+      "mage_create_selection\030\003 \001(\010\022\035\n\025plot_crea" +
+      "te_selection\030\004 \001(\010\022\034\n\024table_show_selecti" +
+      "on\030\005 \001(\010\022\034\n\024image_show_selection\030\006 \001(\010\022\033",
+      "\n\023plot_show_selection\030\007 \001(\010\"\337\005\n\016OpticsSe" +
+      "ttings\022\024\n\014input_option\030\001 \001(\t\022\023\n\013optics_m" +
+      "ode\030\002 \001(\005\022\034\n\024number_of_split_sets\030\003 \001(\005\022" +
+      "\032\n\022use_random_vectors\030\004 \001(\010\022\035\n\025save_appr" +
+      "oximate_sets\030\005 \001(\010\022\023\n\013sample_mode\030\006 \001(\005\022" +
+      "\033\n\023generating_distance\030\007 \001(\001\022\022\n\nmin_poin" +
+      "ts\030\010 \001(\005\022\027\n\017clustering_mode\030\t \001(\005\022\n\n\002xi\030" +
+      "\n \001(\001\022\020\n\010topLevel\030\013 \001(\010\022\023\n\013upper_limit\030\014" +
+      " \001(\001\022\023\n\013lower_limit\030\r \001(\001\022\017\n\007samples\030\016 \001" +
+      "(\005\022\027\n\017sample_fraction\030\017 \001(\001\022\026\n\016fraction_",
+      "noise\030\020 \001(\001\022\033\n\023clustering_distance\030\021 \001(\001" +
+      "\022\014\n\004core\030\022 \001(\010\022\023\n\013image_scale\030\023 \001(\001\022\022\n\ni" +
+      "mage_mode\030\024 \001(\005\022\020\n\010weighted\030\025 \001(\010\022\021\n\tequ" +
+      "alised\030\026 \001(\010\022\021\n\tplot_mode\030\027 \001(\005\022\024\n\014outli" +
+      "ne_mode\030\030 \001(\005\022\032\n\022spanning_tree_mode\030\031 \001(" +
+      "\005\022\016\n\006lambda\030\032 \001(\001\022\022\n\nshow_table\030\033 \001(\010\022\027\n" +
+      "\017table_sort_mode\030\034 \001(\005\022\032\n\022table_reverse_" +
+      "sort\030\035 \001(\010\022I\n\025optics_event_settings\030\036 \001(" +
+      "\0132*.gdsc.smlm.data.config.OpticsEventSet" +
+      "tings\"\203\001\n\017DefaultTemplate\022:\n\rtemplate_ty",
+      "pe\030\001 \001(\0162#.gdsc.smlm.data.config.Templat" +
+      "eType\022\014\n\004name\030\002 \001(\t\022\020\n\010filename\030\003 \001(\t\022\024\n" +
+      "\014tif_filename\030\004 \001(\t\"\\\n\027DefaultTemplateSe" +
+      "ttings\022A\n\021default_templates\030\001 \003(\0132&.gdsc" +
+      ".smlm.data.config.DefaultTemplate\"\375\001\n\035Co" +
+      "nfigurationTemplateSettings\022\016\n\006option\030\001 " +
+      "\001(\005\022!\n\031select_standard_templates\030\002 \001(\010\022\037" +
+      "\n\027select_custom_directory\030\003 \001(\010\022\037\n\027confi" +
+      "guration_directory\030\004 \001(\t\022#\n\033selected_sta" +
+      "ndard_templates\030\005 \003(\t\022!\n\031selected_custom",
+      "_templates\030\006 \003(\t\022\020\n\010template\030\007 \001(\t\022\r\n\005cl" +
+      "ose\030\010 \001(\010\"\232\001\n\023NucleusMaskSettings\022\014\n\004mod" +
+      "e\030\001 \001(\005\022\023\n\013field_width\030\002 \001(\005\022\020\n\010y_dither" +
+      "\030\003 \001(\001\022\020\n\010z_dither\030\004 \001(\001\022\024\n\014nm_per_pixel" +
+      "\030\005 \001(\001\022\024\n\014nm_per_slice\030\006 \001(\001\022\020\n\010diameter" +
+      "\030\007 \001(\001\"\274\010\n\022PSFCreatorSettings\022\014\n\004mode\030\001 " +
+      "\001(\005\022\016\n\006radius\030\002 \001(\001\022\030\n\020interactive_mode\030" +
+      "\003 \001(\010\022\024\n\014nm_per_slice\030\004 \001(\001\022E\n\023fit_engin" +
+      "e_settings\030\005 \001(\0132(.gdsc.smlm.data.config" +
+      ".FitEngineSettings\022\'\n\003psf\030\006 \001(\0132\032.gdsc.s",
+      "mlm.data.config.PSF\022\032\n\022amplitude_fractio" +
+      "n\030\007 \001(\001\022\037\n\027start_background_frames\030\010 \001(\005" +
+      "\022\035\n\025end_background_frames\030\t \001(\005\022\025\n\rmagni" +
+      "fication\030\n \001(\005\022\021\n\tsmoothing\030\013 \001(\001\022\031\n\021cen" +
+      "tre_each_slice\030\014 \001(\010\022\023\n\013com_cut_off\030\r \001(" +
+      "\001\022\034\n\024interpolation_method\030\016 \001(\005\022\017\n\007psfTy" +
+      "pe\030\017 \001(\005\0227\n\013calibration\030\020 \001(\0132\".gdsc.sml" +
+      "m.data.config.Calibration\022\027\n\017analysis_wi" +
+      "ndow\030\021 \001(\001\022\022\n\ncom_window\030\022 \001(\005\022\037\n\027alignm" +
+      "ent_magnification\030\023 \001(\005\022\025\n\rmaxIterations",
+      "\030\024 \001(\005\022\030\n\020check_alignments\030\025 \001(\010\022\031\n\021psf_" +
+      "magnification\030\026 \001(\005\022\016\n\006window\030\027 \001(\005\022\033\n\023s" +
+      "mooth_stack_signal\030\030 \001(\010\022\030\n\020single_preci" +
+      "sion\030\031 \001(\010\022\023\n\013crop_border\030\032 \001(\005\022\022\n\ncrop_" +
+      "start\030\033 \001(\005\022\020\n\010crop_end\030\034 \001(\005\022\033\n\023psf_z_m" +
+      "agnification\030\035 \001(\005\022\022\n\ncom_border\030\036 \001(\001\022\023" +
+      "\n\013output_type\030\037 \001(\005\022\027\n\017spline_filename\030 " +
+      " \001(\t\022\030\n\020crop_to_z_centre\030! \001(\010\022\026\n\016alignm" +
+      "ent_mode\030\" \001(\005\022\032\n\022alignment_z_radius\030# \001" +
+      "(\001\022\022\n\nupdate_roi\030$ \001(\010\022\033\n\023sub_pixel_prec",
+      "ision\030% \001(\001\022\031\n\021rmsd_xy_threshold\030& \001(\001\022\030" +
+      "\n\020rmsd_z_threshold\030\' \001(\001\022\033\n\023com_shift_th" +
+      "reshold\030( \001(\001\"q\n\032CameraModelManagerSetti" +
+      "ngs\022\016\n\006option\030\001 \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n" +
+      "\010origin_y\030\003 \001(\005\022\r\n\005image\030\004 \001(\t\022\020\n\010select" +
+      "ed\030\005 \001(\t\"\227\001\n\032CubicSplineManagerSettings\022" +
+      "\016\n\006option\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmag" +
+      "nification\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shi" +
+      "ft\030\005 \001(\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001" +
+      "(\001\"\362\010\n\030FailCountManagerSettings\022\016\n\006optio",
+      "n\030\001 \001(\005\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_coun" +
+      "t_limit\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(" +
+      "\010\022\034\n\024target_pass_fraction\030\005 \001(\001\022\020\n\010filen" +
+      "ame\030\006 \001(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rol" +
+      "ling_window\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t " +
+      "\001(\005\022\030\n\020plot_fail_weight\030\n \001(\005\022\033\n\023plot_re" +
+      "set_fraction\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030" +
+      "\014 \001(\010\022\023\n\013table_top_n\030\r \001(\005\022,\n$rolling_co" +
+      "unter_min_allowed_failures\030\016 \001(\005\022,\n$roll" +
+      "ing_counter_max_allowed_failures\030\017 \001(\005\022\"",
+      "\n\032rolling_counter_min_window\030\020 \001(\005\022\"\n\032ro" +
+      "lling_counter_max_window\030\021 \001(\005\022-\n%weight" +
+      "ed_counter_min_allowed_failures\030\022 \001(\005\022-\n" +
+      "%weighted_counter_max_allowed_failures\030\023" +
+      " \001(\005\022+\n#weighted_counter_min_pass_decrem" +
+      "ent\030\024 \001(\005\022+\n#weighted_counter_max_pass_d" +
+      "ecrement\030\025 \001(\005\022.\n&resetting_counter_min_" +
+      "allowed_failures\030\026 \001(\005\022.\n&resetting_coun" +
+      "ter_max_allowed_failures\030\027 \001(\005\022,\n$resett" +
+      "ing_counter_min_reset_fraction\030\030 \001(\001\022,\n$",
+      "resetting_counter_max_reset_fraction\030\031 \001" +
+      "(\001\022,\n$resetting_counter_inc_reset_fracti" +
+      "on\030\032 \001(\001\022,\n$pass_rate_counter_min_allowe" +
+      "d_counts\030\033 \001(\005\022,\n$pass_rate_counter_max_" +
+      "allowed_counts\030\034 \001(\005\022\'\n\037pass_rate_counte" +
+      "r_min_pass_rate\030\035 \001(\001\022\'\n\037pass_rate_count" +
+      "er_max_pass_rate\030\036 \001(\001\022\'\n\037pass_rate_coun" +
+      "ter_inc_pass_rate\030\037 \001(\001\"\266\005\n\037AstigmatismM" +
+      "odelManagerSettings\022\016\n\006option\030\001 \001(\005\022\024\n\014n" +
+      "m_per_slice\030\002 \001(\001\022E\n\023fit_engine_settings",
+      "\030\003 \001(\0132(.gdsc.smlm.data.config.FitEngine" +
+      "Settings\022\'\n\003psf\030\004 \001(\0132\032.gdsc.smlm.data.c" +
+      "onfig.PSF\0227\n\013calibration\030\005 \001(\0132\".gdsc.sm" +
+      "lm.data.config.Calibration\022\016\n\006radius\030\006 \001" +
+      "(\001\022\030\n\020log_fit_progress\030\007 \001(\010\022\021\n\tsmoothin" +
+      "g\030\010 \001(\001\022\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_es" +
+      "timated_curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmo" +
+      "del_name\030\014 \001(\t\022\022\n\nsave_model\030\016 \001(\010\022\026\n\016sa" +
+      "ve_fit_width\030\017 \001(\010\022\020\n\010selected\030\r \001(\t\022\033\n\023" +
+      "show_depth_of_focus\030\020 \001(\010\022\033\n\023show_combin",
+      "ed_width\030\026 \001(\010\022\020\n\010show_psf\030\022 \001(\010\022<\n\017z_di" +
+      "stance_unit\030\023 \001(\0162#.gdsc.smlm.data.confi" +
+      "g.DistanceUnit\022<\n\017s_distance_unit\030\024 \001(\0162" +
+      "#.gdsc.smlm.data.config.DistanceUnit\022\030\n\020" +
+      "calibrated_image\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t" +
+      "\"\305\002\n\023CropResultsSettings\022\024\n\014input_option" +
+      "\030\001 \001(\t\022\016\n\006border\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004" +
+      " \001(\001\022\r\n\005width\030\005 \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n\rs" +
+      "elect_region\030\007 \001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\tr" +
+      "oi_image\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010\022\023\n\013",
+      "output_name\030\013 \001(\t\022\023\n\013name_option\030\014 \001(\005\022\023" +
+      "\n\013name_suffix\030\r \001(\t\022\024\n\014name_counter\030\016 \001(" +
+      "\005\022\017\n\007limit_z\030\017 \001(\010\022\r\n\005min_z\030\020 \001(\001\022\r\n\005max" +
+      "_z\030\021 \001(\001\"\346\001\n\030SummariseResultsSettings\022\027\n" +
+      "\017plot_background\030\001 \001(\010\022\023\n\013plot_signal\030\002 " +
+      "\001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006p" +
+      "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
+      "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
+      "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
+      "\005\"\276\002\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
+      "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
+      "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
+      "\022?\n\014drawing_mode\030\010 \001(\0162).gdsc.smlm.data." +
+      "config.Image3DDrawingMode\022\022\n\npixel_size\030" +
+      "\t \001(\001\022K\n\026results_table_settings\030\n \001(\0132+." +
+      "gdsc.smlm.data.config.ResultsTableSettin" +
+      "gs*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022" +
+      "\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLAT" +
+      "E\020\002*b\n\022Image3DDrawingMode\022\026\n\022DRAW_3D_FIX",
+      "ED_SIZE\020\000\022\030\n\024DRAW_3D_XY_PRECISION\020\001\022\032\n\026D" +
+      "RAW_3D_XYZ_DEVIATIONS\020\002B\013B\tGUIProtosb\006pr" +
+      "oto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -38460,6 +38657,7 @@ public final class GUIProtos {
           gdsc.smlm.data.config.CalibrationProtos.getDescriptor(),
           gdsc.smlm.data.config.FitProtos.getDescriptor(),
           gdsc.smlm.data.config.PSFProtos.getDescriptor(),
+          gdsc.smlm.data.config.ResultsProtos.getDescriptor(),
         }, assigner);
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -38580,11 +38778,12 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", "PixelSize", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", "PixelSize", "ResultsTableSettings", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
     gdsc.smlm.data.config.PSFProtos.getDescriptor();
+    gdsc.smlm.data.config.ResultsProtos.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
