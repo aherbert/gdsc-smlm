@@ -61,9 +61,9 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder;
+import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
-import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
 import gdsc.smlm.ij.ij3d.RepeatedIndexedTriangleMesh;
@@ -227,7 +227,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to display");
 		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
-		gd.addChoice("Window", titles, lastWindow);
+		// The behaviour is to allow the settings to store if the user prefers a new window
+		// or to reuse an existing window. If 'new window' then a new window should always
+		// be selected. Otherwise open in the same window as last time. If there was no last
+		// window then the settings will carried over from the last ImageJ session.
+		String window = (settings.getNewWindow()) ? "" : lastWindow; 
+		gd.addChoice("Window", titles, window);
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering(), new OptionListener<Integer>()
@@ -316,6 +321,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setDrawingModeValue(gd.getNextChoiceIndex());
 		gd.collectOptions();
 
+		if (windowChoice == 0)
+		{
+			// Store if the user chose a new window when they had a choice of an existing window
+			if (titleList.size() > 1)
+				settings.setNewWindow(true);
+			// Otherwise they had no choice so leave the preferences as they are.
+		}
+		else
+		{
+			// This was not a new window
+			settings.setNewWindow(false);
+		}
+		
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -351,6 +369,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else
 			univ = univList.get(windowChoice - 1); // Ignore the new window
 
+		lastWindow = univ.getWindow().getTitle();
+		
 		//		{
 		//			// Testing what mesh to use
 		//			//@formatter:off
@@ -1041,6 +1061,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static class ColourSurfaceContentAction implements ContentAction
 	{
 		static String title = "";
+		static boolean resetTransparency = true;
 		ImagePlus imp = null;
 
 		public int run(Content c)
@@ -1055,10 +1076,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (list.length == 0)
 					return -1;
 				gd.addChoice("Image", list, title);
+				gd.addCheckbox("Reset_transparency", resetTransparency);
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return -1;
 				title = gd.getNextChoice();
+				resetTransparency = gd.getNextBoolean();
 				imp = WindowManager.getImage(title);
 				if (imp == null)
 					return -1;
@@ -1069,6 +1092,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			CustomMesh mesh = node.getMesh();
 			CustomMeshHelper helper = new CustomMeshHelper(mesh);
 			helper.loadSurfaceColorsFromImage2D(imp);
+			// Remove the transparency
+			if (resetTransparency)
+				mesh.setTransparency(0);
 			return 0;
 		}
 	}
