@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -231,7 +232,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// or to reuse an existing window. If 'new window' then a new window should always
 		// be selected. Otherwise open in the same window as last time. If there was no last
 		// window then the settings will carried over from the last ImageJ session.
-		String window = (settings.getNewWindow()) ? "" : lastWindow; 
+		String window = (settings.getNewWindow()) ? "" : lastWindow;
 		gd.addChoice("Window", titles, window);
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
@@ -333,7 +334,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// This was not a new window
 			settings.setNewWindow(false);
 		}
-		
+
 		SettingsManager.writeSettings(settings);
 		MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
 		if (results == null || results.size() == 0)
@@ -370,7 +371,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			univ = univList.get(windowChoice - 1); // Ignore the new window
 
 		lastWindow = univ.getWindow().getTitle();
-		
+
 		//		{
 		//			// Testing what mesh to use
 		//			//@formatter:off
@@ -773,19 +774,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Capture a canvas mouse click/region and identify the coordinates.
 		final ImageCanvas3D canvas = (ImageCanvas3D) univ.getCanvas();
 		final BranchGroup scene = univ.getScene();
+
+		// We want to be the first mouse listener for the canvas to prevent
+		// the content selected event.
+		MouseListener[] l = canvas.getMouseListeners();
+		for (int i = 0; i < l.length; i++)
+			canvas.removeMouseListener(l[i]);
+
 		canvas.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mouseClicked(final MouseEvent e)
 			{
-				if (e.isConsumed())
-					return;
-				if (!resultsTableSettings.getShowTable())
+				//System.out.println("plugin mouseClicked");
+				if (!consumeEvent(e))
 					return;
 
-				// This is expensive so require the user to hold down a modifier key
-				if (!(e.isControlDown() || e.isShiftDown() || e.isAltDown()))
-					return;
 				// This finds the vertex indices of the rendered object.
 				Pair<Content, IntersectionInfo> pair = getPickedContent(canvas, scene, e.getX(), e.getY());
 				if (pair == null)
@@ -836,7 +840,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				table.add(p);
 				table.flush();
 
-				//c.setSelected(false);
+				// Consume the event so the item is not selected
 				e.consume();
 			}
 
@@ -874,13 +878,40 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			@Override
 			public void mousePressed(final MouseEvent e)
 			{
+				//System.out.println("plugin mousePressed");
+				if (consumeEvent(e))
+				{
+					// Image3DUniverse adds a canvas mouse listener that calls showPopup.
+					// This selects the content. It ignores the e.isConsumed() flag so
+					// we translate the point offscreen.
+					e.consume();
+					e.translatePoint(1000000, 1000000);
+				}
 			}
 
 			@Override
 			public void mouseReleased(final MouseEvent e)
 			{
+				//System.out.println("plugin mouseReleased");
+				if (consumeEvent(e))
+				{
+					// Image3DUniverse adds a canvas mouse listener that calls showPopup.
+					// This selects the content. It ignores the e.isConsumed() flag so
+					// we translate the point offscreen.
+					e.consume();
+					e.translatePoint(1000000, 1000000);
+				}
+			}
+
+			private boolean consumeEvent(final MouseEvent e)
+			{
+				return !e.isConsumed() && resultsTableSettings.getShowTable() && e.getButton() == MouseEvent.BUTTON1 &&
+						(e.isControlDown() || e.isShiftDown() || e.isAltDown());
 			}
 		});
+
+		for (int i = 0; i < l.length; i++)
+			canvas.addMouseListener(l[i]);
 
 		return univ;
 	}
