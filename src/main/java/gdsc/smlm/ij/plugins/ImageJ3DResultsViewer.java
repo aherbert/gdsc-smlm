@@ -580,6 +580,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return mesh;
 		}
 
+		Rendering r = Rendering.forNumber(settings.getRendering());
+
 		// Repeated mesh creation is much faster as the normals are cached.
 		// There does not appear to be a difference in the speed the image responds
 		// to user interaction between indexed or standard triangles.
@@ -596,7 +598,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		int mode = 2;
 		if (mode == 1)
 		{
-			Pair<Point3f[], int[]> pair = createIndexedObject(settings.getRendering());
+			Pair<Point3f[], int[]> pair = createIndexedObject(r);
 			Point3f[] objectVertices = pair.s;
 			int[] objectFaces = pair.r;
 			long size = (long) results.size() * objectVertices.length;
@@ -618,7 +620,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
 		}
 
-		final List<Point3f> point = createLocalisationObject(settings.getRendering());
+		final List<Point3f> point = createLocalisationObject(r);
 
 		final int singlePointSize = point.size();
 		long size = (long) results.size() * singlePointSize;
@@ -637,7 +639,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (mode == 2)
 		{
 			IJ.showStatus("Creating 3D mesh ...");
-			Rendering r = Rendering.forNumber(settings.getRendering());
 			double creaseAngle = (r.isHighResolution()) ? 44 : 0;
 			IJTrackProgress progress = null; // Used for debugging construction time
 			return new RepeatedTriangleMesh(point.toArray(new Point3f[singlePointSize]),
@@ -798,6 +799,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Add a new menu for SMLM functionality
 		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
 		menubar.add(createSMLMMenuBar());
+		// Add back so it is redrawn
 		univ.setMenubar(menubar);
 
 		univ.addUniverseListener(this);
@@ -1284,22 +1286,35 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 *
 	 * @return the list of triangle vertices for the object
 	 */
-	private static List<Point3f> createLocalisationObject(int rendering)
+	private static List<Point3f> createLocalisationObject(Rendering rendering)
 	{
+		int subdivisions = 0;
 		switch (rendering)
 		{
-			case 1:
-				return createTriangle();
-			case 2:
-				return createSquare();
-			case 3:
-				return createTetrahedron();
-			case 4:
+			case OCTAHEDRON:
 				return createOctahedron();
+			case SQUARE:
+				return createSquare();
+			case TETRAHEDRON:
+				return createTetrahedron();
+			case TRIANGLE:
+				return createTriangle();
+				
+			// All handle the same way
+			case HIGH_RES_SPHERE:
+				subdivisions++;
+			case LOW_RES_SPHERE:
+				subdivisions++;
+			case ICOSAHEDRON:
+				break;
+				
+			case POINT:
+			default:
+				throw new IllegalStateException();
 		}
+		
 		// All spheres based on icosahedron for speed
-		final int subdivisions = rendering - 5;
-		return customnode.MeshMaker.createIcosahedron(subdivisions, 1);
+		return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
 	}
 
 	// Note: The triangles are rendered on both sides so the handedness 
@@ -1413,7 +1428,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 *
 	 * @return the vertices and faces of the the object
 	 */
-	private static Pair<Point3f[], int[]> createIndexedObject(int rendering)
+	private static Pair<Point3f[], int[]> createIndexedObject(Rendering  rendering)
 	{
 		List<Point3f> list = createLocalisationObject(rendering);
 
