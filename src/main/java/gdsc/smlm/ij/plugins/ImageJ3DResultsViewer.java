@@ -382,40 +382,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		lastWindow = univ.getWindow().getTitle();
 
-		//		{
-		//			// Testing what mesh to use
-		//			//@formatter:off
-        //			CustomPointMesh m1 = new CustomPointMesh(Arrays.asList(new Point3f(-2, -2, -2)));
-        //			m1.setPointSize(10);
-        //			CustomIndexedTriangleMesh m2 = new CustomIndexedTriangleMesh(
-        //					new Point3f[] { 
-        //							new Point3f(0, 0, 0), 
-        //							new Point3f(1, 0, 0), 
-        //							new Point3f(0, 1, 0) },
-        //					new int[] { 0, 1, 2 });
-        //			CustomQuadMesh m3 = new CustomQuadMesh(Arrays.asList(
-        //					new Point3f(2, 2, 2), 
-        //					new Point3f(3, 2, 2), 
-        //					new Point3f(3, 3, 2),
-        //					new Point3f(2, 3, 2)
-        //					));
-        //			RepeatedIndexedTriangleMesh m4 = new RepeatedIndexedTriangleMesh(
-        //					new Point3f[] {
-        //							new Point3f(-1, -1, 0), 
-        //							new Point3f(1, -1, 0), 
-        //							new Point3f(1, 1, 0),
-        //							new Point3f(-1, 1, 0)
-        //					}, new int[] {0,1,2,0,2,3}, 
-        //					new Point3f[]{new Point3f(5, 5, 0)}, null, null, 0);
-        //			//@formatter:on
-		//			univ.addContent(univ.createContent(m1, "m1"));
-		//			univ.addContent(univ.createContent(m2, "m2"));
-		//			univ.addContent(univ.createContent(m3, "m3"));
-		//			univ.addContent(univ.createContent(m4, "m4"));
-		//			if (true)
-		//				return;
-		//		}
-
 		CustomMesh mesh = createMesh(settings, results, sphereSize, transparency);
 		if (mesh == null)
 			return;
