@@ -828,17 +828,28 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				int nPerLocalisation = nVertices / data.resultsSize;
 
 				// Determine the localisation
-				int index = pair.r.getVertexIndices()[0] / nPerLocalisation;
+				int vertexIndex = pair.r.getVertexIndices()[0];
+				int index = vertexIndex / nPerLocalisation;
 				//System.out.printf("n=%d [%d]  %s  %s\n", nPerLocalisation, index,
 				//		Arrays.toString(pair.r.getVertexIndices()), pair.r.getIntersectionPoint());
 
-				// Output the result to a table.
-				// Just create a table and add to it.
 				PeakResult p = results.get(index);
 
-				IJTablePeakResults table = createTable(results);
-				table.add(p);
-				table.flush();
+				if (e.getClickCount() > 1)
+				{
+					// Centre on the localisation
+					Point3d coordinate = new Point3d();
+					ga.getCoordinate(vertexIndex, coordinate);
+					univ.centerAt(coordinate);
+				}
+				else
+				{
+					// Output the result to a table.
+					// Just create a table and add to it.
+					IJTablePeakResults table = createTable(results);
+					table.add(p);
+					table.flush();
+				}
 
 				// Consume the event so the item is not selected
 				e.consume();
@@ -905,8 +916,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			private boolean consumeEvent(final MouseEvent e)
 			{
-				return !e.isConsumed() && resultsTableSettings.getShowTable() && e.getButton() == MouseEvent.BUTTON1 &&
-						(e.isControlDown() || e.isShiftDown() || e.isAltDown());
+				if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown() || e.isAltDown()))
+					return false;
+				if (resultsTableSettings.getShowTable() && e.getClickCount() == 1)
+					return true;
+				if (e.getClickCount() == 2)
+					return true;
+				return false;
 			}
 		});
 
@@ -1186,7 +1202,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			ResultsSettings.Builder s = ResultsSettings.newBuilder();
 			s.setResultsTableSettings(resultsTableSettings); // This is from the cache
-			gd.addMessage("Click on the image to view localisation data.\nShift/Ctrl/Alt key must be pressed.");
+			gd.addMessage("Click on the image to view localisation data.\nCtrl/Alt key must be pressed.");
 			ResultsManager.addTableResultsOptions(gd, s, ResultsManager.FLAG_NO_SECTION_HEADER);
 			gd.showDialog();
 			if (gd.wasCanceled())
