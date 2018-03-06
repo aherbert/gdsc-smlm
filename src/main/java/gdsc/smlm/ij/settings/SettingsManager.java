@@ -52,6 +52,7 @@ import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings;
+import gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
 import gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
@@ -1092,6 +1093,19 @@ public class SettingsManager
 	{
 		return new ConfigurationReader<ImageJ3DResultsViewerSettings>(
 				GUIProtosHelper.defaultImageJ3DResultsViewerSettings).read(flags);
+	}
+
+	/**
+	 * Read the TranslateResultsSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the TranslateResultsSettings
+	 */
+	public static TranslateResultsSettings readTranslateResultsSettings(int flags)
+	{
+		return new ConfigurationReader<TranslateResultsSettings>(TranslateResultsSettings.getDefaultInstance())
+				.read(flags);
 	}
 
 	/**

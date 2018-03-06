@@ -588,3 +588,12 @@ message ImageJ3DResultsViewerSettings {
 	double pixel_size = 9;
 	ResultsTableSettings results_table_settings = 10;
 }
+
+// Contains settings for the Translate Results plugin
+message TranslateResultsSettings {
+	string input_option = 1;
+	double dx = 2;
+	double dy = 3;
+	double dz = 4;
+	DistanceUnit distance_unit = 5;
+}

@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 /*----------------------------------------------------------------------------- 
@@ -32,11 +33,6 @@ import ij.plugin.PlugIn;
 public class TranslateResults implements PlugIn
 {
 	private static final String TITLE = "Translate Results";
-	private static String inputOption = "";
-	private static double dx = 0;
-	private static double dy = 0;
-	private static double dz = 0;
-	private static DistanceUnit distanceUnit = DistanceUnit.PIXEL;
 
 	/*
 	 * (non-Javadoc)
@@ -52,26 +48,30 @@ public class TranslateResults implements PlugIn
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;
 		}
+		
+		TranslateResultsSettings.Builder settings = SettingsManager.readTranslateResultsSettings(0).toBuilder();
 
 		// Show a dialog allowing the results set to be filtered
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addMessage("Select a dataset to translate");
-		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-		gd.addNumericField("x", dx, 3);
-		gd.addNumericField("y", dy, 3);
-		gd.addNumericField("z", dz, 3);
-		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), distanceUnit.getNumber());
+		ResultsManager.addInput(gd, settings.getInputOption(), InputSource.MEMORY);
+		gd.addNumericField("x", settings.getDx(), 3);
+		gd.addNumericField("y", settings.getDy(), 3);
+		gd.addNumericField("z", settings.getDz(), 3);
+		gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(), settings.getDistanceUnitValue());
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
 
-		inputOption = ResultsManager.getInputSource(gd);
-		dx = gd.getNextNumber();
-		dy = gd.getNextNumber();
-		dz = gd.getNextNumber();
-		distanceUnit = DistanceUnit.forNumber(gd.getNextChoiceIndex());
-
-		MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
+		settings.setInputOption(ResultsManager.getInputSource(gd));
+		settings.setDx(gd.getNextNumber());
+		settings.setDy(gd.getNextNumber());
+		settings.setDz(gd.getNextNumber());
+		settings.setDistanceUnitValue(gd.getNextChoiceIndex());
+		
+		SettingsManager.writeSettings(settings);		
+		
+		MemoryPeakResults results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
@@ -81,7 +81,7 @@ public class TranslateResults implements PlugIn
 		TypeConverter<DistanceUnit> c;
 		try
 		{
-			c = results.getDistanceConverter(distanceUnit);
+			c = results.getDistanceConverter(settings.getDistanceUnit());
 		}
 		catch (DataException e)
 		{
@@ -89,9 +89,9 @@ public class TranslateResults implements PlugIn
 			return;
 		}
 
-		final float x = (float) c.convertBack(dx);
-		final float y = (float) c.convertBack(dy);
-		final float z = (float) c.convertBack(dz);
+		final float x = (float) c.convertBack(settings.getDx());
+		final float y = (float) c.convertBack(settings.getDy());
+		final float z = (float) c.convertBack(settings.getDz());
 
 		// Reset the 2D bounds
 		if (x != 0 || y != 0)

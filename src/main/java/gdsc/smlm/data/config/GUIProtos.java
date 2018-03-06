@@ -38279,6 +38279,818 @@ public final class GUIProtos {
 
   }
 
+  public interface TranslateResultsSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.TranslateResultsSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    java.lang.String getInputOption();
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getInputOptionBytes();
+
+    /**
+     * <code>double dx = 2;</code>
+     */
+    double getDx();
+
+    /**
+     * <code>double dy = 3;</code>
+     */
+    double getDy();
+
+    /**
+     * <code>double dz = 4;</code>
+     */
+    double getDz();
+
+    /**
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+     */
+    int getDistanceUnitValue();
+    /**
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+     */
+    gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Translate Results plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.TranslateResultsSettings}
+   */
+  public  static final class TranslateResultsSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.TranslateResultsSettings)
+      TranslateResultsSettingsOrBuilder {
+    // Use TranslateResultsSettings.newBuilder() to construct.
+    private TranslateResultsSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TranslateResultsSettings() {
+      inputOption_ = "";
+      dx_ = 0D;
+      dy_ = 0D;
+      dz_ = 0D;
+      distanceUnit_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private TranslateResultsSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              inputOption_ = s;
+              break;
+            }
+            case 17: {
+
+              dx_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              dy_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              dz_ = input.readDouble();
+              break;
+            }
+            case 40: {
+              int rawValue = input.readEnum();
+
+              distanceUnit_ = rawValue;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.class, gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.Builder.class);
+    }
+
+    public static final int INPUT_OPTION_FIELD_NUMBER = 1;
+    private volatile java.lang.Object inputOption_;
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    public java.lang.String getInputOption() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        inputOption_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string input_option = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInputOptionBytes() {
+      java.lang.Object ref = inputOption_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        inputOption_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DX_FIELD_NUMBER = 2;
+    private double dx_;
+    /**
+     * <code>double dx = 2;</code>
+     */
+    public double getDx() {
+      return dx_;
+    }
+
+    public static final int DY_FIELD_NUMBER = 3;
+    private double dy_;
+    /**
+     * <code>double dy = 3;</code>
+     */
+    public double getDy() {
+      return dy_;
+    }
+
+    public static final int DZ_FIELD_NUMBER = 4;
+    private double dz_;
+    /**
+     * <code>double dz = 4;</code>
+     */
+    public double getDz() {
+      return dz_;
+    }
+
+    public static final int DISTANCE_UNIT_FIELD_NUMBER = 5;
+    private int distanceUnit_;
+    /**
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+     */
+    public int getDistanceUnitValue() {
+      return distanceUnit_;
+    }
+    /**
+     * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+     */
+    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
+      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+      return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getInputOptionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, inputOption_);
+      }
+      if (dx_ != 0D) {
+        output.writeDouble(2, dx_);
+      }
+      if (dy_ != 0D) {
+        output.writeDouble(3, dy_);
+      }
+      if (dz_ != 0D) {
+        output.writeDouble(4, dz_);
+      }
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        output.writeEnum(5, distanceUnit_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getInputOptionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, inputOption_);
+      }
+      if (dx_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, dx_);
+      }
+      if (dy_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, dy_);
+      }
+      if (dz_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, dz_);
+      }
+      if (distanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(5, distanceUnit_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings other = (gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) obj;
+
+      boolean result = true;
+      result = result && getInputOption()
+          .equals(other.getInputOption());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDx())
+          == java.lang.Double.doubleToLongBits(
+              other.getDx()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDy())
+          == java.lang.Double.doubleToLongBits(
+              other.getDy()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDz())
+          == java.lang.Double.doubleToLongBits(
+              other.getDz()));
+      result = result && distanceUnit_ == other.distanceUnit_;
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + INPUT_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getInputOption().hashCode();
+      hash = (37 * hash) + DX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDx()));
+      hash = (37 * hash) + DY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDy()));
+      hash = (37 * hash) + DZ_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDz()));
+      hash = (37 * hash) + DISTANCE_UNIT_FIELD_NUMBER;
+      hash = (53 * hash) + distanceUnit_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Translate Results plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.TranslateResultsSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.TranslateResultsSettings)
+        gdsc.smlm.data.config.GUIProtos.TranslateResultsSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.class, gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        inputOption_ = "";
+
+        dx_ = 0D;
+
+        dy_ = 0D;
+
+        dz_ = 0D;
+
+        distanceUnit_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings build() {
+        gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings result = new gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings(this);
+        result.inputOption_ = inputOption_;
+        result.dx_ = dx_;
+        result.dy_ = dy_;
+        result.dz_ = dz_;
+        result.distanceUnit_ = distanceUnit_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings.getDefaultInstance()) return this;
+        if (!other.getInputOption().isEmpty()) {
+          inputOption_ = other.inputOption_;
+          onChanged();
+        }
+        if (other.getDx() != 0D) {
+          setDx(other.getDx());
+        }
+        if (other.getDy() != 0D) {
+          setDy(other.getDy());
+        }
+        if (other.getDz() != 0D) {
+          setDz(other.getDz());
+        }
+        if (other.distanceUnit_ != 0) {
+          setDistanceUnitValue(other.getDistanceUnitValue());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object inputOption_ = "";
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public java.lang.String getInputOption() {
+        java.lang.Object ref = inputOption_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          inputOption_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInputOptionBytes() {
+        java.lang.Object ref = inputOption_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          inputOption_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOption(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder clearInputOption() {
+        
+        inputOption_ = getDefaultInstance().getInputOption();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string input_option = 1;</code>
+       */
+      public Builder setInputOptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        inputOption_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double dx_ ;
+      /**
+       * <code>double dx = 2;</code>
+       */
+      public double getDx() {
+        return dx_;
+      }
+      /**
+       * <code>double dx = 2;</code>
+       */
+      public Builder setDx(double value) {
+        
+        dx_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double dx = 2;</code>
+       */
+      public Builder clearDx() {
+        
+        dx_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double dy_ ;
+      /**
+       * <code>double dy = 3;</code>
+       */
+      public double getDy() {
+        return dy_;
+      }
+      /**
+       * <code>double dy = 3;</code>
+       */
+      public Builder setDy(double value) {
+        
+        dy_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double dy = 3;</code>
+       */
+      public Builder clearDy() {
+        
+        dy_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double dz_ ;
+      /**
+       * <code>double dz = 4;</code>
+       */
+      public double getDz() {
+        return dz_;
+      }
+      /**
+       * <code>double dz = 4;</code>
+       */
+      public Builder setDz(double value) {
+        
+        dz_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double dz = 4;</code>
+       */
+      public Builder clearDz() {
+        
+        dz_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int distanceUnit_ = 0;
+      /**
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+       */
+      public int getDistanceUnitValue() {
+        return distanceUnit_;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+       */
+      public Builder setDistanceUnitValue(int value) {
+        distanceUnit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+       */
+      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getDistanceUnit() {
+        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(distanceUnit_);
+        return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+       */
+      public Builder setDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        distanceUnit_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.gdsc.smlm.data.config.DistanceUnit distance_unit = 5;</code>
+       */
+      public Builder clearDistanceUnit() {
+        
+        distanceUnit_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.TranslateResultsSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.TranslateResultsSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TranslateResultsSettings>
+        PARSER = new com.google.protobuf.AbstractParser<TranslateResultsSettings>() {
+      public TranslateResultsSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new TranslateResultsSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TranslateResultsSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TranslateResultsSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -38379,6 +39191,11 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -38635,12 +39452,15 @@ public final class GUIProtos {
       "config.Image3DDrawingMode\022\022\n\npixel_size\030" +
       "\t \001(\001\022K\n\026results_table_settings\030\n \001(\0132+." +
       "gdsc.smlm.data.config.ResultsTableSettin" +
-      "gs*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022" +
-      "\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLAT" +
-      "E\020\002*b\n\022Image3DDrawingMode\022\026\n\022DRAW_3D_FIX",
-      "ED_SIZE\020\000\022\030\n\024DRAW_3D_XY_PRECISION\020\001\022\032\n\026D" +
-      "RAW_3D_XYZ_DEVIATIONS\020\002B\013B\tGUIProtosb\006pr" +
-      "oto3"
+      "gs\"\220\001\n\030TranslateResultsSettings\022\024\n\014input" +
+      "_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n" +
+      "\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gdsc.",
+      "smlm.data.config.DistanceUnit*O\n\014Templat" +
+      "eType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_T" +
+      "EMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002*b\n\022Image3" +
+      "DDrawingMode\022\026\n\022DRAW_3D_FIXED_SIZE\020\000\022\030\n\024" +
+      "DRAW_3D_XY_PRECISION\020\001\022\032\n\026DRAW_3D_XYZ_DE" +
+      "VIATIONS\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -38779,6 +39599,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
         new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", "PixelSize", "ResultsTableSettings", });
+    internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
+      getDescriptor().getMessageTypes().get(20);
+    internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor,
+        new java.lang.String[] { "InputOption", "Dx", "Dy", "Dz", "DistanceUnit", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();
