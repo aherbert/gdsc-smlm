@@ -5876,9 +5876,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private boolean showLoadDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-
 		String[] images = Utils.getImageList(Utils.GREY_SCALE);
+		if (images.length == 0)
+		{
+			IJ.error(TITLE, "No greyscale benchmark images");
+			return false;
+		}
+		
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Image", images, benchmarkImage);
 		gd.addFilenameField("Results_file", benchmarkFile);
 		gd.addMessage(
