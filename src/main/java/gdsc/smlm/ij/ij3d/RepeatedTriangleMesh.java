@@ -67,8 +67,24 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		Point3f[] vertices = new Point3f[objectVertices.length * points.length];
 
 		final int n = objectVertices.length;
-		if (sizes == null)
+		boolean sameSize = false;
+		if (sizes == null || (sameSize = sameSize(sizes)))
 		{
+			if (sameSize)
+			{
+				// Scale the input object
+				final Point3f s = sizes[0];
+				final float sx = s.x;
+				final float sy = s.y;
+				final float sz = s.z;
+				for (int j = 0; j < n; j++)
+				{
+					objectVertices[j].x *= sx;
+					objectVertices[j].y *= sy;
+					objectVertices[j].z *= sz;
+				}
+			}
+
 			// Translate
 			for (int i = 0, k = 0; i < points.length; i++)
 			{
@@ -108,6 +124,26 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 
 		// Update the geometry
 		this.setGeometry(createGeometry());
+	}
+
+	/**
+	 * Check if all the points are the same size.
+	 *
+	 * @param sizes
+	 *            the sizes (must be an array of at least 1)
+	 * @return true, if successful
+	 */
+	public static boolean sameSize(Point3f[] sizes)
+	{
+		if (sizes.length == 1)
+			return true;
+		final Point3f s = sizes[0];
+		for (int j = 1; j < sizes.length; j++)
+		{
+			if (!sizes[j].equals(s))
+				return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -240,13 +276,27 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 				objectNormals = getNormals(objectVertices);
 
 			final Vector3f[] normals = new Vector3f[nValid];
-			for (int i = 0, k = 0; i < points.length; i++)
+
+			// Binary fill
+			int fill = objectNormals.length;
+			System.arraycopy(objectNormals, 0, normals, 0, fill);
+			for (int i = 2; i < points.length; i *= 2)
 			{
-				for (int j = 0; j < objectNormals.length; j++)
-				{
-					normals[k++] = objectNormals[j];
-				}
+				System.arraycopy(normals, 0, normals, fill, fill);
+				fill *= 2;
 			}
+			// Final fill
+			System.arraycopy(normals, 0, normals, fill, normals.length - fill);
+
+			//			final Vector3f[] normals2 = normals.clone();
+			//			for (int i = 0, k = 0; i < points.length; i++)
+			//			{
+			//				for (int j = 0; j < objectNormals.length; j++)
+			//				{
+			//					normals[k++] = objectNormals[j];
+			//				}
+			//			}
+			//			assert Arrays.equals(normals, normals2) : "Not the same fill";
 
 			ta.setNormals(0, normals);
 
@@ -271,43 +321,43 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	{
 		return super.createAppearance();
 
-//		final Appearance appearance = new Appearance();
-//		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
-//
-//		final PolygonAttributes polyAttrib = new PolygonAttributes();
-//		polyAttrib.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-//		if (this.shaded)
-//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_FILL);
-//		else
-//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-//		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE);
-//
-//		// This is what makes the polygons look the same on both sides!
-//		//polyAttrib.setBackFaceNormalFlip(true);
-//
-//		appearance.setPolygonAttributes(polyAttrib);
-//
-//		final ColoringAttributes colorAttrib = new ColoringAttributes();
-//		colorAttrib.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
-//		if (null != color) // is null when colors are vertex-wise
-//			colorAttrib.setColor(color);
-//		appearance.setColoringAttributes(colorAttrib);
-//
-//		final TransparencyAttributes tr = new TransparencyAttributes();
-//		final int mode = TransparencyAttributes.FASTEST;
-//		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
-//		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
-//		tr.setTransparencyMode(mode);
-//		tr.setTransparency(transparency);
-//		appearance.setTransparencyAttributes(tr);
-//
-//		final Material material = new Material();
-//		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
-//		material.setAmbientColor(0.1f, 0.1f, 0.1f);
-//		material.setSpecularColor(0.1f, 0.1f, 0.1f);
-//		material.setDiffuseColor(0.1f, 0.1f, 0.1f);
-//		appearance.setMaterial(material);
-//		return appearance;
+		//		final Appearance appearance = new Appearance();
+		//		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
+		//
+		//		final PolygonAttributes polyAttrib = new PolygonAttributes();
+		//		polyAttrib.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+		//		if (this.shaded)
+		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+		//		else
+		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+		//		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE);
+		//
+		//		// This is what makes the polygons look the same on both sides!
+		//		//polyAttrib.setBackFaceNormalFlip(true);
+		//
+		//		appearance.setPolygonAttributes(polyAttrib);
+		//
+		//		final ColoringAttributes colorAttrib = new ColoringAttributes();
+		//		colorAttrib.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+		//		if (null != color) // is null when colors are vertex-wise
+		//			colorAttrib.setColor(color);
+		//		appearance.setColoringAttributes(colorAttrib);
+		//
+		//		final TransparencyAttributes tr = new TransparencyAttributes();
+		//		final int mode = TransparencyAttributes.FASTEST;
+		//		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
+		//		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
+		//		tr.setTransparencyMode(mode);
+		//		tr.setTransparency(transparency);
+		//		appearance.setTransparencyAttributes(tr);
+		//
+		//		final Material material = new Material();
+		//		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
+		//		material.setAmbientColor(0.1f, 0.1f, 0.1f);
+		//		material.setSpecularColor(0.1f, 0.1f, 0.1f);
+		//		material.setDiffuseColor(0.1f, 0.1f, 0.1f);
+		//		appearance.setMaterial(material);
+		//		return appearance;
 	}
 
 	/**

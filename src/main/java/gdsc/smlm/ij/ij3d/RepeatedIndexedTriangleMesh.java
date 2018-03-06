@@ -77,8 +77,24 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 		this.nFaces = faces.length;
 
 		final int n = objectVertices.length;
-		if (sizes == null)
+		boolean sameSize = false;
+		if (sizes == null || (sameSize = RepeatedTriangleMesh.sameSize(sizes)))
 		{
+			if (sameSize)
+			{
+				// Scale the input object
+				final Point3f s = sizes[0];
+				final float sx = s.x;
+				final float sy = s.y;
+				final float sz = s.z;
+				for (int j = 0; j < n; j++)
+				{
+					objectVertices[j].x *= sx;
+					objectVertices[j].y *= sy;
+					objectVertices[j].z *= sz;
+				}
+			}
+			
 			// Translate
 			for (int i = 0, k = 0; i < points.length; i++)
 			{
