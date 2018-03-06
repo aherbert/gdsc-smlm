@@ -39,6 +39,7 @@ import customnode.CustomPointMesh;
 import customnode.CustomTriangleMesh;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 
@@ -120,8 +121,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         TETRAHEDRON	{ public String getName() { return "Tetrahedron"; }},
         OCTAHEDRON{ public String getName() { return "Octahedron"; }},
         ICOSAHEDRON	{ public String getName() { return "Icosahedron"; }},
-        LOW_RES_SPHERE { public String getName() { return "Low Resolution Sphere"; }},
-        HIGH_RES_SPHERE	{ public String getName() { return "High Resolution Sphere"; }},
+        LOW_RES_SPHERE { public String getName() { return "Low Resolution Sphere"; }
+        		public boolean isHighResolution() { return true; }},
+        HIGH_RES_SPHERE	{ public String getName() { return "High Resolution Sphere"; }
+        		public boolean isHighResolution() { return true; }},
         ;
 
 		public String getShortName()
@@ -130,6 +133,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}		
 		
 		public boolean is2D() { return false; }
+		
+		public boolean isHighResolution() { return false; }
 
 		public static Rendering forNumber(int rendering)
 		{
@@ -440,6 +445,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.addContent(content);
 		univ.setAutoAdjustView(auto);
 
+		//		// Debug vertex normals
+		//		GeometryArray ga = (GeometryArray) mesh.getGeometry();
+		//		TurboList<Point3f> lines = new TurboList<Point3f>();
+		//		float[] coordinates = new float[ga.getValidVertexCount() * 3];
+		//		float[] normals = new float[coordinates.length];
+		//		ga.getCoordinates(0, coordinates);
+		//		ga.getNormals(0, normals);
+		//		for (int i = 0; i < coordinates.length; i += 3)
+		//		{
+		//			Point3f p = new Point3f(coordinates[i], coordinates[i + 1], coordinates[i + 2]);
+		//			lines.add(p);
+		//			p = (Point3f) p.clone();
+		//			p.x += normals[i];
+		//			p.y += normals[i + 1];
+		//			p.z += normals[i + 2];
+		//			lines.add(p);
+		//		}
+		//		univ.removeContent("Normals");
+		//		univ.addLineMesh(lines, null, "Normals", false);
+
 		IJ.showStatus("");
 	}
 
@@ -565,6 +590,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// are modified through the mesh then the appearance will change. For now just use
 		// the RepeatedTriangleMesh.
 
+		// Also the IndexedTriangleMesh has one normal per vertex and this causes a colour fall-off
+		// on the triangle plane towards the edges. The TriangleMesh colours the entire surface
+		// of each triangle the same which looks 'normal'.
+
 		int mode = 2;
 		if (mode == 1)
 		{
@@ -609,8 +638,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (mode == 2)
 		{
 			IJ.showStatus("Creating 3D mesh ...");
+			Rendering r = Rendering.forNumber(settings.getRendering());
+			double creaseAngle = (r.isHighResolution()) ? 44 : 0;
+			IJTrackProgress progress = null; // Used for debugging construction time
 			return new RepeatedTriangleMesh(point.toArray(new Point3f[singlePointSize]),
-					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
+					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
 		}
 
 		// Old method:		
@@ -919,7 +951,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// Consume left-mouse clicks with the Ctrl or Alt key down.
 				// Single clicks only if showing the results table.
 				// Double clicks for centring the universe.
-				
+
 				if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown() || e.isAltDown()))
 					return false;
 				if (resultsTableSettings.getShowTable() && e.getClickCount() == 1)

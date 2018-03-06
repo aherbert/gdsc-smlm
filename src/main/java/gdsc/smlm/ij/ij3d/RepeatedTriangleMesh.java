@@ -14,6 +14,9 @@ import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomTriangleMesh;
+import gdsc.core.logging.NullTrackProgress;
+import gdsc.core.logging.Ticker;
+import gdsc.core.logging.TrackProgress;
 
 /**
  * Use a triangle mesh object to represent a set of points. The object is duplicated, scaled and translated for
@@ -48,17 +51,52 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	public RepeatedTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color,
 			float transp)
 	{
+		this(objectVertices, points, sizes, color, transp, -1, NullTrackProgress.INSTANCE);
+	}
+
+	/**
+	 * Instantiates a new repeated indexed triangle mesh.
+	 * <p>
+	 * This will repeat the object for each input point. The object
+	 * is assumed to be centred on the origin. It will be scaled and
+	 * translated for each input point.
+	 * <p>
+	 * The crease angle is used to collapse facets normals at a vertex into a single normal for smoothing shading. Set
+	 * to 0 to draw the polygon with no shading.
+	 *
+	 * @param objectVertices
+	 *            the vertices of the object for a single point
+	 * @param points
+	 *            the points
+	 * @param sizes
+	 *            the size of each point
+	 * @param color
+	 *            the color
+	 * @param transp
+	 *            the transparency
+	 * @param creaseAngle
+	 *            the crease angle (in degrees). Set to negative to ignore. The default is 44.
+	 * @param progress
+	 *            the progress
+	 */
+	public RepeatedTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color,
+			float transp, double creaseAngle, TrackProgress progress)
+	{
 		// Create empty 
 		super(null, color, transp);
 
 		if (sizes != null && points.length != sizes.length)
 			throw new IllegalArgumentException("Points and sizes must be the same length");
 
+		progress = NullTrackProgress.createIfNull(progress);
+
+		if (progress.isStatus())
+			progress.status("Standardising object vertices");
 		this.objectVertices = objectVertices;
 
 		checkFacets(objectVertices);
 
-		objectNormals = getNormals(objectVertices);
+		objectNormals = getNormals(objectVertices, creaseAngle);
 
 		// Now build the actual vertices by repeating the points.
 		this.points = points;
@@ -67,6 +105,9 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		Point3f[] vertices = new Point3f[objectVertices.length * points.length];
 
 		final int n = objectVertices.length;
+		if (progress.isStatus())
+			progress.status("Computing vertices");
+		Ticker ticker = Ticker.createStarted(progress, n, false);
 		boolean sameSize = false;
 		if (sizes == null || (sameSize = sameSize(sizes)))
 		{
@@ -97,6 +138,7 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 					vertices[k++] = new Point3f(objectVertices[j].x + dx, objectVertices[j].y + dy,
 							objectVertices[j].z + dz);
 				}
+				ticker.tick();
 			}
 		}
 		else
@@ -117,12 +159,17 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 					vertices[k++] = new Point3f(objectVertices[j].x * sx + dx, objectVertices[j].y * sy + dy,
 							objectVertices[j].z * sz + dz);
 				}
+				ticker.tick();
 			}
 		}
+
+		ticker.stop();
 
 		this.mesh = Arrays.asList(vertices);
 
 		// Update the geometry
+		if (progress.isStatus())
+			progress.status("Creating geometry");
 		this.setGeometry(createGeometry());
 	}
 
@@ -272,9 +319,6 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		else
 		{
 			// Use the same normals for each repeated object
-			if (objectNormals == null)
-				objectNormals = getNormals(objectVertices);
-
 			final Vector3f[] normals = new Vector3f[nValid];
 
 			// Binary fill
@@ -300,8 +344,9 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 
 			ta.setNormals(0, normals);
 
-			final GeometryInfo gi = new GeometryInfo(ta);
-			result = gi.getGeometryArray();
+			//final GeometryInfo gi = new GeometryInfo(ta);
+			//result = gi.getGeometryArray();
+			result = ta;
 		}
 
 		result.setCapability(GeometryArray.ALLOW_NORMAL_WRITE);
@@ -412,13 +457,15 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	}
 
 	/**
-	 * Gets the normals assuming triangle vertices
+	 * Gets the normals assuming triangle vertices.
 	 *
 	 * @param vertices
 	 *            the vertices
+	 * @param creaseAngle
+	 *            the crease angle (in degrees)
 	 * @return the normals
 	 */
-	public static Vector3f[] getNormals(Point3f[] vertices)
+	public static Vector3f[] getNormals(Point3f[] vertices, double creaseAngle)
 	{
 		int nVertices = vertices.length;
 		Vector3f[] normals = new Vector3f[nVertices];
@@ -427,6 +474,8 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		ta.setCoordinates(0, vertices);
 		final GeometryInfo gi = new GeometryInfo(ta);
 		final NormalGenerator ng = new NormalGenerator();
+		if (creaseAngle >= 0 && creaseAngle <= 180)
+			ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
 		ng.generateNormals(gi);
 		Vector3f[] n = gi.getNormals();
 		int[] indices = gi.getNormalIndices();
