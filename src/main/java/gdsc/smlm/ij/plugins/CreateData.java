@@ -115,6 +115,7 @@ import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
+import gdsc.smlm.results.ImageSource.ReadHint;
 import gdsc.smlm.results.ImmutableMemoryPeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -5488,7 +5489,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		IJImageSource imageSource = new IJImageSource(imp);
 		results.setSource(imageSource);
 
-		// Get the calibration
+		// Load the settings as these are used in the dialog
 		settings = SettingsManager.readCreateDataSettings(0).toBuilder();
 
 		simulationParameters = showSimulationParametersDialog(imp, results);
@@ -5537,30 +5538,36 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (results.hasNoise())
 			return;
 
+		IJ.showStatus("Estimating noise ...");
+		
 		// Compute noise per frame
 		ImageStack stack = imp.getImageStack();
 		final int width = stack.getWidth();
 		final int height = stack.getHeight();
 		final IJImageSource source = new IJImageSource(imp);
 		final float[] noise = new float[source.getFrames() + 1];
+		source.setReadHint(ReadHint.SEQUENTIAL);
+		source.open();
 		for (int slice = 1; slice < noise.length; slice++)
 		{
-			stack.getPixels(slice);
 			float[] data = source.next();
 			// Use the trimmed method as there may be a lot of spots in the frame
 			noise[slice] = (float) FitWorker.estimateNoise(data, width, height,
 					NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 		}
 
-		Statistics stats = new Statistics(Arrays.copyOfRange(noise, 1, noise.length));
-		System.out.printf("Noise = %.3f +/- %.3f (%d)\n", stats.getMean(), stats.getStandardDeviation(), stats.getN());
+		//Statistics stats = new Statistics(Arrays.copyOfRange(noise, 1, noise.length));
+		//System.out.printf("Noise = %.3f +/- %.3f (%d)\n", stats.getMean(), stats.getStandardDeviation(), stats.getN());
 
+		// Convert noise units from counts to the result format
+		final TypeConverter<IntensityUnit> c = results.getIntensityConverter(IntensityUnit.COUNT);
+		
 		results.forEach(new PeakResultProcedure()
 		{
 			public void execute(PeakResult p)
 			{
 				if (p.getFrame() < noise.length)
-					p.setNoise(noise[p.getFrame()]);
+					p.setNoise(c.convertBack(noise[p.getFrame()]));
 			}
 		});
 	}
