@@ -916,6 +916,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			private boolean consumeEvent(final MouseEvent e)
 			{
+				// Consume left-mouse clicks with the Ctrl or Alt key down.
+				// Single clicks only if showing the results table.
+				// Double clicks for centring the universe.
+				
 				if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown() || e.isAltDown()))
 					return false;
 				if (resultsTableSettings.getShowTable() && e.getClickCount() == 1)
