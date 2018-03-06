@@ -118,6 +118,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				public boolean is2D() { return true; }},
 		SQUARE { public String getName() { return "Square"; }
 				public boolean is2D() { return true; }},
+		OCTAGON{ public String getName() { return "Octagon"; }
+			public boolean is2D() { return true; }},
+		LOW_RES_CIRCLE { public String getName() { return "Low resolution circle"; }
+			public boolean is2D() { return true; }},
+		HIGH_RES_CIRCLE { public String getName() { return "High resolution circle"; }
+			public boolean is2D() { return true; }},
         TETRAHEDRON	{ public String getName() { return "Tetrahedron"; }},
         OCTAHEDRON{ public String getName() { return "Octahedron"; }},
         ICOSAHEDRON	{ public String getName() { return "Icosahedron"; }},
@@ -427,6 +433,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		Content content = univ.createContent(mesh, name);
 
 		content.setUserData(data);
+		// Prevent relative rotation
+		content.setLocked(true);
 
 		IJ.showStatus("Drawing 3D content ...");
 
@@ -923,28 +931,30 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			public void mousePressed(final MouseEvent e)
 			{
 				//System.out.println("plugin mousePressed");
-				if (consumeEvent(e))
-				{
-					// Image3DUniverse adds a canvas mouse listener that calls showPopup.
-					// This selects the content. It ignores the e.isConsumed() flag so
-					// we translate the point offscreen.
-					e.consume();
-					e.translatePoint(1000000, 1000000);
-				}
+				// Not needed now the content is locked to prevent annoying local rotation
+				//if (consumeEvent(e))
+				//{
+				//	// Image3DUniverse adds a canvas mouse listener that calls showPopup.
+				//	// This selects the content. It ignores the e.isConsumed() flag so
+				//	// we translate the point offscreen.
+				//	e.consume();
+				//	e.translatePoint(1000000, 1000000);
+				//}
 			}
 
 			@Override
 			public void mouseReleased(final MouseEvent e)
 			{
 				//System.out.println("plugin mouseReleased");
-				if (consumeEvent(e))
-				{
-					// Image3DUniverse adds a canvas mouse listener that calls showPopup.
-					// This selects the content. It ignores the e.isConsumed() flag so
-					// we translate the point offscreen.
-					e.consume();
-					e.translatePoint(1000000, 1000000);
-				}
+				// Not needed now the content is locked to prevent annoying local rotation
+				//if (consumeEvent(e))
+				//{
+				//	// Image3DUniverse adds a canvas mouse listener that calls showPopup.
+				//	// This selects the content. It ignores the e.isConsumed() flag so
+				//	// we translate the point offscreen.
+				//	e.consume();
+				//	e.translatePoint(1000000, 1000000);
+				//}
 			}
 
 			private boolean consumeEvent(final MouseEvent e)
@@ -1042,7 +1052,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		resetSelectedView = new JMenuItem("Reset Selected Transformation");
 		resetSelectedView.addActionListener(this);
 		add.add(resetSelectedView);
-		
+
 		add.addSeparator();
 
 		changeColour = new JMenuItem("Change Colour");
@@ -1122,8 +1132,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ResetViewContentAction implements ContentAction
 	{
+		final boolean error;
+
+		public ResetViewContentAction(boolean error)
+		{
+			this.error = error;
+		}
+
 		public int run(Content c)
 		{
+			if (c.isLocked())
+			{
+				if (error)
+				{
+					IJ.error(TITLE, c.getName() + " is locked");
+					return -1;
+				}
+				return 0;
+			}
 			final Transform3D t = new Transform3D();
 			c.setTransform(t);
 			return 0;
@@ -1253,11 +1279,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			univ.resetView();
 			univ.select(null);
-			action = new ResetViewContentAction();
+			action = new ResetViewContentAction(false);
 		}
 		else if (src == resetSelectedView)
 		{
-			action = new ResetViewContentAction();
+			action = new ResetViewContentAction(true);
 		}
 		else if (src == colourSurface)
 		{
@@ -1299,7 +1325,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return createTetrahedron();
 			case TRIANGLE:
 				return createTriangle();
-				
+			case OCTAGON:
+				return createDisc(0, 0, 0, 0, 0, 1, 1, 8);
+			case LOW_RES_CIRCLE:
+				return createDisc(0, 0, 0, 0, 0, 1, 1, 12);
+			case HIGH_RES_CIRCLE:
+				return createDisc(0, 0, 0, 0, 0, 1, 1, 20);
+
 			// All handle the same way
 			case HIGH_RES_SPHERE:
 				subdivisions++;
@@ -1307,14 +1339,101 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				subdivisions++;
 			case ICOSAHEDRON:
 				break;
-				
+
 			case POINT:
 			default:
 				throw new IllegalStateException();
 		}
-		
+
 		// All spheres based on icosahedron for speed
 		return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
+	}
+
+	/**
+	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the disc is
+	 * removed.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param nx
+	 *            the nx
+	 * @param ny
+	 *            the ny
+	 * @param nz
+	 *            the nz
+	 * @param radius
+	 *            the radius
+	 * @param edgePoints
+	 *            the edge points
+	 * @return the list
+	 */
+	static public List<Point3f> createDisc(final double x, final double y, final double z, final double nx,
+			final double ny, final double nz, final double radius, final int edgePoints)
+	{
+		double ax, ay, az;
+
+		if (Math.abs(nx) >= Math.abs(ny))
+		{
+			final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
+			ax = -nz * scale;
+			ay = 0;
+			az = nx * scale;
+		}
+		else
+		{
+			final double scale = 1 / Math.sqrt(ny * ny + nz * nz);
+			ax = 0;
+			ay = nz * scale;
+			az = -ny * scale;
+		}
+
+		/*
+		 * Now to find the other vector in that plane, do the
+		 * cross product of (ax,ay,az) with (nx,ny,nz)
+		 */
+
+		double bx = (ay * nz - az * ny);
+		double by = (az * nx - ax * nz);
+		double bz = (ax * ny - ay * nx);
+		final double bScale = 1 / Math.sqrt(bx * bx + by * by + bz * bz);
+		bx *= bScale;
+		by *= bScale;
+		bz *= bScale;
+
+		final double[] circleX = new double[edgePoints + 1];
+		final double[] circleY = new double[edgePoints + 1];
+		final double[] circleZ = new double[edgePoints + 1];
+
+		for (int i = 0; i < edgePoints + 1; ++i)
+		{
+			final double angle = (i * 2 * Math.PI) / edgePoints;
+			final double c = Math.cos(angle);
+			final double s = Math.sin(angle);
+			circleX[i] = x + radius * c * ax + radius * s * bx;
+			circleY[i] = y + radius * c * ay + radius * s * by;
+			circleZ[i] = z + radius * c * az + radius * s * bz;
+		}
+		final ArrayList<Point3f> list = new ArrayList<Point3f>();
+		final Point3f centre = new Point3f((float) x, (float) y, (float) z);
+		for (int i = 0; i < edgePoints; ++i)
+		{
+			final Point3f t2 = new Point3f((float) circleX[i], (float) circleY[i], (float) circleZ[i]);
+			final Point3f t3 = new Point3f((float) circleX[i + 1], (float) circleY[i + 1], (float) circleZ[i + 1]);
+			list.add(centre);
+			list.add(t2);
+			list.add(t3);
+
+			// We do not duplicate the triangle for both sides as we render the object as 2D
+			// with setBackFaceNormalFlip(true)
+			//list.add(centre);
+			//list.add(t3);
+			//list.add(t2);
+		}
+		return list;
 	}
 
 	// Note: The triangles are rendered on both sides so the handedness 
@@ -1428,7 +1547,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 *
 	 * @return the vertices and faces of the the object
 	 */
-	private static Pair<Point3f[], int[]> createIndexedObject(Rendering  rendering)
+	private static Pair<Point3f[], int[]> createIndexedObject(Rendering rendering)
 	{
 		List<Point3f> list = createLocalisationObject(rendering);
 
