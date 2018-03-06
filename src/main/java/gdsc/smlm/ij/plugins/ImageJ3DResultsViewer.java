@@ -192,7 +192,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem resetZoom;
 	private JMenuItem resetAll;
 	private JMenuItem changeColour;
-	private JMenuItem toggleShading;
 	private JMenuItem resetSelectedView;
 	private JMenuItem colourSurface;
 	private JMenuItem updateTableSettings;
@@ -1034,29 +1033,25 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		add.addSeparator();
 
-		resetAll = new JMenuItem("Reset All");
+		resetAll = new JMenuItem("Reset All Transformations");
 		resetAll.addActionListener(this);
 		add.add(resetAll);
 
+		resetSelectedView = new JMenuItem("Reset Selected Transformation");
+		resetSelectedView.addActionListener(this);
+		add.add(resetSelectedView);
+		
 		add.addSeparator();
 
 		changeColour = new JMenuItem("Change Colour");
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
-		toggleShading = new JMenuItem("Toggle Shading");
-		toggleShading.addActionListener(this);
-		add.add(toggleShading);
-
-		resetSelectedView = new JMenuItem("Reset Selected");
-		resetSelectedView.addActionListener(this);
-		add.add(resetSelectedView);
-
-		add.addSeparator();
-
 		colourSurface = new JMenuItem("Colour surface from 2D image");
 		colourSurface.addActionListener(this);
 		add.add(colourSurface);
+
+		add.addSeparator();
 
 		updateTableSettings = new JMenuItem("Update results table settings");
 		updateTableSettings.addActionListener(this);
@@ -1075,15 +1070,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		 * @return 0 negative for error. No further content can be processed.
 		 */
 		public int run(Content c);
-	}
-
-	private static class ToggleShadedContentAction implements ContentAction
-	{
-		public int run(Content c)
-		{
-			c.setShaded(!c.isShaded());
-			return 0;
-		}
 	}
 
 	private static class ChangeColourContentAction implements ContentAction
@@ -1113,12 +1099,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// Use the latest settings
 				settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
 				ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-				gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
+				// Transparency can be set interactively using: Edit > Change Transparency
+				//gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
 				gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return -1;
-				settings.setTransparency(gd.getNextNumber());
+				//settings.setTransparency(gd.getNextNumber());
 				settings.setLut(gd.getNextChoiceIndex());
 				SettingsManager.writeSettings(settings);
 			}
@@ -1256,11 +1243,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// Actions to perform on content
 		ContentAction action = null;
-		if (src == toggleShading)
-		{
-			action = new ToggleShadedContentAction();
-		}
-		else if (src == changeColour)
+		if (src == changeColour)
 		{
 			action = new ChangeColourContentAction();
 		}
