@@ -122,143 +122,6 @@ public final class GUIProtos {
     // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.TemplateType)
   }
 
-  /**
-   * <pre>
-   * The drawing mode for the 3D image
-   * </pre>
-   *
-   * Protobuf enum {@code gdsc.smlm.data.config.Image3DDrawingMode}
-   */
-  public enum Image3DDrawingMode
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <pre>
-     * Draw using a fixed size
-     * </pre>
-     *
-     * <code>DRAW_3D_FIXED_SIZE = 0;</code>
-     */
-    DRAW_3D_FIXED_SIZE(0),
-    /**
-     * <pre>
-     * Draw using the XY precision for the size. This is to
-     * support rendering of 2D datasets.
-     * </pre>
-     *
-     * <code>DRAW_3D_XY_PRECISION = 1;</code>
-     */
-    DRAW_3D_XY_PRECISION(1),
-    /**
-     * <pre>
-     * Draw using the XYZ parameter deviations for the size
-     * </pre>
-     *
-     * <code>DRAW_3D_XYZ_DEVIATIONS = 2;</code>
-     */
-    DRAW_3D_XYZ_DEVIATIONS(2),
-    UNRECOGNIZED(-1),
-    ;
-
-    /**
-     * <pre>
-     * Draw using a fixed size
-     * </pre>
-     *
-     * <code>DRAW_3D_FIXED_SIZE = 0;</code>
-     */
-    public static final int DRAW_3D_FIXED_SIZE_VALUE = 0;
-    /**
-     * <pre>
-     * Draw using the XY precision for the size. This is to
-     * support rendering of 2D datasets.
-     * </pre>
-     *
-     * <code>DRAW_3D_XY_PRECISION = 1;</code>
-     */
-    public static final int DRAW_3D_XY_PRECISION_VALUE = 1;
-    /**
-     * <pre>
-     * Draw using the XYZ parameter deviations for the size
-     * </pre>
-     *
-     * <code>DRAW_3D_XYZ_DEVIATIONS = 2;</code>
-     */
-    public static final int DRAW_3D_XYZ_DEVIATIONS_VALUE = 2;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static Image3DDrawingMode valueOf(int value) {
-      return forNumber(value);
-    }
-
-    public static Image3DDrawingMode forNumber(int value) {
-      switch (value) {
-        case 0: return DRAW_3D_FIXED_SIZE;
-        case 1: return DRAW_3D_XY_PRECISION;
-        case 2: return DRAW_3D_XYZ_DEVIATIONS;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<Image3DDrawingMode>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        Image3DDrawingMode> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<Image3DDrawingMode>() {
-            public Image3DDrawingMode findValueByNumber(int number) {
-              return Image3DDrawingMode.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.GUIProtos.getDescriptor().getEnumTypes().get(1);
-    }
-
-    private static final Image3DDrawingMode[] VALUES = values();
-
-    public static Image3DDrawingMode valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private Image3DDrawingMode(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.Image3DDrawingMode)
-  }
-
   public interface GUIFilterSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.GUIFilterSettings)
       com.google.protobuf.MessageOrBuilder {
@@ -37064,13 +36927,9 @@ public final class GUIProtos {
     boolean getNewWindow();
 
     /**
-     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+     * <code>int32 size_mode = 8;</code>
      */
-    int getDrawingModeValue();
-    /**
-     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
-     */
-    gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode();
+    int getSizeMode();
 
     /**
      * <code>double pixel_size = 9;</code>
@@ -37089,6 +36948,36 @@ public final class GUIProtos {
      * <code>.gdsc.smlm.data.config.ResultsTableSettings results_table_settings = 10;</code>
      */
     gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder();
+
+    /**
+     * <code>int32 depth_mode = 11;</code>
+     */
+    int getDepthMode();
+
+    /**
+     * <code>double depth_range = 12;</code>
+     */
+    double getDepthRange();
+
+    /**
+     * <code>int32 dither_seed = 13;</code>
+     */
+    int getDitherSeed();
+
+    /**
+     * <code>int32 transparency_mode = 14;</code>
+     */
+    int getTransparencyMode();
+
+    /**
+     * <code>double min_transparency = 15;</code>
+     */
+    double getMinTransparency();
+
+    /**
+     * <code>double max_transparency = 16;</code>
+     */
+    double getMaxTransparency();
   }
   /**
    * <pre>
@@ -37113,8 +37002,14 @@ public final class GUIProtos {
       rendering_ = 0;
       shaded_ = false;
       newWindow_ = false;
-      drawingMode_ = 0;
+      sizeMode_ = 0;
       pixelSize_ = 0D;
+      depthMode_ = 0;
+      depthRange_ = 0D;
+      ditherSeed_ = 0;
+      transparencyMode_ = 0;
+      minTransparency_ = 0D;
+      maxTransparency_ = 0D;
     }
 
     @java.lang.Override
@@ -37179,9 +37074,8 @@ public final class GUIProtos {
               break;
             }
             case 64: {
-              int rawValue = input.readEnum();
 
-              drawingMode_ = rawValue;
+              sizeMode_ = input.readInt32();
               break;
             }
             case 73: {
@@ -37200,6 +37094,36 @@ public final class GUIProtos {
                 resultsTableSettings_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 88: {
+
+              depthMode_ = input.readInt32();
+              break;
+            }
+            case 97: {
+
+              depthRange_ = input.readDouble();
+              break;
+            }
+            case 104: {
+
+              ditherSeed_ = input.readInt32();
+              break;
+            }
+            case 112: {
+
+              transparencyMode_ = input.readInt32();
+              break;
+            }
+            case 121: {
+
+              minTransparency_ = input.readDouble();
+              break;
+            }
+            case 129: {
+
+              maxTransparency_ = input.readDouble();
               break;
             }
           }
@@ -37313,20 +37237,13 @@ public final class GUIProtos {
       return newWindow_;
     }
 
-    public static final int DRAWING_MODE_FIELD_NUMBER = 8;
-    private int drawingMode_;
+    public static final int SIZE_MODE_FIELD_NUMBER = 8;
+    private int sizeMode_;
     /**
-     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+     * <code>int32 size_mode = 8;</code>
      */
-    public int getDrawingModeValue() {
-      return drawingMode_;
-    }
-    /**
-     * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
-     */
-    public gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode() {
-      gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode result = gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.valueOf(drawingMode_);
-      return result == null ? gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.UNRECOGNIZED : result;
+    public int getSizeMode() {
+      return sizeMode_;
     }
 
     public static final int PIXEL_SIZE_FIELD_NUMBER = 9;
@@ -37357,6 +37274,60 @@ public final class GUIProtos {
      */
     public gdsc.smlm.data.config.ResultsProtos.ResultsTableSettingsOrBuilder getResultsTableSettingsOrBuilder() {
       return getResultsTableSettings();
+    }
+
+    public static final int DEPTH_MODE_FIELD_NUMBER = 11;
+    private int depthMode_;
+    /**
+     * <code>int32 depth_mode = 11;</code>
+     */
+    public int getDepthMode() {
+      return depthMode_;
+    }
+
+    public static final int DEPTH_RANGE_FIELD_NUMBER = 12;
+    private double depthRange_;
+    /**
+     * <code>double depth_range = 12;</code>
+     */
+    public double getDepthRange() {
+      return depthRange_;
+    }
+
+    public static final int DITHER_SEED_FIELD_NUMBER = 13;
+    private int ditherSeed_;
+    /**
+     * <code>int32 dither_seed = 13;</code>
+     */
+    public int getDitherSeed() {
+      return ditherSeed_;
+    }
+
+    public static final int TRANSPARENCY_MODE_FIELD_NUMBER = 14;
+    private int transparencyMode_;
+    /**
+     * <code>int32 transparency_mode = 14;</code>
+     */
+    public int getTransparencyMode() {
+      return transparencyMode_;
+    }
+
+    public static final int MIN_TRANSPARENCY_FIELD_NUMBER = 15;
+    private double minTransparency_;
+    /**
+     * <code>double min_transparency = 15;</code>
+     */
+    public double getMinTransparency() {
+      return minTransparency_;
+    }
+
+    public static final int MAX_TRANSPARENCY_FIELD_NUMBER = 16;
+    private double maxTransparency_;
+    /**
+     * <code>double max_transparency = 16;</code>
+     */
+    public double getMaxTransparency() {
+      return maxTransparency_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -37392,14 +37363,32 @@ public final class GUIProtos {
       if (newWindow_ != false) {
         output.writeBool(7, newWindow_);
       }
-      if (drawingMode_ != gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.DRAW_3D_FIXED_SIZE.getNumber()) {
-        output.writeEnum(8, drawingMode_);
+      if (sizeMode_ != 0) {
+        output.writeInt32(8, sizeMode_);
       }
       if (pixelSize_ != 0D) {
         output.writeDouble(9, pixelSize_);
       }
       if (resultsTableSettings_ != null) {
         output.writeMessage(10, getResultsTableSettings());
+      }
+      if (depthMode_ != 0) {
+        output.writeInt32(11, depthMode_);
+      }
+      if (depthRange_ != 0D) {
+        output.writeDouble(12, depthRange_);
+      }
+      if (ditherSeed_ != 0) {
+        output.writeInt32(13, ditherSeed_);
+      }
+      if (transparencyMode_ != 0) {
+        output.writeInt32(14, transparencyMode_);
+      }
+      if (minTransparency_ != 0D) {
+        output.writeDouble(15, minTransparency_);
+      }
+      if (maxTransparency_ != 0D) {
+        output.writeDouble(16, maxTransparency_);
       }
     }
 
@@ -37435,9 +37424,9 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, newWindow_);
       }
-      if (drawingMode_ != gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.DRAW_3D_FIXED_SIZE.getNumber()) {
+      if (sizeMode_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(8, drawingMode_);
+          .computeInt32Size(8, sizeMode_);
       }
       if (pixelSize_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
@@ -37446,6 +37435,30 @@ public final class GUIProtos {
       if (resultsTableSettings_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, getResultsTableSettings());
+      }
+      if (depthMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(11, depthMode_);
+      }
+      if (depthRange_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(12, depthRange_);
+      }
+      if (ditherSeed_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(13, ditherSeed_);
+      }
+      if (transparencyMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(14, transparencyMode_);
+      }
+      if (minTransparency_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(15, minTransparency_);
+      }
+      if (maxTransparency_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(16, maxTransparency_);
       }
       memoizedSize = size;
       return size;
@@ -37481,7 +37494,8 @@ public final class GUIProtos {
           == other.getShaded());
       result = result && (getNewWindow()
           == other.getNewWindow());
-      result = result && drawingMode_ == other.drawingMode_;
+      result = result && (getSizeMode()
+          == other.getSizeMode());
       result = result && (
           java.lang.Double.doubleToLongBits(getPixelSize())
           == java.lang.Double.doubleToLongBits(
@@ -37491,6 +37505,24 @@ public final class GUIProtos {
         result = result && getResultsTableSettings()
             .equals(other.getResultsTableSettings());
       }
+      result = result && (getDepthMode()
+          == other.getDepthMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getDepthRange())
+          == java.lang.Double.doubleToLongBits(
+              other.getDepthRange()));
+      result = result && (getDitherSeed()
+          == other.getDitherSeed());
+      result = result && (getTransparencyMode()
+          == other.getTransparencyMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMinTransparency())
+          == java.lang.Double.doubleToLongBits(
+              other.getMinTransparency()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getMaxTransparency())
+          == java.lang.Double.doubleToLongBits(
+              other.getMaxTransparency()));
       return result;
     }
 
@@ -37519,8 +37551,8 @@ public final class GUIProtos {
       hash = (37 * hash) + NEWWINDOW_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getNewWindow());
-      hash = (37 * hash) + DRAWING_MODE_FIELD_NUMBER;
-      hash = (53 * hash) + drawingMode_;
+      hash = (37 * hash) + SIZE_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getSizeMode();
       hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPixelSize()));
@@ -37528,6 +37560,21 @@ public final class GUIProtos {
         hash = (37 * hash) + RESULTS_TABLE_SETTINGS_FIELD_NUMBER;
         hash = (53 * hash) + getResultsTableSettings().hashCode();
       }
+      hash = (37 * hash) + DEPTH_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getDepthMode();
+      hash = (37 * hash) + DEPTH_RANGE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getDepthRange()));
+      hash = (37 * hash) + DITHER_SEED_FIELD_NUMBER;
+      hash = (53 * hash) + getDitherSeed();
+      hash = (37 * hash) + TRANSPARENCY_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getTransparencyMode();
+      hash = (37 * hash) + MIN_TRANSPARENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMinTransparency()));
+      hash = (37 * hash) + MAX_TRANSPARENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMaxTransparency()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37675,7 +37722,7 @@ public final class GUIProtos {
 
         newWindow_ = false;
 
-        drawingMode_ = 0;
+        sizeMode_ = 0;
 
         pixelSize_ = 0D;
 
@@ -37685,6 +37732,18 @@ public final class GUIProtos {
           resultsTableSettings_ = null;
           resultsTableSettingsBuilder_ = null;
         }
+        depthMode_ = 0;
+
+        depthRange_ = 0D;
+
+        ditherSeed_ = 0;
+
+        transparencyMode_ = 0;
+
+        minTransparency_ = 0D;
+
+        maxTransparency_ = 0D;
+
         return this;
       }
 
@@ -37714,13 +37773,19 @@ public final class GUIProtos {
         result.rendering_ = rendering_;
         result.shaded_ = shaded_;
         result.newWindow_ = newWindow_;
-        result.drawingMode_ = drawingMode_;
+        result.sizeMode_ = sizeMode_;
         result.pixelSize_ = pixelSize_;
         if (resultsTableSettingsBuilder_ == null) {
           result.resultsTableSettings_ = resultsTableSettings_;
         } else {
           result.resultsTableSettings_ = resultsTableSettingsBuilder_.build();
         }
+        result.depthMode_ = depthMode_;
+        result.depthRange_ = depthRange_;
+        result.ditherSeed_ = ditherSeed_;
+        result.transparencyMode_ = transparencyMode_;
+        result.minTransparency_ = minTransparency_;
+        result.maxTransparency_ = maxTransparency_;
         onBuilt();
         return result;
       }
@@ -37784,14 +37849,32 @@ public final class GUIProtos {
         if (other.getNewWindow() != false) {
           setNewWindow(other.getNewWindow());
         }
-        if (other.drawingMode_ != 0) {
-          setDrawingModeValue(other.getDrawingModeValue());
+        if (other.getSizeMode() != 0) {
+          setSizeMode(other.getSizeMode());
         }
         if (other.getPixelSize() != 0D) {
           setPixelSize(other.getPixelSize());
         }
         if (other.hasResultsTableSettings()) {
           mergeResultsTableSettings(other.getResultsTableSettings());
+        }
+        if (other.getDepthMode() != 0) {
+          setDepthMode(other.getDepthMode());
+        }
+        if (other.getDepthRange() != 0D) {
+          setDepthRange(other.getDepthRange());
+        }
+        if (other.getDitherSeed() != 0) {
+          setDitherSeed(other.getDitherSeed());
+        }
+        if (other.getTransparencyMode() != 0) {
+          setTransparencyMode(other.getTransparencyMode());
+        }
+        if (other.getMinTransparency() != 0D) {
+          setMinTransparency(other.getMinTransparency());
+        }
+        if (other.getMaxTransparency() != 0D) {
+          setMaxTransparency(other.getMaxTransparency());
         }
         onChanged();
         return this;
@@ -38044,46 +38127,28 @@ public final class GUIProtos {
         return this;
       }
 
-      private int drawingMode_ = 0;
+      private int sizeMode_ ;
       /**
-       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       * <code>int32 size_mode = 8;</code>
        */
-      public int getDrawingModeValue() {
-        return drawingMode_;
+      public int getSizeMode() {
+        return sizeMode_;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       * <code>int32 size_mode = 8;</code>
        */
-      public Builder setDrawingModeValue(int value) {
-        drawingMode_ = value;
+      public Builder setSizeMode(int value) {
+        
+        sizeMode_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
+       * <code>int32 size_mode = 8;</code>
        */
-      public gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode getDrawingMode() {
-        gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode result = gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.valueOf(drawingMode_);
-        return result == null ? gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode.UNRECOGNIZED : result;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
-       */
-      public Builder setDrawingMode(gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
+      public Builder clearSizeMode() {
         
-        drawingMode_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.Image3DDrawingMode drawing_mode = 8;</code>
-       */
-      public Builder clearDrawingMode() {
-        
-        drawingMode_ = 0;
+        sizeMode_ = 0;
         onChanged();
         return this;
       }
@@ -38229,6 +38294,162 @@ public final class GUIProtos {
           resultsTableSettings_ = null;
         }
         return resultsTableSettingsBuilder_;
+      }
+
+      private int depthMode_ ;
+      /**
+       * <code>int32 depth_mode = 11;</code>
+       */
+      public int getDepthMode() {
+        return depthMode_;
+      }
+      /**
+       * <code>int32 depth_mode = 11;</code>
+       */
+      public Builder setDepthMode(int value) {
+        
+        depthMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 depth_mode = 11;</code>
+       */
+      public Builder clearDepthMode() {
+        
+        depthMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double depthRange_ ;
+      /**
+       * <code>double depth_range = 12;</code>
+       */
+      public double getDepthRange() {
+        return depthRange_;
+      }
+      /**
+       * <code>double depth_range = 12;</code>
+       */
+      public Builder setDepthRange(double value) {
+        
+        depthRange_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double depth_range = 12;</code>
+       */
+      public Builder clearDepthRange() {
+        
+        depthRange_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int ditherSeed_ ;
+      /**
+       * <code>int32 dither_seed = 13;</code>
+       */
+      public int getDitherSeed() {
+        return ditherSeed_;
+      }
+      /**
+       * <code>int32 dither_seed = 13;</code>
+       */
+      public Builder setDitherSeed(int value) {
+        
+        ditherSeed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 dither_seed = 13;</code>
+       */
+      public Builder clearDitherSeed() {
+        
+        ditherSeed_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int transparencyMode_ ;
+      /**
+       * <code>int32 transparency_mode = 14;</code>
+       */
+      public int getTransparencyMode() {
+        return transparencyMode_;
+      }
+      /**
+       * <code>int32 transparency_mode = 14;</code>
+       */
+      public Builder setTransparencyMode(int value) {
+        
+        transparencyMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 transparency_mode = 14;</code>
+       */
+      public Builder clearTransparencyMode() {
+        
+        transparencyMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double minTransparency_ ;
+      /**
+       * <code>double min_transparency = 15;</code>
+       */
+      public double getMinTransparency() {
+        return minTransparency_;
+      }
+      /**
+       * <code>double min_transparency = 15;</code>
+       */
+      public Builder setMinTransparency(double value) {
+        
+        minTransparency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double min_transparency = 15;</code>
+       */
+      public Builder clearMinTransparency() {
+        
+        minTransparency_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double maxTransparency_ ;
+      /**
+       * <code>double max_transparency = 16;</code>
+       */
+      public double getMaxTransparency() {
+        return maxTransparency_;
+      }
+      /**
+       * <code>double max_transparency = 16;</code>
+       */
+      public Builder setMaxTransparency(double value) {
+        
+        maxTransparency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double max_transparency = 16;</code>
+       */
+      public Builder clearMaxTransparency() {
+        
+        maxTransparency_ = 0D;
+        onChanged();
+        return this;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -39444,23 +39665,23 @@ public final class GUIProtos {
       "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
       "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
       "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
-      "\005\"\276\002\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "\005\"\235\003\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
       "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
       "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
       "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
-      "\022?\n\014drawing_mode\030\010 \001(\0162).gdsc.smlm.data." +
-      "config.Image3DDrawingMode\022\022\n\npixel_size\030" +
-      "\t \001(\001\022K\n\026results_table_settings\030\n \001(\0132+." +
-      "gdsc.smlm.data.config.ResultsTableSettin" +
-      "gs\"\220\001\n\030TranslateResultsSettings\022\024\n\014input" +
-      "_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n" +
-      "\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gdsc.",
-      "smlm.data.config.DistanceUnit*O\n\014Templat" +
-      "eType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_T" +
-      "EMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002*b\n\022Image3" +
-      "DDrawingMode\022\026\n\022DRAW_3D_FIXED_SIZE\020\000\022\030\n\024" +
-      "DRAW_3D_XY_PRECISION\020\001\022\032\n\026DRAW_3D_XYZ_DE" +
-      "VIATIONS\020\002B\013B\tGUIProtosb\006proto3"
+      "\022\021\n\tsize_mode\030\010 \001(\005\022\022\n\npixel_size\030\t \001(\001\022" +
+      "K\n\026results_table_settings\030\n \001(\0132+.gdsc.s" +
+      "mlm.data.config.ResultsTableSettings\022\022\n\n" +
+      "depth_mode\030\013 \001(\005\022\023\n\013depth_range\030\014 \001(\001\022\023\n" +
+      "\013dither_seed\030\r \001(\005\022\031\n\021transparency_mode\030" +
+      "\016 \001(\005\022\030\n\020min_transparency\030\017 \001(\001\022\030\n\020max_t" +
+      "ransparency\030\020 \001(\001\"\220\001\n\030TranslateResultsSe",
+      "ttings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001" +
+      "\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdistance_uni" +
+      "t\030\005 \001(\0162#.gdsc.smlm.data.config.Distance" +
+      "Unit*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020" +
+      "\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPL" +
+      "ATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -39598,7 +39819,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "DrawingMode", "PixelSize", "ResultsTableSettings", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(20);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new

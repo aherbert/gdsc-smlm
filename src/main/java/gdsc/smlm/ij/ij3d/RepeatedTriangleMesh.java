@@ -6,6 +6,8 @@ import java.util.List;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.RenderingAttributes;
+import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.utils.geometry.GeometryInfo;
 import org.scijava.java3d.utils.geometry.NormalGenerator;
@@ -361,10 +363,80 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		return result;
 	}
 
+	private static int transparencyMode = TransparencyAttributes.BLENDED;
+
+	/**
+	 * Sets the transparency mode.
+	 *
+	 * @param mode
+	 *            the new transparency mode
+	 * @throws IllegalArgumentException
+	 *             If the mode is not valid
+	 * @see org.scijava.java3d.TransparencyAttributes.setTransparencyMode(int)
+	 */
+	public static void setTransparencyMode(int mode) throws IllegalArgumentException
+	{
+		if ((mode < TransparencyAttributes.FASTEST) || (mode > TransparencyAttributes.NONE))
+		{
+			throw new IllegalArgumentException("Not a valid transparency mode");
+		}
+		transparencyMode = mode;
+	}
+
+	@Override
+	public void setTransparency(final float transparency)
+	{
+		// We want to use a different transparency from the ij3d default which is FASTEST
+		// so override this method.
+
+		// There seems to be a bug in transparency where the depth testing fails if
+		// looking away from the XYZ axis direction. 
+		// This may just be because the coordinates are negative and so 
+		// cannot be depth compared. 
+
+		Appearance appearance = getAppearance();
+		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
+		//final RenderingAttributes ra = appearance.getRenderingAttributes();
+		if (transparency <= .01f)
+		{
+			this.transparency = 0.0f;
+			ta.setTransparencyMode(TransparencyAttributes.NONE);
+			// The default
+			//ra.setDepthTestFunction(RenderingAttributes.LESS_OR_EQUAL);
+		}
+		else
+		{
+			this.transparency = transparency;
+			ta.setTransparencyMode(transparencyMode);
+			// Draw everything
+			//ra.setDepthTestFunction(RenderingAttributes.ALWAYS);
+			// Draw in order
+			//ra.setDepthTestFunction(RenderingAttributes.LESS_OR_EQUAL);
+		}
+		ta.setTransparency(this.transparency);
+	}
+
 	@Override
 	protected Appearance createAppearance()
 	{
-		return super.createAppearance();
+		Appearance appearance = super.createAppearance();
+		// Update the transparency to the default mode
+		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
+		if (ta.getTransparencyMode() != TransparencyAttributes.NONE)
+			ta.setTransparencyMode(transparencyMode);
+		
+		// Fix transparency rendering. See comments in setTransparency(float).
+		RenderingAttributes ra = appearance.getRenderingAttributes();
+		if (ra == null)
+		{
+			// Ensure not null
+			ra = new RenderingAttributes();
+			ra.setCapability(RenderingAttributes.ALLOW_DEPTH_TEST_FUNCTION_WRITE);
+			appearance.setRenderingAttributes(ra);
+		}
+		//ra.setDepthTestFunction((transparency == 0) ? RenderingAttributes.LESS_OR_EQUAL : RenderingAttributes.ALWAYS);
+		
+		return appearance;
 
 		//		final Appearance appearance = new Appearance();
 		//		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);

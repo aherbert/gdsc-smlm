@@ -8,6 +8,7 @@ import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.FitProtos.FilterSettings;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
+import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
@@ -15,13 +16,11 @@ import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
-import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
-import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -359,23 +358,6 @@ public class GUIProtosHelper
 
 		defaultAstigmatismModelManagerSettings = builder.build();
 	}
-	
-	public static String getName(Image3DDrawingMode value)
-	{
-		switch (value)
-		{
-			case DRAW_3D_FIXED_SIZE:
-				return "Fixed size";
-			case DRAW_3D_XYZ_DEVIATIONS:
-				return "XYZ Deviations";
-			case DRAW_3D_XY_PRECISION:
-				return "XY Precision";
-			case UNRECOGNIZED:
-				return "Unknown";
-			default:
-				throw new IllegalStateException("Unknown name: " + value);
-		}
-	}	
 
 	/** The default ImageJ3DResultsViewerSettings */
 	public static final ImageJ3DResultsViewerSettings defaultImageJ3DResultsViewerSettings;
@@ -387,8 +369,14 @@ public class GUIProtosHelper
 		builder.setLut(LutColour.FIRE.ordinal());
 		builder.setRendering(4); // Octahedron
 		builder.setShaded(true);
-		builder.setDrawingModeValue(Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE);
+		builder.setSizeMode(0);
 		builder.setPixelSize(2); // Like weighted 2D pixel rendering using 4 pixels
+		builder.setDepthMode(1);
+		builder.setDepthRange(20);
+		builder.setDitherSeed(123456789);
+		builder.setTransparencyMode(0);
+		builder.setMinTransparency(0);
+		builder.setMaxTransparency(0.9);
 		ResultsTableSettings.Builder resultsTableSettings = builder.getResultsTableSettingsBuilder();
 		resultsTableSettings.setDistanceUnit(DistanceUnit.NM);
 		resultsTableSettings.setShowTable(true);

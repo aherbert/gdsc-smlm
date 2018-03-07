@@ -33,6 +33,7 @@ import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
+import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
@@ -42,12 +43,10 @@ import gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
-import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
-import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -515,36 +514,6 @@ public class SettingsManager
 		for (int i = 0; i < _PrecisionMethodValues.length; i++)
 		{
 			_PrecisionMethodNames[i] = FitProtosHelper.getName(_PrecisionMethodValues[i]);
-		}
-	}
-
-	private static Image3DDrawingMode[] _Image3DDrawingModeValues;
-
-	public static Image3DDrawingMode[] getImage3DDrawingModeValues()
-	{
-		if (_Image3DDrawingModeValues == null)
-			initImage3DDrawingMode();
-		return _Image3DDrawingModeValues;
-	}
-
-	private static String[] _Image3DDrawingModeNames;
-
-	public static String[] getImage3DDrawingModeNames()
-	{
-		if (_Image3DDrawingModeNames == null)
-			initImage3DDrawingMode();
-		return _Image3DDrawingModeNames;
-	}
-
-	private static void initImage3DDrawingMode()
-	{
-		EnumSet<Image3DDrawingMode> d = EnumSet.allOf(Image3DDrawingMode.class);
-		d.remove(Image3DDrawingMode.UNRECOGNIZED);
-		_Image3DDrawingModeValues = d.toArray(new Image3DDrawingMode[d.size()]);
-		_Image3DDrawingModeNames = new String[_Image3DDrawingModeValues.length];
-		for (int i = 0; i < _Image3DDrawingModeValues.length; i++)
-		{
-			_Image3DDrawingModeNames[i] = GUIProtosHelper.getName(_Image3DDrawingModeValues[i]);
 		}
 	}
 

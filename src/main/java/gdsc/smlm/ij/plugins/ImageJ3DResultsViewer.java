@@ -15,16 +15,21 @@ import java.util.List;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.Canvas3D;
+import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.PickInfo;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
 import org.scijava.java3d.PolygonAttributes;
+import org.scijava.java3d.RenderingAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Transform3D;
+import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.View;
 import org.scijava.java3d.utils.pickfast.PickCanvas;
 import org.scijava.vecmath.AxisAngle4d;
@@ -42,6 +47,8 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.Sort;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -60,7 +67,6 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
-import gdsc.smlm.data.config.GUIProtos.Image3DDrawingMode;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings.Builder;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
@@ -78,6 +84,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -110,6 +117,29 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private final static String TITLE = "ImageJ 3D Results Viewer";
 
 	//@formatter:off
+	private enum SizeMode implements NamedObject
+	{
+		FIXED_SIZE { public String getName() { return "Fixed"; }},
+		XY_PRECISION { public String getName() { return "XY Precision"; }},
+		XYZ_DEVIATIONS { public String getName() { return "XYZ Deviations"; }},
+        ;
+
+		public String getShortName()
+		{
+			return getName();
+		}		
+		
+		public static SizeMode forNumber(int number)
+		{
+			SizeMode[] values = SizeMode.values();
+			if (number < 0 || number >= values.length)
+				throw new IllegalArgumentException();
+			return values[number];
+		}
+	};
+	
+	private final static String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
+	
 	private enum Rendering implements NamedObject
 	{
 		POINT { public String getName() { return "Point"; } 
@@ -142,17 +172,63 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		
 		public boolean isHighResolution() { return false; }
 
-		public static Rendering forNumber(int rendering)
+		public static Rendering forNumber(int number)
 		{
 			Rendering[] values = Rendering.values();
-			if (rendering < 0 || rendering >= values.length)
+			if (number < 0 || number >= values.length)
 				throw new IllegalArgumentException();
-			return values[rendering];
+			return values[number];
 		}
 	};
-	//@formatter:on
 
 	private final static String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
+
+	private enum DepthMode implements NamedObject
+	{
+		NONE { public String getName() { return "None"; }},
+		INTENSITY { public String getName() { return "Intensity"; }},
+		DITHER { public String getName() { return "Dither"; }},
+        ;
+
+		public String getShortName()
+		{
+			return getName();
+		}		
+		
+		public static DepthMode forNumber(int number)
+		{
+			DepthMode[] values = DepthMode.values();
+			if (number < 0 || number >= values.length)
+				throw new IllegalArgumentException();
+			return values[number];
+		}
+	};
+	
+	private final static String[] DEPTH_MODE = SettingsManager.getNames((Object[]) DepthMode.values());
+	
+	private enum TransparencyMode implements NamedObject
+	{
+		NONE { public String getName() { return "None"; }},
+		SIZE { public String getName() { return "Size"; }},
+		// Add others, e.g. precision
+        ;
+
+		public String getShortName()
+		{
+			return getName();
+		}		
+		
+		public static TransparencyMode forNumber(int number)
+		{
+			TransparencyMode[] values = TransparencyMode.values();
+			if (number < 0 || number >= values.length)
+				throw new IllegalArgumentException();
+			return values[number];
+		}
+	};
+	
+	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());	
+	//@formatter:on	
 
 	// To debug this from Eclipse relies on being able to find the native 
 	// runtime libraries for Open GL. See the README in the eclipse project folder.
@@ -280,14 +356,47 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return true;
 			}
 		});
-		gd.addMessage("3D options");
 		gd.addCheckbox("Shaded", settings.getShaded());
-		gd.addChoice("Drawing_mode", SettingsManager.getImage3DDrawingModeNames(), settings.getDrawingModeValue(),
+		gd.addChoice("Size_mode", SIZE_MODE, settings.getSizeMode(), new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				settings.setSizeMode(value);
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Size mode options", null);
+				SizeMode mode = SizeMode.forNumber(settings.getSizeMode());
+				if (mode == SizeMode.FIXED_SIZE)
+				{
+					egd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
+				}
+				else
+				{
+					// Other modes do not require options
+					return false;
+				}
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				settings.setSize(egd.getNextNumber());
+				return true;
+			}
+		});
+		gd.addChoice("Transparency_mode", TRANSPARENCY_MODE, settings.getTransparencyMode(),
 				new OptionListener<Integer>()
 				{
 					public boolean collectOptions(Integer value)
 					{
-						settings.setDrawingModeValue(value);
+						settings.setTransparencyMode(value);
 						return collectOptions(false);
 					}
 
@@ -298,25 +407,52 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 					private boolean collectOptions(boolean silent)
 					{
-						ExtendedGenericDialog egd = new ExtendedGenericDialog("Drawing mode options", null);
-						int mode = settings.getDrawingModeValue();
-						if (mode == Image3DDrawingMode.DRAW_3D_FIXED_SIZE_VALUE)
-						{
-							egd.addNumericField("Size", settings.getSize(), 2, 6, "nm");
-						}
-						else
-						{
-							// Other modes do not require options
+						ExtendedGenericDialog egd = new ExtendedGenericDialog("Transparency mode options", null);
+						TransparencyMode mode = TransparencyMode.forNumber(settings.getTransparencyMode());
+						if (mode == TransparencyMode.NONE)
 							return false;
-						}
+						egd.addSlider("Min_transparancy", 0, 0.9, settings.getMinTransparency());
+						egd.addSlider("Max_transparancy", 0, 0.9, settings.getMaxTransparency());
 						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
 							return false;
-						settings.setSize(egd.getNextNumber());
+						settings.setMinTransparency(egd.getNextNumber());
+						settings.setMaxTransparency(egd.getNextNumber());
 						return true;
 					}
 				});
+		gd.addMessage("2D options");
+		gd.addChoice("Depth_mode", DEPTH_MODE, settings.getDepthMode(), new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				settings.setDepthMode(value);
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Depth mode options", null);
+				DepthMode mode = DepthMode.forNumber(settings.getDepthMode());
+				if (mode == DepthMode.NONE)
+					return false;
+				egd.addNumericField("Depth_range", settings.getDepthRange(), 2, 6, "nm");
+				egd.addNumericField("Dither_seed", settings.getDitherSeed(), 0);
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				settings.setDepthRange(egd.getNextNumber());
+				settings.setDitherSeed((int) egd.getNextNumber());
+				return true;
+			}
+		});
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -329,7 +465,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setLut(gd.getNextChoiceIndex());
 		settings.setRendering(gd.getNextChoiceIndex());
 		settings.setShaded(gd.getNextBoolean());
-		settings.setDrawingModeValue(gd.getNextChoiceIndex());
+		settings.setSizeMode(gd.getNextChoiceIndex());
+		settings.setTransparencyMode(gd.getNextChoiceIndex());
+		settings.setDepthMode(gd.getNextChoiceIndex());
 		gd.collectOptions();
 
 		if (windowChoice == 0)
@@ -451,22 +589,21 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		// Store XYZ size for each localisation
-		switch (settings.getDrawingMode())
+		SizeMode mode = SizeMode.forNumber(settings.getSizeMode());
+		switch (mode)
 		{
-			case DRAW_3D_FIXED_SIZE:
+			case FIXED_SIZE:
 				final float size = getFixedSize(settings.getSize());
 				Point3f[] sizes = new Point3f[results.size()];
 				Arrays.fill(sizes, new Point3f(size, size, size));
 				return sizes;
-			case DRAW_3D_XYZ_DEVIATIONS:
+			case XYZ_DEVIATIONS:
 				return createSphereSizeFromDeviations(results);
-			case DRAW_3D_XY_PRECISION:
+			case XY_PRECISION:
 				return createSphereSizeFromPrecision(results);
-			case UNRECOGNIZED:
 			default:
-				break;
+				throw new IllegalStateException("Unknown drawing mode: " + mode);
 		}
-		return null;
 	}
 
 	private static float getFixedSize(double size)
@@ -548,7 +685,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Support drawing as square pixels ...
 		if (settings.getRendering() == 0)
 		{
-			final TurboList<Point3f> points = getPoints(results);
+			final TurboList<Point3f> points = getPoints(results, settings);
 			CustomPointMesh mesh = new CustomPointMesh(points, null, transparency);
 			mesh.setPointSize(sphereSize[0].x);
 			return mesh;
@@ -587,7 +724,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (egd.wasCanceled())
 					return null;
 			}
-			final TurboList<Point3f> points = getPoints(results);
+			final TurboList<Point3f> points = getPoints(results, settings);
 
 			IJ.showStatus("Creating 3D mesh ...");
 			return new RepeatedIndexedTriangleMesh(objectVertices, objectFaces,
@@ -608,7 +745,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (egd.wasCanceled())
 				return null;
 		}
-		final TurboList<Point3f> points = getPoints(results);
+		final TurboList<Point3f> points = getPoints(results, settings);
 
 		if (mode == 2)
 		{
@@ -643,16 +780,64 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return mesh;
 	}
 
-	private static TurboList<Point3f> getPoints(MemoryPeakResults results)
+	private static TurboList<Point3f> getPoints(MemoryPeakResults results,
+			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		final TurboList<Point3f> points = new TurboList<Point3f>(results.size());
-		results.forEach(DistanceUnit.NM, new XYZResultProcedure()
+		if (results.is3D())
 		{
-			public void executeXYZ(float x, float y, float z)
+			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
 			{
-				points.addf(new Point3f(x, y, z));
+				public void executeXYZ(float x, float y, float z)
+				{
+					points.addf(new Point3f(x, y, z));
+				}
+			});
+		}
+		else
+		{
+			results.forEach(DistanceUnit.NM, new XYResultProcedure()
+			{
+				public void executeXY(float x, float y)
+				{
+					points.addf(new Point3f(x, y, 0));
+				}
+			});
+
+			final double range = settings.getDepthRange();
+			if (range > 0 && results.size() > 1)
+			{
+				DepthMode mode = DepthMode.forNumber(settings.getDepthMode());
+				final double min = -settings.getDepthRange() / 2;
+				switch (mode)
+				{
+					case DITHER:
+						final RandomGenerator r = new Well19937c(settings.getDitherSeed());
+						for (int i = points.size(); i-- > 0;)
+						{
+							points.getf(i).z += (min + r.nextDouble() * range);
+						}
+						break;
+					case INTENSITY:
+						// Rank by intensity, highest first
+						StandardResultProcedure p = new StandardResultProcedure(results);
+						p.getI();
+						int[] indices = SimpleArrayUtils.newArray(results.size(), 0, 1);
+						Sort.sort(indices, p.intensity);
+						double inc = range / indices.length;
+						for (int i = 0; i < indices.length; i++)
+						{
+							// The standard rendering has +z going away so put the highest rank at min
+							points.getf(indices[i]).z += (min + i * inc);
+						}
+						break;
+					case NONE:
+						break;
+					default:
+						throw new IllegalStateException("Unknown depth mode: " + mode);
+				}
 			}
-		});
+		}
 		return points;
 	}
 
@@ -663,26 +848,56 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// For all 3D polygons we want to support a true face orientation so transparency works
 		Rendering r = Rendering.forNumber(settings.getRendering());
-		pa.setBackFaceNormalFlip(r.is2D());
+		if (r.is2D())
+		{
+			pa.setCullFace(PolygonAttributes.CULL_NONE);
+			pa.setBackFaceNormalFlip(true);
+		}
+		else
+		{
+			pa.setCullFace(PolygonAttributes.CULL_BACK);
+			pa.setBackFaceNormalFlip(false);
+		}
+
+		TransparencyAttributes ta = appearance.getTransparencyAttributes();
+		ta.setSrcBlendFunction(TransparencyAttributes.BLEND_SRC_ALPHA);
+		//ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE);
+		ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE_MINUS_SRC_ALPHA); // Default
+		
+		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.FASTEST);
+		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
+		RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.BLENDED);
+
+		final ColoringAttributes ca = appearance.getColoringAttributes();
+		if (r.isHighResolution() || r.is2D())
+			// Smooth across vertices. Required to show 2D surfaces smoothly
+			ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+		else
+			// Faster polygon rendering with flat shading
+			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
 	}
 
 	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		// Colour by z
-		//if (results.is3D())
-		//{
 		GeometryArray ga = (GeometryArray) mesh.getGeometry();
 
 		final int vertices = ga.getValidVertexCount();
 
 		Color3f[] allColors = new Color3f[vertices];
-		StandardResultProcedure p = new StandardResultProcedure(results);
-		p.getZ();
-		float[] limits = Maths.limits(p.z);
-		final float minimum = limits[0], maximum = limits[1];
-		final float range = maximum - minimum;
 		LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
+
+		StandardResultProcedure p = null;
+		float range = 0;
+		float[] limits = null;
+		if (results.is3D())
+		{
+			p = new StandardResultProcedure(results);
+			p.getZ();
+			limits = Maths.limits(p.z);
+			range = limits[1] - limits[0];
+		}
 
 		if (range == 0)
 		{
@@ -699,6 +914,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				colors[i] = new Color3f(c);
 			}
 
+			final float minimum = limits[0];
 			final int verticesPerLocalisation = vertices / results.size();
 			for (int i = 0, j = 0, size = results.size(); i < size; i++)
 			{
@@ -715,7 +931,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			mesh.setColor(Arrays.asList(allColors));
 		}
 		mesh.setTransparency(getTransparency(settings));
-		//}
 	}
 
 	/**
