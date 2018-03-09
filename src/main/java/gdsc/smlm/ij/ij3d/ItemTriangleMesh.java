@@ -6,7 +6,6 @@ import java.util.List;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.RenderingAttributes;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.utils.geometry.GeometryInfo;
@@ -14,6 +13,19 @@ import org.scijava.java3d.utils.geometry.NormalGenerator;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2018 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
 
 import customnode.CustomTriangleMesh;
 import gdsc.core.logging.NullTrackProgress;
@@ -24,7 +36,7 @@ import gdsc.core.logging.TrackProgress;
  * Use a triangle mesh object to represent a set of points. The object is duplicated, scaled and translated for
  * each point.
  */
-public class RepeatedTriangleMesh extends CustomTriangleMesh
+public class ItemTriangleMesh extends CustomTriangleMesh implements UpdatedableItemMesh
 {
 	protected Point3f[] objectVertices;
 	protected Vector3f[] objectNormals;
@@ -33,7 +45,7 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	private boolean dirty = false;
 
 	/**
-	 * Instantiates a new repeated indexed triangle mesh.
+	 * Instantiates a new item triangle mesh.
 	 * <p>
 	 * This will repeat the object for each input point. The object
 	 * is assumed to be centred on the origin. It will be scaled and
@@ -50,14 +62,13 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	 * @param transp
 	 *            the transparency
 	 */
-	public RepeatedTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color,
-			float transp)
+	public ItemTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color, float transp)
 	{
 		this(objectVertices, points, sizes, color, transp, -1, NullTrackProgress.INSTANCE);
 	}
 
 	/**
-	 * Instantiates a new repeated indexed triangle mesh.
+	 * Instantiates a new item triangle mesh.
 	 * <p>
 	 * This will repeat the object for each input point. The object
 	 * is assumed to be centred on the origin. It will be scaled and
@@ -81,8 +92,8 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	 * @param progress
 	 *            the progress
 	 */
-	public RepeatedTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color,
-			float transp, double creaseAngle, TrackProgress progress)
+	public ItemTriangleMesh(Point3f[] objectVertices, Point3f[] points, Point3f[] sizes, Color3f color, float transp,
+			double creaseAngle, TrackProgress progress)
 	{
 		// Create empty 
 		super(null, color, transp);
@@ -271,13 +282,12 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		if (mesh == null || mesh.size() < 3)
 			return null;
 		final List<Point3f> tri = mesh;
-		final int nValid = tri.size();
-		final int nAll = 2 * nValid;
+		final int vertexCount = tri.size();
 
-		final Point3f[] coords = new Point3f[nValid];
+		final Point3f[] coords = new Point3f[vertexCount];
 		tri.toArray(coords);
 
-		final Color3f colors[] = new Color3f[nValid];
+		final Color3f colors[] = new Color3f[vertexCount];
 		if (null == color)
 		{
 			// Vertex-wise colors are not stored
@@ -297,7 +307,7 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 			Arrays.fill(colors, color);
 		}
 
-		final GeometryArray ta = new TriangleArray(nAll,
+		final GeometryArray ta = new TriangleArray(vertexCount,
 				GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.NORMALS);
 
 		ta.setCoordinates(0, coords);
@@ -311,17 +321,12 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 			final GeometryInfo gi = new GeometryInfo(ta);
 			final NormalGenerator ng = new NormalGenerator();
 			ng.generateNormals(gi);
-			//			for (int i = 0; i < nValid; i++)
-			//			{
-			//				System.out.printf("[%d] %s : %s  %b\n", i, gi.getNormals()[gi.getNormalIndices()[i]], objectNormals[i],
-			//						gi.getNormals()[gi.getNormalIndices()[i]].equals(objectNormals[i]));
-			//			}
 			result = gi.getGeometryArray();
 		}
 		else
 		{
 			// Use the same normals for each repeated object
-			final Vector3f[] normals = new Vector3f[nValid];
+			final Vector3f[] normals = new Vector3f[vertexCount];
 
 			// Binary fill
 			int fill = objectNormals.length;
@@ -334,20 +339,8 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 			// Final fill
 			System.arraycopy(normals, 0, normals, fill, normals.length - fill);
 
-			//			final Vector3f[] normals2 = normals.clone();
-			//			for (int i = 0, k = 0; i < points.length; i++)
-			//			{
-			//				for (int j = 0; j < objectNormals.length; j++)
-			//				{
-			//					normals[k++] = objectNormals[j];
-			//				}
-			//			}
-			//			assert Arrays.equals(normals, normals2) : "Not the same fill";
-
 			ta.setNormals(0, normals);
 
-			//final GeometryInfo gi = new GeometryInfo(ta);
-			//result = gi.getGeometryArray();
 			result = ta;
 		}
 
@@ -358,7 +351,7 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		result.setCapability(GeometryArray.ALLOW_COUNT_READ);
 		result.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 		result.setCapability(Geometry.ALLOW_INTERSECT);
-		result.setValidVertexCount(nValid);
+		result.setValidVertexCount(vertexCount);
 
 		return result;
 	}
@@ -388,30 +381,17 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 	{
 		// We want to use a different transparency from the ij3d default which is FASTEST
 		// so override this method.
-
-		// There seems to be a bug in transparency where the depth testing fails if
-		// looking away from the XYZ axis direction. 
-		// This may just be because the coordinates are negative and so 
-		// cannot be depth compared. 
-
 		Appearance appearance = getAppearance();
 		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
-		//final RenderingAttributes ra = appearance.getRenderingAttributes();
 		if (transparency <= .01f)
 		{
 			this.transparency = 0.0f;
 			ta.setTransparencyMode(TransparencyAttributes.NONE);
-			// The default
-			//ra.setDepthTestFunction(RenderingAttributes.LESS_OR_EQUAL);
 		}
 		else
 		{
 			this.transparency = transparency;
 			ta.setTransparencyMode(transparencyMode);
-			// Draw everything
-			//ra.setDepthTestFunction(RenderingAttributes.ALWAYS);
-			// Draw in order
-			//ra.setDepthTestFunction(RenderingAttributes.LESS_OR_EQUAL);
 		}
 		ta.setTransparency(this.transparency);
 	}
@@ -424,59 +404,7 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
 		if (ta.getTransparencyMode() != TransparencyAttributes.NONE)
 			ta.setTransparencyMode(transparencyMode);
-		
-		// Fix transparency rendering. See comments in setTransparency(float).
-		RenderingAttributes ra = appearance.getRenderingAttributes();
-		if (ra == null)
-		{
-			// Ensure not null
-			ra = new RenderingAttributes();
-			ra.setCapability(RenderingAttributes.ALLOW_DEPTH_TEST_FUNCTION_WRITE);
-			appearance.setRenderingAttributes(ra);
-		}
-		//ra.setAlphaTestFunction(RenderingAttributes.GREATER);
-		//ra.setAlphaTestValue(0);
-		//ra.setDepthTestFunction((transparency == 0) ? RenderingAttributes.LESS_OR_EQUAL : RenderingAttributes.ALWAYS);
-		
 		return appearance;
-
-		//		final Appearance appearance = new Appearance();
-		//		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
-		//
-		//		final PolygonAttributes polyAttrib = new PolygonAttributes();
-		//		polyAttrib.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-		//		if (this.shaded)
-		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_FILL);
-		//		else
-		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-		//		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE);
-		//
-		//		// This is what makes the polygons look the same on both sides!
-		//		//polyAttrib.setBackFaceNormalFlip(true);
-		//
-		//		appearance.setPolygonAttributes(polyAttrib);
-		//
-		//		final ColoringAttributes colorAttrib = new ColoringAttributes();
-		//		colorAttrib.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
-		//		if (null != color) // is null when colors are vertex-wise
-		//			colorAttrib.setColor(color);
-		//		appearance.setColoringAttributes(colorAttrib);
-		//
-		//		final TransparencyAttributes tr = new TransparencyAttributes();
-		//		final int mode = TransparencyAttributes.FASTEST;
-		//		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
-		//		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
-		//		tr.setTransparencyMode(mode);
-		//		tr.setTransparency(transparency);
-		//		appearance.setTransparencyAttributes(tr);
-		//
-		//		final Material material = new Material();
-		//		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
-		//		material.setAmbientColor(0.1f, 0.1f, 0.1f);
-		//		material.setSpecularColor(0.1f, 0.1f, 0.1f);
-		//		material.setDiffuseColor(0.1f, 0.1f, 0.1f);
-		//		appearance.setMaterial(material);
-		//		return appearance;
 	}
 
 	/**
@@ -559,5 +487,92 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 		}
 
 		return normals;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
+	 */
+	public void reorder(int[] indices) throws IllegalArgumentException
+	{
+		if (dirty)
+			throw new IllegalArgumentException("Mesh has been modified");
+
+		ItemPointMesh.checkIndices(indices, points.length);
+		reorderFast(indices);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
+	 */
+	public void reorderFast(int[] indices) throws IllegalArgumentException
+	{
+		if (dirty)
+			throw new IllegalArgumentException("Mesh has been modified");
+
+		changed = true;
+
+		int oldSize = points.length;
+		int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
+
+		if (size == 0)
+		{
+			mesh.clear();
+			points = new Point3f[0];
+			sizes = new Point3f[0];
+			this.setGeometry(null);
+			return;
+		}
+
+		// From here on we assume the current geometry will not be null
+		// as this only happens when the original size is zero. Size has 
+		// been checked at this point to be the smaller of new and old. 
+		GeometryArray ga = (GeometryArray) getGeometry();
+
+		points = reorder(points, indices);
+		// Sizes could be null or a single size
+		if (sizes != null && sizes.length == points.length)
+			sizes = reorder(sizes, indices);
+
+		// Reorder all things in the geometry: coordinates and colour
+		// The normals can be copied as they are unchanged.
+		// The mesh should contain the same coordinates as the geometry array.
+		int objectSize = objectVertices.length;
+		Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
+		float[] oldColors = new float[oldCoords.length * 3];
+		ga.getColors(0, oldColors);
+		Point3f[] coords = new Point3f[size * objectSize];
+		float[] colors = new float[coords.length * 3];
+		for (int i = 0; i < size; i++)
+		{
+			int j = indices[i];
+
+			int ii = i * objectSize;
+			int jj = j * objectSize;
+			System.arraycopy(oldCoords, jj, coords, ii, objectSize);
+
+			ii *= 3;
+			jj *= 3;
+			System.arraycopy(oldColors, jj, colors, ii, objectSize * 3);
+		}
+		mesh = Arrays.asList(coords);
+
+		// We re-use the geometry and just truncate the vertex count
+		ga.setValidVertexCount(coords.length);
+		ga.setCoordinates(0, coords);
+		ga.setColors(0, colors);
+
+		this.setGeometry(ga);
+	}
+
+	private static Point3f[] reorder(Point3f[] p, int[] indices)
+	{
+		Point3f[] c = new Point3f[indices.length];
+		for (int i = indices.length; i-- > 0;)
+			c[i] = p[indices[i]];
+		return c;
 	}
 }

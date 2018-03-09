@@ -1,6 +1,5 @@
 package gdsc.smlm.ij.ij3d;
 
-import org.scijava.java3d.Appearance;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
@@ -24,7 +23,7 @@ import customnode.CustomIndexedTriangleMesh;
  * Use an indexed triangle mesh object to represent a set of points. The object is duplicated, scaled and translated for
  * each point.
  */
-public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
+public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 {
 	protected Point3f[] objectVertices;
 	protected int[] objectFaces;
@@ -34,7 +33,7 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	private boolean dirty = false;
 
 	/**
-	 * Instantiates a new repeated indexed triangle mesh.
+	 * Instantiates a new item indexed triangle mesh.
 	 * <p>
 	 * This will repeat the object for each input point. The object
 	 * is assumed to be centred on the origin. It will be scaled and
@@ -53,7 +52,7 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	 * @param transp
 	 *            the transparency
 	 */
-	public RepeatedIndexedTriangleMesh(Point3f[] objectVertices, int[] objectFaces, Point3f[] points, Point3f[] sizes,
+	public ItemIndexedTriangleMesh(Point3f[] objectVertices, int[] objectFaces, Point3f[] points, Point3f[] sizes,
 			Color3f color, float transp)
 	{
 		// Create empty 
@@ -78,7 +77,7 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 
 		final int n = objectVertices.length;
 		boolean sameSize = false;
-		if (sizes == null || (sameSize = RepeatedTriangleMesh.sameSize(sizes)))
+		if (sizes == null || (sameSize = ItemTriangleMesh.sameSize(sizes)))
 		{
 			if (sameSize)
 			{
@@ -161,50 +160,6 @@ public class RepeatedIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	{
 		dirty = true;
 		super.setCoordinates(indices, p);
-	}
-
-	@Override
-	protected Appearance createAppearance()
-	{
-		return super.createAppearance();
-
-		//		final Appearance appearance = new Appearance();
-		//		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
-		//
-		//		final PolygonAttributes polyAttrib = new PolygonAttributes();
-		//		polyAttrib.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-		//		if (this.shaded)
-		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_FILL);
-		//		else
-		//			polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-		//		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE);
-		//
-		//		// This is what makes the polygons look the same on both sides!
-		//		//polyAttrib.setBackFaceNormalFlip(true);
-		//
-		//		appearance.setPolygonAttributes(polyAttrib);
-		//
-		//		final ColoringAttributes colorAttrib = new ColoringAttributes();
-		//		colorAttrib.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
-		//		if (null != color) // is null when colors are vertex-wise
-		//			colorAttrib.setColor(color);
-		//		appearance.setColoringAttributes(colorAttrib);
-		//
-		//		final TransparencyAttributes tr = new TransparencyAttributes();
-		//		final int mode = TransparencyAttributes.FASTEST;
-		//		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
-		//		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
-		//		tr.setTransparencyMode(mode);
-		//		tr.setTransparency(transparency);
-		//		appearance.setTransparencyAttributes(tr);
-		//
-		//		final Material material = new Material();
-		//		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
-		//		material.setAmbientColor(0.1f, 0.1f, 0.1f);
-		//		material.setSpecularColor(0.1f, 0.1f, 0.1f);
-		//		material.setDiffuseColor(0.1f, 0.1f, 0.1f);
-		//		appearance.setMaterial(material);
-		//		return appearance;
 	}
 
 	@Override

@@ -25,7 +25,6 @@ import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.PickInfo;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
-import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Transform3D;
@@ -44,6 +43,8 @@ import customnode.CustomMeshNode;
 import customnode.CustomPointMesh;
 import customnode.CustomTriangleMesh;
 import gdsc.core.data.DataException;
+import gdsc.core.data.utils.Rounder;
+import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
@@ -76,8 +77,10 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
-import gdsc.smlm.ij.ij3d.RepeatedIndexedTriangleMesh;
-import gdsc.smlm.ij.ij3d.RepeatedTriangleMesh;
+import gdsc.smlm.ij.ij3d.ItemPointMesh;
+import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
+import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import gdsc.smlm.ij.ij3d.UpdatedableItemMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -287,15 +290,23 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ResultsMetaData
 	{
-		ImageJ3DResultsViewerSettings settings;
+		final ImageJ3DResultsViewerSettings settings;
 
 		/** The results when the object mesh was constructed. */
-		MemoryPeakResults results;
+		final MemoryPeakResults results;
 
-		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results)
+		/**
+		 * The actual positions of each item in the object mesh. The coordinates may differ from the results as 2D
+		 * datasets can be dithered.
+		 */
+		final TurboList<Point3f> points;
+
+		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
+				TurboList<Point3f> points)
 		{
 			this.settings = settings;
 			this.results = results;
+			this.points = points;
 		}
 	}
 
@@ -315,6 +326,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem changeColour;
 	private JMenuItem resetSelectedView;
 	private JMenuItem findEyePoint;
+	private JMenuItem sortBackToFront;
+	private JMenuItem sortFrontToBack;
 	private JMenuItem colourSurface;
 	private JMenuItem updateSettings;
 
@@ -634,7 +647,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		updateAppearance(mesh, settings);
 
-		ResultsMetaData data = new ResultsMetaData(settings.build(), results);
+		ResultsMetaData data = new ResultsMetaData(settings.build(), results, points);
 
 		mesh.setShaded(settings.getShaded());
 
@@ -793,7 +806,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Support drawing as square pixels ...
 		if (settings.getRendering() == 0)
 		{
-			CustomPointMesh mesh = new CustomPointMesh(points, null, transparency);
+			CustomPointMesh mesh = new ItemPointMesh(points, null, transparency);
 			mesh.setPointSize(sphereSize[0].x);
 			return mesh;
 		}
@@ -832,8 +845,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return null;
 			}
 			IJ.showStatus("Creating 3D mesh ...");
-			return new RepeatedIndexedTriangleMesh(objectVertices, objectFaces,
-					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
+			return new ItemIndexedTriangleMesh(objectVertices, objectFaces, points.toArray(new Point3f[points.size()]),
+					sphereSize, null, transparency);
 		}
 
 		final List<Point3f> point = createLocalisationObject(r);
@@ -856,7 +869,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			IJ.showStatus("Creating 3D mesh ...");
 			double creaseAngle = (r.isHighResolution()) ? 44 : 0;
 			IJTrackProgress progress = null; // Used for debugging construction time
-			return new RepeatedTriangleMesh(point.toArray(new Point3f[singlePointSize]),
+			return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
 					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
 		}
 
@@ -968,12 +981,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private void sortPerspective(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
 	{
-		Vector3d v = getViewDirection(settings);
-		if (v == null)
+		Vector3d direction = getViewDirection(settings);
+		if (direction == null)
 			throw new IllegalStateException("The view direction is not valid");
 		Point3d eye = new Point3d(settings.getSortEyeX(), settings.getSortEyeY(), settings.getSortEyeZ());
-		//System.out.printf("Dir %s : Eye %s\n", v, eye);
 
+		double[] d = getDistance(points, direction, eye);
+
+		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
+		Sort.sort(indices, d);
+
+		reorder(indices, results, points);
+	}
+
+	private double[] getDistance(TurboList<Point3f> points, Vector3d direction, Point3d eye)
+	{
+		//System.out.printf("Dir %s : Eye %s\n", v, eye);
 		double[] d = new double[points.size()];
 		for (int i = 0; i < d.length; i++)
 		{
@@ -989,16 +1012,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// We use a descending sort so acute angles (in front of the eye)
 			// should be higher (ranked first) and obtuse angles (behind the 
 			// eye) ranked later.
-			if (v2.dot(v) < 0)
+			if (v2.dot(direction) < 0)
 				d[i] = -d[i];
-			
+
 			//System.out.printf("[%d] %s %s %g = %g\n", i, p, v2, v2.dot(v), d[i]);
 		}
-
-		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-		Sort.sort(indices, d);
-
-		reorder(indices, results, points);
+		return d;
 	}
 
 	private Vector3d getViewDirection(Builder settings)
@@ -1139,10 +1158,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		reorder(indices, results, points);
 	}
-	
+
 	private static int search(int[] values, int key)
 	{
-		for (int i=0; i<values.length; i++)
+		for (int i = 0; i < values.length; i++)
 			if (values[i] == key)
 				return i;
 		return -1;
@@ -1173,7 +1192,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.FASTEST);
 		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
-		RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.BLENDED);
+		ItemTriangleMesh.setTransparencyMode(TransparencyAttributes.BLENDED);
 
 		final ColoringAttributes ca = appearance.getColoringAttributes();
 		if (r.isHighResolution() || r.is2D())
@@ -1182,11 +1201,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else
 			// Faster polygon rendering with flat shading
 			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
-
-		// This allows points to support transparency
-		final PointAttributes pointAttributes = appearance.getPointAttributes();
-		if (pointAttributes != null)
-			pointAttributes.setPointAntialiasingEnable(true);
 	}
 
 	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
@@ -1542,6 +1556,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		findEyePoint.addActionListener(this);
 		add.add(findEyePoint);
 
+		sortBackToFront = new JMenuItem("Sort Back-to-Front");
+		sortBackToFront.addActionListener(this);
+		add.add(sortBackToFront);
+
+		sortFrontToBack = new JMenuItem("Sort Front-to-Back");
+		sortFrontToBack.addActionListener(this);
+		add.add(sortFrontToBack);
+
 		add.addSeparator();
 
 		changeColour = new JMenuItem("Change Colour");
@@ -1568,7 +1590,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		 * 
 		 * @param c
 		 *            The content
-		 * @return 0 negative for error. No further content can be processed.
+		 * @return negative for error. No further content can be processed.
 		 */
 		public int run(Content c);
 
@@ -1649,11 +1671,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private class FindEyePointContentAction extends BaseContentAction
 	{
 		ImageJ3DResultsViewerSettings.Builder settings;
-		final Transform3D ipToVWorld = new Transform3D();
 		final Point3d eyePtInVWorld = new Point3d();
-
 		final Point3d dir0InVWorld = new Point3d();
 		final Point3d dir1InVWorld = new Point3d(0, 0, -1);
+
+		Point3d eye;
+		Vector3d direction;
 
 		FindEyePointContentAction()
 		{
@@ -1661,6 +1684,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (!settings.getSaveEyePoint())
 				settings = null;
 
+			final Transform3D ipToVWorld = new Transform3D();
 			univ.getCanvas().getImagePlateToVworld(ipToVWorld);
 			//ipToVWorldInverse.invert(ipToVWorld);
 			//System.out.printf("ipToVWorld\n%s", ipToVWorld);
@@ -1695,30 +1719,34 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			boolean identity = vWorldToLocal.equals(IDENTITY);
 
-			Point3d eyePtLocalWorld = new Point3d(eyePtInVWorld);
+			eye = new Point3d(eyePtInVWorld);
 
 			final Point3d dir0InLocalWorld = new Point3d(dir0InVWorld);
 			final Point3d dir1InLocalWorld = new Point3d(dir1InVWorld);
 
 			if (!identity)
 			{
-				vWorldToLocal.transform(eyePtLocalWorld);
+				vWorldToLocal.transform(eye);
 				vWorldToLocal.transform(dir0InLocalWorld);
 				vWorldToLocal.transform(dir1InLocalWorld);
 			}
 
-			Vector3d direction = new Vector3d();
+			direction = new Vector3d();
 			direction.sub(dir1InLocalWorld, dir0InLocalWorld);
 
 			// Print the eye coords and direction in the virtual world. 
 			// This can be used for a custom sort.
-			Utils.log("%s : Eye point = %s : Direction = %s", c.getName(), eyePtLocalWorld, direction);
+			//Utils.log("%s : Eye point = %s : Direction = %s", c.getName(), eye, direction);
+			Rounder rounder = RounderFactory.create(4);
+			Utils.log("%s : Eye point = (%s,%s,%s) : Direction = (%s,%s,%s)", c.getName(), rounder.round(eye.x),
+					rounder.round(eye.y), rounder.round(eye.z), rounder.round(direction.x), rounder.round(direction.y),
+					rounder.round(direction.z));
 
 			if (settings != null)
 			{
-				settings.setSortEyeX(eyePtLocalWorld.x);
-				settings.setSortEyeY(eyePtLocalWorld.y);
-				settings.setSortEyeZ(eyePtLocalWorld.z);
+				settings.setSortEyeX(eye.x);
+				settings.setSortEyeY(eye.y);
+				settings.setSortEyeZ(eye.z);
 				settings.setSortDirectionX(direction.x);
 				settings.setSortDirectionY(direction.y);
 				settings.setSortDirectionZ(direction.z);
@@ -1732,6 +1760,49 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			if (settings != null)
 				SettingsManager.writeSettings(settings);
+		}
+	}
+
+	private class SortContentAction extends FindEyePointContentAction
+	{
+		final boolean reverse;
+
+		SortContentAction(boolean reverse)
+		{
+			this.reverse = reverse;
+		}
+
+		public int run(Content c)
+		{
+			int result = super.run(c);
+			if (result != 0)
+				return result;
+
+			final ContentInstant content = c.getInstant(0);
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomMesh mesh = node.getMesh();
+			if (!(mesh instanceof UpdatedableItemMesh))
+				return 0;
+
+			ResultsMetaData data = (ResultsMetaData) c.getUserData();
+
+			if (reverse)
+				direction.negate();
+
+			TurboList<Point3f> points = data.points;
+			double[] d = getDistance(points, direction, eye);
+
+			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
+			Sort.sort(indices, d);
+
+			// Switch to fast mode when not debugging
+			//((UpdatedableItemMesh) mesh).reorder(indices);
+			((UpdatedableItemMesh) mesh).reorderFast(indices);
+
+			// Do this second as points is updated in-line so may break reordering the mesh
+			reorder(indices, data.results, points);
+
+			return 0;
 		}
 	}
 
@@ -1871,6 +1942,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			action = new FindEyePointContentAction();
 		}
+		else if (src == sortBackToFront)
+		{
+			action = new SortContentAction(false);
+		}
+		else if (src == sortFrontToBack)
+		{
+			action = new SortContentAction(true);
+		}
 		else if (src == colourSurface)
 		{
 			action = new ColourSurfaceContentAction();
@@ -1881,13 +1960,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (univ.getSelected() != null)
 		{
 			action.run(univ.getSelected());
-			return;
 		}
-
-		for (Iterator<Content> it = univ.contents(); it.hasNext();)
+		else
 		{
-			if (action.run(it.next()) < 0)
-				return;
+			for (Iterator<Content> it = univ.contents(); it.hasNext();)
+			{
+				if (action.run(it.next()) < 0)
+					break;
+			}
 		}
 
 		action.finish();
