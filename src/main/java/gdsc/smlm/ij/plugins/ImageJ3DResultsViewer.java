@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -77,8 +79,8 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
-import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
+import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.UpdatedableItemMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -1313,7 +1315,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// Add a new menu for SMLM functionality
 		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
-		menubar.add(createSMLMMenuBar());
+		JMenu menu = createSMLMMenuBar();
+		menubar.add(menu);
 		// Add back so it is redrawn
 		univ.setMenubar(menubar);
 
@@ -1529,54 +1532,57 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenu createSMLMMenuBar()
 	{
 		final JMenu add = new JMenu("GDSC SMLM");
+		add.setMnemonic(KeyEvent.VK_G);
 
-		resetRotation = new JMenuItem("Reset Global Rotation");
+		resetRotation = new JMenuItem("Reset Global Rotation", KeyEvent.VK_R);
 		resetRotation.addActionListener(this);
 		add.add(resetRotation);
 
-		resetTranslation = new JMenuItem("Reset Global Translation");
+		resetTranslation = new JMenuItem("Reset Global Translation", KeyEvent.VK_T);
 		resetTranslation.addActionListener(this);
 		add.add(resetTranslation);
 
-		resetZoom = new JMenuItem("Reset Global Zoom");
+		resetZoom = new JMenuItem("Reset Global Zoom", KeyEvent.VK_Z);
 		resetZoom.addActionListener(this);
 		add.add(resetZoom);
 
 		add.addSeparator();
 
-		resetAll = new JMenuItem("Reset All Transformations");
+		resetAll = new JMenuItem("Reset All Transformations", KeyEvent.VK_A);
 		resetAll.addActionListener(this);
 		add.add(resetAll);
 
-		resetSelectedView = new JMenuItem("Reset Selected Transformation");
+		resetSelectedView = new JMenuItem("Reset Selected Transformation", KeyEvent.VK_S);
 		resetSelectedView.addActionListener(this);
 		add.add(resetSelectedView);
 
-		findEyePoint = new JMenuItem("Find Eye Point");
+		findEyePoint = new JMenuItem("Find Eye Point", KeyEvent.VK_E);
 		findEyePoint.addActionListener(this);
 		add.add(findEyePoint);
 
-		sortBackToFront = new JMenuItem("Sort Back-to-Front");
+		sortBackToFront = new JMenuItem("Sort Back-to-Front", KeyEvent.VK_B);
+		sortBackToFront.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed B"));
 		sortBackToFront.addActionListener(this);
 		add.add(sortBackToFront);
 
-		sortFrontToBack = new JMenuItem("Sort Front-to-Back");
+		sortFrontToBack = new JMenuItem("Sort Front-to-Back", KeyEvent.VK_F);
+		sortFrontToBack.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed R"));
 		sortFrontToBack.addActionListener(this);
 		add.add(sortFrontToBack);
 
 		add.addSeparator();
 
-		changeColour = new JMenuItem("Change Colour");
+		changeColour = new JMenuItem("Change Colour", KeyEvent.VK_C);
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
-		colourSurface = new JMenuItem("Colour surface from 2D image");
+		colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
 		colourSurface.addActionListener(this);
 		add.add(colourSurface);
 
 		add.addSeparator();
 
-		updateSettings = new JMenuItem("Update settings");
+		updateSettings = new JMenuItem("Update settings", KeyEvent.VK_U);
 		updateSettings.addActionListener(this);
 		add.add(updateSettings);
 
