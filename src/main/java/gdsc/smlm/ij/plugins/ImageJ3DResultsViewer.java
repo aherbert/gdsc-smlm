@@ -549,13 +549,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (mode == DepthMode.NONE)
 					return false;
 				egd.addNumericField("Depth_range", settings.getDepthRange(), 2, 6, "nm");
-				egd.addNumericField("Dither_seed", settings.getDitherSeed(), 0);
+				if (mode == DepthMode.DITHER)
+					egd.addNumericField("Dither_seed", settings.getDitherSeed(), 0);
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
 				settings.setDepthRange(egd.getNextNumber());
-				settings.setDitherSeed((int) egd.getNextNumber());
+				if (mode == DepthMode.DITHER)
+					settings.setDitherSeed((int) egd.getNextNumber());
 				return true;
 			}
 		});
