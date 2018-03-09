@@ -582,6 +582,14 @@ message ImageJ3DResultsViewerSettings {
 	int32 transparency_mode = 14;
 	double min_transparency = 15;
 	double max_transparency = 16;
+	int32 sort_mode = 17;
+	double sort_direction_x = 18;
+	double sort_direction_y = 19;
+	double sort_direction_z = 20;
+	double sort_eye_x = 21;
+	double sort_eye_y = 22;
+	double sort_eye_z = 23;
+	bool save_eye_point = 24;
 }
 
 // Contains settings for the Translate Results plugin

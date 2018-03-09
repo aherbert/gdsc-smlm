@@ -434,6 +434,8 @@ public class RepeatedTriangleMesh extends CustomTriangleMesh
 			ra.setCapability(RenderingAttributes.ALLOW_DEPTH_TEST_FUNCTION_WRITE);
 			appearance.setRenderingAttributes(ra);
 		}
+		//ra.setAlphaTestFunction(RenderingAttributes.GREATER);
+		//ra.setAlphaTestValue(0);
 		//ra.setDepthTestFunction((transparency == 0) ? RenderingAttributes.LESS_OR_EQUAL : RenderingAttributes.ALWAYS);
 		
 		return appearance;

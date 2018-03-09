@@ -36978,6 +36978,46 @@ public final class GUIProtos {
      * <code>double max_transparency = 16;</code>
      */
     double getMaxTransparency();
+
+    /**
+     * <code>int32 sort_mode = 17;</code>
+     */
+    int getSortMode();
+
+    /**
+     * <code>double sort_direction_x = 18;</code>
+     */
+    double getSortDirectionX();
+
+    /**
+     * <code>double sort_direction_y = 19;</code>
+     */
+    double getSortDirectionY();
+
+    /**
+     * <code>double sort_direction_z = 20;</code>
+     */
+    double getSortDirectionZ();
+
+    /**
+     * <code>double sort_eye_x = 21;</code>
+     */
+    double getSortEyeX();
+
+    /**
+     * <code>double sort_eye_y = 22;</code>
+     */
+    double getSortEyeY();
+
+    /**
+     * <code>double sort_eye_z = 23;</code>
+     */
+    double getSortEyeZ();
+
+    /**
+     * <code>bool save_eye_point = 24;</code>
+     */
+    boolean getSaveEyePoint();
   }
   /**
    * <pre>
@@ -37010,6 +37050,14 @@ public final class GUIProtos {
       transparencyMode_ = 0;
       minTransparency_ = 0D;
       maxTransparency_ = 0D;
+      sortMode_ = 0;
+      sortDirectionX_ = 0D;
+      sortDirectionY_ = 0D;
+      sortDirectionZ_ = 0D;
+      sortEyeX_ = 0D;
+      sortEyeY_ = 0D;
+      sortEyeZ_ = 0D;
+      saveEyePoint_ = false;
     }
 
     @java.lang.Override
@@ -37124,6 +37172,46 @@ public final class GUIProtos {
             case 129: {
 
               maxTransparency_ = input.readDouble();
+              break;
+            }
+            case 136: {
+
+              sortMode_ = input.readInt32();
+              break;
+            }
+            case 145: {
+
+              sortDirectionX_ = input.readDouble();
+              break;
+            }
+            case 153: {
+
+              sortDirectionY_ = input.readDouble();
+              break;
+            }
+            case 161: {
+
+              sortDirectionZ_ = input.readDouble();
+              break;
+            }
+            case 169: {
+
+              sortEyeX_ = input.readDouble();
+              break;
+            }
+            case 177: {
+
+              sortEyeY_ = input.readDouble();
+              break;
+            }
+            case 185: {
+
+              sortEyeZ_ = input.readDouble();
+              break;
+            }
+            case 192: {
+
+              saveEyePoint_ = input.readBool();
               break;
             }
           }
@@ -37330,6 +37418,78 @@ public final class GUIProtos {
       return maxTransparency_;
     }
 
+    public static final int SORT_MODE_FIELD_NUMBER = 17;
+    private int sortMode_;
+    /**
+     * <code>int32 sort_mode = 17;</code>
+     */
+    public int getSortMode() {
+      return sortMode_;
+    }
+
+    public static final int SORT_DIRECTION_X_FIELD_NUMBER = 18;
+    private double sortDirectionX_;
+    /**
+     * <code>double sort_direction_x = 18;</code>
+     */
+    public double getSortDirectionX() {
+      return sortDirectionX_;
+    }
+
+    public static final int SORT_DIRECTION_Y_FIELD_NUMBER = 19;
+    private double sortDirectionY_;
+    /**
+     * <code>double sort_direction_y = 19;</code>
+     */
+    public double getSortDirectionY() {
+      return sortDirectionY_;
+    }
+
+    public static final int SORT_DIRECTION_Z_FIELD_NUMBER = 20;
+    private double sortDirectionZ_;
+    /**
+     * <code>double sort_direction_z = 20;</code>
+     */
+    public double getSortDirectionZ() {
+      return sortDirectionZ_;
+    }
+
+    public static final int SORT_EYE_X_FIELD_NUMBER = 21;
+    private double sortEyeX_;
+    /**
+     * <code>double sort_eye_x = 21;</code>
+     */
+    public double getSortEyeX() {
+      return sortEyeX_;
+    }
+
+    public static final int SORT_EYE_Y_FIELD_NUMBER = 22;
+    private double sortEyeY_;
+    /**
+     * <code>double sort_eye_y = 22;</code>
+     */
+    public double getSortEyeY() {
+      return sortEyeY_;
+    }
+
+    public static final int SORT_EYE_Z_FIELD_NUMBER = 23;
+    private double sortEyeZ_;
+    /**
+     * <code>double sort_eye_z = 23;</code>
+     */
+    public double getSortEyeZ() {
+      return sortEyeZ_;
+    }
+
+    public static final int SAVE_EYE_POINT_FIELD_NUMBER = 24;
+    private boolean saveEyePoint_;
+    /**
+     * <code>bool save_eye_point = 24;</code>
+     */
+    public boolean getSaveEyePoint() {
+      return saveEyePoint_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37389,6 +37549,30 @@ public final class GUIProtos {
       }
       if (maxTransparency_ != 0D) {
         output.writeDouble(16, maxTransparency_);
+      }
+      if (sortMode_ != 0) {
+        output.writeInt32(17, sortMode_);
+      }
+      if (sortDirectionX_ != 0D) {
+        output.writeDouble(18, sortDirectionX_);
+      }
+      if (sortDirectionY_ != 0D) {
+        output.writeDouble(19, sortDirectionY_);
+      }
+      if (sortDirectionZ_ != 0D) {
+        output.writeDouble(20, sortDirectionZ_);
+      }
+      if (sortEyeX_ != 0D) {
+        output.writeDouble(21, sortEyeX_);
+      }
+      if (sortEyeY_ != 0D) {
+        output.writeDouble(22, sortEyeY_);
+      }
+      if (sortEyeZ_ != 0D) {
+        output.writeDouble(23, sortEyeZ_);
+      }
+      if (saveEyePoint_ != false) {
+        output.writeBool(24, saveEyePoint_);
       }
     }
 
@@ -37460,6 +37644,38 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(16, maxTransparency_);
       }
+      if (sortMode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(17, sortMode_);
+      }
+      if (sortDirectionX_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(18, sortDirectionX_);
+      }
+      if (sortDirectionY_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(19, sortDirectionY_);
+      }
+      if (sortDirectionZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(20, sortDirectionZ_);
+      }
+      if (sortEyeX_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(21, sortEyeX_);
+      }
+      if (sortEyeY_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(22, sortEyeY_);
+      }
+      if (sortEyeZ_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(23, sortEyeZ_);
+      }
+      if (saveEyePoint_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(24, saveEyePoint_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -37523,6 +37739,34 @@ public final class GUIProtos {
           java.lang.Double.doubleToLongBits(getMaxTransparency())
           == java.lang.Double.doubleToLongBits(
               other.getMaxTransparency()));
+      result = result && (getSortMode()
+          == other.getSortMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSortDirectionX())
+          == java.lang.Double.doubleToLongBits(
+              other.getSortDirectionX()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSortDirectionY())
+          == java.lang.Double.doubleToLongBits(
+              other.getSortDirectionY()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSortDirectionZ())
+          == java.lang.Double.doubleToLongBits(
+              other.getSortDirectionZ()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSortEyeX())
+          == java.lang.Double.doubleToLongBits(
+              other.getSortEyeX()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSortEyeY())
+          == java.lang.Double.doubleToLongBits(
+              other.getSortEyeY()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSortEyeZ())
+          == java.lang.Double.doubleToLongBits(
+              other.getSortEyeZ()));
+      result = result && (getSaveEyePoint()
+          == other.getSaveEyePoint());
       return result;
     }
 
@@ -37575,6 +37819,29 @@ public final class GUIProtos {
       hash = (37 * hash) + MAX_TRANSPARENCY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getMaxTransparency()));
+      hash = (37 * hash) + SORT_MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getSortMode();
+      hash = (37 * hash) + SORT_DIRECTION_X_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSortDirectionX()));
+      hash = (37 * hash) + SORT_DIRECTION_Y_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSortDirectionY()));
+      hash = (37 * hash) + SORT_DIRECTION_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSortDirectionZ()));
+      hash = (37 * hash) + SORT_EYE_X_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSortEyeX()));
+      hash = (37 * hash) + SORT_EYE_Y_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSortEyeY()));
+      hash = (37 * hash) + SORT_EYE_Z_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSortEyeZ()));
+      hash = (37 * hash) + SAVE_EYE_POINT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSaveEyePoint());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -37744,6 +38011,22 @@ public final class GUIProtos {
 
         maxTransparency_ = 0D;
 
+        sortMode_ = 0;
+
+        sortDirectionX_ = 0D;
+
+        sortDirectionY_ = 0D;
+
+        sortDirectionZ_ = 0D;
+
+        sortEyeX_ = 0D;
+
+        sortEyeY_ = 0D;
+
+        sortEyeZ_ = 0D;
+
+        saveEyePoint_ = false;
+
         return this;
       }
 
@@ -37786,6 +38069,14 @@ public final class GUIProtos {
         result.transparencyMode_ = transparencyMode_;
         result.minTransparency_ = minTransparency_;
         result.maxTransparency_ = maxTransparency_;
+        result.sortMode_ = sortMode_;
+        result.sortDirectionX_ = sortDirectionX_;
+        result.sortDirectionY_ = sortDirectionY_;
+        result.sortDirectionZ_ = sortDirectionZ_;
+        result.sortEyeX_ = sortEyeX_;
+        result.sortEyeY_ = sortEyeY_;
+        result.sortEyeZ_ = sortEyeZ_;
+        result.saveEyePoint_ = saveEyePoint_;
         onBuilt();
         return result;
       }
@@ -37875,6 +38166,30 @@ public final class GUIProtos {
         }
         if (other.getMaxTransparency() != 0D) {
           setMaxTransparency(other.getMaxTransparency());
+        }
+        if (other.getSortMode() != 0) {
+          setSortMode(other.getSortMode());
+        }
+        if (other.getSortDirectionX() != 0D) {
+          setSortDirectionX(other.getSortDirectionX());
+        }
+        if (other.getSortDirectionY() != 0D) {
+          setSortDirectionY(other.getSortDirectionY());
+        }
+        if (other.getSortDirectionZ() != 0D) {
+          setSortDirectionZ(other.getSortDirectionZ());
+        }
+        if (other.getSortEyeX() != 0D) {
+          setSortEyeX(other.getSortEyeX());
+        }
+        if (other.getSortEyeY() != 0D) {
+          setSortEyeY(other.getSortEyeY());
+        }
+        if (other.getSortEyeZ() != 0D) {
+          setSortEyeZ(other.getSortEyeZ());
+        }
+        if (other.getSaveEyePoint() != false) {
+          setSaveEyePoint(other.getSaveEyePoint());
         }
         onChanged();
         return this;
@@ -38448,6 +38763,214 @@ public final class GUIProtos {
       public Builder clearMaxTransparency() {
         
         maxTransparency_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int sortMode_ ;
+      /**
+       * <code>int32 sort_mode = 17;</code>
+       */
+      public int getSortMode() {
+        return sortMode_;
+      }
+      /**
+       * <code>int32 sort_mode = 17;</code>
+       */
+      public Builder setSortMode(int value) {
+        
+        sortMode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 sort_mode = 17;</code>
+       */
+      public Builder clearSortMode() {
+        
+        sortMode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double sortDirectionX_ ;
+      /**
+       * <code>double sort_direction_x = 18;</code>
+       */
+      public double getSortDirectionX() {
+        return sortDirectionX_;
+      }
+      /**
+       * <code>double sort_direction_x = 18;</code>
+       */
+      public Builder setSortDirectionX(double value) {
+        
+        sortDirectionX_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sort_direction_x = 18;</code>
+       */
+      public Builder clearSortDirectionX() {
+        
+        sortDirectionX_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double sortDirectionY_ ;
+      /**
+       * <code>double sort_direction_y = 19;</code>
+       */
+      public double getSortDirectionY() {
+        return sortDirectionY_;
+      }
+      /**
+       * <code>double sort_direction_y = 19;</code>
+       */
+      public Builder setSortDirectionY(double value) {
+        
+        sortDirectionY_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sort_direction_y = 19;</code>
+       */
+      public Builder clearSortDirectionY() {
+        
+        sortDirectionY_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double sortDirectionZ_ ;
+      /**
+       * <code>double sort_direction_z = 20;</code>
+       */
+      public double getSortDirectionZ() {
+        return sortDirectionZ_;
+      }
+      /**
+       * <code>double sort_direction_z = 20;</code>
+       */
+      public Builder setSortDirectionZ(double value) {
+        
+        sortDirectionZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sort_direction_z = 20;</code>
+       */
+      public Builder clearSortDirectionZ() {
+        
+        sortDirectionZ_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double sortEyeX_ ;
+      /**
+       * <code>double sort_eye_x = 21;</code>
+       */
+      public double getSortEyeX() {
+        return sortEyeX_;
+      }
+      /**
+       * <code>double sort_eye_x = 21;</code>
+       */
+      public Builder setSortEyeX(double value) {
+        
+        sortEyeX_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sort_eye_x = 21;</code>
+       */
+      public Builder clearSortEyeX() {
+        
+        sortEyeX_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double sortEyeY_ ;
+      /**
+       * <code>double sort_eye_y = 22;</code>
+       */
+      public double getSortEyeY() {
+        return sortEyeY_;
+      }
+      /**
+       * <code>double sort_eye_y = 22;</code>
+       */
+      public Builder setSortEyeY(double value) {
+        
+        sortEyeY_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sort_eye_y = 22;</code>
+       */
+      public Builder clearSortEyeY() {
+        
+        sortEyeY_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double sortEyeZ_ ;
+      /**
+       * <code>double sort_eye_z = 23;</code>
+       */
+      public double getSortEyeZ() {
+        return sortEyeZ_;
+      }
+      /**
+       * <code>double sort_eye_z = 23;</code>
+       */
+      public Builder setSortEyeZ(double value) {
+        
+        sortEyeZ_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double sort_eye_z = 23;</code>
+       */
+      public Builder clearSortEyeZ() {
+        
+        sortEyeZ_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private boolean saveEyePoint_ ;
+      /**
+       * <code>bool save_eye_point = 24;</code>
+       */
+      public boolean getSaveEyePoint() {
+        return saveEyePoint_;
+      }
+      /**
+       * <code>bool save_eye_point = 24;</code>
+       */
+      public Builder setSaveEyePoint(boolean value) {
+        
+        saveEyePoint_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool save_eye_point = 24;</code>
+       */
+      public Builder clearSaveEyePoint() {
+        
+        saveEyePoint_ = false;
         onChanged();
         return this;
       }
@@ -39665,7 +40188,7 @@ public final class GUIProtos {
       "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
       "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
       "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
-      "\005\"\235\003\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "\005\"\322\004\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
       "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
       "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
       "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
@@ -39675,13 +40198,18 @@ public final class GUIProtos {
       "depth_mode\030\013 \001(\005\022\023\n\013depth_range\030\014 \001(\001\022\023\n" +
       "\013dither_seed\030\r \001(\005\022\031\n\021transparency_mode\030" +
       "\016 \001(\005\022\030\n\020min_transparency\030\017 \001(\001\022\030\n\020max_t" +
-      "ransparency\030\020 \001(\001\"\220\001\n\030TranslateResultsSe",
-      "ttings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001" +
-      "\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdistance_uni" +
-      "t\030\005 \001(\0162#.gdsc.smlm.data.config.Distance" +
-      "Unit*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020" +
-      "\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPL" +
-      "ATE\020\002B\013B\tGUIProtosb\006proto3"
+      "ransparency\030\020 \001(\001\022\021\n\tsort_mode\030\021 \001(\005\022\030\n\020",
+      "sort_direction_x\030\022 \001(\001\022\030\n\020sort_direction" +
+      "_y\030\023 \001(\001\022\030\n\020sort_direction_z\030\024 \001(\001\022\022\n\nso" +
+      "rt_eye_x\030\025 \001(\001\022\022\n\nsort_eye_y\030\026 \001(\001\022\022\n\nso" +
+      "rt_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010\"\220" +
+      "\001\n\030TranslateResultsSettings\022\024\n\014input_opt" +
+      "ion\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030" +
+      "\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gdsc.smlm" +
+      ".data.config.DistanceUnit*O\n\014TemplateTyp" +
+      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
+      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb",
+      "\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -39819,7 +40347,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(20);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new

@@ -25,8 +25,8 @@ import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.PickInfo;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
+import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
-import org.scijava.java3d.RenderingAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Transform3D;
 import org.scijava.java3d.TransparencyAttributes;
@@ -36,6 +36,7 @@ import org.scijava.vecmath.AxisAngle4d;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomMesh;
@@ -49,6 +50,7 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
+import gdsc.core.utils.TextUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -228,6 +230,41 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	};
 	
 	private final static String[] TRANSPARENCY_MODE = SettingsManager.getNames((Object[]) TransparencyMode.values());	
+
+	private enum SortMode implements NamedObject
+	{
+		NONE { public String getName() { return "None"; }
+		public String getDescription() { return ""; }},
+		XYZ { public String getName() { return "XYZ"; }
+		public String getDescription() { return "Sort using XYZ. The order is defined by the direction with the major component used first, e.g. 1,2,3 for zyx ascending, -3,-2,-1 for xyz descending."; }},
+		OTHOGRAPHIC { public String getName() { return "Othographic"; }
+		public String getDescription() { return "Project all points to the plane defined by the direction. Rank by distance to the plane."; }},
+		PERSPECTIVE { public String getName() { return "Perspective"; }
+		public String getDescription() { return "Rank by distance to the eye position for true depth perspective rendering."; }},
+        ;
+
+		public String getShortName()
+		{
+			return getName();
+		}		
+		
+		public static SortMode forNumber(int number)
+		{
+			SortMode[] values = SortMode.values();
+			if (number < 0 || number >= values.length)
+				throw new IllegalArgumentException();
+			return values[number];
+		}
+
+		public abstract String getDescription();
+		
+		public String getDetails()
+		{
+			return getName() + ": " + getDescription();
+		}
+	};
+	
+	private final static String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());	
 	//@formatter:on	
 
 	// To debug this from Eclipse relies on being able to find the native 
@@ -252,15 +289,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		ImageJ3DResultsViewerSettings settings;
 
-		/** The results size when the object mesh was constructed. */
-		final int resultsSize;
+		/** The results when the object mesh was constructed. */
+		MemoryPeakResults results;
 
-		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, int resultsSize)
+		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results)
 		{
 			this.settings = settings;
-			this.resultsSize = resultsSize;
+			this.results = results;
 		}
 	}
+
+	final static Transform3D IDENTITY = new Transform3D();
 
 	// No ned to store this in settings as when the plugin is first run there are no windows 
 	private static String lastWindow = "";
@@ -275,8 +314,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem resetAll;
 	private JMenuItem changeColour;
 	private JMenuItem resetSelectedView;
+	private JMenuItem findEyePoint;
 	private JMenuItem colourSurface;
-	private JMenuItem updateTableSettings;
+	private JMenuItem updateSettings;
 
 	/*
 	 * (non-Javadoc)
@@ -391,6 +431,57 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return true;
 			}
 		});
+		gd.addChoice("Sort_mode", SORT_MODE, settings.getSortMode(), new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				settings.setSortMode(value);
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Sort mode options", null);
+				SortMode mode = SortMode.forNumber(settings.getSortMode());
+				if (mode == SortMode.NONE)
+					return false;
+				egd.addMessage(TextUtils.wrap(
+						"Note: The sort mode is used to correctly render transparent objects. For non-transparent objects " +
+								"faster rendering is achieved with a reverse sort to put close objects at the front.",
+						80));
+				egd.addMessage(TextUtils.wrap(mode.getDetails(), 80));
+				egd.addMessage("Define the direction of the view");
+				egd.addNumericField("Direction_x", settings.getSortDirectionX(), 3, 10, "");
+				egd.addNumericField("Direction_y", settings.getSortDirectionY(), 3, 10, "");
+				egd.addNumericField("Direction_z", settings.getSortDirectionZ(), 3, 10, "");
+				if (mode == SortMode.PERSPECTIVE)
+				{
+					egd.addMessage("Define the view eye position");
+					egd.addNumericField("Eye_x", settings.getSortEyeX(), 3, 10, "nm");
+					egd.addNumericField("Eye_y", settings.getSortEyeY(), 3, 10, "nm");
+					egd.addNumericField("Eye_z", settings.getSortEyeZ(), 3, 10, "nm");
+				}
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				settings.setSortDirectionX(egd.getNextNumber());
+				settings.setSortDirectionY(egd.getNextNumber());
+				settings.setSortDirectionZ(egd.getNextNumber());
+				if (mode == SortMode.PERSPECTIVE)
+				{
+					settings.setSortEyeX(egd.getNextNumber());
+					settings.setSortEyeY(egd.getNextNumber());
+					settings.setSortEyeZ(egd.getNextNumber());
+				}
+				return true;
+			}
+		});
 		gd.addChoice("Transparency_mode", TRANSPARENCY_MODE, settings.getTransparencyMode(),
 				new OptionListener<Integer>()
 				{
@@ -466,6 +557,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		settings.setRendering(gd.getNextChoiceIndex());
 		settings.setShaded(gd.getNextBoolean());
 		settings.setSizeMode(gd.getNextChoiceIndex());
+		settings.setSortMode(gd.getNextChoiceIndex());
 		settings.setTransparencyMode(gd.getNextChoiceIndex());
 		settings.setDepthMode(gd.getNextChoiceIndex());
 		gd.collectOptions();
@@ -518,15 +610,31 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else
 			univ = univList.get(windowChoice - 1); // Ignore the new window
 
+		// This does not work. It is meant to sort each object based on the centre.
+		// However the Content object extends BranchGroup to allow picking.
+		// This means the rendered object has an ordered path and so geometry sorting
+		// is not supported. 
+		// See org.scijava.java3d.RenderMolecule : isOpaqueOrInOG = isOpaque() || (ga.source.orderedPath != null);
+
+		//View view = univ.getViewer().getView();
+		//view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
+		//view.setDepthBufferFreezeTransparent(false);
+		//TransparencySortController.setComparator(view, new SimpleDistanceComparator());
+
+		final TurboList<Point3f> points = getPoints(results, settings);
+
+		results = results.copy();
+		sort(results, points, settings);
+
 		lastWindow = univ.getWindow().getTitle();
 
-		CustomMesh mesh = createMesh(settings, results, sphereSize, transparency);
+		CustomMesh mesh = createMesh(settings, points, sphereSize, transparency);
 		if (mesh == null)
 			return;
 
 		updateAppearance(mesh, settings);
 
-		ResultsMetaData data = new ResultsMetaData(settings.build(), results.size());
+		ResultsMetaData data = new ResultsMetaData(settings.build(), results);
 
 		mesh.setShaded(settings.getShaded());
 
@@ -680,12 +788,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
-			MemoryPeakResults results, final Point3f[] sphereSize, float transparency)
+			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency)
 	{
 		// Support drawing as square pixels ...
 		if (settings.getRendering() == 0)
 		{
-			final TurboList<Point3f> points = getPoints(results, settings);
 			CustomPointMesh mesh = new CustomPointMesh(points, null, transparency);
 			mesh.setPointSize(sphereSize[0].x);
 			return mesh;
@@ -712,8 +819,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			Pair<Point3f[], int[]> pair = createIndexedObject(r);
 			Point3f[] objectVertices = pair.s;
 			int[] objectFaces = pair.r;
-			long size = (long) results.size() * objectVertices.length;
-			long size2 = (long) results.size() * objectFaces.length;
+			long size = (long) points.size() * objectVertices.length;
+			long size2 = (long) points.size() * objectFaces.length;
 			if (size > 10000000L)
 			{
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
@@ -724,8 +831,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (egd.wasCanceled())
 					return null;
 			}
-			final TurboList<Point3f> points = getPoints(results, settings);
-
 			IJ.showStatus("Creating 3D mesh ...");
 			return new RepeatedIndexedTriangleMesh(objectVertices, objectFaces,
 					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency);
@@ -734,7 +839,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final List<Point3f> point = createLocalisationObject(r);
 
 		final int singlePointSize = point.size();
-		long size = (long) results.size() * singlePointSize;
+		long size = (long) points.size() * singlePointSize;
 		if (size > 10000000L)
 		{
 			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
@@ -745,7 +850,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (egd.wasCanceled())
 				return null;
 		}
-		final TurboList<Point3f> points = getPoints(results, settings);
 
 		if (mode == 2)
 		{
@@ -841,6 +945,209 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return points;
 	}
 
+	private void sort(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	{
+		SortMode mode = SortMode.forNumber(settings.getSortMode());
+		switch (mode)
+		{
+			case NONE:
+				return;
+			case PERSPECTIVE:
+				sortPerspective(results, points, settings);
+				break;
+			case OTHOGRAPHIC:
+				sortOrthographic(results, points, settings);
+				break;
+			case XYZ:
+				sortXYZ(results, points, settings);
+				break;
+			default:
+				throw new IllegalStateException("Unknown sort mode " + mode);
+		}
+	}
+
+	private void sortPerspective(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	{
+		Vector3d v = getViewDirection(settings);
+		if (v == null)
+			throw new IllegalStateException("The view direction is not valid");
+		Point3d eye = new Point3d(settings.getSortEyeX(), settings.getSortEyeY(), settings.getSortEyeZ());
+		//System.out.printf("Dir %s : Eye %s\n", v, eye);
+
+		double[] d = new double[points.size()];
+		for (int i = 0; i < d.length; i++)
+		{
+			Point3f p = points.getf(i);
+
+			Vector3d v2 = new Vector3d(p.x - eye.x, p.y - eye.y, p.z - eye.z);
+
+			// Compute distance of all points from the eye.
+			d[i] = v2.length();
+
+			// We need to know if point is in-front of the eye or behind.
+			// Compute dot product (if positive then this is an acute angle).
+			// We use a descending sort so acute angles (in front of the eye)
+			// should be higher (ranked first) and obtuse angles (behind the 
+			// eye) ranked later.
+			if (v2.dot(v) < 0)
+				d[i] = -d[i];
+			
+			//System.out.printf("[%d] %s %s %g = %g\n", i, p, v2, v2.dot(v), d[i]);
+		}
+
+		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
+		Sort.sort(indices, d);
+
+		reorder(indices, results, points);
+	}
+
+	private Vector3d getViewDirection(Builder settings)
+	{
+		Vector3d dir = new Vector3d(settings.getSortDirectionX(), settings.getSortDirectionY(),
+				settings.getSortDirectionZ());
+		double l1 = dir.lengthSquared();
+		if (!Maths.isFinite(l1))
+			return null;
+		return dir;
+	}
+
+	private void reorder(int[] indices, MemoryPeakResults results, TurboList<Point3f> points)
+	{
+		PeakResult[] originalPeakResults = results.toArray();
+		Point3f[] originalPoints = points.toArray(new Point3f[points.size()]);
+
+		// We need another array to store the output 
+		PeakResult[] peakResults = new PeakResult[originalPeakResults.length];
+
+		// Rewrite order
+		for (int i = 0; i < indices.length; i++)
+		{
+			int index = indices[i];
+			points.setf(i, originalPoints[index]);
+			peakResults[i] = originalPeakResults[index];
+		}
+
+		// Bulk update the results
+		results.setSortAfterEnd(false);
+		results.begin();
+		results.addAll(peakResults);
+		results.end();
+	}
+
+	private void sortOrthographic(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	{
+		Vector3d v = getViewDirection(settings);
+		if (v == null)
+		{
+			// Default
+			v = new Vector3d(0, 0, -1);
+		}
+		v.normalize();
+		final double a = v.x;
+		final double b = v.y;
+		final double c = v.z;
+
+		double[] d = new double[points.size()];
+		for (int i = 0; i < d.length; i++)
+		{
+			Point3f p = points.getf(i);
+
+			// Compute signed distance of all points from the plane
+			// defined by normal v and point (0,0,0)
+			d[i] = a * p.x + b * p.y + c * p.z;
+		}
+
+		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
+		Sort.sort(indices, d);
+
+		reorder(indices, results, points);
+	}
+
+	private class CustomSortObject implements Comparable<CustomSortObject>
+	{
+		final float f1, f2, f3;
+		final int index;
+
+		CustomSortObject(int i, float f1, float f2, float f3)
+		{
+			this.f1 = f1;
+			this.f2 = f2;
+			this.f3 = f3;
+			this.index = i;
+		}
+
+		public int compareTo(CustomSortObject o)
+		{
+			if (f1 < o.f1)
+				return -1;
+			if (f1 > o.f1)
+				return 1;
+			if (f2 < o.f2)
+				return -1;
+			if (f2 > o.f2)
+				return 1;
+			if (f3 < o.f3)
+				return -1;
+			if (f3 > o.f3)
+				return 1;
+			return 0;
+		}
+	}
+
+	private void sortXYZ(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	{
+		Vector3d v = getViewDirection(settings);
+		if (v == null)
+		{
+			// Default to z axis (away), then y then x in ascending order
+			v = new Vector3d(-1, -2, 3);
+		}
+		v.normalize();
+
+		// Use the vector lengths in each dimension to set the order
+		int[] indices = SimpleArrayUtils.newArray(3, 0, 1);
+		double[] values = new double[] { v.x, v.y, v.z };
+		double[] absValues = new double[] { Math.abs(v.x), Math.abs(v.y), Math.abs(v.z) };
+		Sort.sort(indices, absValues);
+
+		final int ix = search(indices, 0);
+		final int iy = search(indices, 1);
+		final int iz = search(indices, 2);
+
+		// Use the vector signs to set the direction
+		final int sx = (values[0] <= 0) ? 1 : -1;
+		final int sy = (values[1] <= 0) ? 1 : -1;
+		final int sz = (values[2] <= 0) ? 1 : -1;
+
+		// Sort using the points since these have dithered positions for 2D results.
+		CustomSortObject[] toSort = new CustomSortObject[points.size()];
+		float[] f = new float[3];
+		for (int i = 0; i < toSort.length; i++)
+		{
+			Point3f p = points.getf(i);
+			f[ix] = sx * p.x;
+			f[iy] = sy * p.y;
+			f[iz] = sz * p.z;
+			toSort[i] = new CustomSortObject(i, f[0], f[1], f[2]);
+		}
+
+		Arrays.sort(toSort);
+
+		indices = new int[toSort.length];
+		for (int i = 0; i < toSort.length; i++)
+			indices[i] = toSort[i].index;
+
+		reorder(indices, results, points);
+	}
+	
+	private static int search(int[] values, int key)
+	{
+		for (int i=0; i<values.length; i++)
+			if (values[i] == key)
+				return i;
+		return -1;
+	}
+
 	private static void updateAppearance(CustomMesh mesh, final ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		Appearance appearance = mesh.getAppearance();
@@ -863,7 +1170,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		ta.setSrcBlendFunction(TransparencyAttributes.BLEND_SRC_ALPHA);
 		//ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE);
 		ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE_MINUS_SRC_ALPHA); // Default
-		
+
 		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.FASTEST);
 		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
 		RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.BLENDED);
@@ -875,6 +1182,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else
 			// Faster polygon rendering with flat shading
 			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+
+		// This allows points to support transparency
+		final PointAttributes pointAttributes = appearance.getPointAttributes();
+		if (pointAttributes != null)
+			pointAttributes.setPointAntialiasingEnable(true);
 	}
 
 	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
@@ -1024,15 +1336,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 				ResultsMetaData data = (ResultsMetaData) c.getUserData();
 
-				MemoryPeakResults results = ResultsManager.loadInputResults(data.settings.getInputOption(), false, null,
-						null);
-				// Results must be the same size
-				if (results == null || results.size() != data.resultsSize)
-				{
-					IJ.error(TITLE, "Results are not the same size as when the mesh was constructed: " +
-							data.settings.getInputOption());
-					return;
-				}
+				MemoryPeakResults results = data.results;
 
 				// Look up the localisation from the clicked vertex
 				final ContentInstant content = c.getInstant(0);
@@ -1047,7 +1351,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					// Default to the number of vertices
 					nVertices = ga.getValidVertexCount();
 
-				int nPerLocalisation = nVertices / data.resultsSize;
+				int nPerLocalisation = nVertices / results.size();
 
 				// Determine the localisation
 				int vertexIndex = pair.r.getVertexIndices()[0];
@@ -1234,6 +1538,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		resetSelectedView.addActionListener(this);
 		add.add(resetSelectedView);
 
+		findEyePoint = new JMenuItem("Find Eye Point");
+		findEyePoint.addActionListener(this);
+		add.add(findEyePoint);
+
 		add.addSeparator();
 
 		changeColour = new JMenuItem("Change Colour");
@@ -1246,9 +1554,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		add.addSeparator();
 
-		updateTableSettings = new JMenuItem("Update results table settings");
-		updateTableSettings.addActionListener(this);
-		add.add(updateTableSettings);
+		updateSettings = new JMenuItem("Update settings");
+		updateSettings.addActionListener(this);
+		add.add(updateSettings);
 
 		return add;
 	}
@@ -1263,9 +1571,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		 * @return 0 negative for error. No further content can be processed.
 		 */
 		public int run(Content c);
+
+		public void finish();
 	}
 
-	private static class ChangeColourContentAction implements ContentAction
+	private static abstract class BaseContentAction implements ContentAction
+	{
+		public void finish()
+		{
+		}
+	}
+
+	private static class ChangeColourContentAction extends BaseContentAction
 	{
 		ImageJ3DResultsViewerSettings.Builder settings = null;
 
@@ -1276,15 +1593,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			ResultsMetaData data = (ResultsMetaData) c.getUserData();
 
-			MemoryPeakResults results = ResultsManager.loadInputResults(data.settings.getInputOption(), false, null,
-					null);
-			// Results must be the same size
-			if (results == null || results.size() != data.resultsSize)
-			{
-				IJ.error(TITLE, "Results are not the same size as when the mesh was constructed: " +
-						data.settings.getInputOption());
-				return 1;
-			}
+			MemoryPeakResults results = data.results;
 
 			// Change the colour
 			if (settings == null)
@@ -1311,7 +1620,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static class ResetViewContentAction implements ContentAction
+	private static class ResetViewContentAction extends BaseContentAction
 	{
 		final boolean error;
 
@@ -1337,7 +1646,96 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static class ColourSurfaceContentAction implements ContentAction
+	private class FindEyePointContentAction extends BaseContentAction
+	{
+		ImageJ3DResultsViewerSettings.Builder settings;
+		final Transform3D ipToVWorld = new Transform3D();
+		final Point3d eyePtInVWorld = new Point3d();
+
+		final Point3d dir0InVWorld = new Point3d();
+		final Point3d dir1InVWorld = new Point3d(0, 0, -1);
+
+		FindEyePointContentAction()
+		{
+			this.settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
+			if (!settings.getSaveEyePoint())
+				settings = null;
+
+			univ.getCanvas().getImagePlateToVworld(ipToVWorld);
+			//ipToVWorldInverse.invert(ipToVWorld);
+			//System.out.printf("ipToVWorld\n%s", ipToVWorld);
+
+			univ.getCanvas().getCenterEyeInImagePlate(eyePtInVWorld);
+			ipToVWorld.transform(eyePtInVWorld);
+
+			// Work out where the camera is looking in the virtual world
+			final Transform3D cameraToVWorld = new Transform3D();
+			univ.getVworldToCameraInverse(cameraToVWorld);
+			cameraToVWorld.transform(dir0InVWorld);
+			cameraToVWorld.transform(dir1InVWorld);
+		}
+
+		public int run(Content c)
+		{
+			final Transform3D vWorldToLocal = new Transform3D();
+			// This seems to be the identity matrix. 
+			// Use the local transformation getters instead.
+			//c.getLocalToVworld(vWorldToLocal);
+
+			Transform3D translate = new Transform3D();
+			Transform3D rotate = new Transform3D();
+			c.getLocalTranslate(translate);
+			c.getLocalRotate(rotate);
+
+			// This appears to match the global
+			vWorldToLocal.mul(translate, rotate);
+			vWorldToLocal.invert();
+
+			//System.out.printf("localToVWorld\n%s", localToVWorld);
+
+			boolean identity = vWorldToLocal.equals(IDENTITY);
+
+			Point3d eyePtLocalWorld = new Point3d(eyePtInVWorld);
+
+			final Point3d dir0InLocalWorld = new Point3d(dir0InVWorld);
+			final Point3d dir1InLocalWorld = new Point3d(dir1InVWorld);
+
+			if (!identity)
+			{
+				vWorldToLocal.transform(eyePtLocalWorld);
+				vWorldToLocal.transform(dir0InLocalWorld);
+				vWorldToLocal.transform(dir1InLocalWorld);
+			}
+
+			Vector3d direction = new Vector3d();
+			direction.sub(dir1InLocalWorld, dir0InLocalWorld);
+
+			// Print the eye coords and direction in the virtual world. 
+			// This can be used for a custom sort.
+			Utils.log("%s : Eye point = %s : Direction = %s", c.getName(), eyePtLocalWorld, direction);
+
+			if (settings != null)
+			{
+				settings.setSortEyeX(eyePtLocalWorld.x);
+				settings.setSortEyeY(eyePtLocalWorld.y);
+				settings.setSortEyeZ(eyePtLocalWorld.z);
+				settings.setSortDirectionX(direction.x);
+				settings.setSortDirectionY(direction.y);
+				settings.setSortDirectionZ(direction.z);
+			}
+
+			return 0;
+		}
+
+		@Override
+		public void finish()
+		{
+			if (settings != null)
+				SettingsManager.writeSettings(settings);
+		}
+	}
+
+	private static class ColourSurfaceContentAction extends BaseContentAction
 	{
 		static String title = "";
 		static boolean resetTransparency = true;
@@ -1429,22 +1827,25 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			univ.fireTransformationFinished();
 			return;
 		}
-		if (src == updateTableSettings)
+		if (src == updateSettings)
 		{
+			final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
+					.toBuilder();
+
 			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			ResultsSettings.Builder s = ResultsSettings.newBuilder();
 			s.setResultsTableSettings(resultsTableSettings); // This is from the cache
 			gd.addMessage("Click on the image to view localisation data.\nCtrl/Alt key must be pressed.");
 			ResultsManager.addTableResultsOptions(gd, s, ResultsManager.FLAG_NO_SECTION_HEADER);
+			gd.addCheckbox("Save_eye_point", settings.getSaveEyePoint());
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return;
 			resultsTableSettings = s.getResultsTableSettingsBuilder();
 			resultsTableSettings.setShowTable(gd.getNextBoolean());
+			settings.setSaveEyePoint(gd.getNextBoolean());
 
 			// Save updated settings
-			final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
-					.toBuilder();
 			settings.setResultsTableSettings(resultsTableSettings);
 			SettingsManager.writeSettings(settings);
 			return;
@@ -1466,6 +1867,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			action = new ResetViewContentAction(true);
 		}
+		else if (src == findEyePoint)
+		{
+			action = new FindEyePointContentAction();
+		}
 		else if (src == colourSurface)
 		{
 			action = new ColourSurfaceContentAction();
@@ -1484,6 +1889,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (action.run(it.next()) < 0)
 				return;
 		}
+
+		action.finish();
 	}
 
 	/**
@@ -1531,7 +1938,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	/**
-	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the disc is
+	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the
+	 * disc is
 	 * removed.
 	 *
 	 * @param x
