@@ -364,19 +364,21 @@ public class GUIProtosHelper
 	static
 	{
 		ImageJ3DResultsViewerSettings.Builder builder = ImageJ3DResultsViewerSettings.newBuilder();
-		builder.setSize(10); // NM units
-		builder.setTransparency(0.5);
-		builder.setLut(LutColour.FIRE.ordinal());
-		builder.setRendering(4); // Octahedron
-		builder.setShaded(true);
-		builder.setSizeMode(0);
+		builder.setNewWindow(false);
+		builder.setTransparency(0.65);
+		builder.setLut(LutColour.FIRE_GLOW.ordinal());
+		builder.setRendering(7); // Octahedron
 		builder.setPixelSize(2); // Like weighted 2D pixel rendering using 4 pixels
+		builder.setShaded(true);
+		builder.setSizeMode(0); // Fixed
+		builder.setSize(10); // NM units
+		builder.setSortMode(0); // None
+		builder.setTransparencyMode(0); // None
+		builder.setMinTransparency(0);
+		builder.setMaxTransparency(0.9);
 		builder.setDepthMode(1);
 		builder.setDepthRange(20);
 		builder.setDitherSeed(123456789);
-		builder.setTransparencyMode(0);
-		builder.setMinTransparency(0);
-		builder.setMaxTransparency(0.9);
 		ResultsTableSettings.Builder resultsTableSettings = builder.getResultsTableSettingsBuilder();
 		resultsTableSettings.setDistanceUnit(DistanceUnit.NM);
 		resultsTableSettings.setShowTable(true);
