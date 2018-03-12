@@ -6,6 +6,7 @@ import java.util.List;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.PointArray;
 import org.scijava.java3d.PointAttributes;
 import org.scijava.vecmath.Color3f;
@@ -136,8 +137,8 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
 		float[] oldColors = new float[oldSize * 3];
 		ga.getColors(0, oldColors);
-		Point3f[] coords = new Point3f[size];
-		Color3f[] colors = new Color3f[size];
+		final Point3f[] coords = new Point3f[size];
+		final Color3f[] colors = new Color3f[size];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];
@@ -147,12 +148,19 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		}
 		mesh = Arrays.asList(coords);
 
-		// We re-use the geometry and just truncate the vertex count
-		ga.setValidVertexCount(coords.length);
-		ga.setCoordinates(0, coords);
-		ga.setColors(0, colors);
+		ga.updateData(new GeometryUpdater()
+		{
+			public void updateData(Geometry geometry)
+			{
+				GeometryArray ga = (GeometryArray) geometry;
+				// We re-use the geometry and just truncate the vertex count
+				ga.setCoordinates(0, coords);
+				ga.setColors(0, colors);
+				ga.setValidVertexCount(coords.length);
+			}
+		});
 
-		this.setGeometry(ga);
+		//this.setGeometry(ga);
 	}
 
 	/**

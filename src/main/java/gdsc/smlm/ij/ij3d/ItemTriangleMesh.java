@@ -6,6 +6,7 @@ import java.util.List;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.utils.geometry.GeometryInfo;
@@ -555,8 +556,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
 		float[] oldColors = new float[oldCoords.length * 3];
 		ga.getColors(0, oldColors);
-		Point3f[] coords = new Point3f[size * objectSize];
-		float[] colors = new float[coords.length * 3];
+		final Point3f[] coords = new Point3f[size * objectSize];
+		final float[] colors = new float[coords.length * 3];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];
@@ -571,12 +572,19 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		}
 		mesh = Arrays.asList(coords);
 
-		// We re-use the geometry and just truncate the vertex count
-		ga.setCoordinates(0, coords);
-		ga.setColors(0, colors);
-		ga.setValidVertexCount(coords.length);
+		ga.updateData(new GeometryUpdater()
+		{
+			public void updateData(Geometry geometry)
+			{
+				GeometryArray ga = (GeometryArray) geometry;
+				// We re-use the geometry and just truncate the vertex count
+				ga.setCoordinates(0, coords);
+				ga.setColors(0, colors);
+				ga.setValidVertexCount(coords.length);
+			}
+		});
 
-		this.setGeometry(ga);
+		//this.setGeometry(ga);
 	}
 
 	private static Point3f[] reorder(Point3f[] p, int[] indices)
