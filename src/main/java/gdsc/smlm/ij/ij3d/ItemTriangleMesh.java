@@ -282,31 +282,16 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	{
 		if (mesh == null || mesh.size() < 3)
 			return null;
-		final List<Point3f> tri = mesh;
-		final int vertexCount = tri.size();
+		final int vertexCount = mesh.size();
 
 		final Point3f[] coords = new Point3f[vertexCount];
-		tri.toArray(coords);
+		mesh.toArray(coords);
 
+		// Do not try to get the colour back from the geometry as is done 
+		// in the super-class. That will only work if the size is the same
+		// and this method is likely to be called when the size changes.
 		final Color3f colors[] = new Color3f[vertexCount];
-		if (null == color)
-		{
-			// Vertex-wise colors are not stored
-			// so they have to be retrieved from the geometry:
-			final GeometryArray gaOld = (GeometryArray) getGeometry();
-			if (null != gaOld)
-			{
-				gaOld.getColors(0, colors);
-			}
-			else
-			{
-				Arrays.fill(colors, new Color3f(DEFAULT_COLOR));
-			}
-		}
-		else
-		{
-			Arrays.fill(colors, color);
-		}
+		Arrays.fill(colors, (color == null) ? DEFAULT_COLOR : color);
 
 		final GeometryArray ta = new TriangleArray(vertexCount,
 				GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.NORMALS);

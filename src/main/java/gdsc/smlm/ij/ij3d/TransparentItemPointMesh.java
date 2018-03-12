@@ -3,13 +3,12 @@ package gdsc.smlm.ij.ij3d;
 import java.util.Arrays;
 import java.util.List;
 
-import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.PointArray;
-import org.scijava.java3d.PointAttributes;
 import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
 /*----------------------------------------------------------------------------- 
@@ -25,12 +24,10 @@ import org.scijava.vecmath.Point3f;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import customnode.CustomPointMesh;
-
 /**
  * Create an object to represent a set of points
  */
-public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
+public class TransparentItemPointMesh extends ItemPointMesh implements TransparentItemMesh
 {
 	/**
 	 * Instantiates a new item point mesh.
@@ -38,7 +35,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 	 * @param mesh
 	 *            the mesh
 	 */
-	public ItemPointMesh(final List<Point3f> mesh)
+	public TransparentItemPointMesh(final List<Point3f> mesh)
 	{
 		super(mesh);
 	}
@@ -53,19 +50,9 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 	 * @param transparency
 	 *            the transparency
 	 */
-	public ItemPointMesh(final List<Point3f> mesh, final Color3f color, final float transparency)
+	public TransparentItemPointMesh(final List<Point3f> mesh, final Color3f color, final float transparency)
 	{
 		super(mesh, color, transparency);
-	}
-
-	@Override
-	protected Appearance createAppearance()
-	{
-		Appearance appearance = super.createAppearance();
-		final PointAttributes pointAttributes = appearance.getPointAttributes();
-		// This allows points to support transparency
-		pointAttributes.setPointAntialiasingEnable(true);
-		return appearance;
 	}
 
 	@Override
@@ -78,10 +65,12 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		final Point3f[] coords = new Point3f[size];
 		mesh.toArray(coords);
 
-		final Color3f[] colors = new Color3f[size];
-		Arrays.fill(colors, (color == null) ? DEFAULT_COLOR : color);
+		final Color4f[] colors = new Color4f[size];
+		if (color == null)
+			color = DEFAULT_COLOR;
+		Arrays.fill(colors, new Color4f(color.x, color.y, color.z, 1));
 
-		GeometryArray ta = new PointArray(2 * size, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
+		GeometryArray ta = new PointArray(2 * size, GeometryArray.COORDINATES | GeometryArray.COLOR_4);
 
 		ta.setValidVertexCount(size);
 
@@ -95,17 +84,6 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		ta.setCapability(Geometry.ALLOW_INTERSECT);
 
 		return ta;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
-	 */
-	public void reorder(int[] indices) throws IllegalArgumentException
-	{
-		checkIndices(indices, mesh.size());
-		reorderFast(indices);
 	}
 
 	/*
@@ -134,16 +112,16 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 
 		// Reorder all things in the geometry: coordinates and colour
 		Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
-		float[] oldColors = new float[oldSize * 3];
+		float[] oldColors = new float[oldSize * 4];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size];
-		final Color3f[] colors = new Color3f[size];
+		final Color4f[] colors = new Color4f[size];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];
 			coords[i] = oldCoords[j];
-			j *= 3;
-			colors[i] = new Color3f(oldColors[j], oldColors[j + 1], oldColors[j + 2]);
+			j *= 4;
+			colors[i] = new Color4f(oldColors[j], oldColors[j + 1], oldColors[j + 2], oldColors[j + 3]);
 		}
 		mesh = Arrays.asList(coords);
 
@@ -162,38 +140,6 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		//this.setGeometry(ga);
 	}
 
-	/**
-	 * Check the indices contain a valid natural order of the specifed size
-	 *
-	 * @param indices
-	 *            the indices
-	 * @param size
-	 *            the size
-	 */
-	public static void checkIndices(int[] indices, int size)
-	{
-		if (indices == null || indices.length != size)
-			throw new IllegalArgumentException("Indices length do not match the size of the mesh");
-
-		// Check all indices are present.
-		// Do a sort and then check it is a natural order
-		int[] check = indices.clone();
-		Arrays.sort(check);
-		for (int i = 0; i < check.length; i++)
-			if (check[i] != i)
-				throw new IllegalArgumentException("Indices do not contain a valid natural order");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
-	 */
-	public int size()
-	{
-		return mesh.size();
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -201,6 +147,66 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 	 */
 	public void setItemColor(List<Color3f> color) throws IllegalArgumentException
 	{
-		setColor(color);
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int size = size();
+		if (color.size() != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final float[] colors = new float[4 * size];
+		ga.getColors(0, colors);
+		int i = 0;
+		for (Color3f c : color)
+		{
+			colors[i++] = c.x;
+			colors[i++] = c.y;
+			colors[i++] = c.z;
+			i++; // Skip over alpha
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemColor4(java.util.List)
+	 */
+	public void setItemColor4(List<Color4f> color) throws IllegalArgumentException
+	{
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int size = size();
+		if (color.size() != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final Color4f[] colors = new Color4f[size];
+		color.toArray(colors);
+		ga.setColors(0, colors);
+		changed = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemAlpha(float[])
+	 */
+	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
+	{
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		final int size = size();
+		if (alpha.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final float[] colors = new float[4 * size];
+		ga.getColors(0, colors);
+		for (int i = 0; i < size; i++)
+		{
+			// Set only alpha
+			colors[i * 4 + 3] = alpha[i];
+		}
+		ga.setColors(0, colors);
+		changed = true;
 	}
 }
