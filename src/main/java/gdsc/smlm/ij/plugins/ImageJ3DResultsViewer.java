@@ -108,6 +108,7 @@ import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
 import ij3d.Content;
 import ij3d.ContentInstant;
+import ij3d.DefaultUniverse;
 import ij3d.Image3DMenubar;
 import ij3d.Image3DUniverse;
 import ij3d.ImageCanvas3D;
@@ -1385,6 +1386,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.setMenubar(menubar);
 
 		univ.addUniverseListener(this);
+		
+		univ.setShowBoundingBoxUponSelection(false);
+		univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 
 		// Capture a canvas mouse click/region and identify the coordinates.
 		final ImageCanvas3D canvas = (ImageCanvas3D) univ.getCanvas();
