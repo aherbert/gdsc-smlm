@@ -37018,6 +37018,16 @@ public final class GUIProtos {
      * <code>bool save_eye_point = 24;</code>
      */
     boolean getSaveEyePoint();
+
+    /**
+     * <code>string highlight_colour = 25;</code>
+     */
+    java.lang.String getHighlightColour();
+    /**
+     * <code>string highlight_colour = 25;</code>
+     */
+    com.google.protobuf.ByteString
+        getHighlightColourBytes();
   }
   /**
    * <pre>
@@ -37058,6 +37068,7 @@ public final class GUIProtos {
       sortEyeY_ = 0D;
       sortEyeZ_ = 0D;
       saveEyePoint_ = false;
+      highlightColour_ = "";
     }
 
     @java.lang.Override
@@ -37212,6 +37223,12 @@ public final class GUIProtos {
             case 192: {
 
               saveEyePoint_ = input.readBool();
+              break;
+            }
+            case 202: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              highlightColour_ = s;
               break;
             }
           }
@@ -37490,6 +37507,40 @@ public final class GUIProtos {
       return saveEyePoint_;
     }
 
+    public static final int HIGHLIGHT_COLOUR_FIELD_NUMBER = 25;
+    private volatile java.lang.Object highlightColour_;
+    /**
+     * <code>string highlight_colour = 25;</code>
+     */
+    public java.lang.String getHighlightColour() {
+      java.lang.Object ref = highlightColour_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        highlightColour_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string highlight_colour = 25;</code>
+     */
+    public com.google.protobuf.ByteString
+        getHighlightColourBytes() {
+      java.lang.Object ref = highlightColour_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        highlightColour_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37573,6 +37624,9 @@ public final class GUIProtos {
       }
       if (saveEyePoint_ != false) {
         output.writeBool(24, saveEyePoint_);
+      }
+      if (!getHighlightColourBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 25, highlightColour_);
       }
     }
 
@@ -37676,6 +37730,9 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(24, saveEyePoint_);
       }
+      if (!getHighlightColourBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, highlightColour_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -37767,6 +37824,8 @@ public final class GUIProtos {
               other.getSortEyeZ()));
       result = result && (getSaveEyePoint()
           == other.getSaveEyePoint());
+      result = result && getHighlightColour()
+          .equals(other.getHighlightColour());
       return result;
     }
 
@@ -37842,6 +37901,8 @@ public final class GUIProtos {
       hash = (37 * hash) + SAVE_EYE_POINT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getSaveEyePoint());
+      hash = (37 * hash) + HIGHLIGHT_COLOUR_FIELD_NUMBER;
+      hash = (53 * hash) + getHighlightColour().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -38027,6 +38088,8 @@ public final class GUIProtos {
 
         saveEyePoint_ = false;
 
+        highlightColour_ = "";
+
         return this;
       }
 
@@ -38077,6 +38140,7 @@ public final class GUIProtos {
         result.sortEyeY_ = sortEyeY_;
         result.sortEyeZ_ = sortEyeZ_;
         result.saveEyePoint_ = saveEyePoint_;
+        result.highlightColour_ = highlightColour_;
         onBuilt();
         return result;
       }
@@ -38190,6 +38254,10 @@ public final class GUIProtos {
         }
         if (other.getSaveEyePoint() != false) {
           setSaveEyePoint(other.getSaveEyePoint());
+        }
+        if (!other.getHighlightColour().isEmpty()) {
+          highlightColour_ = other.highlightColour_;
+          onChanged();
         }
         onChanged();
         return this;
@@ -38971,6 +39039,75 @@ public final class GUIProtos {
       public Builder clearSaveEyePoint() {
         
         saveEyePoint_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object highlightColour_ = "";
+      /**
+       * <code>string highlight_colour = 25;</code>
+       */
+      public java.lang.String getHighlightColour() {
+        java.lang.Object ref = highlightColour_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          highlightColour_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string highlight_colour = 25;</code>
+       */
+      public com.google.protobuf.ByteString
+          getHighlightColourBytes() {
+        java.lang.Object ref = highlightColour_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          highlightColour_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string highlight_colour = 25;</code>
+       */
+      public Builder setHighlightColour(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        highlightColour_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string highlight_colour = 25;</code>
+       */
+      public Builder clearHighlightColour() {
+        
+        highlightColour_ = getDefaultInstance().getHighlightColour();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string highlight_colour = 25;</code>
+       */
+      public Builder setHighlightColourBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        highlightColour_ = value;
         onChanged();
         return this;
       }
@@ -40188,7 +40325,7 @@ public final class GUIProtos {
       "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
       "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
       "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
-      "\005\"\322\004\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "\005\"\354\004\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
       "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
       "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
       "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
@@ -40202,14 +40339,14 @@ public final class GUIProtos {
       "sort_direction_x\030\022 \001(\001\022\030\n\020sort_direction" +
       "_y\030\023 \001(\001\022\030\n\020sort_direction_z\030\024 \001(\001\022\022\n\nso" +
       "rt_eye_x\030\025 \001(\001\022\022\n\nsort_eye_y\030\026 \001(\001\022\022\n\nso" +
-      "rt_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010\"\220" +
-      "\001\n\030TranslateResultsSettings\022\024\n\014input_opt" +
-      "ion\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030" +
-      "\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gdsc.smlm" +
-      ".data.config.DistanceUnit*O\n\014TemplateTyp" +
-      "e\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPL" +
-      "ATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb",
-      "\006proto3"
+      "rt_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010\022\030" +
+      "\n\020highlight_colour\030\031 \001(\t\"\220\001\n\030TranslateRe" +
+      "sultsSettings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002d" +
+      "x\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdista" +
+      "nce_unit\030\005 \001(\0162#.gdsc.smlm.data.config.D" +
+      "istanceUnit*O\n\014TemplateType\022\023\n\017INLINE_TE" +
+      "MPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTO",
+      "M_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -40347,7 +40484,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(20);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new

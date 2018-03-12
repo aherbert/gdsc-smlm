@@ -29,7 +29,7 @@ import customnode.CustomPointMesh;
 /**
  * Create an object to represent a set of points
  */
-public class ItemPointMesh extends CustomPointMesh implements UpdatedableItemMesh
+public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 {
 	/**
 	 * Instantiates a new item point mesh.

@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.ij3d;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.scijava.java3d.GeometryArray;
 import org.scijava.vecmath.Color3f;
@@ -20,6 +21,10 @@ import org.scijava.vecmath.Point3f;
  *---------------------------------------------------------------------------*/
 
 import customnode.CustomMesh;
+import gdsc.core.utils.TurboList;
+import gdsc.smlm.ij.plugins.Pair;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -69,7 +74,7 @@ public class CustomMeshHelper
 		stack.addSlice(ip);
 		final Calibration cal = imp.getCalibration();
 		imp = new ImagePlus(null, stack);
-		
+
 		final InterpolatedImage ii = new InterpolatedImage(imp);
 
 		final int N = ga.getValidVertexCount();
@@ -87,4 +92,44 @@ public class CustomMeshHelper
 		mesh.setColor(Arrays.asList(colors));
 	}
 
+	/**
+	 * Creates an indexed object from a a list of triangle vertices
+	 *
+	 * @param list
+	 *            the list of triangle vertices
+	 * @return the vertices and faces of the the object
+	 */
+	public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list)
+	{
+		// Compact the vertices to a set of vertices and faces
+		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<Point3f>(list.size(), 0.5f, -1);
+		TurboList<Point3f> vertices = new TurboList<Point3f>(list.size());
+		TIntArrayList faces = new TIntArrayList(list.size());
+		int index = 0;
+		// Process triangles
+		for (int i = 0; i < list.size(); i += 3)
+		{
+			index = addFace(m, vertices, faces, list.get(i), index);
+			index = addFace(m, vertices, faces, list.get(i + 1), index);
+			index = addFace(m, vertices, faces, list.get(i + 2), index);
+		}
+
+		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+	}
+
+	private static int addFace(TObjectIntHashMap<Point3f> m, TurboList<Point3f> vertices, TIntArrayList faces,
+			Point3f p, int index)
+	{
+		// Add the point if it is not in the set of vertices.
+		// Get the index associated with the vertex.
+		int value = m.putIfAbsent(p, index);
+		if (value == -1)
+		{
+			// Store the points in order
+			vertices.add(p);
+			value = index++;
+		}
+		faces.add(value);
+		return index;
+	}
 }

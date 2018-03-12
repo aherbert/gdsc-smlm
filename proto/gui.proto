@@ -590,6 +590,7 @@ message ImageJ3DResultsViewerSettings {
 	double sort_eye_y = 22;
 	double sort_eye_z = 23;
 	bool save_eye_point = 24;
+	string highlight_colour = 25;
 }
 
 // Contains settings for the Translate Results plugin

@@ -1,12 +1,15 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ import org.scijava.java3d.Canvas3D;
 import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.IndexedGeometryArray;
+import org.scijava.java3d.LineAttributes;
 import org.scijava.java3d.PickInfo;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
 import org.scijava.java3d.PolygonAttributes;
@@ -40,10 +44,10 @@ import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
 
+import customnode.CustomLineMesh;
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
 import customnode.CustomPointMesh;
-import customnode.CustomTriangleMesh;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
@@ -79,10 +83,9 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
-import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
-import gdsc.smlm.ij.ij3d.UpdatedableItemMesh;
+import gdsc.smlm.ij.ij3d.UpdateableItemMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -93,8 +96,6 @@ import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -303,12 +304,110 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		 */
 		final TurboList<Point3f> points;
 
+		/** The sizes of each rendered point. */
+		final Point3f[] sizes;
+
+		/** The rendering mode. */
+		final Rendering rendering;
+
+		/** The point outline for the rendering. */
+		final Point3f[] pointOutline;
+
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
-				TurboList<Point3f> points)
+				TurboList<Point3f> points, Point3f[] sizes)
 		{
 			this.settings = settings;
 			this.results = results;
 			this.points = points;
+			this.sizes = sizes;
+
+			// Create the point outline for the rendering
+			rendering = Rendering.forNumber(settings.getRendering());
+
+			if (settings.getRendering() == 0)
+			{
+				pointOutline = new Point3f[1];
+				pointOutline[0] = new Point3f();
+				return;
+			}
+
+			List<Point3f> outline;
+			if (rendering.is2D())
+			{
+				// Handle all the 2D objects to create an outline. 
+				outline = createLocalisationObjectOutline(rendering);
+			}
+			else
+			{
+				// 3D objects can use the same rendering but then post-process to a set of lines
+				// and create a line mesh.
+				outline = createLocalisationObject(rendering);
+
+				Pair<Point3f[], int[]> pair = CustomMeshHelper.createIndexedObject(outline);
+				Point3f[] vertices = pair.s;
+				int[] faces = pair.r;
+				outline.clear();
+				// Only add lines not yet observed. Use an array since 
+				int max = Maths.max(faces) + 1;
+				boolean[] observed = new boolean[max * max];
+				for (int i = 0; i < faces.length; i += 3)
+				{
+					int t1 = faces[i];
+					int t2 = faces[i + 1];
+					int t3 = faces[i + 2];
+					add(observed, max, t1, t2, vertices, outline);
+					add(observed, max, t2, t3, vertices, outline);
+					add(observed, max, t3, t1, vertices, outline);
+				}
+			}
+			this.pointOutline = outline.toArray(new Point3f[outline.size()]);
+		}
+
+		private static void add(boolean[] observed, int max, int t1, int t2, Point3f[] vertices, List<Point3f> point)
+		{
+			int index = (t1 < t2) ? t1 * max + t2 : t2 * max + t1;
+			if (observed[index])
+				return;
+			observed[index] = true;
+			point.add(vertices[t1]);
+			point.add(vertices[t2]);
+		}
+
+		public CustomMesh createOutline(int index)
+		{
+			Point3f centre = points.get(index);
+			TurboList<Point3f> outline = new TurboList<Point3f>(pointOutline.length);
+
+			if (rendering == Rendering.POINT)
+			{
+				// The scaling does not matter for the point rendering as the point was (0,0,0)
+				Point3f p = pointOutline[0];
+				float x = (float) (p.x + centre.x);
+				float y = (float) (p.y + centre.y);
+				float z = (float) (p.z + centre.z);
+				outline.addf(new Point3f(x, y, z));
+				ItemPointMesh mesh = new ItemPointMesh(outline, highlightColor, 0);
+				mesh.setPointSize(sizes[0].x);
+				mesh.getAppearance().getPolygonAttributes().setPolygonMode(PolygonAttributes.POLYGON_LINE);
+				return mesh;
+			}
+
+			// Translate and scale the outline
+			Point3f scale = (sizes.length == 0) ? sizes[0] : sizes[index];
+			for (int i = 0; i < pointOutline.length; i++)
+			{
+				Point3f p = pointOutline[i];
+				float x = (float) (p.x * scale.x + centre.x);
+				float y = (float) (p.y * scale.y + centre.y);
+				float z = (float) (p.z * scale.z + centre.z);
+				outline.addf(new Point3f(x, y, z));
+			}
+
+			int mode = (rendering.is2D()) ? CustomLineMesh.CONTINUOUS : CustomLineMesh.PAIRWISE;
+			CustomLineMesh mesh = new CustomLineMesh(outline, mode, highlightColor, 0);
+			mesh.setAntiAliasing(true);
+			mesh.setPattern(LineAttributes.PATTERN_SOLID);
+			return mesh;
 		}
 	}
 
@@ -319,6 +418,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static HashMap<String, IJTablePeakResults> resultsTables = new HashMap<String, IJTablePeakResults>();
 	private static ResultsTableSettings.Builder resultsTableSettings;
+	private static Color3f highlightColor = null;
 
 	private Image3DUniverse univ;
 	private JMenuItem resetRotation;
@@ -326,6 +426,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem resetZoom;
 	private JMenuItem resetAll;
 	private JMenuItem changeColour;
+	private JMenuItem changePointSize;
 	private JMenuItem resetSelectedView;
 	private JMenuItem findEyePoint;
 	private JMenuItem sortBackToFront;
@@ -652,7 +753,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		updateAppearance(mesh, settings);
 
-		ResultsMetaData data = new ResultsMetaData(settings.build(), results, points);
+		ResultsMetaData data = new ResultsMetaData(settings.build(), results, points, sphereSize);
 
 		mesh.setShaded(settings.getShaded());
 
@@ -805,103 +906,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return transparency;
 	}
 
-	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
-			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency)
-	{
-		// Support drawing as square pixels ...
-		if (settings.getRendering() == 0)
-		{
-			CustomPointMesh mesh = new ItemPointMesh(points, null, transparency);
-			mesh.setPointSize(sphereSize[0].x);
-			return mesh;
-		}
-
-		Rendering r = Rendering.forNumber(settings.getRendering());
-
-		// Repeated mesh creation is much faster as the normals are cached.
-		// There does not appear to be a difference in the speed the image responds
-		// to user interaction between indexed or standard triangles.
-
-		// Currently the RepeatedIndexedTriangleMesh computes the normals a different way to 
-		// the super class to preserve the orientation of the normals. So if the coordinates 
-		// are modified through the mesh then the appearance will change. For now just use
-		// the RepeatedTriangleMesh.
-
-		// Also the IndexedTriangleMesh has one normal per vertex and this causes a colour fall-off
-		// on the triangle plane towards the edges. The TriangleMesh colours the entire surface
-		// of each triangle the same which looks 'normal'.
-
-		int mode = 2;
-		if (mode == 1)
-		{
-			Pair<Point3f[], int[]> pair = createIndexedObject(r);
-			Point3f[] objectVertices = pair.s;
-			int[] objectFaces = pair.r;
-			long size = (long) points.size() * objectVertices.length;
-			long size2 = (long) points.size() * objectFaces.length;
-			if (size > 10000000L)
-			{
-				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-				egd.addMessage("The results will generate a large mesh of " + size + " vertices and " + size2 +
-						" faces.\nThis may take a long time to render and may run out of memory.");
-				egd.setOKLabel("Continue");
-				egd.showDialog();
-				if (egd.wasCanceled())
-					return null;
-			}
-			IJ.showStatus("Creating 3D mesh ...");
-			return new ItemIndexedTriangleMesh(objectVertices, objectFaces, points.toArray(new Point3f[points.size()]),
-					sphereSize, null, transparency);
-		}
-
-		final List<Point3f> point = createLocalisationObject(r);
-
-		final int singlePointSize = point.size();
-		long size = (long) points.size() * singlePointSize;
-		if (size > 10000000L)
-		{
-			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-			egd.addMessage("The results will generate a large mesh of " + size +
-					" vertices.\nThis may take a long time to render and may run out of memory.");
-			egd.setOKLabel("Continue");
-			egd.showDialog();
-			if (egd.wasCanceled())
-				return null;
-		}
-
-		if (mode == 2)
-		{
-			IJ.showStatus("Creating 3D mesh ...");
-			double creaseAngle = (r.isHighResolution()) ? 44 : 0;
-			IJTrackProgress progress = null; // Used for debugging construction time
-			return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
-					points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
-		}
-
-		// Old method:		
-		// Adapted from Image3DUniverse.addIcospheres:
-		// We create a grainy unit sphere an the origin. 
-		// This is then scaled and translated for each localisation.
-		final List<Point3f> allPoints = new TurboList<Point3f>();
-
-		IJ.showStatus("Creating 3D objects ...");
-		for (int i = 0; i < sphereSize.length; i++)
-		{
-			final Point3f p = points.getf(i);
-			allPoints.addAll(
-					copyScaledTranslated(point, sphereSize[i].x, sphereSize[i].y, sphereSize[i].z, p.x, p.y, p.z));
-		}
-
-		IJ.showStatus("Creating 3D mesh ...");
-
-		//mesh = new CustomTransparentTriangleMesh(allPoints, color, transparency);
-		// This avoids computing the volume
-		CustomTriangleMesh mesh = new CustomTriangleMesh(null, null, transparency);
-		mesh.setMesh(allPoints);
-
-		return mesh;
-	}
-
 	private static TurboList<Point3f> getPoints(MemoryPeakResults results,
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
@@ -920,6 +924,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			results.forEach(DistanceUnit.NM, new XYResultProcedure()
 			{
+
 				public void executeXY(float x, float y)
 				{
 					points.addf(new Point3f(x, y, 0));
@@ -1206,6 +1211,62 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else
 			// Faster polygon rendering with flat shading
 			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+
+		createHighlightColour(settings.getHighlightColour());
+	}
+
+	private static HashMap<String, Color3f> colours;
+	static
+	{
+		colours = new HashMap<String, Color3f>();
+		Field[] fields = Color.class.getFields();
+		for (Field field : fields)
+		{
+			if (Modifier.isStatic(field.getModifiers()) && field.getType() == Color.class)
+			{
+				try
+				{
+					Color c = (Color) field.get(null);
+					colours.put(field.getName().toLowerCase(), new Color3f(c));
+				}
+				catch (IllegalArgumentException e1)
+				{
+				}
+				catch (IllegalAccessException e1)
+				{
+				}
+			}
+		}
+	}
+
+	private static void createHighlightColour(String highlightColour)
+	{
+		highlightColor = null;
+		for (int i = 0; i < highlightColour.length(); i++)
+		{
+			if (Character.isDigit(highlightColour.charAt(i)))
+			{
+				// Try and extract RGB
+				String[] split = highlightColour.split("[\\s,:]+");
+				if (split.length > 2)
+				{
+					try
+					{
+						// RGB
+						int red = Integer.parseInt(split[0]);
+						int green = Integer.parseInt(split[1]);
+						int blue = Integer.parseInt(split[2]);
+						highlightColor = new Color3f(new Color(red, green, blue));
+						return;
+					}
+					catch (NumberFormatException e)
+					{
+
+					}
+				}
+			}
+		}
+		highlightColor = colours.getOrDefault(highlightColour.toLowerCase(), null);
 	}
 
 	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
@@ -1344,10 +1405,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (!consumeEvent(e))
 					return;
 
+				String name = "Clicked localisation";
+
 				// This finds the vertex indices of the rendered object.
 				Pair<Content, IntersectionInfo> pair = getPickedContent(canvas, scene, e.getX(), e.getY());
 				if (pair == null)
+				{
+					univ.removeContent(name);
 					return;
+				}
 
 				// Only process content added from localisations
 				Content c = pair.s;
@@ -1359,7 +1425,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				MemoryPeakResults results = data.results;
 
 				// Look up the localisation from the clicked vertex
-				final ContentInstant content = c.getInstant(0);
+				final ContentInstant content = c.getCurrent();
 				CustomMeshNode node = (CustomMeshNode) content.getContent();
 				CustomMesh mesh = node.getMesh();
 				int nVertices;
@@ -1385,7 +1451,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				{
 					// Centre on the localisation
 					Point3d coordinate = new Point3d();
-					ga.getCoordinate(vertexIndex, coordinate);
+					//ga.getCoordinate(vertexIndex, coordinate);
+					coordinate.set(data.points.get(index));
+
+					// Handle the local transform of the content ...
+					final Transform3D vWorldToLocal = new Transform3D();
+					Transform3D translate = new Transform3D();
+					Transform3D rotate = new Transform3D();
+					content.getLocalTranslate(translate);
+					content.getLocalRotate(rotate);
+					vWorldToLocal.mul(translate, rotate);
+					//vWorldToLocal.invert();
+					vWorldToLocal.transform(coordinate);
+
 					univ.centerAt(coordinate);
 				}
 				else
@@ -1395,6 +1473,36 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					IJTablePeakResults table = createTable(results);
 					table.add(p);
 					table.flush();
+
+					// Highlight the localisation using an outline.
+					CustomMesh pointOutline = data.createOutline(index);
+					if (pointOutline instanceof CustomPointMesh)
+					{
+						// Make the point size correct as points are resizeable
+						((CustomPointMesh) pointOutline).setPointSize(((CustomPointMesh) mesh).getPointSize());
+					}
+
+					univ.setAutoAdjustView(false);
+
+					Content outline = univ.createContent(pointOutline, name);
+					ContentInstant content2 = outline.getInstant(0);
+					Transform3D transform = new Transform3D();
+					Transform3D rotate = new Transform3D();
+					Transform3D translate = new Transform3D();
+					content.getLocalRotate(rotate);
+					content.getLocalTranslate(translate);
+
+					// Translate by the point position
+					transform.mul(translate);
+					transform.mul(rotate);
+
+					content2.setTransform(transform);
+
+					outline.setLocked(true);
+
+					univ.removeContent(name);
+					univ.addContent(outline);
+					univ.setAutoAdjustView(true);
 				}
 
 				// Consume the event so the item is not selected
@@ -1579,8 +1687,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
+		changePointSize = new JMenuItem("Change Point Size", KeyEvent.VK_C);
+		changePointSize.addActionListener(this);
+		add.add(changePointSize);
+
 		toggleTransparent = new JMenuItem("Toggle transparent", KeyEvent.VK_P);
-		toggleTransparent.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed P"));
+		toggleTransparent.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed E"));
 		toggleTransparent.addActionListener(this);
 		add.add(toggleTransparent);
 
@@ -1648,10 +1760,42 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				SettingsManager.writeSettings(settings);
 			}
 
-			final ContentInstant content = c.getInstant(0);
+			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
 			changeColour(mesh, results, settings);
+			return 0;
+		}
+	}
+
+	private static class ChangePointSizeContentAction extends BaseContentAction
+	{
+		ImageJ3DResultsViewerSettings.Builder settings = null;
+
+		public int run(Content c)
+		{
+			final ContentInstant content = c.getCurrent();
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomMesh mesh = node.getMesh();
+
+			if (mesh instanceof CustomPointMesh)
+			{
+				// Change the point size
+				if (settings == null)
+				{
+					// Use the latest settings
+					settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
+					ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+					gd.addNumericField("Pixel_size", settings.getPixelSize(), 2, 6, "px");
+					gd.showDialog();
+					if (gd.wasCanceled())
+						return -1;
+					settings.setPixelSize(gd.getNextNumber());
+					SettingsManager.writeSettings(settings);
+				}
+				((CustomPointMesh) mesh).setPointSize((float) settings.getPixelSize());
+			}
+
 			return 0;
 		}
 	}
@@ -1681,14 +1825,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return 0;
 		}
 	}
-	
+
 	private static class ToggleTransparentAction extends BaseContentAction
 	{
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
 				return 0;
-			final ContentInstant content = c.getInstant(0);
+			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
 			TransparencyAttributes ta = mesh.getAppearance().getTransparencyAttributes();
@@ -1698,7 +1842,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				ta.setTransparencyMode(TransparencyAttributes.NONE);
 			return 0;
 		}
-	}	
+	}
 
 	private class FindEyePointContentAction extends BaseContentAction
 	{
@@ -1738,10 +1882,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// Use the local transformation getters instead.
 			//c.getLocalToVworld(vWorldToLocal);
 
+			ContentInstant content = c.getCurrent();
 			Transform3D translate = new Transform3D();
 			Transform3D rotate = new Transform3D();
-			c.getLocalTranslate(translate);
-			c.getLocalRotate(rotate);
+			content.getLocalTranslate(translate);
+			content.getLocalRotate(rotate);
 
 			// This appears to match the global
 			vWorldToLocal.mul(translate, rotate);
@@ -1810,10 +1955,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (result != 0)
 				return result;
 
-			final ContentInstant content = c.getInstant(0);
+			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
-			if (!(mesh instanceof UpdatedableItemMesh))
+			if (!(mesh instanceof UpdateableItemMesh) || c.getUserData() == null)
 				return 0;
 
 			ResultsMetaData data = (ResultsMetaData) c.getUserData();
@@ -1829,9 +1974,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// Switch to fast mode when not debugging
 			//((UpdatedableItemMesh) mesh).reorder(indices);
-			((UpdatedableItemMesh) mesh).reorderFast(indices);
+			((UpdateableItemMesh) mesh).reorderFast(indices);
 
 			// Do this second as points is updated in-line so may break reordering the mesh
+			// if it has a reference to the points list (e.g. ItemPointMesh)
 			reorder(indices, data.results, points);
 
 			return 0;
@@ -1867,7 +2013,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return -1;
 			}
 
-			final ContentInstant content = c.getInstant(0);
+			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
 			CustomMeshHelper helper = new CustomMeshHelper(mesh);
@@ -1935,18 +2081,64 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
 					.toBuilder();
 
-			ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 			ResultsSettings.Builder s = ResultsSettings.newBuilder();
 			s.setResultsTableSettings(resultsTableSettings); // This is from the cache
 			gd.addMessage("Click on the image to view localisation data.\nCtrl/Alt key must be pressed.");
+			final TextField[] tf = new TextField[1];
+			gd.addStringField("Highlight_colour", settings.getHighlightColour(), new OptionListener<String>()
+			{
+				public boolean collectOptions(String value)
+				{
+					createHighlightColour(value);
+					int r, g, b;
+					if (highlightColor == null)
+					{
+						r = b = 0;
+						g = 255;
+					}
+					else
+					{
+						r = (int) (highlightColor.x * 255);
+						g = (int) (highlightColor.y * 255);
+						b = (int) (highlightColor.z * 255);
+					}
+					ExtendedGenericDialog egd = new ExtendedGenericDialog("Highlight colour", null);
+					egd.addSlider("Red", 0, 255, r);
+					egd.addSlider("Green", 0, 255, g);
+					egd.addSlider("Blue", 0, 255, b);
+					egd.showDialog(true, gd);
+					if (egd.wasCanceled())
+						return false;
+					r = (int) egd.getNextNumber();
+					g = (int) egd.getNextNumber();
+					b = (int) egd.getNextNumber();
+					Color c = new Color(r, g, b);
+					//highlightColor = new Color3f();
+					String cvalue = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
+					//settings.setHighlightColour(cvalue);
+					tf[0].setText(cvalue);
+					return true;
+				}
+
+				public boolean collectOptions()
+				{
+					return false;
+				}
+			});
+			tf[0] = gd.getLastTextField();
 			ResultsManager.addTableResultsOptions(gd, s, ResultsManager.FLAG_NO_SECTION_HEADER);
+			gd.addMessage("Allow the 'Find Eye Point' command to save to settings");
 			gd.addCheckbox("Save_eye_point", settings.getSaveEyePoint());
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return;
+			settings.setHighlightColour(gd.getNextString());
 			resultsTableSettings = s.getResultsTableSettingsBuilder();
 			resultsTableSettings.setShowTable(gd.getNextBoolean());
 			settings.setSaveEyePoint(gd.getNextBoolean());
+
+			createHighlightColour(settings.getHighlightColour());
 
 			// Save updated settings
 			settings.setResultsTableSettings(resultsTableSettings);
@@ -1990,6 +2182,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			action = new ToggleTransparentAction();
 		}
+		else if (src == changePointSize)
+		{
+			action = new ChangePointSizeContentAction();
+		}
 		if (action == null)
 			return;
 
@@ -2007,6 +2203,54 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		action.finish();
+	}
+
+	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
+			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency)
+	{
+		// Support drawing as points ...
+		if (settings.getRendering() == 0)
+		{
+			CustomPointMesh mesh = new ItemPointMesh(points, null, transparency);
+			mesh.setPointSize(sphereSize[0].x);
+			return mesh;
+		}
+
+		Rendering r = Rendering.forNumber(settings.getRendering());
+
+		// Repeated mesh creation is much faster as the normals are cached.
+		// There does not appear to be a difference in the speed the image responds
+		// to user interaction between indexed or standard triangles.
+
+		// Currently the RepeatedIndexedTriangleMesh computes the normals a different way to 
+		// the super class to preserve the orientation of the normals. So if the coordinates 
+		// are modified through the mesh then the appearance will change. For now just use
+		// the RepeatedTriangleMesh.
+
+		// Also the IndexedTriangleMesh has one normal per vertex and this causes a colour fall-off
+		// on the triangle plane towards the edges. The TriangleMesh colours the entire surface
+		// of each triangle the same which looks 'normal'.
+
+		final List<Point3f> point = createLocalisationObject(r);
+
+		final int singlePointSize = point.size();
+		long size = (long) points.size() * singlePointSize;
+		if (size > 10000000L)
+		{
+			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			egd.addMessage("The results will generate a large mesh of " + size +
+					" vertices.\nThis may take a long time to render and may run out of memory.");
+			egd.setOKLabel("Continue");
+			egd.showDialog();
+			if (egd.wasCanceled())
+				return null;
+		}
+
+		IJ.showStatus("Creating 3D mesh ...");
+		double creaseAngle = (r.isHighResolution()) ? 44 : 0;
+		IJTrackProgress progress = null; // Used for debugging construction time
+		return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
+				points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
 	}
 
 	/**
@@ -2046,7 +2290,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			case POINT:
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException("Unknown rendering " + rendering);
 		}
 
 		// All spheres based on icosahedron for speed
@@ -2141,10 +2385,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return list;
 	}
 
-	// Note: The triangles are rendered on both sides so the handedness 
-	// does not matter for the vertices to define the faces. However 
-	// the handedness does matter for the vertices if using transparency.
-	// The orders below have been worked out by trial and error.
+	// Note: The triangles are rendered using a right-hand coordinate system. 
+	// However for 2D shapes the handedness does matter as we set back-face cull off.
+	// For polygons we use ItemTriangleMesh which checks the handedness is 
+	// facing away from the centre so back-face cull can be on.
 
 	private static float sqrt(double d)
 	{
@@ -2155,8 +2399,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{ -sqrt(2d / 9), -sqrt(2d / 3), 0 } };
 	static final private int[][] triFaces = { { 0, 1, 2 } };
 
-	static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { 1, -1, 0 }, { -1, -1, 0 } };
-	static final private int[][] squareFaces = { { 0, 1, 2 }, { 2, 1, 3 } };
+	static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
+	static final private int[][] squareFaces = { { 0, 1, 3 }, { 3, 1, 2 } };
 
 	// https://en.m.wikipedia.org/wiki/Tetrahedron
 	// based on alternated cube
@@ -2246,94 +2490,143 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	/**
-	 * Creates the object used to draw a single localisation.
+	 * Creates the object used to outline a single localisation.
 	 * 
 	 * @param rendering
 	 *
-	 * @return the vertices and faces of the the object
+	 * @return the list of triangle vertices for the object
 	 */
-	private static Pair<Point3f[], int[]> createIndexedObject(Rendering rendering)
+	private static List<Point3f> createLocalisationObjectOutline(Rendering rendering)
 	{
-		List<Point3f> list = createLocalisationObject(rendering);
-
-		// Compact the vertices to a set of vertices and faces
-		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<Point3f>(list.size(), 0.5f, -1);
-		TurboList<Point3f> vertices = new TurboList<Point3f>(list.size());
-		TIntArrayList faces = new TIntArrayList(list.size());
-		int index = 0;
-		// Process triangles
-		for (int i = 0; i < list.size(); i += 3)
+		switch (rendering)
 		{
-			index = addFace(m, vertices, faces, list.get(i), index);
-			index = addFace(m, vertices, faces, list.get(i + 1), index);
-			index = addFace(m, vertices, faces, list.get(i + 2), index);
-		}
+			case SQUARE:
+				return createSquareOutline();
+			case TRIANGLE:
+				return createTriangleOutline();
+			case OCTAGON:
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 8);
+			case LOW_RES_CIRCLE:
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 12);
+			case HIGH_RES_CIRCLE:
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 20);
 
-		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
-	}
-
-	private static int addFace(TObjectIntHashMap<Point3f> m, TurboList<Point3f> vertices, TIntArrayList faces,
-			Point3f p, int index)
-	{
-		// Add the point if it is not in the set of vertices.
-		// Get the index associated with the vertex.
-		int value = m.putIfAbsent(p, index);
-		if (value == -1)
-		{
-			// Store the points in order
-			vertices.add(p);
-			value = index++;
+			default:
+				return createLocalisationObject(rendering);
 		}
-		faces.add(value);
-		return index;
 	}
 
 	/**
-	 * Copy scaled and translated.
-	 * <p>
-	 * Adapted from customnode.MeshMaker.copyTranslated
+	 * Creates the triangle with vertices on a unit sphere.
 	 *
-	 * @param ps
-	 *            the ps
-	 * @param sx
-	 *            the sx
-	 * @param sy
-	 *            the sy
-	 * @param sz
-	 *            the sz
-	 * @param dx
-	 *            the dx
-	 * @param dy
-	 *            the dy
-	 * @param dz
-	 *            the dz
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createTriangleOutline()
+	{
+		return createSolidOutline(triVertices, true);
+	}
+
+	/**
+	 * Creates the square with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSquareOutline()
+	{
+		return createSolidOutline(squareVertices, false);
+	}
+
+	/**
+	 * Creates the solid with the defined faces and vertices on a unit sphere.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param faces
+	 *            the faces
+	 * @param normalise
+	 *            the normalise
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise)
+	{
+		List<Point3f> ps = new ArrayList<Point3f>();
+		for (int i = 0; i < vertices.length; i++)
+		{
+			ps.add(new Point3f(vertices[i]));
+		}
+		// Make continuous 
+		ps.add(new Point3f(vertices[0]));
+		return ps;
+	}
+
+	/**
+	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the
+	 * disc is
+	 * removed.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param nx
+	 *            the nx
+	 * @param ny
+	 *            the ny
+	 * @param nz
+	 *            the nz
+	 * @param radius
+	 *            the radius
+	 * @param edgePoints
+	 *            the edge points
 	 * @return the list
 	 */
-	private static List<Point3f> copyScaledTranslated(final List<Point3f> ps, final float sx, final float sy,
-			final float sz, final float dx, final float dy, final float dz)
+	static public List<Point3f> createDiscOutline(final double x, final double y, final double z, final double nx,
+			final double ny, final double nz, final double radius, final int edgePoints)
 	{
-		final TurboList<Point3f> verts = new TurboList<Point3f>(ps.size());
+		double ax, ay, az;
 
-		//		// Reuse points to save memory and scaling time
-		//		final HashMap<Point3f, Point3f> m = new HashMap<Point3f, Point3f>();
-		//		for (final Point3f p : ps)
-		//		{
-		//			Point3f p2 = m.get(p);
-		//			if (null == p2)
-		//			{
-		//				p2 = new Point3f(p.x * sx + dx, p.y * sy + dy, p.z * sz + dz);
-		//				m.put(p, p2);
-		//			}
-		//			verts.addf(p2);
-		//		}
-
-		// Duplicate all points
-		for (final Point3f p : ps)
+		if (Math.abs(nx) >= Math.abs(ny))
 		{
-			verts.addf(new Point3f(p.x * sx + dx, p.y * sy + dy, p.z * sz + dz));
+			final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
+			ax = -nz * scale;
+			ay = 0;
+			az = nx * scale;
+		}
+		else
+		{
+			final double scale = 1 / Math.sqrt(ny * ny + nz * nz);
+			ax = 0;
+			ay = nz * scale;
+			az = -ny * scale;
 		}
 
-		return verts;
+		/*
+		 * Now to find the other vector in that plane, do the
+		 * cross product of (ax,ay,az) with (nx,ny,nz)
+		 */
+
+		double bx = (ay * nz - az * ny);
+		double by = (az * nx - ax * nz);
+		double bz = (ax * ny - ay * nx);
+		final double bScale = 1 / Math.sqrt(bx * bx + by * by + bz * bz);
+		bx *= bScale;
+		by *= bScale;
+		bz *= bScale;
+
+		final ArrayList<Point3f> list = new ArrayList<Point3f>();
+		for (int i = 0; i < edgePoints + 1; ++i)
+		{
+			final double angle = (i * 2 * Math.PI) / edgePoints;
+			final double c = Math.cos(angle);
+			final double s = Math.sin(angle);
+			float px = (float) (x + radius * c * ax + radius * s * bx);
+			float py = (float) (y + radius * c * ay + radius * s * by);
+			float pz = (float) (z + radius * c * az + radius * s * bz);
+			list.add(new Point3f(px, py, pz));
+		}
+		return list;
 	}
 
 	public void transformationStarted(View view)

@@ -36,7 +36,7 @@ import gdsc.core.logging.TrackProgress;
  * Use a triangle mesh object to represent a set of points. The object is duplicated, scaled and translated for
  * each point.
  */
-public class ItemTriangleMesh extends CustomTriangleMesh implements UpdatedableItemMesh
+public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableItemMesh
 {
 	protected Point3f[] objectVertices;
 	protected Vector3f[] objectNormals;
@@ -572,9 +572,9 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdatedableI
 		mesh = Arrays.asList(coords);
 
 		// We re-use the geometry and just truncate the vertex count
-		ga.setValidVertexCount(coords.length);
 		ga.setCoordinates(0, coords);
 		ga.setColors(0, colors);
+		ga.setValidVertexCount(coords.length);
 
 		this.setGeometry(ga);
 	}
