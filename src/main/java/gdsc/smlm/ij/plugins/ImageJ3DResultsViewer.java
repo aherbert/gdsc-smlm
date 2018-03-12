@@ -331,6 +331,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem sortBackToFront;
 	private JMenuItem sortFrontToBack;
 	private JMenuItem colourSurface;
+	private JMenuItem toggleTransparent;
 	private JMenuItem updateSettings;
 
 	/*
@@ -1189,10 +1190,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			pa.setBackFaceNormalFlip(false);
 		}
 
-		TransparencyAttributes ta = appearance.getTransparencyAttributes();
-		ta.setSrcBlendFunction(TransparencyAttributes.BLEND_SRC_ALPHA);
+		//TransparencyAttributes ta = appearance.getTransparencyAttributes();
+		//ta.setSrcBlendFunction(TransparencyAttributes.BLEND_SRC_ALPHA);
 		//ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE);
-		ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE_MINUS_SRC_ALPHA); // Default
+		//ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE_MINUS_SRC_ALPHA); // Default
 
 		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.FASTEST);
 		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
@@ -1578,6 +1579,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
+		toggleTransparent = new JMenuItem("Toggle transparent", KeyEvent.VK_P);
+		toggleTransparent.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed P"));
+		toggleTransparent.addActionListener(this);
+		add.add(toggleTransparent);
+
 		colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
 		colourSurface.addActionListener(this);
 		add.add(colourSurface);
@@ -1675,6 +1681,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return 0;
 		}
 	}
+	
+	private static class ToggleTransparentAction extends BaseContentAction
+	{
+		public int run(Content c)
+		{
+			if (!(c.getUserData() instanceof ResultsMetaData))
+				return 0;
+			final ContentInstant content = c.getInstant(0);
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomMesh mesh = node.getMesh();
+			TransparencyAttributes ta = mesh.getAppearance().getTransparencyAttributes();
+			if (ta.getTransparencyMode() == TransparencyAttributes.NONE)
+				ta.setTransparencyMode(ItemTriangleMesh.getTransparencyMode());
+			else
+				ta.setTransparencyMode(TransparencyAttributes.NONE);
+			return 0;
+		}
+	}	
 
 	private class FindEyePointContentAction extends BaseContentAction
 	{
@@ -1961,6 +1985,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else if (src == colourSurface)
 		{
 			action = new ColourSurfaceContentAction();
+		}
+		else if (src == toggleTransparent)
+		{
+			action = new ToggleTransparentAction();
 		}
 		if (action == null)
 			return;

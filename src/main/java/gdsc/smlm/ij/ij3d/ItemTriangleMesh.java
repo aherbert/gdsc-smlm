@@ -376,6 +376,17 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdatedableI
 		transparencyMode = mode;
 	}
 
+	/**
+	 * Gets the transparency mode.
+	 *
+	 * @return the transparency mode
+	 * @see org.scijava.java3d.TransparencyAttributes.setTransparencyMode(int)
+	 */
+	public static int getTransparencyMode()
+	{
+		return transparencyMode;
+	}
+
 	@Override
 	public void setTransparency(final float transparency)
 	{
