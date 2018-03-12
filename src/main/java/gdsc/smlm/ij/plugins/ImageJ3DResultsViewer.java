@@ -1835,11 +1835,32 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
-			TransparencyAttributes ta = mesh.getAppearance().getTransparencyAttributes();
-			if (ta.getTransparencyMode() == TransparencyAttributes.NONE)
-				ta.setTransparencyMode(ItemTriangleMesh.getTransparencyMode());
+			// The point mesh does not support the transparency mode switching off.
+			// So switch the actual transparency.
+			if (mesh instanceof CustomPointMesh)
+			{
+				if (mesh.getTransparency() != 0)
+				{
+					mesh.setUserData(new Float(mesh.getTransparency()));
+					mesh.setTransparency(0);
+				}
+				else
+				{
+					// Try and reset to what it was before
+					if (mesh.getUserData() instanceof Float)
+					{
+						mesh.setTransparency((Float) mesh.getUserData());
+					}
+				}
+			}
 			else
-				ta.setTransparencyMode(TransparencyAttributes.NONE);
+			{
+				TransparencyAttributes ta = mesh.getAppearance().getTransparencyAttributes();
+				if (ta.getTransparencyMode() == TransparencyAttributes.NONE)
+					ta.setTransparencyMode(ItemTriangleMesh.getTransparencyMode());
+				else
+					ta.setTransparencyMode(TransparencyAttributes.NONE);
+			}
 			return 0;
 		}
 	}
