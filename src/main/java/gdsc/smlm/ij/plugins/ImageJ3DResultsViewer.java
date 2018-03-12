@@ -83,6 +83,7 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
+import gdsc.smlm.ij.ij3d.ItemMesh;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.UpdateableItemMesh;
@@ -1274,11 +1275,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		// Colour by z
-		GeometryArray ga = (GeometryArray) mesh.getGeometry();
-
-		final int vertices = ga.getValidVertexCount();
-
-		Color3f[] allColors = new Color3f[vertices];
 		LUT lut = LUTHelper.createLUT(LutColour.forNumber(settings.getLut()), false);
 
 		StandardResultProcedure p = null;
@@ -1308,8 +1304,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 
 			final float minimum = limits[0];
-			final int verticesPerLocalisation = vertices / results.size();
-			for (int i = 0, j = 0, size = results.size(); i < size; i++)
+			TurboList<Color3f> allColors = new TurboList<Color3f>(results.size());
+			for (int i = 0, size = results.size(); i < size; i++)
 			{
 				float value = p.z[i];
 				value = value - minimum;
@@ -1318,10 +1314,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				int ivalue = (int) ((value * scale) + 0.5f);
 				if (ivalue > 255)
 					ivalue = 255;
-				for (int k = verticesPerLocalisation; k-- > 0;)
-					allColors[j++] = colors[ivalue];
+				allColors.addf(colors[ivalue]);
 			}
-			mesh.setColor(Arrays.asList(allColors));
+			((ItemMesh) mesh).setItemColor(allColors);
 		}
 		mesh.setTransparency(getTransparency(settings));
 	}
@@ -1386,7 +1381,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		univ.setMenubar(menubar);
 
 		univ.addUniverseListener(this);
-		
+
 		univ.setShowBoundingBoxUponSelection(false);
 		univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 

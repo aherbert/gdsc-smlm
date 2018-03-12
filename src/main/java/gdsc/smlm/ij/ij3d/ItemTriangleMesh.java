@@ -594,4 +594,41 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			c[i] = p[indices[i]];
 		return c;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
+	 */
+	public int size()
+	{
+		return points.length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(java.util.List)
+	 */
+	public void setItemColor(List<Color3f> color) throws IllegalArgumentException
+	{
+		this.color = null;
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int size = size();
+		if (color.size() != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		int objectSize = objectVertices.length;
+		final int N = objectSize * size;
+		final Color3f[] colors = new Color3f[N];
+		int i = 0;
+		for (Color3f c : color)
+		{
+			for (int j = objectSize; j-- > 0;)
+				colors[i++] = c;
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
 }

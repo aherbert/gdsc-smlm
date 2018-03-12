@@ -30,7 +30,7 @@ import customnode.CustomPointMesh;
 /**
  * Create an object to represent a set of points
  */
-public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
+public class ItemPointMesh extends CustomPointMesh implements ItemMesh, UpdateableItemMesh
 {
 	/**
 	 * Instantiates a new item point mesh.
@@ -183,5 +183,25 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		for (int i = 0; i < check.length; i++)
 			if (check[i] != i)
 				throw new IllegalArgumentException("Indices do not contain a valid natural order");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
+	 */
+	public int size()
+	{
+		return mesh.size();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(java.util.List)
+	 */
+	public void setItemColor(List<Color3f> color) throws IllegalArgumentException
+	{
+		setColor(color);
 	}
 }
