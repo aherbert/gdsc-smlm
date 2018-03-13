@@ -40,6 +40,7 @@ import org.scijava.java3d.View;
 import org.scijava.java3d.utils.pickfast.PickCanvas;
 import org.scijava.vecmath.AxisAngle4d;
 import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Point2d;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3d;
@@ -55,6 +56,9 @@ import gdsc.core.data.utils.RounderFactory;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
+import gdsc.core.ij.roi.RoiTest;
+import gdsc.core.ij.roi.RoiTestFactory;
+import gdsc.core.logging.Ticker;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
@@ -442,6 +446,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem toggleTransparent;
 	private JMenuItem toggleShaded;
 	private JMenuItem updateSettings;
+	private JMenuItem cropResults;
 
 	/*
 	 * (non-Javadoc)
@@ -973,9 +978,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static float[] createAlpha(double minA, double maxA, Point3f[] sphereSize)
 	{
-		if (sphereSize==null)
+		if (sphereSize == null)
 			return null;
-		
+
 		double[] d = new double[sphereSize.length];
 		for (int i = 0; i < d.length; i++)
 		{
@@ -1594,12 +1599,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					coordinate.set(data.points.get(index));
 
 					// Handle the local transform of the content ...
-					final Transform3D vWorldToLocal = new Transform3D();
-					Transform3D translate = new Transform3D();
-					Transform3D rotate = new Transform3D();
-					content.getLocalTranslate(translate);
-					content.getLocalRotate(rotate);
-					vWorldToLocal.mul(translate, rotate);
+					final Transform3D vWorldToLocal = getVworldToLocal(content);
 					//vWorldToLocal.invert();
 					vWorldToLocal.transform(coordinate);
 
@@ -1624,19 +1624,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					univ.setAutoAdjustView(false);
 
 					Content outline = univ.createContent(pointOutline, name);
-					ContentInstant content2 = outline.getInstant(0);
-					Transform3D transform = new Transform3D();
-					Transform3D rotate = new Transform3D();
-					Transform3D translate = new Transform3D();
-					content.getLocalRotate(rotate);
-					content.getLocalTranslate(translate);
-
-					// Translate by the point position
-					transform.mul(translate);
-					transform.mul(rotate);
-
-					content2.setTransform(transform);
-
+					outline.getCurrent().setTransform(getVworldToLocal(content));
 					outline.setLocked(true);
 
 					univ.removeContent(name);
@@ -1941,11 +1929,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		add.addSeparator();
 
-		changeColour = new JMenuItem("Change colour", KeyEvent.VK_C);
+		changeColour = new JMenuItem("Change colour", KeyEvent.VK_O);
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
-		changePointSize = new JMenuItem("Change point size", KeyEvent.VK_C);
+		changePointSize = new JMenuItem("Change point size", KeyEvent.VK_H);
 		changePointSize.addActionListener(this);
 		add.add(changePointSize);
 
@@ -1961,6 +1949,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
 		colourSurface.addActionListener(this);
 		add.add(colourSurface);
+
+		add.addSeparator();
+
+		cropResults = new JMenuItem("Crop results", KeyEvent.VK_C);
+		cropResults.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed X"));
+		cropResults.addActionListener(this);
+		add.add(cropResults);
 
 		add.addSeparator();
 
@@ -2223,22 +2218,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		public int run(Content c)
 		{
-			final Transform3D vWorldToLocal = new Transform3D();
-			// This seems to be the identity matrix. 
-			// Use the local transformation getters instead.
-			//c.getLocalToVworld(vWorldToLocal);
-
-			ContentInstant content = c.getCurrent();
-			Transform3D translate = new Transform3D();
-			Transform3D rotate = new Transform3D();
-			content.getLocalTranslate(translate);
-			content.getLocalRotate(rotate);
-
-			// This appears to match the global
-			vWorldToLocal.mul(translate, rotate);
-			vWorldToLocal.invert();
-
-			//System.out.printf("localToVWorld\n%s", localToVWorld);
+			final Transform3D vWorldToLocal = getVworldToLocal(c.getCurrent());
 
 			boolean identity = vWorldToLocal.equals(IDENTITY);
 
@@ -2249,6 +2229,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			if (!identity)
 			{
+				// Since we require the eye-point relative to the local world 
+				// the matrix is inverted
+				vWorldToLocal.invert();
 				vWorldToLocal.transform(eye);
 				vWorldToLocal.transform(dir0InLocalWorld);
 				vWorldToLocal.transform(dir1InLocalWorld);
@@ -2369,6 +2352,83 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				mesh.setTransparency(0);
 			return 0;
 		}
+	}
+
+	private class CropResultsAction extends BaseContentAction
+	{
+		RoiTest shape = null;
+		private final Point2d p2d = new Point2d();
+
+		public int run(Content c)
+		{
+			if (!(c.getUserData() instanceof ResultsMetaData))
+				return 0;
+
+			Canvas3D canvas = univ.getCanvas();
+			if (shape == null)
+			{
+				shape = RoiTestFactory.create(((ImageCanvas3D) canvas).getRoi());
+				if (shape == null)
+					return -1;
+			}
+
+			final ContentInstant content = c.getCurrent();
+
+			// Adapted from CustomTriangleMesh.retain
+			final Transform3D vWorldToIP = new Transform3D();
+			canvas.getImagePlateToVworld(vWorldToIP);
+			vWorldToIP.invert();
+
+			final Transform3D vWorldToLocal = getVworldToLocal(content);
+			if (!vWorldToIP.equals(IDENTITY))
+			{
+				vWorldToLocal.invert(); // To make localToVworld
+				vWorldToIP.mul(vWorldToLocal); // To make localToIP
+			}
+
+			ResultsMetaData data = (ResultsMetaData) c.getUserData();
+
+			// Transform all points to the image plate and test if they are in the ROI 
+			MemoryPeakResults results = data.results;
+			TurboList<Point3f> points = data.points;
+			MemoryPeakResults newResults = new MemoryPeakResults();
+			newResults.copySettings(results);
+			// XXX get a better output name
+			newResults.setName(results.getName() + " Cropped");
+			newResults.begin();
+			Utils.showStatus("Cropping " + results.getName());
+			Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
+			PeakResult[] allResults = results.toArray();
+			for (int i = 0, size = results.size(); i < size; i++)
+			{
+				Point3d locInImagePlate = new Point3d(points.getf(i));
+				vWorldToIP.transform(locInImagePlate);
+				canvas.getPixelLocationFromImagePlate(locInImagePlate, p2d);
+				if (shape.contains(p2d.x, p2d.y))
+					newResults.add(allResults[i]);
+				ticker.tick();
+			}
+
+			int size = newResults.size();
+			IJ.showStatus("Cropped " + TextUtils.pleural(size, "result"));
+			ticker.stop();
+			newResults.end();
+			if (size != 0)
+				MemoryPeakResults.addResults(newResults);
+
+			return 0;
+		}
+	}
+
+	private static Transform3D getVworldToLocal(ContentInstant content)
+	{
+		final Transform3D vWorldToLocal = new Transform3D();
+		Transform3D translate = new Transform3D();
+		Transform3D rotate = new Transform3D();
+		content.getLocalTranslate(translate);
+		content.getLocalRotate(rotate);
+		vWorldToLocal.mul(translate, rotate);
+		return vWorldToLocal;
 	}
 
 	/*
@@ -2535,6 +2595,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		else if (src == changePointSize)
 		{
 			action = new ChangePointSizeContentAction();
+		}
+		else if (src == cropResults)
+		{
+			action = new CropResultsAction();
 		}
 		if (action == null)
 			return;

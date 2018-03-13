@@ -14,16 +14,15 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D;
 
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.IdentityTypeConverter;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.roi.RoiTest;
+import gdsc.core.ij.roi.RoiTestFactory;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
@@ -46,10 +45,7 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
-import ij.gui.Roi;
-import ij.gui.ShapeRoi;
 import ij.plugin.PlugIn;
-import ij.process.FloatPolygon;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
@@ -499,8 +495,8 @@ public class CropResults implements PlugIn
 			IJ.error(TITLE, "No ROI image: " + settings.getRoiImage());
 			return;
 		}
-		final Roi roi = imp.getRoi();
-		if (roi == null || !roi.isArea() || !(roi.getFloatWidth() > 0 && roi.getFloatHeight() > 0))
+		final RoiTest roiTest = RoiTestFactory.create(imp.getRoi());
+		if (roiTest == null)
 		{
 			IJ.error(TITLE, "Not an area ROI");
 			return;
@@ -513,66 +509,15 @@ public class CropResults implements PlugIn
 		final double yscale = (double) roiImageHeight / integerBounds.height;
 
 		final PeakResultPredicate testZ = getZFilter();
-		
-		// Process types separately
-		if (roi.getType() == Roi.RECTANGLE || roi.getType() == Roi.OVAL)
+
+		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
-			final Shape shape;
-			if (roi.getType() == Roi.OVAL)
+			public void executeXYR(float x, float y, PeakResult result)
 			{
-				shape = new Ellipse2D.Double(roi.getXBase(), roi.getYBase(), roi.getFloatWidth(), roi.getFloatHeight());
+				if (roiTest.contains(x * xscale, y * yscale) && testZ.test(result))
+					newResults.add(result);
 			}
-			// Account for corners
-			else if (roi.getCornerDiameter() != 0)
-			{
-				shape = new RoundRectangle2D.Double(roi.getXBase(), roi.getYBase(), roi.getFloatWidth(),
-						roi.getFloatHeight(), roi.getCornerDiameter(), roi.getCornerDiameter());
-			}
-			else
-			{
-				shape = roi.getFloatBounds();
-			}
-			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
-			{
-				public void executeXYR(float x, float y, PeakResult result)
-				{
-					if (shape.contains(x * xscale, y * yscale) && testZ.test(result))
-						newResults.add(result);
-				}
-			});
-		}
-		else if (roi.getType() == Roi.COMPOSITE)
-		{
-			// The composite shape is offset by the origin
-			final Rectangle bounds = roi.getBounds();
-			final Shape shape = ((ShapeRoi) roi).getShape();
-			final int ox = bounds.x;
-			final int oy = bounds.y;
-			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
-			{
-				public void executeXYR(float x, float y, PeakResult result)
-				{
-					if (shape.contains(x * xscale - ox, y * yscale - oy) && testZ.test(result))
-						newResults.add(result);
-				}
-			});
-		}
-		else // Other area type: POLYGON, FREEROI, TRACED_ROI
-		{
-			// Base bounds for fast testing
-			final Rectangle2D.Double bounds = roi.getFloatBounds();
-			final FloatPolygon poly = roi.getFloatPolygon();
-			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
-			{
-				public void executeXYR(float x, float y, PeakResult result)
-				{
-					x *= xscale;
-					y *= yscale;
-					if (bounds.contains(x, y) && poly.contains(x, y) && testZ.test(result))
-						newResults.add(result);
-				}
-			});
-		}
+		});
 
 		newResults.setBounds(null);
 		newResults.getBounds(true);
