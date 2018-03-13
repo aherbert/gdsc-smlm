@@ -30,7 +30,7 @@ import org.scijava.vecmath.Point3f;
 public class TransparentItemPointMesh extends ItemPointMesh implements TransparentItemMesh
 {
 	/**
-	 * Instantiates a new item point mesh.
+	 * Instantiates a new transparent item point mesh.
 	 *
 	 * @param mesh
 	 *            the mesh
@@ -41,7 +41,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	}
 
 	/**
-	 * Instantiates a new item point mesh.
+	 * Instantiates a new transparent item point mesh.
 	 *
 	 * @param mesh
 	 *            the mesh
@@ -115,13 +115,12 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		float[] oldColors = new float[oldSize * 4];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size];
-		final Color4f[] colors = new Color4f[size];
+		final float[] colors = new float[size];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];
 			coords[i] = oldCoords[j];
-			j *= 4;
-			colors[i] = new Color4f(oldColors[j], oldColors[j + 1], oldColors[j + 2], oldColors[j + 3]);
+			System.arraycopy(oldColors, j * 4, colors, i * 4, 4);
 		}
 		mesh = Arrays.asList(coords);
 
@@ -143,16 +142,17 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(java.util.List)
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
-	public void setItemColor(List<Color3f> color) throws IllegalArgumentException
+	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
+		this.color = null;
+		int size = size();
+		if (color.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int size = size();
-		if (color.size() != size)
-			throw new IllegalArgumentException("list of size " + size + " expected");
 		final float[] colors = new float[4 * size];
 		ga.getColors(0, colors);
 		int i = 0;
@@ -170,19 +170,18 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemColor4(java.util.List)
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
-	public void setItemColor4(List<Color4f> color) throws IllegalArgumentException
+	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
+		this.color = null;
+		int size = size();
+		if (color.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int size = size();
-		if (color.size() != size)
-			throw new IllegalArgumentException("list of size " + size + " expected");
-		final Color4f[] colors = new Color4f[size];
-		color.toArray(colors);
-		ga.setColors(0, colors);
+		ga.setColors(0, color);
 		changed = true;
 	}
 
@@ -193,12 +192,12 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	 */
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
-		final GeometryArray ga = (GeometryArray) getGeometry();
-		if (ga == null)
-			return;
 		final int size = size();
 		if (alpha.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
 		final float[] colors = new float[4 * size];
 		ga.getColors(0, colors);
 		for (int i = 0; i < size; i++)
@@ -208,5 +207,49 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		}
 		ga.setColors(0, colors);
 		changed = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemAlpha(float)
+	 */
+	public void setItemAlpha(float alpha) throws IllegalArgumentException
+	{
+		final int size = size();
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		final float[] colors = new float[4 * size];
+		ga.getColors(0, colors);
+		for (int i = 0; i < size; i++)
+		{
+			// Set only alpha
+			colors[i * 4 + 3] = alpha;
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#getItemAlpha(float[])
+	 */
+	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
+	{
+		final int size = size();
+		if (alpha.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		final float[] colors = new float[4 * size];
+		ga.getColors(0, colors);
+		for (int i = 0; i < size; i++)
+		{
+			// Get only alpha
+			alpha[i] = colors[i * 4 + 3];
+		}
 	}
 }

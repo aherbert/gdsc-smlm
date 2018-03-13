@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.ij3d;
 
-import java.util.List;
-
 import org.scijava.vecmath.Color3f;
 
 /*----------------------------------------------------------------------------- 
@@ -37,5 +35,5 @@ public interface ItemMesh
 	 * @throws IllegalArgumentException
 	 *             if the number of colours is incorrect
 	 */
-	public void setItemColor(final List<Color3f> color) throws IllegalArgumentException;
+	public void setItemColor(final Color3f[] color) throws IllegalArgumentException;
 }

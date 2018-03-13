@@ -1,7 +1,6 @@
 package gdsc.smlm.ij.ij3d;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
@@ -43,7 +42,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	protected Vector3f[] objectNormals;
 	protected Point3f[] points;
 	protected Point3f[] sizes;
-	private boolean dirty = false;
+	protected boolean dirty = false;
 
 	/**
 	 * Instantiates a new item triangle mesh.
@@ -512,7 +511,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 		changed = true;
 
-		int oldSize = points.length;
+		int oldSize = size();
 		int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
 		if (size == 0)
@@ -550,10 +549,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 			int ii = i * objectSize;
 			int jj = j * objectSize;
 			System.arraycopy(oldCoords, jj, coords, ii, objectSize);
-
-			ii *= 3;
-			jj *= 3;
-			System.arraycopy(oldColors, jj, colors, ii, objectSize * 3);
+			System.arraycopy(oldColors, jj * 3, colors, ii * 3, objectSize * 3);
 		}
 		mesh = Arrays.asList(coords);
 
@@ -572,7 +568,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		//this.setGeometry(ga);
 	}
 
-	private static Point3f[] reorder(Point3f[] p, int[] indices)
+	static Point3f[] reorder(Point3f[] p, int[] indices)
 	{
 		Point3f[] c = new Point3f[indices.length];
 		for (int i = indices.length; i-- > 0;)
@@ -593,17 +589,17 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(java.util.List)
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
-	public void setItemColor(List<Color3f> color) throws IllegalArgumentException
+	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
+		int size = size();
+		if (color.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int size = size();
-		if (color.size() != size)
-			throw new IllegalArgumentException("list of size " + size + " expected");
 		int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final Color3f[] colors = new Color3f[N];

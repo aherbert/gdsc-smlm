@@ -197,10 +197,17 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(java.util.List)
+	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
-	public void setItemColor(List<Color3f> color) throws IllegalArgumentException
+	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
-		setColor(color);
+		this.color = null;
+		if (color.length != size())
+			throw new IllegalArgumentException("list of size " + size() + " expected");
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		ga.setColors(0, color);
+		changed = true;
 	}
 }

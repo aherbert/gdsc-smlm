@@ -86,6 +86,9 @@ import gdsc.smlm.ij.ij3d.CustomMeshHelper;
 import gdsc.smlm.ij.ij3d.ItemMesh;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import gdsc.smlm.ij.ij3d.TransparentItemMesh;
+import gdsc.smlm.ij.ij3d.TransparentItemPointMesh;
+import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.UpdateableItemMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
@@ -1202,9 +1205,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		//ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE);
 		//ta.setDstBlendFunction(TransparencyAttributes.BLEND_ONE_MINUS_SRC_ALPHA); // Default
 
-		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.FASTEST);
-		//RepeatedTriangleMesh.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
-		ItemTriangleMesh.setTransparencyMode(TransparencyAttributes.BLENDED);
+		ItemTriangleMesh.setTransparencyMode(TransparencyAttributes.FASTEST);
+		//ItemTriangleMesh.setTransparencyMode(TransparencyAttributes.SCREEN_DOOR);
+		//ItemTriangleMesh.setTransparencyMode(TransparencyAttributes.BLENDED);
 
 		final ColoringAttributes ca = appearance.getColoringAttributes();
 		if (r.isHighResolution() || r.is2D())
@@ -1304,7 +1307,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 
 			final float minimum = limits[0];
-			TurboList<Color3f> allColors = new TurboList<Color3f>(results.size());
+			Color3f[] allColors = new Color3f[results.size()];
 			for (int i = 0, size = results.size(); i < size; i++)
 			{
 				float value = p.z[i];
@@ -1314,7 +1317,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				int ivalue = (int) ((value * scale) + 0.5f);
 				if (ivalue > 255)
 					ivalue = 255;
-				allColors.addf(colors[ivalue]);
+				allColors[i] = colors[ivalue];
 			}
 			((ItemMesh) mesh).setItemColor(allColors);
 		}
@@ -1827,6 +1830,39 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ToggleTransparentAction extends BaseContentAction
 	{
+		private static class TransparencyData
+		{
+			float transparency;
+			float[] alpha;
+
+			public void save(CustomMesh mesh)
+			{
+				transparency = mesh.getTransparency();
+				mesh.setTransparency(0);
+				if (mesh instanceof TransparentItemMesh)
+				{
+					TransparentItemMesh t = (TransparentItemMesh) mesh;
+					int size = t.size();
+					if (alpha == null || alpha.length != size)
+						alpha = new float[size];
+					t.getItemAlpha(alpha);
+					t.setItemAlpha(1);
+				}
+			}
+
+			public void restore(CustomMesh mesh)
+			{
+				mesh.setTransparency(transparency);
+				if (mesh instanceof TransparentItemMesh)
+				{
+					TransparentItemMesh t = (TransparentItemMesh) mesh;
+					int size = t.size();
+					if (alpha != null && alpha.length == size)
+						t.setItemAlpha(alpha);
+				}
+			}
+		}
+
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
@@ -1834,32 +1870,46 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
+
+			// Polygons can just switch the tranparency mode
+			TransparencyAttributes ta = mesh.getAppearance().getTransparencyAttributes();
+			boolean off;
+			if (ta.getTransparencyMode() == TransparencyAttributes.NONE)
+			{
+				ta.setTransparencyMode(ItemTriangleMesh.getTransparencyMode());
+				off = false;
+			}
+			else
+			{
+				ta.setTransparencyMode(TransparencyAttributes.NONE);
+				off = true;
+			}
+
 			// The point mesh does not support the transparency mode switching off.
 			// So switch the actual transparency.
 			if (mesh instanceof CustomPointMesh)
 			{
-				if (mesh.getTransparency() != 0)
+				TransparencyData d;
+				if (mesh.getUserData() instanceof TransparencyData)
 				{
-					mesh.setUserData(new Float(mesh.getTransparency()));
-					mesh.setTransparency(0);
+					d = (TransparencyData) mesh.getUserData();
 				}
 				else
 				{
-					// Try and reset to what it was before
-					if (mesh.getUserData() instanceof Float)
-					{
-						mesh.setTransparency((Float) mesh.getUserData());
-					}
+					d = new TransparencyData();
+					mesh.setUserData(d);
+				}
+
+				if (off)
+				{
+					d.save(mesh);
+				}
+				else
+				{
+					d.restore(mesh);
 				}
 			}
-			else
-			{
-				TransparencyAttributes ta = mesh.getAppearance().getTransparencyAttributes();
-				if (ta.getTransparencyMode() == TransparencyAttributes.NONE)
-					ta.setTransparencyMode(ItemTriangleMesh.getTransparencyMode());
-				else
-					ta.setTransparencyMode(TransparencyAttributes.NONE);
-			}
+
 			return 0;
 		}
 	}
@@ -1997,7 +2047,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			((UpdateableItemMesh) mesh).reorderFast(indices);
 
 			// Do this second as points is updated in-line so may break reordering the mesh
-			// if it has a reference to the points list (e.g. ItemPointMesh)
+			// if it has a reference to the points list (e.g. ItemPointMesh initially uses 
+			// the points list but will create a new internal list when it is re-ordered).
 			reorder(indices, data.results, points);
 
 			return 0;
@@ -2231,7 +2282,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
-			CustomPointMesh mesh = new ItemPointMesh(points, null, transparency);
+			CustomPointMesh mesh = new TransparentItemPointMesh(points, null, transparency);
+			//CustomPointMesh mesh = new ItemPointMesh(points, null, transparency);
 			mesh.setPointSize(sphereSize[0].x);
 			return mesh;
 		}
@@ -2269,8 +2321,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		IJ.showStatus("Creating 3D mesh ...");
 		double creaseAngle = (r.isHighResolution()) ? 44 : 0;
 		IJTrackProgress progress = null; // Used for debugging construction time
-		return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
+		return new TransparentItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
 				points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
+		//return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
+		//		points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
 	}
 
 	/**

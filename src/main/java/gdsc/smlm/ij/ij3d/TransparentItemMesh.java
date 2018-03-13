@@ -1,7 +1,5 @@
 package gdsc.smlm.ij.ij3d;
 
-import java.util.List;
-
 import org.scijava.vecmath.Color4f;
 
 /*----------------------------------------------------------------------------- 
@@ -30,10 +28,10 @@ public interface TransparentItemMesh extends ItemMesh
 	 * @throws IllegalArgumentException
 	 *             if the number of colours is incorrect
 	 */
-	public void setItemColor4(final List<Color4f> color) throws IllegalArgumentException;
+	public void setItemColor4(final Color4f[] color) throws IllegalArgumentException;
 
 	/**
-	 * Sets the alpha for each item.
+	 * Sets the alpha for each item. 1 is opaque and 0 is fully transparent.
 	 *
 	 * @param alpha
 	 *            the new alpha
@@ -41,4 +39,24 @@ public interface TransparentItemMesh extends ItemMesh
 	 *             if the number of colours is incorrect
 	 */
 	public void setItemAlpha(final float[] alpha) throws IllegalArgumentException;
+
+	/**
+	 * Sets the alpha for each item. 1 is opaque and 0 is fully transparent.
+	 *
+	 * @param alpha
+	 *            the new alpha
+	 * @throws IllegalArgumentException
+	 *             if the number of colours is incorrect
+	 */
+	public void setItemAlpha(final float alpha) throws IllegalArgumentException;
+
+	/**
+	 * Gets the alpha for each item.
+	 *
+	 * @param alpha
+	 *            the new alpha
+	 * @throws IllegalArgumentException
+	 *             if the number of colours is incorrect
+	 */
+	public void getItemAlpha(final float[] alpha) throws IllegalArgumentException;
 }
