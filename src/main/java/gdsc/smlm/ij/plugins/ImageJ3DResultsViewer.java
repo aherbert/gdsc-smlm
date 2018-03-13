@@ -757,8 +757,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		lastWindow = univ.getWindow().getTitle();
 
-		// TODO - get the per item transparency
-		float[] alpha = null;
+		float[] alpha = createAlpha(settings, sphereSize);
 
 		CustomMesh mesh = createMesh(settings, points, sphereSize, transparency, alpha);
 		if (mesh == null)
@@ -904,6 +903,71 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			IJ.error(TITLE, "The results have no precision: " + e.getMessage());
 			return null;
 		}
+	}
+
+	private static float[] createAlpha(Builder settings, Point3f[] sphereSize)
+	{
+		if (settings.getTransparencyMode() == 0)
+			return null;
+
+		double min = Maths.clip(0, 1, settings.getMinTransparency());
+		double max = Maths.clip(0, 1, settings.getMaxTransparency());
+		if (min == max)
+		{
+			// No per item transparency
+			Utils.log("No per-item transparency as min == max");
+			return null;
+		}
+		// Convert to alpha
+		double minA = 1 - max;
+		double maxA = 1 - min;
+
+		TransparencyMode mode = TransparencyMode.forNumber(settings.getTransparencyMode());
+		switch (mode)
+		{
+			case SIZE:
+				return createAlphaFromSize(settings, minA, maxA, sphereSize);
+			default:
+				throw new IllegalStateException("Unknown transparency mode: " + mode);
+		}
+	}
+
+	private static float[] createAlphaFromSize(Builder settings, double minA, double maxA, Point3f[] sphereSize)
+	{
+		SizeMode mode = SizeMode.forNumber(settings.getSizeMode());
+		if (mode == SizeMode.FIXED_SIZE)
+		{
+			Utils.log("No per-item transparency as size is fixed");
+			return null;
+		}
+
+		double[] d = new double[sphereSize.length];
+		for (int i = 0; i < d.length; i++)
+		{
+			Point3f p = sphereSize[i];
+			// Use the squared distance. This is the equivalent of the area of the shape projected to 2D.
+			d[i] = (double) p.x * p.x + p.y * p.y + p.z * p.z;
+			// Use the average radius. This is the equivalent of the mean radius of an enclosing ellipsoid.
+			//d[i] = Math.sqrt(d[i] / 3);
+		}
+		double[] limits = Maths.limits(d);
+		double min = limits[0];
+		double max = limits[1];
+		if (min == max)
+		{
+			Utils.log("No per-item transparency as size is fixed");
+			return null;
+		}
+
+		double range = (maxA - minA) / (max - min);
+		float[] alpha = new float[d.length];
+		for (int i = 0; i < alpha.length; i++)
+		{
+			// Largest distance has lowest alpha (more transparent) 
+			alpha[i] = (float) (minA + range * (max - d[i]));
+		}
+		//return null;
+		return alpha;
 	}
 
 	private static float getTransparency(ImageJ3DResultsViewerSettingsOrBuilder settings)
@@ -1054,11 +1118,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		MemoryPeakResults results = data.results;
 		TurboList<Point3f> points = data.points;
-		Point3f[] sizes = data.sizes;
 
 		PeakResult[] originalPeakResults = results.toArray();
 		Point3f[] originalPoints = points.toArray(new Point3f[points.size()]);
-		Point3f[] originalSizes = data.sizes.clone();
 
 		// We need another array to store the output 
 		PeakResult[] peakResults = new PeakResult[originalPeakResults.length];
@@ -1069,7 +1131,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			int index = indices[i];
 			points.setf(i, originalPoints[index]);
 			peakResults[i] = originalPeakResults[index];
-			sizes[i] = originalSizes[index];
 		}
 
 		// Bulk update the results
@@ -1077,6 +1138,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		results.begin();
 		results.addAll(peakResults);
 		results.end();
+
+		Point3f[] sizes = data.sizes;
+		if (sizes.length == indices.length)
+		{
+			Point3f[] originalSizes = sizes.clone();
+			// Rewrite order
+			for (int i = 0; i < indices.length; i++)
+			{
+				int index = indices[i];
+				sizes[i] = originalSizes[index];
+			}
+		}
 	}
 
 	private void sortOrthographic(ResultsMetaData data)
