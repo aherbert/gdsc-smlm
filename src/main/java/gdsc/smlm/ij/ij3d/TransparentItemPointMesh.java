@@ -115,7 +115,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		float[] oldColors = new float[oldSize * 4];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size];
-		final float[] colors = new float[size];
+		final float[] colors = new float[size * 4];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];

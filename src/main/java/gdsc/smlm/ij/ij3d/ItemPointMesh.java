@@ -137,13 +137,12 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemMesh
 		float[] oldColors = new float[oldSize * 3];
 		ga.getColors(0, oldColors);
 		final Point3f[] coords = new Point3f[size];
-		final Color3f[] colors = new Color3f[size];
+		final float[] colors = new float[size * 3];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];
 			coords[i] = oldCoords[j];
-			j *= 3;
-			colors[i] = new Color3f(oldColors[j], oldColors[j + 1], oldColors[j + 2]);
+			System.arraycopy(oldColors, j * 3, colors, i * 3, 3);
 		}
 		mesh = Arrays.asList(coords);
 
