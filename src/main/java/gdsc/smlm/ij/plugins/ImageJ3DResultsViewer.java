@@ -1337,7 +1337,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 			((ItemMesh) mesh).setItemColor(allColors);
 		}
-		mesh.setTransparency(getTransparency(settings));
 	}
 
 	/**
