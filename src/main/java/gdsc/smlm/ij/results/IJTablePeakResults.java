@@ -12,6 +12,7 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.ConfigurationException;
+import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -119,6 +120,13 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		canComputePrecision = false;
 		rounder = RounderFactory.create(roundingPrecision);
 
+		// We must correctly convert all the PSF parameter types
+		helper = new PeakResultsHelper(getCalibration(), getPSF());
+		helper.setIntensityUnit(intensityUnit);
+		helper.setDistanceUnit(distanceUnit);
+		helper.setAngleUnit(angleUnit);
+		converters = helper.getConverters();
+
 		if (hasCalibration())
 		{
 			if (showPrecision)
@@ -142,7 +150,11 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 			try
 			{
-				toPixelConverter = getCalibrationReader().getDistanceConverter(DistanceUnit.PIXEL);
+				if (helper.hasDistanceConverter())
+				{
+					toPixelConverter = UnitConverterFactory.createConverter(distanceUnit, DistanceUnit.PIXEL,
+							getCalibrationReader().getNmPerPixel());
+				}
 			}
 			catch (ConversionException e)
 			{
@@ -150,12 +162,6 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			}
 		}
 
-		// We must correctly convert all the PSF parameter types
-		helper = new PeakResultsHelper(getCalibration(), getPSF());
-		helper.setIntensityUnit(intensityUnit);
-		helper.setDistanceUnit(distanceUnit);
-		helper.setAngleUnit(angleUnit);
-		converters = helper.getConverters();
 		ic = converters[PeakResult.INTENSITY];
 		outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
 		if (!showZ)
