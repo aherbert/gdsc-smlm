@@ -379,6 +379,8 @@ public class GUIProtosHelper
 		builder.setDepthMode(1);
 		builder.setDepthRange(20);
 		builder.setDitherSeed(123456789);
+		builder.setNameOption(1);
+		builder.setNameSuffix(" Cropped");
 		ResultsTableSettings.Builder resultsTableSettings = builder.getResultsTableSettingsBuilder();
 		resultsTableSettings.setDistanceUnit(DistanceUnit.NM);
 		resultsTableSettings.setShowTable(true);

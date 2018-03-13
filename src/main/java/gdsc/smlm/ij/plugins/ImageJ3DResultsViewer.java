@@ -2358,6 +2358,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		RoiTest shape = null;
 		private final Point2d p2d = new Point2d();
+		ImageJ3DResultsViewerSettings.Builder settings = null;
 
 		public int run(Content c)
 		{
@@ -2370,6 +2371,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				shape = RoiTestFactory.create(((ImageCanvas3D) canvas).getRoi());
 				if (shape == null)
 					return -1;
+				settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
 			}
 
 			final ContentInstant content = c.getCurrent();
@@ -2393,8 +2395,53 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			TurboList<Point3f> points = data.points;
 			MemoryPeakResults newResults = new MemoryPeakResults();
 			newResults.copySettings(results);
-			// XXX get a better output name
-			newResults.setName(results.getName() + " Cropped");
+			// Get the output name
+			String outputName;
+			if (settings.getNameOption() == CropResults.NAME_OPTION_NAME)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Crop results");
+				String name = (TextUtils.isNullOrEmpty(settings.getOutputName())) ? (results.getName() + " Cropped")
+						: settings.getOutputName();
+				egd.addStringField("Output_name", name, Maths.clip(60, 120, name.length()));
+				egd.showDialog();
+				if (egd.wasCanceled())
+					return -1;
+				settings.setOutputName(egd.getNextString());
+				outputName = settings.getOutputName();
+				if (TextUtils.isNullOrEmpty(outputName))
+				{
+					IJ.error(TITLE, "No output name");
+					return -1;
+				}
+			}
+			else if (settings.getNameOption() == CropResults.NAME_OPTION_SUFFIX)
+			{
+				String suffix = settings.getNameSuffix();
+				if (TextUtils.isNullOrEmpty(suffix))
+				{
+					IJ.error(TITLE, "No output suffix");
+					return -1;
+				}
+				outputName = results.getName() + suffix;
+			}
+			else if (settings.getNameOption() == CropResults.NAME_OPTION_SEQUENCE)
+			{
+				outputName = results.getName();
+				String suffix = settings.getNameSuffix();
+				if (!TextUtils.isNullOrEmpty(suffix))
+				{
+					outputName += suffix;
+				}
+				int counter = settings.getNameCounter();
+				outputName += counter;
+				settings.setNameCounter(counter + 1); // Increment for next time
+			}
+			else
+			{
+				IJ.error(TITLE, "No output name");
+				return -1;
+			}
+			newResults.setName(outputName);
 			newResults.begin();
 			Utils.showStatus("Cropping " + results.getName());
 			Ticker ticker = Ticker.createStarted(new IJTrackProgress(), results.size(), false);
@@ -2417,6 +2464,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				MemoryPeakResults.addResults(newResults);
 
 			return 0;
+		}
+
+		@Override
+		public void finish()
+		{
+			SettingsManager.writeSettings(settings, 0);
 		}
 	}
 
@@ -2536,6 +2589,58 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ResultsManager.addTableResultsOptions(gd, s, ResultsManager.FLAG_NO_SECTION_HEADER);
 			gd.addMessage("Allow the 'Find Eye Point' command to save to settings");
 			gd.addCheckbox("Save_eye_point", settings.getSaveEyePoint());
+			// Same as CropResults
+			gd.addChoice("Crop_name_option", CropResults.NAME_OPTIONS, settings.getNameOption(),
+					new OptionListener<Integer>()
+					{
+						public boolean collectOptions(Integer value)
+						{
+							settings.setNameOption(value);
+							ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+							if (settings.getNameOption() == CropResults.NAME_OPTION_NAME)
+							{
+								return false;
+							}
+							else if (settings.getNameOption() == CropResults.NAME_OPTION_SUFFIX)
+							{
+								String name = (TextUtils.isNullOrEmpty(settings.getNameSuffix())) ? " Cropped"
+										: settings.getNameSuffix();
+								egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+							}
+							else if (settings.getNameOption() == CropResults.NAME_OPTION_SEQUENCE)
+							{
+								String name = settings.getNameSuffix();
+								egd.addStringField("Name_suffix", name, Maths.clip(20, 60, name.length()));
+								int c = settings.getNameCounter();
+								if (c < 1)
+									c = 1;
+								egd.addNumericField("Name_counter", c, 0);
+							}
+							else
+							{
+								throw new IllegalStateException("Unknown name option: " + settings.getNameOption());
+							}
+							egd.showDialog(true, gd);
+							if (egd.wasCanceled())
+								return false;
+							if (settings.getNameOption() == CropResults.NAME_OPTION_SUFFIX)
+							{
+								settings.setNameSuffix(egd.getNextString());
+							}
+							else if (settings.getNameOption() == CropResults.NAME_OPTION_SEQUENCE)
+							{
+								settings.setNameSuffix(egd.getNextString());
+								settings.setNameCounter(Math.max(1, (int) egd.getNextNumber()));
+							}
+
+							return true;
+						}
+
+						public boolean collectOptions()
+						{
+							return false;
+						}
+					});
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return;
@@ -2543,6 +2648,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			resultsTableSettings = s.getResultsTableSettingsBuilder();
 			resultsTableSettings.setShowTable(gd.getNextBoolean());
 			settings.setSaveEyePoint(gd.getNextBoolean());
+			settings.setNameOption(gd.getNextChoiceIndex());
 
 			createHighlightColour(settings.getHighlightColour());
 

@@ -53,10 +53,10 @@ import ij.plugin.PlugIn;
 public class CropResults implements PlugIn
 {
 	private static final String TITLE = "Crop Results";
-	private static final String[] NAME_OPTIONS = { "Name", "Suffix", "Sequence" };
-	private static final int NAME_OPTION_NAME = 0;
-	private static final int NAME_OPTION_SUFFIX = 1;
-	private static final int NAME_OPTION_SEQUENCE = 2;
+	static final String[] NAME_OPTIONS = { "Name", "Suffix", "Sequence" };
+	static final int NAME_OPTION_NAME = 0;
+	static final int NAME_OPTION_SUFFIX = 1;
+	static final int NAME_OPTION_SEQUENCE = 2;
 
 	private TurboList<String> titles;
 	private CropResultsSettings.Builder settings;

@@ -37028,6 +37028,36 @@ public final class GUIProtos {
      */
     com.google.protobuf.ByteString
         getHighlightColourBytes();
+
+    /**
+     * <code>string output_name = 26;</code>
+     */
+    java.lang.String getOutputName();
+    /**
+     * <code>string output_name = 26;</code>
+     */
+    com.google.protobuf.ByteString
+        getOutputNameBytes();
+
+    /**
+     * <code>int32 name_option = 27;</code>
+     */
+    int getNameOption();
+
+    /**
+     * <code>string name_suffix = 28;</code>
+     */
+    java.lang.String getNameSuffix();
+    /**
+     * <code>string name_suffix = 28;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameSuffixBytes();
+
+    /**
+     * <code>int32 name_counter = 29;</code>
+     */
+    int getNameCounter();
   }
   /**
    * <pre>
@@ -37069,6 +37099,10 @@ public final class GUIProtos {
       sortEyeZ_ = 0D;
       saveEyePoint_ = false;
       highlightColour_ = "";
+      outputName_ = "";
+      nameOption_ = 0;
+      nameSuffix_ = "";
+      nameCounter_ = 0;
     }
 
     @java.lang.Override
@@ -37229,6 +37263,28 @@ public final class GUIProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               highlightColour_ = s;
+              break;
+            }
+            case 210: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              outputName_ = s;
+              break;
+            }
+            case 216: {
+
+              nameOption_ = input.readInt32();
+              break;
+            }
+            case 226: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              nameSuffix_ = s;
+              break;
+            }
+            case 232: {
+
+              nameCounter_ = input.readInt32();
               break;
             }
           }
@@ -37541,6 +37597,92 @@ public final class GUIProtos {
       }
     }
 
+    public static final int OUTPUT_NAME_FIELD_NUMBER = 26;
+    private volatile java.lang.Object outputName_;
+    /**
+     * <code>string output_name = 26;</code>
+     */
+    public java.lang.String getOutputName() {
+      java.lang.Object ref = outputName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        outputName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string output_name = 26;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOutputNameBytes() {
+      java.lang.Object ref = outputName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        outputName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_OPTION_FIELD_NUMBER = 27;
+    private int nameOption_;
+    /**
+     * <code>int32 name_option = 27;</code>
+     */
+    public int getNameOption() {
+      return nameOption_;
+    }
+
+    public static final int NAME_SUFFIX_FIELD_NUMBER = 28;
+    private volatile java.lang.Object nameSuffix_;
+    /**
+     * <code>string name_suffix = 28;</code>
+     */
+    public java.lang.String getNameSuffix() {
+      java.lang.Object ref = nameSuffix_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        nameSuffix_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string name_suffix = 28;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameSuffixBytes() {
+      java.lang.Object ref = nameSuffix_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        nameSuffix_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_COUNTER_FIELD_NUMBER = 29;
+    private int nameCounter_;
+    /**
+     * <code>int32 name_counter = 29;</code>
+     */
+    public int getNameCounter() {
+      return nameCounter_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37627,6 +37769,18 @@ public final class GUIProtos {
       }
       if (!getHighlightColourBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 25, highlightColour_);
+      }
+      if (!getOutputNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 26, outputName_);
+      }
+      if (nameOption_ != 0) {
+        output.writeInt32(27, nameOption_);
+      }
+      if (!getNameSuffixBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 28, nameSuffix_);
+      }
+      if (nameCounter_ != 0) {
+        output.writeInt32(29, nameCounter_);
       }
     }
 
@@ -37733,6 +37887,20 @@ public final class GUIProtos {
       if (!getHighlightColourBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, highlightColour_);
       }
+      if (!getOutputNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(26, outputName_);
+      }
+      if (nameOption_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(27, nameOption_);
+      }
+      if (!getNameSuffixBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, nameSuffix_);
+      }
+      if (nameCounter_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(29, nameCounter_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -37826,6 +37994,14 @@ public final class GUIProtos {
           == other.getSaveEyePoint());
       result = result && getHighlightColour()
           .equals(other.getHighlightColour());
+      result = result && getOutputName()
+          .equals(other.getOutputName());
+      result = result && (getNameOption()
+          == other.getNameOption());
+      result = result && getNameSuffix()
+          .equals(other.getNameSuffix());
+      result = result && (getNameCounter()
+          == other.getNameCounter());
       return result;
     }
 
@@ -37903,6 +38079,14 @@ public final class GUIProtos {
           getSaveEyePoint());
       hash = (37 * hash) + HIGHLIGHT_COLOUR_FIELD_NUMBER;
       hash = (53 * hash) + getHighlightColour().hashCode();
+      hash = (37 * hash) + OUTPUT_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getOutputName().hashCode();
+      hash = (37 * hash) + NAME_OPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getNameOption();
+      hash = (37 * hash) + NAME_SUFFIX_FIELD_NUMBER;
+      hash = (53 * hash) + getNameSuffix().hashCode();
+      hash = (37 * hash) + NAME_COUNTER_FIELD_NUMBER;
+      hash = (53 * hash) + getNameCounter();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -38090,6 +38274,14 @@ public final class GUIProtos {
 
         highlightColour_ = "";
 
+        outputName_ = "";
+
+        nameOption_ = 0;
+
+        nameSuffix_ = "";
+
+        nameCounter_ = 0;
+
         return this;
       }
 
@@ -38141,6 +38333,10 @@ public final class GUIProtos {
         result.sortEyeZ_ = sortEyeZ_;
         result.saveEyePoint_ = saveEyePoint_;
         result.highlightColour_ = highlightColour_;
+        result.outputName_ = outputName_;
+        result.nameOption_ = nameOption_;
+        result.nameSuffix_ = nameSuffix_;
+        result.nameCounter_ = nameCounter_;
         onBuilt();
         return result;
       }
@@ -38258,6 +38454,20 @@ public final class GUIProtos {
         if (!other.getHighlightColour().isEmpty()) {
           highlightColour_ = other.highlightColour_;
           onChanged();
+        }
+        if (!other.getOutputName().isEmpty()) {
+          outputName_ = other.outputName_;
+          onChanged();
+        }
+        if (other.getNameOption() != 0) {
+          setNameOption(other.getNameOption());
+        }
+        if (!other.getNameSuffix().isEmpty()) {
+          nameSuffix_ = other.nameSuffix_;
+          onChanged();
+        }
+        if (other.getNameCounter() != 0) {
+          setNameCounter(other.getNameCounter());
         }
         onChanged();
         return this;
@@ -39108,6 +39318,196 @@ public final class GUIProtos {
   checkByteStringIsUtf8(value);
         
         highlightColour_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object outputName_ = "";
+      /**
+       * <code>string output_name = 26;</code>
+       */
+      public java.lang.String getOutputName() {
+        java.lang.Object ref = outputName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          outputName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string output_name = 26;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOutputNameBytes() {
+        java.lang.Object ref = outputName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          outputName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string output_name = 26;</code>
+       */
+      public Builder setOutputName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        outputName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string output_name = 26;</code>
+       */
+      public Builder clearOutputName() {
+        
+        outputName_ = getDefaultInstance().getOutputName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string output_name = 26;</code>
+       */
+      public Builder setOutputNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        outputName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int nameOption_ ;
+      /**
+       * <code>int32 name_option = 27;</code>
+       */
+      public int getNameOption() {
+        return nameOption_;
+      }
+      /**
+       * <code>int32 name_option = 27;</code>
+       */
+      public Builder setNameOption(int value) {
+        
+        nameOption_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 name_option = 27;</code>
+       */
+      public Builder clearNameOption() {
+        
+        nameOption_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object nameSuffix_ = "";
+      /**
+       * <code>string name_suffix = 28;</code>
+       */
+      public java.lang.String getNameSuffix() {
+        java.lang.Object ref = nameSuffix_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          nameSuffix_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string name_suffix = 28;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameSuffixBytes() {
+        java.lang.Object ref = nameSuffix_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          nameSuffix_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string name_suffix = 28;</code>
+       */
+      public Builder setNameSuffix(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        nameSuffix_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name_suffix = 28;</code>
+       */
+      public Builder clearNameSuffix() {
+        
+        nameSuffix_ = getDefaultInstance().getNameSuffix();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string name_suffix = 28;</code>
+       */
+      public Builder setNameSuffixBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        nameSuffix_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int nameCounter_ ;
+      /**
+       * <code>int32 name_counter = 29;</code>
+       */
+      public int getNameCounter() {
+        return nameCounter_;
+      }
+      /**
+       * <code>int32 name_counter = 29;</code>
+       */
+      public Builder setNameCounter(int value) {
+        
+        nameCounter_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 name_counter = 29;</code>
+       */
+      public Builder clearNameCounter() {
+        
+        nameCounter_ = 0;
         onChanged();
         return this;
       }
@@ -40325,7 +40725,7 @@ public final class GUIProtos {
       "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
       "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
       "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
-      "\005\"\354\004\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "\005\"\301\005\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
       "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
       "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
       "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
@@ -40340,13 +40740,15 @@ public final class GUIProtos {
       "_y\030\023 \001(\001\022\030\n\020sort_direction_z\030\024 \001(\001\022\022\n\nso" +
       "rt_eye_x\030\025 \001(\001\022\022\n\nsort_eye_y\030\026 \001(\001\022\022\n\nso" +
       "rt_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010\022\030" +
-      "\n\020highlight_colour\030\031 \001(\t\"\220\001\n\030TranslateRe" +
-      "sultsSettings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002d" +
-      "x\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdista" +
-      "nce_unit\030\005 \001(\0162#.gdsc.smlm.data.config.D" +
-      "istanceUnit*O\n\014TemplateType\022\023\n\017INLINE_TE" +
-      "MPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTO",
-      "M_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\n\020highlight_colour\030\031 \001(\t\022\023\n\013output_name\030" +
+      "\032 \001(\t\022\023\n\013name_option\030\033 \001(\005\022\023\n\013name_suffi" +
+      "x\030\034 \001(\t\022\024\n\014name_counter\030\035 \001(\005\"\220\001\n\030Transl" +
+      "ateResultsSettings\022\024\n\014input_option\030\001 \001(\t" +
+      "\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\r" +
+      "distance_unit\030\005 \001(\0162#.gdsc.smlm.data.con",
+      "fig.DistanceUnit*O\n\014TemplateType\022\023\n\017INLI" +
+      "NE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017" +
+      "CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -40484,7 +40886,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", "OutputName", "NameOption", "NameSuffix", "NameCounter", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(20);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new
