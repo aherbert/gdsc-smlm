@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -438,6 +439,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem sortFrontToBack;
 	private JMenuItem colourSurface;
 	private JMenuItem toggleTransparent;
+	private JMenuItem toggleShaded;
 	private JMenuItem updateSettings;
 
 	/*
@@ -748,19 +750,21 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final TurboList<Point3f> points = getPoints(results, settings);
 
 		results = results.copy();
-		sort(results, points, settings);
+
+		ResultsMetaData data = new ResultsMetaData(settings.build(), results, points, sphereSize);
+
+		sort(data);
 
 		lastWindow = univ.getWindow().getTitle();
 
-		CustomMesh mesh = createMesh(settings, points, sphereSize, transparency);
+		// TODO - get the per item transparency
+		float[] alpha = null;
+
+		CustomMesh mesh = createMesh(settings, points, sphereSize, transparency, alpha);
 		if (mesh == null)
 			return;
 
 		updateAppearance(mesh, settings);
-
-		ResultsMetaData data = new ResultsMetaData(settings.build(), results, points, sphereSize);
-
-		mesh.setShaded(settings.getShaded());
 
 		IJ.showStatus("Creating 3D mesh colour ...");
 		changeColour(mesh, results, data.settings);
@@ -973,40 +977,41 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return points;
 	}
 
-	private void sort(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	private void sort(ResultsMetaData data)
 	{
-		SortMode mode = SortMode.forNumber(settings.getSortMode());
+		SortMode mode = SortMode.forNumber(data.settings.getSortMode());
 		switch (mode)
 		{
 			case NONE:
 				return;
 			case PERSPECTIVE:
-				sortPerspective(results, points, settings);
+				sortPerspective(data);
 				break;
 			case OTHOGRAPHIC:
-				sortOrthographic(results, points, settings);
+				sortOrthographic(data);
 				break;
 			case XYZ:
-				sortXYZ(results, points, settings);
+				sortXYZ(data);
 				break;
 			default:
 				throw new IllegalStateException("Unknown sort mode " + mode);
 		}
 	}
 
-	private void sortPerspective(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	private void sortPerspective(ResultsMetaData data)
 	{
-		Vector3d direction = getViewDirection(settings);
+		ImageJ3DResultsViewerSettingsOrBuilder settings = data.settings;
+		Vector3d direction = getViewDirection(data.settings);
 		if (direction == null)
 			throw new IllegalStateException("The view direction is not valid");
 		Point3d eye = new Point3d(settings.getSortEyeX(), settings.getSortEyeY(), settings.getSortEyeZ());
 
-		double[] d = getDistance(points, direction, eye);
+		double[] d = getDistance(data.points, direction, eye);
 
 		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 		Sort.sort(indices, d);
 
-		reorder(indices, results, points);
+		reorder(indices, data);
 	}
 
 	private double[] getDistance(TurboList<Point3f> points, Vector3d direction, Point3d eye)
@@ -1035,7 +1040,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return d;
 	}
 
-	private Vector3d getViewDirection(Builder settings)
+	private Vector3d getViewDirection(ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		Vector3d dir = new Vector3d(settings.getSortDirectionX(), settings.getSortDirectionY(),
 				settings.getSortDirectionZ());
@@ -1045,10 +1050,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return dir;
 	}
 
-	private void reorder(int[] indices, MemoryPeakResults results, TurboList<Point3f> points)
+	private void reorder(int[] indices, ResultsMetaData data)
 	{
+		MemoryPeakResults results = data.results;
+		TurboList<Point3f> points = data.points;
+		Point3f[] sizes = data.sizes;
+
 		PeakResult[] originalPeakResults = results.toArray();
 		Point3f[] originalPoints = points.toArray(new Point3f[points.size()]);
+		Point3f[] originalSizes = data.sizes.clone();
 
 		// We need another array to store the output 
 		PeakResult[] peakResults = new PeakResult[originalPeakResults.length];
@@ -1059,6 +1069,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			int index = indices[i];
 			points.setf(i, originalPoints[index]);
 			peakResults[i] = originalPeakResults[index];
+			sizes[i] = originalSizes[index];
 		}
 
 		// Bulk update the results
@@ -1068,9 +1079,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		results.end();
 	}
 
-	private void sortOrthographic(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	private void sortOrthographic(ResultsMetaData data)
 	{
-		Vector3d v = getViewDirection(settings);
+		Vector3d v = getViewDirection(data.settings);
 		if (v == null)
 		{
 			// Default
@@ -1080,6 +1091,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final double a = v.x;
 		final double b = v.y;
 		final double c = v.z;
+
+		TurboList<Point3f> points = data.points;
 
 		double[] d = new double[points.size()];
 		for (int i = 0; i < d.length; i++)
@@ -1094,7 +1107,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 		Sort.sort(indices, d);
 
-		reorder(indices, results, points);
+		reorder(indices, data);
 	}
 
 	private class CustomSortObject implements Comparable<CustomSortObject>
@@ -1128,9 +1141,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private void sortXYZ(MemoryPeakResults results, TurboList<Point3f> points, Builder settings)
+	private void sortXYZ(ResultsMetaData data)
 	{
-		Vector3d v = getViewDirection(settings);
+		Vector3d v = getViewDirection(data.settings);
 		if (v == null)
 		{
 			// Default to z axis (away), then y then x in ascending order
@@ -1154,6 +1167,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final int sz = (values[2] <= 0) ? 1 : -1;
 
 		// Sort using the points since these have dithered positions for 2D results.
+		TurboList<Point3f> points = data.points;
 		CustomSortObject[] toSort = new CustomSortObject[points.size()];
 		float[] f = new float[3];
 		for (int i = 0; i < toSort.length; i++)
@@ -1171,7 +1185,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		for (int i = 0; i < toSort.length; i++)
 			indices[i] = toSort[i].index;
 
-		reorder(indices, results, points);
+		reorder(indices, data);
 	}
 
 	private static int search(int[] values, int key)
@@ -1184,6 +1198,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static void updateAppearance(CustomMesh mesh, final ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
+		mesh.setShaded(settings.getShaded());
+
 		Appearance appearance = mesh.getAppearance();
 		PolygonAttributes pa = appearance.getPolygonAttributes();
 
@@ -1407,12 +1423,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (!consumeEvent(e))
 					return;
 
+				// Consume the event
+				e.consume();
+
 				String name = "Clicked localisation";
 
 				// This finds the vertex indices of the rendered object.
 				Pair<Content, IntersectionInfo> pair = getPickedContent(canvas, scene, e.getX(), e.getY());
 				if (pair == null)
 				{
+					univ.select(null); // Do the same as the mouseClicked in Image3DUniverse
 					univ.removeContent(name);
 					return;
 				}
@@ -1420,7 +1440,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// Only process content added from localisations
 				Content c = pair.s;
 				if (!(c.getUserData() instanceof ResultsMetaData))
+				{
+					univ.select(c); // Do the same as the mouseClicked in Image3DUniverse
 					return;
+				}
 
 				ResultsMetaData data = (ResultsMetaData) c.getUserData();
 
@@ -1506,9 +1529,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					univ.addContent(outline);
 					univ.setAutoAdjustView(true);
 				}
-
-				// Consume the event so the item is not selected
-				e.consume();
 			}
 
 			private IJTablePeakResults createTable(MemoryPeakResults results)
@@ -1588,10 +1608,132 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 		});
 
+		// Disable certain listeners that use the Picker. It is slow when there are 
+		// a large number of localisations
+		// 0 = ImageCanvas3D
+		// 1 = DefaultUniverse
+		// 2 = Image3DUniverse
 		for (int i = 0; i < l.length; i++)
-			canvas.addMouseListener(l[i]);
+		{
+			if (l[i].getClass().getName().contains("Image3DUniverse"))
+			{
+				// Only allow the click event. 
+				// This disables the right-click pop-up menu. 
+				// It doesn't have anything of use for localisations anyway. 
+				canvas.addMouseListener(new MouseListenerWrapper(l[i], MouseListenerWrapper.MOUSE_CLICKED));
+			}
+			else
+			{
+				canvas.addMouseListener(l[i]);
+			}
+		}
+
+		// 0 = ImageCanvas3D
+		// 1 = DefaultUniverse
+		// 2 = Image3DUniverse
+		// 3 = EventCatcher	(from scijava)	
+		MouseMotionListener[] ml = canvas.getMouseMotionListeners();
+		for (int i = 0; i < ml.length; i++)
+			canvas.removeMouseMotionListener(ml[i]);
+		for (int i = 0; i < ml.length; i++)
+		{
+			if (ml[i].getClass().getName().contains("Image3DUniverse"))
+			{
+				// Ignore this as it just shows the name in the IJ status bar 
+			}
+			else
+			{
+				canvas.addMouseMotionListener(ml[i]);
+			}
+		}
 
 		return univ;
+	}
+
+	private static class MouseListenerWrapper implements MouseListener
+	{
+		static final int MOUSE_CLICKED = 0x01;
+		static final int MOUSE_PRESSED = 0x02;
+		static final int MOUSE_RELEASED = 0x04;
+		static final int MOUSE_ENTERED = 0x08;
+		static final int MOUSE_EXITED = 0x10;
+
+		final MouseListener l;
+		final int flags;
+
+		MouseListenerWrapper(MouseListener l, int flags)
+		{
+			this.l = l;
+			this.flags = flags;
+		}
+
+		private boolean run(MouseEvent e, int flag)
+		{
+			return (flags & flag) != 0 && !e.isConsumed();
+		}
+
+		public void mouseClicked(MouseEvent e)
+		{
+			if (run(e, MOUSE_CLICKED))
+				l.mouseClicked(e);
+		}
+
+		public void mousePressed(MouseEvent e)
+		{
+			if (run(e, MOUSE_PRESSED))
+				l.mousePressed(e);
+		}
+
+		public void mouseReleased(MouseEvent e)
+		{
+			if (run(e, MOUSE_RELEASED))
+				l.mouseReleased(e);
+		}
+
+		public void mouseEntered(MouseEvent e)
+		{
+			if (run(e, MOUSE_ENTERED))
+				l.mouseEntered(e);
+		}
+
+		public void mouseExited(MouseEvent e)
+		{
+			if (run(e, MOUSE_EXITED))
+				l.mouseExited(e);
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class MouseMotionListenerWrapper implements MouseMotionListener
+	{
+		static final int MOUSE_DRAGGED = 0x01;
+		static final int MOUSE_MOVED = 0x02;
+
+		final MouseMotionListener l;
+		final int flags;
+
+		MouseMotionListenerWrapper(MouseMotionListener l, int flags)
+		{
+			this.l = l;
+			this.flags = flags;
+		}
+
+		private boolean run(MouseEvent e, int flag)
+		{
+			return (flags & flag) != 0 && !e.isConsumed();
+		}
+
+		public void mouseDragged(MouseEvent e)
+		{
+			if (run(e, MOUSE_DRAGGED))
+				l.mouseDragged(e);
+		}
+
+		public void mouseMoved(MouseEvent e)
+		{
+			if (run(e, MOUSE_MOVED))
+				l.mouseMoved(e);
+		}
 	}
 
 	/**
@@ -1647,29 +1789,29 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final JMenu add = new JMenu("GDSC SMLM");
 		add.setMnemonic(KeyEvent.VK_G);
 
-		resetRotation = new JMenuItem("Reset Global Rotation", KeyEvent.VK_R);
+		resetRotation = new JMenuItem("Reset global rotation", KeyEvent.VK_R);
 		resetRotation.addActionListener(this);
 		add.add(resetRotation);
 
-		resetTranslation = new JMenuItem("Reset Global Translation", KeyEvent.VK_T);
+		resetTranslation = new JMenuItem("Reset global translation", KeyEvent.VK_T);
 		resetTranslation.addActionListener(this);
 		add.add(resetTranslation);
 
-		resetZoom = new JMenuItem("Reset Global Zoom", KeyEvent.VK_Z);
+		resetZoom = new JMenuItem("Reset global zoom", KeyEvent.VK_Z);
 		resetZoom.addActionListener(this);
 		add.add(resetZoom);
 
 		add.addSeparator();
 
-		resetAll = new JMenuItem("Reset All Transformations", KeyEvent.VK_A);
+		resetAll = new JMenuItem("Reset all transformations", KeyEvent.VK_A);
 		resetAll.addActionListener(this);
 		add.add(resetAll);
 
-		resetSelectedView = new JMenuItem("Reset Selected Transformation", KeyEvent.VK_S);
+		resetSelectedView = new JMenuItem("Reset selected transformation", KeyEvent.VK_S);
 		resetSelectedView.addActionListener(this);
 		add.add(resetSelectedView);
 
-		findEyePoint = new JMenuItem("Find Eye Point", KeyEvent.VK_E);
+		findEyePoint = new JMenuItem("Find eye point", KeyEvent.VK_E);
 		findEyePoint.addActionListener(this);
 		add.add(findEyePoint);
 
@@ -1685,11 +1827,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		add.addSeparator();
 
-		changeColour = new JMenuItem("Change Colour", KeyEvent.VK_C);
+		changeColour = new JMenuItem("Change colour", KeyEvent.VK_C);
 		changeColour.addActionListener(this);
 		add.add(changeColour);
 
-		changePointSize = new JMenuItem("Change Point Size", KeyEvent.VK_C);
+		changePointSize = new JMenuItem("Change point size", KeyEvent.VK_C);
 		changePointSize.addActionListener(this);
 		add.add(changePointSize);
 
@@ -1697,6 +1839,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		toggleTransparent.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed E"));
 		toggleTransparent.addActionListener(this);
 		add.add(toggleTransparent);
+
+		toggleShaded = new JMenuItem("Toggle shaded", KeyEvent.VK_S);
+		toggleShaded.addActionListener(this);
+		add.add(toggleShaded);
 
 		colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
 		colourSurface.addActionListener(this);
@@ -1914,6 +2060,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
+	private static class ToggleShadedAction extends BaseContentAction
+	{
+		public int run(Content c)
+		{
+			if (!(c.getUserData() instanceof ResultsMetaData))
+				return 0;
+			final ContentInstant content = c.getCurrent();
+			CustomMeshNode node = (CustomMeshNode) content.getContent();
+			CustomMesh mesh = node.getMesh();
+
+			mesh.setShaded(!mesh.isShaded());
+
+			return 0;
+		}
+	}
+
 	private class FindEyePointContentAction extends BaseContentAction
 	{
 		ImageJ3DResultsViewerSettings.Builder settings;
@@ -2036,8 +2198,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (reverse)
 				direction.negate();
 
-			TurboList<Point3f> points = data.points;
-			double[] d = getDistance(points, direction, eye);
+			double[] d = getDistance(data.points, direction, eye);
 
 			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
 			Sort.sort(indices, d);
@@ -2049,7 +2210,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// Do this second as points is updated in-line so may break reordering the mesh
 			// if it has a reference to the points list (e.g. ItemPointMesh initially uses 
 			// the points list but will create a new internal list when it is re-ordered).
-			reorder(indices, data.results, points);
+			reorder(indices, data);
 
 			return 0;
 		}
@@ -2253,6 +2414,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			action = new ToggleTransparentAction();
 		}
+		else if (src == toggleShaded)
+		{
+			action = new ToggleShadedAction();
+		}
 		else if (src == changePointSize)
 		{
 			action = new ChangePointSizeContentAction();
@@ -2277,13 +2442,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	}
 
 	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
-			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency)
+			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
 	{
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
-			CustomPointMesh mesh = new TransparentItemPointMesh(points, null, transparency);
-			//CustomPointMesh mesh = new ItemPointMesh(points, null, transparency);
+			CustomPointMesh mesh;
+			if (alpha != null)
+			{
+				TransparentItemPointMesh mesh2 = new TransparentItemPointMesh(points, null, transparency);
+				mesh = mesh2;
+				mesh2.setItemAlpha(alpha);
+			}
+			else
+			{
+				mesh = new ItemPointMesh(points, null, transparency);
+			}
 			mesh.setPointSize(sphereSize[0].x);
 			return mesh;
 		}
@@ -2321,10 +2495,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		IJ.showStatus("Creating 3D mesh ...");
 		double creaseAngle = (r.isHighResolution()) ? 44 : 0;
 		IJTrackProgress progress = null; // Used for debugging construction time
-		return new TransparentItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
+		if (alpha != null)
+		{
+			TransparentItemTriangleMesh mesh = new TransparentItemTriangleMesh(
+					point.toArray(new Point3f[singlePointSize]), points.toArray(new Point3f[points.size()]), sphereSize,
+					null, transparency, creaseAngle, progress);
+			mesh.setItemAlpha(alpha);
+			return mesh;
+		}
+
+		return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
 				points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
-		//return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
-		//		points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
 	}
 
 	/**
