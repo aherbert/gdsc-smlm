@@ -224,7 +224,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		NONE { public String getName() { return "None"; }},
 		SIZE { public String getName() { return "Size"; }},
-		// Add others, e.g. precision
+		XY_PRECISION { public String getName() { return "XY Precision"; }},
+		XYZ_DEVIATIONS { public String getName() { return "XYZ Deviations"; }},
         ;
 
 		public String getShortName()
@@ -626,8 +627,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 						TransparencyMode mode = TransparencyMode.forNumber(settings.getTransparencyMode());
 						if (mode == TransparencyMode.NONE)
 							return false;
-						egd.addSlider("Min_transparancy", 0, 0.9, settings.getMinTransparency());
-						egd.addSlider("Max_transparancy", 0, 0.9, settings.getMaxTransparency());
+						egd.addSlider("Min_transparancy", 0, 0.95, settings.getMinTransparency());
+						egd.addSlider("Max_transparancy", 0, 0.95, settings.getMaxTransparency());
 						egd.setSilent(silent);
 						egd.showDialog(true, gd);
 						if (egd.wasCanceled())
@@ -757,7 +758,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		lastWindow = univ.getWindow().getTitle();
 
-		float[] alpha = createAlpha(settings, sphereSize);
+		float[] alpha = createAlpha(results, settings, sphereSize);
 
 		CustomMesh mesh = createMesh(settings, points, sphereSize, transparency, alpha);
 		if (mesh == null)
@@ -905,7 +906,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static float[] createAlpha(Builder settings, Point3f[] sphereSize)
+	private static float[] createAlpha(MemoryPeakResults results, Builder settings, Point3f[] sphereSize)
 	{
 		if (settings.getTransparencyMode() == 0)
 			return null;
@@ -922,31 +923,73 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		double minA = 1 - max;
 		double maxA = 1 - min;
 
+		SizeMode sizeMode = SizeMode.forNumber(settings.getSizeMode());
 		TransparencyMode mode = TransparencyMode.forNumber(settings.getTransparencyMode());
 		switch (mode)
 		{
+			case XYZ_DEVIATIONS:
+				if (sizeMode != SizeMode.XYZ_DEVIATIONS)
+					sphereSize = createSphereSizeFromDeviations(results);
+				return createAlpha(minA, maxA, sphereSize);
+			case XY_PRECISION:
+				if (sizeMode != SizeMode.XY_PRECISION)
+					sphereSize = createSphereSizeFromPrecision(results);
+				return createAlpha(minA, maxA, sphereSize);
 			case SIZE:
-				return createAlphaFromSize(settings, minA, maxA, sphereSize);
+				return createAlphaFromSize(results, settings, minA, maxA, sphereSize);
 			default:
 				throw new IllegalStateException("Unknown transparency mode: " + mode);
 		}
 	}
 
-	private static float[] createAlphaFromSize(Builder settings, double minA, double maxA, Point3f[] sphereSize)
+	private static float[] createAlphaFromSize(MemoryPeakResults results, Builder settings, double minA, double maxA,
+			Point3f[] sphereSize)
 	{
-		SizeMode mode = SizeMode.forNumber(settings.getSizeMode());
-		if (mode == SizeMode.FIXED_SIZE)
+		SizeMode sizeMode = SizeMode.forNumber(settings.getSizeMode());
+		if (sizeMode == SizeMode.FIXED_SIZE)
 		{
 			Utils.log("No per-item transparency as size is fixed");
 			return null;
 		}
 
+		if (settings.getRendering() == 0)
+		{
+			// No size was created for fixed point rendering so create it now
+			switch (sizeMode)
+			{
+				case XYZ_DEVIATIONS:
+					sphereSize = createSphereSizeFromDeviations(results);
+					break;
+				case XY_PRECISION:
+					sphereSize = createSphereSizeFromPrecision(results);
+					break;
+				default:
+					throw new IllegalStateException("Unknown drawing mode: " + sizeMode);
+			}
+		}
+
+		return createAlpha(minA, maxA, sphereSize);
+	}
+
+	private static float[] createAlpha(double minA, double maxA, Point3f[] sphereSize)
+	{
+		if (sphereSize==null)
+			return null;
+		
 		double[] d = new double[sphereSize.length];
 		for (int i = 0; i < d.length; i++)
 		{
 			Point3f p = sphereSize[i];
-			// Use the squared distance. This is the equivalent of the area of the shape projected to 2D.
-			d[i] = (double) p.x * p.x + p.y * p.y + p.z * p.z;
+			if (p.x == p.y && p.y == p.z)
+			{
+				d[i] = 3.0 * p.x * p.x;
+			}
+			else
+			{
+				// Use the squared distance. This is the equivalent of the area of the shape projected to 2D.
+				d[i] = (double) p.x * p.x + p.y * p.y + p.z * p.z;
+			}
+
 			// Use the average radius. This is the equivalent of the mean radius of an enclosing ellipsoid.
 			//d[i] = Math.sqrt(d[i] / 3);
 		}
@@ -966,7 +1009,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// Largest distance has lowest alpha (more transparent) 
 			alpha[i] = (float) (minA + range * (max - d[i]));
 		}
-		//return null;
 		return alpha;
 	}
 

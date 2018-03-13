@@ -373,9 +373,9 @@ public class GUIProtosHelper
 		builder.setSizeMode(0); // Fixed
 		builder.setSize(10); // NM units
 		builder.setSortMode(0); // None
-		builder.setTransparencyMode(0); // None
+		builder.setTransparencyMode(1); // From the size
 		builder.setMinTransparency(0);
-		builder.setMaxTransparency(0.9);
+		builder.setMaxTransparency(0.95);
 		builder.setDepthMode(1);
 		builder.setDepthRange(20);
 		builder.setDitherSeed(123456789);
