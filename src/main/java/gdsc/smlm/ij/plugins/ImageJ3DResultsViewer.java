@@ -455,6 +455,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	public void run(String arg)
 	{
+		if (Utils.isExtraOptions())
+		{
+			new ImageJ3DResultsViewerTest().run(arg);
+			return;
+		}
+		
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		if (version == null)
@@ -1026,7 +1032,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return transparency;
 	}
 
-	private static TurboList<Point3f> getPoints(MemoryPeakResults results,
+	static TurboList<Point3f> getPoints(MemoryPeakResults results,
 			ImageJ3DResultsViewerSettingsOrBuilder settings)
 	{
 		final TurboList<Point3f> points = new TurboList<Point3f>(results.size());
@@ -1044,7 +1050,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			results.forEach(DistanceUnit.NM, new XYResultProcedure()
 			{
-
 				public void executeXY(float x, float y)
 				{
 					points.addf(new Point3f(x, y, 0));
