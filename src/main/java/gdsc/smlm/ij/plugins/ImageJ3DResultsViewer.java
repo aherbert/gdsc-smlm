@@ -1527,13 +1527,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final ImageCanvas3D canvas = (ImageCanvas3D) univ.getCanvas();
 		final BranchGroup scene = univ.getScene();
 
-		// We want to be the first mouse listener for the canvas to prevent
-		// the content selected event.
-		MouseListener[] l = canvas.getMouseListeners();
-		for (int i = 0; i < l.length; i++)
-			canvas.removeMouseListener(l[i]);
-
-		canvas.addMouseListener(new MouseAdapter()
+		MouseListener mouseListener = new MouseAdapter()
 		{
 			@Override
 			public void mouseClicked(final MouseEvent e)
@@ -1708,25 +1702,23 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return true;
 				return false;
 			}
-		});
+		};
 
-		// Disable certain listeners that use the Picker. It is slow when there are 
-		// a large number of localisations
 		// 0 = ImageCanvas3D
 		// 1 = DefaultUniverse
 		// 2 = Image3DUniverse
+		MouseListener[] l = canvas.getMouseListeners();
 		for (int i = 0; i < l.length; i++)
 		{
 			if (l[i].getClass().getName().contains("Image3DUniverse"))
 			{
+				// We want to be before the Image3DUniverse to allow consuming the click event.
 				// Only allow the click event. 
 				// This disables the right-click pop-up menu. 
 				// It doesn't have anything of use for localisations anyway. 
+				canvas.removeMouseListener(l[i]);
+				canvas.addMouseListener(mouseListener);
 				canvas.addMouseListener(new MouseListenerWrapper(l[i], MouseListenerWrapper.MOUSE_CLICKED));
-			}
-			else
-			{
-				canvas.addMouseListener(l[i]);
 			}
 		}
 
@@ -1736,16 +1728,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// 3 = EventCatcher	(from scijava)	
 		MouseMotionListener[] ml = canvas.getMouseMotionListeners();
 		for (int i = 0; i < ml.length; i++)
-			canvas.removeMouseMotionListener(ml[i]);
-		for (int i = 0; i < ml.length; i++)
 		{
 			if (ml[i].getClass().getName().contains("Image3DUniverse"))
 			{
 				// Ignore this as it just shows the name in the IJ status bar 
-			}
-			else
-			{
-				canvas.addMouseMotionListener(ml[i]);
+				canvas.removeMouseMotionListener(ml[i]);
 			}
 		}
 
