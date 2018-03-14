@@ -1412,7 +1412,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 			}
 		}
-		highlightColor = colours.getOrDefault(highlightColour.toLowerCase(), null);
+		highlightColor = colours.get(highlightColour.toLowerCase());
 	}
 
 	private static void changeColour(CustomMesh mesh, MemoryPeakResults results,
