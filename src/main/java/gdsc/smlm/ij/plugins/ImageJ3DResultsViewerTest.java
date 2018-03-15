@@ -1,5 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
+import org.scijava.java3d.View;
 import org.scijava.vecmath.Point3f;
 
 import gdsc.core.utils.TurboList;
@@ -35,6 +36,17 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 	private static String version = "";
 	static
 	{
+		// Try setting -Dj3d.sortShape3DBounds for faster centroid computation
+		// See MasterControl.sortShape3DBounds. This only works if The VirtualUniverse
+		// has not been created.
+		java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>()
+		{
+			public String run()
+			{
+				return System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true));
+			}
+		});
+		
 		// Support gracefully handling missing dependencies for the 3D viewer
 		try
 		{
@@ -61,14 +73,14 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		}
 
 		TurboList<Point3f> pointList;
-		float radius;
+		float scale;
 
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			pointList = new TurboList<Point3f>();
 			int range;
-			//range = 1; // 9 points
-			range = 12; // 25^3 = 15625 points
+			range = 1; // 9 points
+			//range = 12; // 25^3 = 15625 points
 			//range = 17; // 35^3 = 42875 points
 			//range = 22; // 45^3 = 91125 points
 			//range = 49; // 99^3 = 970299 points
@@ -82,7 +94,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 					}
 				}
 			}
-			radius = 0.25f;
+			scale = 0.25f;
 		}
 		else
 		{
@@ -108,7 +120,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			pointList = ImageJ3DResultsViewer.getPoints(results, settings);
 			if (pointList == null)
 				return;
-			radius = 10f;
+			scale = 10f;
 		}
 
 		final Image3DUniverse univ = new Image3DUniverse();
@@ -117,12 +129,13 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		ImageWindow3D w = univ.getWindow();
 		GUI.center(w);
 
-		//View view = univ.getViewer().getView();
-		//view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
-		//view.setDepthBufferFreezeTransparent(false);
+		View view = univ.getViewer().getView();
+		view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
+		view.setDepthBufferFreezeTransparent(false);
 
+		IJ.showStatus("Creating points ...");
 		Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);
-		PointGroup pointGroup = new PointGroup(points, radius, null);
+		PointGroup pointGroup = new PointGroup(points, null, null, scale, null, 0.5f);
 		//pointGroup.setRadius(0.25f);
 
 		//		// This supports transparency
@@ -139,9 +152,12 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		//		univ.addContent(c);
 
 		// This does since CustomContentInstant uses a Group to show the nodes 
+		IJ.showStatus("Displaying points ...");
 		final CustomContent c = new CustomContent("Test");
 		final ContentInstant content = c.getCurrent();
 		content.display(new PointGroupNode(pointGroup));
 		univ.addContent(c);
+
+		IJ.showStatus("Done");
 	}
 }
