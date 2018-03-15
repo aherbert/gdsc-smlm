@@ -37058,6 +37058,16 @@ public final class GUIProtos {
      * <code>int32 name_counter = 29;</code>
      */
     int getNameCounter();
+
+    /**
+     * <code>bool support_dynamic_transparency = 30;</code>
+     */
+    boolean getSupportDynamicTransparency();
+
+    /**
+     * <code>bool enable_dynamic_transparency = 31;</code>
+     */
+    boolean getEnableDynamicTransparency();
   }
   /**
    * <pre>
@@ -37103,6 +37113,8 @@ public final class GUIProtos {
       nameOption_ = 0;
       nameSuffix_ = "";
       nameCounter_ = 0;
+      supportDynamicTransparency_ = false;
+      enableDynamicTransparency_ = false;
     }
 
     @java.lang.Override
@@ -37285,6 +37297,16 @@ public final class GUIProtos {
             case 232: {
 
               nameCounter_ = input.readInt32();
+              break;
+            }
+            case 240: {
+
+              supportDynamicTransparency_ = input.readBool();
+              break;
+            }
+            case 248: {
+
+              enableDynamicTransparency_ = input.readBool();
               break;
             }
           }
@@ -37683,6 +37705,24 @@ public final class GUIProtos {
       return nameCounter_;
     }
 
+    public static final int SUPPORT_DYNAMIC_TRANSPARENCY_FIELD_NUMBER = 30;
+    private boolean supportDynamicTransparency_;
+    /**
+     * <code>bool support_dynamic_transparency = 30;</code>
+     */
+    public boolean getSupportDynamicTransparency() {
+      return supportDynamicTransparency_;
+    }
+
+    public static final int ENABLE_DYNAMIC_TRANSPARENCY_FIELD_NUMBER = 31;
+    private boolean enableDynamicTransparency_;
+    /**
+     * <code>bool enable_dynamic_transparency = 31;</code>
+     */
+    public boolean getEnableDynamicTransparency() {
+      return enableDynamicTransparency_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -37781,6 +37821,12 @@ public final class GUIProtos {
       }
       if (nameCounter_ != 0) {
         output.writeInt32(29, nameCounter_);
+      }
+      if (supportDynamicTransparency_ != false) {
+        output.writeBool(30, supportDynamicTransparency_);
+      }
+      if (enableDynamicTransparency_ != false) {
+        output.writeBool(31, enableDynamicTransparency_);
       }
     }
 
@@ -37901,6 +37947,14 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(29, nameCounter_);
       }
+      if (supportDynamicTransparency_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(30, supportDynamicTransparency_);
+      }
+      if (enableDynamicTransparency_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(31, enableDynamicTransparency_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -38002,6 +38056,10 @@ public final class GUIProtos {
           .equals(other.getNameSuffix());
       result = result && (getNameCounter()
           == other.getNameCounter());
+      result = result && (getSupportDynamicTransparency()
+          == other.getSupportDynamicTransparency());
+      result = result && (getEnableDynamicTransparency()
+          == other.getEnableDynamicTransparency());
       return result;
     }
 
@@ -38087,6 +38145,12 @@ public final class GUIProtos {
       hash = (53 * hash) + getNameSuffix().hashCode();
       hash = (37 * hash) + NAME_COUNTER_FIELD_NUMBER;
       hash = (53 * hash) + getNameCounter();
+      hash = (37 * hash) + SUPPORT_DYNAMIC_TRANSPARENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSupportDynamicTransparency());
+      hash = (37 * hash) + ENABLE_DYNAMIC_TRANSPARENCY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getEnableDynamicTransparency());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -38282,6 +38346,10 @@ public final class GUIProtos {
 
         nameCounter_ = 0;
 
+        supportDynamicTransparency_ = false;
+
+        enableDynamicTransparency_ = false;
+
         return this;
       }
 
@@ -38337,6 +38405,8 @@ public final class GUIProtos {
         result.nameOption_ = nameOption_;
         result.nameSuffix_ = nameSuffix_;
         result.nameCounter_ = nameCounter_;
+        result.supportDynamicTransparency_ = supportDynamicTransparency_;
+        result.enableDynamicTransparency_ = enableDynamicTransparency_;
         onBuilt();
         return result;
       }
@@ -38468,6 +38538,12 @@ public final class GUIProtos {
         }
         if (other.getNameCounter() != 0) {
           setNameCounter(other.getNameCounter());
+        }
+        if (other.getSupportDynamicTransparency() != false) {
+          setSupportDynamicTransparency(other.getSupportDynamicTransparency());
+        }
+        if (other.getEnableDynamicTransparency() != false) {
+          setEnableDynamicTransparency(other.getEnableDynamicTransparency());
         }
         onChanged();
         return this;
@@ -39508,6 +39584,58 @@ public final class GUIProtos {
       public Builder clearNameCounter() {
         
         nameCounter_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean supportDynamicTransparency_ ;
+      /**
+       * <code>bool support_dynamic_transparency = 30;</code>
+       */
+      public boolean getSupportDynamicTransparency() {
+        return supportDynamicTransparency_;
+      }
+      /**
+       * <code>bool support_dynamic_transparency = 30;</code>
+       */
+      public Builder setSupportDynamicTransparency(boolean value) {
+        
+        supportDynamicTransparency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool support_dynamic_transparency = 30;</code>
+       */
+      public Builder clearSupportDynamicTransparency() {
+        
+        supportDynamicTransparency_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean enableDynamicTransparency_ ;
+      /**
+       * <code>bool enable_dynamic_transparency = 31;</code>
+       */
+      public boolean getEnableDynamicTransparency() {
+        return enableDynamicTransparency_;
+      }
+      /**
+       * <code>bool enable_dynamic_transparency = 31;</code>
+       */
+      public Builder setEnableDynamicTransparency(boolean value) {
+        
+        enableDynamicTransparency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool enable_dynamic_transparency = 31;</code>
+       */
+      public Builder clearEnableDynamicTransparency() {
+        
+        enableDynamicTransparency_ = false;
         onChanged();
         return this;
       }
@@ -40725,7 +40853,7 @@ public final class GUIProtos {
       "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
       "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
       "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
-      "\005\"\301\005\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "\005\"\214\006\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
       "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
       "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
       "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
@@ -40742,13 +40870,15 @@ public final class GUIProtos {
       "rt_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010\022\030" +
       "\n\020highlight_colour\030\031 \001(\t\022\023\n\013output_name\030" +
       "\032 \001(\t\022\023\n\013name_option\030\033 \001(\005\022\023\n\013name_suffi" +
-      "x\030\034 \001(\t\022\024\n\014name_counter\030\035 \001(\005\"\220\001\n\030Transl" +
-      "ateResultsSettings\022\024\n\014input_option\030\001 \001(\t" +
-      "\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\r" +
-      "distance_unit\030\005 \001(\0162#.gdsc.smlm.data.con",
-      "fig.DistanceUnit*O\n\014TemplateType\022\023\n\017INLI" +
-      "NE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017" +
-      "CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
+      "x\030\034 \001(\t\022\024\n\014name_counter\030\035 \001(\005\022$\n\034support" +
+      "_dynamic_transparency\030\036 \001(\010\022#\n\033enable_dy" +
+      "namic_transparency\030\037 \001(\010\"\220\001\n\030TranslateRe" +
+      "sultsSettings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002d",
+      "x\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdista" +
+      "nce_unit\030\005 \001(\0162#.gdsc.smlm.data.config.D" +
+      "istanceUnit*O\n\014TemplateType\022\023\n\017INLINE_TE" +
+      "MPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTO" +
+      "M_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -40886,7 +41016,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", "OutputName", "NameOption", "NameSuffix", "NameCounter", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", "OutputName", "NameOption", "NameSuffix", "NameCounter", "SupportDynamicTransparency", "EnableDynamicTransparency", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(20);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new

@@ -595,6 +595,8 @@ message ImageJ3DResultsViewerSettings {
 	int32 name_option = 27;
 	string name_suffix = 28;
 	int32 name_counter = 29;
+	bool support_dynamic_transparency = 30;
+	bool enable_dynamic_transparency = 31;
 }
 
 // Contains settings for the Translate Results plugin
