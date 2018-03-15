@@ -32,6 +32,14 @@ public interface ItemShape
 	 *
 	 * @param color
 	 *            the new color
+	 */
+	public void setItemColor(final Color3f color);
+	
+	/**
+	 * Sets the color for each item.
+	 *
+	 * @param color
+	 *            the new color
 	 * @throws IllegalArgumentException
 	 *             if the number of colours is incorrect
 	 */

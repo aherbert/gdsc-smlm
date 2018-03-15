@@ -341,7 +341,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		return result;
 	}
 
-	private static int transparencyMode = TransparencyAttributes.BLENDED;
+	private static int transparencyMode = TransparencyAttributes.FASTEST;
 
 	/**
 	 * Sets the transparency mode.
@@ -584,6 +584,16 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	public int size()
 	{
 		return points.length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
+	 */
+	public void setItemColor(Color3f color)
+	{
+		setColor(color);
 	}
 
 	/*

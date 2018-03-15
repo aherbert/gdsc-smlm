@@ -20,6 +20,8 @@ import org.scijava.java3d.Bounds;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Material;
+import org.scijava.java3d.PointArray;
+import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.Transform3D;
@@ -48,11 +50,11 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	/** The list of points */
 	protected Point3f[] points;
 
-	/** The default appearance when not using per-item colour/transparency */
+	/**
+	 * The default appearance when not using per-item colour/transparency. This is also the reference for shared
+	 * attributes.
+	 */
 	protected Appearance defaultAppearance;
-
-	/** The polygon attributes. These are shared. */
-	protected PolygonAttributes pa;
 
 	/** The global transparency of the points. This may be combined with per item alpha. */
 	protected float transparency;
@@ -105,14 +107,17 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			throw new NullPointerException("Points must not be null");
 		//setCapability(ALLOW_CHILDREN_EXTEND);
 		//setCapability(ALLOW_CHILDREN_WRITE);
+
+		// Default geometry
+		if (ga == null)
+			ga = createSphere(6);
+
 		this.points = points;
-		this.defaultAppearance = createDefaultAppearance(appearance);
+		this.defaultAppearance = createDefaultAppearance(appearance, ga);
 		this.transparency = defaultAppearance.getTransparencyAttributes().getTransparency();
 		defaultAppearance.getMaterial().getDiffuseColor(this.color);
 
-		// Initialise the geometry
-		if (ga == null)
-			ga = createSphere(6);
+		// Get the bounds so we can set the centroid and bounds for each object 
 		Bounds bounds = new Shape3D(ga, null).getBounds();
 
 		final boolean hasColor = colors != null && colors.length == points.length;
@@ -162,13 +167,19 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		Vector3f v3f = new Vector3f();
 		final float alpha1 = 1 - transparency;
 
+		TransparencyAttributes ta = defaultAppearance.getTransparencyAttributes();
+		Material m = defaultAppearance.getMaterial();
+
 		for (int i = 0; i < points.length; i++)
 		{
 			v3f.set(points[i]);
 
-			// Allow per-item appearance
-			appearance = (Appearance) defaultAppearance.cloneNodeComponent(true);
-			appearance.setPolygonAttributes(pa); // Shared
+			// Allow per-item appearance with shared attributes
+			appearance = (Appearance) defaultAppearance.cloneNodeComponent(false);
+			// Not shared attributes
+			appearance.setTransparencyAttributes((TransparencyAttributes) ta.cloneNodeComponent(true));
+			appearance.setMaterial((Material) m.cloneNodeComponent(true));
+
 			if (perItem)
 			{
 				if (hasAlpha)
@@ -229,6 +240,9 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			bounds2.transform(t3d);
 			shape.setBounds(bounds2);
 			shape.setBoundsAutoCompute(false);
+			
+			// Store the point index in the shape for intersection analysis
+			shape.setUserData(i);
 
 			parent.addChild(shape);
 		}
@@ -267,6 +281,16 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			color = this.color;
 		for (int i = 0; i < material.length; i++)
 			material[i].setDiffuseColor(color);
+	}
+
+	/**
+	 * Gets the default color of the points.
+	 *
+	 * @return the color
+	 */
+	public Color3f getColor()
+	{
+		return new Color3f(color);
 	}
 
 	/**
@@ -318,6 +342,34 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	}
 
 	/**
+	 * Gets the transparency of the points. This is blended with a per-item alpha if present.
+	 *
+	 * @return the transparency
+	 */
+	public float getTransparency()
+	{
+		return transparency;
+	}
+
+	/**
+	 * Checks if any item is transparent.
+	 *
+	 * @return true, if is transparent
+	 */
+	public boolean isTransparent()
+	{
+		if (transparency != 0)
+			return true;
+		if (alphas != null && alphas.length == points.length)
+		{
+			for (int i = 0; i < alphas.length; i++)
+				if (alphas[i] != 1)
+					return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Sets the shaded.
 	 *
 	 * @param shaded
@@ -325,13 +377,52 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setShaded(boolean shaded)
 	{
-		setPolygonMode((shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE);
-	}
-
-	private void setPolygonMode(int mode)
-	{
+		PolygonAttributes pa = defaultAppearance.getPolygonAttributes();
+		if (pa == null)
+			return;
+		int mode = (shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE;
 		if (pa.getPolygonMode() != mode)
 			pa.setPolygonMode(mode);
+	}
+
+	/**
+	 * Checks if is shaded.
+	 *
+	 * @return true, if is shaded
+	 */
+	public boolean isShaded()
+	{
+		PolygonAttributes pa = defaultAppearance.getPolygonAttributes();
+		if (pa == null)
+			return false;
+		return pa.getPolygonMode() == PolygonAttributes.POLYGON_FILL;
+	}
+
+	/**
+	 * Sets the pointSize.
+	 *
+	 * @param pointSize
+	 *            the new pointSize
+	 */
+	public void setPointSize(float pointSize)
+	{
+		PointAttributes pa = defaultAppearance.getPointAttributes();
+		if (pa == null)
+			return;
+		pa.setPointSize(pointSize);
+	}
+
+	/**
+	 * Gets the point size.
+	 *
+	 * @return the point size
+	 */
+	public float getPointSize()
+	{
+		PointAttributes pa = defaultAppearance.getPointAttributes();
+		if (pa == null)
+			return 0f;
+		return pa.getPointSize();
 	}
 
 	/**
@@ -340,40 +431,49 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 *
 	 * @param appearance
 	 *            the appearance
+	 * @param ga
 	 * @return the appearance
 	 */
-	private Appearance createDefaultAppearance(Appearance appearance)
+	private Appearance createDefaultAppearance(Appearance appearance, GeometryArray ga)
 	{
 		if (appearance == null)
 			appearance = new Appearance();
 		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
 		appearance.setCapability(Appearance.ALLOW_MATERIAL_READ);
 
-		// These are the defaults. We may need them if we want to support mesh 
-		// display when the polygon mode is Line
-		pa = appearance.getPolygonAttributes();
-		if (pa == null)
+		// Support sharing certain attributes
+
+		if (ga instanceof PointArray)
 		{
-			pa = new PolygonAttributes();
-			pa.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-			pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
-			//pa.setCullFace(PolygonAttributes.CULL_BACK);
-			//pa.setBackFaceNormalFlip(false);
+			appearance.setPolygonAttributes(null);
+
+			PointAttributes pointAttributes = appearance.getPointAttributes();
+			if (pointAttributes == null)
+			{
+				pointAttributes = new PointAttributes();
+				pointAttributes.setCapability(PointAttributes.ALLOW_ANTIALIASING_WRITE);
+				pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
+				pointAttributes.setPointAntialiasingEnable(true);
+				appearance.setPointAttributes(pointAttributes);
+			}
 		}
 		else
 		{
-			// Remove these to speed up cloning
-			appearance.setPolygonAttributes(null);
+			appearance.setPointAttributes(null);
+
+			// These are the defaults. We may need them if we want to support mesh 
+			// display when the polygon mode is Line
+			PolygonAttributes polygonAttributes = appearance.getPolygonAttributes();
+			if (polygonAttributes == null)
+			{
+				polygonAttributes = new PolygonAttributes();
+				polygonAttributes.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+				polygonAttributes.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+				appearance.setPolygonAttributes(polygonAttributes);
+			}
 		}
 
-		// We may need this to choose a different shade model
-		//		final ColoringAttributes colorAttrib = new ColoringAttributes();
-		//		colorAttrib.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
-		//		// This is ignored. The material colour is used.
-		//		colorAttrib.setColor(color);
-		//		colorAttrib.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);
-		//		appearance.setColoringAttributes(colorAttrib);
-
+		// We require transparency and material attributes
 		TransparencyAttributes tr = appearance.getTransparencyAttributes();
 		if (tr == null)
 		{
@@ -433,6 +533,16 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
+	 */
+	public void setItemColor(Color3f color)
+	{
+		setColor(color);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
@@ -486,6 +596,22 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
+		setItemAlpha(alpha, this.transparency);
+	}
+
+	/**
+	 * Sets the item alpha and the global transparency in one operation.
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param transparency
+	 *            the transparency
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
+	 * @see #setItemAlpha(float[])
+	 */
+	public void setItemAlpha(float[] alpha, float transparency) throws IllegalArgumentException
+	{
 		if (alpha != null)
 		{
 			int size = size();
@@ -503,11 +629,27 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
+		setItemAlpha(alpha, this.transparency);
+	}
+
+	/**
+	 * Sets the item alpha and the global transparency in one operation.
+	 *
+	 * @param alpha
+	 *            the alpha
+	 * @param transparency
+	 *            the transparency
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
+	 * @see #setItemAlpha(float)
+	 */
+	public void setItemAlpha(float alpha, float transparency) throws IllegalArgumentException
+	{
 		// Reuse current alpha storage
 		if (alphas == null)
 			alphas = new float[size()];
 		Arrays.fill(alphas, alpha);
-		setTransparency(this.transparency);
+		setTransparency(transparency);
 	}
 
 	/*
