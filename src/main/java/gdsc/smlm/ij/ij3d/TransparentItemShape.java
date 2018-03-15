@@ -16,9 +16,9 @@ import org.scijava.vecmath.Color4f;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for mesh objects that represent a set of items to have transparent colours.
+ * Interface for shape objects that represent a set of items to have transparent colours.
  */
-public interface TransparentItemMesh extends ItemMesh
+public interface TransparentItemShape extends ItemShape
 {
 	/**
 	 * Sets the color for each item.

@@ -16,84 +16,89 @@ import java.util.Arrays;
  *---------------------------------------------------------------------------*/
 
 import org.scijava.java3d.Appearance;
-import org.scijava.java3d.BoundingSphere;
 import org.scijava.java3d.Bounds;
-import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Material;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.Transform3D;
-import org.scijava.java3d.TransformGroup;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.utils.geometry.Primitive;
 import org.scijava.java3d.utils.geometry.Sphere;
 import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3d;
+import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
-import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
 
 /**
- * This class represents a list as a number of objects in the universe.
+ * This class represents a list as a number of repeated shapes in the universe. The shape is defined using a geometry
+ * array.
  * <p>
  * This class is based on ideas in ij3d.pointlist.PointListShape.
  *
  * @author Alex Herbert
  */
-public class PointGroup extends Group
+public class ItemGeometryGroup extends Group implements TransparentItemShape
 {
 	// Tips: https://webserver2.tecgraf.puc-rio.br/~ismael/Cursos/Cidade_CG/labs/Java3D/Java3D_onlinebook_selman/Htmls/3DJava_Ch04.htm#4
-
-	// TODO -
-	// Make the input require an object type, per item XYZ radius, colour and alpha.
-	// Build transparency using a global transparency and per item alpha.
-
-	// Create a list of the primitives appearance (Transparency/Material attributes) 
-	// for direct access to them.
-	// Use getAllChildren() to enumerate the actual children.
-	// Add methods to change the transparency and colour
-	// Transparency should be combined with per item alpha.
-
-	// Basically extent TranparentItemMesh. Change the interface names of Mesh to Node, 
-	// i.e. something that can be added to a scene graph. 
 
 	// See if this can extend BranchGroup to allow picking the items.
 
 	/** The list of points */
-	private Point3f[] points;
+	protected Point3f[] points;
 
 	/** The default appearance when not using per-item colour/transparency */
-	private Appearance defaultAppearance;
+	protected Appearance defaultAppearance;
 
 	/** The polygon attributes. These are shared. */
-	private PolygonAttributes pa;
+	protected PolygonAttributes pa;
 
 	/** The global transparency of the points. This may be combined with per item alpha. */
-	private float transparency;
+	protected float transparency;
 
-	/** The single colour of the material. */
-	private Color3f color = new Color3f();
-
-	/** The per-item colour. */
-	private Color3f[] colors;
+	/** The default colour of the material. */
+	protected Color3f color = new Color3f();
 
 	/** The per-item alpha. */
-	private float[] alphas;
+	protected float[] alphas;
 
 	/** The per-item transparency attributes. */
-	private TransparencyAttributes[] transparencyAttributes = null;
+	protected TransparencyAttributes[] transparencyAttributes = null;
 
 	/** The per-item material. */
-	private Material[] material = null;
+	protected Material[] material = null;
 
-	public PointGroup(final Point3f[] points)
+	/**
+	 * Instantiates a new item geometry group.
+	 *
+	 * @param points
+	 *            the points
+	 */
+	public ItemGeometryGroup(final Point3f[] points)
 	{
 		this(points, null, null, null, null, null);
 	}
 
-	public PointGroup(final Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes,
+	/**
+	 * Instantiates a new item geometry group. The geometry is scaled and translated for each point. The default
+	 * appearance is cloned per item and optionally can be updated with per-item material colour and transparency. The
+	 * transparency in the appearance is blended with per-item alphas to create a per-item transparency.
+	 *
+	 * @param points
+	 *            the points.
+	 * @param ga
+	 *            the geometry array. If null then a default will be used.
+	 * @param appearance
+	 *            the default appearance of the shape. PolygonAttributes, Material and TransparencyAttributes are used.
+	 * @param sizes
+	 *            the sizes of each point. Can be null (no scaling); length=1 (fixed scaling); or points.length.
+	 * @param colors
+	 *            the per-item colors. Can be null.
+	 * @param alphas
+	 *            the per-item alphas. Can be null.
+	 */
+	public ItemGeometryGroup(final Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes,
 			Color3f[] colors, float[] alphas)
 	{
 		if (points == null)
@@ -113,7 +118,6 @@ public class PointGroup extends Group
 		final boolean hasColor = colors != null && colors.length == points.length;
 		final boolean hasAlpha = alphas != null && alphas.length == points.length;
 
-		this.colors = colors;
 		this.alphas = alphas;
 
 		transparencyAttributes = new TransparencyAttributes[points.length];
@@ -216,6 +220,8 @@ public class PointGroup extends Group
 			ga2.setCoordinates(0, coordinates2);
 
 			Shape3D shape = new Shape3D(ga2, appearance);
+			// Each object can be picked. Is this needed?
+			//shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
 
 			// Transform the bounds
 			t3d.set(v3f);
@@ -249,24 +255,16 @@ public class PointGroup extends Group
 	}
 
 	/**
-	 * Get the number of points.
-	 *
-	 * @return the size
-	 */
-	public int size()
-	{
-		return points.length;
-	}
-
-	/**
 	 * Set the color of the points.
 	 *
 	 * @param color
 	 *            the new color
 	 */
-	public void setColor(final Color3f color)
+	public void setColor(Color3f color)
 	{
 		// Global colour
+		if (color == null)
+			color = this.color;
 		for (int i = 0; i < material.length; i++)
 			material[i].setDiffuseColor(color);
 	}
@@ -327,7 +325,6 @@ public class PointGroup extends Group
 	 */
 	public void setShaded(boolean shaded)
 	{
-		// TODO see if the PA can be shared across alll appearances 
 		setPolygonMode((shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE);
 	}
 
@@ -421,5 +418,112 @@ public class PointGroup extends Group
 		int flags = Primitive.GENERATE_NORMALS | Primitive.ENABLE_APPEARANCE_MODIFY | Primitive.ENABLE_GEOMETRY_PICKING;
 		final Sphere sphere = new Sphere(1, flags, divisions, null);
 		return (GeometryArray) sphere.getShape(0).getGeometry();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#size()
+	 */
+	public int size()
+	{
+		return points.length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f[])
+	 */
+	public void setItemColor(Color3f[] color) throws IllegalArgumentException
+	{
+		if (color == null)
+		{
+			// Default
+			setColor(null);
+			return;
+		}
+		int size = size();
+		if (color.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		for (int i = 0; i < material.length; i++)
+			material[i].setDiffuseColor(color[i]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
+	 */
+	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
+	{
+		if (color == null)
+		{
+			this.alphas = null;
+
+			// Default
+			setColor(null);
+			setTransparency(this.transparency);
+			return;
+		}
+		int size = size();
+		if (color.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		if (alphas == null)
+			alphas = new float[size];
+		for (int i = 0; i < material.length; i++)
+		{
+			material[i].setDiffuseColor(color[i].x, color[i].y, color[i].z);
+			alphas[i] = color[i].w;
+		}
+		setTransparency(this.transparency);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
+	 */
+	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
+	{
+		if (alpha != null)
+		{
+			int size = size();
+			if (alpha.length != size)
+				throw new IllegalArgumentException("list of size " + size + " expected");
+		}
+		this.alphas = alpha;
+		setTransparency(this.transparency);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
+	 */
+	public void setItemAlpha(float alpha) throws IllegalArgumentException
+	{
+		// Reuse current alpha storage
+		if (alphas == null)
+			alphas = new float[size()];
+		Arrays.fill(alphas, alpha);
+		setTransparency(this.transparency);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
+	 */
+	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
+	{
+		int size = size();
+		if (alpha.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		if (this.alphas == null)
+			// No alpha
+			Arrays.fill(alpha, 1f);
+		else
+			System.arraycopy(this.alphas, 0, alpha, 0, size);
 	}
 }

@@ -14,9 +14,9 @@ package gdsc.smlm.ij.ij3d;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface allowing mesh objects that represent a set of items to be updated
+ * Interface allowing shape objects that represent a set of items to be updated
  */
-public interface UpdateableItemMesh extends ItemMesh
+public interface UpdateableItemShape extends ItemShape
 {
 	/**
 	 * Reorder the mesh items using the given indices. The number of indices must match the number of items in the mesh

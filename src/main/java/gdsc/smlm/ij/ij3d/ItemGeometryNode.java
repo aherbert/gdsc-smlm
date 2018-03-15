@@ -21,24 +21,24 @@ import org.scijava.vecmath.Tuple3d;
 import ij3d.ContentNode;
 
 /**
- * Node to allow display of PointGroup content
+ * Node to allow display of ItemGeometryGroup content.
  *
  * @author Alex Herbert
  */
-public class PointGroupNode extends ContentNode
+public class ItemGeometryNode extends ContentNode
 {
-	private PointGroup pointGroup;
+	private ItemGeometryGroup pointGroup;
 
 	protected Point3f min, max, center;
 
-	public PointGroupNode(final PointGroup pointGroup)
+	public ItemGeometryNode(final ItemGeometryGroup pointGroup)
 	{
 		this.pointGroup = pointGroup;
 		calculateMinMaxCenterPoint();
 		addChild(pointGroup);
 	}
 
-	public PointGroup getPointGroup()
+	public ItemGeometryGroup getItemGeometry()
 	{
 		return pointGroup;
 	}

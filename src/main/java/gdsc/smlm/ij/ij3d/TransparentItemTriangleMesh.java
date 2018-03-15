@@ -19,7 +19,7 @@ import gdsc.core.logging.TrackProgress;
  * Use a triangle mesh object to represent a set of points. The object is duplicated, scaled and translated for
  * each point.
  */
-public class TransparentItemTriangleMesh extends ItemTriangleMesh implements TransparentItemMesh
+public class TransparentItemTriangleMesh extends ItemTriangleMesh implements TransparentItemShape
 {
 	/**
 	 * Instantiates a new transparent item triangle mesh.

@@ -16,9 +16,9 @@ import org.scijava.vecmath.Color3f;
  *---------------------------------------------------------------------------*/
 
 /**
- * Interface for mesh objects that represent a set of items.
+ * Interface for shape objects that represent a set of items.
  */
-public interface ItemMesh
+public interface ItemShape
 {
 	/**
 	 * Gets the number of items.

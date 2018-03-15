@@ -1,13 +1,16 @@
 package gdsc.smlm.ij.plugins;
 
+import org.scijava.java3d.Appearance;
+import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Point3f;
 
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.ij.ij3d.CustomContent;
-import gdsc.smlm.ij.ij3d.PointGroup;
-import gdsc.smlm.ij.ij3d.PointGroupNode;
+import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
+import gdsc.smlm.ij.ij3d.ItemGeometryNode;
+import gdsc.smlm.ij.ij3d.OrderedItemGeometryGroup;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -46,7 +49,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 				return System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true));
 			}
 		});
-		
+
 		// Support gracefully handling missing dependencies for the 3D viewer
 		try
 		{
@@ -79,8 +82,8 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		{
 			pointList = new TurboList<Point3f>();
 			int range;
-			//range = 1; // 9 points
-			range = 12; // 25^3 = 15625 points
+			range = 1; // 9 points
+			//range = 12; // 25^3 = 15625 points
 			//range = 17; // 35^3 = 42875 points
 			//range = 22; // 45^3 = 91125 points
 			//range = 49; // 99^3 = 970299 points
@@ -131,15 +134,22 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 
 		View view = univ.getViewer().getView();
 		view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
-		view.setDepthBufferFreezeTransparent(false);
+		// I am not sure if this is required if objects are sorted.
+		//view.setDepthBufferFreezeTransparent(false);
 
 		IJ.showStatus("Creating points ...");
 		Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);
 		Point3f[] sizes = new Point3f[] { new Point3f(scale, scale, scale) };
-		PointGroup pointGroup = new PointGroup(points, null, null, sizes, null, null);
-		//pointGroup.setRadius(0.25f);
+		ItemGeometryGroup pointGroup;
+		Appearance appearance = new Appearance();
+		TransparencyAttributes ta = new TransparencyAttributes();
+		ta.setTransparency(0.5f);
+		ta.setTransparencyMode(TransparencyAttributes.FASTEST);
+		appearance.setTransparencyAttributes(ta);
+		pointGroup = new ItemGeometryGroup(points, null, appearance, sizes, null, null);
+		//pointGroup = new OrderedItemGeometryGroup(points, null, appearance, sizes, null, null);
 
-		//		// This supports transparency
+		//		// This supports transparency sorting
 		//		BranchGroup bg = new BranchGroup();
 		//		bg.addChild(pointGroup);
 		//		bg.compile();
@@ -152,11 +162,12 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		//		content.display(new PointGroupNode(pointGroup));
 		//		univ.addContent(c);
 
-		// This does since CustomContentInstant uses a Group to show the nodes 
+		// This does since ItemGeometryNode uses a Group to show the points as individual shapes
+		// and the CustomContentInstant uses a group not an ordered group so show all the adornments.
 		IJ.showStatus("Displaying points ...");
 		final CustomContent c = new CustomContent("Test");
 		final ContentInstant content = c.getCurrent();
-		content.display(new PointGroupNode(pointGroup));
+		content.display(new ItemGeometryNode(pointGroup));
 		univ.addContent(c);
 
 		IJ.showStatus("Done");

@@ -88,13 +88,13 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
-import gdsc.smlm.ij.ij3d.ItemMesh;
+import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
-import gdsc.smlm.ij.ij3d.TransparentItemMesh;
+import gdsc.smlm.ij.ij3d.TransparentItemShape;
 import gdsc.smlm.ij.ij3d.TransparentItemPointMesh;
 import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
-import gdsc.smlm.ij.ij3d.UpdateableItemMesh;
+import gdsc.smlm.ij.ij3d.UpdateableItemShape;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -466,7 +466,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	public void run(String arg)
 	{
-		if (Utils.isExtraOptions())
+		if (true||Utils.isExtraOptions())
 		{
 			new ImageJ3DResultsViewerTest().run(arg);
 			return;
@@ -1471,7 +1471,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					ivalue = 255;
 				allColors[i] = colors[ivalue];
 			}
-			((ItemMesh) mesh).setItemColor(allColors);
+			((ItemShape) mesh).setItemColor(allColors);
 		}
 	}
 
@@ -2097,9 +2097,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{
 				transparency = mesh.getTransparency();
 				mesh.setTransparency(0);
-				if (mesh instanceof TransparentItemMesh)
+				if (mesh instanceof TransparentItemShape)
 				{
-					TransparentItemMesh t = (TransparentItemMesh) mesh;
+					TransparentItemShape t = (TransparentItemShape) mesh;
 					int size = t.size();
 					if (alpha == null || alpha.length != size)
 						alpha = new float[size];
@@ -2111,9 +2111,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			public void restore(CustomMesh mesh)
 			{
 				mesh.setTransparency(transparency);
-				if (mesh instanceof TransparentItemMesh)
+				if (mesh instanceof TransparentItemShape)
 				{
-					TransparentItemMesh t = (TransparentItemMesh) mesh;
+					TransparentItemShape t = (TransparentItemShape) mesh;
 					int size = t.size();
 					if (alpha != null && alpha.length == size)
 						t.setItemAlpha(alpha);
@@ -2290,7 +2290,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final ContentInstant content = c.getCurrent();
 			CustomMeshNode node = (CustomMeshNode) content.getContent();
 			CustomMesh mesh = node.getMesh();
-			if (!(mesh instanceof UpdateableItemMesh) || c.getUserData() == null)
+			if (!(mesh instanceof UpdateableItemShape) || c.getUserData() == null)
 				return 0;
 
 			ResultsMetaData data = (ResultsMetaData) c.getUserData();
@@ -2305,7 +2305,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// Switch to fast mode when not debugging
 			//((UpdatedableItemMesh) mesh).reorder(indices);
-			((UpdateableItemMesh) mesh).reorderFast(indices);
+			((UpdateableItemShape) mesh).reorderFast(indices);
 
 			// Do this second as points is updated in-line so may break reordering the mesh
 			// if it has a reference to the points list (e.g. ItemPointMesh initially uses 
