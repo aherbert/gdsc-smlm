@@ -79,8 +79,8 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		{
 			pointList = new TurboList<Point3f>();
 			int range;
-			range = 1; // 9 points
-			//range = 12; // 25^3 = 15625 points
+			//range = 1; // 9 points
+			range = 12; // 25^3 = 15625 points
 			//range = 17; // 35^3 = 42875 points
 			//range = 22; // 45^3 = 91125 points
 			//range = 49; // 99^3 = 970299 points
@@ -135,7 +135,8 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 
 		IJ.showStatus("Creating points ...");
 		Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);
-		PointGroup pointGroup = new PointGroup(points, null, null, scale, null, 0.5f);
+		Point3f[] sizes = new Point3f[] { new Point3f(scale, scale, scale) };
+		PointGroup pointGroup = new PointGroup(points, null, null, sizes, null, null);
 		//pointGroup.setRadius(0.25f);
 
 		//		// This supports transparency

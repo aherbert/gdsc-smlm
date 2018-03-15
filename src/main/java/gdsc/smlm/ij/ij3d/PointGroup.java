@@ -17,10 +17,12 @@ import java.util.Arrays;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.BoundingSphere;
+import org.scijava.java3d.Bounds;
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Material;
+import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.Transform3D;
 import org.scijava.java3d.TransformGroup;
@@ -30,6 +32,7 @@ import org.scijava.java3d.utils.geometry.Sphere;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
 
 /**
@@ -42,7 +45,7 @@ import org.scijava.vecmath.Vector3f;
 public class PointGroup extends Group
 {
 	// Tips: https://webserver2.tecgraf.puc-rio.br/~ismael/Cursos/Cidade_CG/labs/Java3D/Java3D_onlinebook_selman/Htmls/3DJava_Ch04.htm#4
-	
+
 	// TODO -
 	// Make the input require an object type, per item XYZ radius, colour and alpha.
 	// Build transparency using a global transparency and per item alpha.
@@ -61,11 +64,23 @@ public class PointGroup extends Group
 	/** The list of points */
 	private Point3f[] points;
 
+	/** The default appearance when not using per-item colour/transparency */
+	private Appearance defaultAppearance;
+
+	/** The polygon attributes. These are shared. */
+	private PolygonAttributes pa;
+
 	/** The global transparency of the points. This may be combined with per item alpha. */
 	private float transparency;
 
-	/** The default appearance when not using per-item colour/transparency */
-	private Appearance defaultAppearance;
+	/** The single colour of the material. */
+	private Color3f color = new Color3f();
+
+	/** The per-item colour. */
+	private Color3f[] colors;
+
+	/** The per-item alpha. */
+	private float[] alphas;
 
 	/** The per-item transparency attributes. */
 	private TransparencyAttributes[] transparencyAttributes = null;
@@ -75,87 +90,152 @@ public class PointGroup extends Group
 
 	public PointGroup(final Point3f[] points)
 	{
-		this(points, null, null, 1, null, 0f);
+		this(points, null, null, null, null, null);
 	}
 
-	public PointGroup(final Point3f[] points, GeometryArray ga, Appearance appearance, float scale, Color3f color,
-			float transparency)
+	public PointGroup(final Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes,
+			Color3f[] colors, float[] alphas)
 	{
 		if (points == null)
 			throw new NullPointerException("Points must not be null");
 		//setCapability(ALLOW_CHILDREN_EXTEND);
 		//setCapability(ALLOW_CHILDREN_WRITE);
 		this.points = points;
-		this.transparency = transparency;
 		this.defaultAppearance = createDefaultAppearance(appearance);
+		this.transparency = defaultAppearance.getTransparencyAttributes().getTransparency();
+		defaultAppearance.getMaterial().getDiffuseColor(this.color);
 
-		defaultAppearance = createAppearance(defaultAppearance, color, transparency);
-
+		// Initialise the geometry
 		if (ga == null)
 			ga = createSphere(6);
+		Bounds bounds = new Shape3D(ga, null).getBounds();
 
-		Transform3D t3d = new Transform3D();
-		Transform3D s3d = new Transform3D();
-		Vector3f v3f = new Vector3f();
+		final boolean hasColor = colors != null && colors.length == points.length;
+		final boolean hasAlpha = alphas != null && alphas.length == points.length;
+
+		this.colors = colors;
+		this.alphas = alphas;
+
+		transparencyAttributes = new TransparencyAttributes[points.length];
+		material = new Material[points.length];
+
+		// Flag for creating per-item appearance
+		final boolean perItem = hasColor || hasAlpha;
 
 		float[] coordinates = new float[ga.getVertexCount() * 3];
 		ga.getCoordinates(0, coordinates);
 		float[] coordinates2 = new float[coordinates.length];
 
-		Point3d centre = new Point3d();
-		
+		// Handle a single scale
+		final boolean hasSize;
+		if (sizes == null || ItemTriangleMesh.sameSize(sizes))
+		{
+			hasSize = false;
+			if (sizes != null)
+			{
+				// Scale the input object by the fixed scale
+				final Point3f s = sizes[0];
+				final float sx = s.x;
+				final float sy = s.y;
+				final float sz = s.z;
+				for (int j = 0; j < coordinates.length; j += 3)
+				{
+					coordinates[j] *= sx;
+					coordinates[j + 1] *= sy;
+					coordinates[j + 2] *= sz;
+				}
+			}
+		}
+		else
+			hasSize = true;
+
 		// XXX - Write a new class that uses ordered group
 		// to support custom sort of the displayed order.
 		// OrderedPointGroup extends PointGroup
-		Group parent = this;
-		
+		Group parent = getParentGroup();
+
+		Transform3D t3d = new Transform3D();
+		Vector3f v3f = new Vector3f();
+		final float alpha1 = 1 - transparency;
+
 		for (int i = 0; i < points.length; i++)
 		{
 			v3f.set(points[i]);
 
-			// TODO - Allow per-item appearance
-			appearance = defaultAppearance;
-
-			if (false)
+			// Allow per-item appearance
+			appearance = (Appearance) defaultAppearance.cloneNodeComponent(true);
+			appearance.setPolygonAttributes(pa); // Shared
+			if (perItem)
 			{
-				// Use transforms
-				t3d.set(v3f);
-				final TransformGroup tg = new TransformGroup(t3d);
+				if (hasAlpha)
+				{
+					// Combine alphas to get the transparency
+					float t = 1 - (alpha1 * alphas[i]);
+					TransparencyAttributes tr = appearance.getTransparencyAttributes();
+					final int mode = t == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
+					//if (tr.getTransparencyMode() != mode)
+					tr.setTransparencyMode(mode);
+					//if (tr.getTransparency() != t)
+					tr.setTransparency(t);
+				}
 
-				// Note: Using a non-uniform scale will results in
-				// reduced performanec. See the notes in TransformGroup javadoc.
-				s3d.setScale(scale);
-				final TransformGroup sg = new TransformGroup(s3d);
-				tg.addChild(sg);
+				if (hasColor)
+				{
+					Material material = appearance.getMaterial();
+					material.setDiffuseColor(colors[i]);
+				}
+			}
 
-				Shape3D shape = new Shape3D(ga, appearance);
-				shape.setBounds(new BoundingSphere(centre, scale));
-				shape.setBoundsAutoCompute(false);
+			// Store to allow fast update
+			transparencyAttributes[i] = appearance.getTransparencyAttributes();
+			material[i] = appearance.getMaterial();
 
-				sg.addChild(shape);
-				
-				parent.addChild(tg);
+			// Scale and translate
+			GeometryArray ga2 = (GeometryArray) ga.cloneNodeComponent(true);
+			if (hasSize)
+			{
+				final float sx = sizes[i].x;
+				final float sy = sizes[i].y;
+				final float sz = sizes[i].z;
+				for (int j = 0; j < coordinates2.length; j += 3)
+				{
+					coordinates2[j] = coordinates[j] * sx + v3f.x;
+					coordinates2[j + 1] = coordinates[j + 1] * sy + v3f.y;
+					coordinates2[j + 2] = coordinates[j + 2] * sz + v3f.z;
+				}
 			}
 			else
 			{
-				// Scale and translate
-				GeometryArray ga2 = (GeometryArray) ga.cloneNodeComponent(true);
 				for (int j = 0; j < coordinates2.length; j += 3)
 				{
-					coordinates2[j] = coordinates[j] * scale + v3f.x;
-					coordinates2[j + 1] = coordinates[j + 1] * scale + v3f.y;
-					coordinates2[j + 2] = coordinates[j + 2] * scale + v3f.z;
+					coordinates2[j] = coordinates[j] + v3f.x;
+					coordinates2[j + 1] = coordinates[j + 1] + v3f.y;
+					coordinates2[j + 2] = coordinates[j + 2] + v3f.z;
 				}
-				ga2.setCoordinates(0, coordinates2);
-
-				// XXX - fix this to be generic
-				Shape3D shape = new Shape3D(ga2, appearance);
-				shape.setBounds(new BoundingSphere(new Point3d(points[i]), scale));
-				shape.setBoundsAutoCompute(false);
-
-				parent.addChild(shape);
 			}
+			ga2.setCoordinates(0, coordinates2);
+
+			Shape3D shape = new Shape3D(ga2, appearance);
+
+			// Transform the bounds
+			t3d.set(v3f);
+			Bounds bounds2 = (Bounds) bounds.clone();
+			bounds2.transform(t3d);
+			shape.setBounds(bounds2);
+			shape.setBoundsAutoCompute(false);
+
+			parent.addChild(shape);
 		}
+	}
+
+	/**
+	 * Gets the parent group to which all the shapes should be added.
+	 *
+	 * @return the parent group
+	 */
+	protected Group getParentGroup()
+	{
+		return this;
 	}
 
 	/**
@@ -180,48 +260,92 @@ public class PointGroup extends Group
 
 	/**
 	 * Set the color of the points.
-	 * 
-	 * @param c
+	 *
+	 * @param color
+	 *            the new color
 	 */
-	public void setColor(final Color3f c)
+	public void setColor(final Color3f color)
 	{
-		// Shared colour
-		defaultAppearance.getMaterial().setDiffuseColor(c);
+		// Global colour
+		for (int i = 0; i < material.length; i++)
+			material[i].setDiffuseColor(color);
 	}
 
 	/**
-	 * Set the transparency of the points.
-	 * 
-	 * @param t
+	 * Set the transparency of the points. This is blended with a per-item alpha if present.
+	 *
+	 * @param transparency
+	 *            the new transparency
 	 */
 	public void setTransparency(final float transparency)
 	{
+		// Store global transparency
 		this.transparency = transparency;
 
-		// Shared appearance
-		final TransparencyAttributes tr = defaultAppearance.getTransparencyAttributes();
-		final int mode = transparency == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
-
-		tr.setTransparencyMode(mode);
-		tr.setTransparency(transparency);
-
-		//		for (int i = 0; i < numChildren(); i++)
-		//		{
-		//			final BranchGroup bg = (BranchGroup) getChild(i);
-		//			final TransformGroup tg = (TransformGroup) ((Group) bg.getChild(0)).getChild(0);
-		//			final Sphere s = (Sphere) tg.getChild(0);
-		//			s.setAppearance(appearance);
-		//		}
+		final boolean hasAlpha = alphas != null && alphas.length == points.length;
+		if (hasAlpha)
+		{
+			// Combine with alpha
+			final float alpha1 = 1 - transparency;
+			for (int i = 0; i < transparencyAttributes.length; i++)
+			{
+				float t = 1 - (alpha1 * alphas[i]);
+				TransparencyAttributes tr = transparencyAttributes[i];
+				final int mode = t == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
+				if (tr.getTransparencyMode() != mode)
+					tr.setTransparencyMode(mode);
+				if (tr.getTransparency() != t)
+					tr.setTransparency(t);
+			}
+		}
+		else
+		{
+			// Global transparency
+			if (transparency == 0f)
+			{
+				for (int i = 0; i < transparencyAttributes.length; i++)
+				{
+					transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.NONE);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < transparencyAttributes.length; i++)
+				{
+					transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.FASTEST);
+					transparencyAttributes[i].setTransparency(transparency);
+				}
+			}
+		}
 	}
 
 	/**
-	 * Create an Appearance object.
+	 * Sets the shaded.
+	 *
+	 * @param shaded
+	 *            the new shaded
+	 */
+	public void setShaded(boolean shaded)
+	{
+		// TODO see if the PA can be shared across alll appearances 
+		setPolygonMode((shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE);
+	}
+
+	private void setPolygonMode(int mode)
+	{
+		if (pa.getPolygonMode() != mode)
+			pa.setPolygonMode(mode);
+	}
+
+	/**
+	 * Create a default Appearance object. This will have the correct attributes and capability bits set to manipulate
+	 * the material and transparency.
 	 *
 	 * @param appearance
 	 *            the appearance
 	 * @return the appearance
 	 */
-	private static Appearance createDefaultAppearance(Appearance appearance)
+	private Appearance createDefaultAppearance(Appearance appearance)
 	{
 		if (appearance == null)
 			appearance = new Appearance();
@@ -230,11 +354,20 @@ public class PointGroup extends Group
 
 		// These are the defaults. We may need them if we want to support mesh 
 		// display when the polygon mode is Line
-		//final PolygonAttributes polyAttrib = new PolygonAttributes();
-		////polyAttrib.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-		//polyAttrib.setPolygonMode(PolygonAttributes.POLYGON_FILL);
-		//polyAttrib.setCullFace(PolygonAttributes.CULL_BACK);
-		//polyAttrib.setBackFaceNormalFlip(false);
+		pa = appearance.getPolygonAttributes();
+		if (pa == null)
+		{
+			pa = new PolygonAttributes();
+			pa.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+			pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+			//pa.setCullFace(PolygonAttributes.CULL_BACK);
+			//pa.setBackFaceNormalFlip(false);
+		}
+		else
+		{
+			// Remove these to speed up cloning
+			appearance.setPolygonAttributes(null);
+		}
 
 		// We may need this to choose a different shade model
 		//		final ColoringAttributes colorAttrib = new ColoringAttributes();
@@ -263,35 +396,6 @@ public class PointGroup extends Group
 			appearance.setMaterial(material);
 		}
 		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
-
-		return appearance;
-	}
-
-	/**
-	 * Create an Appearance object.
-	 *
-	 * @param color
-	 *            the color
-	 * @param transparency
-	 *            the transparency
-	 * @return the appearance
-	 */
-	private static Appearance createAppearance(Appearance appearance, Color3f color, float transparency)
-	{
-		appearance = (Appearance) appearance.cloneNodeComponent(true);
-
-		TransparencyAttributes tr = appearance.getTransparencyAttributes();
-		final int mode = transparency == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
-		if (tr.getTransparencyMode() != mode)
-			tr.setTransparencyMode(mode);
-		if (tr.getTransparency() != transparency)
-			tr.setTransparency(transparency);
-
-		if (color != null)
-		{
-			Material material = appearance.getMaterial();
-			material.setDiffuseColor(color);
-		}
 
 		return appearance;
 	}

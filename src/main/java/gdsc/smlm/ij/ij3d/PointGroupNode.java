@@ -31,10 +31,6 @@ public class PointGroupNode extends ContentNode
 
 	protected Point3f min, max, center;
 
-	protected PointGroupNode()
-	{
-	}
-
 	public PointGroupNode(final PointGroup pointGroup)
 	{
 		this.pointGroup = pointGroup;
@@ -98,7 +94,7 @@ public class PointGroupNode extends ContentNode
 	@Override
 	public void shadeUpdated(final boolean shaded)
 	{
-		// do nothing
+		pointGroup.setShaded(shaded);
 	}
 
 	@Override
