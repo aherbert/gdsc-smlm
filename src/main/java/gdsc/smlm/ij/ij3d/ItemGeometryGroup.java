@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Bounds;
+import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Material;
@@ -35,9 +36,8 @@ import org.scijava.vecmath.Vector3f;
 
 /**
  * This class represents a list as a number of repeated shapes in the universe. The shape is defined using a geometry
- * array.
- * <p>
- * This class is based on ideas in ij3d.pointlist.PointListShape.
+ * array. Colouring is assumed to be done using the material diffuse colour. If the geometry has per vertex colours then
+ * this class will not work. It will also not work if using a PointArray as that has no surface to colour.
  *
  * @author Alex Herbert
  */
@@ -131,6 +131,9 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		// Flag for creating per-item appearance
 		final boolean perItem = hasColor || hasAlpha;
 
+		// TODO - update to support setting the colours using the coordinates
+		// and not the material. This will support a PointArray.
+		
 		float[] coordinates = new float[ga.getVertexCount() * 3];
 		ga.getCoordinates(0, coordinates);
 		float[] coordinates2 = new float[coordinates.length];
@@ -230,6 +233,9 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			}
 			ga2.setCoordinates(0, coordinates2);
 
+			// Store the point index in the geometry for intersection analysis
+			ga2.setUserData(i);
+
 			Shape3D shape = new Shape3D(ga2, appearance);
 			// Each object can be picked. Is this needed?
 			//shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
@@ -240,9 +246,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			bounds2.transform(t3d);
 			shape.setBounds(bounds2);
 			shape.setBoundsAutoCompute(false);
-			
-			// Store the point index in the shape for intersection analysis
-			shape.setUserData(i);
 
 			parent.addChild(shape);
 		}
@@ -455,6 +458,14 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 				pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
 				pointAttributes.setPointAntialiasingEnable(true);
 				appearance.setPointAttributes(pointAttributes);
+			}
+
+			ColoringAttributes ca = appearance.getColoringAttributes();
+			if (ca == null)
+			{
+				ca = new ColoringAttributes();
+				ca.setColor(1,  0,  0);
+				appearance.setColoringAttributes(ca);
 			}
 		}
 		else

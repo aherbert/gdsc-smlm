@@ -31,8 +31,8 @@ import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.LineAttributes;
 import org.scijava.java3d.PickInfo;
-import org.scijava.java3d.PointArray;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
+import org.scijava.java3d.PointArray;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Shape3D;
@@ -90,14 +90,16 @@ import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.ij.ij3d.CustomContent;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGeometryNode;
-import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
+import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
-import gdsc.smlm.ij.ij3d.TransparentItemShape;
+import gdsc.smlm.ij.ij3d.OrderedItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.TransparentItemPointMesh;
+import gdsc.smlm.ij.ij3d.TransparentItemShape;
 import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.UpdateableItemShape;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -370,22 +372,23 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// and create a line mesh.
 				outline = createLocalisationObject(rendering);
 
-				Pair<Point3f[], int[]> pair = CustomMeshHelper.createIndexedObject(outline);
-				Point3f[] vertices = pair.s;
-				int[] faces = pair.r;
-				outline.clear();
-				// Only add lines not yet observed. Use an array since 
-				int max = Maths.max(faces) + 1;
-				boolean[] observed = new boolean[max * max];
-				for (int i = 0; i < faces.length; i += 3)
-				{
-					int t1 = faces[i];
-					int t2 = faces[i + 1];
-					int t3 = faces[i + 2];
-					add(observed, max, t1, t2, vertices, outline);
-					add(observed, max, t2, t3, vertices, outline);
-					add(observed, max, t3, t1, vertices, outline);
-				}
+				// For outlining
+				//Pair<Point3f[], int[]> pair = CustomMeshHelper.createIndexedObject(outline);
+				//Point3f[] vertices = pair.s;
+				//int[] faces = pair.r;
+				//outline.clear();
+				//// Only add lines not yet observed. Use an array since 
+				//int max = Maths.max(faces) + 1;
+				//boolean[] observed = new boolean[max * max];
+				//for (int i = 0; i < faces.length; i += 3)
+				//{
+				//	int t1 = faces[i];
+				//	int t2 = faces[i + 1];
+				//	int t3 = faces[i + 2];
+				//	add(observed, max, t1, t2, vertices, outline);
+				//	add(observed, max, t2, t3, vertices, outline);
+				//	add(observed, max, t3, t1, vertices, outline);
+				//}
 			}
 			this.pointOutline = outline.toArray(new Point3f[outline.size()]);
 		}
@@ -414,26 +417,51 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				float z = (float) (p.z + centre.z);
 				outline.addf(new Point3f(x, y, z));
 				ItemPointMesh mesh = new ItemPointMesh(outline, highlightColor, 0);
-				mesh.setPointSize(sizes[0].x);
+				//mesh.setPointSize(sizes[0].x); // Handled later
 				mesh.getAppearance().getPolygonAttributes().setPolygonMode(PolygonAttributes.POLYGON_LINE);
 				return mesh;
 			}
 
-			// Translate and scale the outline
 			Point3f scale = (sizes.length == 0) ? sizes[0] : sizes[index];
-			for (int i = 0; i < pointOutline.length; i++)
+			if (rendering.is2D())
 			{
-				Point3f p = pointOutline[i];
-				float x = (float) (p.x * scale.x + centre.x);
-				float y = (float) (p.y * scale.y + centre.y);
-				float z = (float) (p.z * scale.z + centre.z);
-				outline.addf(new Point3f(x, y, z));
+				// Translate and scale the outline
+				for (int i = 0; i < pointOutline.length; i++)
+				{
+					Point3f p = pointOutline[i];
+					float x = (float) (p.x * scale.x + centre.x);
+					float y = (float) (p.y * scale.y + centre.y);
+					float z = (float) (p.z * scale.z + centre.z);
+					outline.addf(new Point3f(x, y, z));
+				}
+
+				CustomLineMesh mesh = new CustomLineMesh(outline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
+				mesh.setAntiAliasing(true);
+				mesh.setPattern(LineAttributes.PATTERN_SOLID);
+				return mesh;
 			}
 
-			int mode = (rendering.is2D()) ? CustomLineMesh.CONTINUOUS : CustomLineMesh.PAIRWISE;
-			CustomLineMesh mesh = new CustomLineMesh(outline, mode, highlightColor, 0);
-			mesh.setAntiAliasing(true);
-			mesh.setPattern(LineAttributes.PATTERN_SOLID);
+			// 3D polygon so use a non-filled polygon
+			float enlarge = 1.1f;
+			scale = new Point3f(scale);
+			scale.x *= enlarge;
+			scale.y *= enlarge;
+			scale.z *= enlarge;
+			ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline, new Point3f[] { centre },
+					new Point3f[] { scale }, highlightColor, 0);
+
+			//updateAppearance(mesh, settings);
+
+			// Outline
+			mesh.setShaded(false);
+
+			Appearance appearance = mesh.getAppearance();
+			PolygonAttributes pa = appearance.getPolygonAttributes();
+			pa.setCullFace(PolygonAttributes.CULL_BACK);
+			pa.setBackFaceNormalFlip(false);
+			final ColoringAttributes ca = appearance.getColoringAttributes();
+			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+
 			return mesh;
 		}
 	}
@@ -463,6 +491,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem toggleShaded;
 	private JMenuItem updateSettings;
 	private JMenuItem cropResults;
+	private JMenuItem toggleDynamicTransparency;
 
 	/*
 	 * (non-Javadoc)
@@ -513,7 +542,32 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// window then the settings will carried over from the last ImageJ session.
 		String window = (settings.getNewWindow()) ? "" : lastWindow;
 		gd.addChoice("Window", titles, window);
-		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency());
+		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency(), new OptionListener<Double>()
+		{
+			public boolean collectOptions(Double value)
+			{
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Transparancy options", null);
+				egd.addCheckbox("Support_dynamic_transparency", settings.getSupportDynamicTransparency());
+				egd.addCheckbox("Enable_dynamic_transparency", settings.getEnableDynamicTransparency());
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				settings.setSupportDynamicTransparency(egd.getNextBoolean());
+				settings.setEnableDynamicTransparency(egd.getNextBoolean());
+				return true;
+			}
+		});
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering(), new OptionListener<Integer>()
 		{
@@ -532,15 +586,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{
 				ExtendedGenericDialog egd = new ExtendedGenericDialog("Drawing mode options", null);
 				int rendering = settings.getRendering();
-				if (rendering == 0)
-				{
-					egd.addNumericField("Pixel_size", settings.getPixelSize(), 2, 6, "px");
-				}
-				else
-				{
-					// Other modes do not require options
+				if (rendering != 0)
 					return false;
-				}
+				egd.addNumericField("Pixel_size", settings.getPixelSize(), 2, 6, "px");
 				egd.setSilent(silent);
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
@@ -781,18 +829,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		Content content;
 
-		// Build to support true transparency (depends on settings)
-		if (false)
+		// Build to support true transparency (depends on settings).
+		// Currently this is not supported for PointArrays as they require colouring
+		// in the coordinate data.
+		if (settings.getSupportDynamicTransparency())
 		{
-			// Create the single localisation shape
-			Shape3D shape = createShape(settings);
+			ItemGeometryGroup pointGroup = createItemGroup(settings, sphereSize, points, alpha, transparency, colors);
+			if (pointGroup == null)
+				return;
 
-			// Enable only if size < 20000
+			long total = points.size() + getTotalTransparentObjects(univ);
 
-			View view = univ.getViewer().getView();
-			view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
-			// I am not sure if this is required if objects are sorted.
-			//view.setDepthBufferFreezeTransparent(false);
+			activateDynamicTransparency(univ, total, settings.getEnableDynamicTransparency());
+
+			IJ.showStatus("Creating 3D content ...");
+			content = new CustomContent(name);
+			content.getCurrent().display(new ItemGeometryNode(pointGroup));
 		}
 		else
 		{
@@ -1527,13 +1579,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		final Image3DUniverse univ = new Image3DUniverse();
 
-		// Add a new menu for SMLM functionality
-		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
-		JMenu menu = createSMLMMenuBar();
-		menubar.add(menu);
-		// Add back so it is redrawn
-		univ.setMenubar(menubar);
-
 		univ.addUniverseListener(this);
 
 		univ.setShowBoundingBoxUponSelection(false);
@@ -1661,6 +1706,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 					univ.setAutoAdjustView(false);
 
+					pointOutline.setPickable(false);
+
 					Content outline = univ.createContent(pointOutline, name);
 					outline.getCurrent().setTransform(getVworldToLocal(content));
 					outline.setLocked(true);
@@ -1786,6 +1833,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		GUI.center(w);
 		w.setTitle(title2);
 
+		// Add a new menu for SMLM functionality
+		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
+		JMenu menu = createSMLMMenuBar();
+		menubar.add(menu);
+		// Add back so it is redrawn
+		univ.setMenubar(menubar);
+
 		return univ;
 	}
 
@@ -1872,6 +1926,58 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			if (run(e, MOUSE_MOVED))
 				l.mouseMoved(e);
+		}
+	}
+
+	private static long getTotalTransparentObjects(Image3DUniverse univ)
+	{
+		long size = 0;
+		for (@SuppressWarnings("unchecked")
+		Iterator<Content> it = univ.contents(); it.hasNext();)
+		{
+			Content c = it.next();
+			if (!(c.getUserData() instanceof ResultsMetaData))
+				return 0;
+			final ContentInstant content = c.getCurrent();
+			if (content.getContent() instanceof ItemGeometryNode)
+			{
+				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
+				ItemGeometryGroup g = node.getItemGeometry();
+				if (g instanceof OrderedItemGeometryGroup)
+					continue;
+				size += g.size();
+			}
+		}
+		return size;
+	}
+
+	private static void activateDynamicTransparency(Image3DUniverse univ, long size, boolean enable)
+	{
+		View view = univ.getViewer().getView();
+		boolean isEnabled = view.getTransparencySortingPolicy() == View.TRANSPARENCY_SORT_GEOMETRY;
+		if (enable == isEnabled)
+			return;
+
+		if (enable)
+		{
+			if (size > 20000L)
+			{
+				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+				egd.addMessage("The results contain " + size +
+						" transparent objects.\nDynamic transparency may take a long time to render.");
+				egd.setOKLabel("Continue");
+				egd.showDialog();
+				if (egd.wasCanceled())
+					return;
+			}
+
+			view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
+			// I am not sure if this is required if objects are sorted.
+			//view.setDepthBufferFreezeTransparent(false);
+		}
+		else
+		{
+			view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_NONE);
 		}
 	}
 
@@ -1982,6 +2088,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		toggleShaded = new JMenuItem("Toggle shaded", KeyEvent.VK_S);
 		toggleShaded.addActionListener(this);
 		add.add(toggleShaded);
+
+		toggleDynamicTransparency = new JMenuItem("Toggle dynamic transparency", KeyEvent.VK_D);
+		toggleDynamicTransparency.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed D"));
+		toggleDynamicTransparency.addActionListener(this);
+		add.add(toggleDynamicTransparency);
 
 		colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
 		colourSurface.addActionListener(this);
@@ -2797,6 +2908,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			SettingsManager.writeSettings(settings);
 			return;
 		}
+		if (src == toggleDynamicTransparency)
+		{
+			View view = univ.getViewer().getView();
+			boolean activate = view.getTransparencySortingPolicy() == View.TRANSPARENCY_SORT_NONE;
+			long total = (activate) ? getTotalTransparentObjects(univ) : 0;
+			activateDynamicTransparency(univ, total, activate);
+			return;
+		}
 
 		// Actions to perform on content
 		ContentAction action = null;
@@ -2865,6 +2984,36 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		action.finish();
 	}
 
+	private ItemGeometryGroup createItemGroup(final ImageJ3DResultsViewerSettings.Builder settings,
+			final Point3f[] sphereSize, final TurboList<Point3f> points, float[] alpha, float transparency,
+			Color3f[] colors)
+	{
+		// Create the single localisation shape
+		Shape3D shape = createShape(settings);
+
+		GeometryArray ga = (GeometryArray) shape.getGeometry();
+
+		long size = (long) points.size() * ga.getValidVertexCount();
+		if (size > 10000000L)
+		{
+			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			egd.addMessage("The results will generate a large dataset of " + size +
+					" vertices.\nThis may take a long time to render and may run out of memory.");
+			egd.setOKLabel("Continue");
+			egd.showDialog();
+			if (egd.wasCanceled())
+				return null;
+		}
+
+		Appearance appearance = shape.getAppearance();
+		TransparencyAttributes ta = new TransparencyAttributes();
+		ta.setTransparency(transparency);
+		ta.setTransparencyMode((transparency == 0) ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST);
+		appearance.setTransparencyAttributes(ta);
+		return new ItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize, colors,
+				alpha);
+	}
+
 	private static Shape3D createShape(Builder settings)
 	{
 		TurboList<Point3f> points = new TurboList<Point3f>(1);
@@ -2882,6 +3031,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			mesh = new ItemPointMesh(points, null, transparency);
 			((ItemPointMesh) mesh).setPointSize((float) settings.getPixelSize());
+
+			updateAppearance(mesh, settings);
 
 			// Simple point array
 			ga = new PointArray(1, GeometryArray.COORDINATES);
@@ -2901,6 +3052,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			double creaseAngle = (r.isHighResolution()) ? 44 : 0;
 			mesh = new ItemTriangleMesh(vertices, points.toArray(new Point3f[1]), null, null, transparency, creaseAngle,
 					null);
+
+			updateAppearance(mesh, settings);
 
 			int nVertices = vertices.length;
 			ga = new TriangleArray(nVertices, GeometryArray.COORDINATES | GeometryArray.NORMALS);

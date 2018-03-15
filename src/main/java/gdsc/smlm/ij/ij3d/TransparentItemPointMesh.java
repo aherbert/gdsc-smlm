@@ -70,7 +70,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 			color = DEFAULT_COLOR;
 		Arrays.fill(colors, new Color4f(color.x, color.y, color.z, 1));
 
-		GeometryArray ta = new PointArray(2 * size, GeometryArray.COORDINATES | GeometryArray.COLOR_4);
+		GeometryArray ta = new PointArray(size, GeometryArray.COORDINATES | GeometryArray.COLOR_4);
 
 		ta.setValidVertexCount(size);
 

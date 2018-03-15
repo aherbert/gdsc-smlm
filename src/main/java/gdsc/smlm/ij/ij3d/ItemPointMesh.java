@@ -81,7 +81,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 		final Color3f[] colors = new Color3f[size];
 		Arrays.fill(colors, (color == null) ? DEFAULT_COLOR : color);
 
-		GeometryArray ta = new PointArray(2 * size, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
+		GeometryArray ta = new PointArray(size, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 
 		ta.setValidVertexCount(size);
 
