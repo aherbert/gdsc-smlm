@@ -466,7 +466,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	public void run(String arg)
 	{
-		if (true||Utils.isExtraOptions())
+		// For testing
+		if (Utils.isExtraOptions())
 		{
 			new ImageJ3DResultsViewerTest().run(arg);
 			return;
