@@ -98,7 +98,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		// Create empty 
 		super(null, color, transp);
 
-		if (sizes != null && points.length != sizes.length)
+		if (sizes != null && points.length != sizes.length && sizes.length != 1)
 			throw new IllegalArgumentException("Points and sizes must be the same length");
 
 		progress = NullTrackProgress.createIfNull(progress);
