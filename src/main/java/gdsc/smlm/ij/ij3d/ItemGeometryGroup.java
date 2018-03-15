@@ -239,6 +239,7 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			Shape3D shape = new Shape3D(ga2, appearance);
 			// Each object can be picked. Is this needed?
 			//shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
+			shape.setPickable(true);
 
 			// Transform the bounds
 			t3d.set(v3f);
