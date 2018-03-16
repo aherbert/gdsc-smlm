@@ -219,4 +219,12 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 		ga.setColors(0, color);
 		changed = true;
 	}
+	
+	@Override
+	public void calculateMinMaxCenterPoint(Point3f min, Point3f max, Point3f center)
+	{
+		final Point3f[] points = new Point3f[size()];
+		mesh.toArray(points);		
+		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
+	}
 }

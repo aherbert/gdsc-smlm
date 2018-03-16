@@ -625,4 +625,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 		ga.setColors(0, colors);
 		changed = true;
 	}
+
+	@Override
+	public void calculateMinMaxCenterPoint(Point3f min, Point3f max, Point3f center)
+	{
+		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
+	}
 }

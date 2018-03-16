@@ -118,27 +118,7 @@ public class ItemGeometryNode extends ContentNode
 			return;
 
 		Point3f[] points = pointGroup.getPoints();
-		min.set(points[0]);
-		max.set(points[0]);
-		for (int i = 1; i < points.length; i++)
-		{
-			final Point3f p = points[i];
-			if (p.x < min.x)
-				min.x = p.x;
-			else if (p.x > max.x)
-				max.x = p.x;
-			if (p.y < min.y)
-				min.y = p.y;
-			else if (p.y > max.y)
-				max.y = p.y;
-			if (p.z < min.z)
-				min.z = p.z;
-			else if (p.z > max.z)
-				max.z = p.z;
-		}
-		center.x = (max.x + min.x) / 2;
-		center.y = (max.y + min.y) / 2;
-		center.z = (max.z + min.z) / 2;
+		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 
 	@Override

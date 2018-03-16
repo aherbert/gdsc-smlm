@@ -132,4 +132,63 @@ public class CustomMeshHelper
 		faces.add(value);
 		return index;
 	}
+
+	/**
+	 * Calculate min max center point using weighted centre-of-mass.
+	 *
+	 * @param min
+	 *            the min
+	 * @param max
+	 *            the max
+	 * @param center
+	 *            the center
+	 * @param points
+	 *            the points
+	 */
+	public static void calculateMinMaxCenterPoint(Point3f min, Point3f max, Point3f center, Point3f[] points)
+	{
+		min.set(0, 0, 0);
+		max.set(0, 0, 0);
+		center.set(0, 0, 0);
+		if (points == null || points.length == 0)
+			return;
+
+		min.set(points[0]);
+		max.set(points[0]);
+
+		// Weighted centre of mass
+		double sumx = min.x;
+		double sumy = min.y;
+		double sumz = min.z;
+
+		for (int i = 1; i < points.length; i++)
+		{
+			final Point3f p = points[i];
+			if (p.x < min.x)
+				min.x = p.x;
+			else if (p.x > max.x)
+				max.x = p.x;
+			if (p.y < min.y)
+				min.y = p.y;
+			else if (p.y > max.y)
+				max.y = p.y;
+			if (p.z < min.z)
+				min.z = p.z;
+			else if (p.z > max.z)
+				max.z = p.z;
+
+			sumx += p.x;
+			sumy += p.y;
+			sumz += p.z;
+		}
+
+		//// In the middle of the bounds
+		//center.x = (max.x + min.x) / 2;
+		//center.y = (max.y + min.y) / 2;
+		//center.z = (max.z + min.z) / 2;
+
+		// Weighted
+		int n = points.length;
+		center.set((float) (sumx / n), (float) (sumy / n), (float) (sumz / n));
+	}
 }
