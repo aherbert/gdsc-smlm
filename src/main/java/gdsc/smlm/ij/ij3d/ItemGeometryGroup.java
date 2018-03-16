@@ -31,6 +31,7 @@ import org.scijava.java3d.utils.geometry.Sphere;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
 
 /**
@@ -306,9 +307,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			defaultAppearance.getMaterial().getDiffuseColor(this.color);
 		}
 
-		// Get the bounds so we can set the centroid and bounds for each object 
-		Bounds bounds = new Shape3D(ga, null).getBounds();
-
 		final boolean hasColor = colors != null && colors.length == points.length;
 		final boolean hasAlpha = alphas != null && alphas.length == points.length;
 
@@ -331,6 +329,13 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		ga.getCoordinates(0, coordinates);
 		float[] coordinates2 = new float[coordinates.length];
 
+		// Get the bounds so we can set the centroid and bounds for each object 
+		Bounds bounds = new Shape3D(ga, null).getBounds();
+		
+		Transform3D t3d = new Transform3D();
+		Vector3f translate = new Vector3f();
+		Vector3d scale = new Vector3d(); 
+		
 		// Handle a single scale
 		final boolean hasSize;
 		if (sizes == null || ItemTriangleMesh.sameSize(sizes))
@@ -349,6 +354,11 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 					coordinates[j + 1] *= sy;
 					coordinates[j + 2] *= sz;
 				}
+				
+				// Scale the bounds
+				scale.set(s);
+				t3d.setScale(scale);
+				bounds.transform(t3d);
 			}
 		}
 		else
@@ -358,8 +368,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		// to support custom sort of the displayed order.
 		Group parent = getParentGroup();
 
-		Transform3D t3d = new Transform3D();
-		Vector3f v3f = new Vector3f();
 		final float alpha1 = 1 - transparency;
 
 		TransparencyAttributes ta = defaultAppearance.getTransparencyAttributes();
@@ -367,29 +375,30 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 
 		for (int i = 0; i < points.length; i++)
 		{
-			v3f.set(points[i]);
+			translate.set(points[i]);
 
 			// Scale and translate
 			GeometryArray ga2 = (GeometryArray) ga.cloneNodeComponent(true);
 			if (hasSize)
 			{
+				scale.set(sizes[i]); // For scaling the bounds
 				final float sx = sizes[i].x;
 				final float sy = sizes[i].y;
 				final float sz = sizes[i].z;
 				for (int j = 0; j < coordinates2.length; j += 3)
 				{
-					coordinates2[j] = coordinates[j] * sx + v3f.x;
-					coordinates2[j + 1] = coordinates[j + 1] * sy + v3f.y;
-					coordinates2[j + 2] = coordinates[j + 2] * sz + v3f.z;
+					coordinates2[j] = coordinates[j] * sx + translate.x;
+					coordinates2[j + 1] = coordinates[j + 1] * sy + translate.y;
+					coordinates2[j + 2] = coordinates[j + 2] * sz + translate.z;
 				}
 			}
 			else
 			{
 				for (int j = 0; j < coordinates2.length; j += 3)
 				{
-					coordinates2[j] = coordinates[j] + v3f.x;
-					coordinates2[j + 1] = coordinates[j + 1] + v3f.y;
-					coordinates2[j + 2] = coordinates[j + 2] + v3f.z;
+					coordinates2[j] = coordinates[j] + translate.x;
+					coordinates2[j + 1] = coordinates[j + 1] + translate.y;
+					coordinates2[j + 2] = coordinates[j + 2] + translate.z;
 				}
 			}
 			ga2.setCoordinates(0, coordinates2);
@@ -460,7 +469,9 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			shape.setPickable(true);
 
 			// Transform the bounds
-			t3d.set(v3f);
+			t3d.set(translate);
+			if (hasSize)
+				t3d.setScale(scale);
 			Bounds bounds2 = (Bounds) bounds.clone();
 			bounds2.transform(t3d);
 			shape.setBounds(bounds2);
