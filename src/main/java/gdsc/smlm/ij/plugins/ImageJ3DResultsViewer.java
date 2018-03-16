@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -327,6 +328,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ResultsMetaData
 	{
+		Color3f highlightColor;
 		final ImageJ3DResultsViewerSettings settings;
 
 		/** The results when the object mesh was constructed. */
@@ -352,6 +354,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.points = points;
 			this.sizes = sizes;
 			rendering = Rendering.forNumber(settings.getRendering());
+			highlightColourUpdated();
 		}
 
 		CustomContentInstant contentInstance;
@@ -426,14 +429,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				//updateAppearance(mesh, settings);
 
 				// Outline
-				mesh.setShaded(false);
+				//mesh.setShaded(false);
 
 				Appearance appearance = mesh.getAppearance();
 				PolygonAttributes pa = appearance.getPolygonAttributes();
 				pa.setCullFace(PolygonAttributes.CULL_BACK);
 				pa.setBackFaceNormalFlip(false);
+				pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
 				final ColoringAttributes ca = appearance.getColoringAttributes();
 				ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+				appearance.setMaterial(null);
 				return mesh;
 			}
 
@@ -503,6 +508,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{
 				((ItemPointMesh) outline).setPointSize(f);
 			}
+		}
+
+		public void highlightColourUpdated()
+		{
+			this.highlightColor = ImageJ3DResultsViewer.highlightColor;
+			if (outline != null)
+				outline.setColor(highlightColor);
 		}
 	}
 
@@ -924,8 +936,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Set up the click selection node
 		data.createClickSelectionNode(contentInstance);
 
-		IJ.showStatus("Drawing 3D content ...");
-
 		// Preserve orientation on the content
 		boolean auto = univ.getAutoAdjustView();
 		if (univ.getContent(name) == null)
@@ -937,7 +947,23 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			univ.removeContent(name);
 			univ.setAutoAdjustView(false);
 		}
-		univ.addContent(content);
+		//univ.addContent(content);
+		
+		int tick = 0;
+		IJ.showStatus("Drawing 3D content ... ");
+		
+		Future<Content> future = univ.addContentLater(content);
+		while (!future.isDone())
+		{
+			try
+			{
+				Thread.sleep(1000);
+				IJ.showStatus("Drawing 3D content ... " + (++tick));
+			}
+			catch (InterruptedException e)
+			{
+			}
+		}
 		univ.setAutoAdjustView(auto);
 
 		IJ.showStatus("");
@@ -2777,6 +2803,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
+	private static class UpdateHighlightColourAction extends BaseContentAction
+	{
+		public int run(Content c)
+		{
+			if (c.getUserData() instanceof ResultsMetaData)
+			{
+				ResultsMetaData data = (ResultsMetaData) c.getUserData();
+				data.highlightColourUpdated();
+			}
+			return 0;
+		}
+	}
+
 	private static Transform3D getVworldToLocal(ContentInstant content)
 	{
 		final Transform3D vWorldToLocal = new Transform3D();
@@ -2797,6 +2836,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	public void actionPerformed(ActionEvent e)
 	{
 		final Object src = e.getSource();
+
+		ContentAction action = null;
 
 		// Universe actions
 		// Adapted from univ.resetView();
@@ -2959,7 +3000,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// Save updated settings
 			settings.setResultsTableSettings(resultsTableSettings);
 			SettingsManager.writeSettings(settings);
-			return;
+
+			action = new UpdateHighlightColourAction();
 		}
 		if (src == toggleDynamicTransparency)
 		{
@@ -2971,7 +3013,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		// Actions to perform on content
-		ContentAction action = null;
 		if (src == changeColour)
 		{
 			action = new ChangeColourContentAction();
