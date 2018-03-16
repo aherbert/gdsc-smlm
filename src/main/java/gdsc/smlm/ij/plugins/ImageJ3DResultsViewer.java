@@ -32,7 +32,6 @@ import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.LineAttributes;
 import org.scijava.java3d.PickInfo;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
-import org.scijava.java3d.PointArray;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Shape3D;
@@ -3029,15 +3028,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
-			mesh = new ItemPointMesh(points, null, transparency);
+			mesh = new TransparentItemPointMesh(points, null, transparency);
 			((ItemPointMesh) mesh).setPointSize((float) settings.getPixelSize());
 
 			updateAppearance(mesh, settings);
 
 			// Simple point array
-			ga = new PointArray(1, GeometryArray.COORDINATES);
-			ga.setCoordinates(0, new float[3]);
-			ga.setValidVertexCount(1);
+			//ga = new PointArray(1, GeometryArray.COORDINATES);
+			//ga.setCoordinates(0, new float[3]);
+			//ga.setValidVertexCount(1);
+			// Assume the TransparentItemPointMesh sets COLOR_4
+			ga = (GeometryArray) mesh.getGeometry();
 		}
 		else
 		{

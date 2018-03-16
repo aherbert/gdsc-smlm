@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Bounds;
-import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Material;
@@ -37,12 +36,17 @@ import org.scijava.vecmath.Vector3f;
 /**
  * This class represents a list as a number of repeated shapes in the universe. The shape is defined using a geometry
  * array. Colouring is assumed to be done using the material diffuse colour. If the geometry has per vertex colours then
- * this class will not work. It will also not work if using a PointArray as that has no surface to colour.
+ * this class will not work.
+ * <p>
+ * A special exception is made for a PointArray as that has no surface to colour. In this case it must be created using
+ * the flag
  *
  * @author Alex Herbert
  */
 public class ItemGeometryGroup extends Group implements TransparentItemShape
 {
+	private final Color3f DEFAULT_COLOUR = new Color3f(1, 1, 0);
+
 	// Tips: https://webserver2.tecgraf.puc-rio.br/~ismael/Cursos/Cidade_CG/labs/Java3D/Java3D_onlinebook_selman/Htmls/3DJava_Ch04.htm#4
 
 	// See if this can extend BranchGroup to allow picking the items.
@@ -59,17 +63,165 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	/** The global transparency of the points. This may be combined with per item alpha. */
 	protected float transparency;
 
-	/** The default colour of the material. */
+	/** The default colour of the item. */
 	protected Color3f color = new Color3f();
 
 	/** The per-item alpha. */
 	protected float[] alphas;
 
+	/** Flag indicating if this is a point array. */
+	protected final boolean isPointArray;
+
 	/** The per-item transparency attributes. */
 	protected TransparencyAttributes[] transparencyAttributes = null;
 
-	/** The per-item material. */
+	/** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
 	protected Material[] material = null;
+
+	/** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
+	protected GeometryArray[] geometryArray = null;
+
+	private static abstract class PointArrayColorUpdater
+	{
+		/** The per-item colour. Used for PointArrays. PointArrays use color4 coordinates. */
+		final float[] pointColor;
+
+		PointArrayColorUpdater(int n)
+		{
+			pointColor = new float[4 * n];
+		}
+
+		/**
+		 * Set the colour and alpha value and gets the current color array.
+		 *
+		 * @param alpha
+		 *            the alpha
+		 * @return the color
+		 */
+		public abstract float[] getColors(Color4f color4f);
+
+		/**
+		 * Set the colour and alpha value and gets the current color array.
+		 *
+		 * @param alpha
+		 *            the alpha
+		 * @return the color
+		 */
+		public abstract float[] getColors(Color3f color, float alpha);
+
+		/**
+		 * Set the colour value and gets the current color array.
+		 *
+		 * @param alpha
+		 *            the alpha
+		 * @return the color
+		 */
+		public abstract float[] getColors(Color3f color);
+
+		/**
+		 * Set the alpha value and gets the current color array.
+		 *
+		 * @param alpha
+		 *            the alpha
+		 * @return the color
+		 */
+		public abstract float[] getColors(float alpha);
+	}
+
+	private static class SinglePointArrayColorUpdater extends PointArrayColorUpdater
+	{
+		SinglePointArrayColorUpdater()
+		{
+			super(1);
+		}
+
+		public float[] getColors(Color4f color)
+		{
+			pointColor[0] = color.x;
+			pointColor[1] = color.y;
+			pointColor[2] = color.z;
+			pointColor[3] = color.w;
+			return pointColor;
+		}
+
+		public float[] getColors(Color3f color, float alpha)
+		{
+			pointColor[0] = color.x;
+			pointColor[1] = color.y;
+			pointColor[2] = color.z;
+			pointColor[3] = alpha;
+			return pointColor;
+		}
+
+		public float[] getColors(Color3f color)
+		{
+			pointColor[0] = color.x;
+			pointColor[1] = color.y;
+			pointColor[2] = color.z;
+			return pointColor;
+		}
+
+		public float[] getColors(float alpha)
+		{
+			pointColor[3] = alpha;
+			return pointColor;
+		}
+	}
+
+	private static class MultiPointArrayColorUpdater extends PointArrayColorUpdater
+	{
+		MultiPointArrayColorUpdater(int n)
+		{
+			super(n);
+		}
+
+		public float[] getColors(Color4f color)
+		{
+			for (int i = 0; i < pointColor.length;)
+			{
+				pointColor[i++] = color.x;
+				pointColor[i++] = color.y;
+				pointColor[i++] = color.z;
+				pointColor[i++] = color.w;
+			}
+			return pointColor;
+		}
+
+		public float[] getColors(Color3f color, float alpha)
+		{
+			for (int i = 0; i < pointColor.length;)
+			{
+				pointColor[i++] = color.x;
+				pointColor[i++] = color.y;
+				pointColor[i++] = color.z;
+				pointColor[i++] = alpha;
+			}
+			return pointColor;
+		}
+
+		public float[] getColors(Color3f color)
+		{
+			for (int i = 0; i < pointColor.length;)
+			{
+				pointColor[i++] = color.x;
+				pointColor[i++] = color.y;
+				pointColor[i++] = color.z;
+				i++;
+			}
+			return pointColor;
+		}
+
+		public float[] getColors(float alpha)
+		{
+			for (int i = 3; i < pointColor.length; i += 4)
+			{
+				pointColor[i] = alpha;
+			}
+			return pointColor;
+		}
+	}
+
+	protected final PointArrayColorUpdater pointArrayColorUpdater;
 
 	/**
 	 * Instantiates a new item geometry group.
@@ -90,7 +242,7 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 * @param points
 	 *            the points.
 	 * @param ga
-	 *            the geometry array. If null then a default will be used.
+	 *            the geometry array. If null then a default will be used. Assumed to be centred on the origin.
 	 * @param appearance
 	 *            the default appearance of the shape. PolygonAttributes, Material and TransparencyAttributes are used.
 	 * @param sizes
@@ -105,17 +257,54 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	{
 		if (points == null)
 			throw new NullPointerException("Points must not be null");
-		//setCapability(ALLOW_CHILDREN_EXTEND);
-		//setCapability(ALLOW_CHILDREN_WRITE);
 
-		// Default geometry
 		if (ga == null)
+		{
+			// Default geometry
 			ga = createSphere(6);
+			isPointArray = false;
+		}
+		else
+		{
+			isPointArray = (ga instanceof PointArray);
+			// Check input geometry
+			int format = ga.getVertexFormat();
+			if (isPointArray)
+			{
+				if ((format & GeometryArray.COLOR_4) == 0)
+					throw new NullPointerException("PointArray must have COLOR_4 vertex type");
+			}
+			else if ((format & GeometryArray.COLOR_3) != 0)
+			{
+				throw new NullPointerException("GeometryArray must not have COLOR vertex type");
+			}
+		}
 
 		this.points = points;
 		this.defaultAppearance = createDefaultAppearance(appearance, ga);
 		this.transparency = defaultAppearance.getTransparencyAttributes().getTransparency();
-		defaultAppearance.getMaterial().getDiffuseColor(this.color);
+		if (isPointArray)
+		{
+			pointArrayColorUpdater = (ga.getValidVertexCount() == 1) ? new SinglePointArrayColorUpdater()
+					: new MultiPointArrayColorUpdater(ga.getValidVertexCount());
+
+			// Get the first color as the default
+			ga.getColor(0, pointArrayColorUpdater.pointColor);
+			// Only uses index [0,1,2] so ignores the transparency
+			color.set(pointArrayColorUpdater.pointColor);
+			if (color.x == 0 && color.y == 0 && color.z == 0)
+			{
+				this.color.set(DEFAULT_COLOUR);
+				// Update the input to the default
+				ga = (GeometryArray) ga.cloneNodeComponent(true);
+				ga.setColors(0, pointArrayColorUpdater.getColors(color, 1));
+			}
+		}
+		else
+		{
+			pointArrayColorUpdater = null;
+			defaultAppearance.getMaterial().getDiffuseColor(this.color);
+		}
 
 		// Get the bounds so we can set the centroid and bounds for each object 
 		Bounds bounds = new Shape3D(ga, null).getBounds();
@@ -125,15 +314,19 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 
 		this.alphas = alphas;
 
-		transparencyAttributes = new TransparencyAttributes[points.length];
-		material = new Material[points.length];
+		if (isPointArray)
+		{
+			geometryArray = new GeometryArray[points.length];
+		}
+		else
+		{
+			transparencyAttributes = new TransparencyAttributes[points.length];
+			material = new Material[points.length];
+		}
 
 		// Flag for creating per-item appearance
 		final boolean perItem = hasColor || hasAlpha;
 
-		// TODO - update to support setting the colours using the coordinates
-		// and not the material. This will support a PointArray.
-		
 		float[] coordinates = new float[ga.getVertexCount() * 3];
 		ga.getCoordinates(0, coordinates);
 		float[] coordinates2 = new float[coordinates.length];
@@ -161,9 +354,8 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		else
 			hasSize = true;
 
-		// XXX - Write a new class that uses ordered group
+		// Allow use of an ordered group (in sub-class)
 		// to support custom sort of the displayed order.
-		// OrderedPointGroup extends PointGroup
 		Group parent = getParentGroup();
 
 		Transform3D t3d = new Transform3D();
@@ -176,37 +368,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		for (int i = 0; i < points.length; i++)
 		{
 			v3f.set(points[i]);
-
-			// Allow per-item appearance with shared attributes
-			appearance = (Appearance) defaultAppearance.cloneNodeComponent(false);
-			// Not shared attributes
-			appearance.setTransparencyAttributes((TransparencyAttributes) ta.cloneNodeComponent(true));
-			appearance.setMaterial((Material) m.cloneNodeComponent(true));
-
-			if (perItem)
-			{
-				if (hasAlpha)
-				{
-					// Combine alphas to get the transparency
-					float t = 1 - (alpha1 * alphas[i]);
-					TransparencyAttributes tr = appearance.getTransparencyAttributes();
-					final int mode = t == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
-					//if (tr.getTransparencyMode() != mode)
-					tr.setTransparencyMode(mode);
-					//if (tr.getTransparency() != t)
-					tr.setTransparency(t);
-				}
-
-				if (hasColor)
-				{
-					Material material = appearance.getMaterial();
-					material.setDiffuseColor(colors[i]);
-				}
-			}
-
-			// Store to allow fast update
-			transparencyAttributes[i] = appearance.getTransparencyAttributes();
-			material[i] = appearance.getMaterial();
 
 			// Scale and translate
 			GeometryArray ga2 = (GeometryArray) ga.cloneNodeComponent(true);
@@ -235,6 +396,63 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 
 			// Store the point index in the geometry for intersection analysis
 			ga2.setUserData(i);
+
+			// Allow per-item appearance with shared attributes. 
+			// This allows a global transparency for PointArray.
+			appearance = (Appearance) defaultAppearance.cloneNodeComponent(false);
+			if (!isPointArray)
+			{
+				// Not shared attributes
+				appearance.setTransparencyAttributes((TransparencyAttributes) ta.cloneNodeComponent(true));
+				appearance.setMaterial((Material) m.cloneNodeComponent(true));
+			}
+
+			if (perItem)
+			{
+				if (isPointArray)
+				{
+					Color3f c = (hasColor) ? colors[i] : color;
+					float alpha = (hasAlpha) ? alphas[i] : 1f;
+					ga2.setColors(0, pointArrayColorUpdater.getColors(c, alpha));
+				}
+				else
+				{
+					// Note that this entire class is based on an assumption that setting
+					// the colour using attributes is faster/easier than if the input GA
+					// has per-vertex colours. It is definitely easier to support more GA
+					// formats and types (e.g. indexed/stripped) if appearance is used per 
+					// item. No testing has been done on the speed the image is rendered. 
+
+					if (hasAlpha)
+					{
+						// Combine alphas to get the transparency
+						float t = 1 - (alpha1 * alphas[i]);
+						TransparencyAttributes tr = appearance.getTransparencyAttributes();
+						final int mode = t == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
+						//if (tr.getTransparencyMode() != mode)
+						tr.setTransparencyMode(mode);
+						//if (tr.getTransparency() != t)
+						tr.setTransparency(t);
+					}
+
+					if (hasColor)
+					{
+						Material material = appearance.getMaterial();
+						material.setDiffuseColor(colors[i]);
+					}
+				}
+			}
+
+			// Store to allow fast update
+			if (isPointArray)
+			{
+				geometryArray[i] = ga2;
+			}
+			else
+			{
+				transparencyAttributes[i] = appearance.getTransparencyAttributes();
+				material[i] = appearance.getMaterial();
+			}
 
 			Shape3D shape = new Shape3D(ga2, appearance);
 			// Each object can be picked. Is this needed?
@@ -280,11 +498,7 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setColor(Color3f color)
 	{
-		// Global colour
-		if (color == null)
-			color = this.color;
-		for (int i = 0; i < material.length; i++)
-			material[i].setDiffuseColor(color);
+		setItemColor(color);
 	}
 
 	/**
@@ -308,38 +522,47 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		// Store global transparency
 		this.transparency = transparency;
 
-		final boolean hasAlpha = alphas != null && alphas.length == points.length;
-		if (hasAlpha)
+		if (isPointArray)
 		{
-			// Combine with alpha
-			final float alpha1 = 1 - transparency;
-			for (int i = 0; i < transparencyAttributes.length; i++)
-			{
-				float t = 1 - (alpha1 * alphas[i]);
-				TransparencyAttributes tr = transparencyAttributes[i];
-				final int mode = t == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
-				if (tr.getTransparencyMode() != mode)
-					tr.setTransparencyMode(mode);
-				if (tr.getTransparency() != t)
-					tr.setTransparency(t);
-			}
+			// Global transparency
+			defaultAppearance.getTransparencyAttributes().setTransparency(transparency);
 		}
 		else
 		{
-			// Global transparency
-			if (transparency == 0f)
+
+			final boolean hasAlpha = alphas != null && alphas.length == points.length;
+			if (hasAlpha)
 			{
+				// Combine with alpha
+				final float alpha1 = 1 - transparency;
 				for (int i = 0; i < transparencyAttributes.length; i++)
 				{
-					transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.NONE);
+					float t = 1 - (alpha1 * alphas[i]);
+					TransparencyAttributes tr = transparencyAttributes[i];
+					final int mode = t == 0f ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST;
+					if (tr.getTransparencyMode() != mode)
+						tr.setTransparencyMode(mode);
+					if (tr.getTransparency() != t)
+						tr.setTransparency(t);
 				}
 			}
 			else
 			{
-				for (int i = 0; i < transparencyAttributes.length; i++)
+				// All items the same transparency
+				if (transparency == 0f)
 				{
-					transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.FASTEST);
-					transparencyAttributes[i].setTransparency(transparency);
+					for (int i = 0; i < transparencyAttributes.length; i++)
+					{
+						transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.NONE);
+					}
+				}
+				else
+				{
+					for (int i = 0; i < transparencyAttributes.length; i++)
+					{
+						transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.FASTEST);
+						transparencyAttributes[i].setTransparency(transparency);
+					}
 				}
 			}
 		}
@@ -445,11 +668,10 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
 		appearance.setCapability(Appearance.ALLOW_MATERIAL_READ);
 
-		// Support sharing certain attributes
-
 		if (ga instanceof PointArray)
 		{
 			appearance.setPolygonAttributes(null);
+			appearance.setMaterial(null);
 
 			PointAttributes pointAttributes = appearance.getPointAttributes();
 			if (pointAttributes == null)
@@ -461,13 +683,7 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 				appearance.setPointAttributes(pointAttributes);
 			}
 
-			ColoringAttributes ca = appearance.getColoringAttributes();
-			if (ca == null)
-			{
-				ca = new ColoringAttributes();
-				ca.setColor(1,  0,  0);
-				appearance.setColoringAttributes(ca);
-			}
+			// We use the coordinates for the colour
 		}
 		else
 		{
@@ -483,9 +699,19 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 				polygonAttributes.setPolygonMode(PolygonAttributes.POLYGON_FILL);
 				appearance.setPolygonAttributes(polygonAttributes);
 			}
+
+			// We require material attributes for colour
+			Material material = appearance.getMaterial();
+			if (material == null)
+			{
+				material = new Material();
+				material.setDiffuseColor(DEFAULT_COLOUR);
+				appearance.setMaterial(material);
+			}
+			material.setCapability(Material.ALLOW_COMPONENT_WRITE);
 		}
 
-		// We require transparency and material attributes
+		// We require transparency attributes for global transparency
 		TransparencyAttributes tr = appearance.getTransparencyAttributes();
 		if (tr == null)
 		{
@@ -496,15 +722,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		}
 		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
 		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
-
-		Material material = appearance.getMaterial();
-		if (material == null)
-		{
-			material = new Material();
-			material.setDiffuseColor(1, 1, 0);
-			appearance.setMaterial(material);
-		}
-		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
 
 		return appearance;
 	}
@@ -549,7 +766,32 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setItemColor(Color3f color)
 	{
-		setColor(color);
+		// Global colour
+		if (color == null)
+			color = this.color;
+		if (isPointArray)
+		{
+			pointArrayColorUpdater.getColors(color, 1f);
+			if (alphas != null)
+			{
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					geometryArray[i].setColors(i, pointArrayColorUpdater.getColors(alphas[i]));
+				}
+			}
+			else
+			{
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					geometryArray[i].setColors(i, pointArrayColorUpdater.pointColor);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < material.length; i++)
+				material[i].setDiffuseColor(color);
+		}
 	}
 
 	/*
@@ -568,8 +810,29 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		int size = size();
 		if (color.length != size)
 			throw new IllegalArgumentException("list of size " + size + " expected");
-		for (int i = 0; i < material.length; i++)
-			material[i].setDiffuseColor(color[i]);
+		if (isPointArray)
+		{
+			if (alphas != null)
+			{
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					geometryArray[i].setColors(i, pointArrayColorUpdater.getColors(color[i], alphas[i]));
+				}
+			}
+			else
+			{
+				pointArrayColorUpdater.getColors(1f);
+				for (int i = 0; i < geometryArray.length; i++)
+				{
+					geometryArray[i].setColors(i, pointArrayColorUpdater.getColors(color[i]));
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < material.length; i++)
+				material[i].setDiffuseColor(color[i]);
+		}
 	}
 
 	/*
@@ -593,12 +856,23 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 			throw new IllegalArgumentException("list of size " + size + " expected");
 		if (alphas == null)
 			alphas = new float[size];
-		for (int i = 0; i < material.length; i++)
+		if (isPointArray)
 		{
-			material[i].setDiffuseColor(color[i].x, color[i].y, color[i].z);
-			alphas[i] = color[i].w;
+			for (int i = 0; i < geometryArray.length; i++)
+			{
+				geometryArray[i].setColors(i, pointArrayColorUpdater.getColors(color[i]));
+				alphas[i] = color[i].w;
+			}
 		}
-		setTransparency(this.transparency);
+		else
+		{
+			for (int i = 0; i < material.length; i++)
+			{
+				material[i].setDiffuseColor(color[i].x, color[i].y, color[i].z);
+				alphas[i] = color[i].w;
+			}
+			setTransparency(this.transparency);
+		}
 	}
 
 	/*
@@ -608,7 +882,31 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
-		setItemAlpha(alpha, this.transparency);
+		if (isPointArray)
+		{
+			final boolean hasAlpha;
+			if (alpha != null)
+			{
+				int size = size();
+				if (alpha.length != size)
+					throw new IllegalArgumentException("list of size " + size + " expected");
+				hasAlpha = true;
+			}
+			else
+				hasAlpha = false;
+			this.alphas = alpha;
+			for (int i = 0; i < geometryArray.length; i++)
+			{
+				GeometryArray ga = geometryArray[i];
+				ga.getColors(0, pointArrayColorUpdater.pointColor);
+				pointArrayColorUpdater.getColors((hasAlpha) ? alpha[i] : 1f);
+				ga.setColors(i, pointArrayColorUpdater.pointColor);
+			}
+		}
+		else
+		{
+			setItemAlpha(alpha, this.transparency);
+		}
 	}
 
 	/**
@@ -631,6 +929,11 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 				throw new IllegalArgumentException("list of size " + size + " expected");
 		}
 		this.alphas = alpha;
+		if (isPointArray)
+		{
+			// PointArray alpha must be updated  
+			setItemAlpha(alpha);
+		}
 		setTransparency(this.transparency);
 	}
 
@@ -641,7 +944,24 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	 */
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
-		setItemAlpha(alpha, this.transparency);
+		if (isPointArray)
+		{
+			if (alphas == null)
+				alphas = new float[size()];
+			Arrays.fill(alphas, alpha);
+
+			for (int i = 0; i < geometryArray.length; i++)
+			{
+				GeometryArray ga = geometryArray[i];
+				ga.getColors(0, pointArrayColorUpdater.pointColor);
+				pointArrayColorUpdater.getColors(alpha);
+				ga.setColors(i, pointArrayColorUpdater.pointColor);
+			}
+		}
+		else
+		{
+			setItemAlpha(alpha, this.transparency);
+		}
 	}
 
 	/**
@@ -661,6 +981,17 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		if (alphas == null)
 			alphas = new float[size()];
 		Arrays.fill(alphas, alpha);
+		if (isPointArray)
+		{
+			// PointArray alpha must be updated  
+			for (int i = 0; i < geometryArray.length; i++)
+			{
+				GeometryArray ga = geometryArray[i];
+				ga.getColors(0, pointArrayColorUpdater.pointColor);
+				pointArrayColorUpdater.getColors(alpha);
+				ga.setColors(i, pointArrayColorUpdater.pointColor);
+			}
+		}
 		setTransparency(transparency);
 	}
 
