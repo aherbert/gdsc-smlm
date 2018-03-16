@@ -420,6 +420,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				CustomLineMesh mesh = new CustomLineMesh(pointOutline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
 				mesh.setAntiAliasing(true);
 				mesh.setPattern(LineAttributes.PATTERN_SOLID);
+				//mesh.setLineWidth(0.5f); Hard to see
 				return mesh;
 			}
 
@@ -446,6 +447,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				final ColoringAttributes ca = appearance.getColoringAttributes();
 				ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
 				appearance.setMaterial(null);
+				LineAttributes la = new LineAttributes();
+				la.setLineWidth(0.5f);
+				appearance.setLineAttributes(la);
 				return mesh;
 			}
 
