@@ -355,8 +355,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.sizes = sizes;
 			Rendering rendering = Rendering.forNumber(settings.getRendering());
 			if (rendering.isHighResolution())
-				// Don't draw a mesh with too much detail
-				rendering = Rendering.ICOSAHEDRON;
+			{
+				// Don't draw a mesh with too much detail.
+				// XXX fix this as the icosahedron does not envelope the shape.
+				//rendering = Rendering.ICOSAHEDRON;
+			}
 			this.rendering = rendering;
 			highlightColourUpdated();
 		}
