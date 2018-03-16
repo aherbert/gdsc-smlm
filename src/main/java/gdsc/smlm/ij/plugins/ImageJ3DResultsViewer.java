@@ -38,6 +38,7 @@ import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.Transform3D;
+import org.scijava.java3d.TransformGroup;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.View;
@@ -92,6 +93,7 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomContent;
+import gdsc.smlm.ij.ij3d.CustomContentInstant;
 import gdsc.smlm.ij.ij3d.CustomMeshHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGeometryNode;
@@ -125,6 +127,7 @@ import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
 import ij3d.Content;
 import ij3d.ContentInstant;
+import ij3d.ContentNode;
 import ij3d.DefaultUniverse;
 import ij3d.Image3DMenubar;
 import ij3d.Image3DUniverse;
@@ -132,6 +135,7 @@ import ij3d.ImageCanvas3D;
 import ij3d.ImageJ_3D_Viewer;
 import ij3d.ImageWindow3D;
 import ij3d.UniverseListener;
+import ij3d.UniverseSettings;
 
 /**
  * Draws a localisation results set using an ImageJ 3D image
@@ -340,9 +344,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		/** The rendering mode. */
 		final Rendering rendering;
 
-		/** The point outline for the rendering. */
-		final Point3f[] pointOutline;
-
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
 				TurboList<Point3f> points, Point3f[] sizes)
 		{
@@ -350,48 +351,99 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.results = results;
 			this.points = points;
 			this.sizes = sizes;
-
-			// Create the point outline for the rendering
 			rendering = Rendering.forNumber(settings.getRendering());
+		}
 
+		CustomContentInstant contentInstance;
+		TransformGroup tg;
+		int switchIndex;
+		CustomMesh outline;
+
+		public void createClickSelectionNode(CustomContentInstant contentInstance)
+		{
+			this.contentInstance = contentInstance;
+			tg = new TransformGroup();
+			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+			outline = createOutline();
+			tg.addChild(outline);
+			switchIndex = contentInstance.addCustomSwitch(tg);
+		}
+
+		/**
+		 * Create the point outline for the rendering.
+		 *
+		 * @return the custom mesh
+		 */
+		private CustomMesh createOutline()
+		{
+			TurboList<Point3f> points = new TurboList<Point3f>(1);
+			points.add(new Point3f());
 			if (settings.getRendering() == 0)
 			{
-				pointOutline = new Point3f[1];
-				pointOutline[0] = new Point3f();
-				return;
+				ItemPointMesh mesh = new ItemPointMesh(points, highlightColor, 0);
+				mesh.setPointSize((float) settings.getPixelSize());
+				mesh.getAppearance().getPolygonAttributes().setPolygonMode(PolygonAttributes.POLYGON_LINE);
+				return mesh;
 			}
 
-			List<Point3f> outline;
+			List<Point3f> pointOutline;
 			if (rendering.is2D())
 			{
 				// Handle all the 2D objects to create an outline. 
-				outline = createLocalisationObjectOutline(rendering);
-			}
-			else
-			{
-				// 3D objects can use the same rendering but then post-process to a set of lines
-				// and create a line mesh.
-				outline = createLocalisationObject(rendering);
+				pointOutline = createLocalisationObjectOutline(rendering);
 
-				// For outlining
-				//Pair<Point3f[], int[]> pair = CustomMeshHelper.createIndexedObject(outline);
-				//Point3f[] vertices = pair.s;
-				//int[] faces = pair.r;
-				//outline.clear();
-				//// Only add lines not yet observed. Use an array since 
-				//int max = Maths.max(faces) + 1;
-				//boolean[] observed = new boolean[max * max];
-				//for (int i = 0; i < faces.length; i += 3)
-				//{
-				//	int t1 = faces[i];
-				//	int t2 = faces[i + 1];
-				//	int t3 = faces[i + 2];
-				//	add(observed, max, t1, t2, vertices, outline);
-				//	add(observed, max, t2, t3, vertices, outline);
-				//	add(observed, max, t3, t1, vertices, outline);
-				//}
+				CustomLineMesh mesh = new CustomLineMesh(pointOutline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
+				mesh.setAntiAliasing(true);
+				mesh.setPattern(LineAttributes.PATTERN_SOLID);
+				return mesh;
 			}
-			this.pointOutline = outline.toArray(new Point3f[outline.size()]);
+
+			// 3D objects can use the same rendering but then post-process to a set of lines
+			// and create a line mesh.
+			pointOutline = createLocalisationObject(rendering);
+
+			boolean polygon = true;
+			if (polygon)
+			{
+				ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline.toArray(new Point3f[pointOutline.size()]),
+						new Point3f[] { new Point3f() }, null, highlightColor, 0);
+
+				//updateAppearance(mesh, settings);
+
+				// Outline
+				mesh.setShaded(false);
+
+				Appearance appearance = mesh.getAppearance();
+				PolygonAttributes pa = appearance.getPolygonAttributes();
+				pa.setCullFace(PolygonAttributes.CULL_BACK);
+				pa.setBackFaceNormalFlip(false);
+				final ColoringAttributes ca = appearance.getColoringAttributes();
+				ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+				return mesh;
+			}
+
+			// For outlining as a line mesh
+			Pair<Point3f[], int[]> pair = CustomMeshHelper.createIndexedObject(pointOutline);
+			Point3f[] vertices = pair.s;
+			int[] faces = pair.r;
+			pointOutline.clear();
+			// Only add lines not yet observed. Use an array since 
+			int max = Maths.max(faces) + 1;
+			boolean[] observed = new boolean[max * max];
+			for (int i = 0; i < faces.length; i += 3)
+			{
+				int t1 = faces[i];
+				int t2 = faces[i + 1];
+				int t3 = faces[i + 2];
+				add(observed, max, t1, t2, vertices, pointOutline);
+				add(observed, max, t2, t3, vertices, pointOutline);
+				add(observed, max, t3, t1, vertices, pointOutline);
+			}
+			CustomLineMesh mesh = new CustomLineMesh(pointOutline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
+			mesh.setAntiAliasing(true);
+			mesh.setPattern(LineAttributes.PATTERN_SOLID);
+			return mesh;
 		}
 
 		private static void add(boolean[] observed, int max, int t1, int t2, Point3f[] vertices, List<Point3f> point)
@@ -404,66 +456,39 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			point.add(vertices[t2]);
 		}
 
-		public CustomMesh createOutline(int index)
+		public void click(int index)
 		{
-			Point3f centre = points.get(index);
-			TurboList<Point3f> outline = new TurboList<Point3f>(pointOutline.length);
+			if (index < 0 || index >= points.size())
+			{
+				contentInstance.setCustomSwitch(switchIndex, false);
+				return;
+			}
 
+			Transform3D t = new Transform3D();
+
+			// Position correctly
+			Vector3d centre = new Vector3d(points.get(index));
+			t.setTranslation(centre);
+
+			// Enlarge the outline
+			if (rendering != Rendering.POINT)
+			{
+				Vector3d scale = new Vector3d((sizes.length == 0) ? sizes[0] : sizes[index]);
+				scale.scale(1.1);
+				t.setScale(scale);
+			}
+
+			tg.setTransform(t);
+
+			contentInstance.setCustomSwitch(switchIndex, true);
+		}
+
+		public void setPointSize(float f)
+		{
 			if (rendering == Rendering.POINT)
 			{
-				// The scaling does not matter for the point rendering as the point was (0,0,0)
-				Point3f p = pointOutline[0];
-				float x = (float) (p.x + centre.x);
-				float y = (float) (p.y + centre.y);
-				float z = (float) (p.z + centre.z);
-				outline.addf(new Point3f(x, y, z));
-				ItemPointMesh mesh = new ItemPointMesh(outline, highlightColor, 0);
-				//mesh.setPointSize(sizes[0].x); // Handled later
-				mesh.getAppearance().getPolygonAttributes().setPolygonMode(PolygonAttributes.POLYGON_LINE);
-				return mesh;
+				((ItemPointMesh) outline).setPointSize(f);
 			}
-
-			Point3f scale = (sizes.length == 0) ? sizes[0] : sizes[index];
-			if (rendering.is2D())
-			{
-				// Translate and scale the outline
-				for (int i = 0; i < pointOutline.length; i++)
-				{
-					Point3f p = pointOutline[i];
-					float x = (float) (p.x * scale.x + centre.x);
-					float y = (float) (p.y * scale.y + centre.y);
-					float z = (float) (p.z * scale.z + centre.z);
-					outline.addf(new Point3f(x, y, z));
-				}
-
-				CustomLineMesh mesh = new CustomLineMesh(outline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
-				mesh.setAntiAliasing(true);
-				mesh.setPattern(LineAttributes.PATTERN_SOLID);
-				return mesh;
-			}
-
-			// 3D polygon so use a non-filled polygon
-			float enlarge = 1.1f;
-			scale = new Point3f(scale);
-			scale.x *= enlarge;
-			scale.y *= enlarge;
-			scale.z *= enlarge;
-			ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline, new Point3f[] { centre },
-					new Point3f[] { scale }, highlightColor, 0);
-
-			//updateAppearance(mesh, settings);
-
-			// Outline
-			mesh.setShaded(false);
-
-			Appearance appearance = mesh.getAppearance();
-			PolygonAttributes pa = appearance.getPolygonAttributes();
-			pa.setCullFace(PolygonAttributes.CULL_BACK);
-			pa.setBackFaceNormalFlip(false);
-			final ColoringAttributes ca = appearance.getColoringAttributes();
-			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
-
-			return mesh;
 		}
 	}
 
@@ -828,11 +853,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		Color3f[] colors = createColour(results, settings);
 
-		Content content;
+		ContentNode contentNode;
 
 		// Build to support true transparency (depends on settings).
 		// Currently this is not supported for PointArrays as they require colouring
 		// in the coordinate data.
+		IJ.showStatus("Creating 3D geometry ...");
 		if (settings.getSupportDynamicTransparency())
 		{
 			ItemGeometryGroup pointGroup = createItemGroup(settings, sphereSize, points, alpha, transparency, colors);
@@ -849,9 +875,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				activateDynamicTransparency(univ, 0, settings.getEnableDynamicTransparency());
 			}
 
-			IJ.showStatus("Creating 3D content ...");
-			content = new CustomContent(name);
-			content.getCurrent().display(new ItemGeometryNode(pointGroup));
+			contentNode = new ItemGeometryNode(pointGroup);
 		}
 		else
 		{
@@ -861,18 +885,30 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			updateAppearance(mesh, settings);
 
-			IJ.showStatus("Creating 3D mesh colour ...");
 			setColour((ItemShape) mesh, colors);
 
-			IJ.showStatus("Creating 3D content ...");
-			content = univ.createContent(mesh, name);
+			contentNode = new CustomMeshNode(mesh);
 		}
+
+		IJ.showStatus("Creating 3D content ...");
+
+		// Use custom content to support adding new switchable nodes
+		CustomContent content = new CustomContent(name);
+		CustomContentInstant contentInstance = (CustomContentInstant) content.getCurrent();
+		//contentInstance.setColor(mesh.getColor());
+		contentInstance.setTransparency((float) settings.getTransparency());
+		contentInstance.setShaded(settings.getShaded());
+		contentInstance.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
+		contentInstance.display(contentNode);
 
 		createHighlightColour(settings.getHighlightColour());
 
 		content.setUserData(data);
 		// Prevent relative rotation
 		content.setLocked(true);
+
+		// Set up the click selection node
+		data.createClickSelectionNode(contentInstance);
 
 		IJ.showStatus("Drawing 3D content ...");
 
@@ -1691,37 +1727,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					table.flush();
 
 					// Highlight the localisation using an outline.
-					CustomMesh pointOutline = data.createOutline(index);
-					if (pointOutline instanceof CustomPointMesh)
-					{
-						// Make the point size correct as points are resizeable
-						float pointSize = 1;
-						if (content.getContent() instanceof CustomMeshNode)
-						{
-							CustomMeshNode node = (CustomMeshNode) content.getContent();
-							CustomMesh mesh = node.getMesh();
-							pointSize = ((CustomPointMesh) mesh).getPointSize();
-						}
-						else if (content.getContent() instanceof ItemGeometryNode)
-						{
-							ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-							ItemGeometryGroup g = node.getItemGeometry();
-							pointSize = g.getPointSize();
-						}
-						((CustomPointMesh) pointOutline).setPointSize(pointSize);
-					}
-
-					univ.setAutoAdjustView(false);
-
-					pointOutline.setPickable(false);
-
-					Content outline = univ.createContent(pointOutline, name);
-					outline.getCurrent().setTransform(getVworldToLocal(content));
-					outline.setLocked(true);
-
-					univ.removeContent(name);
-					univ.addContent(outline);
-					univ.setAutoAdjustView(true);
+					data.click(index);
 				}
 			}
 
@@ -2000,8 +2006,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final JMenuItem item = menu.getItem(i);
 			if (item == null)
 				continue;
-			System.out.println(item.getText());
-			if (item.getText() != null && item.getText().equals("Toggle dynamic transparency"))
+			if (item.getText().equals("Toggle dynamic transparency"))
 				((JCheckBoxMenuItem) item).setSelected(enable);
 		}
 	}
@@ -2221,7 +2226,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ChangePointSizeContentAction extends BaseContentAction
 	{
-		ImageJ3DResultsViewerSettings.Builder settings = null;
+		float pointSize = -1;
 
 		public int run(Content c)
 		{
@@ -2235,7 +2240,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					// Change the point size
 					if (!getSettings())
 						return -1;
-					((CustomPointMesh) mesh).setPointSize((float) settings.getPixelSize());
+					((CustomPointMesh) mesh).setPointSize(pointSize);
 				}
 			}
 			else if (content.getContent() instanceof ItemGeometryNode)
@@ -2244,7 +2249,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return -1;
 				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
 				ItemGeometryGroup g = node.getItemGeometry();
-				g.setPointSize((float) settings.getPixelSize());
+				g.setPointSize(pointSize);
+			}
+
+			if (c.getUserData() instanceof ResultsMetaData)
+			{
+				ResultsMetaData data = (ResultsMetaData) c.getUserData();
+				data.setPointSize(pointSize);
 			}
 
 			return 0;
@@ -2252,10 +2263,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		private boolean getSettings()
 		{
-			if (settings == null)
+			if (pointSize == -1)
 			{
 				// Use the latest settings
-				settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
+				ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
+						.toBuilder();
 				ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 				gd.addNumericField("Pixel_size", settings.getPixelSize(), 2, 6, "px");
 				gd.showDialog();
@@ -2263,6 +2275,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return false;
 				settings.setPixelSize(gd.getNextNumber());
 				SettingsManager.writeSettings(settings);
+				pointSize = (float) settings.getPixelSize();
 			}
 			return true;
 		}
