@@ -361,12 +361,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		public void createClickSelectionNode(CustomContentInstant contentInstance)
 		{
+			// Note: There is potential here to allow multiple items to be picked.
+			// Maintain a list of the XYZ points that are picked (to support reordering).
+			// At each new click, check the list does not contain the points
+			// and add it.
+			// Currently we have one item that is moved around. For multiple items
+			// we can add new switches. Each point uses the first non-visible switch
+			// for display (or creates a new onw). Maintain a hashtable of the point and 
+			// the switch index.
+			// If a point is removed then set the switch off.
+
+			// Q. How to remove a point?
+			// Click it with the Alt key down?
+
 			this.contentInstance = contentInstance;
 			tg = new TransformGroup();
 			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			outline = createOutline();
 			tg.addChild(outline);
+			tg.setPickable(false);
 			switchIndex = contentInstance.addCustomSwitch(tg);
 		}
 
@@ -1720,14 +1734,25 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 				else
 				{
-					// Output the result to a table.
-					// Just create a table and add to it.
-					IJTablePeakResults table = createTable(results);
-					table.add(p);
-					table.flush();
+					// Ctrl+Shift held down to remove selected
+					if (e.isShiftDown())
+					{
+						data.click(-index);
+					}
+					else
+					{
+						if (resultsTableSettings.getShowTable())
+						{
+							// Output the result to a table.
+							// Just create a table and add to it.
+							IJTablePeakResults table = createTable(results);
+							table.add(p);
+							table.flush();
+						}
 
-					// Highlight the localisation using an outline.
-					data.click(index);
+						// Highlight the localisation using an outline.
+						data.click(index);
+					}
 				}
 			}
 
@@ -1765,31 +1790,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			@Override
 			public void mousePressed(final MouseEvent e)
 			{
-				//System.out.println("plugin mousePressed");
-				// Not needed now the content is locked to prevent annoying local rotation
-				//if (consumeEvent(e))
-				//{
-				//	// Image3DUniverse adds a canvas mouse listener that calls showPopup.
-				//	// This selects the content. It ignores the e.isConsumed() flag so
-				//	// we translate the point offscreen.
-				//	e.consume();
-				//	e.translatePoint(1000000, 1000000);
-				//}
 			}
 
 			@Override
 			public void mouseReleased(final MouseEvent e)
 			{
-				//System.out.println("plugin mouseReleased");
-				// Not needed now the content is locked to prevent annoying local rotation
-				//if (consumeEvent(e))
-				//{
-				//	// Image3DUniverse adds a canvas mouse listener that calls showPopup.
-				//	// This selects the content. It ignores the e.isConsumed() flag so
-				//	// we translate the point offscreen.
-				//	e.consume();
-				//	e.translatePoint(1000000, 1000000);
-				//}
 			}
 
 			private boolean consumeEvent(final MouseEvent e)
@@ -1798,9 +1803,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// Single clicks only if showing the results table.
 				// Double clicks for centring the universe.
 
-				if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown() || e.isAltDown()))
+				if (e.isConsumed() || e.getButton() != MouseEvent.BUTTON1 || !(e.isControlDown()))
 					return false;
-				if (resultsTableSettings.getShowTable() && e.getClickCount() == 1)
+				if ( //resultsTableSettings.getShowTable() && 
+				e.getClickCount() == 1)
 					return true;
 				if (e.getClickCount() == 2)
 					return true;
