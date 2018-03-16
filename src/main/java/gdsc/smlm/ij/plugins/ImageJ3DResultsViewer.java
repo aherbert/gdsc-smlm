@@ -17,7 +17,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
@@ -490,7 +492,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private JMenuItem toggleShaded;
 	private JMenuItem updateSettings;
 	private JMenuItem cropResults;
-	private JMenuItem toggleDynamicTransparency;
+	private JCheckBoxMenuItem toggleDynamicTransparency;
 
 	/*
 	 * (non-Javadoc)
@@ -837,9 +839,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (pointGroup == null)
 				return;
 
-			long total = points.size() + getTotalTransparentObjects(univ);
-
-			activateDynamicTransparency(univ, total, settings.getEnableDynamicTransparency());
+			if (settings.getEnableDynamicTransparency())
+			{
+				long total = points.size() + getTotalTransparentObjects(univ, name);
+				activateDynamicTransparency(univ, total, settings.getEnableDynamicTransparency());
+			}
+			else
+			{
+				activateDynamicTransparency(univ, 0, settings.getEnableDynamicTransparency());
+			}
 
 			IJ.showStatus("Creating 3D content ...");
 			content = new CustomContent(name);
@@ -1833,11 +1841,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		w.setTitle(title2);
 
 		// Add a new menu for SMLM functionality
-		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
-		JMenu menu = createSMLMMenuBar();
-		menubar.add(menu);
-		// Add back so it is redrawn
-		univ.setMenubar(menubar);
+		createSMLMMenuBar(univ);
 
 		return univ;
 	}
@@ -1928,13 +1932,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static long getTotalTransparentObjects(Image3DUniverse univ)
+	private static long getTotalTransparentObjects(Image3DUniverse univ, String ignoreName)
 	{
 		long size = 0;
 		for (@SuppressWarnings("unchecked")
 		Iterator<Content> it = univ.contents(); it.hasNext();)
 		{
 			Content c = it.next();
+			if (ignoreName.equals(c.getName()))
+				continue;
 			if (!(c.getUserData() instanceof ResultsMetaData))
 				return 0;
 			final ContentInstant content = c.getCurrent();
@@ -1952,6 +1958,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static void activateDynamicTransparency(Image3DUniverse univ, long size, boolean enable)
 	{
+		if (size == 0)
+		{
+			IJ.log("No transparent objects");
+			enable = false;
+		}
+
 		View view = univ.getViewer().getView();
 		boolean isEnabled = view.getTransparencySortingPolicy() == View.TRANSPARENCY_SORT_GEOMETRY;
 		if (enable == isEnabled)
@@ -1971,12 +1983,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 
 			view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
+			IJ.log("Enabled dynamic transparency");
 			// I am not sure if this is required if objects are sorted.
 			//view.setDepthBufferFreezeTransparent(false);
 		}
 		else
 		{
 			view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_NONE);
+			IJ.log("Disabled dynamic transparency");
+		}
+
+		JMenuBar menubar = univ.getMenuBar();
+		JMenu menu = menubar.getMenu(menubar.getMenuCount() - 1);
+		for (int i = 0; i < menu.getItemCount(); i++)
+		{
+			final JMenuItem item = menu.getItem(i);
+			if (item == null)
+				continue;
+			System.out.println(item.getText());
+			if (item.getText() != null && item.getText().equals("Toggle dynamic transparency"))
+				((JCheckBoxMenuItem) item).setSelected(enable);
 		}
 	}
 
@@ -2025,11 +2051,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	/**
 	 * Creates the SMLM menu bar.
+	 * 
+	 * @param univ
 	 *
 	 * @return the menu bar
 	 */
-	private JMenu createSMLMMenuBar()
+	private void createSMLMMenuBar(Image3DUniverse univ)
 	{
+		Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
+
 		final JMenu add = new JMenu("GDSC SMLM");
 		add.setMnemonic(KeyEvent.VK_G);
 
@@ -2088,8 +2118,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		toggleShaded.addActionListener(this);
 		add.add(toggleShaded);
 
-		toggleDynamicTransparency = new JMenuItem("Toggle dynamic transparency", KeyEvent.VK_D);
+		toggleDynamicTransparency = new JCheckBoxMenuItem("Toggle dynamic transparency");
+		toggleDynamicTransparency.setMnemonic(KeyEvent.VK_D);
 		toggleDynamicTransparency.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed D"));
+		toggleDynamicTransparency
+				.setSelected(univ.getViewer().getView().getTransparencySortingPolicy() != View.TRANSPARENCY_SORT_NONE);
 		toggleDynamicTransparency.addActionListener(this);
 		add.add(toggleDynamicTransparency);
 
@@ -2110,7 +2143,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		updateSettings.addActionListener(this);
 		add.add(updateSettings);
 
-		return add;
+		menubar.add(add);
+		// Add back so it is redrawn
+		univ.setMenubar(menubar);
 	}
 
 	private interface ContentAction
@@ -2909,9 +2944,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		if (src == toggleDynamicTransparency)
 		{
+			long total = getTotalTransparentObjects(univ, "");
 			View view = univ.getViewer().getView();
 			boolean activate = view.getTransparencySortingPolicy() == View.TRANSPARENCY_SORT_NONE;
-			long total = (activate) ? getTotalTransparentObjects(univ) : 0;
 			activateDynamicTransparency(univ, total, activate);
 			return;
 		}
