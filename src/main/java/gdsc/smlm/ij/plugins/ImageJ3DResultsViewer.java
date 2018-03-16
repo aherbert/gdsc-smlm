@@ -353,7 +353,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.results = results;
 			this.points = points;
 			this.sizes = sizes;
-			rendering = Rendering.forNumber(settings.getRendering());
+			Rendering rendering = Rendering.forNumber(settings.getRendering());
+			if (rendering.isHighResolution())
+				// Don't draw a mesh with too much detail
+				rendering = Rendering.ICOSAHEDRON;
+			this.rendering = rendering;
 			highlightColourUpdated();
 		}
 
@@ -552,12 +556,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	public void run(String arg)
 	{
-		// For testing
-		if (Utils.isExtraOptions())
-		{
-			new ImageJ3DResultsViewerTest().run(arg);
-			return;
-		}
+		//// For testing
+		//if (Utils.isExtraOptions())
+		//{
+		//	new ImageJ3DResultsViewerTest().run(arg);
+		//	return;
+		//}
 
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
@@ -948,10 +952,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			univ.setAutoAdjustView(false);
 		}
 		//univ.addContent(content);
-		
+
 		int tick = 0;
 		IJ.showStatus("Drawing 3D content ... ");
-		
+
 		Future<Content> future = univ.addContentLater(content);
 		while (!future.isDone())
 		{
@@ -3163,6 +3167,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ga.setCoordinates(0, coords);
 			ga.setNormals(0, normals);
 			ga.setValidVertexCount(nVertices);
+
+			//			// Test using the geometry from a sphere primative
+			//			switch (r)
+			//			{
+			//				case HIGH_RES_SPHERE:
+			//					ga = ItemGeometryGroup.createSphere(50);
+			//					break;
+			//				case LOW_RES_SPHERE:
+			//					ga = ItemGeometryGroup.createSphere(16);
+			//					break;
+			//			}
 		}
 
 		return new Shape3D(ga, mesh.getAppearance());
@@ -3274,6 +3289,25 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			default:
 				throw new IllegalStateException("Unknown rendering " + rendering);
 		}
+
+		//		// TODO - Put lots of spheres on a view and see how they look.
+		//		// Is it worth supporting an ItemTriangleStripMesh so we can control 
+		//		// the sphere better than the icosahedron?
+		//		
+		//		// Test how many vertices a primitive sphere has
+		//		for (int d = 4; d < 50; d++)
+		//		{
+		//			// This is a triangle strip array so is more space efficient
+		//			Sphere s = new Sphere(1, Sphere.GENERATE_NORMALS, d);
+		//			System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), s.getNumTriangles());
+		//		}
+		//
+		//		for (int d = 0; d < 4; d++)
+		//		{
+		//			int v = customnode.MeshMaker.createIcosahedron(d, 1f).size();
+		//			int t = v/3;
+		//			System.out.printf("Icosahedron divisions = %d, V=%d, T=%d\n", d, v, t);
+		//		}
 
 		// All spheres based on icosahedron for speed
 		return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
