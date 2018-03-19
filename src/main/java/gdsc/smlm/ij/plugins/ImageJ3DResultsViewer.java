@@ -94,8 +94,8 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.ij3d.CustomContent;
+import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.CustomContentInstant;
-import gdsc.smlm.ij.ij3d.CustomMeshHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGeometryNode;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
@@ -192,6 +192,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
         		public boolean isHighResolution() { return true; }},
         HIGH_RES_SPHERE	{ public String getName() { return "High Resolution Sphere"; }
         		public boolean isHighResolution() { return true; }},
+        SUPER_HIGH_RES_SPHERE	{ public String getName() { return "Super-High Resolution Sphere"; }
+		public boolean isHighResolution() { return true; }},
         ;
 
 		public String getShortName()
@@ -362,8 +364,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (rendering.isHighResolution())
 			{
 				// Don't draw a mesh with too much detail.
-				// XXX fix this as the icosahedron does not envelope the shape.
-				//rendering = Rendering.ICOSAHEDRON;
+				// Note the Icosahedron does not envelope the shape but the next division does. 
+				rendering = Rendering.LOW_RES_SPHERE;
 			}
 			this.rendering = rendering;
 			highlightColourUpdated();
@@ -443,7 +445,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 
 			// For outlining as a line mesh
-			Pair<Point3f[], int[]> pair = CustomMeshHelper.createIndexedObject(pointOutline);
+			Pair<Point3f[], int[]> pair = CustomContentHelper.createIndexedObject(pointOutline);
 			Point3f[] vertices = pair.s;
 			int[] faces = pair.r;
 			pointOutline.clear();
@@ -640,7 +642,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	public void run(String arg)
 	{
 		//// For testing
-		//if (Utils.isExtraOptions())
+		//if (true || Utils.isExtraOptions())
 		//{
 		//	new ImageJ3DResultsViewerTest().run(arg);
 		//	return;
@@ -2775,13 +2777,28 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 
 			final ContentInstant content = c.getCurrent();
-			CustomMeshNode node = (CustomMeshNode) content.getContent();
-			CustomMesh mesh = node.getMesh();
-			CustomMeshHelper helper = new CustomMeshHelper(mesh);
-			helper.loadSurfaceColorsFromImage2D(imp);
-			// Remove the transparency
-			if (resetTransparency)
-				mesh.setTransparency(0);
+			ItemShape itemShape = null;
+			if (content.getContent() instanceof CustomMeshNode)
+			{
+				CustomMeshNode node = (CustomMeshNode) content.getContent();
+				CustomMesh mesh = node.getMesh();
+				if (!(mesh instanceof ItemShape))
+					return 0;
+				if (resetTransparency)
+					mesh.setTransparency(0);
+				itemShape = (ItemShape) mesh;
+			}
+			else if (content.getContent() instanceof ItemGeometryNode)
+			{
+				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
+				ItemGeometryGroup g = node.getItemGeometry();
+				if (!(g instanceof ItemShape))
+					return 0;
+				if (resetTransparency)
+					g.setTransparency(0);
+				itemShape = (ItemShape) g;
+			}
+			CustomContentHelper.loadSurfaceColorsFromImage2D(itemShape, imp);
 			return 0;
 		}
 	}
@@ -3230,10 +3247,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			updateAppearance(mesh, settings);
 
-			// Simple point array
-			//ga = new PointArray(1, GeometryArray.COORDINATES);
-			//ga.setCoordinates(0, new float[3]);
-			//ga.setValidVertexCount(1);
 			// Assume the TransparentItemPointMesh sets COLOR_4
 			ga = (GeometryArray) mesh.getGeometry();
 		}
@@ -3376,6 +3389,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return createDisc(0, 0, 0, 0, 0, 1, 1, 20);
 
 			// All handle the same way
+			case SUPER_HIGH_RES_SPHERE:
+				subdivisions++;
 			case HIGH_RES_SPHERE:
 				subdivisions++;
 			case LOW_RES_SPHERE:
@@ -3387,25 +3402,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			default:
 				throw new IllegalStateException("Unknown rendering " + rendering);
 		}
-
-		//		// TODO - Put lots of spheres on a view and see how they look.
-		//		// Is it worth supporting an ItemTriangleStripMesh so we can control 
-		//		// the sphere better than the icosahedron?
-		//		
-		//		// Test how many vertices a primitive sphere has
-		//		for (int d = 4; d < 50; d++)
-		//		{
-		//			// This is a triangle strip array so is more space efficient
-		//			Sphere s = new Sphere(1, Sphere.GENERATE_NORMALS, d);
-		//			System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), s.getNumTriangles());
-		//		}
-		//
-		//		for (int d = 0; d < 4; d++)
-		//		{
-		//			int v = customnode.MeshMaker.createIcosahedron(d, 1f).size();
-		//			int t = v/3;
-		//			System.out.printf("Icosahedron divisions = %d, V=%d, T=%d\n", d, v, t);
-		//		}
 
 		// All spheres based on icosahedron for speed
 		return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
