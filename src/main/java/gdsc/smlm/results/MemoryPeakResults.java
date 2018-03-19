@@ -1917,7 +1917,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = getf(i);
+			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeXYZR(
 					dc.convert(r.getXPosition()),
@@ -1953,7 +1953,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			procedure.executeZ(dc.convert(r.getZPosition()));
 		}
 	}
-	
+
 	/**
 	 * For each result execute the procedure
 	 * <p>
@@ -2109,7 +2109,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			final PeakResult r = getfX(i);
+			final PeakResult r = getf(i);
 			r.setOrigX(r.getOrigX() + x);
 			r.setOrigY(r.getOrigY() + y);
 			r.setXPosition(r.getXPosition() + xx);
@@ -2290,5 +2290,25 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	public PeakResult[] getResults(PeakResultPredicate filter)
 	{
 		return results.subset(filter);
+	}
+
+	/**
+	 * Find the index of the given result. Uses the == operator on the provided reference so it must be the exact same
+	 * object.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the index (or -1)
+	 */
+	public int indexOf(PeakResult result)
+	{
+		if (result == null)
+			return -1;
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			if (getf(i) == result)
+				return i;
+		}
+		return -1;
 	}
 }
