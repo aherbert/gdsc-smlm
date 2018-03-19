@@ -14,8 +14,6 @@ package gdsc.smlm.ij.utils;
  *---------------------------------------------------------------------------*/
 
 import java.awt.Color;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Sort;
@@ -32,7 +30,7 @@ import ij.text.TextPanel;
  * <p>
  * The provider should provide [slice,x,y] coordinates for the image ROI.
  */
-public class ImageROIPainter implements MouseListener
+public class ImageROIPainter extends TextPanelMouseListener
 {
 	private TextPanel textPanel;
 	private String title;
@@ -48,6 +46,8 @@ public class ImageROIPainter implements MouseListener
 	 */
 	public ImageROIPainter(TextPanel textPanel, String title, CoordinateProvider coordProvider)
 	{
+		super(textPanel);
+
 		// Check if the image is displayed
 		this.title = title;
 		this.textPanel = textPanel;
@@ -55,20 +55,14 @@ public class ImageROIPainter implements MouseListener
 		textPanel.addMouseListener(this);
 	}
 
-	public void mouseClicked(MouseEvent e)
-	{
-		// Show the result that was double clicked in the result table
-		if (e.getClickCount() > 1)
-			paint(textPanel.getSelectionStart());
-	}
-
 	/**
 	 * Trigger the ROI painter using the selected index from the text panel.
 	 *
 	 * @param selectedIndex
 	 *            the selected index
+	 * @see gdsc.smlm.ij.utils.TextPanelMouseListener#selected(int)
 	 */
-	public void paint(int selectedIndex)
+	public void selected(int selectedIndex)
 	{
 		if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
 			return;
@@ -91,16 +85,6 @@ public class ImageROIPainter implements MouseListener
 		Utils.adjustSourceRect(imp, 0, (int) x, (int) y);
 	}
 
-	public void mousePressed(MouseEvent e)
-	{
-		// If a multiple-line selection is made then show all the points
-		int index = textPanel.getSelectionStart();
-		int index2 = textPanel.getSelectionEnd();
-		if (index == index2)
-			return;
-		paint(textPanel.getSelectionStart(), textPanel.getSelectionEnd());
-	}
-
 	/**
 	 * Trigger the ROI painter using the selection from the text panel.
 	 *
@@ -108,8 +92,9 @@ public class ImageROIPainter implements MouseListener
 	 *            the selection start
 	 * @param selectionEnd
 	 *            the selection end
+	 * @see gdsc.smlm.ij.utils.TextPanelMouseListener#selected(int, int)
 	 */
-	public void paint(int selectionStart, int selectionEnd)
+	public void selected(int selectionStart, int selectionEnd)
 	{
 		if (selectionStart < 0 || selectionStart >= textPanel.getLineCount())
 			return;
@@ -200,6 +185,16 @@ public class ImageROIPainter implements MouseListener
 		o.add(roi);
 	}
 
+	/**
+	 * Adds the roi to the specified slice in the image using an overlay.
+	 *
+	 * @param imp
+	 *            the imp
+	 * @param slice
+	 *            the slice
+	 * @param roi
+	 *            the roi
+	 */
 	public static void addRoi(ImagePlus imp, int slice, PointRoi roi)
 	{
 		if (imp != null && slice > 0 && slice <= imp.getStackSize())
@@ -223,21 +218,6 @@ public class ImageROIPainter implements MouseListener
 				imp.setOverlay(null);
 			}
 		}
-	}
-
-	public void mouseReleased(MouseEvent e)
-	{
-		// Ignore
-	}
-
-	public void mouseEntered(MouseEvent e)
-	{
-		// Ignore
-	}
-
-	public void mouseExited(MouseEvent e)
-	{
-		// Ignore
 	}
 
 	/**

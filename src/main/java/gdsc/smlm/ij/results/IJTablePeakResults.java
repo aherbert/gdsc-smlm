@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.results;
 
 import java.awt.Frame;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
 
 import gdsc.core.data.utils.ConversionException;
@@ -970,7 +971,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			return;
 		tp.setSelection(selectedIndex, selectedIndex);
 		if (roiPainter != null)
-			roiPainter.paint(selectedIndex);
+			roiPainter.selected(selectedIndex);
 	}
 
 	/**
@@ -989,6 +990,16 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			return;
 		tp.setSelection(selectionStart, selectionEnd);
 		if (roiPainter != null)
-			roiPainter.paint(selectionStart, selectionEnd);
+			roiPainter.selected(selectionStart, selectionEnd);
+	}
+	
+	/**
+	 * Adds the mouse listener to the text panel.
+	 *
+	 * @param listener the listener
+	 */
+	public void addTextPanelMouseListener(MouseListener listener)
+	{
+		tp.addMouseListener(listener);
 	}
 }
