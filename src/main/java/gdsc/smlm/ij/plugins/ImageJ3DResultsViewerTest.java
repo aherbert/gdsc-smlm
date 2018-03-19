@@ -1,15 +1,21 @@
 package gdsc.smlm.ij.plugins;
 
+import java.util.List;
+
+import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.View;
+import org.scijava.java3d.utils.geometry.Sphere;
 import org.scijava.vecmath.Point3f;
 
+import customnode.CustomMesh;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.ij.ij3d.CustomContent;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGeometryNode;
+import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.OrderedItemGeometryGroup;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -72,6 +78,67 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		if (version == null)
 		{
 			IJ.error(TITLE, "Java 3D is not available");
+			return;
+		}
+
+		boolean sphereTest = true;
+		if (sphereTest)
+		{
+			// Sphere test
+			// Put lots of spheres on a view and see how they look.
+			// Is it worth supporting an ItemTriangleStripMesh so we can control 
+			// the sphere better than the icosahedron?
+			final Image3DUniverse univ = new Image3DUniverse();
+			univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
+			univ.show();
+			ImageWindow3D w = univ.getWindow();
+			GUI.center(w);
+
+			// Test how many vertices a primitive sphere has
+			float x = 0, y = 0;
+			float space = 2.5f;
+
+			Appearance a = null;
+			for (int d = 0; d < 4; d++)
+			{
+				List<Point3f> points = customnode.MeshMaker.createIcosahedron(d, 1f);
+				int v = points.size();
+				int t = v / 3;
+				System.out.printf("Icosahedron divisions = %d, V=%d, T=%d\n", d, v, t);
+
+				CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
+						new Point3f[] { new Point3f(x, y, 0) }, null, null, 0);
+
+				a = mesh.getAppearance();
+				univ.addCustomMesh(mesh, x + "," + y + "," + t);
+				x += space;
+			}
+
+			// The T=800 sphere looks about the same as the Icosahedron(div=3) T=1280
+			// This may be a better super-high resolution option.
+			
+			x = 0;
+			y += space;
+			a = (Appearance) a.cloneNodeComponent(true);
+			//a.getColoringAttributes().setColor(0, 1, 0);
+			a.getMaterial().setDiffuseColor(0, 1, 0);
+			for (int d = 4; d < 50; d += 4)
+			{
+				// This is a triangle strip array so is more space efficient
+				Sphere s = new Sphere(1, Sphere.GENERATE_NORMALS, d);
+				int t = s.getNumTriangles();
+				System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), t);
+
+				ItemGeometryGroup g = new ItemGeometryGroup(new Point3f[] { new Point3f(x, y, 0) },
+						(GeometryArray) s.getShape().getGeometry(), a, null, null, null);
+				String name = x + "," + y + "," + t;
+				CustomContent content = new CustomContent(name, true);
+				content.getCurrent().display(new ItemGeometryNode(g));
+				univ.addContent(content);
+
+				x += space;
+			}
+
 			return;
 		}
 
