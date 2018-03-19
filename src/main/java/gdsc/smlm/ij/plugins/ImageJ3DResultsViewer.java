@@ -346,6 +346,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		/** The rendering mode. */
 		final Rendering rendering;
 
+		CustomContentInstant contentInstance;
+		CustomMesh outline;
+		TurboList<PeakResult> selected = new TurboList<PeakResult>();
+		TurboList<TransformGroup> selectedNode = new TurboList<TransformGroup>();
+
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
 				TurboList<Point3f> points, Point3f[] sizes)
 		{
@@ -364,34 +369,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			highlightColourUpdated();
 		}
 
-		CustomContentInstant contentInstance;
-		TransformGroup tg;
-		int switchIndex;
-		CustomMesh outline;
-
 		public void createClickSelectionNode(CustomContentInstant contentInstance)
 		{
 			// Note: There is potential here to allow multiple items to be picked.
-			// Maintain a list of the XYZ points that are picked (to support reordering).
+			// Maintain a list of the results that are picked.
 			// At each new click, check the list does not contain the points
 			// and add it.
-			// Currently we have one item that is moved around. For multiple items
-			// we can add new switches. Each point uses the first non-visible switch
-			// for display (or creates a new onw). Maintain a hashtable of the point and 
-			// the switch index.
+			// For multiple items we add new switches. Each new selected point uses the 
+			// first non-visible switch for display (or creates a new one). 
 			// If a point is removed then set the switch off.
 
-			// Q. How to remove a point?
-			// Click it with the Alt key down?
-
 			this.contentInstance = contentInstance;
-			tg = new TransformGroup();
-			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			outline = createOutline();
-			tg.addChild(outline);
-			tg.setPickable(false);
-			switchIndex = contentInstance.addCustomSwitch(tg);
 		}
 
 		/**
@@ -486,17 +475,24 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			point.add(vertices[t2]);
 		}
 
-		public void click(int index)
+		public void select(int index)
 		{
 			if (index < 0 || index >= points.size())
-			{
-				contentInstance.setCustomSwitch(switchIndex, false);
 				return;
+
+			PeakResult r = results.get(index);
+
+			// Find in the list of selected 
+			int switchIndex = findSelected(r);
+			
+			if (switchIndex == -1)
+			{
+				switchIndex = addToSelected(r);
 			}
 
+			// Position correctly
 			Transform3D t = new Transform3D();
 
-			// Position correctly
 			Vector3d centre = new Vector3d(points.get(index));
 			t.setTranslation(centre);
 
@@ -508,11 +504,82 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				t.setScale(scale);
 			}
 
-			tg.setTransform(t);
-
+			selectedNode.getf(switchIndex).setTransform(t);
 			contentInstance.setCustomSwitch(switchIndex, true);
 		}
 
+		private int findSelected(PeakResult r)
+		{
+			for (int i = 0; i < selected.size(); i++)
+			{
+				PeakResult r2 = selected.getf(i);
+				if (r2 != null && r.equals(r2))
+					return i;
+			}
+			return -1;
+		}
+
+
+		private int addToSelected(PeakResult r)
+		{
+			// Find the first available index
+			int switchIndex = findEmpty();
+			if (switchIndex == -1)
+			{
+				TransformGroup tg = new TransformGroup();
+				tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+				tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+				tg.addChild(new Shape3D(outline.getGeometry(), outline.getAppearance()));
+				tg.setPickable(false);
+				switchIndex = contentInstance.addCustomSwitch(tg);
+				selected.add(r);
+				selectedNode.add(tg);
+			}
+			else
+			{
+				selected.setf(switchIndex, r);
+			}
+			return switchIndex;
+		}
+		
+		private int findEmpty()
+		{
+			for (int i = 0; i < selected.size(); i++)
+			{
+				PeakResult r2 = selected.getf(i);
+				if (r2 == null)
+					return i;
+			}
+			return -1;
+		}		
+
+		
+		public void deselect(int index)
+		{
+			if (index < 0 || index >= points.size())
+				return;
+
+			PeakResult r = results.get(index);
+
+			// Find in the list of selected 
+			int switchIndex = findSelected(r);
+			if (switchIndex != -1)
+			{
+				// Switch off
+				contentInstance.setCustomSwitch(switchIndex, false);
+				selected.setf(switchIndex, null);
+			}
+		}
+		
+		public void clearSelected()
+		{
+			for (int i = 0; i < selected.size(); i++)
+			{
+				contentInstance.setCustomSwitch(i, false);
+				selected.setf(i, null);
+			}			
+		}
+		
 		public void setPointSize(float f)
 		{
 			if (rendering == Rendering.POINT)
@@ -1774,7 +1841,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					// Ctrl+Shift held down to remove selected
 					if (e.isShiftDown())
 					{
-						data.click(-index);
+						data.deselect(index);
 					}
 					else
 					{
@@ -1787,8 +1854,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 							table.flush();
 						}
 
+						// Remove previous selection
+						data.clearSelected();
 						// Highlight the localisation using an outline.
-						data.click(index);
+						data.select(index);
 					}
 				}
 			}

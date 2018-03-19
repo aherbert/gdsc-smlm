@@ -102,6 +102,7 @@ public class CustomContentInstant extends ContentInstant
 		localTranslate.addChild(localRotate);
 
 		ordered = new Group();
+		ordered.setCapability(Group.ALLOW_CHILDREN_EXTEND);		
 		for (int i = 0; i < 5; i++)
 		{
 			final Switch s = new Switch();
@@ -251,7 +252,10 @@ public class CustomContentInstant extends ContentInstant
 		s.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		s.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		s.addChild(node);
-		ordered.addChild(s);
+		// Only a branch group can be added to a live scence
+		BranchGroup bg = new BranchGroup();
+		bg.addChild(s);
+		ordered.addChild(bg);
 		return index; // Account for the standard switches
 	}
 
@@ -271,7 +275,9 @@ public class CustomContentInstant extends ContentInstant
 		which += 5;
 		if (which >= ordered.numChildren())
 			return;
-		((Switch) ordered.getChild(which)).setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
+		BranchGroup bg = (BranchGroup) ordered.getChild(which); 
+		Switch s = (Switch) bg.getChild(0);
+		s.setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
 	}
 
 	private void setSwitch(final int which, final boolean on)
