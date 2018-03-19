@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Node;
+import org.scijava.java3d.OrderedGroup;
 import org.scijava.java3d.Switch;
 import org.scijava.java3d.Transform3D;
 import org.scijava.java3d.TransformGroup;
@@ -86,6 +87,12 @@ public class CustomContentInstant extends ContentInstant
 
 	public CustomContentInstant(final String name)
 	{
+		// Default is to be ordered
+		this(name, true);
+	}
+
+	public CustomContentInstant(final String name, boolean isOrdered)
+	{
 		super(name);
 
 		setCapability(BranchGroup.ALLOW_DETACH);
@@ -101,8 +108,8 @@ public class CustomContentInstant extends ContentInstant
 		localRotate.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		localTranslate.addChild(localRotate);
 
-		ordered = new Group();
-		ordered.setCapability(Group.ALLOW_CHILDREN_EXTEND);		
+		ordered = (isOrdered) ? new OrderedGroup() : new Group();
+		ordered.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		for (int i = 0; i < 5; i++)
 		{
 			final Switch s = new Switch();
@@ -239,7 +246,7 @@ public class CustomContentInstant extends ContentInstant
 	}
 
 	/**
-	 * Adds a custom switchable item to the content. The content can be optionally displayed. 
+	 * Adds a custom switchable item to the content. The content can be optionally displayed.
 	 *
 	 * @return the switch number
 	 */
@@ -275,7 +282,7 @@ public class CustomContentInstant extends ContentInstant
 		which += 5;
 		if (which >= ordered.numChildren())
 			return;
-		BranchGroup bg = (BranchGroup) ordered.getChild(which); 
+		BranchGroup bg = (BranchGroup) ordered.getChild(which);
 		Switch s = (Switch) bg.getChild(0);
 		s.setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
 	}

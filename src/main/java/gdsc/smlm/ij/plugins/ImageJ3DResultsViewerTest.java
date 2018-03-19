@@ -165,7 +165,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		// This does since ItemGeometryNode uses a Group to show the points as individual shapes
 		// and the CustomContentInstant uses a group not an ordered group so show all the adornments.
 		IJ.showStatus("Displaying points ...");
-		final CustomContent c = new CustomContent("Test");
+		final CustomContent c = new CustomContent("Test", false);
 		final ContentInstant content = c.getCurrent();
 		content.display(new ItemGeometryNode(pointGroup));
 		univ.addContent(c);

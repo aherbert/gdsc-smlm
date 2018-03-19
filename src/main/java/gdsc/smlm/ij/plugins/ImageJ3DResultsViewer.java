@@ -997,7 +997,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		IJ.showStatus("Creating 3D content ...");
 
 		// Use custom content to support adding new switchable nodes
-		CustomContent content = new CustomContent(name);
+		CustomContent content = new CustomContent(name, !settings.getSupportDynamicTransparency());
 		CustomContentInstant contentInstance = (CustomContentInstant) content.getCurrent();
 		//contentInstance.setColor(mesh.getColor());
 		contentInstance.setTransparency((float) settings.getTransparency());
