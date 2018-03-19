@@ -484,7 +484,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// Find in the list of selected 
 			int switchIndex = findSelected(r);
-			
+
 			if (switchIndex == -1)
 			{
 				switchIndex = addToSelected(r);
@@ -519,7 +519,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return -1;
 		}
 
-
 		private int addToSelected(PeakResult r)
 		{
 			// Find the first available index
@@ -541,7 +540,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 			return switchIndex;
 		}
-		
+
 		private int findEmpty()
 		{
 			for (int i = 0; i < selected.size(); i++)
@@ -551,9 +550,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return i;
 			}
 			return -1;
-		}		
+		}
 
-		
 		public void deselect(int index)
 		{
 			if (index < 0 || index >= points.size())
@@ -570,16 +568,27 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				selected.setf(switchIndex, null);
 			}
 		}
-		
+
 		public void clearSelected()
 		{
 			for (int i = 0; i < selected.size(); i++)
 			{
 				contentInstance.setCustomSwitch(i, false);
 				selected.setf(i, null);
-			}			
+			}
 		}
-		
+
+		public void select(PeakResult r)
+		{
+			select(results.indexOf(r));
+		}
+
+		@SuppressWarnings("unused")
+		public void deselect(PeakResult r)
+		{
+			deselect(results.indexOf(r));
+		}
+
 		public void setPointSize(float f)
 		{
 			if (rendering == Rendering.POINT)
@@ -998,12 +1007,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// Use custom content to support adding new switchable nodes
 		CustomContent content = new CustomContent(name, !settings.getSupportDynamicTransparency());
-		CustomContentInstant contentInstance = (CustomContentInstant) content.getCurrent();
+		CustomContentInstant contentInstant = (CustomContentInstant) content.getCurrent();
 		//contentInstance.setColor(mesh.getColor());
-		contentInstance.setTransparency((float) settings.getTransparency());
-		contentInstance.setShaded(settings.getShaded());
-		contentInstance.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
-		contentInstance.display(contentNode);
+		contentInstant.setTransparency((float) settings.getTransparency());
+		contentInstant.setShaded(settings.getShaded());
+		contentInstant.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
+		contentInstant.display(contentNode);
 
 		createHighlightColour(settings.getHighlightColour());
 
@@ -1012,16 +1021,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		content.setLocked(true);
 
 		// Set up the click selection node
-		data.createClickSelectionNode(contentInstance);
+		data.createClickSelectionNode(contentInstant);
 
 		// Preserve orientation on the content
+		ResultsMetaData oldData = null;
 		boolean auto = univ.getAutoAdjustView();
-		if (univ.getContent(name) == null)
+		Content oldContent = univ.getContent(name);
+		if (oldContent == null)
 		{
 			univ.setAutoAdjustView(true);
 		}
 		else
 		{
+			if (oldContent != null && oldContent.getUserData() instanceof ResultsMetaData)
+			{
+				oldData = (ResultsMetaData) oldContent.getUserData();
+			}
 			univ.removeContent(name);
 			univ.setAutoAdjustView(false);
 		}
@@ -1043,6 +1058,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 		}
 		univ.setAutoAdjustView(auto);
+
+		// Reselect
+		if (oldData != null)
+		{
+			for (PeakResult r : oldData.selected)
+				data.select(r);
+		}
 
 		IJ.showStatus("");
 	}
