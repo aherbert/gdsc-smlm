@@ -118,7 +118,7 @@ public class ItemGeometryNode extends ContentNode
 			return;
 
 		Point3f[] points = pointGroup.getPoints();
-		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
+		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 
 	@Override

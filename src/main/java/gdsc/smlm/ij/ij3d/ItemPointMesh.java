@@ -196,6 +196,16 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
+	 */
+	public Point3f getCoordinate(int i)
+	{
+		return mesh.get(i);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -238,6 +248,6 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	{
 		final Point3f[] points = new Point3f[size()];
 		mesh.toArray(points);
-		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
+		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 }

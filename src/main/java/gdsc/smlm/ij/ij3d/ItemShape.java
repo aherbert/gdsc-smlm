@@ -1,6 +1,7 @@
 package gdsc.smlm.ij.ij3d;
 
 import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Point3f;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -26,7 +27,16 @@ public interface ItemShape
 	 * @return the size
 	 */
 	public int size();
-	
+
+	/**
+	 * Gets the coordinate of the specified item.
+	 *
+	 * @param i
+	 *            the index
+	 * @return the coordinate
+	 */
+	public Point3f getCoordinate(int i);
+
 	/**
 	 * Sets the color for each item.
 	 *
@@ -34,7 +44,7 @@ public interface ItemShape
 	 *            the new color
 	 */
 	public void setItemColor(final Color3f color);
-	
+
 	/**
 	 * Sets the color for each item.
 	 *

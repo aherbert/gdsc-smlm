@@ -592,6 +592,16 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
+	 */
+	public Point3f getCoordinate(int i)
+	{
+		return points[i];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -642,6 +652,6 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	@Override
 	public void calculateMinMaxCenterPoint(Point3f min, Point3f max, Point3f center)
 	{
-		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
+		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 }

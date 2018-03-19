@@ -46,7 +46,7 @@ import org.scijava.vecmath.Vector3f;
  */
 public class ItemGeometryGroup extends Group implements TransparentItemShape
 {
-	private final Color3f DEFAULT_COLOUR = new Color3f(1, 1, 0);
+	private final Color3f DEFAULT_COLOUR = new Color3f(0, 1, 0);
 
 	// Tips: https://webserver2.tecgraf.puc-rio.br/~ismael/Cursos/Cidade_CG/labs/Java3D/Java3D_onlinebook_selman/Htmls/3DJava_Ch04.htm#4
 
@@ -331,11 +331,11 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 
 		// Get the bounds so we can set the centroid and bounds for each object 
 		Bounds bounds = new Shape3D(ga, null).getBounds();
-		
+
 		Transform3D t3d = new Transform3D();
 		Vector3f translate = new Vector3f();
-		Vector3d scale = new Vector3d(); 
-		
+		Vector3d scale = new Vector3d();
+
 		// Handle a single scale
 		final boolean hasSize;
 		if (sizes == null || ItemTriangleMesh.sameSize(sizes))
@@ -354,7 +354,7 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 					coordinates[j + 1] *= sy;
 					coordinates[j + 2] *= sz;
 				}
-				
+
 				// Scale the bounds
 				scale.set(s);
 				t3d.setScale(scale);
@@ -768,6 +768,16 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	public int size()
 	{
 		return points.length;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
+	 */
+	public Point3f getCoordinate(int i)
+	{
+		return points[i];
 	}
 
 	/*
