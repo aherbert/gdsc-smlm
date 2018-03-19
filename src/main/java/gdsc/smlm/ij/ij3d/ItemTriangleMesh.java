@@ -592,11 +592,24 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
+	 */
+	@Override
+	public void setColor(Color3f color)
+	{
+		// Delegate this to the interface implementation.
+		// Allows transparent version to only implement to the interface method.
+		setItemColor(color);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
 	public void setItemColor(Color3f color)
 	{
-		setColor(color);
+		super.setColor(color);
 	}
 
 	/*

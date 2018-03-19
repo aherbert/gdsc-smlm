@@ -196,11 +196,24 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
+	 */
+	@Override
+	public void setColor(Color3f color)
+	{
+		// Delegate this to the interface implementation. 
+		// Allows transparent version to only implement to the interface method.
+		setItemColor(color);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
 	public void setItemColor(Color3f color)
 	{
-		setColor(color);
+		super.setColor(color);
 	}
 
 	/*
@@ -219,12 +232,12 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 		ga.setColors(0, color);
 		changed = true;
 	}
-	
+
 	@Override
 	public void calculateMinMaxCenterPoint(Point3f min, Point3f max, Point3f center)
 	{
 		final Point3f[] points = new Point3f[size()];
-		mesh.toArray(points);		
+		mesh.toArray(points);
 		CustomMeshHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 }

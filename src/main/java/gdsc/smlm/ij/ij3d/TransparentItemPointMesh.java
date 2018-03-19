@@ -139,6 +139,35 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		//this.setGeometry(ga);
 	}
 
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
+	 */
+	public void setItemColor(Color3f color)
+	{
+		if (color == null)
+			color = DEFAULT_COLOR;
+		this.color = color;
+		int size = size();
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		final float[] colors = new float[4 * size];
+		ga.getColors(0, colors);
+		int i = 0;
+		while (i < colors.length)
+		{
+			colors[i++] = color.x;
+			colors[i++] = color.y;
+			colors[i++] = color.z;
+			i++; // Skip over alpha
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
