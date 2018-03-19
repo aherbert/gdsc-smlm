@@ -992,14 +992,48 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (roiPainter != null)
 			roiPainter.selected(selectionStart, selectionEnd);
 	}
-	
+
 	/**
 	 * Adds the mouse listener to the text panel.
 	 *
-	 * @param listener the listener
+	 * @param listener
+	 *            the listener
 	 */
 	public void addTextPanelMouseListener(MouseListener listener)
 	{
 		tp.addMouseListener(listener);
 	}
+
+	/**
+	 * Removes the mouse listener to the text panel.
+	 *
+	 * @param listener
+	 *            the listener
+	 */
+	public void removeTextPanelMouseListener(MouseListener listener)
+	{
+		tp.removeMouseListener(listener);
+	}
+	
+	/**
+	 * Gets the text panel.
+	 *
+	 * @return the text panel
+	 */
+	public TextPanel getTextPanel()
+	{
+		return tp;
+	}
+
+	// TODO - Extend the selection functionality so that selectionListeners can be added
+	// to receive notification whan items from the table are selected. 
+	//	public void addSelectionListener()
+	//	{
+	//		
+	//	}
+	//	
+	//	public void removeSelectionListener()
+	//	{
+	//		
+	//	}
 }

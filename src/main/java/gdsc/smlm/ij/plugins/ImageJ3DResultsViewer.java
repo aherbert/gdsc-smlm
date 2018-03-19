@@ -108,6 +108,7 @@ import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.UpdateableItemShape;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
+import gdsc.smlm.ij.utils.TextPanelMouseListener;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
@@ -116,6 +117,7 @@ import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -126,6 +128,7 @@ import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
+import ij.text.TextPanel;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.ContentNode;
@@ -330,6 +333,65 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ResultsMetaData
 	{
+		private class TableSelectedListener extends TextPanelMouseListener
+		{
+			ResultsMetaData data;
+
+			public TableSelectedListener(ResultsMetaData data)
+			{
+				this.data = data;
+			}
+
+			@Override
+			protected void selected(int selectedIndex)
+			{
+				if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
+					return;
+				clearSelected();
+				data.selectFromCounter(getCounter(textPanel.getLine(selectedIndex)));
+			}
+
+			private int getCounter(String line)
+			{
+				int i = line.indexOf('\t');
+				if (i != -1)
+				{
+					try
+					{
+						return Integer.parseInt(line.substring(0, i));
+					}
+					catch (NumberFormatException e)
+					{
+					}
+				}
+				return -1;
+			}
+
+			@Override
+			protected void selected(int selectionStart, int selectionEnd)
+			{
+				if (selectionStart < 0 || selectionStart >= textPanel.getLineCount())
+					return;
+				if (selectionEnd < selectionStart || selectionEnd >= textPanel.getLineCount())
+					return;
+				clearSelected();
+				while (selectionStart <= selectionEnd)
+				{
+					data.selectFromCounter(getCounter(textPanel.getLine(selectionStart)));
+					selectionStart++;
+				}
+			}
+
+			public TextPanel getTextPanel()
+			{
+				return textPanel;
+			}
+		}
+
+		TableSelectedListener tableSelectedListener;
+		IJTablePeakResults table;
+		TIntObjectHashMap<PeakResult> map = new TIntObjectHashMap<PeakResult>();
+
 		Color3f highlightColor;
 		final ImageJ3DResultsViewerSettings settings;
 
@@ -356,6 +418,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
 				TurboList<Point3f> points, Point3f[] sizes)
 		{
+			tableSelectedListener = new TableSelectedListener(this);
 			this.settings = settings;
 			this.results = results;
 			this.points = points;
@@ -604,6 +667,37 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.highlightColor = ImageJ3DResultsViewer.highlightColor;
 			if (outline != null)
 				outline.setColor(highlightColor);
+		}
+
+		public void setTable(IJTablePeakResults table)
+		{
+			// Use a listener to map clicked results back onto the image
+			if (table != null)
+			{
+				TextPanel tp = table.getTextPanel();
+				if (tableSelectedListener.getTextPanel() != tp)
+				{
+					map.clear();
+					tableSelectedListener.setTextPanel(tp);
+				}
+			}
+			else
+			{
+				map.clear();
+				tableSelectedListener.setTextPanel(null);
+			}
+		}
+
+		public void selectFromCounter(int key)
+		{
+			PeakResult r = map.get(key);
+			if (r != null)
+				select(r);
+		}
+
+		public void addToMap(int key, PeakResult p)
+		{
+			map.put(key, p);
 		}
 	}
 
@@ -927,16 +1021,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			IJ.showStatus("");
 			return;
 		}
-
-		// Test object rendering with a small results set
-		//		MemoryPeakResults results2 = results;
-		//		results = new MemoryPeakResults();
-		//		results.copySettings(results2);
-		//		results.add(results2.getFirst());
-		//		results.add(results2.getFirst().clone());
-		//		results.get(1).setZPosition(results.get(0).getZPosition() + 2);
-		//		results.add(results2.getFirst().clone());
-		//		results.get(2).setZPosition(results.get(0).getZPosition() - 2);
 
 		// Determine if the drawing mode is supported and compute the point size
 		final Point3f[] sphereSize = createSphereSize(results, settings);
@@ -1873,8 +1957,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 						{
 							// Output the result to a table.
 							// Just create a table and add to it.
-							IJTablePeakResults table = createTable(results);
+							IJTablePeakResults table = createTable(results, data);
 							table.add(p);
+							data.addToMap(table.size(), p);
 							table.flush();
 						}
 
@@ -1886,7 +1971,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 			}
 
-			private IJTablePeakResults createTable(MemoryPeakResults results)
+			private IJTablePeakResults createTable(MemoryPeakResults results, ResultsMetaData data)
 			{
 				String name = results.getName();
 				IJTablePeakResults table = resultsTables.get(name);
@@ -1914,6 +1999,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					table.begin();
 					resultsTables.put(name, table);
 				}
+				data.setTable(table);
 				return table;
 			}
 

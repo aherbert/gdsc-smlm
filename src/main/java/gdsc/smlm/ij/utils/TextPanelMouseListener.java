@@ -27,18 +27,36 @@ public abstract class TextPanelMouseListener implements MouseListener
 	protected TextPanel textPanel;
 
 	/**
+	 * Instantiates a new text panel mouse listener.
+	 */
+	public TextPanelMouseListener()
+	{
+	}
+
+	/**
+	 * Instantiates a new text panel mouse listener.
+	 *
 	 * @param textPanel
 	 *            The text panel to listen to for mouse events
-	 * @param title
-	 *            The title of the image to add the ROI to
-	 * @param coordProvider
-	 *            Provides coordinates from the lines selected in the text panel
 	 */
 	public TextPanelMouseListener(TextPanel textPanel)
 	{
-		// Check if the image is displayed
+		setTextPanel(textPanel);
+	}
+
+	/**
+	 * Sets the text panel.
+	 *
+	 * @param textPanel
+	 *            the new text panel
+	 */
+	public void setTextPanel(TextPanel textPanel)
+	{
+		if (this.textPanel != null)
+			this.textPanel.removeMouseListener(this);
 		this.textPanel = textPanel;
-		textPanel.addMouseListener(this);
+		if (this.textPanel != null)
+			this.textPanel.addMouseListener(this);
 	}
 
 	/*
@@ -58,7 +76,8 @@ public abstract class TextPanelMouseListener implements MouseListener
 	/**
 	 * Trigger that a single line from the panel has been selected.
 	 *
-	 * @param selectedIndex the selected index
+	 * @param selectedIndex
+	 *            the selected index
 	 */
 	protected abstract void selected(int selectedIndex);
 
