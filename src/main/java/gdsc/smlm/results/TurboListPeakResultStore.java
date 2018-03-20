@@ -27,7 +27,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores peak results using a TurboList. This is similar to an TurboList but does not have concurrency checking.
+ * Stores peak results using a TurboList. This is similar to an ArrayList but does not have concurrency checking.
  */
 public class TurboListPeakResultStore implements PeakResultStore
 {
