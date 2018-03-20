@@ -152,4 +152,30 @@ public interface PeakResultStore
 	 *            the random generator
 	 */
 	public void shuffle(final RandomGenerator randomGenerator);
+
+	/**
+	 * Returns the index of the first occurrence of the specified result
+	 * in this store, or -1 if this list does not contain the element.
+	 * More formally, returns the lowest index <tt>i</tt> such that
+	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
+	 * or -1 if there is no such index.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the index (or -1)
+	 */
+	public int indexOf(PeakResult result);
+
+	/**
+	 * Returns the index of the last occurrence of the specified result
+	 * in this store, or -1 if this list does not contain the element.
+	 * More formally, returns the highest index <tt>i</tt> such that
+	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
+	 * or -1 if there is no such index.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the index (or -1)
+	 */
+	public int lastIndexOf(PeakResult result);
 }

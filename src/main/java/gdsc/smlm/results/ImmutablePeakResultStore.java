@@ -158,4 +158,14 @@ public class ImmutablePeakResultStore implements PeakResultStore
 	{
 		store.shuffle(randomGenerator);
 	}
+
+	public int indexOf(PeakResult result)
+	{
+		return store.indexOf(result);
+	}
+
+	public int lastIndexOf(PeakResult result)
+	{
+		return store.lastIndexOf(result);
+	}
 }

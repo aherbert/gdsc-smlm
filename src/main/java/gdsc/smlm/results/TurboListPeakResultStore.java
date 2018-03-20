@@ -251,4 +251,24 @@ public class TurboListPeakResultStore implements PeakResultStore
 	{
 		Collections.shuffle(results, RandomAdaptor.createAdaptor(randomGenerator));
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#indexOf(gdsc.smlm.results.PeakResult)
+	 */
+	public int indexOf(PeakResult result)
+	{
+		return results.indexOf(result);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#lastIndexOf(gdsc.smlm.results.PeakResult)
+	 */
+	public int lastIndexOf(PeakResult result)
+	{
+		return results.lastIndexOf(result);
+	}
 }

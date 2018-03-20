@@ -2302,13 +2302,6 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 */
 	public int indexOf(PeakResult result)
 	{
-		if (result == null)
-			return -1;
-		for (int i = 0, size = size(); i < size; i++)
-		{
-			if (getf(i) == result)
-				return i;
-		}
-		return -1;
+		return results.indexOf(result);
 	}
 }

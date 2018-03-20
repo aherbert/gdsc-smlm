@@ -250,8 +250,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 		}
 		return copy();
 	}
-	
-	
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -341,5 +340,49 @@ public class ArrayPeakResultStore implements PeakResultStore
 			results[i] = results[j];
 			results[j] = tmp;
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#indexOf(gdsc.smlm.results.PeakResult)
+	 */
+	public int indexOf(PeakResult result)
+	{
+		if (result == null)
+		{
+			for (int i = 0; i < size; i++)
+				if (results[i] == null)
+					return i;
+		}
+		else
+		{
+			for (int i = 0; i < size; i++)
+				if (result.equals(results[i]))
+					return i;
+		}
+		return -1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#lastIndexOf(gdsc.smlm.results.PeakResult)
+	 */
+	public int lastIndexOf(PeakResult result)
+	{
+		if (result == null)
+		{
+			for (int i = size; i-- > 0;)
+				if (results[i] == null)
+					return i;
+		}
+		else
+		{
+			for (int i = size; i-- > 0;)
+				if (result.equals(results[i]))
+					return i;
+		}
+		return -1;
 	}
 }
