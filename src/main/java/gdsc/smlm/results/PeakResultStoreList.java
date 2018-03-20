@@ -34,12 +34,26 @@ public interface PeakResultStoreList extends PeakResultStore
 	/**
 	 * Removes the result.
 	 *
-	 * @param index the index
+	 * @param index
+	 *            the index
 	 * @return the peak result removed
-     * @throws IndexOutOfBoundsException If the index is invalid
+	 * @throws IndexOutOfBoundsException
+	 *             If the index is invalid
 	 */
 	public PeakResult remove(int index);
-	
+
+	/**
+	 * Removes a range of results.
+	 *
+	 * @param fromIndex
+	 *            the from index
+	 * @param toIndex
+	 *            the to index (inclusive)
+	 * @throws IndexOutOfBoundsException
+	 *             If the index is invalid
+	 */
+	public void remove(int fromIndex, int toIndex);
+
 	/**
 	 * Sort the results.
 	 */

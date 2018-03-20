@@ -48,6 +48,11 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore imple
 		throw new DataException("This result store is immutable");
 	}
 
+	public void remove(int fromIndex, int toIndex)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
 	public void sort()
 	{
 		store.sort();

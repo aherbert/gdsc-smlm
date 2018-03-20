@@ -196,6 +196,15 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	}
 
 	/**
+	 * A version of rangeCheck with lower bounds check
+	 */
+	private void rangeCheckWithLowerBounds(int index)
+	{
+		if (index > size || index < 0)
+			throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+	}
+
+	/**
 	 * Constructs an IndexOutOfBoundsException detail message.
 	 */
 	private String outOfBoundsMsg(int index)
@@ -213,6 +222,28 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 		if (numMoved > 0)
 			System.arraycopy(results, index + 1, results, index, numMoved);
 		results[--size] = null; // Let gc do its work
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int, int)
+	 */
+	public void remove(int fromIndex, int toIndex)
+	{
+		if (fromIndex > toIndex)
+		{
+			throw new IllegalArgumentException("fromIndex must be <= toIndex");
+		}
+		rangeCheckWithLowerBounds(fromIndex);
+		rangeCheck(toIndex); // This is above fromIndex so ignore lower bounds check
+		toIndex++; // Make exclusive
+		int numMoved = size - toIndex;
+		if (numMoved > 0)
+			System.arraycopy(results, toIndex, results, fromIndex, numMoved);
+		// Let gc do its work
+		while (fromIndex++ < toIndex)
+			results[size--] = null;
 	}
 
 	/*

@@ -137,6 +137,23 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int, int)
+	 */
+	public void remove(int fromIndex, int toIndex)
+	{
+		if (fromIndex > toIndex)
+		{
+			throw new IllegalArgumentException("fromIndex must be <= toIndex");
+		}
+		for (int i = toIndex; i >= fromIndex; i--)
+		{
+			results.remove(i);
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResult)
 	 */
 	public boolean remove(PeakResult result)

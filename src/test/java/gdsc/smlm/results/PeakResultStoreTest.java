@@ -190,6 +190,49 @@ public class PeakResultStoreTest
 			store.removeCollection(Arrays.asList(toRemove));
 			assertEquals(list1, list1.length, store);
 		}
+
+		// Can remove range
+		if (!isList)
+			return;
+
+		size = 0;
+		store.clear();
+		for (int i = 0; i < 20; i++)
+		{
+			result = create(r);
+			list[size++] = result;
+			store.add(result);
+		}
+
+		// From the end
+		storeList.remove(size - 1, size - 1);
+		assertEquals(list, --size, store);
+
+		storeList.remove(size - 2, size - 1);
+		size -= 2;
+		assertEquals(list, size, store);
+
+		// From the start
+		storeList.remove(0, 0);
+		list = Arrays.copyOfRange(list, 1, size);
+		size = list.length;
+		assertEquals(list, size, store);
+
+		storeList.remove(0, 1);
+		list = Arrays.copyOfRange(list, 2, size);
+		size = list.length;
+		assertEquals(list, size, store);
+
+		// From the middle
+		storeList.remove(3, 3);
+		System.arraycopy(list, 4, list, 3, size - 4);
+		size--;
+		assertEquals(list, size, store);
+
+		storeList.remove(3, 4);
+		System.arraycopy(list, 5, list, 3, size - 5);
+		size -= 2;
+		assertEquals(list, size, store);
 	}
 
 	private PeakResult create(RandomGenerator r)
