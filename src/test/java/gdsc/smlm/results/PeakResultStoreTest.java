@@ -8,6 +8,7 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.Random;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 
 public class PeakResultStoreTest
@@ -32,8 +33,16 @@ public class PeakResultStoreTest
 		canStoreResults(new ArrayPeakResultStore(capacity));
 	}
 
+	@Test
+	public void canStoreResultsUsingHashSet()
+	{
+		canStoreResults(new SetPeakResultStore(capacity));
+	}
+
 	private void canStoreResults(PeakResultStore store)
 	{
+		final boolean isList = store instanceof PeakResultStoreList;
+		PeakResultStoreList storeList = (isList) ? (PeakResultStoreList) store : null;
 		PeakResult result;
 		RandomGenerator r = new Well19937c(30051977);
 
@@ -49,43 +58,37 @@ public class PeakResultStoreTest
 			result = create(r);
 			list[size++] = result;
 			store.add(result);
-
-			Assert.assertEquals(size, store.size());
-			Assert.assertTrue(result == store.get(i));
-
-			// Can convert to an array
-			PeakResult[] array = store.toArray();
-			Assert.assertEquals(size, array.length);
-			for (int j = 0; j < size; j++)
-				Assert.assertTrue(list[i] == array[i]);
 		}
 
+		assertEquals(list, size, store);
+
 		// Can sort
-		Arrays.sort(list, 0, size);
-		store.sort();
-
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == store.get(i));
-
-		Comparator<PeakResult> c = new Comparator<PeakResult>()
+		if (isList)
 		{
-			public int compare(PeakResult o1, PeakResult o2)
-			{
-				return o1.getOrigX() - o2.getOrigX();
-			}
-		};
-		Arrays.sort(list, 0, size, c);
-		store.sort(c);
+			Arrays.sort(list, 0, size);
+			storeList.sort();
 
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == store.get(i));
+			for (int i = 0; i < size; i++)
+				Assert.assertTrue(list[i] == storeList.get(i));
+
+			Comparator<PeakResult> c = new Comparator<PeakResult>()
+			{
+				public int compare(PeakResult o1, PeakResult o2)
+				{
+					return o1.getOrigX() - o2.getOrigX();
+				}
+			};
+			Arrays.sort(list, 0, size, c);
+			storeList.sort(c);
+
+			for (int i = 0; i < size; i++)
+				Assert.assertTrue(list[i] == storeList.get(i));
+		}
 
 		// Can trim to size
 		store.trimToSize();
-		Assert.assertEquals(size, store.size());
 
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == store.get(i));
+		assertEquals(list, size, store);
 
 		// Can remove null results
 		store.add(null);
@@ -107,15 +110,12 @@ public class PeakResultStoreTest
 				return t == null;
 			}
 		});
-		Assert.assertEquals(size, store.size());
-
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == store.get(i));
+		assertEquals(list, size, store);
 
 		// Can clear
 		size = 0;
 		store.clear();
-		Assert.assertEquals(size, store.size());
+		assertEquals(list, size, store);
 
 		// Can add collection
 		for (int i = 0; i < 10; i++)
@@ -124,9 +124,7 @@ public class PeakResultStoreTest
 			list[size++] = result;
 		}
 		store.addCollection(Arrays.asList(Arrays.copyOf(list, size)));
-		Assert.assertEquals(size, store.size());
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == store.get(i));
+		assertEquals(list, size, store);
 
 		// Can add array
 		size = 0;
@@ -137,16 +135,61 @@ public class PeakResultStoreTest
 			list[size++] = result;
 		}
 		store.addArray(Arrays.copyOf(list, size));
-		Assert.assertEquals(size, store.size());
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == store.get(i));
+		assertEquals(list, size, store);
 
 		// Can copy
 		PeakResultStore copy = store.copy();
 		Assert.assertNotEquals(copy, store);
-		Assert.assertEquals(size, copy.size());
-		for (int i = 0; i < size; i++)
-			Assert.assertTrue(list[i] == copy.get(i));
+		assertEquals(list, size, store);
+
+		// Can remove single
+		for (int j = 0; j < 5; j++)
+		{
+			size = 0;
+			store.clear();
+			PeakResult toRemove = null;
+			for (int i = 0; i < 5; i++)
+			{
+				result = create(r);
+				if (j != i)
+					list[size++] = result;
+				else
+					toRemove = result;
+				store.add(result);
+			}
+			Assert.assertNotEquals(size, store.size());
+			store.remove(toRemove);
+			assertEquals(list, size, store);
+		}
+
+		// Can remove collection
+		for (int j = 0; j < 5; j++)
+		{
+			size = 0;
+			store.clear();
+			for (int i = 0; i < 20; i++)
+			{
+				result = create(r);
+				list[size++] = result;
+				store.add(result);
+			}
+
+			int[] indices = Random.sample(3, size, r);
+			Arrays.sort(indices);
+			PeakResult[] list1 = new PeakResult[size - indices.length];
+			PeakResult[] toRemove = new PeakResult[indices.length];
+			for (int i = 0; i < indices.length; i++)
+			{
+				toRemove[i] = list[indices[i]];
+			}
+			for (int i = 0, k = 0; i < size; i++)
+			{
+				if (Arrays.binarySearch(indices, i) < 0)
+					list1[k++] = list[i];
+			}
+			store.removeCollection(Arrays.asList(toRemove));
+			assertEquals(list1, list1.length, store);
+		}
 	}
 
 	private PeakResult create(RandomGenerator r)
@@ -154,5 +197,34 @@ public class PeakResultStoreTest
 		return new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(), r.nextFloat(),
 				PeakResult.createParams(r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat()),
 				null);
+	}
+
+	private void assertEquals(PeakResult[] list, int size, PeakResultStore store)
+	{
+		Assert.assertEquals(size, store.size());
+
+		final boolean isList = store instanceof PeakResultStoreList;
+		if (isList)
+		{
+			PeakResultStoreList storeList = (PeakResultStoreList) store;
+			for (int i = 0; i < size; i++)
+			{
+				Assert.assertTrue(list[i] == storeList.get(i));
+				Assert.assertEquals(i, storeList.indexOf(storeList.get(i)));
+			}
+		}
+		// Set equals
+		PeakResult[] list2 = store.toArray();
+		Assert.assertEquals(size, list2.length);
+		for (int i = 0; i < size; i++)
+			Assert.assertTrue(contains(list, size, list2[i]));
+	}
+
+	private boolean contains(PeakResult[] list, int size, PeakResult peakResult)
+	{
+		for (int i = 0; i < size; i++)
+			if (list[i] == peakResult)
+				return true;
+		return false;
 	}
 }

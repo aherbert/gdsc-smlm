@@ -1,9 +1,6 @@
 package gdsc.smlm.results;
 
 import java.util.Collection;
-import java.util.Comparator;
-
-import org.apache.commons.math3.random.RandomGenerator;
 
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -27,15 +24,6 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 public interface PeakResultStore
 {
 	/**
-	 * Gets the result.
-	 *
-	 * @param index
-	 *            the index
-	 * @return the peak result
-	 */
-	public PeakResult get(int index);
-
-	/**
 	 * Get the size.
 	 *
 	 * @return the size
@@ -47,33 +35,99 @@ public interface PeakResultStore
 	 *
 	 * @param result
 	 *            the result
+	 * @return true if the store is changed
 	 */
-	public void add(PeakResult result);
+	public boolean add(PeakResult result);
 
 	/**
 	 * Add all results.
 	 *
 	 * @param results
 	 *            the results
+	 * @return true if the store is changed
 	 */
-	public void addCollection(Collection<PeakResult> results);
+	public boolean addCollection(Collection<PeakResult> results);
 
 	/**
 	 * Add all results.
 	 *
 	 * @param results
 	 *            the results
+	 * @return true if the store is changed
 	 */
-	public void addArray(PeakResult[] results);
+	public boolean addArray(PeakResult[] results);
 
 	/**
 	 * Adds the results.
 	 *
 	 * @param results
 	 *            the results
+	 * @return true if the store is changed
 	 */
-	public void addStore(PeakResultStore results);
+	public boolean addStore(PeakResultStore results);
 
+	/**
+	 * Remove a result. Not synchronized.
+	 *
+	 * @param result
+	 *            the result
+	 * @return true if the store is changed
+	 */
+	public boolean remove(PeakResult result);
+
+	/**
+	 * Remove all results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return true if the store is changed
+	 */
+	public boolean removeCollection(Collection<PeakResult> results);
+
+	/**
+	 * Remove all results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return true if the store is changed
+	 */
+	public boolean removeArray(PeakResult[] results);
+
+	/**
+	 * Removes the results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return true if the store is changed
+	 */
+	public boolean removeStore(PeakResultStore results);
+
+	/**
+	 * Retain all results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return true if the store is changed
+	 */
+	public boolean retainCollection(Collection<PeakResult> results);
+
+	/**
+	 * Retain all results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return true if the store is changed
+	 */
+	public boolean retainArray(PeakResult[] results);
+
+	/**
+	 * Retains the results.
+	 *
+	 * @param results
+	 *            the results
+	 * @return true if the store is changed
+	 */
+	public boolean retainStore(PeakResultStore results);	
 	/**
 	 * Clear the results.
 	 */
@@ -84,19 +138,6 @@ public interface PeakResultStore
 	 * the storage of an instance.
 	 */
 	public void trimToSize();
-
-	/**
-	 * Sort the results.
-	 */
-	public void sort();
-
-	/**
-	 * Sort the results.
-	 *
-	 * @param comparator
-	 *            the comparator
-	 */
-	public void sort(Comparator<PeakResult> comparator);
 
 	/**
 	 * Convert to an array. This is a new allocation of storage space.
@@ -146,36 +187,18 @@ public interface PeakResultStore
 	public PeakResult[] subset(PeakResultPredicate filter);
 
 	/**
-	 * Shuffle the results.
+	 * Returns <tt>true</tt> if this store contains the specified result.
+	 * More formally, returns <tt>true</tt> if and only if this store contains
+	 * at least one element <tt>e</tt> such that
+	 * <tt>(result==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;result.equals(e))</tt>.
 	 *
-	 * @param randomGenerator
-	 *            the random generator
-	 */
-	public void shuffle(final RandomGenerator randomGenerator);
-
-	/**
-	 * Returns the index of the first occurrence of the specified result
-	 * in this store, or -1 if this list does not contain the element.
-	 * More formally, returns the lowest index <tt>i</tt> such that
-	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
+	 * @param result
+	 *            element whose presence in this list is to be tested
+	 * @return <tt>true</tt> if this list contains the specified result
 	 *
 	 * @param result
 	 *            the result
-	 * @return the index (or -1)
+	 * @return true, if successful
 	 */
-	public int indexOf(PeakResult result);
-
-	/**
-	 * Returns the index of the last occurrence of the specified result
-	 * in this store, or -1 if this list does not contain the element.
-	 * More formally, returns the highest index <tt>i</tt> such that
-	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
-	 *
-	 * @param result
-	 *            the result
-	 * @return the index (or -1)
-	 */
-	public int lastIndexOf(PeakResult result);
+	public boolean contains(PeakResult result);
 }

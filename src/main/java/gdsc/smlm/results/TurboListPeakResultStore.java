@@ -29,7 +29,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 /**
  * Stores peak results using a TurboList. This is similar to an ArrayList but does not have concurrency checking.
  */
-public class TurboListPeakResultStore implements PeakResultStore
+public class TurboListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection
 {
 	/** The results. */
 	private TurboList<PeakResult> results;
@@ -59,7 +59,7 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#get(int)
+	 * @see gdsc.smlm.results.PeakResultStoreList#get(int)
 	 */
 	public PeakResult get(int index)
 	{
@@ -81,9 +81,9 @@ public class TurboListPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResult)
 	 */
-	public void add(PeakResult result)
+	public boolean add(PeakResult result)
 	{
-		results.add(result);
+		return results.add(result);
 	}
 
 	/*
@@ -91,9 +91,9 @@ public class TurboListPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addCollection(java.util.Collection)
 	 */
-	public void addCollection(Collection<PeakResult> results)
+	public boolean addCollection(Collection<PeakResult> results)
 	{
-		this.results.addAll(results);
+		return this.results.addAll(results);
 	}
 
 	/*
@@ -101,9 +101,9 @@ public class TurboListPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addArray(gdsc.smlm.results.PeakResult[])
 	 */
-	public void addArray(PeakResult[] results)
+	public boolean addArray(PeakResult[] results)
 	{
-		this.results.addAll(Arrays.asList(results));
+		return this.results.addAll(Arrays.asList(results));
 	}
 
 	/*
@@ -111,18 +111,112 @@ public class TurboListPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addStore(gdsc.smlm.results.PeakResultStore)
 	 */
-	public void addStore(PeakResultStore results)
+	public boolean addStore(PeakResultStore results)
 	{
-		if (results instanceof TurboListPeakResultStore)
+		if (results instanceof PeakResultStoreCollection)
 		{
-			this.results.addAll(((TurboListPeakResultStore) results).results);
+			return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
 		}
 		else
 		{
-			addArray(results.toArray());
+			return addArray(results.toArray());
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int)
+	 */
+	public PeakResult remove(int index)
+	{
+		return results.remove(index);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResult)
+	 */
+	public boolean remove(PeakResult result)
+	{
+		return results.remove(result);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#removeCollection(java.util.Collection)
+	 */
+	public boolean removeCollection(Collection<PeakResult> results)
+	{
+		return this.results.removeAll(results);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#removeArray(gdsc.smlm.results.PeakResult[])
+	 */
+	public boolean removeArray(PeakResult[] results)
+	{
+		return this.results.removeAll(Arrays.asList(results));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#removeStore(gdsc.smlm.results.PeakResultStore)
+	 */
+	public boolean removeStore(PeakResultStore results)
+	{
+		if (results instanceof PeakResultStoreCollection)
+		{
+			return this.results.removeAll(((PeakResultStoreCollection) results).getCollectionReference());
+		}
+		else
+		{
+			return removeArray(results.toArray());
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#retainCollection(java.util.Collection)
+	 */
+	public boolean retainCollection(Collection<PeakResult> results)
+	{
+		return this.results.retainAll(results);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#retainArray(gdsc.smlm.results.PeakResult[])
+	 */
+	public boolean retainArray(PeakResult[] results)
+	{
+		return this.results.retainAll(Arrays.asList(results));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#retainStore(gdsc.smlm.results.PeakResultStore)
+	 */
+	public boolean retainStore(PeakResultStore results)
+	{
+		if (results instanceof PeakResultStoreCollection)
+		{
+			return this.results.retainAll(((PeakResultStoreCollection) results).getCollectionReference());
+		}
+		else
+		{
+			return retainArray(results.toArray());
+		}
+	}	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -146,7 +240,7 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#sort()
+	 * @see gdsc.smlm.results.PeakResultStoreList#sort()
 	 */
 	public void sort()
 	{
@@ -156,7 +250,7 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#sort(java.util.Comparator)
+	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
 	 */
 	public void sort(Comparator<PeakResult> comparator)
 	{
@@ -245,7 +339,7 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#shuffle(org.apache.commons.math3.random.RandomGenerator)
+	 * @see gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
 	 */
 	public void shuffle(RandomGenerator randomGenerator)
 	{
@@ -255,7 +349,7 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#indexOf(gdsc.smlm.results.PeakResult)
+	 * @see gdsc.smlm.results.PeakResultStoreList#indexOf(gdsc.smlm.results.PeakResult)
 	 */
 	public int indexOf(PeakResult result)
 	{
@@ -265,10 +359,41 @@ public class TurboListPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#lastIndexOf(gdsc.smlm.results.PeakResult)
+	 * @see gdsc.smlm.results.PeakResultStoreList#lastIndexOf(gdsc.smlm.results.PeakResult)
 	 */
 	public int lastIndexOf(PeakResult result)
 	{
 		return results.lastIndexOf(result);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#contains(gdsc.smlm.results.PeakResult)
+	 */
+	public boolean contains(PeakResult result)
+	{
+		return results.contains(result);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStoreCollection#getCollection()
+	 */
+	@SuppressWarnings("unchecked")
+	public Collection<PeakResult> getCollection()
+	{
+		return (Collection<PeakResult>) results.clone();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStoreCollection#getCollectionReference()
+	 */
+	public Collection<PeakResult> getCollectionReference()
+	{
+		return results;
 	}
 }

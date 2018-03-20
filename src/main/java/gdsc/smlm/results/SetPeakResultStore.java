@@ -1,23 +1,16 @@
 package gdsc.smlm.results;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 
-import org.apache.commons.math3.random.RandomAdaptor;
-import org.apache.commons.math3.random.RandomGenerator;
-
-import gdsc.core.utils.TurboList;
-import gdsc.core.utils.TurboList.SimplePredicate;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
- * Copyright (C) 2017 Alex Herbert
+ * Copyright (C) 2018 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -28,22 +21,22 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
  *---------------------------------------------------------------------------*/
 
 /**
- * Stores peak results using an ArrayList.
+ * Stores peak results using a set. This is similar to an HashSet but does not have concurrency checking.
  */
-public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection
+public class SetPeakResultStore implements PeakResultStore, PeakResultStoreCollection
 {
 	/** The results. */
-	private ArrayList<PeakResult> results;
+	private HashSet<PeakResult> results;
 
 	/**
-	 * Instantiates a new array list peak results store.
+	 * Instantiates a new set peak results store.
 	 *
 	 * @param capacity
 	 *            the capacity
 	 */
-	public ArrayListPeakResultStore(int capacity)
+	public SetPeakResultStore(int capacity)
 	{
-		this.results = new ArrayList<PeakResult>(capacity);
+		this.results = new HashSet<PeakResult>(capacity);
 	}
 
 	/**
@@ -52,19 +45,9 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 * @param store
 	 *            the store to copy
 	 */
-	public ArrayListPeakResultStore(ArrayListPeakResultStore store)
+	public SetPeakResultStore(SetPeakResultStore store)
 	{
-		this.results = new ArrayList<PeakResult>(store.results);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#get(int)
-	 */
-	public PeakResult get(int index)
-	{
-		return results.get(index);
+		this.results = new HashSet<PeakResult>(store.results);
 	}
 
 	/*
@@ -122,16 +105,6 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 		{
 			return addArray(results.toArray());
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int)
-	 */
-	public PeakResult remove(int index)
-	{
-		return results.remove(index);
 	}
 
 	/*
@@ -235,27 +208,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 */
 	public void trimToSize()
 	{
-		results.trimToSize();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#sort()
-	 */
-	public void sort()
-	{
-		Collections.sort(results);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
-	 */
-	public void sort(Comparator<PeakResult> comparator)
-	{
-		Collections.sort(results, comparator);
+		//results.trimToSize();
 	}
 
 	/*
@@ -275,7 +228,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 */
 	public PeakResultStore copy()
 	{
-		return new ArrayListPeakResultStore(this);
+		return new SetPeakResultStore(this);
 	}
 
 	/*
@@ -287,9 +240,9 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	{
 		if (deepCopy)
 		{
-			ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
-			for (int i = 0, size = size(); i < size; i++)
-				copy.add(results.get(i).clone());
+			SetPeakResultStore copy = new SetPeakResultStore(size());
+			for (PeakResult r : results)
+				copy.add(r.clone());
 			return copy;
 		}
 		return copy();
@@ -302,21 +255,12 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 */
 	public boolean removeIf(final PeakResultPredicate filter)
 	{
-		// Util we upgrade the Java version to 1.8 the ArrayList does not support 
-		// predicates so use a TurboList
-		TurboList<PeakResult> temp = new TurboList<PeakResult>(this.results);
-		if (temp.removeIf(new SimplePredicate<PeakResult>()
-		{
-			public boolean test(PeakResult t)
-			{
-				return filter.test(t);
-			}
-		}))
-		{
-			this.results = new ArrayList<PeakResult>(temp);
-			return true;
-		}
-		return false;
+		// Delegate to the list implementation
+		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
+		for (PeakResult r : results)
+			if (filter.test(r))
+				list.add(r);
+		return this.results.removeAll(Arrays.asList(list.toArray()));
 	}
 
 	/*
@@ -326,8 +270,8 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	 */
 	public void forEach(PeakResultProcedure procedure)
 	{
-		for (int i = 0, size = size(); i < size; i++)
-			procedure.execute(results.get(i));
+		for (PeakResult r : results)
+			procedure.execute(r);
 	}
 
 	/*
@@ -338,40 +282,10 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	public PeakResult[] subset(PeakResultPredicate filter)
 	{
 		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
-		for (int i = 0, size = size(); i < size; i++)
-			if (filter.test(results.get(i)))
-				list.add(results.get(i));
+		for (PeakResult r : results)
+			if (filter.test(r))
+				list.add(r);
 		return list.toArray();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
-	 */
-	public void shuffle(RandomGenerator randomGenerator)
-	{
-		Collections.shuffle(results, RandomAdaptor.createAdaptor(randomGenerator));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#indexOf(gdsc.smlm.results.PeakResult)
-	 */
-	public int indexOf(PeakResult result)
-	{
-		return results.indexOf(result);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#lastIndexOf(gdsc.smlm.results.PeakResult)
-	 */
-	public int lastIndexOf(PeakResult result)
-	{
-		return results.lastIndexOf(result);
 	}
 
 	/*

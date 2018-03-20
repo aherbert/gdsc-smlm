@@ -87,7 +87,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * The results.
 	 * This is encapsulated to allow changing the data structure used to store the results.
 	 */
-	protected PeakResultStore results;
+	protected PeakResultStoreList results;
 
 	/**
 	 * Gets the result.
@@ -283,7 +283,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @throws IllegalArgumentException
 	 *             If the store is null
 	 */
-	public MemoryPeakResults(PeakResultStore store) throws IllegalArgumentException
+	public MemoryPeakResults(PeakResultStoreList store) throws IllegalArgumentException
 	{
 		if (store == null)
 			throw new IllegalArgumentException("Store must not be null");
@@ -867,7 +867,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			// Deep copy the objects that are not immutable
 			if (getBounds() != null)
 				copy.setBounds(new Rectangle(getBounds()));
-			copy.results = results.copy(copyResults);
+			copy.results = (PeakResultStoreList) results.copy(copyResults);
 		}
 		return copy;
 	}

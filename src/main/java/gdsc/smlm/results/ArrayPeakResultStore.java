@@ -27,7 +27,7 @@ import gdsc.smlm.results.procedures.PeakResultProcedure;
 /**
  * Stores peak results using an array.
  */
-public class ArrayPeakResultStore implements PeakResultStore
+public class ArrayPeakResultStore implements PeakResultStoreList
 {
 	/** The results. */
 	private PeakResult[] results;
@@ -76,7 +76,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 * <p>
 	 * Note: This does not check against the current size so can return stale data.
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#get(int)
+	 * @see gdsc.smlm.results.PeakResultStoreList#get(int)
 	 */
 	public PeakResult get(int index)
 	{
@@ -121,10 +121,11 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResult)
 	 */
-	public void add(PeakResult result)
+	public boolean add(PeakResult result)
 	{
 		checkCapacity(1);
 		results[size++] = result;
+		return true;
 	}
 
 	/*
@@ -132,9 +133,9 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addAll(java.util.Collection)
 	 */
-	public void addCollection(Collection<PeakResult> results)
+	public boolean addCollection(Collection<PeakResult> results)
 	{
-		addArray(results.toArray(new PeakResult[results.size()]));
+		return addArray(results.toArray(new PeakResult[results.size()]));
 	}
 
 	/*
@@ -142,13 +143,14 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addAll(gdsc.smlm.results.PeakResult[])
 	 */
-	public void addArray(PeakResult[] results)
+	public boolean addArray(PeakResult[] results)
 	{
 		if (results == null)
-			return;
+			return false;
 		checkCapacity(results.length);
 		System.arraycopy(results, 0, this.results, size, results.length);
 		size += results.length;
+		return true;
 	}
 
 	/*
@@ -156,15 +158,191 @@ public class ArrayPeakResultStore implements PeakResultStore
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResultStore)
 	 */
-	public void addStore(PeakResultStore results)
+	public boolean addStore(PeakResultStore results)
 	{
 		if (results instanceof ArrayPeakResultStore)
 		{
-			addArray(((ArrayPeakResultStore) results).results);
+			return addArray(((ArrayPeakResultStore) results).results);
 		}
 		else
 		{
-			addArray(results.toArray());
+			return addArray(results.toArray());
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int)
+	 */
+	public PeakResult remove(int index)
+	{
+		rangeCheck(index);
+		PeakResult oldValue = results[index];
+		fastRemove(index);
+		return oldValue;
+	}
+
+	/**
+	 * Checks if the given index is in range. If not, throws an appropriate
+	 * runtime exception. This method does *not* check if the index is
+	 * negative: It is always used immediately prior to an array access,
+	 * which throws an ArrayIndexOutOfBoundsException if index is negative.
+	 */
+	private void rangeCheck(int index)
+	{
+		if (index >= size)
+			throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+	}
+
+	/**
+	 * Constructs an IndexOutOfBoundsException detail message.
+	 */
+	private String outOfBoundsMsg(int index)
+	{
+		return "Index: " + index + ", Size: " + size;
+	}
+
+	/*
+	 * Private remove method that skips bounds checking and does not
+	 * return the value removed.
+	 */
+	private void fastRemove(int index)
+	{
+		int numMoved = size - index - 1;
+		if (numMoved > 0)
+			System.arraycopy(results, index + 1, results, index, numMoved);
+		results[--size] = null; // Let gc do its work
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResult)
+	 */
+	public boolean remove(PeakResult result)
+	{
+		int index = indexOf(result);
+		if (index != -1)
+		{
+			fastRemove(index);
+			return true;
+		}
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#removeAll(java.util.Collection)
+	 */
+	public boolean removeCollection(Collection<PeakResult> results)
+	{
+		return removeArray(results.toArray(new PeakResult[results.size()]));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#removeAll(gdsc.smlm.results.PeakResult[])
+	 */
+	public boolean removeArray(PeakResult[] results)
+	{
+		if (results == null || results.length == 0)
+			return false;
+		return batchRemove(results, false);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResultStore)
+	 */
+	public boolean removeStore(PeakResultStore results)
+	{
+		if (results instanceof ArrayPeakResultStore)
+		{
+			return removeArray(((ArrayPeakResultStore) results).results);
+		}
+		else
+		{
+			return removeArray(results.toArray());
+		}
+	}
+
+	private boolean batchRemove(PeakResult[] results2, boolean complement)
+	{
+		// Adapted from java.utisl.ArrayList
+
+		ArrayPeakResultStore c = new ArrayPeakResultStore(results2);
+		int r = 0, w = 0;
+		boolean modified = false;
+		try
+		{
+			for (; r < size; r++)
+				if (c.contains(results[r]) == complement)
+					results[w++] = results[r];
+		}
+		finally
+		{
+			// Preserve data even if c.contains() throws.
+			if (r != size)
+			{
+				System.arraycopy(results, r, results, w, size - r);
+				w += size - r;
+			}
+			if (w != size)
+			{
+				// clear to let GC do its work
+				for (int i = w; i < size; i++)
+					results[i] = null;
+				size = w;
+				modified = true;
+			}
+		}
+		return modified;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#retainAll(java.util.Collection)
+	 */
+	public boolean retainCollection(Collection<PeakResult> results)
+	{
+		return retainArray(results.toArray(new PeakResult[results.size()]));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#retainArray(gdsc.smlm.results.PeakResult[])
+	 */
+	public boolean retainArray(PeakResult[] results)
+	{
+		if (results == null || results.length == 0)
+		{
+			boolean result = size != 0;
+			clear();
+			return result;
+		}
+		return batchRemove(results, true);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#retain(gdsc.smlm.results.PeakResultStore)
+	 */
+	public boolean retainStore(PeakResultStore results)
+	{
+		if (results instanceof ArrayPeakResultStore)
+		{
+			return retainArray(((ArrayPeakResultStore) results).results);
+		}
+		else
+		{
+			return retainArray(results.toArray());
 		}
 	}
 
@@ -195,7 +373,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#sort()
+	 * @see gdsc.smlm.results.PeakResultStoreList#sort()
 	 */
 	public void sort()
 	{
@@ -205,7 +383,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#sort(java.util.Comparator)
+	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
 	 */
 	public void sort(Comparator<PeakResult> comparator)
 	{
@@ -328,7 +506,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#shuffle(org.apache.commons.math3.random.RandomGenerator)
+	 * @see gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
 	 */
 	public void shuffle(RandomGenerator randomGenerator)
 	{
@@ -345,7 +523,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#indexOf(gdsc.smlm.results.PeakResult)
+	 * @see gdsc.smlm.results.PeakResultStoreList#indexOf(gdsc.smlm.results.PeakResult)
 	 */
 	public int indexOf(PeakResult result)
 	{
@@ -367,7 +545,7 @@ public class ArrayPeakResultStore implements PeakResultStore
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStore#lastIndexOf(gdsc.smlm.results.PeakResult)
+	 * @see gdsc.smlm.results.PeakResultStoreList#lastIndexOf(gdsc.smlm.results.PeakResult)
 	 */
 	public int lastIndexOf(PeakResult result)
 	{
@@ -385,4 +563,15 @@ public class ArrayPeakResultStore implements PeakResultStore
 		}
 		return -1;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultStore#contains(gdsc.smlm.results.PeakResult)
+	 */
+	public boolean contains(PeakResult result)
+	{
+		return indexOf(result) != -1;
+	}
+
 }

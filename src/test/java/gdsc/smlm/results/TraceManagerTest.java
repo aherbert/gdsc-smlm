@@ -159,7 +159,7 @@ public class TraceManagerTest
 
 	private MemoryPeakResults toPeakResults(Trace... traces)
 	{
-		PeakResultStore results = new ArrayPeakResultStore(traces.length);
+		PeakResultStoreList results = new ArrayPeakResultStore(traces.length);
 		for (Trace t : traces)
 		{
 			results.addStore(t.getPoints());
@@ -183,8 +183,8 @@ public class TraceManagerTest
 
 		for (int i = 0; i < expected.length; i++)
 		{
-			PeakResultStore e = expected[i].getPoints();
-			PeakResultStore a = actual[i].getPoints();
+			PeakResultStoreList e = expected[i].getPoints();
+			PeakResultStoreList a = actual[i].getPoints();
 			Assert.assertEquals("Points are different lengths [" + i + "]", e.size(), a.size());
 			for (int j = 0; j < e.size(); j++)
 			{

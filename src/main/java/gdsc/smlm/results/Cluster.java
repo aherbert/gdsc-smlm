@@ -29,7 +29,7 @@ public class Cluster implements Comparable<Cluster>
 		STANDARD, SIGNAL_WEIGHTED
 	}
 
-	protected PeakResultStore results = new ArrayPeakResultStore(2);
+	protected PeakResultStoreList results = new ArrayPeakResultStore(2);
 	private float[] centroid = null;
 	private int id;
 
@@ -47,7 +47,7 @@ public class Cluster implements Comparable<Cluster>
 		return results.size();
 	}
 
-	public PeakResultStore getPoints()
+	public PeakResultStoreList getPoints()
 	{
 		return results;
 	}
@@ -91,7 +91,7 @@ public class Cluster implements Comparable<Cluster>
 		return centroid;
 	}
 
-	private float[] getCentroid(PeakResultStore results, float[] weights)
+	private float[] getCentroid(PeakResultStoreList results, float[] weights)
 	{
 		centroid = new float[2];
 		double sum = 0;
@@ -339,7 +339,7 @@ public class Cluster implements Comparable<Cluster>
 		if (singles == size())
 			return;
 
-		PeakResultStore newResults = new ArrayPeakResultStore(size());
+		PeakResultStoreList newResults = new ArrayPeakResultStore(size());
 		for (int i = 0; i < singles; i++)
 		{
 			newResults.add(results.get(i));
@@ -376,7 +376,7 @@ public class Cluster implements Comparable<Cluster>
 		}
 		else
 		{
-			PeakResultStore newResults = new ArrayPeakResultStore(size() - 2);
+			PeakResultStoreList newResults = new ArrayPeakResultStore(size() - 2);
 			for (int i = 1, size = size() - 1; i < size; i++)
 				newResults.add(results.get(i));
 			results = newResults;

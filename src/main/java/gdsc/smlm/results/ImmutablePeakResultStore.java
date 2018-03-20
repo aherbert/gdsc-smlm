@@ -1,9 +1,6 @@
 package gdsc.smlm.results;
 
 import java.util.Collection;
-import java.util.Comparator;
-
-import org.apache.commons.math3.random.RandomGenerator;
 
 import gdsc.core.data.DataException;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -42,32 +39,62 @@ public class ImmutablePeakResultStore implements PeakResultStore
 		this.store = store;
 	}
 
-	public PeakResult get(int index)
-	{
-		return new ImmutablePeakResult(store.get(index));
-	}
-
 	public int size()
 	{
 		return store.size();
 	}
 
-	public void add(PeakResult result)
+	public boolean add(PeakResult result)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
-	public void addCollection(Collection<PeakResult> results)
+	public boolean addCollection(Collection<PeakResult> results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
-	public void addArray(PeakResult[] results)
+	public boolean addArray(PeakResult[] results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
-	public void addStore(PeakResultStore results)
+	public boolean addStore(PeakResultStore results)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean remove(PeakResult result)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean removeCollection(Collection<PeakResult> results)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean removeArray(PeakResult[] results)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean removeStore(PeakResultStore results)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean retainCollection(Collection<PeakResult> results)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean retainArray(PeakResult[] results)
+	{
+		throw new DataException("This result store is immutable");
+	}
+
+	public boolean retainStore(PeakResultStore results)
 	{
 		throw new DataException("This result store is immutable");
 	}
@@ -80,16 +107,6 @@ public class ImmutablePeakResultStore implements PeakResultStore
 	public void trimToSize()
 	{
 		store.trimToSize();
-	}
-
-	public void sort()
-	{
-		store.sort();
-	}
-
-	public void sort(Comparator<PeakResult> comparator)
-	{
-		store.sort(comparator);
 	}
 
 	public PeakResult[] toArray()
@@ -154,18 +171,8 @@ public class ImmutablePeakResultStore implements PeakResultStore
 		return makeImmutable(store.subset(filter));
 	}
 
-	public void shuffle(final RandomGenerator randomGenerator)
+	public boolean contains(PeakResult result)
 	{
-		store.shuffle(randomGenerator);
-	}
-
-	public int indexOf(PeakResult result)
-	{
-		return store.indexOf(result);
-	}
-
-	public int lastIndexOf(PeakResult result)
-	{
-		return store.lastIndexOf(result);
+		return store.contains(result);
 	}
 }

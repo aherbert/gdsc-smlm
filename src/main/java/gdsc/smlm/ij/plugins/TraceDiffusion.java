@@ -56,7 +56,7 @@ import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultStore;
+import gdsc.smlm.results.PeakResultStoreList;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
@@ -253,7 +253,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			StoredDataStatistics msdPerMoleculeAdjacent = new StoredDataStatistics();
 			for (Trace trace : traces)
 			{
-				PeakResultStore results = trace.getPoints();
+				PeakResultStoreList results = trace.getPoints();
 				// Sum the MSD and the time
 				final int traceLength = (settings.getTruncate()) ? settings.getMinimumTraceLength() : trace.size();
 

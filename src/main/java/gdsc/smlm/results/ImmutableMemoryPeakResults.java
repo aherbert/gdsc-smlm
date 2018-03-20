@@ -51,7 +51,7 @@ public class ImmutableMemoryPeakResults extends MemoryPeakResults
 	 */
 	public ImmutableMemoryPeakResults(MemoryPeakResults results, boolean copy)
 	{
-		super((copy) ? results.results.copy() : results.results);
+		super((PeakResultStoreList) ((copy) ? results.results.copy() : results.results));
 		copySettings(results);
 		built = true;
 	}
