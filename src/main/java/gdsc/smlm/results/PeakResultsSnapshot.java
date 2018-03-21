@@ -1,5 +1,6 @@
 package gdsc.smlm.results;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -249,7 +250,7 @@ public class PeakResultsSnapshot
 	}
 
 	/**
-	 * Check if the results match the snapshot.
+	 * Check if the snapshot matches the results.
 	 *
 	 * @param peakResults
 	 *            the peak results
@@ -275,5 +276,28 @@ public class PeakResultsSnapshot
 			}
 		}
 		return (this.values[j].equals(digest.digest()));
+	}
+
+	/**
+	 * Check if the snapshot matches the other snapshot.
+	 * <p>
+	 * Note: This will return false if there is no snapshot even if the other
+	 * snapshot is also not valid.
+	 *
+	 * @param other
+	 *            the other snapshot
+	 * @return true, if successful
+	 */
+	public boolean matches(final PeakResultsSnapshot other)
+	{
+		// No match if no snapshot. We don't check if the other snapshot is also invalid.
+		if (size < 0)
+			return false;
+
+		// Check the size.
+		if (size != other.size)
+			return false;
+
+		return Arrays.equals(values, other.values);
 	}
 }

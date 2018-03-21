@@ -15,6 +15,7 @@ public class PeakResultSnapshotTest
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
 		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
 	}
 
 	@Test
@@ -24,6 +25,7 @@ public class PeakResultSnapshotTest
 		PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
 		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
 	}
 
 	@Test
@@ -33,6 +35,7 @@ public class PeakResultSnapshotTest
 		PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
 		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
 	}
 
 	@Test
@@ -42,6 +45,7 @@ public class PeakResultSnapshotTest
 		PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
 		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
 	}
 
 	@Test
@@ -51,6 +55,7 @@ public class PeakResultSnapshotTest
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
 		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
 	}
 
 	@Test
@@ -60,6 +65,7 @@ public class PeakResultSnapshotTest
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
 		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
 	}
 
 	@Test
@@ -68,16 +74,19 @@ public class PeakResultSnapshotTest
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
 		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertFalse(snap.matches(createResults(r, 10, 5, false, false, false, false)));
-		Assert.assertFalse(snap.matches(createResults(r, 1, 5, false, false, false, false)));
-		Assert.assertFalse(snap.matches(createResults(r, 0, 5, false, false, false, false)));
+		for (int size : new int[] { 10, 1, 0 })
+		{
+			PeakResult[] r2 = createResults(r, size, 5, false, false, false, false);
+			Assert.assertFalse(snap.matches(r2));
+			Assert.assertFalse(snap.matches(newPeakResultsSnapshot(r2)));
+		}
 	}
 
 	@Test
 	public void timeDigest()
 	{
 		Assume.assumeTrue(false);
-		
+
 		final RandomGenerator r = new Well19937c();
 		PeakResultsSnapshot snap = new PeakResultsSnapshot();
 		int N = 5;
@@ -85,13 +94,13 @@ public class PeakResultSnapshotTest
 		{
 			PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
 			long time = System.nanoTime();
-			for (int i=N; i-- > 0; )
+			for (int i = N; i-- > 0;)
 				snap.snapshot(-1, r1);
 			time = System.nanoTime() - time;
 			System.out.printf("size = %d, time = %g ms\n", size, (1e-6 * time) / N);
 		}
-	}	
-	
+	}
+
 	private PeakResult[] createResults(RandomGenerator r, int size, int n, boolean withDeviations, boolean withId,
 			boolean withEndFrame, boolean withPrecision)
 	{
