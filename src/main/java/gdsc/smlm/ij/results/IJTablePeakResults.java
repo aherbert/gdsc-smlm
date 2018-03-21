@@ -22,7 +22,7 @@ import gdsc.smlm.ij.utils.ImageROIPainter;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultsHelper;
+import gdsc.smlm.results.PeakResultConversionHelper;
 import gnu.trove.list.array.TIntArrayList;
 import ij.WindowManager;
 import ij.text.TextPanel;
@@ -46,7 +46,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 
 	private boolean canComputePrecision = false;
 
-	private PeakResultsHelper helper;
+	private PeakResultConversionHelper helper;
 	private Converter[] converters;
 	private Converter ic;
 	private int[] outIndices;
@@ -122,7 +122,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		rounder = RounderFactory.create(roundingPrecision);
 
 		// We must correctly convert all the PSF parameter types
-		helper = new PeakResultsHelper(getCalibration(), getPSF());
+		helper = new PeakResultConversionHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		helper.setAngleUnit(angleUnit);

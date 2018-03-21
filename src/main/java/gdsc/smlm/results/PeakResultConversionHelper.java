@@ -34,12 +34,12 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 /**
  * Helper class for converting peak results
  */
-public class PeakResultsHelper
+public class PeakResultConversionHelper
 {
 	private Calibration calibration;
 	private PSF psf;
 
-	public PeakResultsHelper(Calibration calibration, PSF psf)
+	public PeakResultConversionHelper(Calibration calibration, PSF psf)
 	{
 		this.calibration = calibration;
 		this.psf = psf;

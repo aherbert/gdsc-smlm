@@ -827,7 +827,7 @@ public class PeakResultsReader
 		{
 			gaussian2Dformat = false;
 			// The number of fields should be within the PSF object
-			nFields = new PeakResultsHelper(null, psf).getNames().length;
+			nFields = new PeakResultConversionHelper(null, psf).getNames().length;
 		}
 
 		DataInputStream input = null;
@@ -1067,7 +1067,7 @@ public class PeakResultsReader
 		else
 		{
 			// The number of fields should be within the PSF object
-			nFields = new PeakResultsHelper(null, psf).getNames().length;
+			nFields = new PeakResultConversionHelper(null, psf).getNames().length;
 		}
 
 		BufferedReader input = null;

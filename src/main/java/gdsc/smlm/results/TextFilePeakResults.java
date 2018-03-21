@@ -44,7 +44,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 {
 	private Gaussian2DPeakResultCalculator calculator;
 
-	private PeakResultsHelper helper;
+	private PeakResultConversionHelper helper;
 	private Converter[] converters;
 
 	private DistanceUnit distanceUnit = null;
@@ -160,7 +160,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		}
 
 		// We must correctly convert all the PSF parameter types
-		helper = new PeakResultsHelper(getCalibration(), getPSF());
+		helper = new PeakResultConversionHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		helper.setAngleUnit(angleUnit);

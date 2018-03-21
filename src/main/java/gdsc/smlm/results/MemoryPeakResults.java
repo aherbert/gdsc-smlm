@@ -1211,7 +1211,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (!hasCalibration())
 			return false;
 
-		PeakResultsHelper helper = new PeakResultsHelper(getCalibration(), getPSF());
+		PeakResultConversionHelper helper = new PeakResultConversionHelper(getCalibration(), getPSF());
 		helper.setIntensityUnit(intensityUnit);
 		helper.setDistanceUnit(distanceUnit);
 		if (PSFHelper.hasAngleParameters(getPSF()))
