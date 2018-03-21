@@ -212,6 +212,10 @@ public class PeakResultsSnapshot
 				// Report this 
 				e.printStackTrace();
 			}
+			finally
+			{
+				future = null;
+			}
 		}
 		return hasSnapshot();
 	}
