@@ -22,7 +22,7 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultStoreList;
 
-public class PeakResultListFrame extends JFrame
+public class PeakResultModelFrame extends JFrame
 {
 	private static final long serialVersionUID = -1530205032042929260L;
 
@@ -69,12 +69,12 @@ public class PeakResultListFrame extends JFrame
 
 	private JList<PeakResult> list;
 
-	public PeakResultListFrame(PeakResultModel model)
+	public PeakResultModelFrame(PeakResultModel model)
 	{
 		this(model, null);
 	}
 
-	public PeakResultListFrame(PeakResultModel model, ListSelectionModel selectionModel)
+	public PeakResultModelFrame(PeakResultModel model, ListSelectionModel selectionModel)
 	{
 		list = new JList<PeakResult>(model);
 		list.setPrototypeCellValue(new ExtendedPeakResult(1, 1, 1, 1));
@@ -138,7 +138,7 @@ public class PeakResultListFrame extends JFrame
 					}
 					final PeakResultModel model = new PeakResultModel(store);
 
-					final PeakResultListFrame d = new PeakResultListFrame(model, selectionModel);
+					final PeakResultModelFrame d = new PeakResultModelFrame(model, selectionModel);
 					//					d.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)
@@ -158,7 +158,7 @@ public class PeakResultListFrame extends JFrame
 
 					// Selecting in one list activates the other list
 
-					final PeakResultListFrame d2 = new PeakResultListFrame(model, selectionModel);
+					final PeakResultModelFrame d2 = new PeakResultModelFrame(model, selectionModel);
 					//					d2.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)
