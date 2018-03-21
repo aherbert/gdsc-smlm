@@ -165,18 +165,18 @@ public class PeakResultsSnapshot
 	 */
 	private String[] digest(PeakResult... peakResults)
 	{
-		// Snapshot digest of 3 values (at 2, 4 and all results). 
+		// Snapshot digest of 3 values (at 1, 10 and all results). 
 		// This should allow a fast compare of results sets with the same size.
 		String[] values = new String[3];
 		int j = 0;
 		digest.reset();
-		for (int i = 0, snap = 1; i < peakResults.length; i++)
+		for (int i = 0, snap = 0; i < peakResults.length; i++)
 		{
 			digest.update(peakResults[i]);
 			if (i == snap)
 			{
 				values[j++] = digest.digest();
-				snap = (j == values.length - 1) ? peakResults.length : snap * 2;
+				snap = (j == values.length - 1) ? peakResults.length : 9;
 			}
 		}
 		values[j++] = digest.digest();
@@ -265,14 +265,14 @@ public class PeakResultsSnapshot
 		// Same logic as digest
 		int j = 0;
 		digest.reset();
-		for (int i = 0, snap = 1; i < peakResults.length; i++)
+		for (int i = 0, snap = 0; i < peakResults.length; i++)
 		{
 			digest.update(peakResults[i]);
 			if (i == snap)
 			{
 				if (!this.values[j++].equals(digest.digest()))
 					return false;
-				snap = (j == values.length - 1) ? peakResults.length : snap * 2;
+				snap = (j == values.length - 1) ? peakResults.length : 9;
 			}
 		}
 		return (this.values[j].equals(digest.digest()));

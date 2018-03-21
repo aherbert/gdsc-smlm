@@ -19,6 +19,16 @@ public class PeakResultSnapshotTest
 	}
 
 	@Test
+	public void sameSize1ResultsAreEqual()
+	{
+		final RandomGenerator r = new Well19937c();
+		PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
+		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
+		Assert.assertTrue(snap.matches(r1));
+		Assert.assertTrue(snap.matches(snap));
+	}
+
+	@Test
 	public void sameEmptyResultsAreEqual()
 	{
 		final RandomGenerator r = new Well19937c();
