@@ -1,4 +1,6 @@
-package gdsc.smlm.results;
+package gdsc.smlm.results.data;
+
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -14,31 +16,27 @@ package gdsc.smlm.results;
  *---------------------------------------------------------------------------*/
 
 /**
- * Gets a parameter value from a results.
+ * Gets the end frame from a result.
  */
-public class PeakResultParameterValue implements PeakResultValue
+public class PeakResultDataEndFrame extends PeakResultDataInteger
 {
-	/** The parameter index. */
-	public final int index;
-
-	/**
-	 * Instantiates a new peak result parameter value.
-	 *
-	 * @param index
-	 *            the index
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.results.PeakResultData#getValue(gdsc.smlm.results.PeakResult)
 	 */
-	public PeakResultParameterValue(int index)
+	public Integer getValue(PeakResult result)
 	{
-		this.index = index;
+		return result.getEndFrame();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.procedures.PeakResultValue#getValue(gdsc.smlm.results.PeakResult)
+	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
-	public float getValue(PeakResult result)
+	public String getValueName()
 	{
-		return result.getParameter(index);
+		return "End Frame";
 	}
 }

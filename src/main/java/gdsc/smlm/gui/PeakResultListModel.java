@@ -24,7 +24,7 @@ import gdsc.smlm.results.PeakResultStoreList;
 /**
  * Stores peak results and allows event propagation to listeners of the model.
  */
-public class PeakResultModel extends AbstractListModel<PeakResult>
+public class PeakResultListModel extends AbstractListModel<PeakResult>
 {
 	private static final long serialVersionUID = -7095827869962490626L;
 
@@ -34,7 +34,7 @@ public class PeakResultModel extends AbstractListModel<PeakResult>
 	/**
 	 * Instantiates a new peak result model.
 	 */
-	public PeakResultModel()
+	public PeakResultListModel()
 	{
 		this(null);
 	}
@@ -47,7 +47,7 @@ public class PeakResultModel extends AbstractListModel<PeakResult>
 	 * @param results
 	 *            the results
 	 */
-	public PeakResultModel(PeakResultStoreList results)
+	public PeakResultListModel(PeakResultStoreList results)
 	{
 		if (results == null)
 			results = new ArrayPeakResultStore(10);

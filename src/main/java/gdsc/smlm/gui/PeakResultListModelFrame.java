@@ -16,13 +16,29 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2018 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.ArrayPeakResultStore;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultStoreList;
 
-public class PeakResultModelFrame extends JFrame
+/**
+ * A frame that shows a PeakResultsListModel
+ * @author Alex Herbert
+ */
+public class PeakResultListModelFrame extends JFrame
 {
 	private static final long serialVersionUID = -1530205032042929260L;
 
@@ -69,12 +85,12 @@ public class PeakResultModelFrame extends JFrame
 
 	private JList<PeakResult> list;
 
-	public PeakResultModelFrame(PeakResultModel model)
+	public PeakResultListModelFrame(PeakResultListModel model)
 	{
 		this(model, null);
 	}
 
-	public PeakResultModelFrame(PeakResultModel model, ListSelectionModel selectionModel)
+	public PeakResultListModelFrame(PeakResultListModel model, ListSelectionModel selectionModel)
 	{
 		list = new JList<PeakResult>(model);
 		list.setPrototypeCellValue(new ExtendedPeakResult(1, 1, 1, 1));
@@ -136,9 +152,9 @@ public class PeakResultModelFrame extends JFrame
 										r.nextFloat(), r.nextFloat()),
 								null));
 					}
-					final PeakResultModel model = new PeakResultModel(store);
+					final PeakResultListModel model = new PeakResultListModel(store);
 
-					final PeakResultModelFrame d = new PeakResultModelFrame(model, selectionModel);
+					final PeakResultListModelFrame d = new PeakResultListModelFrame(model, selectionModel);
 					//					d.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)
@@ -158,7 +174,7 @@ public class PeakResultModelFrame extends JFrame
 
 					// Selecting in one list activates the other list
 
-					final PeakResultModelFrame d2 = new PeakResultModelFrame(model, selectionModel);
+					final PeakResultListModelFrame d2 = new PeakResultListModelFrame(model, selectionModel);
 					//					d2.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)

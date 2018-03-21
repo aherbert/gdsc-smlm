@@ -34,7 +34,7 @@ import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultParameterValue;
+import gdsc.smlm.results.PeakResultValueParameter;
 import gdsc.smlm.results.predicates.MinMaxPeakResultPredicate;
 import gdsc.smlm.results.predicates.PassPeakResultPredicate;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
@@ -120,7 +120,7 @@ public class CropResults implements PlugIn
 
 		// Allow z-filtering
 		if (results.is3D())
-			minMax = new MinMaxResultProcedure(results, new PeakResultParameterValue(PeakResult.Z));
+			minMax = new MinMaxResultProcedure(results, new PeakResultValueParameter(PeakResult.Z));
 
 		if (roiMode)
 		{
@@ -438,7 +438,7 @@ public class CropResults implements PlugIn
 		if (myLimitZ)
 		{
 			return new MinMaxPeakResultPredicate((float) settings.getMinZ(), (float) settings.getMaxZ(),
-					new PeakResultParameterValue(PeakResult.Z));
+					new PeakResultValueParameter(PeakResult.Z));
 		}
 		return new PassPeakResultPredicate();
 	}
