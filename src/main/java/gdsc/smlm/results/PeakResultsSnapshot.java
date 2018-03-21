@@ -72,12 +72,15 @@ public class PeakResultsSnapshot
 	/** The values. */
 	private String[] values;
 
+	/** The hash. */
+	private int hash;
+
 	/**
 	 * Instantiates a new peak results snapshot.
 	 */
 	public PeakResultsSnapshot()
 	{
-		size = -1;
+		reset();
 	}
 
 	/**
@@ -101,10 +104,16 @@ public class PeakResultsSnapshot
 	 */
 	public boolean snapshot(PeakResult... peakResults)
 	{
-		size = -1;
+		reset();
 		values = digest(peakResults);
 		size = peakResults.length;
 		return true;
+	}
+
+	private void reset()
+	{
+		size = -1;
+		hash = 0;
 	}
 
 	/**
@@ -145,7 +154,7 @@ public class PeakResultsSnapshot
 	 */
 	public void snapshotLater(final ExecutorService executorService, final PeakResult... peakResults)
 	{
-		size = -1;
+		reset();
 		future = executorService.submit(new Runnable()
 		{
 			public void run()
@@ -281,8 +290,8 @@ public class PeakResultsSnapshot
 	/**
 	 * Check if the snapshot matches the other snapshot.
 	 * <p>
-	 * Note: This will return false if there is no snapshot even if the other
-	 * snapshot is also not valid.
+	 * Note: This will return true if there is no snapshot only if the state of the other
+	 * snapshot is the same. It is left to the user to check that the state is valid.
 	 *
 	 * @param other
 	 *            the other snapshot
@@ -290,14 +299,52 @@ public class PeakResultsSnapshot
 	 */
 	public boolean matches(final PeakResultsSnapshot other)
 	{
-		// No match if no snapshot. We don't check if the other snapshot is also invalid.
-		if (size < 0)
-			return false;
-
-		// Check the size.
+		// Check the size. We match bad states.
 		if (size != other.size)
 			return false;
 
 		return Arrays.equals(values, other.values);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		if (size < 0)
+			return -size; // Fast exit if an invalid state
+		int h = hash;
+		if (h == 0)
+		{
+			// Use the hashcode of all the digests
+			String value = values[0];
+			for (int j = 1; j < values.length; j++)
+			{
+				if (values[j].length() > 0)
+				{
+					value += values[j];
+				}
+			}
+			hash = value.hashCode();
+		}
+		return h;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (!(obj instanceof PeakResultsSnapshot))
+			return false;
+		return matches((PeakResultsSnapshot) obj);
 	}
 }
