@@ -6,16 +6,16 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
-public class PeakResultSnapshotTest
+public class PeakResultDigestTest
 {
 	@Test
 	public void sameResultsAreEqual()
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -23,9 +23,9 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -33,9 +33,9 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -43,9 +43,9 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -53,9 +53,9 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -63,9 +63,9 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -73,9 +73,9 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
-		Assert.assertTrue(snap.matches(r1));
-		Assert.assertTrue(snap.matches(snap));
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertTrue(digest.matches(digest));
 	}
 
 	@Test
@@ -83,29 +83,71 @@ public class PeakResultSnapshotTest
 	{
 		final RandomGenerator r = new Well19937c();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
-		PeakResultsSnapshot snap = newPeakResultsSnapshot(r1);
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		for (int size : new int[] { 10, 1, 0 })
 		{
 			PeakResult[] r2 = createResults(r, size, 5, false, false, false, false);
-			Assert.assertFalse(snap.matches(r2));
-			Assert.assertFalse(snap.matches(newPeakResultsSnapshot(r2)));
+			Assert.assertFalse(digest.matches(r2));
+			Assert.assertFalse(digest.matches(new PeakResultsDigest(r2)));
 		}
 	}
 
+	@Test
+	public void digestMatchesPeakResultDigest()
+	{
+		final RandomGenerator r = new Well19937c();
+		for (int size = 1; size < 5; size++)
+		{
+			PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
+			PeakResultsDigest digest = new PeakResultsDigest(r1);
+
+			PeakResultDigest d = new PeakResultDigest();
+			for (PeakResult rr : r1)
+				d.update(rr);
+			Assert.assertEquals(d.digest(), digest.getDigest());
+		}
+	}
+
+	@Test
+	public void digestIsEmptyStringWhenSizeIsZero()
+	{
+		Assert.assertEquals("", new PeakResultsDigest(new PeakResult[0]).getDigest());
+	}
+
+	@Test
+	public void digestHandlesNull()
+	{
+		PeakResult[] r1 = null;
+		PeakResult[] r0 = new PeakResult[0];
+		PeakResultsDigest digest = new PeakResultsDigest(r1);
+		Assert.assertTrue(digest.matches(r1));
+		Assert.assertFalse(digest.matches(r0));
+	}
+	
+	@Test
+	public void digestHandlesEmptyArray()
+	{
+		PeakResult[] r1 = null;
+		PeakResult[] r0 = new PeakResult[0];
+		PeakResultsDigest digest = new PeakResultsDigest(r0);
+		Assert.assertTrue(digest.matches(r0));
+		Assert.assertFalse(digest.matches(r1));
+	}
+	
 	@Test
 	public void timeDigest()
 	{
 		Assume.assumeTrue(false);
 
 		final RandomGenerator r = new Well19937c();
-		PeakResultsSnapshot snap = new PeakResultsSnapshot();
+		PeakResultsDigest digest = new PeakResultsDigest();
 		int N = 5;
 		for (int size = 1000; size < 2000000; size *= 2)
 		{
 			PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
 			long time = System.nanoTime();
 			for (int i = N; i-- > 0;)
-				snap.snapshot(-1, r1);
+				digest.digest(r1);
 			time = System.nanoTime() - time;
 			System.out.printf("size = %d, time = %g ms\n", size, (1e-6 * time) / N);
 		}
@@ -139,13 +181,5 @@ public class PeakResultSnapshotTest
 		while (n-- > 0)
 			p[n] = r.nextFloat();
 		return p;
-	}
-
-	private PeakResultsSnapshot newPeakResultsSnapshot(PeakResult[] peakResults)
-	{
-		// For debug testing do not use a timeout
-		PeakResultsSnapshot snap = new PeakResultsSnapshot();
-		snap.snapshot(-1, peakResults);
-		return snap;
 	}
 }

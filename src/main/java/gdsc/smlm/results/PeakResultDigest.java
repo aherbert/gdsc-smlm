@@ -111,12 +111,31 @@ public class PeakResultDigest
 	}
 
 	/**
-	 * Get the digest.
+	 * Get the digest and reset.
 	 *
 	 * @return the hex string
 	 */
 	public String digest()
 	{
 		return Digest.toHex(digest.digest());
+	}
+
+	/**
+	 * Get a snapshot of the current digest. This is done by cloning the digest. If this is not support then return
+	 * null.
+	 *
+	 * @return the hex string (or null)
+	 */
+	public String snapshot()
+	{
+		try
+		{
+			MessageDigest d = (MessageDigest) digest.clone();
+			return Digest.toHex(d.digest());
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
 	}
 }
