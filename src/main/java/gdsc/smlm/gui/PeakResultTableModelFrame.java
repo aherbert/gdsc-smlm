@@ -1,8 +1,8 @@
 package gdsc.smlm.gui;
 
 import java.awt.EventQueue;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultListSelectionModel;
@@ -89,6 +89,7 @@ public class PeakResultTableModelFrame extends JFrame
 	public PeakResultTableModelFrame(final PeakResultTableModel model, TableColumnModel columnModel,
 			ListSelectionModel selectionModel)
 	{
+		// This is required to get the column sizes for the model data.
 		model.setLive(true);
 
 		table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
@@ -102,21 +103,36 @@ public class PeakResultTableModelFrame extends JFrame
 		add(scroll);
 		pack();
 
-		addWindowStateListener(new WindowStateListener()
+		// If the window is never set visible then we cannot ensure this happens in 
+		// the closing event so do it here and again when opened.
+		model.setLive(false);
+
+		addWindowListener(new WindowAdapter()
 		{
-			public void windowStateChanged(WindowEvent e)
+			public void windowOpened(WindowEvent e)
 			{
-				if (e.getNewState() == WindowEvent.WINDOW_OPENED)
-					WindowManager.addWindow(PeakResultTableModelFrame.this);
-				else if (e.getNewState() == WindowEvent.WINDOW_CLOSED)
-				{
-					model.setLive(false);
-					WindowManager.removeWindow(PeakResultTableModelFrame.this);
-				}
-				//else if (e.getNewState() == WindowEvent.WINDOW_ACTIVATED)
-				//	WindowManager.setWindow(PeakResultTableModelFrame.this);
+				model.setLive(true);
+				WindowManager.addWindow(PeakResultTableModelFrame.this);
+			}
+
+			public void windowClosed(WindowEvent e)
+			{
+				model.setLive(false);
+				WindowManager.removeWindow(PeakResultTableModelFrame.this);
 			}
 		});
+	}
+
+	/**
+	 * Clean up this table. This should only be called when the table is no longer required as it removes the JTable
+	 * from the model listeners.
+	 */
+	public void cleanUp()
+	{
+		// Since the models may be shared
+		table.getModel().removeTableModelListener(table);
+		table.getColumnModel().removeColumnModelListener(table);
+		table.getSelectionModel().removeListSelectionListener(table);
 	}
 
 	/**

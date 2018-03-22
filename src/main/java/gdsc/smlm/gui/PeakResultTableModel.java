@@ -1,6 +1,7 @@
 package gdsc.smlm.gui;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.event.TableModelEvent;
@@ -68,6 +69,9 @@ public class PeakResultTableModel extends AbstractTableModel
 	/** Count used to count how many PeakResultTableModelFrame are displaying this model. */
 	private AtomicInteger liveCount = new AtomicInteger();
 
+	/** The flag used to indicate the columns require updating. */
+	private AtomicBoolean columnsComputed = new AtomicBoolean(false);
+
 	private final PeakResultStoreList data;
 	private final Calibration calibration;
 	private final PSF psf;
@@ -117,8 +121,8 @@ public class PeakResultTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Sets the model to the live state. This creates all the table layout information and updates it when properties
-	 * are changed.
+	 * Sets the model to the live state. This creates all the table layout information and causes it to update when
+	 * properties are changed.
 	 */
 	void setLive(boolean isLive)
 	{
@@ -126,7 +130,7 @@ public class PeakResultTableModel extends AbstractTableModel
 			liveCount.getAndDecrement();
 		else
 			liveCount.getAndDecrement();
-		tableChanged();
+		createTableStructure(false);
 	}
 
 	/**
@@ -210,14 +214,16 @@ public class PeakResultTableModel extends AbstractTableModel
 		if (equals(this.tableSettings, tableSettings))
 			return;
 		this.tableSettings = tableSettings;
-		tableChanged();
+		createTableStructure(true);
 	}
 
 	/**
 	 * Check if the settings are equal
 	 *
-	 * @param t1 the t1
-	 * @param t2 the t2
+	 * @param t1
+	 *            the t1
+	 * @param t2
+	 *            the t2
 	 * @return true, if successful
 	 */
 	private boolean equals(ResultsTableSettings t1, ResultsTableSettings t2)
@@ -234,10 +240,25 @@ public class PeakResultTableModel extends AbstractTableModel
 		return result;
 	}
 
-	public void tableChanged()
+	/**
+	 * Called when the structure of the table should be created. If the structure has not changed or no live table are
+	 * attached then this does nothing.
+	 *
+	 * @param changed
+	 *            Set to true if a property controlling the structure has changed
+	 */
+	private void createTableStructure(boolean changed)
 	{
-		if (liveCount.get() == 0)
+		if (changed)
+			columnsComputed.set(false);
+
+		// If no live attached tables or nothing has changed then return
+		// Note: We use a live count instead of the listener count (see listenerList.getListenerCount())
+		// so it can be turned off by PeakResultTableModelFrame.
+		if (liveCount.get() == 0 || columnsComputed.get())
 			return;
+
+		columnsComputed.set(true);
 
 		rounder = RounderFactory.create(tableSettings.getRoundingPrecision());
 
@@ -562,8 +583,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		boolean changed = this.showDeviations != showDeviations;
 		this.showDeviations = showDeviations;
-		if (changed)
-			tableChanged();
+		createTableStructure(changed);
 	}
 
 	/**
@@ -582,8 +602,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		boolean changed = this.showEndFrame != showEndFrame;
 		this.showEndFrame = showEndFrame;
-		if (changed)
-			tableChanged();
+		createTableStructure(changed);
 	}
 
 	/**
@@ -602,8 +621,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		boolean changed = this.showId != showId;
 		this.showId = showId;
-		if (changed)
-			tableChanged();
+		createTableStructure(changed);
 	}
 
 	/**
@@ -626,8 +644,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		boolean changed = this.showZ != showZ;
 		this.showZ = showZ;
-		if (changed)
-			tableChanged();
+		createTableStructure(changed);
 	}
 
 	/**

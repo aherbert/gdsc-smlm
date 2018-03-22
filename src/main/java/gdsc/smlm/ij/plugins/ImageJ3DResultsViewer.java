@@ -9,6 +9,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -572,31 +574,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return -1;
 		}
 
-		public void deselect(int index)
-		{
-			if (index < 0 || index >= points.size())
-				return;
-
-			PeakResult r = results.get(index);
-
-			// Deselect from the model
-			int i = peakResultTableModel.indexOf(r);
-			if (i != -1)
-				listSelectionModel.removeSelectionInterval(i, i);
-
-			// XXX this should be obsolete as the selection listener will handle any selection changs
-			//			
-			//			// Find in the list of selected 
-			//			int switchIndex = findSelected(r);
-			//			if (switchIndex != -1)
-			//			{
-			//				// Switch off
-			//				contentInstance.setCustomSwitch(switchIndex, false);
-			//				selected.setf(switchIndex, null);
-			//
-			//			}
-		}
-
 		public void clearSelected()
 		{
 			for (int i = 0; i < selected.size(); i++)
@@ -609,12 +586,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public void select(PeakResult r)
 		{
 			select(results.indexOf(r));
-		}
-
-		@SuppressWarnings("unused")
-		public void deselect(PeakResult r)
-		{
-			deselect(results.indexOf(r));
 		}
 
 		public void setPointSize(float f)
@@ -1983,15 +1954,31 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 						.get(data.digest);
 
 				PeakResultTableModelFrame table = t.c;
-				if (table == null || !table.isVisible())
+				if (table != null && !table.isVisible())
+				{
+					// Just in case
+					table.cleanUp();
+					table = null;
+				}
+				if (table == null)
 				{
 					table = new PeakResultTableModelFrame(t.a, t.b);
 					table.setTitle(TITLE + " " + results.getName());
+					// Ensure cleanup
 					table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					final PeakResultTableModelFrame finalTable = table;
+					table.addWindowListener(new WindowAdapter()
+					{
+						public void windowClosed(WindowEvent e)
+						{
+							finalTable.cleanUp();
+						}
+					});
 					table.setVisible(true);
 					resultsTables.put(data.digest,
 							new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(t.a, t.b,
 									table));
+					t = null;
 				}
 			}
 
@@ -3873,5 +3860,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	public void universeClosed()
 	{
+
 	}
 }
