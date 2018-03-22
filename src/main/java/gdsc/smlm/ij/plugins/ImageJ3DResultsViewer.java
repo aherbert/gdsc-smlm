@@ -132,6 +132,7 @@ import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GUI;
+import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.process.LUTHelper;
@@ -1942,13 +1943,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					{
 						if (i != -1)
 							data.listSelectionModel.removeSelectionInterval(i, i);
-						//data.deselect(index);
 					}
 					else
 					{
 						// Ctrl held down to set selection
 						if (i == -1)
 						{
+							// Not currently in the table so add it
 							i = data.peakResultTableModel.getRowCount();
 							data.peakResultTableModel.add(data, p);
 						}
@@ -1984,7 +1985,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				PeakResultTableModelFrame table = t.c;
 				if (table == null || !table.isVisible())
 				{
-					table = new PeakResultTableModelFrame(t.a, null, t.b);
+					table = new PeakResultTableModelFrame(t.a, t.b);
 					table.setTitle(TITLE + " " + results.getName());
 					table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					table.setVisible(true);
@@ -2894,9 +2895,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			Canvas3D canvas = univ.getCanvas();
 			if (shape == null)
 			{
-				shape = RoiTestFactory.create(((ImageCanvas3D) canvas).getRoi());
+				ImageCanvas3D canvas3D = (ImageCanvas3D) canvas;
+				Roi roi = canvas3D.getRoi();
+				if (roi == null)
+					roi = new Roi(0, 0, canvas.getWidth(), canvas.getHeight());
+				shape = RoiTestFactory.create(roi);
 				if (shape == null)
+				{
+
 					return -1;
+				}
 				settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
 			}
 
@@ -2995,7 +3003,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		@Override
 		public void finish()
 		{
-			SettingsManager.writeSettings(settings, 0);
+			if (settings != null)
+				SettingsManager.writeSettings(settings, 0);
 		}
 	}
 
@@ -3196,6 +3205,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// Save updated settings
 			settings.setResultsTableSettings(resultsTableSettings);
 			SettingsManager.writeSettings(settings);
+
+			// Update the table settings for all the selection models
+			ResultsTableSettings ts = resultsTableSettings.build();
+			for (Triplet<PeakResultTableModel, ?, ?> t : resultsTables.values())
+				t.a.setTableSettings(ts);
 
 			action = new UpdateHighlightColourAction();
 		}
