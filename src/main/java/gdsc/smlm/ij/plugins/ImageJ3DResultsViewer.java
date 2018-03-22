@@ -128,6 +128,8 @@ import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.procedure.TObjectIntProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -620,19 +622,70 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		private void updateSelection()
 		{
+			//			clearSelected();
+			//			for (int i = 0; i < indices.length; i++)
+			//			{
+			//				select(peakResultTableModel.get(indices[i]));
+			//			}
+
 			int[] indices = ListSelectionModelHelper.getSelectedIndices(listSelectionModel);
 
-			// TODO - better logic to preserve those currently selected:
-			// 1. Find all those to select (new selection)
-			// 2. Find all those currently selected (old selection)
-			// 3. Find those to: keep, select, deselect
-			// 4. Update by deselecting then selecting
+			if (indices.length == 0)
+			{
+				clearSelected();
+				return;
+			}
 
-			clearSelected();
+			// Try to to preserve those currently selected
+
+			// Find all those currently selected (old selection)
+			int NO_ENTRY = -1;
+			TObjectIntHashMap<PeakResult> oldSelection = new TObjectIntHashMap<PeakResult>(selected.size(), 0.5f,
+					NO_ENTRY);
+			for (int i = 0; i < selected.size(); i++)
+			{
+				PeakResult r = selected.getf(i);
+				if (r != null)
+					oldSelection.put(r, i);
+			}
+
+			if (oldSelection.isEmpty())
+			{
+				// Just select the new indices
+				for (int i = 0; i < indices.length; i++)
+				{
+					select(peakResultTableModel.get(indices[i]));
+				}
+				return;
+			}
+
+			// Process the new selection, checking if already selected.
+			TurboList<PeakResult> toSelect = new TurboList<PeakResult>(indices.length);
 			for (int i = 0; i < indices.length; i++)
 			{
-				select(peakResultTableModel.get(indices[i]));
+				PeakResult r = peakResultTableModel.get(indices[i]);
+				// Check if already selected
+				if (oldSelection.remove(r) == NO_ENTRY)
+				{
+					// Do this later to save space
+					toSelect.addf(r);
+				}
 			}
+
+			// Remove the old selection no longer required
+			oldSelection.forEachEntry(new TObjectIntProcedure<PeakResult>()
+			{
+				public boolean execute(PeakResult r, int i)
+				{
+					contentInstance.setCustomSwitch(i, false);
+					selected.setf(i, null);
+					return true;
+				}
+			});
+
+			// Select the new additions
+			for (int i = toSelect.size(); i-- > 0;)
+				select(toSelect.getf(i));
 		}
 
 		public void removeSelectionModel()
