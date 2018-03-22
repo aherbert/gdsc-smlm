@@ -1,9 +1,7 @@
 package gdsc.smlm.ij.ij3d;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.scijava.java3d.GeometryArray;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 
@@ -20,7 +18,6 @@ import org.scijava.vecmath.Point3f;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import customnode.CustomMesh;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.ij.plugins.Pair;
 import gnu.trove.list.array.TIntArrayList;
@@ -32,10 +29,24 @@ import ij.process.ImageProcessor;
 import vib.InterpolatedImage;
 
 /**
- * Provide helper functionality for dealing with the CustomMesh class.
+ * Provide helper functionality for dealing with the CustomContent.
  */
 public class CustomContentHelper
 {
+	/**
+	 * Define the largest array size for Java 3D.
+	 * If an ArrayGeometry is larger than this then there will be exceptions
+	 * within the Java 3D code. The code writes the float array of a GeometryArray
+	 * into a ByteBuffer. If the current ByteBuffer is too small then it is doubled 
+	 * in size. This sets a limit on the array size of a ByteBuffer as the maximum 
+	 * length of an array in java divided by 4 (4 bytes to a float) divided by 2 (to 
+	 * allow buffer doubling).
+	 * If the max array size is 2^30, rather than Integer.MAX_VALUE, to give header 
+	 * space then the recommended max size for a single strip of a GeometryArray is 
+	 * 2^30 / 2^2 / 2 = 2^27.
+	 */
+	public static final int MAX_ARRAY_SIZE = 1 << 27;
+
 	/**
 	 * Load surface colors from a 2D image. This only works if the xy coordinates from the mesh can be mapped directly
 	 * onto the image pixel coordinates by dividing by the input image pixel width / height (i.e. the input image must

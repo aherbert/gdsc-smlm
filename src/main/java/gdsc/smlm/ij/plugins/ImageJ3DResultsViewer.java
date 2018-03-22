@@ -1014,7 +1014,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (results == null || results.size() == 0)
 		{
 			IJ.error(TITLE, "No results could be loaded");
-			IJ.showStatus("");
 			return;
 		}
 
@@ -1061,7 +1060,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			ItemGeometryGroup pointGroup = createItemGroup(settings, sphereSize, points, alpha, transparency, colors);
 			if (pointGroup == null)
+			{
+				IJ.showStatus("");
 				return;
+			}
 
 			if (settings.getEnableDynamicTransparency())
 			{
@@ -1079,7 +1081,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			CustomMesh mesh = createMesh(settings, points, sphereSize, transparency, alpha);
 			if (mesh == null)
+			{
+				IJ.showStatus("");
 				return;
+			}
 
 			updateAppearance(mesh, settings);
 
@@ -1113,6 +1118,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (data.digest == null)
 		{
 			IJ.error(TITLE, "Failed to identify repeat results set");
+			IJ.showStatus("");
 			return;
 		}
 		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
@@ -3463,8 +3469,30 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		final List<Point3f> point = createLocalisationObject(r);
 
+		int stride = 3 + 3 + 3; // Coordinates + normals + color
+		if (alpha != null)
+			stride++;
+
 		final int singlePointSize = point.size();
 		long size = (long) points.size() * singlePointSize;
+		long arraySize = size * stride;
+		// This may work 
+		//int MAX_ARRAY_SIZE = 1 << 28;
+		// This is a safe limit 
+		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
+		if (arraySize > MAX_ARRAY_SIZE)
+		{
+			double capacity = (double) arraySize / MAX_ARRAY_SIZE;
+			//@formatter:off
+			IJ.error(TITLE,
+					TextUtils.wrap(String.format(
+							"The results will generate data of %d values. " +
+							"This is amount of data is not supported (%.2fx capacity). " +
+							"Please choose a different rendering model with less vertices.",
+							arraySize, capacity), 80));
+			//@formatter:on
+			return null;
+		}
 		if (size > 10000000L)
 		{
 			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
