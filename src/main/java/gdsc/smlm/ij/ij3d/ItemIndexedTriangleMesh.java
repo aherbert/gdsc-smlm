@@ -86,8 +86,11 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 				final float sx = s.x;
 				final float sy = s.y;
 				final float sz = s.z;
+				// Do not destroy the input
+				objectVertices = objectVertices.clone();
 				for (int j = 0; j < n; j++)
 				{
+					objectVertices[j] = new Point3f(objectVertices[j]);
 					objectVertices[j].x *= sx;
 					objectVertices[j].y *= sy;
 					objectVertices[j].z *= sz;
