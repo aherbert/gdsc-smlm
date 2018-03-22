@@ -1,6 +1,7 @@
 package gdsc.smlm.gui;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -64,8 +65,8 @@ public class PeakResultTableModel extends AbstractTableModel
 	/** Identifies the cell renderer has changed. */
 	static final int RENDERER = -99;
 
-	/** Flag used to show the model has been passed to PeakResultTableModelFrame. */
-	private boolean isLive;
+	/** Count used to count how many PeakResultTableModelFrame are displaying this model. */
+	private AtomicInteger liveCount = new AtomicInteger();
 
 	private final PeakResultStoreList data;
 	private final Calibration calibration;
@@ -101,27 +102,30 @@ public class PeakResultTableModel extends AbstractTableModel
 	public PeakResultTableModel(PeakResultStoreList results, Calibration calibration, PSF psf,
 			ResultsTableSettings tableSettings)
 	{
-		this.isLive = false;
-
 		if (results == null)
 			results = new ArrayPeakResultStore(10);
 		if (calibration == null)
 			calibration = Calibration.getDefaultInstance();
 		if (psf == null)
 			psf = PSF.getDefaultInstance();
+		if (tableSettings == null)
+			tableSettings = ResultsProtosHelper.defaultResultsSettings.getResultsTableSettings();
 		this.data = results;
 		this.calibration = calibration;
 		this.psf = psf;
-		setTableSettings(tableSettings);
+		this.tableSettings = tableSettings;
 	}
 
 	/**
 	 * Sets the model to the live state. This creates all the table layout information and updates it when properties
 	 * are changed.
 	 */
-	void setLive()
+	void setLive(boolean isLive)
 	{
-		isLive = true;
+		if (isLive)
+			liveCount.getAndDecrement();
+		else
+			liveCount.getAndDecrement();
 		tableChanged();
 	}
 
@@ -203,15 +207,36 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		if (tableSettings == null)
 			tableSettings = ResultsProtosHelper.defaultResultsSettings.getResultsTableSettings();
-		if (tableSettings.equals(this.tableSettings))
+		if (equals(this.tableSettings, tableSettings))
 			return;
 		this.tableSettings = tableSettings;
 		tableChanged();
 	}
 
+	/**
+	 * Check if the settings are equal
+	 *
+	 * @param t1 the t1
+	 * @param t2 the t2
+	 * @return true, if successful
+	 */
+	private boolean equals(ResultsTableSettings t1, ResultsTableSettings t2)
+	{
+		// Adapted from ResultsTableSettings.equals() to only use the settings of interest
+		boolean result = true;
+		result = result && t1.getDistanceUnitValue() == t2.getDistanceUnitValue();
+		result = result && t1.getIntensityUnitValue() == t2.getIntensityUnitValue();
+		result = result && t1.getAngleUnitValue() == t2.getAngleUnitValue();
+		result = result && (t1.getShowPrecision() == t2.getShowPrecision());
+		result = result && (t1.getShowFittingData() == t2.getShowFittingData());
+		result = result && (t1.getShowNoiseData() == t2.getShowNoiseData());
+		result = result && (t1.getRoundingPrecision() == t2.getRoundingPrecision());
+		return result;
+	}
+
 	public void tableChanged()
 	{
-		if (!isLive)
+		if (liveCount.get() == 0)
 			return;
 
 		rounder = RounderFactory.create(tableSettings.getRoundingPrecision());

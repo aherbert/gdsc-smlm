@@ -36,6 +36,7 @@ import gdsc.smlm.results.PeakResultStoreList;
 
 /**
  * A frame that shows a PeakResultsListModel
+ * 
  * @author Alex Herbert
  */
 public class PeakResultListModelFrame extends JFrame
@@ -134,7 +135,8 @@ public class PeakResultListModelFrame extends JFrame
 				if (e.getValueIsAdjusting())
 					return;
 				System.out.printf("Model Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-						e.getValueIsAdjusting(), Arrays.toString(getSelectedIndices(selectionModel)));
+						e.getValueIsAdjusting(),
+						Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
 			}
 		});
 
@@ -196,65 +198,5 @@ public class PeakResultListModelFrame extends JFrame
 				}
 			}
 		});
-
-		//		// This doesn't work as the frames are frozen
-		//		Thread.sleep(1000);
-		//		
-		//		// Random selections ...
-		//		EventQueue.invokeLater(new Runnable()
-		//		{
-		//			public void run()
-		//			{
-		//				try
-		//				{
-		//					while (true)
-		//					{
-		//						Thread.sleep(5000);
-		//						int k = r.nextInt(n);
-		//						int[] indices = Random.sample(k, n, r);
-		//						selectionModel.clearSelection();
-		//						for (int index : indices)
-		//							selectionModel.addSelectionInterval(index, index);
-		//					}
-		//				}
-		//				catch (InterruptedException e)
-		//				{
-		//					e.printStackTrace();
-		//				}
-		//			}
-		//		});
-	}
-
-	/**
-	 * Gets the selected indices from the selection model.
-	 * <p>
-	 * Copied from javax.swing.JList
-	 *
-	 * @param sm
-	 *            the sm
-	 * @return the selected indices
-	 */
-	public static int[] getSelectedIndices(ListSelectionModel sm)
-	{
-		int iMin = sm.getMinSelectionIndex();
-		int iMax = sm.getMaxSelectionIndex();
-
-		if ((iMin < 0) || (iMax < 0))
-		{
-			return new int[0];
-		}
-
-		int[] rvTmp = new int[1 + (iMax - iMin)];
-		int n = 0;
-		for (int i = iMin; i <= iMax; i++)
-		{
-			if (sm.isSelectedIndex(i))
-			{
-				rvTmp[n++] = i;
-			}
-		}
-		int[] rv = new int[n];
-		System.arraycopy(rvTmp, 0, rv, 0, n);
-		return rv;
 	}
 }

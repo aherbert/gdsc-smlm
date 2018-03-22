@@ -52,23 +52,53 @@ public class PeakResultTableModelFrame extends JFrame
 
 	private JTable table;
 
+	/**
+	 * Instantiates a new peak result table model frame.
+	 *
+	 * @param model
+	 *            the model
+	 */
 	public PeakResultTableModelFrame(PeakResultTableModel model)
 	{
 		this(model, null, null);
 	}
 
-	public PeakResultTableModelFrame(PeakResultTableModel model, TableColumnModel cm, ListSelectionModel selectionModel)
+	/**
+	 * Instantiates a new peak result table model frame.
+	 *
+	 * @param model
+	 *            the model
+	 * @param selectionModel
+	 *            the selection model
+	 */
+	public PeakResultTableModelFrame(PeakResultTableModel model, ListSelectionModel selectionModel)
 	{
-		model.setLive();
+		this(model, null, selectionModel);
+	}
 
-		table = new PeakResultTableModelJTable(model, cm, selectionModel);
-		
+	/**
+	 * Instantiates a new peak result table model frame.
+	 *
+	 * @param model
+	 *            the model
+	 * @param columnModel
+	 *            the column model
+	 * @param selectionModel
+	 *            the selection model
+	 */
+	public PeakResultTableModelFrame(final PeakResultTableModel model, TableColumnModel columnModel,
+			ListSelectionModel selectionModel)
+	{
+		model.setLive(true);
+
+		table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
+
 		final JScrollPane scroll = new JScrollPane(table);
 
 		ScreenDimensionHelper helper = new ScreenDimensionHelper();
 		helper.setMinHeight(300);
 		helper.setup(scroll);
-		
+
 		add(scroll);
 		pack();
 
@@ -79,7 +109,10 @@ public class PeakResultTableModelFrame extends JFrame
 				if (e.getNewState() == WindowEvent.WINDOW_OPENED)
 					WindowManager.addWindow(PeakResultTableModelFrame.this);
 				else if (e.getNewState() == WindowEvent.WINDOW_CLOSED)
+				{
+					model.setLive(false);
 					WindowManager.removeWindow(PeakResultTableModelFrame.this);
+				}
 				//else if (e.getNewState() == WindowEvent.WINDOW_ACTIVATED)
 				//	WindowManager.setWindow(PeakResultTableModelFrame.this);
 			}
@@ -107,7 +140,8 @@ public class PeakResultTableModelFrame extends JFrame
 				if (e.getValueIsAdjusting())
 					return;
 				System.out.printf("Model Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-						e.getValueIsAdjusting(), Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
+						e.getValueIsAdjusting(),
+						Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
 			}
 		});
 
