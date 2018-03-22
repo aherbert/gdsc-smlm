@@ -2835,7 +2835,7 @@ public class FIRE implements PlugIn
 		public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work)
 		{
 			// Plot the histogram
-			wo.add(histogram.plot(work.s.mean, work.s.sigma));
+			wo.add(histogram.plot(work.a.mean, work.a.sigma));
 			return work;
 		}
 	}
@@ -2862,7 +2862,7 @@ public class FIRE implements PlugIn
 		public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work)
 		{
 			// Compute Q and then plot the scaled FRC numerator
-			WorkSettings settings = work.s;
+			WorkSettings settings = work.a;
 			for (PlotWindow pw : qplot.plot(settings.mean, settings.sigma, settings.qValue))
 				wo.add(pw);
 			return work;

@@ -1,6 +1,8 @@
 package gdsc.smlm.gui;
 
 import java.awt.EventQueue;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultListSelectionModel;
@@ -36,6 +38,8 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.ArrayPeakResultStore;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultStoreList;
+import ij.WindowManager;
+import ij.gui.ScreenDimensionHelper;
 
 /**
  * A frame that shows a PeakResultsTableModel
@@ -55,16 +59,33 @@ public class PeakResultTableModelFrame extends JFrame
 
 	public PeakResultTableModelFrame(PeakResultTableModel model, TableColumnModel cm, ListSelectionModel selectionModel)
 	{
+		model.setLive();
+
 		table = new PeakResultTableModelJTable(model, cm, selectionModel);
 		
-		// TODO - sort this
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
 		final JScrollPane scroll = new JScrollPane(table);
+
+		ScreenDimensionHelper helper = new ScreenDimensionHelper();
+		helper.setMinHeight(300);
+		helper.setup(scroll);
+		
 		add(scroll);
 		pack();
+
+		addWindowStateListener(new WindowStateListener()
+		{
+			public void windowStateChanged(WindowEvent e)
+			{
+				if (e.getNewState() == WindowEvent.WINDOW_OPENED)
+					WindowManager.addWindow(PeakResultTableModelFrame.this);
+				else if (e.getNewState() == WindowEvent.WINDOW_CLOSED)
+					WindowManager.removeWindow(PeakResultTableModelFrame.this);
+				//else if (e.getNewState() == WindowEvent.WINDOW_ACTIVATED)
+				//	WindowManager.setWindow(PeakResultTableModelFrame.this);
+			}
+		});
 	}
-	
+
 	/**
 	 * Launch the application.
 	 * 
@@ -86,7 +107,7 @@ public class PeakResultTableModelFrame extends JFrame
 				if (e.getValueIsAdjusting())
 					return;
 				System.out.printf("Model Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-						e.getValueIsAdjusting(), Arrays.toString(getSelectedIndices(selectionModel)));
+						e.getValueIsAdjusting(), Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
 			}
 		});
 
@@ -110,7 +131,7 @@ public class PeakResultTableModelFrame extends JFrame
 					cw.setCountPerPhoton(10);
 					cw.setDistanceUnit(DistanceUnit.PIXEL);
 					cw.setIntensityUnit(IntensityUnit.COUNT);
-					
+
 					ResultsTableSettings.Builder tableSettings = ResultsTableSettings.newBuilder();
 					tableSettings.setDistanceUnit(DistanceUnit.NM);
 					tableSettings.setIntensityUnit(IntensityUnit.PHOTON);
@@ -118,8 +139,9 @@ public class PeakResultTableModelFrame extends JFrame
 					tableSettings.setShowNoiseData(true);
 					tableSettings.setShowPrecision(true);
 					tableSettings.setRoundingPrecision(4);
-					
-					final PeakResultTableModel model = new PeakResultTableModel(store, cw.getCalibration(), null, tableSettings.build());
+
+					final PeakResultTableModel model = new PeakResultTableModel(store, cw.getCalibration(), null,
+							tableSettings.build());
 
 					final PeakResultTableModelFrame d = new PeakResultTableModelFrame(model, null, selectionModel);
 					d.setTitle("D");
@@ -165,65 +187,5 @@ public class PeakResultTableModelFrame extends JFrame
 				}
 			}
 		});
-
-		//		// This doesn't work as the frames are frozen
-		//		Thread.sleep(1000);
-		//		
-		//		// Random selections ...
-		//		EventQueue.invokeLater(new Runnable()
-		//		{
-		//			public void run()
-		//			{
-		//				try
-		//				{
-		//					while (true)
-		//					{
-		//						Thread.sleep(5000);
-		//						int k = r.nextInt(n);
-		//						int[] indices = Random.sample(k, n, r);
-		//						selectionModel.clearSelection();
-		//						for (int index : indices)
-		//							selectionModel.addSelectionInterval(index, index);
-		//					}
-		//				}
-		//				catch (InterruptedException e)
-		//				{
-		//					e.printStackTrace();
-		//				}
-		//			}
-		//		});
-	}
-
-	/**
-	 * Gets the selected indices from the selection model.
-	 * <p>
-	 * Copied from javax.swing.JList
-	 *
-	 * @param sm
-	 *            the sm
-	 * @return the selected indices
-	 */
-	public static int[] getSelectedIndices(ListSelectionModel sm)
-	{
-		int iMin = sm.getMinSelectionIndex();
-		int iMax = sm.getMaxSelectionIndex();
-
-		if ((iMin < 0) || (iMax < 0))
-		{
-			return new int[0];
-		}
-
-		int[] rvTmp = new int[1 + (iMax - iMin)];
-		int n = 0;
-		for (int i = iMin; i <= iMax; i++)
-		{
-			if (sm.isSelectedIndex(i))
-			{
-				rvTmp[n++] = i;
-			}
-		}
-		int[] rv = new int[n];
-		System.arraycopy(rvTmp, 0, rv, 0, n);
-		return rv;
 	}
 }

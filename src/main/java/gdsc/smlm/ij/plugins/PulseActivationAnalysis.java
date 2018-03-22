@@ -1052,7 +1052,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			@Override
 			public Pair<RunSettings, Object> doWork(Pair<RunSettings, Object> work)
 			{
-				PulseActivationAnalysis.this.run(work.s);
+				PulseActivationAnalysis.this.run(work.a);
 				return work;
 			}
 		});

@@ -16,13 +16,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -93,6 +100,9 @@ import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettingsOrBuilder;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.gui.ListSelectionModelHelper;
+import gdsc.smlm.gui.PeakResultTableModel;
+import gdsc.smlm.gui.PeakResultTableModelFrame;
 import gdsc.smlm.ij.ij3d.CustomContent;
 import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.CustomContentInstant;
@@ -107,17 +117,15 @@ import gdsc.smlm.ij.ij3d.TransparentItemShape;
 import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
 import gdsc.smlm.ij.ij3d.UpdateableItemShape;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.results.IJTablePeakResults;
-import gdsc.smlm.ij.utils.TextPanelMouseListener;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultsDigest;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -128,7 +136,6 @@ import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
-import ij.text.TextPanel;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.ContentNode;
@@ -331,66 +338,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
-	private static class ResultsMetaData
+	private static class ResultsMetaData implements ListSelectionListener
 	{
-		private class TableSelectedListener extends TextPanelMouseListener
-		{
-			ResultsMetaData data;
-
-			public TableSelectedListener(ResultsMetaData data)
-			{
-				this.data = data;
-			}
-
-			@Override
-			protected void selected(int selectedIndex)
-			{
-				if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
-					return;
-				clearSelected();
-				data.selectFromCounter(getCounter(textPanel.getLine(selectedIndex)));
-			}
-
-			private int getCounter(String line)
-			{
-				int i = line.indexOf('\t');
-				if (i != -1)
-				{
-					try
-					{
-						return Integer.parseInt(line.substring(0, i));
-					}
-					catch (NumberFormatException e)
-					{
-					}
-				}
-				return -1;
-			}
-
-			@Override
-			protected void selected(int selectionStart, int selectionEnd)
-			{
-				if (selectionStart < 0 || selectionStart >= textPanel.getLineCount())
-					return;
-				if (selectionEnd < selectionStart || selectionEnd >= textPanel.getLineCount())
-					return;
-				clearSelected();
-				while (selectionStart <= selectionEnd)
-				{
-					data.selectFromCounter(getCounter(textPanel.getLine(selectionStart)));
-					selectionStart++;
-				}
-			}
-
-			public TextPanel getTextPanel()
-			{
-				return textPanel;
-			}
-		}
-
-		TableSelectedListener tableSelectedListener;
-		IJTablePeakResults table;
-		TIntObjectHashMap<PeakResult> map = new TIntObjectHashMap<PeakResult>();
+		PeakResultTableModel peakResultTableModel;
+		ListSelectionModel listSelectionModel;
 
 		Color3f highlightColor;
 		final ImageJ3DResultsViewerSettings settings;
@@ -410,6 +361,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		/** The rendering mode. */
 		final Rendering rendering;
 
+		/** Used to test if this is the same results set */
+		PeakResultsDigest digest;
+
 		CustomContentInstant contentInstance;
 		CustomMesh outline;
 		TurboList<PeakResult> selected = new TurboList<PeakResult>();
@@ -418,7 +372,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
 				TurboList<Point3f> points, Point3f[] sizes)
 		{
-			tableSelectedListener = new TableSelectedListener(this);
 			this.settings = settings;
 			this.results = results;
 			this.points = points;
@@ -436,10 +389,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		public void createClickSelectionNode(CustomContentInstant contentInstance)
 		{
-			// Note: There is potential here to allow multiple items to be picked.
-			// Maintain a list of the results that are picked.
+			// Note: Allow multiple items to be picked.
+			// Maintain a list of the results that are picked (the table model).
 			// At each new click, check the list does not contain the points
 			// and add it.
+			// Selction is handled by a selection model.
 			// For multiple items we add new switches. Each new selected point uses the 
 			// first non-visible switch for display (or creates a new one). 
 			// If a point is removed then set the switch off.
@@ -509,8 +463,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// For outlining as a line mesh
 			Pair<Point3f[], int[]> pair = CustomContentHelper.createIndexedObject(pointOutline);
-			Point3f[] vertices = pair.s;
-			int[] faces = pair.r;
+			Point3f[] vertices = pair.a;
+			int[] faces = pair.b;
 			pointOutline.clear();
 			// Only add lines not yet observed. Use an array since 
 			int max = Maths.max(faces) + 1;
@@ -624,14 +578,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			PeakResult r = results.get(index);
 
-			// Find in the list of selected 
-			int switchIndex = findSelected(r);
-			if (switchIndex != -1)
-			{
-				// Switch off
-				contentInstance.setCustomSwitch(switchIndex, false);
-				selected.setf(switchIndex, null);
-			}
+			// Deselect from the model
+			int i = peakResultTableModel.indexOf(r);
+			if (i != -1)
+				listSelectionModel.removeSelectionInterval(i, i);
+
+			// XXX this should be obsolete as the selection listener will handle any selection changs
+			//			
+			//			// Find in the list of selected 
+			//			int switchIndex = findSelected(r);
+			//			if (switchIndex != -1)
+			//			{
+			//				// Switch off
+			//				contentInstance.setCustomSwitch(switchIndex, false);
+			//				selected.setf(switchIndex, null);
+			//
+			//			}
 		}
 
 		public void clearSelected()
@@ -669,44 +631,53 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				outline.setColor(highlightColor);
 		}
 
-		public void setTable(IJTablePeakResults table)
+		public void addSelectionModel(Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t)
 		{
-			// Use a listener to map clicked results back onto the image
-			if (table != null)
+			this.peakResultTableModel = t.a;
+			this.listSelectionModel = t.b;
+			listSelectionModel.addListSelectionListener(this);
+			updateSelection();
+		}
+
+		public void valueChanged(ListSelectionEvent e)
+		{
+			if (e.getValueIsAdjusting())
+				return;
+			updateSelection();
+		}
+
+		private void updateSelection()
+		{
+			int[] indices = ListSelectionModelHelper.getSelectedIndices(listSelectionModel);
+
+			// TODO - better logic to preserve those currently selected:
+			// 1. Find all those to select (new selection)
+			// 2. Find all those currently selected (old selection)
+			// 3. Find those to: keep, select, deselect
+			// 4. Update by deselecting then selecting
+
+			clearSelected();
+			for (int i = 0; i < indices.length; i++)
 			{
-				TextPanel tp = table.getTextPanel();
-				if (tableSelectedListener.getTextPanel() != tp)
-				{
-					map.clear();
-					tableSelectedListener.setTextPanel(tp);
-				}
-			}
-			else
-			{
-				map.clear();
-				tableSelectedListener.setTextPanel(null);
+				select(peakResultTableModel.get(indices[i]));
 			}
 		}
 
-		public void selectFromCounter(int key)
+		public void removeSelectionModel()
 		{
-			PeakResult r = map.get(key);
-			if (r != null)
-				select(r);
-		}
-
-		public void addToMap(int key, PeakResult p)
-		{
-			map.put(key, p);
+			listSelectionModel.removeListSelectionListener(this);
 		}
 	}
 
-	final static Transform3D IDENTITY = new Transform3D();
+	/** The executor service for message digests. */
+	private final static ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+	private final static Transform3D IDENTITY = new Transform3D();
 
 	// No ned to store this in settings as when the plugin is first run there are no windows 
 	private static String lastWindow = "";
 
-	private static HashMap<String, IJTablePeakResults> resultsTables = new HashMap<String, IJTablePeakResults>();
+	private static HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables = new HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>>();
 	private static ResultsTableSettings.Builder resultsTableSettings;
 	private static Color3f highlightColor = null;
 
@@ -1040,6 +1011,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		results = results.copy();
 
+		// Commence a digest
+		Future<PeakResultsDigest> futureDigest = PeakResultsDigest.digestLater(executorService, results.toArray());
+
 		final TurboList<Point3f> points = getPoints(results, settings);
 
 		ResultsMetaData data = new ResultsMetaData(settings.build(), results, points, sphereSize);
@@ -1109,8 +1083,30 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Set up the click selection node
 		data.createClickSelectionNode(contentInstant);
 
+		// Set up the results selection model
+		data.digest = PeakResultsDigest.waitForDigest(futureDigest, -1);
+		if (data.digest == null)
+		{
+			IJ.error(TITLE, "Failed to identify repeat results set");
+			return;
+		}
+		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
+		if (t == null)
+		{
+			t = new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(
+					new PeakResultTableModel(null, results.getCalibration(), results.getPSF(),
+							// Note the settings do not matter until the table is set live
+							resultsTableSettings.build()),
+					new DefaultListSelectionModel(), null);
+			t.a.setCheckDuplicates(true);
+			t.a.setShowDeviations(results.hasDeviations());
+			t.a.setShowZ(results.is3D());
+			t.a.setShowId(results.hasId());
+			t.a.setShowEndFrame(results.hasEndFrame());
+			resultsTables.put(data.digest, t);
+		}
+
 		// Preserve orientation on the content
-		ResultsMetaData oldData = null;
 		boolean auto = univ.getAutoAdjustView();
 		Content oldContent = univ.getContent(name);
 		if (oldContent == null)
@@ -1119,10 +1115,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		else
 		{
-			if (oldContent != null && oldContent.getUserData() instanceof ResultsMetaData)
-			{
-				oldData = (ResultsMetaData) oldContent.getUserData();
-			}
 			univ.removeContent(name);
 			univ.setAutoAdjustView(false);
 		}
@@ -1145,12 +1137,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		univ.setAutoAdjustView(auto);
 
-		// Reselect
-		if (oldData != null)
-		{
-			for (PeakResult r : oldData.selected)
-				data.select(r);
-		}
+		// Initials the selection model
+		data.addSelectionModel(t);
 
 		IJ.showStatus("");
 	}
@@ -1881,7 +1869,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 
 				// Only process content added from localisations
-				Content c = pair.s;
+				Content c = pair.a;
 				if (!(c.getUserData() instanceof ResultsMetaData))
 				{
 					univ.select(c); // Do the same as the mouseClicked in Image3DUniverse
@@ -1911,7 +1899,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					int nPerLocalisation = nVertices / results.size();
 
 					// Determine the localisation
-					int vertexIndex = pair.r.getVertexIndices()[0];
+					int vertexIndex = pair.b.getVertexIndices()[0];
 					index = vertexIndex / nPerLocalisation;
 					//System.out.printf("n=%d [%d]  %s  %s\n", nPerLocalisation, index,
 					//		Arrays.toString(pair.r.getVertexIndices()), pair.r.getIntersectionPoint());
@@ -1921,9 +1909,9 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					//ItemGeometryNode node = (ItemGeometryNode) content.getContent();
 					//ItemGeometryGroup g = node.getItemGeometry();
 					// All shapes have the index as the user data
-					Object o = pair.r.getGeometry().getUserData();
+					Object o = pair.b.getGeometry().getUserData();
 					if (o instanceof Integer)
-						index = (Integer) pair.r.getGeometry().getUserData();
+						index = (Integer) pair.b.getGeometry().getUserData();
 				}
 				if (index == -1)
 					return;
@@ -1946,61 +1934,64 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 				else
 				{
+					// Find in the model
+					int i = data.peakResultTableModel.indexOf(p);
+
 					// Ctrl+Shift held down to remove selected
 					if (e.isShiftDown())
 					{
-						data.deselect(index);
+						if (i != -1)
+							data.listSelectionModel.removeSelectionInterval(i, i);
+						//data.deselect(index);
 					}
 					else
 					{
-						if (resultsTableSettings.getShowTable())
+						// Ctrl held down to set selection
+						if (i == -1)
 						{
-							// Output the result to a table.
-							// Just create a table and add to it.
-							IJTablePeakResults table = createTable(results, data);
-							table.add(p);
-							data.addToMap(table.size(), p);
-							table.flush();
+							i = data.peakResultTableModel.getRowCount();
+							data.peakResultTableModel.add(data, p);
 						}
 
-						// Remove previous selection
-						data.clearSelected();
+						if (resultsTableSettings.getShowTable())
+						{
+							// Output the selection to a table.
+							createTable(results, data);
+						}
+
 						// Highlight the localisation using an outline.
-						data.select(index);
+						// Add to or replace previous selection.
+						boolean add = true;
+						if (add)
+							data.listSelectionModel.addSelectionInterval(i, i);
+						else
+							data.listSelectionModel.setSelectionInterval(i, i);
 					}
 				}
 			}
 
-			private IJTablePeakResults createTable(MemoryPeakResults results, ResultsMetaData data)
+			private void createTable(MemoryPeakResults results, ResultsMetaData data)
 			{
-				String name = results.getName();
-				IJTablePeakResults table = resultsTables.get(name);
-				if (table == null || !table.getResultsWindow().isVisible())
+				// There is a single TableModel and SelectionModel for each unique results set.
+				// This is displayed in a window. Show the window if it is not visible.
+				// Set the window to have dispose on close (to save memory).
+
+				// Clicks just select from the selection model, and add results to the table model.
+
+				Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables
+						.get(data.digest);
+
+				PeakResultTableModelFrame table = t.c;
+				if (table == null || !table.isVisible())
 				{
-					// Have table settings in the settings.
-					// Allow it to be set in the GDSC SMLM menu.
-					table = new IJTablePeakResults(results.hasDeviations());
-					table.setTableTitle(TITLE + " " + name);
-					table.copySettings(results);
-					table.setDistanceUnit(resultsTableSettings.getDistanceUnit());
-					table.setIntensityUnit(resultsTableSettings.getIntensityUnit());
-					table.setAngleUnit(resultsTableSettings.getAngleUnit());
-					table.setShowPrecision(resultsTableSettings.getShowPrecision());
-					if (resultsTableSettings.getShowPrecision())
-						table.setComputePrecision(true);
-					table.setShowEndFrame(results.hasEndFrame());
-					table.setRoundingPrecision(resultsTableSettings.getRoundingPrecision());
-					table.setShowZ(results.is3D());
-					table.setShowFittingData(resultsTableSettings.getShowFittingData());
-					table.setShowNoiseData(resultsTableSettings.getShowNoiseData());
-					table.setShowId(results.hasId());
-					table.setAddCounter(true);
-					table.setHideSourceText(false);
-					table.begin();
-					resultsTables.put(name, table);
+					table = new PeakResultTableModelFrame(t.a, null, t.b);
+					table.setTitle(TITLE + " " + results.getName());
+					table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					table.setVisible(true);
+					resultsTables.put(data.digest,
+							new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(t.a, t.b,
+									table));
 				}
-				data.setTable(table);
-				return table;
 			}
 
 			@Override
@@ -3846,6 +3837,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	public void contentRemoved(Content c)
 	{
+		// Unregister from the selection model
+		if (c != null && c.getUserData() instanceof ResultsMetaData)
+		{
+			ResultsMetaData data = (ResultsMetaData) c.getUserData();
+			data.removeSelectionModel();
+		}
 	}
 
 	public void contentChanged(Content c)

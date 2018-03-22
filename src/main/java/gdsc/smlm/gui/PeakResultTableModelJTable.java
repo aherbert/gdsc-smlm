@@ -1,54 +1,11 @@
 package gdsc.smlm.gui;
 
-import java.util.Arrays;
-
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-
-import gdsc.core.data.utils.ConversionException;
-import gdsc.core.data.utils.Converter;
-import gdsc.core.data.utils.Rounder;
-import gdsc.core.data.utils.RounderFactory;
-import gdsc.core.utils.TextUtils;
-import gdsc.core.utils.TurboList;
-import gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import gdsc.smlm.data.config.PSFProtos.PSF;
-import gdsc.smlm.data.config.PSFProtosHelper;
-
-/*----------------------------------------------------------------------------- 
- * GDSC SMLM Software
- * 
- * Copyright (C) 2018 Alex Herbert
- * Genome Damage and Stability Centre
- * University of Sussex, UK
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *---------------------------------------------------------------------------*/
-
-import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import gdsc.smlm.data.config.CalibrationProtosHelper;
-import gdsc.smlm.data.config.CalibrationReader;
-import gdsc.smlm.data.config.ConfigurationException;
-import gdsc.smlm.data.config.ResultsProtosHelper;
-import gdsc.smlm.data.config.UnitConverterFactory;
-import gdsc.smlm.results.ArrayPeakResultStore;
-import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
-import gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultConversionHelper;
-import gdsc.smlm.results.PeakResultData;
-import gdsc.smlm.results.PeakResultStoreList;
-import gdsc.smlm.results.data.*;
 
 /**
  * Stores peak results and allows event propagation to listeners of the model.
@@ -57,26 +14,48 @@ public class PeakResultTableModelJTable extends JTable
 {
 	private static final long serialVersionUID = 7144289957208169053L;
 
+	private TableColumnAdjuster tca;
+
 	public PeakResultTableModelJTable(PeakResultTableModel model, TableColumnModel cm,
 			ListSelectionModel selectionModel)
 	{
 		super(model, cm, selectionModel);
 		updateRenderer();
+
+		// Make all the columns show the full data.
+		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+		// Note that this is not dynamic and so must manually be called when columns change
+		tca = new TableColumnAdjuster(this, 6, false);
+		//  Only process 10 rows max.
+		tca.setMaxRows(10);
+		tca.adjustColumns();
 	}
 
 	@Override
-	public void tableChanged(TableModelEvent e)
+	public void tableChanged(final TableModelEvent e)
 	{
 		if (e.getType() == PeakResultTableModel.RENDERER)
 		{
+			// Special event when the rendering has changed, 
+			// e.g. the rounding precision has changed 
 			updateRenderer();
 			return;
 		}
-		if (e.getType() == TableModelEvent.ALL_COLUMNS)
-		{
-			updateRenderer();
-		}
+		
 		super.tableChanged(e);
+
+		if (e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW)
+		{
+			// The whole thing changed so resize the columns
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					tca.adjustColumns();
+				}
+			});
+		}
 	}
 
 	private void updateRenderer()
@@ -92,7 +71,7 @@ public class PeakResultTableModelJTable extends JTable
 		}
 		else
 		{
-			// Reset?
+			// Reset to null?
 		}
 	}
 }

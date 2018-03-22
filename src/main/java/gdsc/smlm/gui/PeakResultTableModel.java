@@ -11,6 +11,7 @@ import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.Converter;
 import gdsc.core.data.utils.Rounder;
 import gdsc.core.data.utils.RounderFactory;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -51,6 +52,7 @@ import gdsc.smlm.results.data.PeakResultDataParameterConverter;
 import gdsc.smlm.results.data.PeakResultDataParameterDeviationConverter;
 import gdsc.smlm.results.data.PeakResultDataPrecision;
 import gdsc.smlm.results.data.PeakResultDataSNR;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * Stores peak results and allows event propagation to listeners of the model.
@@ -62,11 +64,20 @@ public class PeakResultTableModel extends AbstractTableModel
 	/** Identifies the cell renderer has changed. */
 	static final int RENDERER = -99;
 
-	final PeakResultStoreList data;
-	final Calibration calibration;
-	final PSF psf;
+	/** Flag used to show the model has been passed to PeakResultTableModelFrame. */
+	private boolean isLive;
+
+	private final PeakResultStoreList data;
+	private final Calibration calibration;
+	private final PSF psf;
 	private ResultsTableSettings tableSettings;
 	private boolean checkForDuplicates = false;
+
+	// These depend on the source results
+	private boolean showDeviations = false;
+	private boolean showEndFrame = false;
+	private boolean showId = false;
+	private boolean showZ = false;
 
 	// Used for the columns 
 	private Rounder rounder;
@@ -75,8 +86,6 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/**
 	 * Instantiates a new peak result model using the store.
-	 * <p>
-	 * The default store implementation is a set to avoid duplicate entries in the model.
 	 *
 	 * @param results
 	 *            the results
@@ -86,10 +95,14 @@ public class PeakResultTableModel extends AbstractTableModel
 	 *            the psf
 	 * @param tableSettings
 	 *            the table settings
+	 * @param isLive
+	 *            the is live
 	 */
 	public PeakResultTableModel(PeakResultStoreList results, Calibration calibration, PSF psf,
 			ResultsTableSettings tableSettings)
 	{
+		this.isLive = false;
+
 		if (results == null)
 			results = new ArrayPeakResultStore(10);
 		if (calibration == null)
@@ -103,6 +116,16 @@ public class PeakResultTableModel extends AbstractTableModel
 	}
 
 	/**
+	 * Sets the model to the live state. This creates all the table layout information and updates it when properties
+	 * are changed.
+	 */
+	void setLive()
+	{
+		isLive = true;
+		tableChanged();
+	}
+
+	/**
 	 * Convert the model to an array.
 	 *
 	 * @return the peak result array
@@ -112,19 +135,62 @@ public class PeakResultTableModel extends AbstractTableModel
 		return data.toArray();
 	}
 
+	/**
+	 * Gets the calibration.
+	 *
+	 * @return the calibration
+	 */
 	public Calibration getCalibration()
 	{
 		return calibration;
 	}
 
+	/**
+	 * Gets the psf.
+	 *
+	 * @return the psf
+	 */
 	public PSF getPSF()
 	{
 		return psf;
 	}
 
+	/**
+	 * Gets the table settings.
+	 *
+	 * @return the table settings
+	 */
 	public ResultsTableSettings getTableSettings()
 	{
 		return tableSettings;
+	}
+
+	/**
+	 * Gets the results for the given index.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the peak result
+	 */
+	public PeakResult get(int index)
+	{
+		return data.get(index);
+	}
+
+	/**
+	 * Returns the index of the first occurrence of the specified result
+	 * in this store, or -1 if this list does not contain the element.
+	 * More formally, returns the lowest index <tt>i</tt> such that
+	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
+	 * or -1 if there is no such index.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the index (or -1)
+	 */
+	public int indexOf(PeakResult result)
+	{
+		return data.indexOf(result);
 	}
 
 	/**
@@ -140,6 +206,13 @@ public class PeakResultTableModel extends AbstractTableModel
 		if (tableSettings.equals(this.tableSettings))
 			return;
 		this.tableSettings = tableSettings;
+		tableChanged();
+	}
+
+	public void tableChanged()
+	{
+		if (!isLive)
+			return;
 
 		rounder = RounderFactory.create(tableSettings.getRoundingPrecision());
 
@@ -163,12 +236,16 @@ public class PeakResultTableModel extends AbstractTableModel
 
 		valuesList.add(new PeakResultDataFrame());
 		addName(valuesList, namesList);
-		// XXX - Configure this
-		valuesList.add(new PeakResultDataEndFrame());
-		addName(valuesList, namesList);
-		// XXX - Configure this
-		valuesList.add(new PeakResultDataId());
-		addName(valuesList, namesList);
+		if (showEndFrame)
+		{
+			valuesList.add(new PeakResultDataEndFrame());
+			addName(valuesList, namesList);
+		}
+		if (showId)
+		{
+			valuesList.add(new PeakResultDataId());
+			addName(valuesList, namesList);
+		}
 		if (tableSettings.getShowFittingData())
 		{
 			valuesList.add(new PeakResultDataOrigX());
@@ -195,9 +272,15 @@ public class PeakResultTableModel extends AbstractTableModel
 			addName(valuesList, namesList);
 		}
 
-		// XXX - Configure this
-		boolean showDeviations = false;
-		for (int i = 0; i < PeakResult.STANDARD_PARAMETERS; i++)
+		int[] outIndices = SimpleArrayUtils.newArray(converters.length, 0, 1);
+		if (!showZ)
+		{
+			TIntArrayList list = new TIntArrayList(outIndices);
+			list.remove(PeakResult.Z);
+			outIndices = list.toArray();
+		}
+
+		for (int i : outIndices)
 		{
 			// Must be converted
 			valuesList.add(new PeakResultDataParameterConverter(converters[i], i));
@@ -282,12 +365,22 @@ public class PeakResultTableModel extends AbstractTableModel
 		return data.size();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+	 */
 	@Override
 	public String getColumnName(int column)
 	{
 		return names[column]; // values[column].getValueName();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+	 */
 	@Override
 	public Class<?> getColumnClass(int columnIndex)
 	{
@@ -311,7 +404,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
-		PeakResult r = data.get(rowIndex);
+		PeakResult r = get(rowIndex);
 		return values[columnIndex].getValue(r);
 	}
 
@@ -426,6 +519,90 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		data.remove(fromIndex, toIndex);
 		fireTableRowsDeleted(fromIndex, toIndex);
+	}
+
+	/**
+	 * @return If true show the results deviations in the table
+	 */
+	public boolean isShowDeviations()
+	{
+		return showDeviations;
+	}
+
+	/**
+	 * @param showDeviations
+	 *            If true show the results deviations in the table
+	 */
+	public void setShowDeviations(boolean showDeviations)
+	{
+		boolean changed = this.showDeviations != showDeviations;
+		this.showDeviations = showDeviations;
+		if (changed)
+			tableChanged();
+	}
+
+	/**
+	 * @return If true show the results end frame in the table
+	 */
+	public boolean isShowEndFrame()
+	{
+		return showEndFrame;
+	}
+
+	/**
+	 * @param showEndFrame
+	 *            If true show the results end frame in the table
+	 */
+	public void setShowEndFrame(boolean showEndFrame)
+	{
+		boolean changed = this.showEndFrame != showEndFrame;
+		this.showEndFrame = showEndFrame;
+		if (changed)
+			tableChanged();
+	}
+
+	/**
+	 * @return If true show the results Id in the table
+	 */
+	public boolean isShowId()
+	{
+		return showId;
+	}
+
+	/**
+	 * @param showId
+	 *            If true show the results Id in the table
+	 */
+	public void setShowId(boolean showId)
+	{
+		boolean changed = this.showId != showId;
+		this.showId = showId;
+		if (changed)
+			tableChanged();
+	}
+
+	/**
+	 * Checks if showing the Z column.
+	 *
+	 * @return true, if is show Z
+	 */
+	public boolean isShowZ()
+	{
+		return showZ;
+	}
+
+	/**
+	 * Set to true to show the Z column.
+	 *
+	 * @param showZ
+	 *            the new show Z
+	 */
+	public void setShowZ(boolean showZ)
+	{
+		boolean changed = this.showZ != showZ;
+		this.showZ = showZ;
+		if (changed)
+			tableChanged();
 	}
 
 	/**
