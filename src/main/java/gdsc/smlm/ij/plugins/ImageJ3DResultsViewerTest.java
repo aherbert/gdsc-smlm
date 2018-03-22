@@ -2,8 +2,8 @@ package gdsc.smlm.ij.plugins;
 
 import java.util.List;
 
-import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Appearance;
+import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.View;
 import org.scijava.java3d.utils.geometry.Sphere;
@@ -13,10 +13,10 @@ import customnode.CustomMesh;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.ij.ij3d.CustomContent;
+import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGeometryNode;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
-import gdsc.smlm.ij.ij3d.OrderedItemGeometryGroup;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -102,13 +102,14 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			for (int d = 0; d < 4; d++)
 			{
 				List<Point3f> points = customnode.MeshMaker.createIcosahedron(d, 1f);
+				Pair<Point3f[], int[]> p = CustomContentHelper.createIndexedObject(points);
 				int v = points.size();
 				int t = v / 3;
-				System.out.printf("Icosahedron divisions = %d, V=%d, T=%d\n", d, v, t);
+				System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d, i=%d\n", d, v, t, p.a.length, p.b.length);
 
 				CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
 						new Point3f[] { new Point3f(x, y, 0) }, null, null, 0);
-
+				
 				a = mesh.getAppearance();
 				univ.addCustomMesh(mesh, x + "," + y + "," + t);
 				x += space;
