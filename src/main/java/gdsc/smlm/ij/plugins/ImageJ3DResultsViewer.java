@@ -3444,9 +3444,33 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
 			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
 	{
+		// This may work 
+		//int MAX_ARRAY_SIZE = 1 << 28;
+		// This is a safe limit (2^27)
+		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
+		
+		int stride = 3 + 3; // Coordinates + color
+		if (alpha != null)
+			stride++; // add color alpha
+		
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
+			long arraySize = (long) points.size() * stride;
+			if (arraySize > MAX_ARRAY_SIZE)
+			{
+				double capacity = (double) arraySize / MAX_ARRAY_SIZE;
+				//@formatter:off
+				IJ.error(TITLE,
+						TextUtils.wrap(String.format(
+								"The results will generate data of %d values. " +
+								"This is amount of data is not supported (%.2fx capacity). " +
+								"Please choose a different dataset with fewer points.",
+								arraySize, capacity), 80));
+				//@formatter:on
+				return null;
+			}
+			
 			CustomPointMesh mesh;
 			if (alpha != null)
 			{
@@ -3481,17 +3505,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		final List<Point3f> point = createLocalisationObject(r);
 
-		int stride = 3 + 3 + 3; // Coordinates + normals + color
-		if (alpha != null)
-			stride++;
-
+		stride += 3; // + normals
+		
 		final int singlePointSize = point.size();
 		long size = (long) points.size() * singlePointSize;
 		long arraySize = size * stride;
-		// This may work 
-		//int MAX_ARRAY_SIZE = 1 << 28;
-		// This is a safe limit 
-		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
 		if (arraySize > MAX_ARRAY_SIZE)
 		{
 			double capacity = (double) arraySize / MAX_ARRAY_SIZE;
@@ -3500,7 +3518,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					TextUtils.wrap(String.format(
 							"The results will generate data of %d values. " +
 							"This is amount of data is not supported (%.2fx capacity). " +
-							"Please choose a different rendering model with less vertices.",
+							"Please choose a different rendering model with fewer vertices.",
 							arraySize, capacity), 80));
 			//@formatter:on
 			return null;
