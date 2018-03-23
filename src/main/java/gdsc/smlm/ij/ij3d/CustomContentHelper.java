@@ -149,6 +149,12 @@ public class CustomContentHelper
 		min.set(points[0]);
 		max.set(points[0]);
 
+		if (points.length == 1)
+		{
+			center.set(points[0]);
+			return;
+		}
+		
 		// Weighted centre of mass
 		double sumx = min.x;
 		double sumy = min.y;
