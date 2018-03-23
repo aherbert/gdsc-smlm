@@ -1,4 +1,4 @@
-package gdsc.smlm.gui;
+package gdsc.smlm.ij.gui;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -14,7 +14,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
@@ -26,8 +25,11 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
+import gdsc.core.data.utils.ConversionException;
+import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.XmlUtils;
+import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -48,13 +50,18 @@ import gdsc.smlm.ij.settings.SettingsManager;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.ArrayPeakResultStore;
+import gdsc.smlm.results.FramePeakResultComparator;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultStoreList;
+import gnu.trove.list.array.TFloatArrayList;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
 import ij.gui.ScreenDimensionHelper;
 
 /**
@@ -66,15 +73,16 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 {
 	private static final long serialVersionUID = -3671174621388288975L;
 
-	private JTable table;
+	private PeakResultTableModelJTable table;
 	private JMenuItem fileSave;
-	private JMenuItem fileShowSource;
 	private JMenuItem editDelete;
 	private JMenuItem editDeleteAll;
 	private JMenuItem editSelectAll;
 	private JMenuItem editSelectNone;
 	private JMenuItem editUnsort;
 	private JMenuItem editTableSettings;
+	private JMenuItem sourceShow;
+	private JMenuItem sourceOverlay;
 	private String saveName;
 
 	/**
@@ -167,6 +175,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(createFileMenu());
 		menubar.add(createEditMenu());
+		menubar.add(createSourceMenu());
 		return menubar;
 	}
 
@@ -175,7 +184,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		final JMenu menu = new JMenu("File");
 		menu.setMnemonic(KeyEvent.VK_F);
 		menu.add(fileSave = add(menu, "Save ...", KeyEvent.VK_S, "ctrl pressed S"));
-		menu.add(fileShowSource = add(menu, "Show source", KeyEvent.VK_W, null));
 		return menu;
 	}
 
@@ -190,6 +198,15 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		menu.add(editUnsort = add(menu, "Unsort", KeyEvent.VK_U, null));
 		menu.addSeparator();
 		menu.add(editTableSettings = add(menu, "Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
+		return menu;
+	}
+
+	private JMenu createSourceMenu()
+	{
+		final JMenu menu = new JMenu("Source");
+		menu.setMnemonic(KeyEvent.VK_S);
+		menu.add(sourceShow = add(menu, "Show", KeyEvent.VK_W, "ctrl pressed I"));
+		menu.add(sourceOverlay = add(menu, "Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
 		return menu;
 	}
 
@@ -212,8 +229,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		final Object src = e.getSource();
 		if (src == fileSave)
 			doSave();
-		else if (src == fileShowSource)
-			doShowSource();
 		else if (src == editDelete)
 			doDelete();
 		else if (src == editDeleteAll)
@@ -226,6 +241,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			doUnsort();
 		else if (src == editTableSettings)
 			doEditTableSettings();
+		else if (src == sourceShow)
+			doShowSource();
+		else if (src == sourceOverlay)
+			doShowOverlay();
 	}
 
 	private void doSave()
@@ -249,24 +268,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		MemoryPeakResults results = model.toMemoryPeakResults();
 		results.setName(saveName);
 		MemoryPeakResults.addResults(results);
-	}
-
-	private void doShowSource()
-	{
-		PeakResultTableModel model = getModel();
-		if (model == null)
-			return;
-		ImageSource source = model.getSource();
-		String text = getTitle() + " source";
-		if (source == null)
-		{
-			text += " = NA";
-		}
-		else
-		{
-			text += "\n" + XmlUtils.prettyPrintXml(source.toXML());
-		}
-		IJ.log(text);
 	}
 
 	private void doDelete()
@@ -332,6 +333,87 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		tableSettings.setShowPrecision(egd.getNextBoolean());
 		tableSettings.setRoundingPrecision((int) egd.getNextNumber());
 		model.setTableSettings(tableSettings.build());
+	}
+
+	private void doShowSource()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null)
+			return;
+		ImageSource source = model.getSource();
+		String text = getTitle() + " source";
+		if (source == null)
+		{
+			text += " = NA";
+		}
+		else
+		{
+			text += "\n" + XmlUtils.prettyPrintXml(source.toXML());
+		}
+		IJ.log(text);
+	}
+
+	private void doShowOverlay()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null)
+			return;
+		PeakResult[] list = table.getSelectedData();
+		if (list.length == 0)
+			return;
+		ImageSource source = model.getSource();
+		if (source == null)
+			return;
+
+		String title = source.getOriginal().getName();
+		ImagePlus imp = WindowManager.getImage(title);
+		if (imp == null)
+			return;
+		// Assumes 3D stack (no channel/time)
+		if (imp.getNDimensions() > 3)
+			return;
+		try
+		{
+			TypeConverter<DistanceUnit> converter = CalibrationHelper.getDistanceConverter(model.getCalibration(),
+					DistanceUnit.PIXEL);
+			Overlay o = new Overlay();
+			Arrays.sort(list, FramePeakResultComparator.INSTANCE);
+			TFloatArrayList ox = new TFloatArrayList(100);
+			TFloatArrayList oy = new TFloatArrayList(100);
+			int t = list[0].getFrame() - 1;
+			for (int i = 0; i < list.length; i++)
+			{
+				if (t != list[i].getFrame())
+				{
+					if (ox.size() > 0)
+					{
+						PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+						roi.setPointType(3);
+						roi.setPosition(t);
+						ox.resetQuick();
+						oy.resetQuick();
+						o.add(roi);
+					}
+					t = list[i].getFrame();
+				}
+				ox.add(converter.convert(list[i].getXPosition()));
+				oy.add(converter.convert(list[i].getYPosition()));
+			}
+			if (ox.size() > 0)
+			{
+				PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+				roi.setPointType(3);
+				roi.setPosition(t);
+				o.add(roi);
+			}
+			imp.setOverlay(o);
+			imp.setSlice(list[0].getFrame());
+			imp.getWindow().toFront();
+		}
+		catch (ConversionException e)
+		{
+			return;
+		}
 	}
 
 	private PeakResultTableModel getModel()

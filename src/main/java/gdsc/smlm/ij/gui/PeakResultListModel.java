@@ -1,4 +1,4 @@
-package gdsc.smlm.gui;
+package gdsc.smlm.ij.gui;
 
 import java.util.Arrays;
 

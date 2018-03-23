@@ -1,11 +1,14 @@
-package gdsc.smlm.gui;
+package gdsc.smlm.ij.gui;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import gdsc.smlm.results.PeakResult;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -90,5 +93,58 @@ public class PeakResultTableModelJTable extends JTable
 		{
 			// Reset to null?
 		}
+	}
+
+	/**
+	 * Returns the data of all selected rows. This maps the indices from the view to the data model.
+	 *
+	 * @return an array containing the data of all selected rows,
+	 *         or an empty array if no row is selected
+	 * @see #getSelectedRow
+	 */
+	public PeakResult[] getSelectedData()
+	{
+		if (dataModel instanceof PeakResultTableModel)
+		{
+			PeakResultTableModel model = (PeakResultTableModel) dataModel;
+			int iMin = selectionModel.getMinSelectionIndex();
+			int iMax = selectionModel.getMaxSelectionIndex();
+
+			if ((iMin == -1) || (iMax == -1))
+			{
+				return new PeakResult[0];
+			}
+
+			PeakResult[] rvTmp = new PeakResult[1 + (iMax - iMin)];
+			int n = 0;
+
+			RowSorter<?> sorter = getRowSorter();
+			if (sorter != null)
+			{
+				for (int i = iMin; i <= iMax; i++)
+				{
+					if (selectionModel.isSelectedIndex(i))
+					{
+						rvTmp[n++] = model.get(sorter.convertRowIndexToModel(i));
+					}
+				}
+			}
+			else
+			{
+				for (int i = iMin; i <= iMax; i++)
+				{
+					if (selectionModel.isSelectedIndex(i))
+					{
+						rvTmp[n++] = model.get(i);
+					}
+				}
+			}
+			if (n == rvTmp.length)
+				return rvTmp;
+			PeakResult[] rv = new PeakResult[n];
+			System.arraycopy(rvTmp, 0, rv, 0, n);
+			return rv;
+		}
+		return new PeakResult[0];
 	}
 }
