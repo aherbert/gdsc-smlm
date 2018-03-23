@@ -52,8 +52,10 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 *
 	 * @param store
 	 *            the store to copy
+	 * @throws NullPointerException
+	 *             if the store is null
 	 */
-	public ArrayPeakResultStore(ArrayPeakResultStore store)
+	public ArrayPeakResultStore(ArrayPeakResultStore store) throws NullPointerException
 	{
 		this.results = store.toArray();
 		this.size = store.size;
@@ -64,8 +66,10 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 *
 	 * @param results
 	 *            the results
+	 * @throws NullPointerException
+	 *             if the results are null
 	 */
-	ArrayPeakResultStore(PeakResult[] results)
+	public ArrayPeakResultStore(PeakResult[] results) throws NullPointerException
 	{
 		this.results = results;
 		this.size = results.length;
