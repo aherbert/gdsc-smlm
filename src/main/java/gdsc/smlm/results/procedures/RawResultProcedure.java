@@ -21,7 +21,9 @@ import gdsc.smlm.results.MemoryPeakResults;
  */
 //@formatter:off
 public class RawResultProcedure extends AbstractResultProcedure implements 
-        BIXYZResultProcedure 
+        BIXYZResultProcedure,
+		IResultProcedure, 
+		XYZResultProcedure 
 //@formatter:on
 {
 	/** The background. */
@@ -42,7 +44,8 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 	/**
 	 * Instantiates a new standard result procedure.
 	 *
-	 * @param results            the results
+	 * @param results
+	 *            the results
 	 */
 	public RawResultProcedure(MemoryPeakResults results)
 	{
@@ -70,6 +73,67 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 	{
 		this.background[i] = background;
 		this.intensity[i] = intensity;
+		this.x[i] = x;
+		this.y[i] = y;
+		this.z[i] = z;
+		i++;
+	}
+
+	/**
+	 * Gets the I data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getI() throws DataException
+	{
+		i = 0;
+		this.intensity = allocate(this.intensity);
+		results.forEachNative((IResultProcedure) this);
+	}
+
+	public void executeI(float intensity)
+	{
+		this.intensity[i] = intensity;
+		i++;
+	}
+
+	/**
+	 * Gets the B data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getB() throws DataException
+	{
+		i = 0;
+		this.background = allocate(this.background);
+		results.forEachNative((BResultProcedure) this);
+	}
+
+	public void executeB(float background)
+	{
+		this.background[i] = background;
+		i++;
+	}
+
+	/**
+	 * Gets the XYZ data in the configured units.
+	 * 
+	 * @throws DataException
+	 *             if conversion to the required units is not possible
+	 */
+	public void getXYZ() throws DataException
+	{
+		i = 0;
+		this.x = allocate(this.x);
+		this.y = allocate(this.y);
+		this.z = allocate(this.z);
+		results.forEachNative((XYZResultProcedure) this);
+	}
+
+	public void executeXYZ(float x, float y, float z)
+	{
 		this.x[i] = x;
 		this.y[i] = y;
 		this.z[i] = z;

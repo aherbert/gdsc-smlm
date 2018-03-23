@@ -1340,6 +1340,105 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/**
+	 * For each result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEachNative(BResultProcedure procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			procedure.executeB(r.getBackground());
+		}
+	}
+
+	/**
+	 * For the first result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forFirstNative(BResultProcedure procedure)
+	{
+		if (isEmpty())
+			return;
+		final PeakResult r = getf(0);
+		procedure.executeB(r.getBackground());
+	}
+
+	/**
+	 * For each result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEachNative(IResultProcedure procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			procedure.executeI(r.getSignal());
+		}
+	}
+
+	/**
+	 * For the first result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forFirstNative(IResultProcedure procedure)
+	{
+		if (isEmpty())
+			return;
+		final PeakResult r = getf(0);
+		procedure.executeI(r.getSignal());
+	}
+
+	/**
+	 * For each result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forEachNative(XYZResultProcedure procedure)
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			procedure.executeXYZ(r.getXPosition(), r.getYPosition(), r.getZPosition());
+		}
+	}
+
+	/**
+	 * For the first result execute the procedure.
+	 * <p>
+	 * Warning: Results with be in their native units since no unit conversion is performed.
+	 *
+	 * @param procedure
+	 *            the procedure
+	 */
+	public void forFirstNative(XYZResultProcedure procedure)
+	{
+		if (isEmpty())
+			return;
+		final PeakResult r = getf(0);
+		procedure.executeXYZ(r.getXPosition(), r.getYPosition(), r.getZPosition());
+	}
+
+	/**
 	 * For each result execute the procedure using the specified units.
 	 * <p>
 	 * This will fail if the calibration is missing information to convert the units.
