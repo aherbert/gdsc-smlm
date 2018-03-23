@@ -377,34 +377,46 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			TypeConverter<DistanceUnit> converter = CalibrationHelper.getDistanceConverter(model.getCalibration(),
 					DistanceUnit.PIXEL);
 			Overlay o = new Overlay();
-			Arrays.sort(list, FramePeakResultComparator.INSTANCE);
-			TFloatArrayList ox = new TFloatArrayList(100);
-			TFloatArrayList oy = new TFloatArrayList(100);
-			int t = list[0].getFrame() - 1;
-			for (int i = 0; i < list.length; i++)
+
+			if (list.length == 1)
 			{
-				if (t != list[i].getFrame())
-				{
-					if (ox.size() > 0)
-					{
-						PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
-						roi.setPointType(3);
-						roi.setPosition(t);
-						ox.resetQuick();
-						oy.resetQuick();
-						o.add(roi);
-					}
-					t = list[i].getFrame();
-				}
-				ox.add(converter.convert(list[i].getXPosition()));
-				oy.add(converter.convert(list[i].getYPosition()));
-			}
-			if (ox.size() > 0)
-			{
-				PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+				PeakResult p = list[0];
+				PointRoi roi = new PointRoi(converter.convert(p.getXPosition()), converter.convert(p.getYPosition()));
 				roi.setPointType(3);
-				roi.setPosition(t);
+				roi.setPosition(p.getFrame());
 				o.add(roi);
+			}
+			else
+			{
+				Arrays.sort(list, FramePeakResultComparator.INSTANCE);
+				TFloatArrayList ox = new TFloatArrayList(list.length);
+				TFloatArrayList oy = new TFloatArrayList(list.length);
+				int t = list[0].getFrame() - 1;
+				for (int i = 0; i < list.length; i++)
+				{
+					if (t != list[i].getFrame())
+					{
+						if (ox.size() > 0)
+						{
+							PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+							roi.setPointType(3);
+							roi.setPosition(t);
+							ox.resetQuick();
+							oy.resetQuick();
+							o.add(roi);
+						}
+						t = list[i].getFrame();
+					}
+					ox.add(converter.convert(list[i].getXPosition()));
+					oy.add(converter.convert(list[i].getYPosition()));
+				}
+				if (ox.size() > 0)
+				{
+					PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+					roi.setPointType(3);
+					roi.setPosition(t);
+					o.add(roi);
+				}
 			}
 			imp.setOverlay(o);
 			imp.setSlice(list[0].getFrame());
