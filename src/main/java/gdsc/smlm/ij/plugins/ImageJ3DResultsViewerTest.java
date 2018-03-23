@@ -16,6 +16,7 @@ import gdsc.smlm.ij.ij3d.CustomContent;
 import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGeometryNode;
+import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -105,21 +106,27 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 				Pair<Point3f[], int[]> p = CustomContentHelper.createIndexedObject(points);
 				int v = points.size();
 				int t = v / 3;
-				System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d, i=%d\n", d, v, t, p.a.length, p.b.length);
+				System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d (%.2f), i=%d\n", d, v, t, p.a.length,
+						v / (double) p.a.length, p.b.length);
 
 				CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
 						new Point3f[] { new Point3f(x, y, 0) }, null, null, 0);
-				
+
 				a = mesh.getAppearance();
 				univ.addCustomMesh(mesh, x + "," + y + "," + t);
+
+				float y2 = y + space;
+				mesh = new ItemIndexedTriangleMesh(p.a, p.b, new Point3f[] { new Point3f(x, y2, 0) }, null, null, 0);
+				univ.addCustomMesh(mesh, x + "," + y2 + "," + t);
+
 				x += space;
 			}
 
 			// The T=800 sphere looks about the same as the Icosahedron(div=3) T=1280
 			// This may be a better super-high resolution option.
-			
+
 			x = 0;
-			y += space;
+			y += 2 * space;
 			a = (Appearance) a.cloneNodeComponent(true);
 			//a.getColoringAttributes().setColor(0, 1, 0);
 			a.getMaterial().setDiffuseColor(0, 1, 0);
