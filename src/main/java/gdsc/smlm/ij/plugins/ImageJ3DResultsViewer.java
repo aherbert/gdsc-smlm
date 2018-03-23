@@ -1125,15 +1125,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		if (t == null)
 		{
 			t = new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(
-					new PeakResultTableModel(null, results.getCalibration(), results.getPSF(),
+					new PeakResultTableModel(results, false,
 							// Note the settings do not matter until the table is set live
 							resultsTableSettings.build()),
 					new DefaultListSelectionModel(), null);
 			t.a.setCheckDuplicates(true);
-			t.a.setShowDeviations(results.hasDeviations());
-			t.a.setShowZ(results.is3D());
-			t.a.setShowId(results.hasId());
-			t.a.setShowEndFrame(results.hasEndFrame());
 			resultsTables.put(data.digest, t);
 		}
 
@@ -2102,9 +2098,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// Finally display the window
 		univ.show();
-		ImageWindow3D w = univ.getWindow();
+		final ImageWindow3D w = univ.getWindow();
 		GUI.center(w);
 		w.setTitle(title2);
+
+		WindowManager.addWindow(w);
+		w.addWindowListener(new WindowAdapter()
+		{
+			public void windowClosed(WindowEvent e)
+			{
+				WindowManager.removeWindow(w);
+			}
+		});
 
 		// Add a new menu for SMLM functionality
 		createSMLMMenuBar(univ);
@@ -3462,6 +3467,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// the super class to preserve the orientation of the normals. So if the coordinates 
 		// are modified through the mesh then the appearance will change. For now just use
 		// the RepeatedTriangleMesh.
+
+		// TODO - check this. It may not be true if the shading mode is flat...
 
 		// Also the IndexedTriangleMesh has one normal per vertex and this causes a colour fall-off
 		// on the triangle plane towards the edges. The TriangleMesh colours the entire surface
