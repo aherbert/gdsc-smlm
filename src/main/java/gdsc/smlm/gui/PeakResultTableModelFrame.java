@@ -70,6 +70,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	private JMenuItem fileShowSource;
 	private JMenuItem editDelete;
 	private JMenuItem editClear;
+	private JMenuItem editSelectAll;
+	private JMenuItem editSelectNone;
 	private JMenuItem editTableSettings;
 	private String saveName;
 
@@ -180,7 +182,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		final JMenu menu = new JMenu("Edit");
 		menu.setMnemonic(KeyEvent.VK_E);
 		menu.add(editDelete = add(menu, "Delete", KeyEvent.VK_D, null));
-		menu.add(editClear = add(menu, "Clear", KeyEvent.VK_C, null));
+		menu.add(editClear = add(menu, "Delete All", KeyEvent.VK_A, null));
+		menu.add(editSelectNone = add(menu, "Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
+		menu.add(editSelectAll = add(menu, "Select All", KeyEvent.VK_S, null));
+		menu.addSeparator();
 		menu.add(editTableSettings = add(menu, "Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
 		return menu;
 	}
@@ -210,6 +215,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			doDelete();
 		else if (src == editClear)
 			doClear();
+		else if (src == editSelectNone)
+			doSelectNone();
+		else if (src == editSelectAll)
+			doSelectAll();
 		else if (src == editTableSettings)
 			doEditTableSettings();
 	}
@@ -272,6 +281,16 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		model.clear();
 	}
 
+	private void doSelectNone()
+	{
+		table.clearSelection();
+	}
+
+	private void doSelectAll()
+	{
+		table.selectAll();
+	}
+
 	private void doEditTableSettings()
 	{
 		PeakResultTableModel model = getModel();
@@ -307,6 +326,47 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	{
 		TableModel model = table.getModel();
 		return (model instanceof PeakResultTableModel) ? (PeakResultTableModel) model : null;
+	}
+
+	/**
+	 * Maps the index of the row in terms of the view to the
+	 * underlying <code>TableModel</code>. If the contents of the
+	 * model are not sorted the model and view indices are the same.
+	 *
+	 * @param viewRowIndex
+	 *            the index of the row in the view
+	 * @return the index of the corresponding row in the model
+	 * @throws IndexOutOfBoundsException
+	 *             if sorting is enabled and passed an
+	 *             index outside the range of the <code>JTable</code> as
+	 *             determined by the method <code>getRowCount</code>
+	 * @see javax.swing.table.TableRowSorter
+	 * @see #getRowCount
+	 * @since 1.6
+	 */
+	public int convertRowIndexToModel(int viewRowIndex)
+	{
+		return table.convertRowIndexToModel(viewRowIndex);
+	}
+
+	/**
+	 * Maps the index of the row in terms of the
+	 * <code>TableModel</code> to the view. If the contents of the
+	 * model are not sorted the model and view indices are the same.
+	 *
+	 * @param modelRowIndex
+	 *            the index of the row in terms of the model
+	 * @return the index of the corresponding row in the view, or -1 if
+	 *         the row isn't visible
+	 * @throws IndexOutOfBoundsException
+	 *             if sorting is enabled and passed an
+	 *             index outside the number of rows of the <code>TableModel</code>
+	 * @see javax.swing.table.TableRowSorter
+	 * @since 1.6
+	 */
+	public int convertRowIndexToView(int viewRowIndex)
+	{
+		return table.convertRowIndexToView(viewRowIndex);
 	}
 
 	/**
@@ -390,6 +450,11 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 					final PeakResultTableModelFrame d2 = new PeakResultTableModelFrame(model, null, selectionModel);
 					d2.setTitle("D2");
+					// Since we have the same selection model we need the same row sorter,
+					// otherwise the selection is scrambled by sorting.
+					// The alternative would be to get the source for the selection event (the table) 
+					// and get the row sorter to do the mapping.
+					d2.table.setRowSorter(d.table.getRowSorter());
 					//					d2.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)

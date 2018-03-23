@@ -243,6 +243,10 @@ public class PeakResultTableModel extends AbstractTableModel
 		TurboList<PeakResultData<?>> valuesList = new TurboList<PeakResultData<?>>();
 		TurboList<String> namesList = new TurboList<String>();
 
+		// XXX - make thi configurable
+		valuesList.add(new PeakResultDataFrame());
+		namesList.add("#");
+		
 		valuesList.add(new PeakResultDataFrame());
 		addName(valuesList, namesList);
 		if (showEndFrame)
@@ -405,6 +409,8 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
+		if (columnIndex == 0)
+			return new Integer(rowIndex+1);
 		PeakResult r = get(rowIndex);
 		return values[columnIndex].getValue(r);
 	}

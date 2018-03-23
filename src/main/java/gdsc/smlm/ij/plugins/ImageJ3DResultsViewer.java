@@ -622,18 +622,21 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		private void updateSelection()
 		{
-			//			clearSelected();
-			//			for (int i = 0; i < indices.length; i++)
-			//			{
-			//				select(peakResultTableModel.get(indices[i]));
-			//			}
-
 			int[] indices = ListSelectionModelHelper.getSelectedIndices(listSelectionModel);
 
 			if (indices.length == 0)
 			{
 				clearSelected();
 				return;
+			}
+			
+			// If the selection is output to a table then it may have been sorted
+			// and we map the index from the table to the data model
+			PeakResultTableModelFrame table = findTable(this);
+			if (table != null)
+			{
+				for (int i = 0; i < indices.length; i++)
+					indices[i] = table.convertRowIndexToModel(indices[i]);
 			}
 
 			// Try to to preserve those currently selected
@@ -691,6 +694,53 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		public void removeSelectionModel()
 		{
 			listSelectionModel.removeListSelectionListener(this);
+		}
+
+		public void removeFromSelectionModel(PeakResult p)
+		{
+			// Find in the model
+			int i = peakResultTableModel.indexOf(p);
+			if (i != -1)
+			{
+				// If the selection is output to a table then it may have been sorted
+				// and we map the index from the data to the table
+				PeakResultTableModelFrame table = findTable(this);
+				if (table != null)
+					i = table.convertRowIndexToView(i);
+				listSelectionModel.removeSelectionInterval(i, i);
+			}
+		}
+
+		public void addToSelectionModel(PeakResult p)
+		{
+			// Find in the model
+			int i = peakResultTableModel.indexOf(p);
+			
+			if (i == -1)
+			{
+				// Not currently in the table so add it
+				i = peakResultTableModel.getRowCount();
+				peakResultTableModel.add(this, p);
+			}
+
+			// If the selection is output to a table then it may have been sorted
+			// and we map the index from the data to the table
+			PeakResultTableModelFrame table;
+			if (resultsTableSettings.getShowTable())
+				table = createTable(results, this);
+			else
+				table = findTable(this);
+			
+			if (table != null)
+				i = table.convertRowIndexToView(i);
+
+			// Highlight the localisation using an outline.
+			// Add to or replace previous selection.
+			boolean add = true;
+			if (add)
+				listSelectionModel.addSelectionInterval(i, i);
+			else
+				listSelectionModel.setSelectionInterval(i, i);			
 		}
 	}
 
@@ -1961,79 +2011,16 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 				else
 				{
-					// Find in the model
-					int i = data.peakResultTableModel.indexOf(p);
-
-					// Ctrl+Shift held down to remove selected
 					if (e.isShiftDown())
 					{
-						if (i != -1)
-							data.listSelectionModel.removeSelectionInterval(i, i);
+						// Ctrl+Shift held down to remove selected
+						data.removeFromSelectionModel(p);
 					}
 					else
 					{
 						// Ctrl held down to set selection
-						if (i == -1)
-						{
-							// Not currently in the table so add it
-							i = data.peakResultTableModel.getRowCount();
-							data.peakResultTableModel.add(data, p);
-						}
-
-						if (resultsTableSettings.getShowTable())
-						{
-							// Output the selection to a table.
-							createTable(results, data);
-						}
-
-						// Highlight the localisation using an outline.
-						// Add to or replace previous selection.
-						boolean add = true;
-						if (add)
-							data.listSelectionModel.addSelectionInterval(i, i);
-						else
-							data.listSelectionModel.setSelectionInterval(i, i);
+						data.addToSelectionModel(p);
 					}
-				}
-			}
-
-			private void createTable(MemoryPeakResults results, ResultsMetaData data)
-			{
-				// There is a single TableModel and SelectionModel for each unique results set.
-				// This is displayed in a window. Show the window if it is not visible.
-				// Set the window to have dispose on close (to save memory).
-
-				// Clicks just select from the selection model, and add results to the table model.
-
-				Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables
-						.get(data.digest);
-
-				PeakResultTableModelFrame table = t.c;
-				if (table != null && !table.isVisible())
-				{
-					// Just in case
-					table.cleanUp();
-					table = null;
-				}
-				if (table == null)
-				{
-					table = new PeakResultTableModelFrame(t.a, t.b);
-					table.setTitle(TITLE + " " + results.getName());
-					// Ensure cleanup
-					table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-					final PeakResultTableModelFrame finalTable = table;
-					table.addWindowListener(new WindowAdapter()
-					{
-						public void windowClosed(WindowEvent e)
-						{
-							finalTable.cleanUp();
-						}
-					});
-					table.setVisible(true);
-					resultsTables.put(data.digest,
-							new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(t.a, t.b,
-									table));
-					t = null;
 				}
 			}
 
@@ -2115,6 +2102,57 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		createSMLMMenuBar(univ);
 
 		return univ;
+	}
+
+	private static PeakResultTableModelFrame findTable(ResultsMetaData data)
+	{
+		// There is a single TableModel and SelectionModel for each unique results set.
+		// This may be displayed in a window. 
+		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
+		PeakResultTableModelFrame table = t.c;
+		if (table != null && table.isVisible())
+			return table;
+		return null;
+	}
+
+	private static PeakResultTableModelFrame createTable(MemoryPeakResults results, ResultsMetaData data)
+	{
+		// There is a single TableModel and SelectionModel for each unique results set.
+		// This is displayed in a window. Show the window if it is not visible.
+		// Set the window to have dispose on close (to save memory).
+
+		// Clicks just select from the selection model, and add results to the table model.
+
+		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
+
+		PeakResultTableModelFrame table = t.c;
+		if (table != null)
+		{
+			if (table.isVisible())
+				return table;
+
+			// Just in case the listeners are still active
+			table.cleanUp();
+		}
+
+		// No table or not visible so create a new one
+		table = new PeakResultTableModelFrame(t.a, t.b);
+		table.setTitle(TITLE + " " + results.getName());
+		// Ensure cleanup
+		table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		final PeakResultTableModelFrame finalTable = table;
+		table.addWindowListener(new WindowAdapter()
+		{
+			public void windowClosed(WindowEvent e)
+			{
+				finalTable.cleanUp();
+			}
+		});
+		table.setVisible(true);
+		resultsTables.put(data.digest,
+				new Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>(t.a, t.b, table));
+
+		return table;
 	}
 
 	private static class MouseListenerWrapper implements MouseListener
@@ -3448,11 +3486,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		//int MAX_ARRAY_SIZE = 1 << 28;
 		// This is a safe limit (2^27)
 		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
-		
+
 		int stride = 3 + 3; // Coordinates + color
 		if (alpha != null)
 			stride++; // add color alpha
-		
+
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
@@ -3470,7 +3508,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				//@formatter:on
 				return null;
 			}
-			
+
 			CustomPointMesh mesh;
 			if (alpha != null)
 			{
@@ -3506,7 +3544,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final List<Point3f> point = createLocalisationObject(r);
 
 		stride += 3; // + normals
-		
+
 		final int singlePointSize = point.size();
 		long size = (long) points.size() * singlePointSize;
 		long arraySize = size * stride;
