@@ -97,6 +97,16 @@ message ResultsFileSettings {
 	bool show_precision = 7;
 }
 
+// The type of results file
+enum ResultsTableFormat {
+	// None
+	TABLE_NONE = 0;
+	// Use an ImageJ table
+	IMAGEJ = 1;
+	// Use an interactive table
+	INTERACTIVE = 2;
+}
+
 // Define the results table settings
 message ResultsTableSettings {
 	// Set to true to show the results table
@@ -117,6 +127,8 @@ message ResultsTableSettings {
 	int32 rounding_precision = 8;
 	// Set to true to update the settings on existing tables
 	bool update_existing_tables = 9;
+	// The results table format
+	ResultsTableFormat results_table_format = 10;
 }
 
 // Define the in-memory results settings

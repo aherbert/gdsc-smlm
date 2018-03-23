@@ -3,6 +3,7 @@ package gdsc.smlm.data.config;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -143,6 +144,30 @@ public class ResultsProtosHelper
 				return "None";
 			case DRAW_Z_POSITION:
 				return "Z position";
+			case UNRECOGNIZED:
+				return "Unknown";
+			default:
+				throw new IllegalStateException("Unknown name: " + value);
+		}
+	}
+	
+	/**
+	 * Gets the name.
+	 *
+	 * @param value
+	 *            the results table format
+	 * @return the name
+	 */
+	public static String getName(ResultsTableFormat value)
+	{
+		switch (value)
+		{
+			case IMAGEJ:
+				return "ImageJ";
+			case INTERACTIVE:
+				return "Interactive";
+			case TABLE_NONE:
+				return "None";
 			case UNRECOGNIZED:
 				return "Unknown";
 			default:

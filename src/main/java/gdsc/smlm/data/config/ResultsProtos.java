@@ -598,6 +598,141 @@ public final class ResultsProtos {
     // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.ResultsFileFormat)
   }
 
+  /**
+   * <pre>
+   * The type of results file
+   * </pre>
+   *
+   * Protobuf enum {@code gdsc.smlm.data.config.ResultsTableFormat}
+   */
+  public enum ResultsTableFormat
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * None
+     * </pre>
+     *
+     * <code>TABLE_NONE = 0;</code>
+     */
+    TABLE_NONE(0),
+    /**
+     * <pre>
+     * Use an ImageJ table
+     * </pre>
+     *
+     * <code>IMAGEJ = 1;</code>
+     */
+    IMAGEJ(1),
+    /**
+     * <pre>
+     * Use an interactive table
+     * </pre>
+     *
+     * <code>INTERACTIVE = 2;</code>
+     */
+    INTERACTIVE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * None
+     * </pre>
+     *
+     * <code>TABLE_NONE = 0;</code>
+     */
+    public static final int TABLE_NONE_VALUE = 0;
+    /**
+     * <pre>
+     * Use an ImageJ table
+     * </pre>
+     *
+     * <code>IMAGEJ = 1;</code>
+     */
+    public static final int IMAGEJ_VALUE = 1;
+    /**
+     * <pre>
+     * Use an interactive table
+     * </pre>
+     *
+     * <code>INTERACTIVE = 2;</code>
+     */
+    public static final int INTERACTIVE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static ResultsTableFormat valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static ResultsTableFormat forNumber(int value) {
+      switch (value) {
+        case 0: return TABLE_NONE;
+        case 1: return IMAGEJ;
+        case 2: return INTERACTIVE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<ResultsTableFormat>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        ResultsTableFormat> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ResultsTableFormat>() {
+            public ResultsTableFormat findValueByNumber(int number) {
+              return ResultsTableFormat.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.ResultsProtos.getDescriptor().getEnumTypes().get(3);
+    }
+
+    private static final ResultsTableFormat[] VALUES = values();
+
+    public static ResultsTableFormat valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private ResultsTableFormat(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.ResultsTableFormat)
+  }
+
   public interface ResultsImageSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ResultsImageSettings)
       com.google.protobuf.MessageOrBuilder {
@@ -2969,6 +3104,23 @@ public final class ResultsProtos {
      * <code>bool update_existing_tables = 9;</code>
      */
     boolean getUpdateExistingTables();
+
+    /**
+     * <pre>
+     * The results table format
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+     */
+    int getResultsTableFormatValue();
+    /**
+     * <pre>
+     * The results table format
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+     */
+    gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat getResultsTableFormat();
   }
   /**
    * <pre>
@@ -2995,6 +3147,7 @@ public final class ResultsProtos {
       showNoiseData_ = false;
       roundingPrecision_ = 0;
       updateExistingTables_ = false;
+      resultsTableFormat_ = 0;
     }
 
     @java.lang.Override
@@ -3068,6 +3221,12 @@ public final class ResultsProtos {
             case 72: {
 
               updateExistingTables_ = input.readBool();
+              break;
+            }
+            case 80: {
+              int rawValue = input.readEnum();
+
+              resultsTableFormat_ = rawValue;
               break;
             }
           }
@@ -3243,6 +3402,30 @@ public final class ResultsProtos {
       return updateExistingTables_;
     }
 
+    public static final int RESULTS_TABLE_FORMAT_FIELD_NUMBER = 10;
+    private int resultsTableFormat_;
+    /**
+     * <pre>
+     * The results table format
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+     */
+    public int getResultsTableFormatValue() {
+      return resultsTableFormat_;
+    }
+    /**
+     * <pre>
+     * The results table format
+     * </pre>
+     *
+     * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+     */
+    public gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat getResultsTableFormat() {
+      gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.valueOf(resultsTableFormat_);
+      return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3281,6 +3464,9 @@ public final class ResultsProtos {
       }
       if (updateExistingTables_ != false) {
         output.writeBool(9, updateExistingTables_);
+      }
+      if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber()) {
+        output.writeEnum(10, resultsTableFormat_);
       }
     }
 
@@ -3325,6 +3511,10 @@ public final class ResultsProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, updateExistingTables_);
       }
+      if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(10, resultsTableFormat_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -3356,6 +3546,7 @@ public final class ResultsProtos {
           == other.getRoundingPrecision());
       result = result && (getUpdateExistingTables()
           == other.getUpdateExistingTables());
+      result = result && resultsTableFormat_ == other.resultsTableFormat_;
       return result;
     }
 
@@ -3389,6 +3580,8 @@ public final class ResultsProtos {
       hash = (37 * hash) + UPDATE_EXISTING_TABLES_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getUpdateExistingTables());
+      hash = (37 * hash) + RESULTS_TABLE_FORMAT_FIELD_NUMBER;
+      hash = (53 * hash) + resultsTableFormat_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3540,6 +3733,8 @@ public final class ResultsProtos {
 
         updateExistingTables_ = false;
 
+        resultsTableFormat_ = 0;
+
         return this;
       }
 
@@ -3571,6 +3766,7 @@ public final class ResultsProtos {
         result.showNoiseData_ = showNoiseData_;
         result.roundingPrecision_ = roundingPrecision_;
         result.updateExistingTables_ = updateExistingTables_;
+        result.resultsTableFormat_ = resultsTableFormat_;
         onBuilt();
         return result;
       }
@@ -3638,6 +3834,9 @@ public final class ResultsProtos {
         }
         if (other.getUpdateExistingTables() != false) {
           setUpdateExistingTables(other.getUpdateExistingTables());
+        }
+        if (other.resultsTableFormat_ != 0) {
+          setResultsTableFormatValue(other.getResultsTableFormatValue());
         }
         onChanged();
         return this;
@@ -4081,6 +4280,70 @@ public final class ResultsProtos {
       public Builder clearUpdateExistingTables() {
         
         updateExistingTables_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int resultsTableFormat_ = 0;
+      /**
+       * <pre>
+       * The results table format
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+       */
+      public int getResultsTableFormatValue() {
+        return resultsTableFormat_;
+      }
+      /**
+       * <pre>
+       * The results table format
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+       */
+      public Builder setResultsTableFormatValue(int value) {
+        resultsTableFormat_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The results table format
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+       */
+      public gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat getResultsTableFormat() {
+        gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat result = gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.valueOf(resultsTableFormat_);
+        return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The results table format
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+       */
+      public Builder setResultsTableFormat(gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        resultsTableFormat_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The results table format
+       * </pre>
+       *
+       * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
+       */
+      public Builder clearResultsTableFormat() {
+        
+        resultsTableFormat_ = 0;
         onChanged();
         return this;
       }
@@ -6219,7 +6482,7 @@ public final class ResultsProtos {
       "Unit\022<\n\016intensity_unit\030\005 \001(\0162$.gdsc.smlm" +
       ".data.config.IntensityUnit\0224\n\nangle_unit" +
       "\030\006 \001(\0162 .gdsc.smlm.data.config.AngleUnit" +
-      "\022\026\n\016show_precision\030\007 \001(\010\"\342\002\n\024ResultsTabl" +
+      "\022\026\n\016show_precision\030\007 \001(\010\"\253\003\n\024ResultsTabl" +
       "eSettings\022\022\n\nshow_table\030\001 \001(\010\022:\n\rdistanc" +
       "e_unit\030\002 \001(\0162#.gdsc.smlm.data.config.Dis" +
       "tanceUnit\022<\n\016intensity_unit\030\003 \001(\0162$.gdsc" +
@@ -6228,30 +6491,33 @@ public final class ResultsProtos {
       "eUnit\022\026\n\016show_precision\030\005 \001(\010\022\031\n\021show_fi" +
       "tting_data\030\006 \001(\010\022\027\n\017show_noise_data\030\007 \001(" +
       "\010\022\032\n\022rounding_precision\030\010 \001(\005\022\036\n\026update_" +
-      "existing_tables\030\t \001(\010\",\n\027ResultsInMemory" +
-      "Settings\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017ResultsS" +
-      "ettings\022\024\n\014log_progress\030\001 \001(\010\022\027\n\017show_de" +
-      "viations\030\002 \001(\010\022K\n\026results_image_settings" +
-      "\030\003 \001(\0132+.gdsc.smlm.data.config.ResultsIm" +
-      "ageSettings\022I\n\025results_file_settings\030\004 \001" +
-      "(\0132*.gdsc.smlm.data.config.ResultsFileSe",
-      "ttings\022K\n\026results_table_settings\030\005 \001(\0132+" +
-      ".gdsc.smlm.data.config.ResultsTableSetti" +
-      "ngs\022R\n\032results_in_memory_settings\030\006 \001(\0132" +
-      "..gdsc.smlm.data.config.ResultsInMemoryS" +
-      "ettings*\262\002\n\020ResultsImageType\022\r\n\tDRAW_NON" +
-      "E\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016DRAW_INTE" +
-      "NSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023\n\017DRAW_F" +
-      "ITTED_PSF\020\004\022 \n\034DRAW_LOCALISATIONS_PRECIS" +
-      "ION\020\005\022\034\n\030DRAW_INTENSITY_PRECISION\020\006\022(\n$D" +
-      "RAW_LOCALISATIONS_AVERAGE_PRECISION\020\007\022$\n",
-      " DRAW_INTENSITY_AVERAGE_PRECISION\020\010\022\022\n\016D" +
-      "RAW_FIT_ERROR\020\t\022\023\n\017DRAW_Z_POSITION\020\n*C\n\020" +
-      "ResultsImageMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE" +
-      "_REPLACE\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFile" +
-      "Format\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINAR" +
-      "Y\020\002\022\007\n\003TSF\020\003\022\010\n\004MALK\020\004B\017B\rResultsProtosb" +
-      "\006proto3"
+      "existing_tables\030\t \001(\010\022G\n\024results_table_f" +
+      "ormat\030\n \001(\0162).gdsc.smlm.data.config.Resu" +
+      "ltsTableFormat\",\n\027ResultsInMemorySetting" +
+      "s\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017ResultsSettings" +
+      "\022\024\n\014log_progress\030\001 \001(\010\022\027\n\017show_deviation" +
+      "s\030\002 \001(\010\022K\n\026results_image_settings\030\003 \001(\0132" +
+      "+.gdsc.smlm.data.config.ResultsImageSett",
+      "ings\022I\n\025results_file_settings\030\004 \001(\0132*.gd" +
+      "sc.smlm.data.config.ResultsFileSettings\022" +
+      "K\n\026results_table_settings\030\005 \001(\0132+.gdsc.s" +
+      "mlm.data.config.ResultsTableSettings\022R\n\032" +
+      "results_in_memory_settings\030\006 \001(\0132..gdsc." +
+      "smlm.data.config.ResultsInMemorySettings" +
+      "*\262\002\n\020ResultsImageType\022\r\n\tDRAW_NONE\020\000\022\026\n\022" +
+      "DRAW_LOCALISATIONS\020\001\022\022\n\016DRAW_INTENSITY\020\002" +
+      "\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023\n\017DRAW_FITTED_P" +
+      "SF\020\004\022 \n\034DRAW_LOCALISATIONS_PRECISION\020\005\022\034",
+      "\n\030DRAW_INTENSITY_PRECISION\020\006\022(\n$DRAW_LOC" +
+      "ALISATIONS_AVERAGE_PRECISION\020\007\022$\n DRAW_I" +
+      "NTENSITY_AVERAGE_PRECISION\020\010\022\022\n\016DRAW_FIT" +
+      "_ERROR\020\t\022\023\n\017DRAW_Z_POSITION\020\n*C\n\020Results" +
+      "ImageMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLAC" +
+      "E\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022" +
+      "\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003" +
+      "TSF\020\003\022\010\n\004MALK\020\004*A\n\022ResultsTableFormat\022\016\n" +
+      "\nTABLE_NONE\020\000\022\n\n\006IMAGEJ\020\001\022\017\n\013INTERACTIVE" +
+      "\020\002B\017B\rResultsProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6283,7 +6549,7 @@ public final class ResultsProtos {
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsTableSettings_descriptor,
-        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", "UpdateExistingTables", });
+        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", "UpdateExistingTables", "ResultsTableFormat", });
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_fieldAccessorTable = new

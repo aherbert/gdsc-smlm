@@ -41,9 +41,9 @@ public class PeakResultTableModelJTable extends JTable
 		// Note that this is not dynamic and so must manually be called when columns change
 		tca = new TableColumnAdjuster(this, 6, false);
 		//  Only process 10 rows max.
-		tca.setMaxRows(10);
+		tca.setMaxRows(5);
 		tca.adjustColumns();
-		
+
 		setAutoCreateRowSorter(true);
 	}
 
@@ -57,7 +57,7 @@ public class PeakResultTableModelJTable extends JTable
 			updateRenderer();
 			return;
 		}
-		
+
 		super.tableChanged(e);
 
 		if (e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW)
@@ -67,7 +67,9 @@ public class PeakResultTableModelJTable extends JTable
 			{
 				public void run()
 				{
-					tca.adjustColumns();
+					// This is null when the table is first created
+					if (tca != null)
+						tca.adjustColumns();
 				}
 			});
 		}

@@ -60,6 +60,7 @@ import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
 import gdsc.smlm.data.config.ResultsProtosHelper;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
@@ -334,6 +335,36 @@ public class SettingsManager
 		for (int i = 0; i < _ResultsFileFormatValues.length; i++)
 		{
 			_ResultsFileFormatNames[i] = ResultsProtosHelper.getName(_ResultsFileFormatValues[i]);
+		}
+	}
+
+	private static ResultsTableFormat[] _ResultsTableFormatValues;
+
+	public static ResultsTableFormat[] getResultsTableFormatValues()
+	{
+		if (_ResultsTableFormatValues == null)
+			initResultsTableFormat();
+		return _ResultsTableFormatValues;
+	}
+
+	private static String[] _ResultsTableFormatNames;
+
+	public static String[] getResultsTableFormatNames()
+	{
+		if (_ResultsTableFormatNames == null)
+			initResultsTableFormat();
+		return _ResultsTableFormatNames;
+	}
+
+	private static void initResultsTableFormat()
+	{
+		EnumSet<ResultsTableFormat> d = EnumSet.allOf(ResultsTableFormat.class);
+		d.remove(ResultsTableFormat.UNRECOGNIZED);
+		_ResultsTableFormatValues = d.toArray(new ResultsTableFormat[d.size()]);
+		_ResultsTableFormatNames = new String[_ResultsTableFormatValues.length];
+		for (int i = 0; i < _ResultsTableFormatValues.length; i++)
+		{
+			_ResultsTableFormatNames[i] = ResultsProtosHelper.getName(_ResultsTableFormatValues[i]);
 		}
 	}
 
