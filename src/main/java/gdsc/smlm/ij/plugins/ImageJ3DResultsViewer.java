@@ -125,6 +125,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultsDigest;
 import gdsc.smlm.results.procedures.PeakResultProcedureX;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.RawResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
@@ -258,6 +259,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		NONE { public String getName() { return "None"; }},
 		SIZE { public String getName() { return "Size"; }},
+		INTENSITY { public String getName() { return "Intensity"; }},
 		XY_PRECISION { public String getName() { return "XY Precision"; }},
 		XYZ_DEVIATIONS { public String getName() { return "XYZ Deviations"; }},
         ;
@@ -629,7 +631,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				clearSelected();
 				return;
 			}
-			
+
 			// If the selection is output to a table then it may have been sorted
 			// and we map the index from the table to the data model
 			PeakResultTableModelFrame table = findTable(this);
@@ -715,7 +717,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			// Find in the model
 			int i = peakResultTableModel.indexOf(p);
-			
+
 			if (i == -1)
 			{
 				// Not currently in the table so add it
@@ -730,7 +732,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				table = createTable(results, this);
 			else
 				table = findTable(this);
-			
+
 			if (table != null)
 				i = table.convertRowIndexToView(i);
 
@@ -740,7 +742,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (add)
 				listSelectionModel.addSelectionInterval(i, i);
 			else
-				listSelectionModel.setSelectionInterval(i, i);			
+				listSelectionModel.setSelectionInterval(i, i);
 		}
 	}
 
@@ -1332,6 +1334,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		TransparencyMode mode = TransparencyMode.forNumber(settings.getTransparencyMode());
 		switch (mode)
 		{
+			case INTENSITY:
+				return createAlphaFromIntensity(results, settings, minA, maxA, sphereSize);
 			case XYZ_DEVIATIONS:
 				if (sizeMode != SizeMode.XYZ_DEVIATIONS)
 					sphereSize = createSphereSizeFromDeviations(results);
@@ -1345,6 +1349,32 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			default:
 				throw new IllegalStateException("Unknown transparency mode: " + mode);
 		}
+	}
+
+	private static float[] createAlphaFromIntensity(MemoryPeakResults results, Builder settings, double minA,
+			double maxA, Point3f[] sphereSize)
+	{
+		RawResultProcedure p = new RawResultProcedure(results);
+		p.getI();
+
+		float[] intensity = p.intensity;
+		float[] limits = Maths.limits(intensity);
+		float min = limits[0];
+		float max = limits[1];
+		if (min == max)
+		{
+			Utils.log("No per-item transparency as intensity is fixed");
+			return null;
+		}
+
+		double range = (maxA - minA) / (max - min);
+		float[] alpha = new float[intensity.length];
+		for (int i = 0; i < alpha.length; i++)
+		{
+			// Lowest intensity has lowest alpha (more transparent) 
+			alpha[i] = (float) (minA + range * (intensity[i] - min));
+		}
+		return alpha;
 	}
 
 	private static float[] createAlphaFromSize(MemoryPeakResults results, Builder settings, double minA, double maxA,
