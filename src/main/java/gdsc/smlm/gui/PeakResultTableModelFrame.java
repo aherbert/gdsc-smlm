@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
@@ -69,9 +70,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	private JMenuItem fileSave;
 	private JMenuItem fileShowSource;
 	private JMenuItem editDelete;
-	private JMenuItem editClear;
+	private JMenuItem editDeleteAll;
 	private JMenuItem editSelectAll;
 	private JMenuItem editSelectNone;
+	private JMenuItem editUnsort;
 	private JMenuItem editTableSettings;
 	private String saveName;
 
@@ -182,9 +184,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		final JMenu menu = new JMenu("Edit");
 		menu.setMnemonic(KeyEvent.VK_E);
 		menu.add(editDelete = add(menu, "Delete", KeyEvent.VK_D, null));
-		menu.add(editClear = add(menu, "Delete All", KeyEvent.VK_A, null));
+		menu.add(editDeleteAll = add(menu, "Delete All", KeyEvent.VK_A, null));
 		menu.add(editSelectNone = add(menu, "Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
 		menu.add(editSelectAll = add(menu, "Select All", KeyEvent.VK_S, null));
+		menu.add(editUnsort = add(menu, "Unsort", KeyEvent.VK_U, null));
 		menu.addSeparator();
 		menu.add(editTableSettings = add(menu, "Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
 		return menu;
@@ -213,12 +216,14 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 			doShowSource();
 		else if (src == editDelete)
 			doDelete();
-		else if (src == editClear)
-			doClear();
+		else if (src == editDeleteAll)
+			doDeleteAll();
 		else if (src == editSelectNone)
 			doSelectNone();
 		else if (src == editSelectAll)
 			doSelectAll();
+		else if (src == editUnsort)
+			doUnsort();
 		else if (src == editTableSettings)
 			doEditTableSettings();
 	}
@@ -273,7 +278,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		model.remove(this, indices);
 	}
 
-	private void doClear()
+	private void doDeleteAll()
 	{
 		PeakResultTableModel model = getModel();
 		if (model == null)
@@ -289,6 +294,13 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	private void doSelectAll()
 	{
 		table.selectAll();
+	}
+
+	private void doUnsort()
+	{
+		RowSorter<?> rs = table.getRowSorter();
+		if (rs != null)
+			rs.setSortKeys(null);
 	}
 
 	private void doEditTableSettings()
