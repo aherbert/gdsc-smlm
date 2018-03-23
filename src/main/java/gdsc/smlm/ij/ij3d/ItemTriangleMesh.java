@@ -654,4 +654,10 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	{
 		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
+	
+	@Override
+	public float getVolume()
+	{
+		return 0;
+	}
 }

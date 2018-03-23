@@ -312,4 +312,16 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 
 		return normals;
 	}
+
+	@Override
+	public void calculateMinMaxCenterPoint(Point3f min, Point3f max, Point3f center)
+	{
+		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
+	}
+	
+	@Override
+	public float getVolume()
+	{
+		return 0;
+	}
 }
