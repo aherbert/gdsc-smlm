@@ -38,6 +38,8 @@ import gdsc.smlm.data.config.ResultsProtosHelper;
 import gdsc.smlm.results.ArrayPeakResultStore;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultConversionHelper;
 import gdsc.smlm.results.PeakResultData;
@@ -79,6 +81,8 @@ public class PeakResultTableModel extends AbstractTableModel
 	private boolean checkForDuplicates = false;
 
 	// These depend on the source results
+	private ImageSource source;
+	private String configuration = "";
 	private boolean showDeviations = false;
 	private boolean showEndFrame = false;
 	private boolean showId = false;
@@ -88,6 +92,34 @@ public class PeakResultTableModel extends AbstractTableModel
 	private Rounder rounder;
 	private PeakResultData<?>[] values;
 	private String[] names;
+
+	/**
+	 * Instantiates a new peak result model using settings from the resultsSource.
+	 *
+	 * @param resultsSource
+	 *            the results source
+	 * @param copyData
+	 *            Set to true to copy the data from the results source
+	 * @param tableSettings
+	 *            the table settings
+	 */
+	public PeakResultTableModel(MemoryPeakResults resultsSource, boolean copyData, ResultsTableSettings tableSettings)
+	{
+		if (tableSettings == null)
+			tableSettings = ResultsProtosHelper.defaultResultsSettings.getResultsTableSettings();
+		this.tableSettings = tableSettings;
+
+		data = (copyData) ? new ArrayPeakResultStore(resultsSource.toArray()) : new ArrayPeakResultStore(10);
+		this.calibration = resultsSource.getCalibration();
+		this.psf = resultsSource.getPSF();
+
+		setShowDeviations(resultsSource.hasDeviations());
+		setShowZ(resultsSource.is3D());
+		setShowId(resultsSource.hasId());
+		setShowEndFrame(resultsSource.hasEndFrame());
+		setSource(resultsSource.getSource());
+		setConfiguration(resultsSource.getConfiguration());
+	}
 
 	/**
 	 * Instantiates a new peak result model using the store.
@@ -100,8 +132,6 @@ public class PeakResultTableModel extends AbstractTableModel
 	 *            the psf
 	 * @param tableSettings
 	 *            the table settings
-	 * @param isLive
-	 *            the is live
 	 */
 	public PeakResultTableModel(PeakResultStoreList results, Calibration calibration, PSF psf,
 			ResultsTableSettings tableSettings)
@@ -120,48 +150,9 @@ public class PeakResultTableModel extends AbstractTableModel
 		this.tableSettings = tableSettings;
 	}
 
-	/**
-	 * Sets the model to the live state. This creates all the table layout information and causes it to update when
-	 * properties are changed.
-	 */
-	void setLive(boolean isLive)
-	{
-		if (isLive)
-			liveCount.getAndDecrement();
-		else
-			liveCount.getAndDecrement();
-		createTableStructure(false);
-	}
-
-	/**
-	 * Convert the model to an array.
-	 *
-	 * @return the peak result array
-	 */
-	public PeakResult[] toArray()
-	{
-		return data.toArray();
-	}
-
-	/**
-	 * Gets the calibration.
-	 *
-	 * @return the calibration
-	 */
-	public Calibration getCalibration()
-	{
-		return calibration;
-	}
-
-	/**
-	 * Gets the psf.
-	 *
-	 * @return the psf
-	 */
-	public PSF getPSF()
-	{
-		return psf;
-	}
+	//*************************************************************************/
+	// Table column appearance
+	//*************************************************************************/
 
 	/**
 	 * Gets the table settings.
@@ -171,34 +162,6 @@ public class PeakResultTableModel extends AbstractTableModel
 	public ResultsTableSettings getTableSettings()
 	{
 		return tableSettings;
-	}
-
-	/**
-	 * Gets the results for the given index.
-	 *
-	 * @param index
-	 *            the index
-	 * @return the peak result
-	 */
-	public PeakResult get(int index)
-	{
-		return data.get(index);
-	}
-
-	/**
-	 * Returns the index of the first occurrence of the specified result
-	 * in this store, or -1 if this list does not contain the element.
-	 * More formally, returns the lowest index <tt>i</tt> such that
-	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
-	 * or -1 if there is no such index.
-	 *
-	 * @param result
-	 *            the result
-	 * @return the index (or -1)
-	 */
-	public int indexOf(PeakResult result)
-	{
-		return data.indexOf(result);
 	}
 
 	/**
@@ -389,17 +352,9 @@ public class PeakResultTableModel extends AbstractTableModel
 		namesList.add(name);
 	}
 
-	/**
-	 * Sets the rounding precision.
-	 *
-	 * @param roundingPrecision
-	 *            the new rounding precision
-	 */
-	public void setRoundingPrecision(int roundingPrecision)
-	{
-		rounder = RounderFactory.create(roundingPrecision);
-		fireTableChanged(new TableModelEvent(this, 0, 0, 0, RENDERER));
-	}
+	//*************************************************************************/
+	// Table model methods
+	//*************************************************************************/
 
 	/*
 	 * (non-Javadoc)
@@ -454,6 +409,65 @@ public class PeakResultTableModel extends AbstractTableModel
 		return values[columnIndex].getValue(r);
 	}
 
+	//*************************************************************************/
+	// Data management
+	//*************************************************************************/
+
+	/**
+	 * To memory peak results.
+	 *
+	 * @return the memory peak results
+	 */
+	public MemoryPeakResults toMemoryPeakResults()
+	{
+		ArrayPeakResultStore store = new ArrayPeakResultStore(data.size());
+		store.addArray(data.toArray());
+		MemoryPeakResults results = new MemoryPeakResults(store);
+		results.setPSF(psf);
+		results.setCalibration(calibration);
+		results.setSource(source);
+		results.setConfiguration(configuration);
+		return results;
+	}
+
+	/**
+	 * Convert the model to an array.
+	 *
+	 * @return the peak result array
+	 */
+	public PeakResult[] toArray()
+	{
+		return data.toArray();
+	}
+
+	/**
+	 * Gets the results for the given index.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the peak result
+	 */
+	public PeakResult get(int index)
+	{
+		return data.get(index);
+	}
+
+	/**
+	 * Returns the index of the first occurrence of the specified result
+	 * in this store, or -1 if this list does not contain the element.
+	 * More formally, returns the lowest index <tt>i</tt> such that
+	 * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>,
+	 * or -1 if there is no such index.
+	 *
+	 * @param result
+	 *            the result
+	 * @return the index (or -1)
+	 */
+	public int indexOf(PeakResult result)
+	{
+		return data.indexOf(result);
+	}
+
 	/**
 	 * Adds the results. Duplicates can be avoided using the check for duplicates property.
 	 * 
@@ -501,12 +515,12 @@ public class PeakResultTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Removes the result
+	 * Removes the result.
 	 *
 	 * @param source
 	 *            the source
-	 * @param peakResult
-	 *            the peak result
+	 * @param index
+	 *            the index
 	 */
 	public void remove(Object source, int index)
 	{
@@ -514,6 +528,53 @@ public class PeakResultTableModel extends AbstractTableModel
 			return;
 		data.remove(index);
 		fireTableRowsDeleted(index, index);
+	}
+
+	/**
+	 * Removes the result.
+	 *
+	 * @param source
+	 *            the source
+	 * @param indices
+	 *            the indices
+	 */
+	public void remove(Object source, int[] indices)
+	{
+		if (indices == null || indices.length == 0)
+			return;
+		if (indices.length == 1)
+		{
+			remove(indices[0]);
+			return;
+		}
+
+		int size = 0;
+		for (int i = 0; i < indices.length; i++)
+		{
+			int index = indices[i];
+			if (index < 0 || index >= data.size())
+				continue;
+			indices[size++] = index;
+		}
+
+		if (size == 0)
+			return;
+		if (size < indices.length)
+			indices = Arrays.copyOf(indices, size);
+
+		int[] pairs = SimpleArrayUtils.getRanges(indices);
+
+		size = pairs.length;
+		int firstRow = pairs[0];
+		int lastRow = pairs[size - 1];
+
+		// Remove ranges starting at the end (to preserve the list order)
+		for (int i = size - 1; i > 0; i -= 2)
+		{
+			data.remove(pairs[i - 1], pairs[i]);
+		}
+
+		fireTableRowsDeleted(firstRow, lastRow);
 	}
 
 	/**
@@ -565,6 +626,77 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		data.remove(fromIndex, toIndex);
 		fireTableRowsDeleted(fromIndex, toIndex);
+	}
+
+	//*************************************************************************/
+	// Properties
+	//*************************************************************************/
+
+	/**
+	 * Sets the model to the live state. This creates all the table layout information and causes it to update when
+	 * properties are changed.
+	 */
+	void setLive(boolean isLive)
+	{
+		if (isLive)
+			liveCount.getAndDecrement();
+		else
+			liveCount.getAndDecrement();
+		createTableStructure(false);
+	}
+
+	/**
+	 * Checks if is live.
+	 *
+	 * @return true, if is live
+	 */
+	boolean isLive()
+	{
+		return liveCount.get() != 0;
+	}
+
+	/**
+	 * Sets the source.
+	 *
+	 * @param source
+	 *            the new source
+	 */
+	public void setSource(ImageSource source)
+	{
+		boolean changed = (this.source != source);
+		this.source = source;
+		createTableStructure(changed);
+	}
+
+	/**
+	 * Gets the source.
+	 *
+	 * @return the source
+	 */
+	public ImageSource getSource()
+	{
+		return source;
+	}
+
+	/**
+	 * Sets the configuration.
+	 *
+	 * @param configuration
+	 *            the new configuration
+	 */
+	public void setConfiguration(String configuration)
+	{
+		this.configuration = configuration;
+	}
+
+	/**
+	 * Gets the configuration.
+	 *
+	 * @return the configuration
+	 */
+	public String getConfiguration()
+	{
+		return configuration;
 	}
 
 	/**
@@ -669,6 +801,41 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		this.checkForDuplicates = checkForDuplicates;
 	}
+
+	/**
+	 * Sets the rounding precision.
+	 *
+	 * @param roundingPrecision
+	 *            the new rounding precision
+	 */
+	public void setRoundingPrecision(int roundingPrecision)
+	{
+		rounder = RounderFactory.create(roundingPrecision);
+		fireTableChanged(new TableModelEvent(this, 0, 0, 0, RENDERER));
+	}
+
+	/**
+	 * Gets the calibration.
+	 *
+	 * @return the calibration
+	 */
+	public Calibration getCalibration()
+	{
+		return calibration;
+	}
+
+	/**
+	 * Gets the psf.
+	 *
+	 * @return the psf
+	 */
+	public PSF getPSF()
+	{
+		return psf;
+	}
+	//*************************************************************************/
+	// Table cell appearance (Rendering)
+	//*************************************************************************/
 
 	/**
 	 * Gets the float renderer.

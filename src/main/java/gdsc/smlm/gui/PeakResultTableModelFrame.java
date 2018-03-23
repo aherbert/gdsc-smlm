@@ -1,26 +1,37 @@
 package gdsc.smlm.gui;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
+import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.XmlUtils;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.smlm.ij.settings.SettingsManager;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -36,9 +47,13 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.results.ArrayPeakResultStore;
+import gdsc.smlm.results.ImageSource;
+import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultStoreList;
+import ij.IJ;
 import ij.WindowManager;
+import ij.gui.ExtendedGenericDialog;
 import ij.gui.ScreenDimensionHelper;
 
 /**
@@ -46,11 +61,17 @@ import ij.gui.ScreenDimensionHelper;
  * 
  * @author Alex Herbert
  */
-public class PeakResultTableModelFrame extends JFrame
+public class PeakResultTableModelFrame extends JFrame implements ActionListener
 {
 	private static final long serialVersionUID = -3671174621388288975L;
 
 	private JTable table;
+	private JMenuItem fileSave;
+	private JMenuItem fileShowSource;
+	private JMenuItem editDelete;
+	private JMenuItem editClear;
+	private JMenuItem editTableSettings;
+	private String saveName;
 
 	/**
 	 * Instantiates a new peak result table model frame.
@@ -89,6 +110,8 @@ public class PeakResultTableModelFrame extends JFrame
 	public PeakResultTableModelFrame(final PeakResultTableModel model, TableColumnModel columnModel,
 			ListSelectionModel selectionModel)
 	{
+		setJMenuBar(createMenuBar());
+
 		// This is required to get the column sizes for the model data.
 		model.setLive(true);
 
@@ -135,6 +158,157 @@ public class PeakResultTableModelFrame extends JFrame
 		table.getSelectionModel().removeListSelectionListener(table);
 	}
 
+	private JMenuBar createMenuBar()
+	{
+		JMenuBar menubar = new JMenuBar();
+		menubar.add(createFileMenu());
+		menubar.add(createEditMenu());
+		return menubar;
+	}
+
+	private JMenu createFileMenu()
+	{
+		final JMenu menu = new JMenu("File");
+		menu.setMnemonic(KeyEvent.VK_F);
+		menu.add(fileSave = add(menu, "Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+		menu.add(fileShowSource = add(menu, "Show source", KeyEvent.VK_W, null));
+		return menu;
+	}
+
+	private JMenu createEditMenu()
+	{
+		final JMenu menu = new JMenu("Edit");
+		menu.setMnemonic(KeyEvent.VK_E);
+		menu.add(editDelete = add(menu, "Delete", KeyEvent.VK_D, null));
+		menu.add(editClear = add(menu, "Clear", KeyEvent.VK_C, null));
+		menu.add(editTableSettings = add(menu, "Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
+		return menu;
+	}
+
+	private JMenuItem add(JMenu menu, String text, int mnemonic, String keyStroke)
+	{
+		JMenuItem item = new JMenuItem(text, mnemonic);
+		if (keyStroke != null)
+			item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
+		item.addActionListener(this);
+		return item;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e)
+	{
+		final Object src = e.getSource();
+		if (src == fileSave)
+			doSave();
+		else if (src == fileShowSource)
+			doShowSource();
+		else if (src == editDelete)
+			doDelete();
+		else if (src == editClear)
+			doClear();
+		else if (src == editTableSettings)
+			doEditTableSettings();
+	}
+
+	private void doSave()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null || model.getRowCount() == 0)
+			return;
+		ExtendedGenericDialog gd = new ExtendedGenericDialog("Save Results", this);
+		if (TextUtils.isNullOrEmpty(saveName))
+			saveName = getTitle();
+		gd.addStringField("Results_set_name", saveName, 30);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		saveName = gd.getNextString();
+		if (TextUtils.isNullOrEmpty(saveName))
+		{
+			IJ.error("No results set name");
+			return;
+		}
+		MemoryPeakResults results = model.toMemoryPeakResults();
+		results.setName(saveName);
+		MemoryPeakResults.addResults(results);
+	}
+
+	private void doShowSource()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null)
+			return;
+		ImageSource source = model.getSource();
+		String text = getTitle() + " source";
+		if (source == null)
+		{
+			text += " = NA";
+		}
+		else
+		{
+			text += "\n" + XmlUtils.prettyPrintXml(source.toXML());
+		}
+		IJ.log(text);
+	}
+
+	private void doDelete()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null)
+			return;
+		int[] indices = table.getSelectedRows();
+		model.remove(this, indices);
+	}
+
+	private void doClear()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null)
+			return;
+		model.clear();
+	}
+
+	private void doEditTableSettings()
+	{
+		PeakResultTableModel model = getModel();
+		if (model == null)
+			return;
+		ResultsTableSettings.Builder tableSettings = model.getTableSettings().toBuilder();
+		// Copied from ResultsManager.addTableResultsOptions
+		ExtendedGenericDialog egd = new ExtendedGenericDialog("Table Settings", this);
+		egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
+				tableSettings.getDistanceUnit().getNumber());
+		egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
+				tableSettings.getIntensityUnit().getNumber());
+		egd.addChoice("Table_angle_unit", SettingsManager.getAngleUnitNames(),
+				tableSettings.getAngleUnit().getNumber());
+		egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
+		egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
+		egd.addCheckbox("Table_show_precision", tableSettings.getShowPrecision());
+		egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
+		egd.showDialog();
+		if (egd.wasCanceled())
+			return;
+		tableSettings.setDistanceUnitValue(egd.getNextChoiceIndex());
+		tableSettings.setIntensityUnitValue(egd.getNextChoiceIndex());
+		tableSettings.setAngleUnitValue(egd.getNextChoiceIndex());
+		tableSettings.setShowFittingData(egd.getNextBoolean());
+		tableSettings.setShowNoiseData(egd.getNextBoolean());
+		tableSettings.setShowPrecision(egd.getNextBoolean());
+		tableSettings.setRoundingPrecision((int) egd.getNextNumber());
+		model.setTableSettings(tableSettings.build());
+	}
+
+	private PeakResultTableModel getModel()
+	{
+		TableModel model = table.getModel();
+		return (model instanceof PeakResultTableModel) ? (PeakResultTableModel) model : null;
+	}
+
 	/**
 	 * Launch the application.
 	 * 
@@ -143,7 +317,7 @@ public class PeakResultTableModelFrame extends JFrame
 	public static void main(String[] args) throws InterruptedException
 	{
 		final RandomGenerator r = new Well19937c();
-		final int n = 10;
+		final int n = 20;
 
 		final ListSelectionModel selectionModel = new DefaultListSelectionModel();
 
