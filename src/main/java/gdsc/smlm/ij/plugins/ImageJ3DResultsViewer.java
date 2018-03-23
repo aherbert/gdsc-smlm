@@ -3242,6 +3242,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 							return false;
 						}
 					});
+			gd.addCheckbox("Update_existing_tables", resultsTableSettings.getUpdateExistingTables());
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return;
@@ -3250,6 +3251,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			resultsTableSettings.setShowTable(gd.getNextBoolean());
 			settings.setSaveEyePoint(gd.getNextBoolean());
 			settings.setNameOption(gd.getNextChoiceIndex());
+			resultsTableSettings.setUpdateExistingTables(gd.getNextBoolean());
 
 			createHighlightColour(settings.getHighlightColour());
 
@@ -3258,9 +3260,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			SettingsManager.writeSettings(settings);
 
 			// Update the table settings for all the selection models
-			ResultsTableSettings ts = resultsTableSettings.build();
-			for (Triplet<PeakResultTableModel, ?, ?> t : resultsTables.values())
-				t.a.setTableSettings(ts);
+			if (resultsTableSettings.getUpdateExistingTables())
+			{
+				ResultsTableSettings ts = resultsTableSettings.build();
+				for (Triplet<PeakResultTableModel, ?, ?> t : resultsTables.values())
+					t.a.setTableSettings(ts);
+			}
 
 			action = new UpdateHighlightColourAction();
 		}

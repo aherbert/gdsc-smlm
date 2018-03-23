@@ -2960,6 +2960,15 @@ public final class ResultsProtos {
      * <code>int32 rounding_precision = 8;</code>
      */
     int getRoundingPrecision();
+
+    /**
+     * <pre>
+     * Set to true to update the settings on existing tables
+     * </pre>
+     *
+     * <code>bool update_existing_tables = 9;</code>
+     */
+    boolean getUpdateExistingTables();
   }
   /**
    * <pre>
@@ -2985,6 +2994,7 @@ public final class ResultsProtos {
       showFittingData_ = false;
       showNoiseData_ = false;
       roundingPrecision_ = 0;
+      updateExistingTables_ = false;
     }
 
     @java.lang.Override
@@ -3053,6 +3063,11 @@ public final class ResultsProtos {
             case 64: {
 
               roundingPrecision_ = input.readInt32();
+              break;
+            }
+            case 72: {
+
+              updateExistingTables_ = input.readBool();
               break;
             }
           }
@@ -3215,6 +3230,19 @@ public final class ResultsProtos {
       return roundingPrecision_;
     }
 
+    public static final int UPDATE_EXISTING_TABLES_FIELD_NUMBER = 9;
+    private boolean updateExistingTables_;
+    /**
+     * <pre>
+     * Set to true to update the settings on existing tables
+     * </pre>
+     *
+     * <code>bool update_existing_tables = 9;</code>
+     */
+    public boolean getUpdateExistingTables() {
+      return updateExistingTables_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3250,6 +3278,9 @@ public final class ResultsProtos {
       }
       if (roundingPrecision_ != 0) {
         output.writeInt32(8, roundingPrecision_);
+      }
+      if (updateExistingTables_ != false) {
+        output.writeBool(9, updateExistingTables_);
       }
     }
 
@@ -3290,6 +3321,10 @@ public final class ResultsProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, roundingPrecision_);
       }
+      if (updateExistingTables_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(9, updateExistingTables_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -3319,6 +3354,8 @@ public final class ResultsProtos {
           == other.getShowNoiseData());
       result = result && (getRoundingPrecision()
           == other.getRoundingPrecision());
+      result = result && (getUpdateExistingTables()
+          == other.getUpdateExistingTables());
       return result;
     }
 
@@ -3349,6 +3386,9 @@ public final class ResultsProtos {
           getShowNoiseData());
       hash = (37 * hash) + ROUNDING_PRECISION_FIELD_NUMBER;
       hash = (53 * hash) + getRoundingPrecision();
+      hash = (37 * hash) + UPDATE_EXISTING_TABLES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getUpdateExistingTables());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3498,6 +3538,8 @@ public final class ResultsProtos {
 
         roundingPrecision_ = 0;
 
+        updateExistingTables_ = false;
+
         return this;
       }
 
@@ -3528,6 +3570,7 @@ public final class ResultsProtos {
         result.showFittingData_ = showFittingData_;
         result.showNoiseData_ = showNoiseData_;
         result.roundingPrecision_ = roundingPrecision_;
+        result.updateExistingTables_ = updateExistingTables_;
         onBuilt();
         return result;
       }
@@ -3592,6 +3635,9 @@ public final class ResultsProtos {
         }
         if (other.getRoundingPrecision() != 0) {
           setRoundingPrecision(other.getRoundingPrecision());
+        }
+        if (other.getUpdateExistingTables() != false) {
+          setUpdateExistingTables(other.getUpdateExistingTables());
         }
         onChanged();
         return this;
@@ -3997,6 +4043,44 @@ public final class ResultsProtos {
       public Builder clearRoundingPrecision() {
         
         roundingPrecision_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean updateExistingTables_ ;
+      /**
+       * <pre>
+       * Set to true to update the settings on existing tables
+       * </pre>
+       *
+       * <code>bool update_existing_tables = 9;</code>
+       */
+      public boolean getUpdateExistingTables() {
+        return updateExistingTables_;
+      }
+      /**
+       * <pre>
+       * Set to true to update the settings on existing tables
+       * </pre>
+       *
+       * <code>bool update_existing_tables = 9;</code>
+       */
+      public Builder setUpdateExistingTables(boolean value) {
+        
+        updateExistingTables_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Set to true to update the settings on existing tables
+       * </pre>
+       *
+       * <code>bool update_existing_tables = 9;</code>
+       */
+      public Builder clearUpdateExistingTables() {
+        
+        updateExistingTables_ = false;
         onChanged();
         return this;
       }
@@ -6135,7 +6219,7 @@ public final class ResultsProtos {
       "Unit\022<\n\016intensity_unit\030\005 \001(\0162$.gdsc.smlm" +
       ".data.config.IntensityUnit\0224\n\nangle_unit" +
       "\030\006 \001(\0162 .gdsc.smlm.data.config.AngleUnit" +
-      "\022\026\n\016show_precision\030\007 \001(\010\"\302\002\n\024ResultsTabl" +
+      "\022\026\n\016show_precision\030\007 \001(\010\"\342\002\n\024ResultsTabl" +
       "eSettings\022\022\n\nshow_table\030\001 \001(\010\022:\n\rdistanc" +
       "e_unit\030\002 \001(\0162#.gdsc.smlm.data.config.Dis" +
       "tanceUnit\022<\n\016intensity_unit\030\003 \001(\0162$.gdsc" +
@@ -6143,30 +6227,31 @@ public final class ResultsProtos {
       "_unit\030\004 \001(\0162 .gdsc.smlm.data.config.Angl",
       "eUnit\022\026\n\016show_precision\030\005 \001(\010\022\031\n\021show_fi" +
       "tting_data\030\006 \001(\010\022\027\n\017show_noise_data\030\007 \001(" +
-      "\010\022\032\n\022rounding_precision\030\010 \001(\005\",\n\027Results" +
-      "InMemorySettings\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017" +
-      "ResultsSettings\022\024\n\014log_progress\030\001 \001(\010\022\027\n" +
-      "\017show_deviations\030\002 \001(\010\022K\n\026results_image_" +
-      "settings\030\003 \001(\0132+.gdsc.smlm.data.config.R" +
-      "esultsImageSettings\022I\n\025results_file_sett" +
-      "ings\030\004 \001(\0132*.gdsc.smlm.data.config.Resul" +
-      "tsFileSettings\022K\n\026results_table_settings",
-      "\030\005 \001(\0132+.gdsc.smlm.data.config.ResultsTa" +
-      "bleSettings\022R\n\032results_in_memory_setting" +
-      "s\030\006 \001(\0132..gdsc.smlm.data.config.ResultsI" +
-      "nMemorySettings*\262\002\n\020ResultsImageType\022\r\n\t" +
-      "DRAW_NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016D" +
-      "RAW_INTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023" +
-      "\n\017DRAW_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISATION" +
-      "S_PRECISION\020\005\022\034\n\030DRAW_INTENSITY_PRECISIO" +
-      "N\020\006\022(\n$DRAW_LOCALISATIONS_AVERAGE_PRECIS" +
-      "ION\020\007\022$\n DRAW_INTENSITY_AVERAGE_PRECISIO",
-      "N\020\010\022\022\n\016DRAW_FIT_ERROR\020\t\022\023\n\017DRAW_Z_POSITI" +
-      "ON\020\n*C\n\020ResultsImageMode\022\r\n\tIMAGE_ADD\020\000\022" +
-      "\021\n\rIMAGE_REPLACE\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021Res" +
-      "ultsFileFormat\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022" +
-      "\n\n\006BINARY\020\002\022\007\n\003TSF\020\003\022\010\n\004MALK\020\004B\017B\rResult" +
-      "sProtosb\006proto3"
+      "\010\022\032\n\022rounding_precision\030\010 \001(\005\022\036\n\026update_" +
+      "existing_tables\030\t \001(\010\",\n\027ResultsInMemory" +
+      "Settings\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017ResultsS" +
+      "ettings\022\024\n\014log_progress\030\001 \001(\010\022\027\n\017show_de" +
+      "viations\030\002 \001(\010\022K\n\026results_image_settings" +
+      "\030\003 \001(\0132+.gdsc.smlm.data.config.ResultsIm" +
+      "ageSettings\022I\n\025results_file_settings\030\004 \001" +
+      "(\0132*.gdsc.smlm.data.config.ResultsFileSe",
+      "ttings\022K\n\026results_table_settings\030\005 \001(\0132+" +
+      ".gdsc.smlm.data.config.ResultsTableSetti" +
+      "ngs\022R\n\032results_in_memory_settings\030\006 \001(\0132" +
+      "..gdsc.smlm.data.config.ResultsInMemoryS" +
+      "ettings*\262\002\n\020ResultsImageType\022\r\n\tDRAW_NON" +
+      "E\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016DRAW_INTE" +
+      "NSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023\n\017DRAW_F" +
+      "ITTED_PSF\020\004\022 \n\034DRAW_LOCALISATIONS_PRECIS" +
+      "ION\020\005\022\034\n\030DRAW_INTENSITY_PRECISION\020\006\022(\n$D" +
+      "RAW_LOCALISATIONS_AVERAGE_PRECISION\020\007\022$\n",
+      " DRAW_INTENSITY_AVERAGE_PRECISION\020\010\022\022\n\016D" +
+      "RAW_FIT_ERROR\020\t\022\023\n\017DRAW_Z_POSITION\020\n*C\n\020" +
+      "ResultsImageMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE" +
+      "_REPLACE\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFile" +
+      "Format\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINAR" +
+      "Y\020\002\022\007\n\003TSF\020\003\022\010\n\004MALK\020\004B\017B\rResultsProtosb" +
+      "\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6198,7 +6283,7 @@ public final class ResultsProtos {
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsTableSettings_descriptor,
-        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", });
+        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", "UpdateExistingTables", });
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_fieldAccessorTable = new

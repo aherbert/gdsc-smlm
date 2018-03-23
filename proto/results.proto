@@ -115,6 +115,8 @@ message ResultsTableSettings {
 	bool show_noise_data = 7;
 	// Set the rounding precision for the results table
 	int32 rounding_precision = 8;
+	// Set to true to update the settings on existing tables
+	bool update_existing_tables = 9;
 }
 
 // Define the in-memory results settings
