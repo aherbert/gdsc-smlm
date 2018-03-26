@@ -130,11 +130,12 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		// This is required to get the column sizes for the model data.
 		model.setLive(true);
 
-		int[] indices = ListSelectionModelHelper.getSelectedIndices(selectionModel);
+		int[] indices = (selectionModel != null) ? ListSelectionModelHelper.getSelectedIndices(selectionModel) : null;
 
 		table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
 
-		ListSelectionModelHelper.setSelectedIndices(selectionModel, indices);
+		if (indices != null)
+			ListSelectionModelHelper.setSelectedIndices(selectionModel, indices);
 
 		final JScrollPane scroll = new JScrollPane(table);
 
