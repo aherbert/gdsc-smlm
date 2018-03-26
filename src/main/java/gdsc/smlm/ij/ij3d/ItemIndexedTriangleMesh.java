@@ -1,5 +1,8 @@
 package gdsc.smlm.ij.ij3d;
 
+import org.scijava.java3d.Geometry;
+import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.IndexedTriangleArray;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
@@ -96,7 +99,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 					objectVertices[j].z *= sz;
 				}
 			}
-			
+
 			// Translate
 			for (int i = 0, k = 0; i < points.length; i++)
 			{
@@ -149,6 +152,31 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 
 		// Update the geometry
 		this.setGeometry(createGeometry());
+	}
+
+	@Override
+	protected GeometryArray createGeometry()
+	{
+		if (nVertices == 0)
+			return null;
+		final IndexedTriangleArray ta = new IndexedTriangleArray(vertices.length, GeometryArray.COORDINATES |
+				GeometryArray.COLOR_3 | GeometryArray.NORMALS | GeometryArray.USE_COORD_INDEX_ONLY, faces.length);
+
+		ta.setValidIndexCount(nFaces);
+
+		ta.setCoordinates(0, vertices);
+		ta.setCoordinateIndices(0, faces);
+
+		ta.setColors(0, colors);
+		//ta.setColorIndices(0, faces);
+
+		ta.setNormals(0, getNormals());
+		//ta.setNormalIndices(0, faces);
+
+		ta.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+		ta.setCapability(Geometry.ALLOW_INTERSECT);
+
+		return ta;
 	}
 
 	@Override
@@ -318,7 +346,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	{
 		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
-	
+
 	@Override
 	public float getVolume()
 	{

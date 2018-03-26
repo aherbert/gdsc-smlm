@@ -35,9 +35,9 @@ import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
 
 /**
- * This class represents a list as a number of repeated shapes in the universe. The shape is defined using a geometry
- * array. Colouring is assumed to be done using the material diffuse colour. If the geometry has per vertex colours then
- * this class will not work.
+ * This class represents a list as a number of repeated shapes in the universe. Each item has its own Java 3D Shape3D
+Shape3D * object added to the group. The shape is defined using a geometry array. Colouring is assumed to be done using the
+ * material diffuse colour. If the geometry has per vertex colours then this class will not work.
  * <p>
  * A special exception is made for a PointArray as that has no surface to colour. In this case it must be created using
  * the GeometryArray.COLOR_4 flag.
@@ -122,7 +122,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 			int format = ga.getVertexFormat();
 			if (isPointArray)
 			{
-				if ((format & GeometryArray.COLOR_4) == 0)
+				if ((format & GeometryArray.COLOR_4) != GeometryArray.COLOR_4)
 					throw new NullPointerException("PointArray must have COLOR_4 vertex type");
 			}
 			else if ((format & GeometryArray.COLOR_3) != 0)
@@ -415,7 +415,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		// Ignore this as transparency is handled by this class alone 
 		return null;
 	}
-	
+
 	@Override
 	protected PolygonAttributes getPolygonAttributes()
 	{
@@ -734,7 +734,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 			// Global transparency is merged with alpha
 			setTransparency(this.transparency);
 		}
-		
+
 	}
 
 	/**
