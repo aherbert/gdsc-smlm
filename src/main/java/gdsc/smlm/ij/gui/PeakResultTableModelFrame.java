@@ -28,6 +28,7 @@ import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
+import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.XmlUtils;
 import gdsc.smlm.data.config.CalibrationHelper;
@@ -134,7 +135,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
 
 		ListSelectionModelHelper.setSelectedIndices(selectionModel, indices);
-		
+
 		final JScrollPane scroll = new JScrollPane(table);
 
 		ScreenDimensionHelper helper = new ScreenDimensionHelper();
@@ -474,7 +475,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 				}
 			}
 			imp.setOverlay(o);
-			imp.setSlice(list[0].getFrame());
+			PeakResult p = list[0];
+			imp.setSlice(p.getFrame());
+			Utils.adjustSourceRect(imp, 0, (int) converter.convert(p.getXPosition()),
+					(int) converter.convert(p.getYPosition()));
 			imp.getWindow().toFront();
 		}
 		catch (ConversionException e)
