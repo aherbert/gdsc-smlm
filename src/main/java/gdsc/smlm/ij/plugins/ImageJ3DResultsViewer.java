@@ -109,11 +109,11 @@ import gdsc.smlm.ij.ij3d.CustomContent;
 import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.CustomContentInstant;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
-import gdsc.smlm.ij.ij3d.ItemGeometryNode;
+import gdsc.smlm.ij.ij3d.ItemGroup;
+import gdsc.smlm.ij.ij3d.ItemGroupNode;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
-import gdsc.smlm.ij.ij3d.OrderedItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.TransparentItemPointMesh;
 import gdsc.smlm.ij.ij3d.TransparentItemShape;
 import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
@@ -1131,7 +1131,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				activateDynamicTransparency(univ, 0, settings.getEnableDynamicTransparency());
 			}
 
-			contentNode = new ItemGeometryNode(pointGroup);
+			contentNode = new ItemGroupNode(pointGroup);
 		}
 		else
 		{
@@ -2015,10 +2015,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					//System.out.printf("n=%d [%d]  %s  %s\n", nPerLocalisation, index,
 					//		Arrays.toString(pair.r.getVertexIndices()), pair.r.getIntersectionPoint());
 				}
-				else if (content.getContent() instanceof ItemGeometryNode)
+				else if (content.getContent() instanceof ItemGroupNode)
 				{
 					//ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-					//ItemGeometryGroup g = node.getItemGeometry();
+					//ItemGroup g = node.getItemGroup();
 					// All shapes have the index as the user data
 					Object o = pair.b.getGeometry().getUserData();
 					if (o instanceof Integer)
@@ -2294,13 +2294,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (!(c.getUserData() instanceof ResultsMetaData))
 				return 0;
 			final ContentInstant content = c.getCurrent();
-			if (content.getContent() instanceof ItemGeometryNode)
+			if (content.getContent() instanceof ItemGroupNode)
 			{
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				ItemGeometryGroup g = node.getItemGeometry();
-				if (g instanceof OrderedItemGeometryGroup)
-					continue;
-				size += g.size();
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				ItemGroup g = node.getItemGroup();
+				if (g instanceof ItemGeometryGroup)
+					size += g.size();
 			}
 		}
 		return size;
@@ -2557,10 +2556,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				if (mesh instanceof ItemShape)
 					itemShape = (ItemShape) mesh;
 			}
-			else if (content.getContent() instanceof ItemGeometryNode)
+			else if (content.getContent() instanceof ItemGroupNode)
 			{
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				itemShape = node.getItemGeometry();
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				itemShape = node.getItemGroup();
 			}
 			if (itemShape != null)
 				changeColour(itemShape, results, settings);
@@ -2587,12 +2586,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					((CustomPointMesh) mesh).setPointSize(pointSize);
 				}
 			}
-			else if (content.getContent() instanceof ItemGeometryNode)
+			else if (content.getContent() instanceof ItemGroupNode)
 			{
 				if (!getSettings())
 					return -1;
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				ItemGeometryGroup g = node.getItemGeometry();
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				ItemGroup g = node.getItemGroup();
 				g.setPointSize(pointSize);
 			}
 
@@ -2685,6 +2684,33 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 			}
 
+			public void save(ItemGroup group)
+			{
+				// TODO - update this for additional types of ItemGroup
+				if (group instanceof ItemGeometryGroup)
+				{
+					save((ItemGeometryGroup) group);
+				}
+				else
+				{
+					transparency = group.getTransparency();
+					group.setTransparency(0f);
+				}
+			}
+
+			public void restore(ItemGroup group)
+			{
+				// TODO - update this for additional types of ItemGroup
+				if (group instanceof ItemGeometryGroup)
+				{
+					restore((ItemGeometryGroup) group);
+				}
+				else
+				{
+					group.setTransparency(transparency);
+				}
+			}
+
 			public void save(ItemGeometryGroup group)
 			{
 				int size = group.size();
@@ -2752,10 +2778,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					}
 				}
 			}
-			else if (content.getContent() instanceof ItemGeometryNode)
+			else if (content.getContent() instanceof ItemGroupNode)
 			{
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				ItemGeometryGroup g = node.getItemGeometry();
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				ItemGroup g = node.getItemGroup();
 
 				TransparencyData d;
 				if (g.getUserData() instanceof TransparencyData)
@@ -2796,10 +2822,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				CustomMesh mesh = node.getMesh();
 				mesh.setShaded(!mesh.isShaded());
 			}
-			else if (content.getContent() instanceof ItemGeometryNode)
+			else if (content.getContent() instanceof ItemGroupNode)
 			{
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				ItemGeometryGroup g = node.getItemGeometry();
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				ItemGroup g = node.getItemGroup();
 				g.setShaded(!g.isShaded());
 			}
 
@@ -2920,10 +2946,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				updateable = (UpdateableItemShape) mesh;
 				reorderData = true;
 			}
-			else if (content.getContent() instanceof ItemGeometryNode)
+			else if (content.getContent() instanceof ItemGroupNode)
 			{
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				ItemGeometryGroup g = node.getItemGeometry();
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				ItemGroup g = node.getItemGroup();
 				if (!(g instanceof UpdateableItemShape))
 					return 0;
 				updateable = (UpdateableItemShape) g;
@@ -2996,12 +3022,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					mesh.setTransparency(0);
 				itemShape = (ItemShape) mesh;
 			}
-			else if (content.getContent() instanceof ItemGeometryNode)
+			else if (content.getContent() instanceof ItemGroupNode)
 			{
-				ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-				ItemGeometryGroup g = node.getItemGeometry();
-				if (!(g instanceof ItemShape))
-					return 0;
+				ItemGroupNode node = (ItemGroupNode) content.getContent();
+				ItemGroup g = node.getItemGroup();
 				if (resetTransparency)
 					g.setTransparency(0);
 				itemShape = (ItemShape) g;

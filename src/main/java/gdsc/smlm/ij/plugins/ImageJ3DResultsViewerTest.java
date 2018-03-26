@@ -15,7 +15,7 @@ import gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import gdsc.smlm.ij.ij3d.CustomContent;
 import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
-import gdsc.smlm.ij.ij3d.ItemGeometryNode;
+import gdsc.smlm.ij.ij3d.ItemGroupNode;
 import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -141,7 +141,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 						(GeometryArray) s.getShape().getGeometry(), a, null, null, null);
 				String name = x + "," + y + "," + t;
 				CustomContent content = new CustomContent(name, true);
-				content.getCurrent().display(new ItemGeometryNode(g));
+				content.getCurrent().display(new ItemGroupNode(g));
 				univ.addContent(content);
 
 				x += space;
@@ -242,7 +242,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		IJ.showStatus("Displaying points ...");
 		final CustomContent c = new CustomContent("Test", false);
 		final ContentInstant content = c.getCurrent();
-		content.display(new ItemGeometryNode(pointGroup));
+		content.display(new ItemGroupNode(pointGroup));
 		univ.addContent(c);
 
 		IJ.showStatus("Done");

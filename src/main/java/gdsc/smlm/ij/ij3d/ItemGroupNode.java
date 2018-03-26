@@ -21,26 +21,26 @@ import org.scijava.vecmath.Tuple3d;
 import ij3d.ContentNode;
 
 /**
- * Node to allow display of ItemGeometryGroup content.
+ * Node to allow display of ItemGroup content.
  *
  * @author Alex Herbert
  */
-public class ItemGeometryNode extends ContentNode
+public class ItemGroupNode extends ContentNode
 {
-	private ItemGeometryGroup pointGroup;
+	private ItemGroup itemGroup;
 
 	protected Point3f min, max, center;
 
-	public ItemGeometryNode(final ItemGeometryGroup pointGroup)
+	public ItemGroupNode(final ItemGroup itemGroup)
 	{
-		this.pointGroup = pointGroup;
+		this.itemGroup = itemGroup;
 		calculateMinMaxCenterPoint();
-		addChild(pointGroup);
+		addChild(itemGroup);
 	}
 
-	public ItemGeometryGroup getItemGeometry()
+	public ItemGroup getItemGroup()
 	{
-		return pointGroup;
+		return itemGroup;
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ItemGeometryNode extends ContentNode
 	@Override
 	public void colorUpdated(final Color3f color)
 	{
-		pointGroup.setColor(color);
+		itemGroup.setColor(color);
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class ItemGeometryNode extends ContentNode
 	@Override
 	public void shadeUpdated(final boolean shaded)
 	{
-		pointGroup.setShaded(shaded);
+		itemGroup.setShaded(shaded);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class ItemGeometryNode extends ContentNode
 	@Override
 	public void transparencyUpdated(final float transparency)
 	{
-		pointGroup.setTransparency(transparency);
+		itemGroup.setTransparency(transparency);
 	}
 
 	private void calculateMinMaxCenterPoint()
@@ -114,10 +114,10 @@ public class ItemGeometryNode extends ContentNode
 		min = new Point3f();
 		max = new Point3f();
 		center = new Point3f();
-		if (pointGroup.size() == 0)
+		if (itemGroup.size() == 0)
 			return;
 
-		Point3f[] points = pointGroup.getPoints();
+		Point3f[] points = itemGroup.getPoints();
 		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
 

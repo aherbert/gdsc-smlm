@@ -40,21 +40,12 @@ import org.scijava.vecmath.Vector3f;
  * this class will not work.
  * <p>
  * A special exception is made for a PointArray as that has no surface to colour. In this case it must be created using
- * the flag
+ * the GeometryArray.COLOR_4 flag.
  *
  * @author Alex Herbert
  */
-public class ItemGeometryGroup extends Group implements TransparentItemShape
+public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 {
-	private final Color3f DEFAULT_COLOUR = new Color3f(0, 1, 0);
-
-	// Tips: https://webserver2.tecgraf.puc-rio.br/~ismael/Cursos/Cidade_CG/labs/Java3D/Java3D_onlinebook_selman/Htmls/3DJava_Ch04.htm#4
-
-	// See if this can extend BranchGroup to allow picking the items.
-
-	/** The list of points */
-	protected Point3f[] points;
-
 	/**
 	 * The default appearance when not using per-item colour/transparency. This is also the reference for shared
 	 * attributes.
@@ -81,146 +72,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 
 	/** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
 	protected GeometryArray[] geometryArray = null;
-
-	private static abstract class PointArrayColorUpdater
-	{
-		/** The per-item colour. Used for PointArrays. PointArrays use color4 coordinates. */
-		final float[] pointColor;
-
-		PointArrayColorUpdater(int n)
-		{
-			pointColor = new float[4 * n];
-		}
-
-		/**
-		 * Set the colour and alpha value and gets the current color array.
-		 *
-		 * @param alpha
-		 *            the alpha
-		 * @return the color
-		 */
-		public abstract float[] getColors(Color4f color4f);
-
-		/**
-		 * Set the colour and alpha value and gets the current color array.
-		 *
-		 * @param alpha
-		 *            the alpha
-		 * @return the color
-		 */
-		public abstract float[] getColors(Color3f color, float alpha);
-
-		/**
-		 * Set the colour value and gets the current color array.
-		 *
-		 * @param alpha
-		 *            the alpha
-		 * @return the color
-		 */
-		public abstract float[] getColors(Color3f color);
-
-		/**
-		 * Set the alpha value and gets the current color array.
-		 *
-		 * @param alpha
-		 *            the alpha
-		 * @return the color
-		 */
-		public abstract float[] getColors(float alpha);
-	}
-
-	private static class SinglePointArrayColorUpdater extends PointArrayColorUpdater
-	{
-		SinglePointArrayColorUpdater()
-		{
-			super(1);
-		}
-
-		public float[] getColors(Color4f color)
-		{
-			pointColor[0] = color.x;
-			pointColor[1] = color.y;
-			pointColor[2] = color.z;
-			pointColor[3] = color.w;
-			return pointColor;
-		}
-
-		public float[] getColors(Color3f color, float alpha)
-		{
-			pointColor[0] = color.x;
-			pointColor[1] = color.y;
-			pointColor[2] = color.z;
-			pointColor[3] = alpha;
-			return pointColor;
-		}
-
-		public float[] getColors(Color3f color)
-		{
-			pointColor[0] = color.x;
-			pointColor[1] = color.y;
-			pointColor[2] = color.z;
-			return pointColor;
-		}
-
-		public float[] getColors(float alpha)
-		{
-			pointColor[3] = alpha;
-			return pointColor;
-		}
-	}
-
-	private static class MultiPointArrayColorUpdater extends PointArrayColorUpdater
-	{
-		MultiPointArrayColorUpdater(int n)
-		{
-			super(n);
-		}
-
-		public float[] getColors(Color4f color)
-		{
-			for (int i = 0; i < pointColor.length;)
-			{
-				pointColor[i++] = color.x;
-				pointColor[i++] = color.y;
-				pointColor[i++] = color.z;
-				pointColor[i++] = color.w;
-			}
-			return pointColor;
-		}
-
-		public float[] getColors(Color3f color, float alpha)
-		{
-			for (int i = 0; i < pointColor.length;)
-			{
-				pointColor[i++] = color.x;
-				pointColor[i++] = color.y;
-				pointColor[i++] = color.z;
-				pointColor[i++] = alpha;
-			}
-			return pointColor;
-		}
-
-		public float[] getColors(Color3f color)
-		{
-			for (int i = 0; i < pointColor.length;)
-			{
-				pointColor[i++] = color.x;
-				pointColor[i++] = color.y;
-				pointColor[i++] = color.z;
-				i++;
-			}
-			return pointColor;
-		}
-
-		public float[] getColors(float alpha)
-		{
-			for (int i = 3; i < pointColor.length; i += 4)
-			{
-				pointColor[i] = alpha;
-			}
-			return pointColor;
-		}
-	}
 
 	protected final PointArrayColorUpdater pointArrayColorUpdater;
 
@@ -256,8 +107,7 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	public ItemGeometryGroup(final Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes,
 			Color3f[] colors, float[] alphas)
 	{
-		if (points == null)
-			throw new NullPointerException("Points must not be null");
+		super(points);
 
 		if (ga == null)
 		{
@@ -481,53 +331,13 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		}
 	}
 
-	/**
-	 * Gets the parent group to which all the shapes should be added.
-	 *
-	 * @return the parent group
-	 */
-	protected Group getParentGroup()
-	{
-		return this;
-	}
-
-	/**
-	 * Gets the points.
-	 *
-	 * @return the points
-	 */
-	public Point3f[] getPoints()
-	{
-		return points;
-	}
-
-	/**
-	 * Set the color of the points.
-	 *
-	 * @param color
-	 *            the new color
-	 */
-	public void setColor(Color3f color)
-	{
-		setItemColor(color);
-	}
-
-	/**
-	 * Gets the default color of the points.
-	 *
-	 * @return the color
-	 */
+	@Override
 	public Color3f getColor()
 	{
 		return new Color3f(color);
 	}
 
-	/**
-	 * Set the transparency of the points. This is blended with a per-item alpha if present.
-	 *
-	 * @param transparency
-	 *            the new transparency
-	 */
+	@Override
 	public void setTransparency(final float transparency)
 	{
 		// Store global transparency
@@ -579,21 +389,13 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		}
 	}
 
-	/**
-	 * Gets the transparency of the points. This is blended with a per-item alpha if present.
-	 *
-	 * @return the transparency
-	 */
+	@Override
 	public float getTransparency()
 	{
 		return transparency;
 	}
 
-	/**
-	 * Checks if any item is transparent.
-	 *
-	 * @return true, if is transparent
-	 */
+	@Override
 	public boolean isTransparent()
 	{
 		if (transparency != 0)
@@ -607,60 +409,23 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		return false;
 	}
 
-	/**
-	 * Sets the shaded.
-	 *
-	 * @param shaded
-	 *            the new shaded
-	 */
-	public void setShaded(boolean shaded)
+	@Override
+	protected TransparencyAttributes getTransparencyAttributes()
 	{
-		PolygonAttributes pa = defaultAppearance.getPolygonAttributes();
-		if (pa == null)
-			return;
-		int mode = (shaded) ? PolygonAttributes.POLYGON_FILL : PolygonAttributes.POLYGON_LINE;
-		if (pa.getPolygonMode() != mode)
-			pa.setPolygonMode(mode);
+		// Ignore this as transparency is handled by this class alone 
+		return null;
+	}
+	
+	@Override
+	protected PolygonAttributes getPolygonAttributes()
+	{
+		return defaultAppearance.getPolygonAttributes();
 	}
 
-	/**
-	 * Checks if is shaded.
-	 *
-	 * @return true, if is shaded
-	 */
-	public boolean isShaded()
+	@Override
+	protected PointAttributes getPointAttributes()
 	{
-		PolygonAttributes pa = defaultAppearance.getPolygonAttributes();
-		if (pa == null)
-			return false;
-		return pa.getPolygonMode() == PolygonAttributes.POLYGON_FILL;
-	}
-
-	/**
-	 * Sets the pointSize.
-	 *
-	 * @param pointSize
-	 *            the new pointSize
-	 */
-	public void setPointSize(float pointSize)
-	{
-		PointAttributes pa = defaultAppearance.getPointAttributes();
-		if (pa == null)
-			return;
-		pa.setPointSize(pointSize);
-	}
-
-	/**
-	 * Gets the point size.
-	 *
-	 * @return the point size
-	 */
-	public float getPointSize()
-	{
-		PointAttributes pa = defaultAppearance.getPointAttributes();
-		if (pa == null)
-			return 0f;
-		return pa.getPointSize();
+		return defaultAppearance.getPointAttributes();
 	}
 
 	/**
@@ -738,15 +503,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 	}
 
 	/**
-	 * Returns a string representation of the underlying List<Point3f>.
-	 */
-	@Override
-	public String toString()
-	{
-		return Arrays.toString(points);
-	}
-
-	/**
 	 * Creates the geometry for a sphere using the given number of divisions.
 	 *
 	 * @param divisions
@@ -758,26 +514,6 @@ public class ItemGeometryGroup extends Group implements TransparentItemShape
 		int flags = Primitive.GENERATE_NORMALS | Primitive.ENABLE_APPEARANCE_MODIFY | Primitive.ENABLE_GEOMETRY_PICKING;
 		final Sphere sphere = new Sphere(1, flags, divisions, null);
 		return (GeometryArray) sphere.getShape(0).getGeometry();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ij.ij3d.ItemShape#size()
-	 */
-	public int size()
-	{
-		return points.length;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
-	 */
-	public Point3f getCoordinate(int i)
-	{
-		return points[i];
 	}
 
 	/*
