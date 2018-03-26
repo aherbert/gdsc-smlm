@@ -700,6 +700,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		public void removeFromSelectionModel(PeakResult p)
 		{
+			if (peakResultTableModel == null)
+				return;
 			// Find in the model
 			int i = peakResultTableModel.indexOf(p);
 			if (i != -1)
@@ -715,6 +717,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		public void addToSelectionModel(PeakResult p)
 		{
+			if (peakResultTableModel == null)
+				return;
 			// Find in the model
 			int i = peakResultTableModel.indexOf(p);
 
@@ -1216,7 +1220,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		univ.setAutoAdjustView(auto);
 
-		// Initials the selection model
+		// Initialise the selection model
 		data.addSelectionModel(t);
 
 		IJ.showStatus("");
@@ -2182,14 +2186,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				int[] indices = ListSelectionModelHelper.getSelectedIndices(t.b);
 				finalTable.convertRowIndexToModel(indices);
 				finalTable.cleanUp(); // Remove listeners
-				if (indices.length != 0)
-				{
-					t.b.setValueIsAdjusting(true);
-					t.b.setSelectionInterval(indices[0], indices[0]);
-					for (int i = 1; i < indices.length; i++)
-						t.b.addSelectionInterval(indices[i], indices[i]);
-					t.b.setValueIsAdjusting(false);
-				}
+				ListSelectionModelHelper.setSelectedIndices(t.b, indices);
 			}
 		});
 		table.setVisible(true);
@@ -3508,7 +3505,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			ga.setNormals(0, normals);
 			ga.setValidVertexCount(nVertices);
 
-			//			// Test using the geometry from a sphere primative
+			//			// Test using the geometry from a sphere primitive
 			//			switch (r)
 			//			{
 			//				case HIGH_RES_SPHERE:

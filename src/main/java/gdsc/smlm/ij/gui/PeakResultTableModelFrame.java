@@ -129,8 +129,12 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		// This is required to get the column sizes for the model data.
 		model.setLive(true);
 
+		int[] indices = ListSelectionModelHelper.getSelectedIndices(selectionModel);
+
 		table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
 
+		ListSelectionModelHelper.setSelectedIndices(selectionModel, indices);
+		
 		final JScrollPane scroll = new JScrollPane(table);
 
 		ScreenDimensionHelper helper = new ScreenDimensionHelper();
@@ -326,7 +330,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		if (model == null)
 			return;
 		int[] indices = table.getSelectedRows();
-		table.convertRowIndexToModel(indices); 
+		table.convertRowIndexToModel(indices);
 		model.remove(this, indices);
 	}
 
@@ -648,7 +652,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					// However this breaks deletion of data as the row sorter double processes the deletion.
 					// Basically only one table can use the same selection model when sorting is desired.
 					//d2.table.setRowSorter(d.table.getRowSorter());
-					
+
 					//					d2.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)

@@ -39,4 +39,16 @@ public class ListSelectionModelHelper
 		System.arraycopy(rvTmp, 0, rv, 0, n);
 		return rv;
 	}
+
+	public static void setSelectedIndices(ListSelectionModel sm, int[] indices)
+	{
+		if (indices == null || indices.length == 0)
+			return;
+
+		sm.setValueIsAdjusting(true);
+		sm.setSelectionInterval(indices[0], indices[0]);
+		for (int i = 1; i < indices.length; i++)
+			sm.addSelectionInterval(indices[i], indices[i]);
+		sm.setValueIsAdjusting(false);
+	}
 }
