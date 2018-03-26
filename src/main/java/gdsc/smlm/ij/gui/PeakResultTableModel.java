@@ -246,7 +246,7 @@ public class PeakResultTableModel extends AbstractTableModel
 		// XXX - make thi configurable
 		valuesList.add(new PeakResultDataFrame());
 		namesList.add("#");
-		
+
 		valuesList.add(new PeakResultDataFrame());
 		addName(valuesList, namesList);
 		if (showEndFrame)
@@ -410,7 +410,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		if (columnIndex == 0)
-			return new Integer(rowIndex+1);
+			return new Integer(rowIndex + 1);
 		PeakResult r = get(rowIndex);
 		return values[columnIndex].getValue(r);
 	}
@@ -517,7 +517,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public void remove(Object source, PeakResult peakResult)
 	{
-		remove(data.indexOf(peakResult));
+		remove(source, data.indexOf(peakResult));
 	}
 
 	/**
@@ -548,9 +548,10 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		if (indices == null || indices.length == 0)
 			return;
+		
 		if (indices.length == 1)
 		{
-			remove(indices[0]);
+			remove(source, indices[0]);
 			return;
 		}
 
@@ -584,7 +585,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Removes the results. This is a convenience method that calls remove for each result.
+	 * Removes the results.
 	 *
 	 * @param source
 	 *            the source
@@ -595,16 +596,46 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		if (peakResults.length == 0)
 			return;
+		if (peakResults.length == 1)
+		{
+			remove(source, peakResults[0]);
+			return;
+		}
+		int[] indices = new int[peakResults.length];
+		int size = 0;
 		for (int i = 0; i < peakResults.length; i++)
 		{
-			remove(peakResults[i]);
+			int j = data.indexOf(peakResults[i]);
+			if (j >= 0)
+				indices[size++] = j;
 		}
+		if (size == 0)
+			return;
+		if (size < peakResults.length)
+			indices = Arrays.copyOf(indices, size);
+		
+		int[] pairs = SimpleArrayUtils.getRanges(indices);
+
+		size = pairs.length;
+		int firstRow = pairs[0];
+		int lastRow = pairs[size - 1];
+
+		// Remove ranges starting at the end (to preserve the list order)
+		for (int i = size - 1; i > 0; i -= 2)
+		{
+			data.remove(pairs[i - 1], pairs[i]);
+		}
+
+		fireTableRowsDeleted(firstRow, lastRow);
 	}
 
 	/**
 	 * Clear the results.
+	 *
+	 * @param source
+	 *            the source
 	 */
-	public void clear()
+	public void clear(Object source)
 	{
 		int index1 = data.size() - 1;
 		if (index1 >= 0)
@@ -623,12 +654,14 @@ public class PeakResultTableModel extends AbstractTableModel
 	 * Throws an <code>ArrayIndexOutOfBoundsException</code>
 	 * if the index was invalid.
 	 *
+	 * @param source
+	 *            the source
 	 * @param fromIndex
 	 *            the index of the lower end of the range
 	 * @param toIndex
 	 *            the index of the upper end of the range
 	 */
-	public void removeRange(int fromIndex, int toIndex)
+	public void removeRange(Object source, int fromIndex, int toIndex)
 	{
 		data.remove(fromIndex, toIndex);
 		fireTableRowsDeleted(fromIndex, toIndex);

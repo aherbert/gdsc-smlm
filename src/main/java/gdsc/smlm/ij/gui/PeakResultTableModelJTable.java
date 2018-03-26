@@ -147,4 +147,48 @@ public class PeakResultTableModelJTable extends JTable
 		}
 		return new PeakResult[0];
 	}
+
+	/**
+	 * Returns the location of <code>index</code> in terms of the
+	 * underlying model. That is, for the row <code>index</code> in
+	 * the coordinates of the view this returns the row index in terms
+	 * of the underlying model.
+	 *
+	 * @param indices
+	 *            the indices (updated in-place)
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>index</code> is outside the
+	 *             range of the view
+	 */
+	public void convertRowIndexToModel(int[] indices)
+	{
+		RowSorter<?> sorter = getRowSorter();
+		if (sorter != null)
+		{
+			for (int i = 0; i < indices.length; i++)
+				indices[i] = sorter.convertRowIndexToModel(indices[i]);
+		}
+	}
+
+	/**
+	 * Returns the location of <code>index</code> in terms of the
+	 * view. That is, for the row <code>index</code> in the
+	 * coordinates of the underlying model this returns the row index
+	 * in terms of the view.
+	 *
+	 * @param indices
+	 *            the indices (updated in-place)
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>index</code> is outside
+	 *             the range of the model
+	 */
+	public void convertRowIndexToView(int[] indices)
+	{
+		RowSorter<?> sorter = getRowSorter();
+		if (sorter != null)
+		{
+			for (int i = 0; i < indices.length; i++)
+				indices[i] = sorter.convertRowIndexToView(indices[i]);
+		}
+	}
 }

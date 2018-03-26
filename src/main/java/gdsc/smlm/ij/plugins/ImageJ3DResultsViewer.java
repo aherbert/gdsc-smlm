@@ -637,8 +637,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			PeakResultTableModelFrame table = findTable(this);
 			if (table != null)
 			{
-				for (int i = 0; i < indices.length; i++)
-					indices[i] = table.convertRowIndexToModel(indices[i]);
+				table.convertRowIndexToModel(indices);
 			}
 
 			// Try to to preserve those currently selected
@@ -783,12 +782,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 */
 	public void run(String arg)
 	{
-		//// For testing
-		//if (true || Utils.isExtraOptions())
-		//{
-		//	new ImageJ3DResultsViewerTest().run(arg);
-		//	return;
-		//}
+		// For testing
+		//		if (true || Utils.isExtraOptions())
+		//		{
+		//			new ImageJ3DResultsViewerTest().run(arg);
+		//			return;
+		//		}
 
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
@@ -2153,7 +2152,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		// Clicks just select from the selection model, and add results to the table model.
 
-		Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables.get(data.digest);
+		final Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t = resultsTables
+				.get(data.digest);
 
 		PeakResultTableModelFrame table = t.c;
 		if (table != null)
@@ -2168,6 +2168,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// No table or not visible so create a new one
 		table = new PeakResultTableModelFrame(t.a, t.b);
 		table.setTitle(TITLE + " " + results.getName());
+		table.setReadOnly(false);
 		// Ensure cleanup
 		table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		final PeakResultTableModelFrame finalTable = table;
@@ -2175,7 +2176,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			public void windowClosed(WindowEvent e)
 			{
-				finalTable.cleanUp();
+				// We must unmap the selection since we use the selection model
+				// across all active views of the same dataset.
+				int[] indices = ListSelectionModelHelper.getSelectedIndices(t.b);
+				finalTable.convertRowIndexToModel(indices);
+				finalTable.cleanUp(); // Remove listeners
+				if (indices.length != 0)
+				{
+					t.b.setValueIsAdjusting(true);
+					t.b.setSelectionInterval(indices[0], indices[0]);
+					for (int i = 1; i < indices.length; i++)
+						t.b.addSelectionInterval(indices[i], indices[i]);
+					t.b.setValueIsAdjusting(false);
+				}
 			}
 		});
 		table.setVisible(true);

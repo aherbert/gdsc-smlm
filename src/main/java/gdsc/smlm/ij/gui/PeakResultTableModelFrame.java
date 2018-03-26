@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -75,6 +76,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 	private PeakResultTableModelJTable table;
 	private JMenuItem fileSave;
+	private JCheckBoxMenuItem editReadOnly;
 	private JMenuItem editDelete;
 	private JMenuItem editDeleteAll;
 	private JMenuItem editSelectAll;
@@ -191,13 +193,30 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	{
 		final JMenu menu = new JMenu("Edit");
 		menu.setMnemonic(KeyEvent.VK_E);
-		menu.add(editDelete = add(menu, "Delete", KeyEvent.VK_D, null));
+		menu.add(editReadOnly = addToggle(menu, "Read-only", KeyEvent.VK_R, null, false));
+		menu.add(editDelete = add(menu, "Delete", KeyEvent.VK_D, "DELETE"));
 		menu.add(editDeleteAll = add(menu, "Delete All", KeyEvent.VK_A, null));
+		menu.addSeparator();
 		menu.add(editSelectNone = add(menu, "Select None", KeyEvent.VK_N, "ctrl shift pressed A"));
 		menu.add(editSelectAll = add(menu, "Select All", KeyEvent.VK_S, null));
 		menu.add(editUnsort = add(menu, "Unsort", KeyEvent.VK_U, null));
 		menu.addSeparator();
 		menu.add(editTableSettings = add(menu, "Table Settings ...", KeyEvent.VK_T, "ctrl pressed T"));
+
+		// Read-only by default
+		editReadOnly.setSelected(true);
+		editDelete.setEnabled(false);
+		editDeleteAll.setEnabled(false);
+		editReadOnly.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				boolean allowDelete = !isReadOnly();
+				editDelete.setEnabled(allowDelete);
+				editDeleteAll.setEnabled(allowDelete);
+			}
+		});
+
 		return menu;
 	}
 
@@ -205,7 +224,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	{
 		final JMenu menu = new JMenu("Source");
 		menu.setMnemonic(KeyEvent.VK_S);
-		menu.add(sourceShow = add(menu, "Show", KeyEvent.VK_W, "ctrl pressed I"));
+		menu.add(sourceShow = add(menu, "Show", KeyEvent.VK_DELETE, "ctrl pressed I"));
 		menu.add(sourceOverlay = add(menu, "Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
 		return menu;
 	}
@@ -213,6 +232,16 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	private JMenuItem add(JMenu menu, String text, int mnemonic, String keyStroke)
 	{
 		JMenuItem item = new JMenuItem(text, mnemonic);
+		if (keyStroke != null)
+			item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
+		item.addActionListener(this);
+		return item;
+	}
+
+	private JCheckBoxMenuItem addToggle(JMenu menu, String text, int mnemonic, String keyStroke, boolean selected)
+	{
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem(text, selected);
+		item.setMnemonic(mnemonic);
 		if (keyStroke != null)
 			item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
 		item.addActionListener(this);
@@ -270,12 +299,34 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		MemoryPeakResults.addResults(results);
 	}
 
+	/**
+	 * Sets the read only.
+	 *
+	 * @param readOnly
+	 *            the new read only
+	 */
+	public void setReadOnly(boolean readOnly)
+	{
+		editReadOnly.setSelected(readOnly);
+	}
+
+	/**
+	 * Checks if is read only.
+	 *
+	 * @return true, if is read only
+	 */
+	public boolean isReadOnly()
+	{
+		return editReadOnly.isSelected();
+	}
+
 	private void doDelete()
 	{
 		PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
 		int[] indices = table.getSelectedRows();
+		table.convertRowIndexToModel(indices); 
 		model.remove(this, indices);
 	}
 
@@ -284,7 +335,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		PeakResultTableModel model = getModel();
 		if (model == null)
 			return;
-		model.clear();
+		model.clear(this);
 	}
 
 	private void doSelectNone()
@@ -476,6 +527,40 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	}
 
 	/**
+	 * Returns the location of <code>index</code> in terms of the
+	 * underlying model. That is, for the row <code>index</code> in
+	 * the coordinates of the view this returns the row index in terms
+	 * of the underlying model.
+	 *
+	 * @param indices
+	 *            the indices (updated in-place)
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>index</code> is outside the
+	 *             range of the view
+	 */
+	public void convertRowIndexToModel(int[] indices)
+	{
+		table.convertRowIndexToModel(indices);
+	}
+
+	/**
+	 * Returns the location of <code>index</code> in terms of the
+	 * view. That is, for the row <code>index</code> in the
+	 * coordinates of the underlying model this returns the row index
+	 * in terms of the view.
+	 *
+	 * @param indices
+	 *            the indices (updated in-place)
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>index</code> is outside
+	 *             the range of the model
+	 */
+	public void convertRowIndexToView(int[] indices)
+	{
+		table.convertRowIndexToView(indices);
+	}
+
+	/**
 	 * Launch the application.
 	 * 
 	 * @throws InterruptedException
@@ -560,7 +645,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					// otherwise the selection is scrambled by sorting.
 					// The alternative would be to get the source for the selection event (the table) 
 					// and get the row sorter to do the mapping.
-					d2.table.setRowSorter(d.table.getRowSorter());
+					// However this breaks deletion of data as the row sorter double processes the deletion.
+					// Basically only one table can use the same selection model when sorting is desired.
+					//d2.table.setRowSorter(d.table.getRowSorter());
+					
 					//					d2.addListSelectionListener(new ListSelectionListener()
 					//					{
 					//						public void valueChanged(ListSelectionEvent e)
