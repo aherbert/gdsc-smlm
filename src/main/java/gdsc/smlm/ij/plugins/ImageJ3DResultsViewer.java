@@ -556,7 +556,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 				tg.addChild(new Shape3D(outline.getGeometry(), outline.getAppearance()));
 				tg.setPickable(false);
-				switchIndex = contentInstance.addCustomSwitch(tg);
+				// Add the outline before to support transparency
+				switchIndex = contentInstance.addCustomSwitch(tg, true);
 				selected.add(r);
 				selectedNode.add(tg);
 			}

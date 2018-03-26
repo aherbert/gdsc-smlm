@@ -20,6 +20,7 @@ import org.scijava.vecmath.Vector3d;
 
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.io.FileInfo;
@@ -83,6 +84,9 @@ public class CustomContentInstant extends ContentInstant
 
 	private boolean available = true;
 
+	private int customBefore = 0;
+	private TIntObjectHashMap<Switch> switchMap;
+
 	// Copy the entire contents of the super class
 
 	public CustomContentInstant(final String name)
@@ -109,6 +113,7 @@ public class CustomContentInstant extends ContentInstant
 		localTranslate.addChild(localRotate);
 
 		ordered = (isOrdered) ? new OrderedGroup() : new Group();
+		ordered.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		ordered.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		for (int i = 0; i < 5; i++)
 		{
@@ -206,6 +211,12 @@ public class CustomContentInstant extends ContentInstant
 			final Switch s = (Switch) e.nextElement();
 			s.removeAllChildren();
 		}
+		// remove custom switch objects
+		while (ordered.numChildren() > 5)
+			ordered.removeChild(ordered.numChildren() - 1);
+		customBefore = 0;
+		if (switchMap != null)
+			switchMap.clear();
 
 		// create content node and add it to the switch
 		contentNode = node;
@@ -247,22 +258,41 @@ public class CustomContentInstant extends ContentInstant
 
 	/**
 	 * Adds a custom switchable item to the content. The content can be optionally displayed.
+	 * <p>
+	 * The before flag species if the switch should be inserted into the group before the standard content, or added
+	 * after. This is relevant if using an ordered group and transparent objects. Any transparent object must be drawn
+	 * after non-transparent objects.
 	 *
+	 * @param node
+	 *            the node
+	 * @param before
+	 *            the before flag
 	 * @return the switch number
 	 */
-	public int addCustomSwitch(Node node)
+	public int addCustomSwitch(Node node, boolean before)
 	{
-		int index = ordered.numChildren() - 5;
+		if (switchMap == null)
+			switchMap = new TIntObjectHashMap<Switch>();
+		int index = switchMap.size();
 		final Switch s = new Switch();
+		switchMap.put(index, s);
 		s.setCapability(Switch.ALLOW_SWITCH_WRITE);
 		s.setCapability(Switch.ALLOW_SWITCH_READ);
 		s.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		s.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		s.addChild(node);
-		// Only a branch group can be added to a live scence
+		// Only a branch group can be added to a live scene
 		BranchGroup bg = new BranchGroup();
 		bg.addChild(s);
-		ordered.addChild(bg);
+		if (before)
+		{
+			ordered.insertChild(bg, 0);
+			customBefore++;
+		}
+		else
+		{
+			ordered.addChild(bg);
+		}
 		return index; // Account for the standard switches
 	}
 
@@ -276,19 +306,18 @@ public class CustomContentInstant extends ContentInstant
 	 */
 	public void setCustomSwitch(int which, final boolean on)
 	{
-		if (which < 0)
+		if (switchMap == null)
 			return;
-		// Add the standard switches
-		which += 5;
-		if (which >= ordered.numChildren())
+		Switch s = switchMap.get(which);
+		if (s == null)
 			return;
-		BranchGroup bg = (BranchGroup) ordered.getChild(which);
-		Switch s = (Switch) bg.getChild(0);
 		s.setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
 	}
 
-	private void setSwitch(final int which, final boolean on)
+	private void setSwitch(int which, final boolean on)
 	{
+		// Account for custom switch data before the standard data
+		which += customBefore;
 		((Switch) ordered.getChild(which)).setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
 	}
 
