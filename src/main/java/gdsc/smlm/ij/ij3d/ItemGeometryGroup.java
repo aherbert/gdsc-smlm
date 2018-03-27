@@ -73,7 +73,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	/** The per-item material. Used for polygons. PointArrays use color4 coordinates. */
 	protected GeometryArray[] geometryArray = null;
 
-	protected final PointArrayColorUpdater pointArrayColorUpdater;
+	protected final ArrayColorUpdater pointArrayColorUpdater;
 
 	/**
 	 * Instantiates a new item geometry group.
@@ -136,8 +136,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		this.transparency = defaultAppearance.getTransparencyAttributes().getTransparency();
 		if (isPointArray)
 		{
-			pointArrayColorUpdater = (ga.getValidVertexCount() == 1) ? new SinglePointArrayColorUpdater()
-					: new MultiPointArrayColorUpdater(ga.getValidVertexCount());
+			pointArrayColorUpdater = ArrayColorUpdater.create(ga.getValidVertexCount(), true);
 
 			// Get the first color as the default
 			ga.getColor(0, pointArrayColorUpdater.pointColor);

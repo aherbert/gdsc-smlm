@@ -1,0 +1,844 @@
+package gdsc.smlm.ij.ij3d;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.scijava.java3d.Appearance;
+import org.scijava.java3d.ColoringAttributes;
+import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.Material;
+import org.scijava.java3d.PointArray;
+import org.scijava.java3d.PointAttributes;
+import org.scijava.java3d.PolygonAttributes;
+import org.scijava.java3d.Shape3D;
+import org.scijava.java3d.TriangleArray;
+import org.scijava.java3d.utils.geometry.GeometryInfo;
+import org.scijava.java3d.utils.geometry.NormalGenerator;
+import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Vector3f;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2018 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.NamedObject;
+import gdsc.smlm.utils.Pair;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
+/**
+ * Create Shape3D objects
+ */
+public class Shape3DHelper
+{
+	//@formatter:off
+	public enum Rendering implements NamedObject
+	{
+		POINT { public String getName() { return "Point"; } 
+				public boolean is2D() { return true; }},
+		SQUARE { public String getName() { return "Square"; }
+				public boolean is2D() { return true; }},
+		HEXAGON{ public String getName() { return "Hexagon"; }
+			public boolean is2D() { return true; }},
+		LOW_RES_CIRCLE { public String getName() { return "Low resolution circle"; }
+			public boolean is2D() { return true; }},
+		HIGH_RES_CIRCLE { public String getName() { return "High resolution circle"; }
+			public boolean is2D() { return true; }},
+        CUBE { public String getName() { return "Cube"; }},
+        ICOSAHEDRON	{ public String getName() { return "Icosahedron"; }},
+        LOW_RES_SPHERE { public String getName() { return "Low Resolution Sphere"; }
+        		public boolean isHighResolution() { return true; }},
+        HIGH_RES_SPHERE	{ public String getName() { return "High Resolution Sphere"; }
+        		public boolean isHighResolution() { return true; }},
+        SUPER_HIGH_RES_SPHERE	{ public String getName() { return "Super-High Resolution Sphere"; }
+		public boolean isHighResolution() { return true; }},
+        ;
+
+		public String getShortName()
+		{
+			return getName();
+		}		
+		
+		public boolean is2D() { return false; }
+		
+		public boolean isHighResolution() { return false; }
+
+		public static Rendering forNumber(int number)
+		{
+			Rendering[] values = Rendering.values();
+			if (number < 0 || number >= values.length)
+				throw new IllegalArgumentException();
+			return values[number];
+		}
+	};
+	//@formatter:on
+
+	public static Shape3D createShape(Rendering rendering, int colorDepth)
+	{
+		TurboList<Point3f> points = new TurboList<Point3f>(1);
+		points.addf(new Point3f());
+
+		GeometryArray ga;
+		Appearance appearance = new Appearance();
+
+		int vertexFormat = GeometryArray.COORDINATES;
+		if (colorDepth == 3)
+			vertexFormat |= GeometryArray.COLOR_3;
+		else if (colorDepth == 4)
+			vertexFormat |= GeometryArray.COLOR_4;
+
+		// Support drawing as points ...
+		if (rendering == Rendering.POINT)
+		{
+			ga = new PointArray(1, vertexFormat);
+
+			PointAttributes pa = new PointAttributes();
+			pa.setPointAntialiasingEnable(true);
+			appearance.setPointAttributes(pa);
+		}
+		else
+		{
+			// TODO - Update this to use:
+			// a fan for 2D circles
+			// a strip for 2D squares
+			// Indexed geometry
+
+			ga = createGeometryArray(rendering, colorDepth);
+
+			//			// Test using the geometry from a sphere primitive
+			//			switch (r)
+			//			{
+			//				case HIGH_RES_SPHERE:
+			//					ga = ItemGeometryGroup.createSphere(50);
+			//					break;
+			//				case LOW_RES_SPHERE:
+			//					ga = ItemGeometryGroup.createSphere(16);
+			//					break;
+			//			}
+
+			PolygonAttributes pa = new PolygonAttributes();
+			pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+			if (rendering.is2D())
+			{
+				pa.setCullFace(PolygonAttributes.CULL_NONE);
+				pa.setBackFaceNormalFlip(true);
+			}
+			else
+			{
+				pa.setCullFace(PolygonAttributes.CULL_BACK);
+				pa.setBackFaceNormalFlip(false);
+			}
+			appearance.setPolygonAttributes(pa);
+
+			final ColoringAttributes ca = new ColoringAttributes();
+			//			if (rendering.isHighResolution() || rendering.is2D())
+			//				// Smooth across vertices. Required to show 2D surfaces smoothly
+			//				ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+			//			else
+			//				// Faster polygon rendering with flat shading
+			//				ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+			// For indexed models (with 1 normal per vertex) always use smooth shading
+			ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+			appearance.setColoringAttributes(ca);
+
+			Material m = new Material();
+			m.setShininess(128f);
+			appearance.setMaterial(m);
+		}
+
+		return new Shape3D(ga, appearance);
+	}
+
+	/**
+	 * Gets the normals assuming triangle vertices.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param creaseAngle
+	 *            the crease angle (in degrees; 0=facet normals; 180=smooth shading)
+	 * @return the normals
+	 */
+	public static Vector3f[] getNormals(Point3f[] vertices, double creaseAngle)
+	{
+		int nVertices = vertices.length;
+		Vector3f[] normals = new Vector3f[nVertices];
+
+		final GeometryArray ta = new TriangleArray(nVertices, GeometryArray.COORDINATES);
+		ta.setCoordinates(0, vertices);
+		final GeometryInfo gi = new GeometryInfo(ta);
+		final NormalGenerator ng = new NormalGenerator();
+		if (creaseAngle >= 0 && creaseAngle <= 180)
+			ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
+		ng.generateNormals(gi);
+		Vector3f[] n = gi.getNormals();
+		int[] indices = gi.getNormalIndices();
+		for (int i = 0; i < nVertices; i++)
+		{
+			normals[i] = n[indices[i]];
+		}
+
+		return normals;
+	}
+
+	/**
+	 * Gets the normals assuming triangle vertices.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param creaseAngle
+	 *            the crease angle (in degrees; 0=facet normals; 180=smooth shading)
+	 * @return the normals
+	 */
+	public static Pair<Vector3f[], int[]> getIndexedNormals(Point3f[] vertices, double creaseAngle)
+	{
+		int nVertices = vertices.length;
+		final GeometryArray ta = new TriangleArray(nVertices, GeometryArray.COORDINATES);
+		ta.setCoordinates(0, vertices);
+		final GeometryInfo gi = new GeometryInfo(ta);
+		final NormalGenerator ng = new NormalGenerator();
+		if (creaseAngle >= 0 && creaseAngle <= 180)
+			ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
+		ng.generateNormals(gi);
+		return new Pair<Vector3f[], int[]>(gi.getNormals(), gi.getNormalIndices());
+	}
+
+	/**
+	 * Creates the object used to draw a single localisation.
+	 * 
+	 * @param rendering
+	 *
+	 * @return the list of triangle vertices for the object
+	 */
+	public static List<Point3f> createLocalisationObject(Rendering rendering)
+	{
+		int subdivisions = 0;
+		switch (rendering)
+		{
+			case CUBE:
+				return createCube();
+			case SQUARE:
+				return createSquare();
+			case HEXAGON:
+				return createDisc(0, 0, 0, 0, 0, 1, 1, 6);
+			case LOW_RES_CIRCLE:
+				return createDisc(0, 0, 0, 0, 0, 1, 1, 12);
+			case HIGH_RES_CIRCLE:
+				return createDisc(0, 0, 0, 0, 0, 1, 1, 20);
+
+			// All handle the same way
+			case SUPER_HIGH_RES_SPHERE:
+				subdivisions++;
+			case HIGH_RES_SPHERE:
+				subdivisions++;
+			case LOW_RES_SPHERE:
+				subdivisions++;
+			case ICOSAHEDRON:
+				break;
+
+			case POINT:
+			default:
+				throw new IllegalStateException("Unknown rendering " + rendering);
+		}
+
+		// All spheres based on icosahedron for speed
+		return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
+	}
+
+	/**
+	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the
+	 * disc is
+	 * removed.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param nx
+	 *            the nx
+	 * @param ny
+	 *            the ny
+	 * @param nz
+	 *            the nz
+	 * @param radius
+	 *            the radius
+	 * @param edgePoints
+	 *            the edge points
+	 * @return the list
+	 */
+	public static List<Point3f> createDisc(final double x, final double y, final double z, final double nx,
+			final double ny, final double nz, final double radius, final int edgePoints)
+	{
+		double ax, ay, az;
+
+		if (Math.abs(nx) >= Math.abs(ny))
+		{
+			final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
+			ax = -nz * scale;
+			ay = 0;
+			az = nx * scale;
+		}
+		else
+		{
+			final double scale = 1 / Math.sqrt(ny * ny + nz * nz);
+			ax = 0;
+			ay = nz * scale;
+			az = -ny * scale;
+		}
+
+		/*
+		 * Now to find the other vector in that plane, do the
+		 * cross product of (ax,ay,az) with (nx,ny,nz)
+		 */
+
+		double bx = (ay * nz - az * ny);
+		double by = (az * nx - ax * nz);
+		double bz = (ax * ny - ay * nx);
+		final double bScale = 1 / Math.sqrt(bx * bx + by * by + bz * bz);
+		bx *= bScale;
+		by *= bScale;
+		bz *= bScale;
+
+		final double[] circleX = new double[edgePoints + 1];
+		final double[] circleY = new double[edgePoints + 1];
+		final double[] circleZ = new double[edgePoints + 1];
+
+		for (int i = 0; i < edgePoints + 1; ++i)
+		{
+			final double angle = (i * 2 * Math.PI) / edgePoints;
+			final double c = Math.cos(angle);
+			final double s = Math.sin(angle);
+			circleX[i] = x + radius * c * ax + radius * s * bx;
+			circleY[i] = y + radius * c * ay + radius * s * by;
+			circleZ[i] = z + radius * c * az + radius * s * bz;
+		}
+		final TurboList<Point3f> list = new TurboList<Point3f>();
+		final Point3f centre = new Point3f((float) x, (float) y, (float) z);
+		for (int i = 0; i < edgePoints; ++i)
+		{
+			final Point3f t2 = new Point3f((float) circleX[i], (float) circleY[i], (float) circleZ[i]);
+			final Point3f t3 = new Point3f((float) circleX[i + 1], (float) circleY[i + 1], (float) circleZ[i + 1]);
+			list.add(centre);
+			list.add(t2);
+			list.add(t3);
+
+			// We do not duplicate the triangle for both sides as we render the object as 2D
+			// with setBackFaceNormalFlip(true)
+			//list.add(centre);
+			//list.add(t3);
+			//list.add(t2);
+		}
+		return list;
+	}
+
+	// Note: The triangles are rendered using a right-hand coordinate system. 
+	// However for 2D shapes the handedness does matter as we set back-face cull off.
+	// For polygons we check the handedness is 
+	// facing away from the centre so back-face cull can be on.
+
+	private static float sqrt(double d)
+	{
+		return (float) Math.sqrt(d);
+	}
+
+	static final private float[][] triVertices = { { sqrt(8d / 9), 0, 0 }, { -sqrt(2d / 9), sqrt(2d / 3), 0 },
+			{ -sqrt(2d / 9), -sqrt(2d / 3), 0 } };
+	static final private int[][] triFaces = { { 0, 1, 2 } };
+
+	static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
+	static final private int[][] squareFaces = { { 0, 1, 3 }, { 3, 1, 2 } };
+
+	// https://en.m.wikipedia.org/wiki/Tetrahedron
+	// based on alternated cube
+	static final private float[][] tetraVertices = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+	static final private int[][] tetraFaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
+
+	// https://en.m.wikipedia.org/wiki/Octahedron
+	static final private float[][] octaVertices = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
+			{ 0, 0, -1 }, };
+	static final private int[][] octaFaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
+			{ 1, 3, 5 }, { 2, 1, 5 }, { 0, 2, 5 }, };
+
+	static final private float[][] cubeVertices = { { 1, 1, -1 }, { -1, 1, -1 }, { -1, -1, -1 }, { 1, -1, -1 },
+			{ 1, 1, 1 }, { -1, 1, 1 }, { -1, -1, 1 }, { 1, -1, 1 }, };
+	static final private int[][] cubeFaces = { { 0, 1, 3 }, { 3, 1, 2 }, { 0, 4, 7 }, { 0, 7, 3 }, { 1, 5, 6 },
+			{ 1, 6, 2 }, { 3, 7, 6 }, { 3, 6, 2 }, { 0, 4, 5 }, { 0, 5, 1 }, { 4, 5, 7 }, { 4, 6, 7 }, };
+	static final private int[][] cubeFaces4 = { { 0, 1, 5, 4 }, { 1, 2, 6, 5 }, { 2, 3, 7, 6 }, { 3, 0, 4, 7 },
+			{ 7, 4, 5, 6 }, { 2, 1, 0, 3 }, };
+
+	/**
+	 * Creates the triangle with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	@SuppressWarnings("unused")
+	private static List<Point3f> createTriangle()
+	{
+		return createSolid(triVertices, triFaces, true);
+	}
+
+	/**
+	 * Creates the square with vertices on a unit square.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSquare()
+	{
+		return createSolid(squareVertices, squareFaces, false);
+	}
+
+	/**
+	 * Creates the tetrahedron with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	@SuppressWarnings("unused")
+	private static List<Point3f> createTetrahedron()
+	{
+		return createSolid(tetraVertices, tetraFaces, true);
+	}
+
+	/**
+	 * Creates the octahedron with vertices on a unit cube.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	@SuppressWarnings("unused")
+	private static List<Point3f> createOctahedron()
+	{
+		// This is already normalised
+		return createSolid(octaVertices, octaFaces, false);
+	}
+
+	/**
+	 * Creates the cube with vertices on a unit cube.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createCube()
+	{
+		// This is already normalised
+		return createSolid(cubeVertices, cubeFaces, false);
+	}
+
+	/**
+	 * Creates the solid with the defined faces and vertices on a unit sphere.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param faces
+	 *            the faces
+	 * @param normalise
+	 *            the normalise
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise)
+	{
+		List<Point3f> ps = new TurboList<Point3f>();
+		for (int i = 0; i < faces.length; i++)
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				ps.add(new Point3f(vertices[faces[i][k]]));
+			}
+		}
+		// Project all vertices to the surface of a sphere of radius 1
+		if (normalise)
+			normalise(ps);
+
+		return ps;
+	}
+
+	private static void normalise(List<Point3f> ps)
+	{
+		final Vector3f v = new Vector3f();
+		for (final Point3f p : ps)
+		{
+			v.set(p);
+			v.normalize();
+			p.set(v);
+		}
+	}
+
+	/**
+	 * Creates the object used to outline a single localisation.
+	 * 
+	 * @param rendering
+	 *
+	 * @return the list of triangle vertices for the object
+	 */
+	public static List<Point3f> createLocalisationObjectOutline(Rendering rendering)
+	{
+		switch (rendering)
+		{
+			case SQUARE:
+				return createSquareOutline();
+			case HEXAGON:
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 8);
+			case LOW_RES_CIRCLE:
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 12);
+			case HIGH_RES_CIRCLE:
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 20);
+
+			default:
+				return createLocalisationObject(rendering);
+		}
+	}
+
+	/**
+	 * Creates the triangle with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	@SuppressWarnings("unused")
+	private static List<Point3f> createTriangleOutline()
+	{
+		return createSolidOutline(triVertices, true);
+	}
+
+	/**
+	 * Creates the square with vertices on a unit sphere.
+	 *
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSquareOutline()
+	{
+		return createSolidOutline(squareVertices, false);
+	}
+
+	/**
+	 * Creates the solid with the defined faces and vertices on a unit sphere.
+	 *
+	 * @param vertices
+	 *            the vertices
+	 * @param faces
+	 *            the faces
+	 * @param normalise
+	 *            the normalise
+	 * @return the list of vertices for the triangles
+	 */
+	private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise)
+	{
+		List<Point3f> ps = new TurboList<Point3f>();
+		for (int i = 0; i < vertices.length; i++)
+		{
+			ps.add(new Point3f(vertices[i]));
+		}
+		// Make continuous 
+		ps.add(new Point3f(vertices[0]));
+		return ps;
+	}
+
+	/**
+	 * Creates the disc outline.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param nx
+	 *            the nx
+	 * @param ny
+	 *            the ny
+	 * @param nz
+	 *            the nz
+	 * @param radius
+	 *            the radius
+	 * @param edgePoints
+	 *            the edge points
+	 * @return the list
+	 */
+	public static List<Point3f> createDiscOutline(final double x, final double y, final double z, final double nx,
+			final double ny, final double nz, final double radius, final int edgePoints)
+	{
+		return createDiscEdge(false, x, y, z, nx, ny, nz, radius, edgePoints);
+	}
+
+	/**
+	 * Creates the disc outline with the first point at the centre, i.e. suitable for use as a triangle fan array.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param nx
+	 *            the nx
+	 * @param ny
+	 *            the ny
+	 * @param nz
+	 *            the nz
+	 * @param radius
+	 *            the radius
+	 * @param edgePoints
+	 *            the edge points
+	 * @return the list
+	 */
+	public static List<Point3f> createDiscFan(final double x, final double y, final double z, final double nx,
+			final double ny, final double nz, final double radius, final int edgePoints)
+	{
+		return createDiscEdge(true, x, y, z, nx, ny, nz, radius, edgePoints);
+	}
+
+	/**
+	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the
+	 * disc is removed.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
+	 * @param nx
+	 *            the nx
+	 * @param ny
+	 *            the ny
+	 * @param nz
+	 *            the nz
+	 * @param radius
+	 *            the radius
+	 * @param edgePoints
+	 *            the edge points
+	 * @return the list
+	 */
+	private static List<Point3f> createDiscEdge(boolean includeCenter, final double x, final double y, final double z,
+			final double nx, final double ny, final double nz, final double radius, final int edgePoints)
+	{
+		double ax, ay, az;
+
+		if (Math.abs(nx) >= Math.abs(ny))
+		{
+			final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
+			ax = -nz * scale;
+			ay = 0;
+			az = nx * scale;
+		}
+		else
+		{
+			final double scale = 1 / Math.sqrt(ny * ny + nz * nz);
+			ax = 0;
+			ay = nz * scale;
+			az = -ny * scale;
+		}
+
+		/*
+		 * Now to find the other vector in that plane, do the
+		 * cross product of (ax,ay,az) with (nx,ny,nz)
+		 */
+
+		double bx = (ay * nz - az * ny);
+		double by = (az * nx - ax * nz);
+		double bz = (ax * ny - ay * nx);
+		final double bScale = 1 / Math.sqrt(bx * bx + by * by + bz * bz);
+		bx *= bScale;
+		by *= bScale;
+		bz *= bScale;
+
+		TurboList<Point3f> list = new TurboList<Point3f>();
+		if (includeCenter)
+			list.add(new Point3f((float) x, (float) y, (float) z));
+		for (int i = edgePoints + 1; i-- > 0;)
+		{
+			// For consistency with the rendering of the icosahedron
+			// we rotate by a quarter turn. The icosahedron projected 
+			// flat then looks like the hexagon.
+
+			final double angle = Math.PI / 2 + (i * 2 * Math.PI) / edgePoints;
+			final double c = Math.cos(angle);
+			final double s = Math.sin(angle);
+			float px = (float) (x + radius * c * ax + radius * s * bx);
+			float py = (float) (y + radius * c * ay + radius * s * by);
+			float pz = (float) (z + radius * c * az + radius * s * bz);
+			list.add(new Point3f(px, py, pz));
+		}
+		return list;
+	}
+
+	/**
+	 * Creates the object used to draw a single localisation.
+	 * 
+	 * @param rendering
+	 * @param colorDepth
+	 *
+	 * @return the list of triangle vertices for the object
+	 */
+	public static GeometryArray createGeometryArray(Rendering rendering, int colorDepth)
+	{
+		int subdivisions = 0;
+		GeometryInfo gi;
+		List<Point3f> coords;
+		int primitive = GeometryInfo.TRIANGLE_ARRAY;
+		int[] stripsCounts = null;
+		Vector3f normal = new Vector3f();
+		boolean normalise = false;
+		switch (rendering)
+		{
+			// 2D
+			case SQUARE:
+				primitive = GeometryInfo.QUAD_ARRAY;
+				coords = new TurboList<Point3f>();
+				for (int i = 0; i < 4; i++)
+					coords.add(new Point3f(cubeVertices[i][0], cubeVertices[i][1], 0));
+				normalise = true;
+				normal.set(0, 0, 1);
+				break;
+
+			case HIGH_RES_CIRCLE:
+				subdivisions += 8;
+			case LOW_RES_CIRCLE:
+				subdivisions += 6;
+			case HEXAGON:
+				subdivisions += 6;
+				primitive = GeometryInfo.TRIANGLE_FAN_ARRAY;
+				coords = createDiscFan(0, 0, 0, 0, 0, 1, 1, subdivisions);
+				stripsCounts = new int[] { coords.size() };
+				normal.set(0, 0, 1);
+				break;
+
+			// 3D
+			case CUBE:
+				primitive = GeometryInfo.QUAD_ARRAY;
+				coords = new TurboList<Point3f>();
+				Point3f[] vertices = new Point3f[8];
+				for (int i = 0; i < 8; i++)
+					vertices[i] = new Point3f(cubeVertices[i][0], cubeVertices[i][1], cubeVertices[i][2]);
+				for (int[] face : cubeFaces4)
+				{
+					for (int i = 0; i < 4; i++)
+						coords.add(vertices[face[i]]);
+				}
+				normalise = true;
+				break;
+
+			// All spheres based on icosahedron for speed
+			case SUPER_HIGH_RES_SPHERE:
+				subdivisions++;
+			case HIGH_RES_SPHERE:
+				subdivisions++;
+			case LOW_RES_SPHERE:
+				subdivisions++;
+			case ICOSAHEDRON:
+				coords = customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
+				break;
+
+			case POINT:
+			default:
+				throw new IllegalStateException("Unknown rendering " + rendering);
+		}
+
+		gi = new GeometryInfo(primitive);
+
+		if (normalise)
+			normalise(coords);
+
+		if (rendering.is2D())
+		{
+			gi.setCoordinates(coords.toArray(new Point3f[coords.size()]));
+			gi.setStripCounts(stripsCounts);
+
+			if (colorDepth == 3)
+				gi.setColors3(new float[coords.size() * 3]);
+			else if (colorDepth == 4)
+				gi.setColors4(new float[coords.size() * 4]);
+
+			// Normals generated with the normal generator add extra normals for indexed arrays
+			// so we do it manually
+			Vector3f[] normals = new Vector3f[coords.size()];
+			Arrays.fill(normals, normal);
+			gi.setNormals(normals);
+		}
+		else
+		{
+			// Generate indexes manually. The GeometryInfo somehow does not doe this correctly.
+			Pair<Point3f[], int[]> p = createIndexedObject(coords);
+
+			Point3f[] iCoords = p.a;
+			gi.setCoordinates(iCoords);
+			gi.setCoordinateIndices(p.b);
+
+			// Normals are just the vector from 0,0,0 to the vertex
+			Vector3f[] normals = new Vector3f[iCoords.length];
+			for (int i = 0; i < normals.length; i++)
+			{
+				normal.set(iCoords[i]);
+				normal.normalize();
+				normals[i] = new Vector3f(normal);
+			}
+
+			gi.setNormals(normals);
+			gi.setNormalIndices(p.b);
+
+			if (colorDepth == 3 || colorDepth == 4)
+			{
+				if (colorDepth == 3)
+					gi.setColors3(new float[iCoords.length * 3]);
+				else if (colorDepth == 4)
+					gi.setColors4(new float[iCoords.length * 4]);
+				gi.setColorIndices(p.b);
+			}
+
+			//			final NormalGenerator ng = new NormalGenerator();
+			//			double creaseAngle = (rendering.isHighResolution()) ? Math.PI : 0;
+			//			ng.setCreaseAngle(creaseAngle);
+			//			//if (rendering== Rendering.ICOSAHEDRON)
+			//			//	ng.setCreaseAngle(180);
+			//			ng.generateNormals(gi);
+		}
+
+		GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray() : gi.getIndexedGeometryArray();
+
+		//int v = ga.getValidVertexCount();
+		//float[] p = new float[v * 3];
+		//ga.getCoordinates(0, p);
+		//for (int i = 0; i < p.length; i += 3)
+		//	System.out.printf("%f %f %f\n", p[i], p[i + 1], p[i + 2]);
+
+		return ga;
+	}
+
+	/**
+	 * Creates an indexed object from a list of vertices
+	 *
+	 * @param list
+	 *            the list of vertices
+	 * @return the vertices and indices of the the object
+	 */
+	public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list)
+	{
+		// Compact the vertices to a set of vertices and faces
+		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<Point3f>(list.size(), 0.5f, -1);
+		TurboList<Point3f> vertices = new TurboList<Point3f>(list.size());
+		TIntArrayList faces = new TIntArrayList(list.size());
+		int index = 0;
+		// Process triangles
+		for (int i = 0; i < list.size(); i++)
+		{
+			Point3f p = list.get(i);
+			int value = m.putIfAbsent(p, index);
+			if (value == -1)
+			{
+				// Store the points in order
+				vertices.add(p);
+				value = index++;
+			}
+			faces.add(value);
+		}
+
+		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+	}
+}

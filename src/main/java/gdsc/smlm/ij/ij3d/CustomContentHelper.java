@@ -86,7 +86,7 @@ public class CustomContentHelper
 	}
 
 	/**
-	 * Creates an indexed object from a a list of triangle vertices
+	 * Creates an indexed object from a list of triangle vertices
 	 *
 	 * @param list
 	 *            the list of triangle vertices

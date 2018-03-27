@@ -13,7 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +58,6 @@ import org.scijava.vecmath.Point2d;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3d;
-import org.scijava.vecmath.Vector3f;
 
 import customnode.CustomLineMesh;
 import customnode.CustomMesh;
@@ -114,6 +112,8 @@ import gdsc.smlm.ij.ij3d.ItemGroupNode;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import gdsc.smlm.ij.ij3d.Shape3DHelper;
+import gdsc.smlm.ij.ij3d.Shape3DHelper.Rendering;
 import gdsc.smlm.ij.ij3d.TransparentItemPointMesh;
 import gdsc.smlm.ij.ij3d.TransparentItemShape;
 import gdsc.smlm.ij.ij3d.TransparentItemTriangleMesh;
@@ -129,6 +129,8 @@ import gdsc.smlm.results.procedures.RawResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
 import gdsc.smlm.results.procedures.XYResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
+import gdsc.smlm.utils.Pair;
+import gdsc.smlm.utils.Triplet;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.procedure.TObjectIntProcedure;
 import ij.IJ;
@@ -187,49 +189,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	
 	private final static String[] SIZE_MODE = SettingsManager.getNames((Object[]) SizeMode.values());
 	
-	private enum Rendering implements NamedObject
-	{
-		POINT { public String getName() { return "Point"; } 
-				public boolean is2D() { return true; }},
-		TRIANGLE { public String getName() { return "Triangle"; }
-				public boolean is2D() { return true; }},
-		SQUARE { public String getName() { return "Square"; }
-				public boolean is2D() { return true; }},
-		OCTAGON{ public String getName() { return "Octagon"; }
-			public boolean is2D() { return true; }},
-		LOW_RES_CIRCLE { public String getName() { return "Low resolution circle"; }
-			public boolean is2D() { return true; }},
-		HIGH_RES_CIRCLE { public String getName() { return "High resolution circle"; }
-			public boolean is2D() { return true; }},
-        TETRAHEDRON	{ public String getName() { return "Tetrahedron"; }},
-        OCTAHEDRON{ public String getName() { return "Octahedron"; }},
-        ICOSAHEDRON	{ public String getName() { return "Icosahedron"; }},
-        LOW_RES_SPHERE { public String getName() { return "Low Resolution Sphere"; }
-        		public boolean isHighResolution() { return true; }},
-        HIGH_RES_SPHERE	{ public String getName() { return "High Resolution Sphere"; }
-        		public boolean isHighResolution() { return true; }},
-        SUPER_HIGH_RES_SPHERE	{ public String getName() { return "Super-High Resolution Sphere"; }
-		public boolean isHighResolution() { return true; }},
-        ;
-
-		public String getShortName()
-		{
-			return getName();
-		}		
-		
-		public boolean is2D() { return false; }
-		
-		public boolean isHighResolution() { return false; }
-
-		public static Rendering forNumber(int number)
-		{
-			Rendering[] values = Rendering.values();
-			if (number < 0 || number >= values.length)
-				throw new IllegalArgumentException();
-			return values[number];
-		}
-	};
-
 	private final static String[] RENDERING = SettingsManager.getNames((Object[]) Rendering.values());
 
 	private enum DepthMode implements NamedObject
@@ -430,7 +389,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (rendering.is2D())
 			{
 				// Handle all the 2D objects to create an outline. 
-				pointOutline = createLocalisationObjectOutline(rendering);
+				pointOutline = Shape3DHelper.createLocalisationObjectOutline(rendering);
 
 				CustomLineMesh mesh = new CustomLineMesh(pointOutline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
 				mesh.setAntiAliasing(true);
@@ -439,66 +398,30 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return mesh;
 			}
 
-			// 3D objects can use the same rendering but then post-process to a set of lines
-			// and create a line mesh.
-			pointOutline = createLocalisationObject(rendering);
+			// 3D objects can use the same rendering but then post-process to line polygon.
+			// Note using a line mesh would work but does not cull the backface
+			pointOutline = Shape3DHelper.createLocalisationObject(rendering);
 
-			boolean polygon = true;
-			if (polygon)
-			{
-				ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline.toArray(new Point3f[pointOutline.size()]),
-						new Point3f[] { new Point3f() }, null, highlightColor, 0);
+			ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline.toArray(new Point3f[pointOutline.size()]),
+					new Point3f[] { new Point3f() }, null, highlightColor, 0);
 
-				//updateAppearance(mesh, settings);
+			//updateAppearance(mesh, settings);
 
-				// Outline
-				//mesh.setShaded(false);
+			// Outline
+			//mesh.setShaded(false);
 
-				Appearance appearance = mesh.getAppearance();
-				PolygonAttributes pa = appearance.getPolygonAttributes();
-				pa.setCullFace(PolygonAttributes.CULL_BACK);
-				pa.setBackFaceNormalFlip(false);
-				pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-				final ColoringAttributes ca = appearance.getColoringAttributes();
-				ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
-				appearance.setMaterial(null);
-				LineAttributes la = new LineAttributes();
-				la.setLineWidth(0.5f);
-				appearance.setLineAttributes(la);
-				return mesh;
-			}
-
-			// For outlining as a line mesh
-			Pair<Point3f[], int[]> pair = CustomContentHelper.createIndexedObject(pointOutline);
-			Point3f[] vertices = pair.a;
-			int[] faces = pair.b;
-			pointOutline.clear();
-			// Only add lines not yet observed. Use an array since 
-			int max = Maths.max(faces) + 1;
-			boolean[] observed = new boolean[max * max];
-			for (int i = 0; i < faces.length; i += 3)
-			{
-				int t1 = faces[i];
-				int t2 = faces[i + 1];
-				int t3 = faces[i + 2];
-				add(observed, max, t1, t2, vertices, pointOutline);
-				add(observed, max, t2, t3, vertices, pointOutline);
-				add(observed, max, t3, t1, vertices, pointOutline);
-			}
-			CustomLineMesh mesh = new CustomLineMesh(pointOutline, CustomLineMesh.CONTINUOUS, highlightColor, 0);
-			mesh.setAntiAliasing(true);
-			mesh.setPattern(LineAttributes.PATTERN_SOLID);
+			Appearance appearance = mesh.getAppearance();
+			PolygonAttributes pa = appearance.getPolygonAttributes();
+			pa.setCullFace(PolygonAttributes.CULL_BACK);
+			pa.setBackFaceNormalFlip(false);
+			pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+			final ColoringAttributes ca = appearance.getColoringAttributes();
+			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+			appearance.setMaterial(null);
+			LineAttributes la = new LineAttributes();
+			la.setLineWidth(0.5f);
+			appearance.setLineAttributes(la);
 			return mesh;
-		}
-
-		private static void add(boolean[] observed, int max, int t1, int t2, Point3f[] vertices, List<Point3f> point)
-		{
-			int index = (t1 < t2) ? t1 * max + t2 : t2 * max + t1;
-			if (observed[index])
-				return;
-			observed[index] = true;
-			point.add(vertices[t1]);
-			point.add(vertices[t2]);
 		}
 
 		public void select(int index)
@@ -788,11 +711,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	public void run(String arg)
 	{
 		// For testing
-		//		if (true || Utils.isExtraOptions())
-		//		{
-		//			new ImageJ3DResultsViewerTest().run(arg);
-		//			return;
-		//		}
+		//if (true || Utils.isExtraOptions())
+		//{
+		//	new ImageJ3DResultsViewerTest().run(arg);
+		//	return;
+		//}
 
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
@@ -3504,7 +3427,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			Rendering r = Rendering.forNumber(settings.getRendering());
 
-			final List<Point3f> point = createLocalisationObject(r);
+			final List<Point3f> point = Shape3DHelper.createLocalisationObject(r);
 			Point3f[] vertices = point.toArray(new Point3f[1]);
 
 			// Correct the direction
@@ -3606,7 +3529,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// on the triangle plane towards the edges. The TriangleMesh colours the entire surface
 		// of each triangle the same which looks 'normal'.
 
-		final List<Point3f> point = createLocalisationObject(r);
+		final List<Point3f> point = Shape3DHelper.createLocalisationObject(r);
 
 		stride += 3; // + normals
 
@@ -3651,384 +3574,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
 				points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
-	}
-
-	/**
-	 * Creates the object used to draw a single localisation.
-	 * 
-	 * @param rendering
-	 *
-	 * @return the list of triangle vertices for the object
-	 */
-	private static List<Point3f> createLocalisationObject(Rendering rendering)
-	{
-		int subdivisions = 0;
-		switch (rendering)
-		{
-			case OCTAHEDRON:
-				return createOctahedron();
-			case SQUARE:
-				return createSquare();
-			case TETRAHEDRON:
-				return createTetrahedron();
-			case TRIANGLE:
-				return createTriangle();
-			case OCTAGON:
-				return createDisc(0, 0, 0, 0, 0, 1, 1, 8);
-			case LOW_RES_CIRCLE:
-				return createDisc(0, 0, 0, 0, 0, 1, 1, 12);
-			case HIGH_RES_CIRCLE:
-				return createDisc(0, 0, 0, 0, 0, 1, 1, 20);
-
-			// All handle the same way
-			case SUPER_HIGH_RES_SPHERE:
-				subdivisions++;
-			case HIGH_RES_SPHERE:
-				subdivisions++;
-			case LOW_RES_SPHERE:
-				subdivisions++;
-			case ICOSAHEDRON:
-				break;
-
-			case POINT:
-			default:
-				throw new IllegalStateException("Unknown rendering " + rendering);
-		}
-
-		// All spheres based on icosahedron for speed
-		return customnode.MeshMaker.createIcosahedron(subdivisions, 1f);
-	}
-
-	/**
-	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the
-	 * disc is
-	 * removed.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
-	 * @param nx
-	 *            the nx
-	 * @param ny
-	 *            the ny
-	 * @param nz
-	 *            the nz
-	 * @param radius
-	 *            the radius
-	 * @param edgePoints
-	 *            the edge points
-	 * @return the list
-	 */
-	static public List<Point3f> createDisc(final double x, final double y, final double z, final double nx,
-			final double ny, final double nz, final double radius, final int edgePoints)
-	{
-		double ax, ay, az;
-
-		if (Math.abs(nx) >= Math.abs(ny))
-		{
-			final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
-			ax = -nz * scale;
-			ay = 0;
-			az = nx * scale;
-		}
-		else
-		{
-			final double scale = 1 / Math.sqrt(ny * ny + nz * nz);
-			ax = 0;
-			ay = nz * scale;
-			az = -ny * scale;
-		}
-
-		/*
-		 * Now to find the other vector in that plane, do the
-		 * cross product of (ax,ay,az) with (nx,ny,nz)
-		 */
-
-		double bx = (ay * nz - az * ny);
-		double by = (az * nx - ax * nz);
-		double bz = (ax * ny - ay * nx);
-		final double bScale = 1 / Math.sqrt(bx * bx + by * by + bz * bz);
-		bx *= bScale;
-		by *= bScale;
-		bz *= bScale;
-
-		final double[] circleX = new double[edgePoints + 1];
-		final double[] circleY = new double[edgePoints + 1];
-		final double[] circleZ = new double[edgePoints + 1];
-
-		for (int i = 0; i < edgePoints + 1; ++i)
-		{
-			final double angle = (i * 2 * Math.PI) / edgePoints;
-			final double c = Math.cos(angle);
-			final double s = Math.sin(angle);
-			circleX[i] = x + radius * c * ax + radius * s * bx;
-			circleY[i] = y + radius * c * ay + radius * s * by;
-			circleZ[i] = z + radius * c * az + radius * s * bz;
-		}
-		final ArrayList<Point3f> list = new ArrayList<Point3f>();
-		final Point3f centre = new Point3f((float) x, (float) y, (float) z);
-		for (int i = 0; i < edgePoints; ++i)
-		{
-			final Point3f t2 = new Point3f((float) circleX[i], (float) circleY[i], (float) circleZ[i]);
-			final Point3f t3 = new Point3f((float) circleX[i + 1], (float) circleY[i + 1], (float) circleZ[i + 1]);
-			list.add(centre);
-			list.add(t2);
-			list.add(t3);
-
-			// We do not duplicate the triangle for both sides as we render the object as 2D
-			// with setBackFaceNormalFlip(true)
-			//list.add(centre);
-			//list.add(t3);
-			//list.add(t2);
-		}
-		return list;
-	}
-
-	// Note: The triangles are rendered using a right-hand coordinate system. 
-	// However for 2D shapes the handedness does matter as we set back-face cull off.
-	// For polygons we use ItemTriangleMesh which checks the handedness is 
-	// facing away from the centre so back-face cull can be on.
-
-	private static float sqrt(double d)
-	{
-		return (float) Math.sqrt(d);
-	}
-
-	static final private float[][] triVertices = { { sqrt(8d / 9), 0, 0 }, { -sqrt(2d / 9), sqrt(2d / 3), 0 },
-			{ -sqrt(2d / 9), -sqrt(2d / 3), 0 } };
-	static final private int[][] triFaces = { { 0, 1, 2 } };
-
-	static final private float[][] squareVertices = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
-	static final private int[][] squareFaces = { { 0, 1, 3 }, { 3, 1, 2 } };
-
-	// https://en.m.wikipedia.org/wiki/Tetrahedron
-	// based on alternated cube
-	static final private float[][] tetraVertices = { { 1, 1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
-	static final private int[][] tetraFaces = { { 0, 1, 2 }, { 0, 1, 3 }, { 1, 2, 3 }, { 0, 2, 3 } };
-
-	// https://en.m.wikipedia.org/wiki/Octahedron
-	static final private float[][] octaVertices = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 },
-			{ 0, 0, -1 }, };
-	static final private int[][] octaFaces = { { 0, 3, 4 }, { 3, 1, 4 }, { 1, 2, 4 }, { 2, 0, 4 }, { 3, 0, 5 },
-			{ 1, 3, 5 }, { 2, 1, 5 }, { 0, 2, 5 }, };
-
-	/**
-	 * Creates the triangle with vertices on a unit sphere.
-	 *
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createTriangle()
-	{
-		return createSolid(triVertices, triFaces, true);
-	}
-
-	/**
-	 * Creates the square with vertices on a unit sphere.
-	 *
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createSquare()
-	{
-		return createSolid(squareVertices, squareFaces, false);
-	}
-
-	/**
-	 * Creates the tetrahedron with vertices on a unit sphere.
-	 *
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createTetrahedron()
-	{
-		return createSolid(tetraVertices, tetraFaces, true);
-	}
-
-	/**
-	 * Creates the octahedron with vertices on a unit sphere.
-	 *
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createOctahedron()
-	{
-		// This is already normalised
-		return createSolid(octaVertices, octaFaces, false);
-	}
-
-	/**
-	 * Creates the solid with the defined faces and vertices on a unit sphere.
-	 *
-	 * @param vertices
-	 *            the vertices
-	 * @param faces
-	 *            the faces
-	 * @param normalise
-	 *            the normalise
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise)
-	{
-		List<Point3f> ps = new ArrayList<Point3f>();
-		for (int i = 0; i < faces.length; i++)
-		{
-			for (int k = 0; k < 3; k++)
-			{
-				ps.add(new Point3f(vertices[faces[i][k]]));
-			}
-		}
-		// Project all vertices to the surface of a sphere of radius 1
-		if (normalise)
-		{
-			final Vector3f v = new Vector3f();
-			for (final Point3f p : ps)
-			{
-				v.set(p);
-				v.normalize();
-				p.set(v);
-			}
-		}
-		return ps;
-	}
-
-	/**
-	 * Creates the object used to outline a single localisation.
-	 * 
-	 * @param rendering
-	 *
-	 * @return the list of triangle vertices for the object
-	 */
-	private static List<Point3f> createLocalisationObjectOutline(Rendering rendering)
-	{
-		switch (rendering)
-		{
-			case SQUARE:
-				return createSquareOutline();
-			case TRIANGLE:
-				return createTriangleOutline();
-			case OCTAGON:
-				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 8);
-			case LOW_RES_CIRCLE:
-				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 12);
-			case HIGH_RES_CIRCLE:
-				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 20);
-
-			default:
-				return createLocalisationObject(rendering);
-		}
-	}
-
-	/**
-	 * Creates the triangle with vertices on a unit sphere.
-	 *
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createTriangleOutline()
-	{
-		return createSolidOutline(triVertices, true);
-	}
-
-	/**
-	 * Creates the square with vertices on a unit sphere.
-	 *
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createSquareOutline()
-	{
-		return createSolidOutline(squareVertices, false);
-	}
-
-	/**
-	 * Creates the solid with the defined faces and vertices on a unit sphere.
-	 *
-	 * @param vertices
-	 *            the vertices
-	 * @param faces
-	 *            the faces
-	 * @param normalise
-	 *            the normalise
-	 * @return the list of vertices for the triangles
-	 */
-	private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise)
-	{
-		List<Point3f> ps = new ArrayList<Point3f>();
-		for (int i = 0; i < vertices.length; i++)
-		{
-			ps.add(new Point3f(vertices[i]));
-		}
-		// Make continuous 
-		ps.add(new Point3f(vertices[0]));
-		return ps;
-	}
-
-	/**
-	 * Creates the disc. This is copied from MeshMaker but the duplication of the vertices for both sides on the
-	 * disc is
-	 * removed.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @param z
-	 *            the z
-	 * @param nx
-	 *            the nx
-	 * @param ny
-	 *            the ny
-	 * @param nz
-	 *            the nz
-	 * @param radius
-	 *            the radius
-	 * @param edgePoints
-	 *            the edge points
-	 * @return the list
-	 */
-	static public List<Point3f> createDiscOutline(final double x, final double y, final double z, final double nx,
-			final double ny, final double nz, final double radius, final int edgePoints)
-	{
-		double ax, ay, az;
-
-		if (Math.abs(nx) >= Math.abs(ny))
-		{
-			final double scale = 1 / Math.sqrt(nx * nx + nz * nz);
-			ax = -nz * scale;
-			ay = 0;
-			az = nx * scale;
-		}
-		else
-		{
-			final double scale = 1 / Math.sqrt(ny * ny + nz * nz);
-			ax = 0;
-			ay = nz * scale;
-			az = -ny * scale;
-		}
-
-		/*
-		 * Now to find the other vector in that plane, do the
-		 * cross product of (ax,ay,az) with (nx,ny,nz)
-		 */
-
-		double bx = (ay * nz - az * ny);
-		double by = (az * nx - ax * nz);
-		double bz = (ax * ny - ay * nx);
-		final double bScale = 1 / Math.sqrt(bx * bx + by * by + bz * bz);
-		bx *= bScale;
-		by *= bScale;
-		bz *= bScale;
-
-		final ArrayList<Point3f> list = new ArrayList<Point3f>();
-		for (int i = 0; i < edgePoints + 1; ++i)
-		{
-			final double angle = (i * 2 * Math.PI) / edgePoints;
-			final double c = Math.cos(angle);
-			final double s = Math.sin(angle);
-			float px = (float) (x + radius * c * ax + radius * s * bx);
-			float py = (float) (y + radius * c * ay + radius * s * by);
-			float pz = (float) (z + radius * c * az + radius * s * bz);
-			list.add(new Point3f(px, py, pz));
-		}
-		return list;
 	}
 
 	public void transformationStarted(View view)

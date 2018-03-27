@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.View;
 import org.scijava.java3d.utils.geometry.Sphere;
@@ -17,10 +18,14 @@ import gdsc.smlm.ij.ij3d.CustomContentHelper;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGroupNode;
 import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
+import gdsc.smlm.ij.ij3d.ItemMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import gdsc.smlm.ij.ij3d.Shape3DHelper;
+import gdsc.smlm.ij.ij3d.Shape3DHelper.Rendering;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.utils.Pair;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GUI;
@@ -79,6 +84,52 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		if (version == null)
 		{
 			IJ.error(TITLE, "Java 3D is not available");
+			return;
+		}
+
+		boolean renderingTest = true;
+		if (renderingTest)
+		{
+			// Put all the shapes from rendering on a view and see how they look.
+			final Image3DUniverse univ = new Image3DUniverse();
+			univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
+			univ.show();
+			ImageWindow3D w = univ.getWindow();
+			GUI.center(w);
+
+			// Test how many vertices a primitive sphere has
+			float x = 0, y = 0;
+			float space = 2.5f;
+
+			Appearance a = null;
+
+			//for (Rendering rendering : new Rendering[] { Rendering.SQUARE, Rendering.OCTAGON, Rendering.ICOSAHEDRON })
+			for (Rendering rendering : Rendering.values())
+			{
+				Shape3D shape = Shape3DHelper.createShape(rendering, 3);
+
+				a = (Appearance) shape.getAppearance().cloneNodeComponent(true);
+
+				if (a == null)
+				{
+					List<Point3f> points = customnode.MeshMaker.createIcosahedron(0, 1f);
+					CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
+							new Point3f[] { new Point3f(x, y, 0) }, null, null, 0);
+					a = mesh.getAppearance();
+				}
+
+				ItemMesh mesh = new ItemMesh(new Point3f[] { new Point3f(x, y, 0) },
+						(GeometryArray) shape.getGeometry(), a, null, null, 0f);
+
+				System.out.printf("R=%s %s  Vc=%d  V=%d\n", rendering, shape.getGeometry().getClass().getSimpleName(),
+						mesh.getVerticesCountPerItem(), mesh.getVerticesPerItem());
+
+				if (rendering == Rendering.POINT)
+					a.getPointAttributes().setPointSize(10);
+				univ.addCustomMesh(mesh, x + "," + y);
+				x += space;
+			}
+
 			return;
 		}
 

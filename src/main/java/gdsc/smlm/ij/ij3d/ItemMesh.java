@@ -1,12 +1,20 @@
 package gdsc.smlm.ij.ij3d;
 
+import java.util.Arrays;
+
 import org.scijava.java3d.Appearance;
+import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.GeometryStripArray;
 import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.IndexedGeometryStripArray;
+import org.scijava.java3d.IndexedPointArray;
+import org.scijava.java3d.Material;
+import org.scijava.java3d.PointArray;
+import org.scijava.java3d.PointAttributes;
+import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
@@ -26,13 +34,15 @@ import org.scijava.vecmath.Point3f;
 
 import customnode.CustomMesh;
 import gdsc.core.utils.BitFlags;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.TurboList;
 
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated for
  * each point.
  */
-public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
+public class ItemMesh extends CustomMesh implements UpdateableItemShape
 {
 	/** The vertex count of the original geometry array. */
 	final protected int vertexCount;
@@ -40,11 +50,29 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 	/** The vertex format of the original geometry array. */
 	final protected int vertexFormat;
 
+	/** The index count of the original geometry array. */
+	final protected int indexCount;
+
 	/** The points. */
 	protected Point3f[] points;
 
 	/** The size of each point. */
 	protected Point3f[] sizes;
+
+	/** Set to true if this is a point array. */
+	final protected boolean isPointArray;
+
+	/** Set to true if this is a strip geometry array. */
+	final protected boolean isStripGeometryArray;
+
+	/**
+	 * If there are no per-vertex colours this is set to true to colour the object using the material, false uses the
+	 * ColoringAttributes.
+	 */
+	protected boolean isColorByMaterial;
+
+	/** The color updater used to update the colour array for a single item. */
+	protected ArrayColorUpdater colorUpdater;
 
 	/**
 	 * Instantiates a new item mesh.
@@ -64,14 +92,16 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 	 *            the default appearance of the shape. PolygonAttributes, Material and TransparencyAttributes are used.
 	 * @param sizes
 	 *            the sizes of each point. Can be null (no scaling); length=1 (fixed scaling); or points.length.
-	 * @param colors
-	 *            the per-item colors. Can be null. Must be the correct length for the number of vertices (including
-	 *            alpha if using GeometryArray.COLOR_4)
+	 * @param color
+	 *            the color
+	 * @param transparency
+	 *            the transparency
 	 */
-	public ItemMesh(Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes, float[] colors)
+	public ItemMesh(Point3f[] points, GeometryArray ga, Appearance appearance, Point3f[] sizes, final Color3f color,
+			final float transparency)
 	{
 		// Create empty
-		super(null, null, 0f);
+		super(null, color, transparency);
 
 		if (sizes != null && points.length != sizes.length && sizes.length != 1)
 			throw new IllegalArgumentException("Points and sizes must be the same length");
@@ -83,35 +113,27 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 
 		vertexCount = ga.getValidVertexCount();
 		vertexFormat = ga.getVertexFormat();
+		if (ga instanceof IndexedGeometryArray)
+			indexCount = ((IndexedGeometryArray) ga).getValidIndexCount();
+		else
+			indexCount = 0;
+		isPointArray = (ga instanceof PointArray || ga instanceof IndexedPointArray);
+		isStripGeometryArray = (ga instanceof IndexedGeometryStripArray || ga instanceof GeometryStripArray);
 
 		// Set the flags we support and error if there are others
 		int flags = GeometryArray.COORDINATES;
-
-		if (colors != null)
-		{
-			if (!hasColor())
-				throw new IllegalArgumentException("Colours given but no colour format used in input geometry");
-			flags |= GeometryArray.COLOR_3;
-			if (hasColor4())
-				flags |= GeometryArray.COLOR_4;
-			int size = points.length * getNumberOfColorsPerVertex();
-			if (colors.length != size)
-				throw new IllegalArgumentException(
-						"Incorrect number of colours used, input=" + colors.length + ", expected=" + size);
-		}
-
 		if ((vertexFormat & GeometryArray.NORMALS) != 0)
 			flags |= GeometryArray.NORMALS;
-
-		// Only support simple indexed arrays
-		if (ga instanceof IndexedGeometryArray)
+		if (hasColor4())
+			flags |= GeometryArray.COLOR_4;
+		else if (hasColor())
+			flags |= GeometryArray.COLOR_3;
+		if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0)
 			flags |= GeometryArray.USE_COORD_INDEX_ONLY;
 
 		int extra = BitFlags.unset(vertexFormat, flags);
 		if (extra != 0)
 			throw new IllegalArgumentException("Unsupported vertex format flags: " + extra);
-		if (!BitFlags.areSet(vertexFormat, flags))
-			throw new IllegalArgumentException("Unsupported vertex format: " + extra);
 
 		this.points = points;
 		this.sizes = sizes;
@@ -120,7 +142,7 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		float[] objectCoords = new float[vertexCount * 3];
 		ga.getCoordinates(0, objectCoords);
 
-		float[] allCoords = new float[vertexCount * points.length];
+		float[] allCoords = new float[objectCoords.length * points.length];
 
 		boolean sameSize = false;
 		if (sizes == null || (sameSize = sameSize(sizes)))
@@ -179,10 +201,14 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 
 		// Update the geometry. 
 		// Do this in a method to allow sub-classes to change the geometry.
-		this.setGeometry(createGeometry(allCoords, colors, ga));
+		this.setGeometry(createGeometry(allCoords, ga));
 
 		// Create a default appearance
-		setAppearance(appearance);
+		setAppearance(createAppearance(appearance, ga));
+
+		// Initialise
+		setColor(color);
+		setTransparency(transparency);
 	}
 
 	@Override
@@ -239,6 +265,56 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 	public int getNumberOfColorsPerVertex()
 	{
 		return (hasColor4()) ? 4 : (hasColor()) ? 3 : 0;
+	}
+
+	/**
+	 * Checks if is index geometry array.
+	 *
+	 * @return true, if is index geometry array
+	 */
+	public boolean isIndexGeometryArray()
+	{
+		return (indexCount > 0);
+	}
+
+	/**
+	 * Gets the vertices per item.
+	 *
+	 * @return the vertices per item
+	 */
+	public int getVerticesPerItem()
+	{
+		return (indexCount > 0) ? indexCount : vertexCount;
+	}
+
+	/**
+	 * Gets the vertices count per item. This may be lower than the vertices per item if using an indexed array.
+	 *
+	 * @return the vertices count per item
+	 */
+	public int getVerticesCountPerItem()
+	{
+		return vertexCount;
+	}
+
+	/**
+	 * Checks if is point array.
+	 *
+	 * @return true, if is point array
+	 */
+	public boolean isPointArray()
+	{
+		return isPointArray;
+	}
+
+	/**
+	 * Checks if is strip geometry array.
+	 *
+	 * @return true, if is strip geometry array
+	 */
+	public boolean isStripGeometryArray()
+	{
+		return isStripGeometryArray;
 	}
 
 	/**
@@ -303,7 +379,7 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		throw new NotImplementedException();
 	}
 
-	protected GeometryArray createGeometry(float[] coords, float[] colors, GeometryArray sourceGA)
+	protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGA)
 	{
 		// Create using reflection
 		final GeometryArray ga;
@@ -311,10 +387,51 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		{
 			Class<?> clazz = sourceGA.getClass();
 			//clazz = clazz.asSubclass(clazz);
-			Class<?>[] paramTypes = { int.class, int.class };
-			Object[] paramValues = { vertexCount * points.length, vertexFormat };
 
-			ga = (GeometryArray) clazz.asSubclass(clazz).getConstructor(paramTypes).newInstance(paramValues);
+			TurboList<Class<?>> paramTypes = new TurboList<Class<?>>(4);
+			TurboList<Object> paramValues = new TurboList<Object>(4);
+
+			paramTypes.add(int.class);
+			paramTypes.add(int.class);
+			paramValues.add(vertexCount * points.length);
+			paramValues.add(vertexFormat);
+
+			if (isIndexGeometryArray())
+			{
+				paramTypes.add(int.class);
+				paramValues.add(indexCount * points.length);
+			}
+
+			// Handle strips
+			int numStrips = 0;
+			int[] objectStripCounts = null;
+			int[] allStripCounts = null;
+			if (sourceGA instanceof IndexedGeometryStripArray)
+			{
+				IndexedGeometryStripArray igsa = (IndexedGeometryStripArray) sourceGA;
+				numStrips = igsa.getNumStrips();
+				objectStripCounts = new int[numStrips];
+				igsa.getStripIndexCounts(objectStripCounts);
+			}
+			else if (sourceGA instanceof GeometryStripArray)
+			{
+				GeometryStripArray gsa = (GeometryStripArray) sourceGA;
+				numStrips = gsa.getNumStrips();
+				objectStripCounts = new int[numStrips];
+				gsa.getStripVertexCounts(objectStripCounts);
+			}
+
+			if (objectStripCounts != null)
+			{
+				allStripCounts = new int[numStrips * points.length];
+				duplicate(objectStripCounts, 0, numStrips, points.length, allStripCounts, 0);
+				paramTypes.add(int[].class);
+				paramValues.add(allStripCounts);
+			}
+
+			Class<?>[] paramTypes2 = paramTypes.toArray(new Class<?>[paramTypes.size()]);
+			Object[] paramValues2 = paramValues.toArray();
+			ga = (GeometryArray) clazz.getConstructor(paramTypes2).newInstance(paramValues2);
 		}
 		catch (Exception e)
 		{
@@ -323,7 +440,6 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		}
 
 		ga.setCoordinates(0, coords);
-		ga.setValidVertexCount(coords.length);
 		ga.setCapability(GeometryArray.ALLOW_COORDINATE_WRITE);
 		ga.setCapability(GeometryArray.ALLOW_COUNT_WRITE);
 		ga.setCapability(GeometryArray.ALLOW_COUNT_READ);
@@ -331,81 +447,84 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		ga.setCapability(Geometry.ALLOW_INTERSECT);
 
 		// Handle normals
-		if (hasNormals())
-		{
-			float[] objectNormals = new float[vertexCount * 3];
-			sourceGA.getNormals(0, objectNormals);
-			float[] allNormals = new float[objectNormals.length * points.length];
-			duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
-			ga.setNormals(0, allNormals);
-		}
+		boolean doNormals = hasNormals();
 
 		// Handle colors
 		if (hasColor())
 		{
 			ga.setCapability(GeometryArray.ALLOW_COLOR_READ);
 			ga.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
-			if (colors != null)
-			{
-				// Special case for a PointArray
-				if (vertexCount == 1)
-				{
-					ga.setColors(0, colors);
-				}
-				else
-				{
-					int colorsPerVertex = getNumberOfColorsPerVertex();
-					int coloursPerObject = colorsPerVertex * vertexCount;
-					float[] all = new float[coloursPerObject * colors.length];
-					for (int i = 0; i < colors.length; i += colorsPerVertex)
-					{
-						duplicate(colors, i, colorsPerVertex, vertexCount, all, i * vertexCount);
-					}
-					ga.setColors(0, all);
-				}
-			}
+			colorUpdater = ArrayColorUpdater.create(vertexCount, hasColor4());
 		}
 
 		// Fan are extensions of GeometryStripArray so do not need extra code.
 
 		// Handle indexed array
-		if (sourceGA instanceof IndexedGeometryArray)
+		if (isIndexGeometryArray())
 		{
-			IndexedGeometryArray iga = (IndexedGeometryArray) sourceGA;
-			int indexCount = iga.getValidIndexCount();
-			int[] indices = new int[indexCount];
-			iga.getCoordinateIndices(0, indices);
-			int[] allIndices = new int[indices.length * points.length];
+			IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
+			IndexedGeometryArray iga = (IndexedGeometryArray) ga;
+			int objectIndexCount = sourceIGA.getValidIndexCount();
+			int[] objectIndices = new int[objectIndexCount];
+			int[] allIndices = new int[objectIndices.length * points.length];
+			sourceIGA.getCoordinateIndices(0, objectIndices);
 			for (int i = 0, k = 0; i < points.length; i++)
 			{
 				int offset = k;
-				for (int j = 0; j < indices.length; j++)
-					allIndices[k++] = indices[j] + offset;
+				for (int j = 0; j < objectIndices.length; j++)
+					allIndices[k++] = objectIndices[j] + offset;
 			}
-			((IndexedGeometryArray) ga).setCoordinateIndices(0, allIndices);
+			iga.setCoordinateIndices(0, allIndices);
 
-			// Handle strips
-			if (sourceGA instanceof IndexedGeometryStripArray)
+			// Check if we need the color and normal indices 
+			if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0)
 			{
-				IndexedGeometryStripArray igsa = (IndexedGeometryStripArray) sourceGA;
-				int numStrips = igsa.getNumStrips();
-				int[] indexCounts = new int[numStrips];
-				igsa.getStripIndexCounts(indexCounts);
-				int[] allIndexCounts = new int[numStrips * points.length];
-				duplicate(indexCounts, 0, numStrips, points.length, allIndexCounts, 0);
-				((IndexedGeometryStripArray) ga).getStripIndexCounts(allIndexCounts);
+				if (hasNormals())
+				{
+					// Done later
+				}
+
+				if (hasColor())
+				{
+					// Update the colour for each vertex as normal
+				}
+			}
+			else
+			{
+				if (hasNormals())
+				{
+					// Use the same index for all vertices for normals
+					sourceIGA.getNormalIndices(0, objectIndices);
+					duplicate(objectIndices, 0, objectIndices.length, points.length, allIndices, 0);
+					iga.setNormalIndices(0, objectIndices);
+
+					float[] normals = new float[(Maths.max(objectIndices) + 1) * 3];
+					sourceIGA.getNormals(0, normals);
+					iga.setNormals(0, normals);
+
+					doNormals = false;
+				}
+
+				if (hasColor())
+				{
+					// Use a single index per item for vertex colour
+					for (int i = 0, k = 0; i < points.length; i++)
+						for (int j = 0; j < objectIndexCount; j++)
+							allIndices[k++] = i;
+					iga.setColorIndices(0, allIndices);
+					// Only have to update a single colour per item
+					colorUpdater = ArrayColorUpdater.create(1, hasColor4());
+				}
 			}
 		}
-		// Handle strips
-		else if (sourceGA instanceof GeometryStripArray)
+
+		if (doNormals)
 		{
-			GeometryStripArray gsa = (GeometryStripArray) sourceGA;
-			int numStrips = gsa.getNumStrips();
-			int[] vertexCounts = new int[numStrips];
-			gsa.getStripVertexCounts(vertexCounts);
-			int[] allVertexCounts = new int[numStrips * points.length];
-			duplicate(vertexCounts, 0, numStrips, points.length, allVertexCounts, 0);
-			((GeometryStripArray) ga).getStripVertexCounts(allVertexCounts);
+			float[] objectNormals = new float[vertexCount * 3];
+			sourceGA.getNormals(0, objectNormals);
+			float[] allNormals = new float[objectNormals.length * points.length];
+			duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
+			ga.setNormals(0, allNormals);
 		}
 
 		return ga;
@@ -466,12 +585,19 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		if (transparency <= .01f)
 		{
 			this.transparency = 0.0f;
-			ta.setTransparencyMode(TransparencyAttributes.NONE);
+
+			// For a strange reason if this is set to NONE before the mesh is added to 
+			// a scene then the transparency cannot be adjusted. So set to FASTEST.
+			if (ta.isLive())
+				ta.setTransparencyMode(TransparencyAttributes.NONE);
+			else
+				ta.setTransparencyMode(TransparencyAttributes.FASTEST);
 		}
 		else
 		{
 			this.transparency = transparency;
 			ta.setTransparencyMode(transparencyMode);
+			//ta.setTransparencyMode(TransparencyAttributes.BLENDED);
 		}
 		ta.setTransparency(this.transparency);
 	}
@@ -482,15 +608,105 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		throw new NotImplementedException();
 	}
 
-	protected Appearance createAppearance(GeometryArray ga)
+	protected Appearance createAppearance(Appearance appearance, GeometryArray ga)
 	{
-		// TOD0 - create a suitable appearance for points or 3D shapes.
+		// Create a suitable appearance for points or 3D shapes.
+		if (appearance == null)
+			appearance = new Appearance();
 
-		Appearance appearance = super.createAppearance();
-		// Update the transparency to the default mode
-		final TransparencyAttributes ta = appearance.getTransparencyAttributes();
-		if (ta.getTransparencyMode() != TransparencyAttributes.NONE)
-			ta.setTransparencyMode(transparencyMode);
+		appearance.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
+		appearance.setCapability(Appearance.ALLOW_MATERIAL_READ);
+		appearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);
+
+		// Ensure we have the ability to colour the object
+		if (!hasColor())
+		{
+			isColorByMaterial = !isPointArray;
+		}
+
+		if (isPointArray)
+		{
+			appearance.setPolygonAttributes(null);
+			appearance.setMaterial(null);
+
+			PointAttributes pointAttributes = appearance.getPointAttributes();
+			if (pointAttributes == null)
+			{
+				pointAttributes = new PointAttributes();
+				pointAttributes.setPointAntialiasingEnable(true);
+				appearance.setPointAttributes(pointAttributes);
+			}
+			pointAttributes.setCapability(PointAttributes.ALLOW_ANTIALIASING_WRITE);
+			pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
+
+			if (hasColor())
+			{
+				// We use the coordinates for the colour
+				appearance.setColoringAttributes(null);
+			}
+			else
+			{
+				ColoringAttributes ca = appearance.getColoringAttributes();
+				if (ca == null)
+				{
+					ca = new ColoringAttributes();
+					ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+					appearance.setColoringAttributes(ca);
+				}
+				ca.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);
+			}
+		}
+		else
+		{
+			appearance.setPointAttributes(null);
+
+			// These are the defaults. We may need them if we want to support mesh 
+			// display when the polygon mode is Line
+			PolygonAttributes polygonAttributes = appearance.getPolygonAttributes();
+			if (polygonAttributes == null)
+			{
+				polygonAttributes = new PolygonAttributes();
+				polygonAttributes.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+				appearance.setPolygonAttributes(polygonAttributes);
+			}
+			polygonAttributes.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+
+			ColoringAttributes ca = appearance.getColoringAttributes();
+			if (ca == null)
+			{
+				ca = new ColoringAttributes();
+				ca.setShadeModel(ColoringAttributes.SHADE_GOURAUD);
+				appearance.setColoringAttributes(ca);
+			}
+			ca.setCapability(ColoringAttributes.ALLOW_SHADE_MODEL_WRITE);
+
+			Material material = appearance.getMaterial();
+			if (material == null)
+			{
+				material = new Material();
+				material.setAmbientColor(0.1f, 0.1f, 0.1f);
+				material.setSpecularColor(0.1f, 0.1f, 0.1f);
+				material.setDiffuseColor(DEFAULT_COLOR);
+				appearance.setMaterial(material);
+			}
+			// Ensure per vertex colours replace the diffuse colour
+			material.setColorTarget(Material.DIFFUSE);
+			if (isColorByMaterial)
+				material.setCapability(Material.ALLOW_COMPONENT_WRITE);
+		}
+
+		// We require transparency attributes for global transparency
+		TransparencyAttributes tr = appearance.getTransparencyAttributes();
+		if (tr == null)
+		{
+			tr = new TransparencyAttributes();
+			tr.setTransparencyMode(TransparencyAttributes.NONE);
+			tr.setTransparency(0f);
+			appearance.setTransparencyAttributes(tr);
+		}
+		tr.setCapability(TransparencyAttributes.ALLOW_VALUE_WRITE);
+		tr.setCapability(TransparencyAttributes.ALLOW_MODE_WRITE);
+
 		return appearance;
 	}
 
@@ -514,8 +730,8 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 	{
 		changed = true;
 
-		int oldSize = size();
-		int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
+		final int oldSize = size();
+		final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
 		if (size == 0)
 		{
@@ -537,32 +753,34 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 
 		// Reorder all things in the geometry: coordinates and colour.
 		// The normals, indices, strip counts are are unchanged.
-		int objectSize = vertexCount;
+		//int objectSize = vertexCount;
 
-		final float[] oldCoords = new float[oldSize * objectSize * 3];
+		int n = vertexCount * 3;
+		final float[] oldCoords = new float[oldSize * n];
 		ga.getCoordinates(0, oldCoords);
-		final float[] coords = new float[size * objectSize * 3];
+		final float[] coords = new float[size * n];
 		for (int i = 0; i < size; i++)
 		{
 			int j = indices[i];
-			int ii = i * objectSize * 3;
-			int jj = j * objectSize * 3;
-			System.arraycopy(oldCoords, jj, coords, ii, objectSize);
+			int ii = i * n;
+			int jj = j * n;
+			System.arraycopy(oldCoords, jj, coords, ii, n);
 		}
 
 		final float[] colors;
 		if (hasColor())
 		{
-			int n = getNumberOfColorsPerVertex();
-			float[] oldColors = (n == 3) ? oldCoords : new float[oldSize * objectSize * n];
+			n = colorUpdater.size();
+			int colorSize = oldSize * n;
+			float[] oldColors = (colorSize < oldCoords.length) ? oldCoords : new float[colorSize];
 			ga.getColors(0, oldColors);
-			colors = new float[size * objectSize * n];
+			colors = new float[size * n];
 			for (int i = 0; i < size; i++)
 			{
 				int j = indices[i];
-				int ii = i * objectSize * n;
-				int jj = j * objectSize * n;
-				System.arraycopy(oldColors, jj, colors, ii, objectSize);
+				int ii = i * n;
+				int jj = j * n;
+				System.arraycopy(oldColors, jj, colors, ii, n);
 			}
 		}
 		else
@@ -579,7 +797,35 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 				ga.setCoordinates(0, coords);
 				if (colors != null)
 					ga.setColors(0, colors);
-				ga.setValidVertexCount(coords.length);
+
+				if (size != oldSize)
+				{
+					if (isIndexGeometryArray())
+					{
+						if (isStripGeometryArray())
+						{
+							int[] indices = new int[indexCount * oldSize];
+							((IndexedGeometryStripArray) ga).getStripIndexCounts(indices);
+							indices = Arrays.copyOf(indices, indexCount * size);
+							((IndexedGeometryStripArray) ga).setStripIndexCounts(indices);
+						}
+						else
+						{
+							((IndexedGeometryArray) ga).setValidIndexCount(size * indexCount);
+						}
+					}
+					else if (isStripGeometryArray())
+					{
+						int[] indices = new int[vertexCount * oldSize];
+						((GeometryStripArray) ga).getStripVertexCounts(indices);
+						indices = Arrays.copyOf(indices, vertexCount * size);
+						((GeometryStripArray) ga).setStripVertexCounts(indices);
+					}
+					else
+					{
+						ga.setValidVertexCount(size * vertexCount);
+					}
+				}
 			}
 		});
 	}
@@ -632,39 +878,38 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 	 */
 	public void setItemColor(Color3f color)
 	{
-		if (!hasColor())
-		{
-			// TODO - set colour in the Appearance, e.g. Material color or ColoringAttributes
-			return;
-		}
 		if (color == null)
 			color = DEFAULT_COLOR;
 		this.color = color;
+		if (!hasColor())
+		{
+			if (isColorByMaterial)
+				getAppearance().getMaterial().setDiffuseColor(color);
+			else
+				getAppearance().getColoringAttributes().setColor(color);
+			return;
+		}
 		int size = size();
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = vertexCount;
-		int n = getNumberOfColorsPerVertex();
-		final float[] colors = new float[objectSize * size * n];
-		if (n == 3)
+		final float[] colors = new float[size * colorUpdater.size()];
+		if (hasColor3())
 		{
 			float[] tmp = new float[3];
 			color.get(tmp);
-			duplicate(tmp, 0, 3, size, colors, 0);
+			duplicate(tmp, 0, 3, size * colorUpdater.getN(), colors, 0);
 			ga.setColors(0, colors);
 		}
 		else
 		{
 			// Preserve alpha
 			ga.getColors(0, colors);
-			int i = 0;
-			for (int j = objectSize; j-- > 0;)
+			for (int i = 0; i < colors.length; i += 4)
 			{
-				colors[i++] = color.x;
-				colors[i++] = color.y;
-				colors[i++] = color.z;
-				i++; // Skip over alpha
+				colors[i] = color.x;
+				colors[i + 1] = color.y;
+				colors[i + 2] = color.z;
 			}
 			ga.setColors(0, colors);
 		}
@@ -680,7 +925,7 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 	{
 		if (!hasColor())
 		{
-			// TODO - set colour in the Appearance, e.g. Material color or ColoringAttributes
+			setItemColor(color[0]);
 			return;
 		}
 		this.color = null;
@@ -690,20 +935,13 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		int objectSize = vertexCount;
-		int n = getNumberOfColorsPerVertex();
-		final float[] colors = new float[objectSize * size * n];
-		if (n == 3)
+		final float[] colors = new float[size * colorUpdater.size()];
+		int n = colorUpdater.size();
+		if (hasColor3())
 		{
-			int i = 0;
-			for (Color3f c : color)
+			for (int i = 0; i < color.length; i++)
 			{
-				for (int j = objectSize; j-- > 0;)
-				{
-					colors[i++] = c.x;
-					colors[i++] = c.y;
-					colors[i++] = c.z;
-				}
+				System.arraycopy(colorUpdater.getColors(color[i]), 0, colors, i * n, n);
 			}
 			ga.setColors(0, colors);
 		}
@@ -711,16 +949,11 @@ public abstract class ItemMesh extends CustomMesh implements UpdateableItemShape
 		{
 			// Preserve alpha
 			ga.getColors(0, colors);
-			int i = 0;
-			for (Color3f c : color)
+			for (int i = 0; i < color.length; i++)
 			{
-				for (int j = objectSize; j-- > 0;)
-				{
-					colors[i++] = c.x;
-					colors[i++] = c.y;
-					colors[i++] = c.z;
-					i++; // Skip over alpha
-				}
+				int offset = i * n;
+				colorUpdater.getColors(color[i], colors[offset + 3]);
+				System.arraycopy(colorUpdater.pointColor, 0, colors, i * n, n);
 			}
 			ga.setColors(0, colors);
 		}
