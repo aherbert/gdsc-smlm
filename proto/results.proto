@@ -6,33 +6,32 @@ syntax = "proto3";
 package gdsc.smlm.data.config;
 
 option java_outer_classname = "ResultsProtos";
-
 import "unit.proto";
 
 // The type of results image
 enum ResultsImageType {
-	// No results image
+// No results image
 	DRAW_NONE = 0;
 	// Draw each localisation using an intensity of 1
-	DRAW_LOCALISATIONS = 1; 
+	DRAW_LOCALISATIONS = 1;
 	// Draw each localisation using the signal intensity
 	DRAW_INTENSITY = 2;
 	// Draw each localisation using the frame number as the intensity
 	DRAW_FRAME_NUMBER = 3;
 	// Draw each localisation using the fitted PSF
-	DRAW_FITTED_PSF = 4; 
+	DRAW_FITTED_PSF = 4;
 	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with 
 	// the width equal to the localisation precision 
-	DRAW_LOCALISATIONS_PRECISION = 5; 
+	DRAW_LOCALISATIONS_PRECISION = 5;
 	// Draw each localisation as a Gaussian 2D spot using the signal intensity with 
 	// the width equal to the localisation precision 
-	DRAW_INTENSITY_PRECISION = 6; 
+	DRAW_INTENSITY_PRECISION = 6;
 	// Draw each localisation as a Gaussian 2D spot using an intensity of 1 with the 
 	// width equal to the specified average localisation precision 
-	DRAW_LOCALISATIONS_AVERAGE_PRECISION = 7; 
+	DRAW_LOCALISATIONS_AVERAGE_PRECISION = 7;
 	// Draw each localisation as a Gaussian 2D spot using the signal intensity with 
 	// the width equal to the specified average localisation precision 
-	DRAW_INTENSITY_AVERAGE_PRECISION = 8; 
+	DRAW_INTENSITY_AVERAGE_PRECISION = 8;
 	// Draw each localisation using the fit error as the intensity
 	DRAW_FIT_ERROR = 9;
 	// Draw each localisation using the z-position as the intensity (providing crude 3D rendering)
@@ -41,7 +40,7 @@ enum ResultsImageType {
 
 // The mode for the results image
 enum ResultsImageMode {
-	// Add the value to the image
+// Add the value to the image
 	IMAGE_ADD = 0;
 	// Replace the current value
 	IMAGE_REPLACE = 1;
@@ -51,7 +50,7 @@ enum ResultsImageMode {
 
 // Define the results image settings
 message ResultsImageSettings {
-	// Define the type of results image
+// Define the type of results image
 	ResultsImageType image_type = 1;
 	// Set to true to weight the result over nearest-neighbour pixels
 	bool weighted = 2;
@@ -67,12 +66,12 @@ message ResultsImageSettings {
 
 // The type of results file
 enum ResultsFileFormat {
-	// None
+// None
 	FILE_NONE = 0;
 	// Text
 	TEXT = 1;
 	// Binary
-	BINARY = 2; 
+	BINARY = 2;
 	// Tagged Spot File
 	TSF = 3;
 	// Molecular Accuracy Localisation Keep
@@ -81,7 +80,7 @@ enum ResultsFileFormat {
 
 // The results file settings
 message ResultsFileSettings {
-	// The results directory 
+// The results directory
 	string results_directory = 1;
 	// The results filename
 	string results_filename = 2;
@@ -99,7 +98,7 @@ message ResultsFileSettings {
 
 // The type of results file
 enum ResultsTableFormat {
-	// None
+// None
 	TABLE_NONE = 0;
 	// Use an ImageJ table
 	IMAGEJ = 1;
@@ -109,7 +108,7 @@ enum ResultsTableFormat {
 
 // Define the results table settings
 message ResultsTableSettings {
-	// Set to true to show the results table
+// Set to true to show the results table
 	bool show_table = 1;
 	// The distance unit
 	DistanceUnit distance_unit = 2;
@@ -129,27 +128,32 @@ message ResultsTableSettings {
 	bool update_existing_tables = 9;
 	// The results table format
 	ResultsTableFormat results_table_format = 10;
+	// Set to true to show a row counter in the table
+	bool show_row_counter = 11;
+	// Set to true to show a row index in the table.
+	// Only relevant when the table can show a different order from the backing list.
+	bool show_row_index = 12;
 }
 
 // Define the in-memory results settings
 message ResultsInMemorySettings {
-	// Set to true to save the results to memory
-	bool in_memory = 1;	
+// Set to true to save the results to memory
+	bool in_memory = 1;
 }
 
 // Define the results settings
 message ResultsSettings {
-	// Set to true to log progress during fitting
+// Set to true to log progress during fitting
 	bool log_progress = 1;
 	// Set to true to show the parameter deviations. This applies to table and file results output.
 	bool show_deviations = 2;
-	
+
 	// The results image settings
 	ResultsImageSettings results_image_settings = 3;
 
 	// The results file settings
 	ResultsFileSettings results_file_settings = 4;
-	
+
 	// The results table settings
 	ResultsTableSettings results_table_settings = 5;
 

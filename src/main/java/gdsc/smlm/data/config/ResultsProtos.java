@@ -1675,7 +1675,7 @@ public final class ResultsProtos {
 
     /**
      * <pre>
-     * The results directory 
+     * The results directory
      * </pre>
      *
      * <code>string results_directory = 1;</code>
@@ -1683,7 +1683,7 @@ public final class ResultsProtos {
     java.lang.String getResultsDirectory();
     /**
      * <pre>
-     * The results directory 
+     * The results directory
      * </pre>
      *
      * <code>string results_directory = 1;</code>
@@ -1904,7 +1904,7 @@ public final class ResultsProtos {
     private volatile java.lang.Object resultsDirectory_;
     /**
      * <pre>
-     * The results directory 
+     * The results directory
      * </pre>
      *
      * <code>string results_directory = 1;</code>
@@ -1923,7 +1923,7 @@ public final class ResultsProtos {
     }
     /**
      * <pre>
-     * The results directory 
+     * The results directory
      * </pre>
      *
      * <code>string results_directory = 1;</code>
@@ -2479,7 +2479,7 @@ public final class ResultsProtos {
       private java.lang.Object resultsDirectory_ = "";
       /**
        * <pre>
-       * The results directory 
+       * The results directory
        * </pre>
        *
        * <code>string results_directory = 1;</code>
@@ -2498,7 +2498,7 @@ public final class ResultsProtos {
       }
       /**
        * <pre>
-       * The results directory 
+       * The results directory
        * </pre>
        *
        * <code>string results_directory = 1;</code>
@@ -2518,7 +2518,7 @@ public final class ResultsProtos {
       }
       /**
        * <pre>
-       * The results directory 
+       * The results directory
        * </pre>
        *
        * <code>string results_directory = 1;</code>
@@ -2535,7 +2535,7 @@ public final class ResultsProtos {
       }
       /**
        * <pre>
-       * The results directory 
+       * The results directory
        * </pre>
        *
        * <code>string results_directory = 1;</code>
@@ -2548,7 +2548,7 @@ public final class ResultsProtos {
       }
       /**
        * <pre>
-       * The results directory 
+       * The results directory
        * </pre>
        *
        * <code>string results_directory = 1;</code>
@@ -3121,6 +3121,16 @@ public final class ResultsProtos {
      * <code>.gdsc.smlm.data.config.ResultsTableFormat results_table_format = 10;</code>
      */
     gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat getResultsTableFormat();
+
+    /**
+     * <code>bool show_row_counter = 11;</code>
+     */
+    boolean getShowRowCounter();
+
+    /**
+     * <code>bool show_row_index = 12;</code>
+     */
+    boolean getShowRowIndex();
   }
   /**
    * <pre>
@@ -3148,6 +3158,8 @@ public final class ResultsProtos {
       roundingPrecision_ = 0;
       updateExistingTables_ = false;
       resultsTableFormat_ = 0;
+      showRowCounter_ = false;
+      showRowIndex_ = false;
     }
 
     @java.lang.Override
@@ -3227,6 +3239,16 @@ public final class ResultsProtos {
               int rawValue = input.readEnum();
 
               resultsTableFormat_ = rawValue;
+              break;
+            }
+            case 88: {
+
+              showRowCounter_ = input.readBool();
+              break;
+            }
+            case 96: {
+
+              showRowIndex_ = input.readBool();
               break;
             }
           }
@@ -3426,6 +3448,24 @@ public final class ResultsProtos {
       return result == null ? gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.UNRECOGNIZED : result;
     }
 
+    public static final int SHOW_ROW_COUNTER_FIELD_NUMBER = 11;
+    private boolean showRowCounter_;
+    /**
+     * <code>bool show_row_counter = 11;</code>
+     */
+    public boolean getShowRowCounter() {
+      return showRowCounter_;
+    }
+
+    public static final int SHOW_ROW_INDEX_FIELD_NUMBER = 12;
+    private boolean showRowIndex_;
+    /**
+     * <code>bool show_row_index = 12;</code>
+     */
+    public boolean getShowRowIndex() {
+      return showRowIndex_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3467,6 +3507,12 @@ public final class ResultsProtos {
       }
       if (resultsTableFormat_ != gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat.TABLE_NONE.getNumber()) {
         output.writeEnum(10, resultsTableFormat_);
+      }
+      if (showRowCounter_ != false) {
+        output.writeBool(11, showRowCounter_);
+      }
+      if (showRowIndex_ != false) {
+        output.writeBool(12, showRowIndex_);
       }
     }
 
@@ -3515,6 +3561,14 @@ public final class ResultsProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(10, resultsTableFormat_);
       }
+      if (showRowCounter_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(11, showRowCounter_);
+      }
+      if (showRowIndex_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(12, showRowIndex_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -3547,6 +3601,10 @@ public final class ResultsProtos {
       result = result && (getUpdateExistingTables()
           == other.getUpdateExistingTables());
       result = result && resultsTableFormat_ == other.resultsTableFormat_;
+      result = result && (getShowRowCounter()
+          == other.getShowRowCounter());
+      result = result && (getShowRowIndex()
+          == other.getShowRowIndex());
       return result;
     }
 
@@ -3582,6 +3640,12 @@ public final class ResultsProtos {
           getUpdateExistingTables());
       hash = (37 * hash) + RESULTS_TABLE_FORMAT_FIELD_NUMBER;
       hash = (53 * hash) + resultsTableFormat_;
+      hash = (37 * hash) + SHOW_ROW_COUNTER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowRowCounter());
+      hash = (37 * hash) + SHOW_ROW_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowRowIndex());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3735,6 +3799,10 @@ public final class ResultsProtos {
 
         resultsTableFormat_ = 0;
 
+        showRowCounter_ = false;
+
+        showRowIndex_ = false;
+
         return this;
       }
 
@@ -3767,6 +3835,8 @@ public final class ResultsProtos {
         result.roundingPrecision_ = roundingPrecision_;
         result.updateExistingTables_ = updateExistingTables_;
         result.resultsTableFormat_ = resultsTableFormat_;
+        result.showRowCounter_ = showRowCounter_;
+        result.showRowIndex_ = showRowIndex_;
         onBuilt();
         return result;
       }
@@ -3837,6 +3907,12 @@ public final class ResultsProtos {
         }
         if (other.resultsTableFormat_ != 0) {
           setResultsTableFormatValue(other.getResultsTableFormatValue());
+        }
+        if (other.getShowRowCounter() != false) {
+          setShowRowCounter(other.getShowRowCounter());
+        }
+        if (other.getShowRowIndex() != false) {
+          setShowRowIndex(other.getShowRowIndex());
         }
         onChanged();
         return this;
@@ -4344,6 +4420,58 @@ public final class ResultsProtos {
       public Builder clearResultsTableFormat() {
         
         resultsTableFormat_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean showRowCounter_ ;
+      /**
+       * <code>bool show_row_counter = 11;</code>
+       */
+      public boolean getShowRowCounter() {
+        return showRowCounter_;
+      }
+      /**
+       * <code>bool show_row_counter = 11;</code>
+       */
+      public Builder setShowRowCounter(boolean value) {
+        
+        showRowCounter_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_row_counter = 11;</code>
+       */
+      public Builder clearShowRowCounter() {
+        
+        showRowCounter_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean showRowIndex_ ;
+      /**
+       * <code>bool show_row_index = 12;</code>
+       */
+      public boolean getShowRowIndex() {
+        return showRowIndex_;
+      }
+      /**
+       * <code>bool show_row_index = 12;</code>
+       */
+      public Builder setShowRowIndex(boolean value) {
+        
+        showRowIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_row_index = 12;</code>
+       */
+      public Builder clearShowRowIndex() {
+        
+        showRowIndex_ = false;
         onChanged();
         return this;
       }
@@ -6482,7 +6610,7 @@ public final class ResultsProtos {
       "Unit\022<\n\016intensity_unit\030\005 \001(\0162$.gdsc.smlm" +
       ".data.config.IntensityUnit\0224\n\nangle_unit" +
       "\030\006 \001(\0162 .gdsc.smlm.data.config.AngleUnit" +
-      "\022\026\n\016show_precision\030\007 \001(\010\"\253\003\n\024ResultsTabl" +
+      "\022\026\n\016show_precision\030\007 \001(\010\"\335\003\n\024ResultsTabl" +
       "eSettings\022\022\n\nshow_table\030\001 \001(\010\022:\n\rdistanc" +
       "e_unit\030\002 \001(\0162#.gdsc.smlm.data.config.Dis" +
       "tanceUnit\022<\n\016intensity_unit\030\003 \001(\0162$.gdsc" +
@@ -6493,31 +6621,32 @@ public final class ResultsProtos {
       "\010\022\032\n\022rounding_precision\030\010 \001(\005\022\036\n\026update_" +
       "existing_tables\030\t \001(\010\022G\n\024results_table_f" +
       "ormat\030\n \001(\0162).gdsc.smlm.data.config.Resu" +
-      "ltsTableFormat\",\n\027ResultsInMemorySetting" +
-      "s\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017ResultsSettings" +
-      "\022\024\n\014log_progress\030\001 \001(\010\022\027\n\017show_deviation" +
-      "s\030\002 \001(\010\022K\n\026results_image_settings\030\003 \001(\0132" +
-      "+.gdsc.smlm.data.config.ResultsImageSett",
-      "ings\022I\n\025results_file_settings\030\004 \001(\0132*.gd" +
-      "sc.smlm.data.config.ResultsFileSettings\022" +
-      "K\n\026results_table_settings\030\005 \001(\0132+.gdsc.s" +
-      "mlm.data.config.ResultsTableSettings\022R\n\032" +
-      "results_in_memory_settings\030\006 \001(\0132..gdsc." +
-      "smlm.data.config.ResultsInMemorySettings" +
-      "*\262\002\n\020ResultsImageType\022\r\n\tDRAW_NONE\020\000\022\026\n\022" +
-      "DRAW_LOCALISATIONS\020\001\022\022\n\016DRAW_INTENSITY\020\002" +
-      "\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023\n\017DRAW_FITTED_P" +
-      "SF\020\004\022 \n\034DRAW_LOCALISATIONS_PRECISION\020\005\022\034",
-      "\n\030DRAW_INTENSITY_PRECISION\020\006\022(\n$DRAW_LOC" +
-      "ALISATIONS_AVERAGE_PRECISION\020\007\022$\n DRAW_I" +
-      "NTENSITY_AVERAGE_PRECISION\020\010\022\022\n\016DRAW_FIT" +
-      "_ERROR\020\t\022\023\n\017DRAW_Z_POSITION\020\n*C\n\020Results" +
-      "ImageMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIMAGE_REPLAC" +
-      "E\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsFileFormat\022" +
-      "\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BINARY\020\002\022\007\n\003" +
-      "TSF\020\003\022\010\n\004MALK\020\004*A\n\022ResultsTableFormat\022\016\n" +
-      "\nTABLE_NONE\020\000\022\n\n\006IMAGEJ\020\001\022\017\n\013INTERACTIVE" +
-      "\020\002B\017B\rResultsProtosb\006proto3"
+      "ltsTableFormat\022\030\n\020show_row_counter\030\013 \001(\010" +
+      "\022\026\n\016show_row_index\030\014 \001(\010\",\n\027ResultsInMem" +
+      "orySettings\022\021\n\tin_memory\030\001 \001(\010\"\371\002\n\017Resul" +
+      "tsSettings\022\024\n\014log_progress\030\001 \001(\010\022\027\n\017show" +
+      "_deviations\030\002 \001(\010\022K\n\026results_image_setti",
+      "ngs\030\003 \001(\0132+.gdsc.smlm.data.config.Result" +
+      "sImageSettings\022I\n\025results_file_settings\030" +
+      "\004 \001(\0132*.gdsc.smlm.data.config.ResultsFil" +
+      "eSettings\022K\n\026results_table_settings\030\005 \001(" +
+      "\0132+.gdsc.smlm.data.config.ResultsTableSe" +
+      "ttings\022R\n\032results_in_memory_settings\030\006 \001" +
+      "(\0132..gdsc.smlm.data.config.ResultsInMemo" +
+      "rySettings*\262\002\n\020ResultsImageType\022\r\n\tDRAW_" +
+      "NONE\020\000\022\026\n\022DRAW_LOCALISATIONS\020\001\022\022\n\016DRAW_I" +
+      "NTENSITY\020\002\022\025\n\021DRAW_FRAME_NUMBER\020\003\022\023\n\017DRA",
+      "W_FITTED_PSF\020\004\022 \n\034DRAW_LOCALISATIONS_PRE" +
+      "CISION\020\005\022\034\n\030DRAW_INTENSITY_PRECISION\020\006\022(" +
+      "\n$DRAW_LOCALISATIONS_AVERAGE_PRECISION\020\007" +
+      "\022$\n DRAW_INTENSITY_AVERAGE_PRECISION\020\010\022\022" +
+      "\n\016DRAW_FIT_ERROR\020\t\022\023\n\017DRAW_Z_POSITION\020\n*" +
+      "C\n\020ResultsImageMode\022\r\n\tIMAGE_ADD\020\000\022\021\n\rIM" +
+      "AGE_REPLACE\020\001\022\r\n\tIMAGE_MAX\020\002*K\n\021ResultsF" +
+      "ileFormat\022\r\n\tFILE_NONE\020\000\022\010\n\004TEXT\020\001\022\n\n\006BI" +
+      "NARY\020\002\022\007\n\003TSF\020\003\022\010\n\004MALK\020\004*A\n\022ResultsTabl" +
+      "eFormat\022\016\n\nTABLE_NONE\020\000\022\n\n\006IMAGEJ\020\001\022\017\n\013I",
+      "NTERACTIVE\020\002B\017B\rResultsProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6549,7 +6678,7 @@ public final class ResultsProtos {
     internal_static_gdsc_smlm_data_config_ResultsTableSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ResultsTableSettings_descriptor,
-        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", "UpdateExistingTables", "ResultsTableFormat", });
+        new java.lang.String[] { "ShowTable", "DistanceUnit", "IntensityUnit", "AngleUnit", "ShowPrecision", "ShowFittingData", "ShowNoiseData", "RoundingPrecision", "UpdateExistingTables", "ResultsTableFormat", "ShowRowCounter", "ShowRowIndex", });
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_gdsc_smlm_data_config_ResultsInMemorySettings_fieldAccessorTable = new
