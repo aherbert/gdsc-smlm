@@ -92,6 +92,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	private Rounder rounder;
 	private PeakResultData<?>[] values;
 	private String[] names;
+	private boolean rowCounter;
 
 	/**
 	 * Instantiates a new peak result model using settings from the resultsSource.
@@ -200,6 +201,7 @@ public class PeakResultTableModel extends AbstractTableModel
 		result = result && (t1.getShowFittingData() == t2.getShowFittingData());
 		result = result && (t1.getShowNoiseData() == t2.getShowNoiseData());
 		result = result && (t1.getRoundingPrecision() == t2.getRoundingPrecision());
+		result = result && (t1.getShowRowCounter() == t2.getShowRowCounter());
 		return result;
 	}
 
@@ -243,9 +245,11 @@ public class PeakResultTableModel extends AbstractTableModel
 		TurboList<PeakResultData<?>> valuesList = new TurboList<PeakResultData<?>>();
 		TurboList<String> namesList = new TurboList<String>();
 
-		// XXX - make thi configurable
-		valuesList.add(new PeakResultDataFrame());
-		namesList.add("#");
+		if (rowCounter = tableSettings.getShowRowCounter())
+		{
+			valuesList.add(new PeakResultDataFrame());
+			namesList.add("#");
+		}
 
 		valuesList.add(new PeakResultDataFrame());
 		addName(valuesList, namesList);
@@ -409,8 +413,11 @@ public class PeakResultTableModel extends AbstractTableModel
 	 */
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
-		if (columnIndex == 0)
-			return new Integer(rowIndex + 1);
+		if (rowCounter)
+		{
+			if (columnIndex == 0)
+				return new Integer(rowIndex + 1);
+		}
 		PeakResult r = get(rowIndex);
 		return values[columnIndex].getValue(r);
 	}
@@ -548,7 +555,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	{
 		if (indices == null || indices.length == 0)
 			return;
-		
+
 		if (indices.length == 1)
 		{
 			remove(source, indices[0]);
@@ -613,7 +620,7 @@ public class PeakResultTableModel extends AbstractTableModel
 			return;
 		if (size < peakResults.length)
 			indices = Arrays.copyOf(indices, size);
-		
+
 		int[] pairs = SimpleArrayUtils.getRanges(indices);
 
 		size = pairs.length;

@@ -130,9 +130,6 @@ message ResultsTableSettings {
 	ResultsTableFormat results_table_format = 10;
 	// Set to true to show a row counter in the table
 	bool show_row_counter = 11;
-	// Set to true to show a row index in the table.
-	// Only relevant when the table can show a different order from the backing list.
-	bool show_row_index = 12;
 }
 
 // Define the in-memory results settings

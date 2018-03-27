@@ -379,6 +379,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
 		egd.addCheckbox("Table_show_precision", tableSettings.getShowPrecision());
 		egd.addSlider("Table_precision", 0, 10, tableSettings.getRoundingPrecision());
+		egd.addCheckbox("Table_show_counter", tableSettings.getShowRowCounter());
 		egd.showDialog();
 		if (egd.wasCanceled())
 			return;
@@ -389,6 +390,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		tableSettings.setShowNoiseData(egd.getNextBoolean());
 		tableSettings.setShowPrecision(egd.getNextBoolean());
 		tableSettings.setRoundingPrecision((int) egd.getNextNumber());
+		tableSettings.setShowRowCounter(egd.getNextBoolean());
 		model.setTableSettings(tableSettings.build());
 	}
 
