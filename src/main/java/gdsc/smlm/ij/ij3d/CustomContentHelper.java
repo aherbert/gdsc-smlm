@@ -19,7 +19,7 @@ import org.scijava.vecmath.Point3f;
  *---------------------------------------------------------------------------*/
 
 import gdsc.core.utils.TurboList;
-import gdsc.smlm.ij.plugins.Pair;
+import gdsc.smlm.utils.Pair;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.ImagePlus;

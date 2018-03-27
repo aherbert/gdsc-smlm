@@ -65,6 +65,7 @@ import gdsc.smlm.results.PeakResultsList;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
+import gdsc.smlm.utils.Pair;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;

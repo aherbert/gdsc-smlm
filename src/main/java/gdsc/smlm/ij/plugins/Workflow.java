@@ -16,6 +16,8 @@ package gdsc.smlm.ij.plugins;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import gdsc.smlm.utils.Pair;
+
 /**
  * Allow processing work in stages, repeating only the stages necessary to render new results given changes to settings.
  * This class is designed to be used to allow live display of results upon settings changes by running the analysis on

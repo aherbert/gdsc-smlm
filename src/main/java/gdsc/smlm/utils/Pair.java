@@ -1,9 +1,9 @@
-package gdsc.smlm.ij.plugins;
+package gdsc.smlm.utils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
  * 
- * Copyright (C) 2018 Alex Herbert
+ * Copyright (C) 2017 Alex Herbert
  * Genome Damage and Stability Centre
  * University of Sussex, UK
  * 
@@ -14,20 +14,18 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 /**
- * A generic triplet.
+ * A generic pair.
  * 
  * @author Alex Herbert
  */
-public class Triplet<A, B, C>
+public class Pair<A, B>
 {
 	public final A a;
 	public final B b;
-	public final C c;
 
-	public Triplet(A a, B b, C c)
+	public Pair(A a, B b)
 	{
 		this.a = a;
 		this.b = b;
-		this.c = c;
 	}
 }

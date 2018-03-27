@@ -72,6 +72,7 @@ import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.StandardResultProcedure;
+import gdsc.smlm.utils.Pair;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;

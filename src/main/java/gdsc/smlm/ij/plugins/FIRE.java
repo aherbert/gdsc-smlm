@@ -97,6 +97,7 @@ import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
+import gdsc.smlm.utils.Pair;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;

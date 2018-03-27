@@ -1,5 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
+import gdsc.smlm.utils.Pair;
+
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
  * 
