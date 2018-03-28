@@ -113,6 +113,7 @@ import gdsc.smlm.ij.ij3d.ItemMesh;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import gdsc.smlm.ij.ij3d.ReferenceItemMesh;
 import gdsc.smlm.ij.ij3d.Shape3DHelper;
 import gdsc.smlm.ij.ij3d.Shape3DHelper.Rendering;
 import gdsc.smlm.ij.ij3d.TransparentItemPointMesh;
@@ -3594,7 +3595,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
-			ItemMesh mesh = new ItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, null, null,
+			ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, null, null,
 					transparency);
 			if (alpha != null)
 			{
@@ -3618,7 +3619,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		IJ.showStatus("Creating 3D mesh ...");
-		ItemMesh mesh = new ItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize, null,
+		ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize, null,
 				transparency);
 		if (alpha != null)
 		{
