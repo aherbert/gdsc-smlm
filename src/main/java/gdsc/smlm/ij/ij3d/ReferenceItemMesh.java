@@ -271,9 +271,10 @@ public class ReferenceItemMesh extends ItemMesh
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		final float[] colors = ga.getColorRefFloat();
+		final float[] colors;
 		if (hasColor3())
 		{
+			colors = new float[size() * colorUpdater.size()];
 			float[] tmp = new float[3];
 			color.get(tmp);
 			duplicate(tmp, 0, 3, colors.length / 3, colors, 0);
@@ -281,6 +282,7 @@ public class ReferenceItemMesh extends ItemMesh
 		else
 		{
 			// Preserve alpha
+			colors = ga.getColorRefFloat().clone();
 			for (int i = 0; i < colors.length; i += 4)
 			{
 				colors[i] = color.x;
@@ -312,9 +314,10 @@ public class ReferenceItemMesh extends ItemMesh
 		if (ga == null)
 			return;
 		int n = colorUpdater.size();
-		final float[] colors = ga.getColorRefFloat();
+		final float[] colors;
 		if (hasColor3())
 		{
+			colors = new float[size() * n];
 			for (int i = 0; i < color.length; i++)
 			{
 				System.arraycopy(colorUpdater.getColors(color[i]), 0, colors, i * n, n);
@@ -323,6 +326,7 @@ public class ReferenceItemMesh extends ItemMesh
 		else
 		{
 			// Preserve alpha
+			colors = ga.getColorRefFloat().clone();
 			for (int i = 0; i < color.length; i++)
 			{
 				int offset = i * n;
@@ -352,7 +356,7 @@ public class ReferenceItemMesh extends ItemMesh
 		if (ga == null)
 			return;
 		int n = colorUpdater.size();
-		final float[] colors = ga.getColorRefFloat();
+		final float[] colors = new float[size() * n];
 		for (int i = 0; i < color.length; i++)
 		{
 			System.arraycopy(colorUpdater.getColors(color[i]), 0, colors, i * n, n);
@@ -379,7 +383,7 @@ public class ReferenceItemMesh extends ItemMesh
 			return;
 		int n = colorUpdater.size();
 		// Preserve color
-		final float[] colors = ga.getColorRefFloat();
+		final float[] colors = ga.getColorRefFloat().clone();
 		for (int i = 0; i < size; i++)
 		{
 			int offset = i * n;
@@ -406,7 +410,7 @@ public class ReferenceItemMesh extends ItemMesh
 			return;
 		int n = colorUpdater.size();
 		// Preserve color
-		final float[] colors = ga.getColorRefFloat();
+		final float[] colors = ga.getColorRefFloat().clone();
 		for (int i = 0; i < size; i++)
 		{
 			int offset = i * n;
