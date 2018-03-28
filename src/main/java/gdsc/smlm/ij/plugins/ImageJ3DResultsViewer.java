@@ -109,6 +109,7 @@ import gdsc.smlm.ij.ij3d.CustomContentInstant;
 import gdsc.smlm.ij.ij3d.ItemGeometryGroup;
 import gdsc.smlm.ij.ij3d.ItemGroup;
 import gdsc.smlm.ij.ij3d.ItemGroupNode;
+import gdsc.smlm.ij.ij3d.ItemMesh;
 import gdsc.smlm.ij.ij3d.ItemPointMesh;
 import gdsc.smlm.ij.ij3d.ItemShape;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
@@ -2584,32 +2585,54 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{
 				transparency = mesh.getTransparency();
 				mesh.setTransparency(0);
-				if (mesh instanceof TransparentItemShape)
+				if (mesh instanceof ItemMesh)
 				{
-					TransparentItemShape t = (TransparentItemShape) mesh;
-					int size = t.size();
-					if (alpha == null || alpha.length != size)
-						alpha = new float[size];
-					t.getItemAlpha(alpha);
-					t.setItemAlpha(1);
+					ItemMesh t = (ItemMesh) mesh;
+					if (t.hasColor4())
+					{
+						save((TransparentItemShape) mesh);
+					}
 				}
+				else if (mesh instanceof TransparentItemShape)
+				{
+					save((TransparentItemShape) mesh);
+				}
+			}
+
+			private void save(TransparentItemShape t)
+			{
+				int size = t.size();
+				if (alpha == null || alpha.length != size)
+					alpha = new float[size];
+				t.getItemAlpha(alpha);
+				t.setItemAlpha(1);
 			}
 
 			public void restore(CustomMesh mesh)
 			{
 				mesh.setTransparency(transparency);
-				if (mesh instanceof TransparentItemShape)
+				if (mesh instanceof ItemMesh)
 				{
-					TransparentItemShape t = (TransparentItemShape) mesh;
-					int size = t.size();
-					if (alpha != null && alpha.length == size)
-						t.setItemAlpha(alpha);
+					ItemMesh t = (ItemMesh) mesh;
+					if (t.hasColor4())
+					{
+						restore((TransparentItemShape) mesh);
+					}
 				}
+				else if (mesh instanceof TransparentItemShape)
+				{
+					restore((TransparentItemShape) mesh);
+				}
+			}
+
+			private void restore(TransparentItemShape t)
+			{
+				if (alpha != null && alpha.length == t.size())
+					t.setItemAlpha(alpha);
 			}
 
 			public void save(ItemGroup group)
 			{
-				// TODO - update this for additional types of ItemGroup
 				if (group instanceof ItemGeometryGroup)
 				{
 					save((ItemGeometryGroup) group);
@@ -2623,7 +2646,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			public void restore(ItemGroup group)
 			{
-				// TODO - update this for additional types of ItemGroup
 				if (group instanceof ItemGeometryGroup)
 				{
 					restore((ItemGeometryGroup) group);

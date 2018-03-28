@@ -315,7 +315,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
-		ga.getColor(0, colors);
+		ga.getColors(0, colors);
 		int i = 3;
 		for (float f : alpha)
 		{
@@ -343,12 +343,15 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
-		ga.getColor(0, colors);
+		ga.getColors(0, colors);
 		int i = 3;
-		for (int j = objectSize; j-- > 0;)
+		while (size-- > 0)
 		{
-			colors[i] = alpha;
-			i += 4;
+			for (int j = objectSize; j-- > 0;)
+			{
+				colors[i] = alpha;
+				i += 4;
+			}
 		}
 		ga.setColors(0, colors);
 		changed = true;
@@ -370,7 +373,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 		int objectSize = objectVertices.length;
 		final int N = objectSize * size;
 		final float[] colors = new float[N * 4];
-		ga.getColor(0, colors);
+		ga.getColors(0, colors);
 		for (int i = 0; i < size; i++)
 		{
 			// Get only alpha

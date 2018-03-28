@@ -17,6 +17,7 @@ import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
 /*----------------------------------------------------------------------------- 
@@ -41,8 +42,11 @@ import gdsc.core.utils.TurboList;
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated for
  * each point.
+ * <p>
+ * Note: TransparentItemShape is only supported if {@link #hasColor4()} is true, i.e. the input geometry has per vertex
+ * colours with alpha.
  */
-public class ItemMesh extends CustomMesh implements UpdateableItemShape
+public class ItemMesh extends CustomMesh implements UpdateableItemShape, TransparentItemShape
 {
 	/** The vertex count of the original geometry array. */
 	final protected int vertexCount;
@@ -893,12 +897,13 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		final float[] colors = new float[size * colorUpdater.size()];
+		int n = colorUpdater.size();
+		final float[] colors = new float[size * n];
 		if (hasColor3())
 		{
 			float[] tmp = new float[3];
 			color.get(tmp);
-			duplicate(tmp, 0, 3, size * colorUpdater.getN(), colors, 0);
+			duplicate(tmp, 0, 3, size * n, colors, 0);
 			ga.setColors(0, colors);
 		}
 		else
@@ -935,8 +940,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape
 		final GeometryArray ga = (GeometryArray) getGeometry();
 		if (ga == null)
 			return;
-		final float[] colors = new float[size * colorUpdater.size()];
 		int n = colorUpdater.size();
+		final float[] colors = new float[size * n];
 		if (hasColor3())
 		{
 			for (int i = 0; i < color.length; i++)
@@ -953,7 +958,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape
 			{
 				int offset = i * n;
 				colorUpdater.getColors(color[i], colors[offset + 3]);
-				System.arraycopy(colorUpdater.pointColor, 0, colors, i * n, n);
+				System.arraycopy(colorUpdater.pointColor, 0, colors, offset, n);
 			}
 			ga.setColors(0, colors);
 		}
@@ -970,5 +975,116 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape
 	public float getVolume()
 	{
 		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
+	 */
+	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
+	{
+		if (!hasColor4())
+			throw new IllegalArgumentException("Per-item alpha not supported");
+
+		this.color = null;
+		int size = size();
+		if (color.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int n = colorUpdater.size();
+		final float[] colors = new float[size * n];
+		for (int i = 0; i < color.length; i++)
+		{
+			System.arraycopy(colorUpdater.getColors(color[i]), 0, colors, i * n, n);
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
+	 */
+	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
+	{
+		if (!hasColor4())
+			throw new IllegalArgumentException("Per-item alpha not supported");
+
+		int size = size();
+		if (alpha.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int n = colorUpdater.size();
+		final float[] colors = new float[size * n];
+		// Preserve color
+		ga.getColors(0, colors);
+		for (int i = 0; i < size; i++)
+		{
+			int offset = i * n;
+			for (int j = 3; j < n; j += 4)
+				colors[j + offset] = alpha[i];
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
+	 */
+	public void setItemAlpha(float alpha) throws IllegalArgumentException
+	{
+		if (!hasColor4())
+			throw new IllegalArgumentException("Per-item alpha not supported");
+
+		int size = size();
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int n = colorUpdater.size();
+		final float[] colors = new float[size * n];
+		// Preserve color
+		ga.getColors(0, colors);
+		for (int i = 0; i < size; i++)
+		{
+			int offset = i * n;
+			for (int j = 3; j < n; j += 4)
+				colors[j + offset] = alpha;
+		}
+		ga.setColors(0, colors);
+		changed = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
+	 */
+	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
+	{
+		if (!hasColor4())
+			throw new IllegalArgumentException("Per-item alpha not supported");
+
+		int size = size();
+		if (alpha.length != size)
+			throw new IllegalArgumentException("list of size " + size + " expected");
+		final GeometryArray ga = (GeometryArray) getGeometry();
+		if (ga == null)
+			return;
+		int n = colorUpdater.size();
+		final float[] colors = new float[size * n];
+		ga.getColors(0, colors);
+		for (int i = 0; i < size; i++)
+		{
+			// Get only alpha
+			alpha[i] = colors[i * n + 3];
+		}
 	}
 }
