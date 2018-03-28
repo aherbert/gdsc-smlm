@@ -1067,14 +1067,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		else
 		{
-			CustomMesh mesh = createMesh(settings, points, sphereSize, transparency, alpha);
+			CustomMesh mesh = createItemMesh(settings, points, sphereSize, transparency, alpha);
 			if (mesh == null)
 			{
 				IJ.showStatus("");
 				return;
 			}
 
-			updateAppearance(mesh, settings);
+			//updateAppearance(mesh, settings);
 
 			setColour((ItemShape) mesh, colors);
 
@@ -3519,6 +3519,99 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return new Shape3D(ga, mesh.getAppearance());
 	}
 
+	private static CustomMesh createItemMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
+			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
+	{
+		// This may work 
+		//int MAX_ARRAY_SIZE = 1 << 28;
+		// This is a safe limit (2^27)
+		int MAX_ARRAY_SIZE = CustomContentHelper.MAX_ARRAY_SIZE;
+
+		Rendering rendering = Rendering.forNumber(settings.getRendering());
+		int colorDepth = (alpha != null) ? 4 : 3;
+		Shape3D shape = Shape3DHelper.createShape(rendering, colorDepth);
+
+		GeometryArray ga = (GeometryArray) shape.getGeometry();
+		Appearance appearance = shape.getAppearance();
+
+		// Estimate the largest array required for the data
+
+		int singlePointVertexSize = ga.getValidVertexCount();
+		int singlePointIndexSize = 0;
+
+		// The stride is used when all the data is stored in a single float[] array.
+		// Indexed arrays store coords, normals and colors in different float[] arrays.
+		int stride = 3; // Coordinates
+		if (!(ga instanceof IndexedGeometryArray))
+		{
+			stride += colorDepth;
+			if (settings.getRendering() != 0)
+				stride += 3; // + normals
+		}
+		else
+		{
+			// Indexed arrays may have much larger index array than the vertex array 
+			singlePointIndexSize = ((IndexedGeometryArray) ga).getIndexCount();
+			// Colours are not a problem (even with alpha) as the ItemMesh compacts 
+			// them to 1 colour per item. So the coordinates will still be the 
+			// largest array.
+		}
+
+		int singlePointSize = Math.max(singlePointIndexSize, stride * singlePointVertexSize);
+
+		long arraySize = (long) points.size() * singlePointSize;
+		if (arraySize > MAX_ARRAY_SIZE)
+		{
+			double capacity = (double) arraySize / MAX_ARRAY_SIZE;
+			//@formatter:off
+			IJ.error(TITLE,
+					TextUtils.wrap(String.format(
+							"The results will generate data of %d values. " +
+							"This is amount of data is not supported (%.2fx capacity). " +
+							"Please choose a different dataset with fewer points or " +
+							"different rendering model.",
+							arraySize, capacity), 80));
+			//@formatter:on
+			return null;
+		}
+
+		// Support drawing as points ...
+		if (settings.getRendering() == 0)
+		{
+			ItemMesh mesh = new ItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, null, null,
+					transparency);
+			if (alpha != null)
+			{
+				mesh.setItemAlpha(alpha);
+			}
+			mesh.getAppearance().getPointAttributes().setPointSize(sphereSize[0].x);
+			return mesh;
+		}
+
+		int triangles = Shape3DHelper.getNumberOfTriangles(rendering);
+		long size = (long) points.size() * triangles;
+		if (size > 10000000L)
+		{
+			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
+			egd.addMessage("The results will generate a large mesh of " + size +
+					" triangles.\nThis may take a long time to render and may run out of memory.");
+			egd.setOKLabel("Continue");
+			egd.showDialog();
+			if (egd.wasCanceled())
+				return null;
+		}
+
+		IJ.showStatus("Creating 3D mesh ...");
+		ItemMesh mesh = new ItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize, null,
+				transparency);
+		if (alpha != null)
+		{
+			mesh.setItemAlpha(alpha);
+		}
+		return mesh;
+	}
+
+	@SuppressWarnings("unused")
 	private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
 			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
 	{
