@@ -211,6 +211,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		setAppearance(createAppearance(appearance, ga));
 
 		// Initialise
+		if (hasColor4())
+			setItemAlpha(1f);
 		setColor(color);
 		setTransparency(transparency);
 	}
@@ -903,7 +905,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		{
 			float[] tmp = new float[3];
 			color.get(tmp);
-			duplicate(tmp, 0, 3, size * n, colors, 0);
+			duplicate(tmp, 0, 3, colors.length / 3, colors, 0);
 			ga.setColors(0, colors);
 		}
 		else
