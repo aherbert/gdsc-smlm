@@ -1905,14 +1905,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// Consume the event
 				e.consume();
 
-				String name = "Clicked localisation";
-
 				// This finds the vertex indices of the rendered object.
 				Pair<Content, IntersectionInfo> pair = getPickedContent(canvas, scene, e.getX(), e.getY());
 				if (pair == null)
 				{
 					univ.select(null); // Do the same as the mouseClicked in Image3DUniverse
-					univ.removeContent(name);
 					return;
 				}
 
@@ -1937,12 +1934,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					CustomMesh mesh = node.getMesh();
 					int nVertices;
 					GeometryArray ga = (GeometryArray) mesh.getGeometry();
-					if (ga instanceof IndexedGeometryArray)
-						// An indexed mesh has the correct number of vertex indices
-						nVertices = ((IndexedGeometryArray) ga).getValidIndexCount();
-					else
-						// Default to the number of vertices
-						nVertices = ga.getValidVertexCount();
+					//					if (ga instanceof IndexedGeometryArray)
+					//						// An indexed mesh has the correct number of vertex indices
+					//						nVertices = ((IndexedGeometryArray) ga).getValidIndexCount();
+					//					else
+					// Default to the number of vertices
+					nVertices = ga.getValidVertexCount();
 
 					int nPerLocalisation = nVertices / results.size();
 
@@ -1950,7 +1947,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					int vertexIndex = pair.b.getVertexIndices()[0];
 					index = vertexIndex / nPerLocalisation;
 					//System.out.printf("n=%d [%d]  %s  %s\n", nPerLocalisation, index,
-					//		Arrays.toString(pair.r.getVertexIndices()), pair.r.getIntersectionPoint());
+					//		Arrays.toString(pair.b.getVertexIndices()), pair.b.getIntersectionPoint());
 				}
 				else if (content.getContent() instanceof ItemGroupNode)
 				{
@@ -3595,8 +3592,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// Support drawing as points ...
 		if (settings.getRendering() == 0)
 		{
-			ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, null, null,
-					transparency);
+			ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, null,
+					null, transparency);
 			if (alpha != null)
 			{
 				mesh.setItemAlpha(alpha);
@@ -3619,8 +3616,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 
 		IJ.showStatus("Creating 3D mesh ...");
-		ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize, null,
-				transparency);
+		ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize,
+				null, transparency);
 		if (alpha != null)
 		{
 			mesh.setItemAlpha(alpha);
