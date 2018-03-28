@@ -83,6 +83,8 @@ public class Shape3DHelper
 	};
 	//@formatter:on
 
+	private static int[] numberOfTriangles = new int[Rendering.values().length];
+
 	public static Shape3D createShape(Rendering rendering, int colorDepth)
 	{
 		TurboList<Point3f> points = new TurboList<Point3f>(1);
@@ -671,13 +673,37 @@ public class Shape3DHelper
 
 	/**
 	 * Creates the object used to draw a single localisation.
-	 * 
-	 * @param rendering
-	 * @param colorDepth
 	 *
-	 * @return the list of triangle vertices for the object
+	 * @param rendering
+	 *            the rendering
+	 * @param colorDepth
+	 *            the color depth
+	 * @return the geometry array
 	 */
 	public static GeometryArray createGeometryArray(Rendering rendering, int colorDepth)
+	{
+		GeometryInfo gi = createGeometryInfo(rendering, colorDepth);
+		GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray() : gi.getIndexedGeometryArray();
+
+		//int v = ga.getValidVertexCount();
+		//float[] p = new float[v * 3];
+		//ga.getCoordinates(0, p);
+		//for (int i = 0; i < p.length; i += 3)
+		//	System.out.printf("%f %f %f\n", p[i], p[i + 1], p[i + 2]);
+
+		return ga;
+	}
+
+	/**
+	 * Creates the object used to draw a single localisation.
+	 *
+	 * @param rendering
+	 *            the rendering
+	 * @param colorDepth
+	 *            the color depth
+	 * @return the geometry info
+	 */
+	public static GeometryInfo createGeometryInfo(Rendering rendering, int colorDepth)
 	{
 		int subdivisions = 0;
 		GeometryInfo gi;
@@ -800,15 +826,7 @@ public class Shape3DHelper
 			//			ng.generateNormals(gi);
 		}
 
-		GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray() : gi.getIndexedGeometryArray();
-
-		//int v = ga.getValidVertexCount();
-		//float[] p = new float[v * 3];
-		//ga.getCoordinates(0, p);
-		//for (int i = 0; i < p.length; i += 3)
-		//	System.out.printf("%f %f %f\n", p[i], p[i + 1], p[i + 2]);
-
-		return ga;
+		return gi;
 	}
 
 	/**
@@ -840,5 +858,43 @@ public class Shape3DHelper
 		}
 
 		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+	}
+
+	/**
+	 * Gets the number of triangles.
+	 *
+	 * @param ga
+	 *            the geometry array
+	 * @return the number of triangles
+	 */
+	public static int getNumberOfTriangles(GeometryArray ga)
+	{
+		GeometryInfo gi = new GeometryInfo(ga);
+		gi.convertToIndexedTriangles();
+		return gi.getCoordinateIndices().length / 3;
+	}
+
+	/**
+	 * Gets the number of triangles.
+	 *
+	 * @param rendering
+	 *            the rendering
+	 * @return the number of triangles
+	 */
+	public static int getNumberOfTriangles(Rendering rendering)
+	{
+		if (rendering == Rendering.POINT)
+			return 0;
+		int index = rendering.ordinal();
+		if (numberOfTriangles[index] == 0)
+		{
+			GeometryInfo gi = createGeometryInfo(rendering, 0);
+			// Remove normals so the conversion is faster
+			gi.setNormals((float[]) null);
+			gi.setNormalIndices(null);
+			gi.convertToIndexedTriangles();
+			numberOfTriangles[index] = gi.getCoordinateIndices().length / 3;
+		}
+		return numberOfTriangles[index];
 	}
 }

@@ -101,28 +101,18 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			float x = 0, y = 0;
 			float space = 2.5f;
 
-			Appearance a = null;
-
 			//for (Rendering rendering : new Rendering[] { Rendering.SQUARE, Rendering.OCTAGON, Rendering.ICOSAHEDRON })
 			for (Rendering rendering : Rendering.values())
 			{
 				Shape3D shape = Shape3DHelper.createShape(rendering, 3);
 
-				a = (Appearance) shape.getAppearance().cloneNodeComponent(true);
-
-				if (a == null)
-				{
-					List<Point3f> points = customnode.MeshMaker.createIcosahedron(0, 1f);
-					CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
-							new Point3f[] { new Point3f(x, y, 0) }, null, null, 0);
-					a = mesh.getAppearance();
-				}
+				Appearance a = shape.getAppearance();
 
 				ItemMesh mesh = new ItemMesh(new Point3f[] { new Point3f(x, y, 0) },
 						(GeometryArray) shape.getGeometry(), a, null, null, 0f);
 
-				System.out.printf("R=%s %s  Vc=%d  V=%d\n", rendering, shape.getGeometry().getClass().getSimpleName(),
-						mesh.getVerticesCountPerItem(), mesh.getVerticesPerItem());
+				System.out.printf("R=%s %s  Vc=%d  V=%d  T=%d\n", rendering, shape.getGeometry().getClass().getSimpleName(),
+						mesh.getVerticesCountPerItem(), mesh.getVerticesPerItem(), Shape3DHelper.getNumberOfTriangles(rendering));
 
 				if (rendering == Rendering.POINT)
 					a.getPointAttributes().setPointSize(10);
