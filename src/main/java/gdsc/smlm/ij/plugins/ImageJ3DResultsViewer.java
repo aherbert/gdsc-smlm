@@ -488,7 +488,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 				tg.addChild(new Shape3D(outline.getGeometry(), outline.getAppearance()));
 				tg.setPickable(false);
-				// Add the outline before to support transparency
+				// Add the outline before to support transparency.
 				switchIndex = contentInstance.addCustomSwitch(tg, true);
 				selected.add(r);
 				selectedNode.add(tg);
@@ -627,7 +627,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		public void removeSelectionModel()
 		{
-			listSelectionModel.removeListSelectionListener(this);
+			if (listSelectionModel != null)
+			{
+				listSelectionModel.removeListSelectionListener(this);
+				listSelectionModel = null;
+			}
 		}
 
 		public void removeFromSelectionModel(PeakResult p)
@@ -2719,7 +2723,29 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 				// The point mesh does not support the transparency mode switching off.
 				// So switch the actual transparency.
-				if (mesh instanceof CustomPointMesh)
+				if (mesh instanceof ItemMesh && ((ItemMesh) mesh).isPointArray())
+				{
+					TransparencyData d;
+					if (mesh.getUserData() instanceof TransparencyData)
+					{
+						d = (TransparencyData) mesh.getUserData();
+					}
+					else
+					{
+						d = new TransparencyData();
+						mesh.setUserData(d);
+					}
+
+					if (off)
+					{
+						d.save(mesh);
+					}
+					else
+					{
+						d.restore(mesh);
+					}
+				}
+				else if (mesh instanceof CustomPointMesh)
 				{
 					TransparencyData d;
 					if (mesh.getUserData() instanceof TransparencyData)
@@ -3534,27 +3560,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		GeometryArray ga = (GeometryArray) shape.getGeometry();
 		Appearance appearance = shape.getAppearance();
 
-		// Estimate the largest array required for the data
+		// Estimate the largest array required for the data.
+		// The mesh is created by reference using an array for coords, normals and colors. 
 
 		int singlePointVertexSize = ga.getValidVertexCount();
 		int singlePointIndexSize = 0;
 
-		// The stride is used when all the data is stored in a single float[] array.
-		// Indexed arrays store coords, normals and colors in different float[] arrays.
-		int stride = 3; // Coordinates
-		if (!(ga instanceof IndexedGeometryArray))
-		{
-			stride += colorDepth;
-			if (settings.getRendering() != 0)
-				stride += 3; // + normals
-		}
-		else
+		int stride = Math.max(3, colorDepth);
+		if (ga instanceof IndexedGeometryArray)
 		{
 			// Indexed arrays may have much larger index array than the vertex array 
 			singlePointIndexSize = ((IndexedGeometryArray) ga).getIndexCount();
-			// Colours are not a problem (even with alpha) as the ItemMesh compacts 
-			// them to 1 colour per item. So the coordinates will still be the 
-			// largest array.
 		}
 
 		int singlePointSize = Math.max(singlePointIndexSize, stride * singlePointVertexSize);

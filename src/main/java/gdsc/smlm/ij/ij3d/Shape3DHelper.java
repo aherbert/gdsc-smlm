@@ -14,6 +14,7 @@ import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.TriangleArray;
 import org.scijava.java3d.utils.geometry.GeometryInfo;
 import org.scijava.java3d.utils.geometry.NormalGenerator;
+import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
@@ -687,7 +688,9 @@ public class Shape3DHelper
 	public static GeometryArray createGeometryArray(Rendering rendering, int colorDepth)
 	{
 		GeometryInfo gi = createGeometryInfo(rendering, colorDepth);
-		GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray() : gi.getIndexedGeometryArray();
+		boolean useCoordIndexOnly = gi.getUseCoordIndexOnly();
+		GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray()
+				: gi.getIndexedGeometryArray(false, false, false, useCoordIndexOnly, false);
 
 		//int v = ga.getValidVertexCount();
 		//float[] p = new float[v * 3];
@@ -773,6 +776,8 @@ public class Shape3DHelper
 
 		gi = new GeometryInfo(primitive);
 
+		gi.setUseCoordIndexOnly(true);
+
 		if (normalise)
 			normalise(coords);
 
@@ -811,7 +816,7 @@ public class Shape3DHelper
 			}
 
 			gi.setNormals(normals);
-			gi.setNormalIndices(p.b);
+			//gi.setNormalIndices(p.b);
 
 			if (colorDepth == 3 || colorDepth == 4)
 			{
@@ -819,7 +824,7 @@ public class Shape3DHelper
 					gi.setColors3(new float[iCoords.length * 3]);
 				else if (colorDepth == 4)
 					gi.setColors4(new float[iCoords.length * 4]);
-				gi.setColorIndices(p.b);
+				//gi.setColorIndices(p.b);
 			}
 
 			//			final NormalGenerator ng = new NormalGenerator();
@@ -893,9 +898,13 @@ public class Shape3DHelper
 		if (numberOfTriangles[index] == 0)
 		{
 			GeometryInfo gi = createGeometryInfo(rendering, 0);
-			// Remove normals so the conversion is faster
-			gi.setNormals((float[]) null);
+			// Remove so the conversion is faster
+			gi.setColors((Color3f[]) null);
+			gi.setColorIndices(null);
+			gi.setNormals((Vector3f[]) null);
 			gi.setNormalIndices(null);
+			// this is required before conversion
+			gi.setUseCoordIndexOnly(false);
 			gi.convertToIndexedTriangles();
 			numberOfTriangles[index] = gi.getCoordinateIndices().length / 3;
 		}

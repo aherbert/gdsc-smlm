@@ -416,6 +416,92 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGA)
 	{
+		final GeometryArray ga = createGeometryArray(sourceGA, 0);
+
+		ga.setCoordinates(0, coords);
+		ga.setCapability(GeometryArray.ALLOW_COORDINATE_WRITE);
+
+		// Handle normals
+		boolean doNormals = hasNormals();
+
+		// Handle colors
+		if (hasColor())
+		{
+			ga.setCapability(GeometryArray.ALLOW_COLOR_READ);
+			ga.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+			colorUpdater = ArrayColorUpdater.create(vertexCount, hasColor4());
+		}
+
+		// Fan are extensions of GeometryStripArray so do not need extra code.
+
+		// Handle indexed array
+		if (isIndexGeometryArray())
+		{
+			IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
+			IndexedGeometryArray iga = (IndexedGeometryArray) ga;
+			int objectIndexCount = sourceIGA.getValidIndexCount();
+			int[] objectIndices = new int[objectIndexCount];
+			int[] allIndices = new int[objectIndices.length * points.length];
+			sourceIGA.getCoordinateIndices(0, objectIndices);
+			duplicateIndices(objectIndices, allIndices);
+			iga.setCoordinateIndices(0, allIndices);
+
+			// Check if we need the color and normal indices 
+			if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0)
+			{
+				if (hasNormals())
+				{
+					// Done later
+				}
+
+				if (hasColor())
+				{
+					// Update the colour for each vertex as normal
+				}
+			}
+			else
+			{
+				if (hasNormals())
+				{
+					// Use the same index for all vertices for normals
+					sourceIGA.getNormalIndices(0, objectIndices);
+					duplicate(objectIndices, 0, objectIndices.length, points.length, allIndices, 0);
+					iga.setNormalIndices(0, allIndices);
+
+					float[] normals = new float[(Maths.max(objectIndices) + 1) * 3];
+					sourceIGA.getNormals(0, normals);
+					iga.setNormals(0, normals);
+
+					doNormals = false;
+				}
+
+				if (hasColor())
+				{
+					// Use a single index per item for vertex colour
+					for (int i = 0, k = 0; i < points.length; i++)
+						for (int j = 0; j < objectIndexCount; j++)
+							allIndices[k++] = i;
+					iga.setColorIndices(0, allIndices);
+					// Only have to update a single colour per item
+					colorUpdater = ArrayColorUpdater.create(1, hasColor4());
+				}
+			}
+		}
+
+		if (doNormals)
+		{
+			float[] objectNormals = new float[vertexCount * 3];
+			sourceGA.getNormals(0, objectNormals);
+			float[] allNormals = new float[objectNormals.length * points.length];
+			duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
+			ga.setNormals(0, allNormals);
+		}
+
+		return ga;
+	}
+
+	protected GeometryArray createGeometryArray(GeometryArray sourceGA, int format)
+	{
 		// Create using reflection
 		final GeometryArray ga;
 		try
@@ -429,7 +515,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			paramTypes.add(int.class);
 			paramTypes.add(int.class);
 			paramValues.add(vertexCount * points.length);
-			paramValues.add(vertexFormat);
+			paramValues.add(vertexFormat | format);
 
 			if (isIndexGeometryArray())
 			{
@@ -474,98 +560,15 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			return null;
 		}
 
-		ga.setCoordinates(0, coords);
-		ga.setCapability(GeometryArray.ALLOW_COORDINATE_WRITE);
 		ga.setCapability(GeometryArray.ALLOW_COUNT_WRITE);
 		ga.setCapability(GeometryArray.ALLOW_COUNT_READ);
 		ga.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 		ga.setCapability(Geometry.ALLOW_INTERSECT);
 
-		// Handle normals
-		boolean doNormals = hasNormals();
-
-		// Handle colors
-		if (hasColor())
-		{
-			ga.setCapability(GeometryArray.ALLOW_COLOR_READ);
-			ga.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
-			colorUpdater = ArrayColorUpdater.create(vertexCount, hasColor4());
-		}
-
-		// Fan are extensions of GeometryStripArray so do not need extra code.
-
-		// Handle indexed array
-		if (isIndexGeometryArray())
-		{
-			IndexedGeometryArray sourceIGA = (IndexedGeometryArray) sourceGA;
-			IndexedGeometryArray iga = (IndexedGeometryArray) ga;
-			int objectIndexCount = sourceIGA.getValidIndexCount();
-			int[] objectIndices = new int[objectIndexCount];
-			int[] allIndices = new int[objectIndices.length * points.length];
-			sourceIGA.getCoordinateIndices(0, objectIndices);
-			for (int i = 0, k = 0; i < points.length; i++)
-			{
-				int offset = k;
-				for (int j = 0; j < objectIndices.length; j++)
-					allIndices[k++] = objectIndices[j] + offset;
-			}
-			iga.setCoordinateIndices(0, allIndices);
-
-			// Check if we need the color and normal indices 
-			if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0)
-			{
-				if (hasNormals())
-				{
-					// Done later
-				}
-
-				if (hasColor())
-				{
-					// Update the colour for each vertex as normal
-				}
-			}
-			else
-			{
-				if (hasNormals())
-				{
-					// Use the same index for all vertices for normals
-					sourceIGA.getNormalIndices(0, objectIndices);
-					duplicate(objectIndices, 0, objectIndices.length, points.length, allIndices, 0);
-					iga.setNormalIndices(0, objectIndices);
-
-					float[] normals = new float[(Maths.max(objectIndices) + 1) * 3];
-					sourceIGA.getNormals(0, normals);
-					iga.setNormals(0, normals);
-
-					doNormals = false;
-				}
-
-				if (hasColor())
-				{
-					// Use a single index per item for vertex colour
-					for (int i = 0, k = 0; i < points.length; i++)
-						for (int j = 0; j < objectIndexCount; j++)
-							allIndices[k++] = i;
-					iga.setColorIndices(0, allIndices);
-					// Only have to update a single colour per item
-					colorUpdater = ArrayColorUpdater.create(1, hasColor4());
-				}
-			}
-		}
-
-		if (doNormals)
-		{
-			float[] objectNormals = new float[vertexCount * 3];
-			sourceGA.getNormals(0, objectNormals);
-			float[] allNormals = new float[objectNormals.length * points.length];
-			duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
-			ga.setNormals(0, allNormals);
-		}
-
 		return ga;
 	}
 
-	private void duplicate(Object source, int from, int length, int n, Object dest, int to)
+	protected void duplicate(Object source, int from, int length, int n, Object dest, int to)
 	{
 		// Binary fill
 		int fill = length;
@@ -577,6 +580,17 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		}
 		// Final fill
 		System.arraycopy(dest, to, dest, to + fill, n * length - fill);
+	}
+
+	protected void duplicateIndices(int[] objectIndices, int[] allIndices)
+	{
+		int nIndices = Maths.max(objectIndices) + 1;
+		for (int i = 0, k = 0; i < points.length; i++)
+		{
+			int offset = i * nIndices;
+			for (int j = 0; j < objectIndices.length; j++)
+				allIndices[k++] = objectIndices[j] + offset;
+		}
 	}
 
 	private static int transparencyMode = TransparencyAttributes.FASTEST;
@@ -661,6 +675,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 		if (isPointArray)
 		{
+			shaded = false;
 			appearance.setPolygonAttributes(null);
 			appearance.setMaterial(null);
 
@@ -703,6 +718,11 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 				polygonAttributes = new PolygonAttributes();
 				polygonAttributes.setPolygonMode(PolygonAttributes.POLYGON_FILL);
 				appearance.setPolygonAttributes(polygonAttributes);
+				shaded = true;
+			}
+			else
+			{
+				shaded = polygonAttributes.getPolygonMode() == PolygonAttributes.POLYGON_FILL;
 			}
 			polygonAttributes.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
 
@@ -1117,5 +1137,17 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			// Get only alpha
 			alpha[i] = colors[i * n + 3];
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see customnode.CustomMesh#setShaded(boolean)
+	 */
+	@Override
+	public void setShaded(boolean b)
+	{
+		if (!isPointArray)
+			super.setShaded(b);
 	}
 }

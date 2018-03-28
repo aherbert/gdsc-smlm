@@ -20,6 +20,7 @@ import gdsc.smlm.ij.ij3d.ItemGroupNode;
 import gdsc.smlm.ij.ij3d.ItemIndexedTriangleMesh;
 import gdsc.smlm.ij.ij3d.ItemMesh;
 import gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import gdsc.smlm.ij.ij3d.ReferenceItemMesh;
 import gdsc.smlm.ij.ij3d.Shape3DHelper;
 import gdsc.smlm.ij.ij3d.Shape3DHelper.Rendering;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -108,7 +109,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 
 				Appearance a = shape.getAppearance();
 
-				ItemMesh mesh = new ItemMesh(new Point3f[] { new Point3f(x, y, 0) },
+				ItemMesh mesh = new ReferenceItemMesh(new Point3f[] { new Point3f(x, y, 0) },
 						(GeometryArray) shape.getGeometry(), a, null, null, 0f);
 
 				System.out.printf("R=%s %s  Vc=%d  V=%d  T=%d\n", rendering, shape.getGeometry().getClass().getSimpleName(),
