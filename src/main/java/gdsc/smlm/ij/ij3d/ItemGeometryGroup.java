@@ -452,11 +452,11 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 			if (pointAttributes == null)
 			{
 				pointAttributes = new PointAttributes();
-				pointAttributes.setCapability(PointAttributes.ALLOW_ANTIALIASING_WRITE);
-				pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
 				pointAttributes.setPointAntialiasingEnable(true);
 				appearance.setPointAttributes(pointAttributes);
 			}
+			pointAttributes.setCapability(PointAttributes.ALLOW_ANTIALIASING_WRITE);
+			pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
 
 			// We use the coordinates for the colour
 		}
@@ -470,10 +470,10 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 			if (polygonAttributes == null)
 			{
 				polygonAttributes = new PolygonAttributes();
-				polygonAttributes.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
-				polygonAttributes.setPolygonMode(PolygonAttributes.POLYGON_FILL);
 				appearance.setPolygonAttributes(polygonAttributes);
 			}
+			polygonAttributes.setCapability(PolygonAttributes.ALLOW_MODE_WRITE);
+			polygonAttributes.setPolygonMode(PolygonAttributes.POLYGON_FILL);
 
 			// We require material attributes for colour
 			Material material = appearance.getMaterial();

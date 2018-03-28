@@ -401,28 +401,36 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// 3D objects can use the same rendering but then post-process to line polygon.
 			// Note using a line mesh would work but does not cull the backface
-			pointOutline = Shape3DHelper.createLocalisationObject(rendering);
+			Shape3D shape = Shape3DHelper.createShape(rendering, 0);
 
-			ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline.toArray(new Point3f[pointOutline.size()]),
-					new Point3f[] { new Point3f() }, null, highlightColor, 0);
+			//pointOutline = Shape3DHelper.createLocalisationObject(rendering);
+
+			//ItemTriangleMesh mesh = new ItemTriangleMesh(pointOutline.toArray(new Point3f[pointOutline.size()]),
+			//		new Point3f[] { new Point3f() }, null, highlightColor, 0);
 
 			//updateAppearance(mesh, settings);
 
 			// Outline
 			//mesh.setShaded(false);
 
-			Appearance appearance = mesh.getAppearance();
+			Appearance appearance;
+			//appearance = mesh.getAppearance();
+			appearance = shape.getAppearance();
+
 			PolygonAttributes pa = appearance.getPolygonAttributes();
 			pa.setCullFace(PolygonAttributes.CULL_BACK);
 			pa.setBackFaceNormalFlip(false);
 			pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-			final ColoringAttributes ca = appearance.getColoringAttributes();
-			ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
+			//final ColoringAttributes ca = appearance.getColoringAttributes();
+			//ca.setShadeModel(ColoringAttributes.SHADE_FLAT);
 			appearance.setMaterial(null);
 			LineAttributes la = new LineAttributes();
 			la.setLineWidth(0.5f);
 			appearance.setLineAttributes(la);
-			return mesh;
+
+			return new ItemMesh(new Point3f(), (GeometryArray) shape.getGeometry(), appearance, null, highlightColor,
+					0f);
+			//return mesh;
 		}
 
 		public void select(int index)
@@ -2502,7 +2510,18 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			{
 				CustomMeshNode node = (CustomMeshNode) content.getContent();
 				CustomMesh mesh = node.getMesh();
-				if (mesh instanceof CustomPointMesh)
+				if (mesh instanceof ItemMesh)
+				{
+					ItemMesh t = (ItemMesh) mesh;
+					if (t.isPointArray())
+					{
+						// Change the point size
+						if (!getSettings())
+							return -1;
+						t.getAppearance().getPointAttributes().setPointSize(pointSize);
+					}
+				}
+				else if (mesh instanceof CustomPointMesh)
 				{
 					// Change the point size
 					if (!getSettings())
@@ -3397,16 +3416,26 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			Color3f[] colors)
 	{
 		// Create the single localisation shape
-		Shape3D shape = createShape(settings);
+		//Shape3D shape = createShape(settings);
+
+		Rendering rendering = Rendering.forNumber(settings.getRendering());
+		// All objects have colour using the appearance not per vertex colours.
+		// The exception is points which do not support colour from appearance.
+		int colorDepth = (rendering == Rendering.POINT) ? 4 : 0;
+		Shape3D shape = Shape3DHelper.createShape(rendering, colorDepth);
+
+		// Use max so that points get a value of 1
+		int triangles = Math.max(Shape3DHelper.getNumberOfTriangles(rendering), 1);
 
 		GeometryArray ga = (GeometryArray) shape.getGeometry();
 
-		long size = (long) points.size() * ga.getValidVertexCount();
+		long size = (long) points.size() * triangles;
 		if (size > 10000000L)
 		{
+			String name = (rendering == Rendering.POINT) ? "points" : "triangles";
 			ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-			egd.addMessage("The results will generate a large dataset of " + size +
-					" vertices.\nThis may take a long time to render and may run out of memory.");
+			egd.addMessage("The results will generate a large dataset of " + size + " " + name +
+					".\nThis may take a long time to render and may run out of memory.");
 			egd.setOKLabel("Continue");
 			egd.showDialog();
 			if (egd.wasCanceled())
@@ -3422,6 +3451,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				alpha);
 	}
 
+	@SuppressWarnings("unused")
 	private static Shape3D createShape(Builder settings)
 	{
 		TurboList<Point3f> points = new TurboList<Point3f>(1);

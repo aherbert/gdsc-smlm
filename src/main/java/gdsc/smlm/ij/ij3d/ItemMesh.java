@@ -88,6 +88,35 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * The input geometry array vertex format is checked and unsupported formats throw an exception. Currently this only
 	 * supports coordinates, normals and color. Strip and Fan arrays are supported.
 	 *
+	 * @param point
+	 *            the point
+	 * @param ga
+	 *            the geometry array. If null then a default will be used. Assumed to be centred on the origin.
+	 * @param appearance
+	 *            the default appearance of the shape. PolygonAttributes, Material and TransparencyAttributes are used.
+	 * @param sizes
+	 *            the sizes of each point. Can be null (no scaling); length=1 (fixed scaling); or points.length.
+	 * @param color
+	 *            the color
+	 * @param transparency
+	 *            the transparency
+	 */
+	public ItemMesh(Point3f point, GeometryArray ga, Appearance appearance, Point3f[] sizes, final Color3f color,
+			final float transparency)
+	{
+		this(new Point3f[] { point }, ga, appearance, sizes, color, transparency);
+	}
+
+	/**
+	 * Instantiates a new item mesh.
+	 * <p>
+	 * This will repeat the object for each input point. The object
+	 * is assumed to be centred on the origin. It will be scaled and
+	 * translated for each input point.
+	 * <p>
+	 * The input geometry array vertex format is checked and unsupported formats throw an exception. Currently this only
+	 * supports coordinates, normals and color. Strip and Fan arrays are supported.
+	 *
 	 * @param points
 	 *            the points
 	 * @param ga

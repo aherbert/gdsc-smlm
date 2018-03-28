@@ -230,12 +230,13 @@ public class Shape3DHelper
 				return createCube();
 			case SQUARE:
 				return createSquare();
-			case HEXAGON:
-				return createDisc(0, 0, 0, 0, 0, 1, 1, 6);
-			case LOW_RES_CIRCLE:
-				return createDisc(0, 0, 0, 0, 0, 1, 1, 12);
 			case HIGH_RES_CIRCLE:
-				return createDisc(0, 0, 0, 0, 0, 1, 1, 20);
+				subdivisions += 8;
+			case LOW_RES_CIRCLE:
+				subdivisions += 6;
+			case HEXAGON:
+				subdivisions += 6;
+				return createDisc(0, 0, 0, 0, 0, 1, 1, subdivisions);
 
 			// All handle the same way
 			case SUPER_HIGH_RES_SPHERE:
@@ -397,7 +398,7 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createSquare()
 	{
-		return createSolid(squareVertices, squareFaces, false);
+		return createSolid(squareVertices, squareFaces, true);
 	}
 
 	/**
@@ -430,8 +431,7 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createCube()
 	{
-		// This is already normalised
-		return createSolid(cubeVertices, cubeFaces, false);
+		return createSolid(cubeVertices, cubeFaces, true);
 	}
 
 	/**
@@ -482,16 +482,18 @@ public class Shape3DHelper
 	 */
 	public static List<Point3f> createLocalisationObjectOutline(Rendering rendering)
 	{
+		int subdivisions = 0;
 		switch (rendering)
 		{
 			case SQUARE:
 				return createSquareOutline();
-			case HEXAGON:
-				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 8);
-			case LOW_RES_CIRCLE:
-				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 12);
 			case HIGH_RES_CIRCLE:
-				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, 20);
+				subdivisions += 8;
+			case LOW_RES_CIRCLE:
+				subdivisions += 6;
+			case HEXAGON:
+				subdivisions += 6;
+				return createDiscOutline(0, 0, 0, 0, 0, 1, 1, subdivisions);
 
 			default:
 				return createLocalisationObject(rendering);
@@ -516,7 +518,7 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createSquareOutline()
 	{
-		return createSolidOutline(squareVertices, false);
+		return createSolidOutline(squareVertices, true);
 	}
 
 	/**
@@ -539,6 +541,8 @@ public class Shape3DHelper
 		}
 		// Make continuous 
 		ps.add(new Point3f(vertices[0]));
+		if (normalise)
+			normalise(ps);
 		return ps;
 	}
 
