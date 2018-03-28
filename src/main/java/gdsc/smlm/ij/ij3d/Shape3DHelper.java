@@ -111,11 +111,6 @@ public class Shape3DHelper
 		}
 		else
 		{
-			// TODO - Update this to use:
-			// a fan for 2D circles
-			// a strip for 2D squares
-			// Indexed geometry
-
 			ga = createGeometryArray(rendering, colorDepth);
 
 			//			// Test using the geometry from a sphere primitive
@@ -156,6 +151,13 @@ public class Shape3DHelper
 
 			Material m = new Material();
 			m.setShininess(128f);
+			m.setAmbientColor(0.1f, 0.1f, 0.1f);
+			if (rendering.isHighResolution())
+				// Allow shiny highlights on balls
+				m.setSpecularColor(0.1f, 0.1f, 0.1f);
+			else
+				// For flat appearance
+				m.setSpecularColor(0, 0, 0);
 			appearance.setMaterial(m);
 		}
 
@@ -799,7 +801,9 @@ public class Shape3DHelper
 		}
 		else
 		{
-			// Generate indexes manually. The GeometryInfo somehow does not doe this correctly.
+			// Generate indexes manually. 
+			// The GeometryInfo somehow does not do this correctly for all rendering modes.
+			// E.g. the icosahedron gets extra indexes to normals that are 0,0,0.
 			Pair<Point3f[], int[]> p = createIndexedObject(coords);
 
 			Point3f[] iCoords = p.a;
