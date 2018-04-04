@@ -1151,13 +1151,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			try
 			{
-				Thread.sleep(1000);
-				if (future.isDone())
+				// Wait for 1 second
+				for (int i = 0; i < 20; i++)
 				{
-					// Only get the result when finished, so avoiding a blocking wait
-					added = future.get();
-					break;
+					Thread.sleep(50);
+					if (future.isDone())
+					{
+						// Only get the result when finished, so avoiding a blocking wait
+						added = future.get();
+						break;
+					}
 				}
+				if (added != null)
+					break;
 
 				long seconds = sw.getTime(TimeUnit.SECONDS);
 				if (seconds % 20 == 0)
