@@ -102,7 +102,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 *            the sizes of each point. Can be null (no scaling); length=1 (fixed scaling); or points.length.
 	 * @param colors
 	 *            the per-item colors. Can be null. A length of 1 will override the default colour taken from the
-	 *            geometry (for PointArray) or appearance.
+	 *            geometry (for PointArray) or appearance (for polygon shapes).
 	 * @param alphas
 	 *            the per-item alphas. Can be null.
 	 */
@@ -488,6 +488,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 			pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
 
 			// We use the coordinates for the colour
+			ga.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
 		}
 		else
 		{

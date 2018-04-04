@@ -3507,6 +3507,11 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		ta.setTransparency(transparency);
 		ta.setTransparencyMode((transparency == 0) ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST);
 		appearance.setTransparencyAttributes(ta);
+		if (rendering == Rendering.POINT)
+		{
+			//appearance.getPointAttributes().setPointSize((float) settings.getPixelSize());
+			appearance.getPointAttributes().setPointSize(sphereSize[0].x);
+		}
 		return new ItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance, sphereSize, colors,
 				alpha);
 	}
