@@ -1061,6 +1061,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return;
 			}
 
+			//setColour(pointGroup, colors);
+			
 			if (settings.getEnableDynamicTransparency())
 			{
 				long total = points.size() + getTotalTransparentObjects(univ, name);
@@ -1075,7 +1077,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		else
 		{
-			CustomMesh mesh = createItemMesh(settings, points, sphereSize, transparency, alpha);
+			ItemMesh mesh = createItemMesh(settings, points, sphereSize, transparency, alpha);
 			if (mesh == null)
 			{
 				IJ.showStatus("");
@@ -1084,7 +1086,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			//updateAppearance(mesh, settings);
 
-			setColour((ItemShape) mesh, colors);
+			setColour(mesh, colors);
 
 			contentNode = new CustomMeshNode(mesh);
 		}
@@ -3579,7 +3581,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		return new Shape3D(ga, mesh.getAppearance());
 	}
 
-	private static CustomMesh createItemMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
+	private static ItemMesh createItemMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
 			TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha)
 	{
 		// This may work 
