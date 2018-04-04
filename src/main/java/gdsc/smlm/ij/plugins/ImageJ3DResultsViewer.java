@@ -17,9 +17,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
@@ -32,6 +34,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.scijava.java3d.Appearance;
@@ -1140,25 +1143,52 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 		//univ.addContent(content);
 
-		int tick = 0;
 		IJ.showStatus("Drawing 3D content ... ");
-
+		StopWatch sw = StopWatch.createStarted();
 		Future<Content> future = univ.addContentLater(content);
-		while (!future.isDone())
+		Content added = null;
+		while (true)
 		{
 			try
 			{
 				Thread.sleep(1000);
-				IJ.showStatus("Drawing 3D content ... " + (++tick));
+				if (future.isDone())
+				{
+					// Only get the result when finished, so avoiding a blocking wait
+					added = future.get();
+					break;
+				}
+
+				long seconds = sw.getTime(TimeUnit.SECONDS);
+				if (seconds % 20 == 0)
+				{
+					ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+					egd.addMessage("Current wait time is " + sw.toString());
+					egd.setOKLabel("Wait");
+					egd.showDialog();
+					if (egd.wasCanceled())
+					{
+						future.cancel(true);
+						break;
+					}
+				}
+
+				IJ.showStatus("Drawing 3D content ... " + seconds);
 			}
 			catch (InterruptedException e)
 			{
+				break;
+			}
+			catch (ExecutionException e)
+			{
+				break;
 			}
 		}
 		univ.setAutoAdjustView(auto);
 
 		// Initialise the selection model
-		data.addSelectionModel(t);
+		if (added != null)
+			data.addSelectionModel(t);
 
 		IJ.showStatus("");
 	}
