@@ -36,7 +36,8 @@ import org.scijava.vecmath.Vector3f;
 
 /**
  * This class represents a list as a number of repeated shapes in the universe. Each item has its own Java 3D Shape3D
-Shape3D * object added to the group. The shape is defined using a geometry array. Colouring is assumed to be done using the
+ * Shape3D * object added to the group. The shape is defined using a geometry array. Colouring is assumed to be done
+ * using the
  * material diffuse colour. If the geometry has per vertex colours then this class will not work.
  * <p>
  * A special exception is made for a PointArray as that has no surface to colour. In this case it must be created using
@@ -100,7 +101,8 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * @param sizes
 	 *            the sizes of each point. Can be null (no scaling); length=1 (fixed scaling); or points.length.
 	 * @param colors
-	 *            the per-item colors. Can be null.
+	 *            the per-item colors. Can be null. A length of 1 will override the default colour taken from the
+	 *            geometry (for PointArray) or appearance.
 	 * @param alphas
 	 *            the per-item alphas. Can be null.
 	 */
@@ -134,18 +136,34 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		this.points = points;
 		this.defaultAppearance = createDefaultAppearance(appearance, ga);
 		this.transparency = defaultAppearance.getTransparencyAttributes().getTransparency();
+
+		final boolean hasColor = colors != null && colors.length == points.length;
+		final boolean hasAlpha = alphas != null && alphas.length == points.length;
+
+		// Initialise color of the default objects (for cloning)
 		if (isPointArray)
 		{
 			pointArrayColorUpdater = ArrayColorUpdater.create(ga.getValidVertexCount(), true);
 
 			// Get the first color as the default
-			ga.getColor(0, pointArrayColorUpdater.pointColor);
-			// Only uses index [0,1,2] so ignores the transparency
-			color.set(pointArrayColorUpdater.pointColor);
+			if (!hasColor && colors != null && colors.length == 1)
+			{
+				color.set(colors[0]);
+			}
+			else
+			{
+				ga.getColor(0, pointArrayColorUpdater.pointColor);
+				// Only uses index [0,1,2] so ignores the transparency
+				color.set(pointArrayColorUpdater.pointColor);
+			}
 			if (color.x == 0 && color.y == 0 && color.z == 0)
 			{
-				this.color.set(DEFAULT_COLOUR);
-				// Update the input to the default
+				color.set(DEFAULT_COLOUR);
+			}
+			// Update the input to the default if it is different
+			ga.getColor(0, pointArrayColorUpdater.pointColor);
+			if (!color.equals(new Color3f(pointArrayColorUpdater.pointColor)))
+			{
 				ga = (GeometryArray) ga.cloneNodeComponent(true);
 				ga.setColors(0, pointArrayColorUpdater.getColors(color, 1));
 			}
@@ -153,11 +171,22 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 		else
 		{
 			pointArrayColorUpdater = null;
-			defaultAppearance.getMaterial().getDiffuseColor(this.color);
-		}
 
-		final boolean hasColor = colors != null && colors.length == points.length;
-		final boolean hasAlpha = alphas != null && alphas.length == points.length;
+			// Get the first color as the default
+			if (!hasColor && colors != null && colors.length == 1)
+			{
+				color.set(colors[0]);
+			}
+			else
+			{
+				defaultAppearance.getMaterial().getDiffuseColor(color);
+			}
+			if (color.x == 0 && color.y == 0 && color.z == 0)
+			{
+				color.set(DEFAULT_COLOUR);
+			}
+			defaultAppearance.getMaterial().setDiffuseColor(color);
+		}
 
 		this.alphas = alphas;
 

@@ -1061,8 +1061,6 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				return;
 			}
 
-			//setColour(pointGroup, colors);
-			
 			if (settings.getEnableDynamicTransparency())
 			{
 				long total = points.size() + getTotalTransparentObjects(univ, name);
