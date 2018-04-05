@@ -987,6 +987,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store the benchmark settings when not using variable photons
 		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
 		{
+			// TODO - Over the region of the simulation compute the CRLB for BIXYZ
+			// i.e. all standard parameters of any PSF model.
+			// For a Gaussian we can use the Mortensen formulas.
+			// For Astigmatism for Poisson data we can approximate using the Smith et al method
+			// For all others (Airy/ImagePSF) we can approximate using numerical gradients
+			// of the log-likelihood function.
+			
+			
+			
 			final double qe = getQuantumEfficiency();
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
