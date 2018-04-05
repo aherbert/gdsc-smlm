@@ -124,6 +124,7 @@ import gdsc.smlm.results.PeakResultsReader;
 import gdsc.smlm.results.SynchronizedPeakResults;
 import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.count.FrameCounter;
+import gdsc.smlm.results.procedures.BIRResultProcedure;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import gdsc.smlm.results.procedures.RawResultProcedure;
@@ -473,26 +474,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public void setPhotons(MemoryPeakResults results)
 		{
 			molecules = results.size();
-			results.forEach(new PeakResultProcedure()
+			// Get the signal and background in photons
+			results.forEach(IntensityUnit.PHOTON, new BIRResultProcedure()
 			{
-				public void execute(PeakResult result)
+				public void executeBIR(float bg, float intensity, PeakResult result)
 				{
 					int i = result.getFrame() - 1;
 					if (p[i] != 0)
 						throw new RuntimeException("Multiple peaks on the same frame: " + result.getFrame());
-					p[i] = result.getSignal();
-					background[i] = result.getBackground();
+					p[i] = intensity;
+					background[i] = bg;
 				}
 			});
 			double av = Maths.sum(p) / molecules;
 			double av2 = Maths.sum(background) / molecules;
 			Utils.log(
 					"Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
-					frames, molecules, Utils.rounded(averageSignal), Utils.rounded(av / gain), Utils.rounded(b),
-					Utils.rounded(av2 / gain));
+					frames, molecules, Utils.rounded(averageSignal), Utils.rounded(av), Utils.rounded(b),
+					Utils.rounded(av2));
 			// Reset the average signal and background (in photons)
-			averageSignal = av / gain;
-			b = av2 / gain;
+			averageSignal = av;
+			b = av2;
 		}
 
 		/**
@@ -5539,7 +5541,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			return;
 
 		IJ.showStatus("Estimating noise ...");
-		
+
 		// Compute noise per frame
 		ImageStack stack = imp.getImageStack();
 		final int width = stack.getWidth();
@@ -5561,7 +5563,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Convert noise units from counts to the result format
 		final TypeConverter<IntensityUnit> c = results.getIntensityConverter(IntensityUnit.COUNT);
-		
+
 		results.forEach(new PeakResultProcedure()
 		{
 			public void execute(PeakResult p)
@@ -5882,7 +5884,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.error(TITLE, "No greyscale benchmark images");
 			return false;
 		}
-		
+
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Image", images, benchmarkImage);
 		gd.addFilenameField("Results_file", benchmarkFile);
