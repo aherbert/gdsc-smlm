@@ -60,12 +60,26 @@ public class BenchmarkFit implements PlugIn
 
 	private static TextWindow summaryTable = null, analysisTable = null;
 
-	private static final String[] NAMES = new String[] { "dB (photons)", "dSignal (photons)", "dAngle (deg)", "dX (nm)",
-			"dY (nm)", "dSx (nm)", "dSy (nm)", "Time (ms)", "dActualSignal (photons)", "dSax (nm)", "dSay (nm)" };
-	private static final int TIME = 7;
-	private static final int ACTUAL_SIGNAL = 8;
-	private static final int ADJUSTED_X_SD = 9;
-	private static final int ADJUSTED_Y_SD = 10;
+	//@formatter:off
+	// These are assuming a Gaussian 2D PSF
+	private static final String[] NAMES = new String[] { 
+			"dB (photons)", 
+			"dSignal (photons)", 
+			"dX (nm)",
+			"dY (nm)", 
+			"dZ (nm)", 
+			"dSx (nm)", 
+			"dSy (nm)", 
+			"dAngle (deg)", 
+			"Time (ms)",
+			"dActualSignal (photons)", 
+			"dSax (nm)", 
+			"dSay (nm)" };
+	//@formatter:on
+	private static final int TIME = 8;
+	private static final int ACTUAL_SIGNAL = 9;
+	private static final int ADJUSTED_X_SD = 10;
+	private static final int ADJUSTED_Y_SD = 11;
 	private static boolean[] displayHistograms = new boolean[NAMES.length];
 	static
 	{
@@ -208,25 +222,29 @@ public class BenchmarkFit implements PlugIn
 			final int size = region.height;
 			final int totalFrames = benchmarkParameters.frames;
 
+			// TODO - Use a camera model to pre-process the data
+
 			// Subtract the bias
 			final double bias = benchmarkParameters.bias;
 			for (int i = 0; i < data.length; i++)
 				data[i] -= bias;
 			// Remove the gain
-			double gain = 1;
 			if (!fitConfig.isFitCameraCounts())
 			{
-				gain = benchmarkParameters.gain;
+				final double gain = benchmarkParameters.gain;
 				for (int i = 0; i < data.length; i++)
 					data[i] /= gain;
 			}
 
-			// Get the background and signal estimate
+			// Get the background and signal estimate for fitting in the correct units
 			final double b = (backgroundFitting) ? getBackground(data, size, size)
-					: answer[Gaussian2DFunction.BACKGROUND] * gain;
+					// Convert the answer to the correct units
+					: answer[Gaussian2DFunction.BACKGROUND] *
+							((fitConfig.isFitCameraCounts()) ? benchmarkParameters.gain : 1);
 			final double signal = (signalFitting) ? getSignal(data, b)
-					//: benchmarkParameters.p[frame];
-					: answer[Gaussian2DFunction.SIGNAL] * gain;
+					// Convert the answer to the correct units
+					: answer[Gaussian2DFunction.SIGNAL] *
+							((fitConfig.isFitCameraCounts()) ? benchmarkParameters.gain : 1);
 
 			// Find centre-of-mass estimate
 			if (comFitting)
@@ -273,8 +291,8 @@ public class BenchmarkFit implements PlugIn
 					if (fitConfig.isFitCameraCounts())
 					{
 						// Update all the parameters to be in photons
-						params[Gaussian2DFunction.BACKGROUND] /= gain;
-						params[Gaussian2DFunction.SIGNAL] /= gain;
+						params[Gaussian2DFunction.BACKGROUND] /= benchmarkParameters.gain;
+						params[Gaussian2DFunction.SIGNAL] /= benchmarkParameters.gain;
 					}
 					result[c] = params;
 					time[c] = System.nanoTime() - start;
@@ -438,7 +456,6 @@ public class BenchmarkFit implements PlugIn
 
 			return true;
 		}
-
 	}
 
 	/**
@@ -480,10 +497,10 @@ public class BenchmarkFit implements PlugIn
 		{
 			stats[j].add(result[j] - answer[j]);
 		}
-		stats[7].add(time);
-		stats[8].add(result[Gaussian2DFunction.SIGNAL] - photons);
-		stats[9].add(result[Gaussian2DFunction.X_SD] - sa);
-		stats[10].add(result[Gaussian2DFunction.Y_SD] - sa);
+		stats[TIME].add(time);
+		stats[ACTUAL_SIGNAL].add(result[Gaussian2DFunction.SIGNAL] - photons);
+		stats[ADJUSTED_X_SD].add(result[Gaussian2DFunction.X_SD] - sa);
+		stats[ADJUSTED_Y_SD].add(result[Gaussian2DFunction.Y_SD] - sa);
 	}
 
 	public void run(String arg)
@@ -659,6 +676,7 @@ public class BenchmarkFit implements PlugIn
 		answer[Gaussian2DFunction.SIGNAL] = benchmarkParameters.getSignal();
 		answer[Gaussian2DFunction.X_POSITION] = benchmarkParameters.x;
 		answer[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.y;
+		answer[Gaussian2DFunction.Z_POSITION] = benchmarkParameters.z;
 		answer[Gaussian2DFunction.X_SD] = benchmarkParameters.s / benchmarkParameters.a;
 		answer[Gaussian2DFunction.Y_SD] = benchmarkParameters.s / benchmarkParameters.a;
 
@@ -755,16 +773,18 @@ public class BenchmarkFit implements PlugIn
 		IJ.showStatus("Collecting results ...");
 
 		// Collect the results
-		Statistics[] stats = new Statistics[NAMES.length];
+		Statistics[] stats = null;
 		for (int i = 0; i < workers.size(); i++)
 		{
 			Statistics[] next = workers.get(i).stats;
+			if (stats == null)
+			{
+				stats = next;
+				continue;
+			}
 			for (int j = 0; j < next.length; j++)
 			{
-				if (stats[j] == null)
-					stats[j] = next[j];
-				else
-					stats[j].add(next[j]);
+				stats[j].add(next[j]);
 			}
 		}
 		workers.clear();
@@ -1057,11 +1077,12 @@ public class BenchmarkFit implements PlugIn
 		final double[] convert = new double[NAMES.length];
 		convert[Gaussian2DFunction.BACKGROUND] = (fitConfig.isBackgroundFitting()) ? 1 : 0;
 		convert[Gaussian2DFunction.SIGNAL] = (fitConfig.isNotSignalFitting() && fitConfig.isFixedPSF()) ? 0 : 1;
-		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[Gaussian2DFunction.X_POSITION] = benchmarkParameters.a;
 		convert[Gaussian2DFunction.Y_POSITION] = benchmarkParameters.a;
+		convert[Gaussian2DFunction.Z_POSITION] = (fitConfig.isZFitting()) ? benchmarkParameters.a : 0;
 		convert[Gaussian2DFunction.X_SD] = (fitConfig.isXSDFitting()) ? benchmarkParameters.a : 0;
 		convert[Gaussian2DFunction.Y_SD] = (fitConfig.isYSDFitting()) ? benchmarkParameters.a : 0;
+		convert[Gaussian2DFunction.ANGLE] = (fitConfig.isAngleFitting()) ? 180.0 / Math.PI : 0;
 		convert[TIME] = 1e-6;
 		convert[ACTUAL_SIGNAL] = convert[Gaussian2DFunction.SIGNAL];
 		convert[ADJUSTED_X_SD] = convert[Gaussian2DFunction.X_SD];
