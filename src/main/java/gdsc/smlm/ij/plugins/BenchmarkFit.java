@@ -12,14 +12,20 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
+
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.config.CalibrationProtosHelper;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitStatus;
@@ -30,11 +36,13 @@ import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJImageConverter;
+import gdsc.smlm.model.camera.CameraModel;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 import ij.text.TextWindow;
@@ -46,11 +54,23 @@ public class BenchmarkFit implements PlugIn
 {
 	private static final String TITLE = "Benchmark Fit";
 
-	private static int regionSize = 3;
+	private static int regionSize = 4;
 	private static double lastS = 0;
-	private static boolean offsetFitting = true;
-	private static double startOffset = 0.5;
-	private static boolean comFitting = false;
+
+	private static final String[] ORIGIN_XY = { "Origin", "Centre-of-Mass", "Offset" };
+	private static final String[] ORIGIN_Z = { "Origin", "0", "Offset" };
+	private static int originXY = 0;
+	private static int originZ = 0;
+	private static double offsetX = 0;
+	private static double offsetY = 0;
+	private static double offsetZ = 0;
+
+	private static boolean zeroOffset = true;
+	private static double offsetPoints = 0;
+	private static double offsetRangeX = 0.5;
+	private static double offsetRangeY = 0.5;
+	private static double offsetRangeZ = 0.5;
+
 	private static boolean backgroundFitting = true;
 	private static boolean signalFitting = true;
 	private static boolean showHistograms = false;
@@ -152,27 +172,38 @@ public class BenchmarkFit implements PlugIn
 		final Statistics[] stats = new Statistics[NAMES.length];
 		final ImageStack stack;
 		final Rectangle region;
-		final double[][] xy;
+		final double[][] offsets;
 		final FitConfiguration fitConfig;
+		final CameraModel cameraModel;
 		final double sa;
+		final int size;
+		final int totalFrames;
+		final double[] origin;
 
-		double[] data = null;
+		float[] data = null;
 		private double[] lb, ub = null;
 		private double[] lc, uc = null;
 
-		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region, FitConfiguration fitConfig)
+		public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region, FitConfiguration fitConfig,
+				CameraModel cameraModel)
 		{
 			this.jobs = jobs;
 			this.stack = stack;
 			this.region = region;
 			this.fitConfig = fitConfig.clone();
-			this.xy = getStartPoints();
+			this.cameraModel = cameraModel;
+			this.offsets = startPoints;
 
 			for (int i = 0; i < stats.length; i++)
 				stats[i] = (showHistograms || saveRawData) ? new StoredDataStatistics() : new Statistics();
 			sa = getSa();
 
 			createBounds();
+
+			size = region.height;
+			totalFrames = benchmarkParameters.frames;
+			origin = new double[] { answer[Gaussian2DFunction.X_POSITION], answer[Gaussian2DFunction.Y_POSITION],
+					answer[Gaussian2DFunction.Z_POSITION] };
 		}
 
 		/*
@@ -216,25 +247,21 @@ public class BenchmarkFit implements PlugIn
 			showProgress();
 
 			// Extract the data
-			data = IJImageConverter.getDoubleData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(),
-					region, data);
+			data = IJImageConverter.getData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
+					data);
 
-			final int size = region.height;
-			final int totalFrames = benchmarkParameters.frames;
-
-			// TODO - Use a camera model to pre-process the data
-
-			// Subtract the bias
-			final double bias = benchmarkParameters.bias;
-			for (int i = 0; i < data.length; i++)
-				data[i] -= bias;
-			// Remove the gain
-			if (!fitConfig.isFitCameraCounts())
+			// Use a camera model to pre-process the data. 
+			// The camera model is cropped to the correct region size.
+			if (fitConfig.isFitCameraCounts())
 			{
-				final double gain = benchmarkParameters.gain;
-				for (int i = 0; i < data.length; i++)
-					data[i] /= gain;
+				cameraModel.removeBias(data);
 			}
+			else
+			{
+				cameraModel.removeBiasAndGain(data);
+			}
+
+			double[] data = SimpleArrayUtils.toDouble(this.data);
 
 			// Get the background and signal estimate for fitting in the correct units
 			final double b = (backgroundFitting) ? getBackground(data, size, size)
@@ -247,15 +274,26 @@ public class BenchmarkFit implements PlugIn
 							((fitConfig.isFitCameraCounts()) ? benchmarkParameters.gain : 1);
 
 			// Find centre-of-mass estimate
-			if (comFitting)
-			{
-				getCentreOfMass(data, size, size, xy[xy.length - 1]);
+			double[] com = new double[2];
+			getCentreOfMass(data, size, size, com);
 
-				double dx = xy[xy.length - 1][0] - answer[Gaussian2DFunction.X_POSITION];
-				double dy = xy[xy.length - 1][1] - answer[Gaussian2DFunction.Y_POSITION];
-				if (dx * dx + dy * dy < startOffset * startOffset)
-					comValid.incrementAndGet();
+			// Update the origin from the answer
+			if (originXY == 1)
+			{
+				// Use Centre of mass as the origin
+				origin[0] = com[0];
+				origin[1] = com[1];
 			}
+			if (originZ == 1)
+			{
+				// Use zero as the origin
+				origin[2] = 0;
+			}
+
+			double dx = com[0] - answer[Gaussian2DFunction.X_POSITION];
+			double dy = com[1] - answer[Gaussian2DFunction.Y_POSITION];
+			if (Math.abs(dx) < offsetRangeX && Math.abs(dy) < offsetRangeY)
+				comValid.getAndIncrement();
 
 			double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 			initialParams[Gaussian2DFunction.BACKGROUND] = b;
@@ -264,18 +302,19 @@ public class BenchmarkFit implements PlugIn
 			initialParams[Gaussian2DFunction.Y_SD] = fitConfig.getInitialYSD();
 
 			double[][] bounds = null;
-			double[][] result = new double[xy.length][];
-			long[] time = new long[xy.length];
+			double[][] result = new double[offsets.length][];
+			long[] time = new long[offsets.length];
 			int c = 0;
 			int resultPosition = frame;
-			for (double[] centre : xy)
+			for (double[] offset : offsets)
 			{
 				long start = System.nanoTime();
 
 				// Do fitting
 				final double[] params = initialParams.clone();
-				params[Gaussian2DFunction.X_POSITION] = centre[0];
-				params[Gaussian2DFunction.Y_POSITION] = centre[1];
+				params[Gaussian2DFunction.X_POSITION] = origin[0] + offset[0];
+				params[Gaussian2DFunction.Y_POSITION] = origin[1] + offset[1];
+				params[Gaussian2DFunction.Z_POSITION] = origin[2] + offset[2];
 				fitConfig.initialise(1, size, size, params);
 				FunctionSolver solver = fitConfig.getFunctionSolver();
 				if (solver.isBounded())
@@ -547,7 +586,7 @@ public class BenchmarkFit implements PlugIn
 
 	private boolean showDialog()
 	{
-		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
 		final double sa = getSa();
@@ -569,9 +608,96 @@ public class BenchmarkFit implements PlugIn
 		gd.addSlider("Region_size", 2, 20, regionSize);
 		PeakFit.addPSFOptions(gd, fitConfig);
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
-		gd.addCheckbox("Offset_fit", offsetFitting);
-		gd.addNumericField("Start_offset", startOffset, 3);
-		gd.addCheckbox("Include_CoM_fit", comFitting);
+		gd.addChoice("Origin_XY", ORIGIN_XY, originXY, new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				originXY = value;
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				if (originXY != 2)
+					return false;
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Origin XY");
+				egd.addNumericField("Offset_X", offsetX, 2, 6, "nm");
+				egd.addNumericField("Offset_Y", offsetY, 2, 6, "nm");
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				offsetX = gd.getNextNumber();
+				offsetY = gd.getNextNumber();
+				return true;
+			}
+		});
+		gd.addChoice("Origin_Z", ORIGIN_Z, originZ, new OptionListener<Integer>()
+		{
+			public boolean collectOptions(Integer value)
+			{
+				originZ = value;
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				if (originZ != 2)
+					return false;
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Origin Z");
+				egd.addNumericField("Offset_Z", offsetZ, 2, 6, "nm");
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				offsetZ = gd.getNextNumber();
+				return true;
+			}
+		});
+
+		gd.addCheckbox("Zero_offset", zeroOffset);
+		gd.addNumericField("Offset_points", offsetPoints, 0, new OptionListener<Double>()
+		{
+
+			public boolean collectOptions(Double value)
+			{
+				offsetPoints = Math.max(0, value);
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				if (offsetPoints == 0)
+					return false;
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Offset range");
+				egd.addSlider("Offset_range_x", 0, 2.5, offsetRangeX);
+				egd.addSlider("Offset_range_y", 0, 2.5, offsetRangeY);
+				egd.addSlider("Offset_range_z", 0, 2.5, offsetRangeZ);
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				offsetRangeX = Math.max(0, egd.getNextNumber());
+				offsetRangeY = Math.max(0, egd.getNextNumber());
+				offsetRangeZ = Math.max(0, egd.getNextNumber());
+				return true;
+			}
+		});
 		gd.addCheckbox("Background_fitting", backgroundFitting);
 		gd.addMessage("Signal fitting can be disabled for " + PSFProtosHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) +
 				" function");
@@ -587,9 +713,10 @@ public class BenchmarkFit implements PlugIn
 		regionSize = (int) Math.abs(gd.getNextNumber());
 		fitConfig.setPSFType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
-		offsetFitting = gd.getNextBoolean();
-		startOffset = Math.abs(gd.getNextNumber());
-		comFitting = gd.getNextBoolean();
+		originXY = gd.getNextChoiceIndex();
+		originZ = gd.getNextChoiceIndex();
+		zeroOffset = gd.getNextBoolean();
+		offsetPoints = Math.max(0, gd.getNextNumber());
 		backgroundFitting = gd.getNextBoolean();
 		signalFitting = gd.getNextBoolean();
 		showHistograms = gd.getNextBoolean();
@@ -597,7 +724,9 @@ public class BenchmarkFit implements PlugIn
 
 		gd.collectOptions();
 
-		if (!comFitting && !offsetFitting)
+		getStartPoints(fitConfig.is3D());
+
+		if (startPoints.length == 0)
 		{
 			IJ.error(TITLE, "No initial fitting positions");
 			return false;
@@ -620,27 +749,32 @@ public class BenchmarkFit implements PlugIn
 		calibration.setExposureTime(1000);
 		fitConfig.setCalibration(calibration.getCalibration());
 
+		fitConfig.setCameraModelName(benchmarkParameters.cameraModelName);
+		
+		if (!PeakFit.configurePSFModel(config))
+			return false;
+
 		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, 0))
 			return false;
 
 		if (showHistograms)
 		{
-			gd = new ExtendedGenericDialog(TITLE);
-			gd.addMessage("Select the histograms to display");
-			gd.addNumericField("Histogram_bins", histogramBins, 0);
+			ExtendedGenericDialog gd2 = new ExtendedGenericDialog(TITLE);
+			gd2.addMessage("Select the histograms to display");
+			gd2.addNumericField("Histogram_bins", histogramBins, 0);
 
 			double[] convert = getConversionFactors();
 
 			for (int i = 0; i < displayHistograms.length; i++)
 				if (convert[i] != 0)
-					gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
-			gd.showDialog();
-			if (gd.wasCanceled())
+					gd2.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+			gd2.showDialog();
+			if (gd2.wasCanceled())
 				return false;
-			histogramBins = (int) Math.abs(gd.getNextNumber());
+			histogramBins = (int) Math.abs(gd2.getNextNumber());
 			for (int i = 0; i < displayHistograms.length; i++)
 				if (convert[i] != 0)
-					displayHistograms[i] = gd.getNextBoolean();
+					displayHistograms[i] = gd2.getNextBoolean();
 		}
 
 		return true;
@@ -711,6 +845,12 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setNotSignalFitting(!signalFitting);
 		fitConfig.setComputeDeviations(false);
 
+		// Create the camera model
+		CameraModel cameraModel = fitConfig.getCameraModel();
+		// Crop for speed. Reset origin first so the region is within the model
+		cameraModel.setOrigin(0, 0);
+		cameraModel = cameraModel.crop(region, false);
+
 		final ImageStack stack = imp.getImageStack();
 
 		// Create a pool of workers
@@ -720,7 +860,7 @@ public class BenchmarkFit implements PlugIn
 		List<Thread> threads = new LinkedList<Thread>();
 		for (int i = 0; i < nThreads; i++)
 		{
-			Worker worker = new Worker(jobs, stack, region, fitConfig);
+			Worker worker = new Worker(jobs, stack, region, fitConfig, cameraModel);
 			Thread t = new Thread(worker);
 			workers.add(worker);
 			threads.add(t);
@@ -730,7 +870,7 @@ public class BenchmarkFit implements PlugIn
 		final int totalFrames = benchmarkParameters.frames;
 
 		// Store all the fitting results
-		results = new double[totalFrames * getNumberOfStartPoints()][];
+		results = new double[totalFrames * startPoints.length][];
 		resultsTime = new long[results.length];
 
 		// Fit the frames
@@ -765,7 +905,7 @@ public class BenchmarkFit implements PlugIn
 		}
 		threads.clear();
 
-		if (comFitting)
+		if (hasOffsetXY())
 			Utils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
 					Utils.rounded((100.0 * comValid.intValue()) / totalFrames));
 
@@ -790,7 +930,7 @@ public class BenchmarkFit implements PlugIn
 		workers.clear();
 
 		// Show a table of the results
-		summariseResults(stats);
+		summariseResults(stats, cameraModel);
 
 		// Optionally show histograms
 		if (showHistograms)
@@ -894,47 +1034,77 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
+	private double[][] startPoints = null;
+
 	/**
+	 * @param is3D
 	 * @return The starting points for the fitting
 	 */
-	private double[][] getStartPoints()
+	private double[][] getStartPoints(boolean is3D)
 	{
-		double[][] xy = new double[getNumberOfStartPoints()][];
-		int ii = 0;
+		if (startPoints != null)
+			return startPoints;
 
-		if (offsetFitting)
+		TurboList<double[]> list = new TurboList<double[]>();
+
+		// Set up origin with an offset
+		double[] origin = new double[3];
+		switch (originXY)
 		{
-			if (startOffset == 0)
-			{
-				xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION],
-						answer[Gaussian2DFunction.Y_POSITION] };
-			}
-			else
-			{
-				// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
-				// startOffset pixels total distance 
-				final double distance = Math.sqrt(startOffset * startOffset * 0.5);
+			case 2:
+				// Offset from the origin in pixels
+				origin[0] = offsetX / benchmarkParameters.a;
+				origin[1] = offsetY / benchmarkParameters.a;
+				break;
+			case 0:
+			case 1:
+				// No offset
+				break;
+			default:
+				throw new IllegalStateException();
+		}
+		switch (originZ)
+		{
+			case 2:
+				// Offset from the origin in pixels
+				origin[2] = offsetZ / benchmarkParameters.a;
+				break;
+			case 0:
+			case 1:
+				// No offset
+				break;
+			default:
+				throw new IllegalStateException();
+		}
 
-				for (int x = -1; x <= 1; x += 2)
-					for (int y = -1; y <= 1; y += 2)
-					{
-						xy[ii++] = new double[] { answer[Gaussian2DFunction.X_POSITION] + x * distance,
-								answer[Gaussian2DFunction.Y_POSITION] + y * distance };
-					}
+		if (zeroOffset)
+			list.add(origin.clone());
+
+		if (offsetPoints > 0 && ((offsetRangeX > 0 || offsetRangeY > 0) || is3D && offsetRangeZ > 0))
+		{
+			double[] min = new double[] { -Math.max(0, offsetRangeX), -Math.max(0, offsetRangeY),
+					-Math.max(0, offsetRangeZ) };
+			double[] range = new double[] { 2 * min[0], 2 * min[1], 2 * min[2] };
+			HaltonSequenceGenerator halton = new HaltonSequenceGenerator((is3D) ? 3 : 2);
+			for (int i = 0; i < offsetPoints; i++)
+			{
+				double[] offset = origin.clone();
+				double[] v = halton.nextVector();
+				for (int j = 0; j < v.length; j++)
+				{
+					offset[j] += v[j] * range[j] + min[j];
+				}
+				list.add(offset);
 			}
 		}
-		// Add space for centre-of-mass at the end of the array
-		if (comFitting)
-			xy[ii++] = new double[2];
-		return xy;
+
+		startPoints = list.toArray(new double[list.size()][]);
+		return startPoints;
 	}
 
-	private int getNumberOfStartPoints()
+	private boolean hasOffsetXY()
 	{
-		int n = (offsetFitting) ? 1 : 0;
-		if (startOffset > 0)
-			n *= 4;
-		return (comFitting) ? n + 1 : n;
+		return offsetRangeX > 0 && offsetRangeY > 0;
 	}
 
 	/**
@@ -969,13 +1139,15 @@ public class BenchmarkFit implements PlugIn
 		double sum = 0;
 		for (int y = 0, index = 0; y < maxy; y++)
 		{
+			double sum1 = 0;
 			for (int x = 0; x < maxx; x++, index++)
 			{
 				final double value = data[index];
-				sum += value;
+				sum1 += value;
 				com[0] += x * value;
-				com[1] += y * value;
 			}
+			com[1] += y * sum1;
+			sum += sum1;
 		}
 
 		for (int i = 2; i-- > 0;)
@@ -984,7 +1156,7 @@ public class BenchmarkFit implements PlugIn
 		}
 	}
 
-	private void summariseResults(Statistics[] stats)
+	private void summariseResults(Statistics[] stats, CameraModel cameraModel)
 	{
 		createTable();
 
@@ -1000,8 +1172,24 @@ public class BenchmarkFit implements PlugIn
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.x))).append('\t');
 		sb.append(Utils.rounded(distanceFromCentre(benchmarkParameters.y))).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.a * benchmarkParameters.z)).append('\t');
-		sb.append(Utils.rounded(benchmarkParameters.gain)).append('\t');
-		sb.append(Utils.rounded(benchmarkParameters.readNoise)).append('\t');
+
+		CameraType cameraType = benchmarkParameters.cameraType;
+		if (cameraType == CameraType.SCMOS)
+		{
+			sb.append("sCMOS (").append(benchmarkParameters.cameraModelName).append(") ");
+			Rectangle bounds = benchmarkParameters.cameraBounds;
+			Rectangle cropBounds = cameraModel.getBounds();
+			sb.append(" ").append(bounds.x + cropBounds.x).append(",").append(bounds.y + cropBounds.y);
+			sb.append(" ").append(region.width).append("x").append(region.width);
+		}
+		else
+		{
+			sb.append(CalibrationProtosHelper.getName(cameraType));
+			sb.append(" Gain=").append(benchmarkParameters.gain);
+			sb.append(" B=").append(benchmarkParameters.bias);
+		}
+		sb.append('\t');
+
 		sb.append(Utils.rounded(benchmarkParameters.getBackground())).append('\t');
 		sb.append(Utils.rounded(benchmarkParameters.noise)).append('\t');
 
@@ -1051,8 +1239,7 @@ public class BenchmarkFit implements PlugIn
 
 		// Now output the actual results ...		
 		sb.append('\t');
-		final double recall = (stats[0].getN() / (double) getNumberOfStartPoints()) /
-				benchmarkParameters.getMolecules();
+		final double recall = (stats[0].getN() / (double) startPoints.length) / benchmarkParameters.getMolecules();
 		sb.append(Utils.rounded(recall));
 
 		for (int i = 0; i < stats.length; i++)
@@ -1092,6 +1279,7 @@ public class BenchmarkFit implements PlugIn
 
 	private double distanceFromCentre(double x)
 	{
+		// This assumes a 
 		x -= 0.5;
 		final int i = (int) Math.round(x);
 		x = x - i;
@@ -1130,7 +1318,7 @@ public class BenchmarkFit implements PlugIn
 
 	private String createParameterHeader()
 	{
-		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tGain\tReadNoise (ADUs)\tB (photons)\tNoise (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
+		return "Molecules\tN\ts (nm)\ta (nm)\tsa (nm)\tX (nm)\tY (nm)\tZ (nm)\tCamera model\tB (photons)\tNoise (photons)\tSNR\tLimit N\tLimit X\tLimit X ML\tRegion\tWidth\tMethod\tOptions";
 	}
 
 	private void runAnalysis()

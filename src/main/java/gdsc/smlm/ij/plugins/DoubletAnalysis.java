@@ -1721,6 +1721,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			// Only configure the fit solver if not in a macro
 			configure = Macro.getOptions() == null;
 		}
+		if (configure && !PeakFit.configurePSFModel(config))
+			return false;
 		if (configure && !PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, PeakFit.FLAG_NO_SAVE))
 			return false;
 

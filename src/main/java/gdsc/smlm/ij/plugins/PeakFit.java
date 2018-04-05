@@ -2406,6 +2406,22 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 *            the flags
 	 * @return true, if successful
 	 */
+	public static boolean configurePSFModel(FitEngineConfiguration config)
+	{
+		return configurePSFModel(config, FLAG_NO_SAVE);
+	}
+	
+	/**
+	 * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
+	 * <p>
+	 * If the configuration is for a 3D PSF then a dialog to configure the z model is shown.
+	 *
+	 * @param config
+	 *            the config
+	 * @param flags
+	 *            the flags
+	 * @return true, if successful
+	 */
 	public static boolean configurePSFModel(FitEngineConfiguration config, int flags)
 	{
 		FitConfiguration fitConfig = config.getFitConfiguration();

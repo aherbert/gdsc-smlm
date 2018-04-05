@@ -219,7 +219,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	private static final int FILTER_PRECISION = 6;
 	private static final int FILTER_ITERATIONS = 7;
 	private static final int FILTER_EVALUATIONS = 8;
-	
+
 	// TODO - Add support for optimising z-depth during 3D fitting
 
 	private FilterCriteria[] createFilterCriteria()
@@ -1228,6 +1228,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			fitConfig.setCameraType(simulationParameters.cameraType);
 			fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
 		}
+		if (!PeakFit.configurePSFModel(config))
+			return false;
 		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null,
 				(extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0))
 			return false;
