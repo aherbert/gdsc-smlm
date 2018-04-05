@@ -14,6 +14,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
@@ -55,7 +68,7 @@ public class BenchmarkFit implements PlugIn
 	private static final String TITLE = "Benchmark Fit";
 
 	private static int regionSize = 4;
-	private static double lastS = 0;
+	private static double lastId = 0;
 
 	private static final String[] ORIGIN_XY = { "Origin", "Centre-of-Mass", "Offset" };
 	private static final String[] ORIGIN_Z = { "Origin", "0", "Offset" };
@@ -601,14 +614,18 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setNmPerPixel(benchmarkParameters.a);
 
 		// For each new benchmark width, reset the PSF width to the square pixel adjustment
-		if (lastS != benchmarkParameters.s)
+		if (lastId != benchmarkParameters.id)
 		{
-			lastS = benchmarkParameters.s;
+			lastId = benchmarkParameters.id;
 			fitConfig.setInitialPeakStdDev(benchmarkParameters.s / benchmarkParameters.a);
 			// The adjusted width is only relevant when using a single point approximation 
 			// for a Gaussian over the pixel. Using the ERF function computes the actual 
 			// integral over the pixel.
 			//fitConfig.setInitialPeakStdDev(sa);
+			
+			// Set the PSF. This requires the CreateData plugin to store the most appropriate
+			// PSF used for the simulation.
+			fitConfig.setPSF(benchmarkParameters.psf);
 		}
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
@@ -781,6 +798,10 @@ public class BenchmarkFit implements PlugIn
 
 		gd.collectOptions();
 
+		// Do this before the call to is3D()
+		if (!PeakFit.configurePSFModel(config))
+			return false;
+		
 		getStartPoints(fitConfig.is3D());
 
 		if (startPoints.length == 0)
@@ -807,9 +828,6 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setCalibration(calibration.getCalibration());
 
 		fitConfig.setCameraModelName(benchmarkParameters.cameraModelName);
-
-		if (!PeakFit.configurePSFModel(config))
-			return false;
 
 		if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null, 0))
 			return false;

@@ -42,6 +42,19 @@ import org.apache.commons.math3.util.FastMath;
 
 import com.google.protobuf.TextFormat;
 
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2013 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.ConversionException;
@@ -257,6 +270,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private SummaryStatistics photonStats;
 	//private boolean imagePSF;
 	private double hwhm = 0;
+	private PSF psf = null;
 
 	private TIntHashSet movingMolecules;
 	private TIntIntHashMap idToCompound;
@@ -345,9 +359,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		final double noise;
 
+		/** The best approximation of the PSF used to fit the simulation data. */
+		final PSF psf;
+
 		public BaseParameters(double s, double a, double minSignal, double maxSignal, double averageSignal, double bias,
 				double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
-				Rectangle cameraBounds, double b, double noise)
+				Rectangle cameraBounds, double b, double noise, PSF psf)
 		{
 			id = nextId++;
 			this.s = s;
@@ -364,6 +381,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.cameraBounds = cameraBounds;
 			this.b = b;
 			this.noise = noise;
+			this.psf = psf;
 		}
 
 		/**
@@ -403,10 +421,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public SimulationParameters(int molecules, boolean fullSimulation, double s, double a, double minSignal,
 				double maxSignal, double averageSignal, double depth, boolean fixedDepth, double bias, double gain,
 				double qe, double readNoise, CameraType cameraType, String cameraModelName, Rectangle cameraBounds,
-				double b, double noise)
+				double b, double noise, PSF psf)
 		{
 			super(s, a, minSignal, maxSignal, averageSignal, bias, gain, qe, readNoise, cameraType, cameraModelName,
-					cameraBounds, b, noise);
+					cameraBounds, b, noise, psf);
 			this.molecules = molecules;
 			this.fullSimulation = fullSimulation;
 			this.depth = depth;
@@ -455,10 +473,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
 				double bias, double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
 				Rectangle cameraBounds, double b, double noise, double precisionN, double precisionX,
-				double precisionXML)
+				double precisionXML, PSF psf)
 		{
 			super(s, a, signal, signal, signal, bias, gain, qe, readNoise, cameraType, cameraModelName, cameraBounds, b,
-					noise);
+					noise, psf);
 
 			this.frames = frames;
 			this.x = x;
@@ -973,7 +991,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
 					readNoise, settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
-					settings.getBackground(), noise, lowerN, lowerP, lowerMLP);
+					settings.getBackground(), noise, lowerN, lowerP, lowerMLP,
+					createPSF(sd / settings.getPixelPitch()));
 		}
 		else
 		{
@@ -1064,7 +1083,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum(), signalPerFrame,
 				settings.getDepth(), settings.getFixedDepth(), settings.getBias(), totalGain, qe, readNoise,
 				settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
-				settings.getBackground(), noise);
+				settings.getBackground(), noise, createPSF(sd / settings.getPixelPitch()));
 	}
 
 	/**
@@ -1357,6 +1376,58 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 		}
 		return hwhm;
+	}
+
+	private PSF createPSF(double psfSD) throws IllegalArgumentException
+	{
+		if (psf == null)
+		{
+			if (psfModelType == PSF_MODEL_ASTIGMATISM)
+			{
+				// Note: the astigmatismModel may not yet be created so create if necessary.
+				// This is used to store the best PSF to use to fit the data.
+				AstigmatismModel astigmatismModel = this.astigmatismModel;
+				if (astigmatismModel == null)
+					astigmatismModel = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
+				if (astigmatismModel == null)
+					throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
+				
+				// Assume conversion for simulation
+				try
+				{
+					if (DoubleEquality.relativeError(astigmatismModel.getNmPerPixel(), settings.getPixelPitch()) > 1e-6)
+					{
+						// Convert to nm
+						astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.NM,
+								DistanceUnit.NM);
+						// Reset pixel pitch. This will draw the spot using the correct size on the different size pixels.
+						astigmatismModel = astigmatismModel.toBuilder().setNmPerPixel(settings.getPixelPitch()).build();
+					}
+
+					// Convert for simulation in pixels
+					astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL,
+							DistanceUnit.PIXEL);
+				}
+				catch (ConversionException e)
+				{
+					// Wrap so this can be caught as the same type
+					throw new IllegalArgumentException(e);
+				}
+
+				psf = PSFProtosHelper.createPSF(astigmatismModel, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
+				psf = psf.toBuilder().setModelName(settings.getAstigmatismModel()).build();
+			}
+			else
+			{
+				PSF.Builder psfBuilder;
+				// Set the PSF as a Gaussian using the width at z=0. 
+				// In future this could be improved for other PSFs.
+				psfBuilder = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
+				psfBuilder.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
+				psf = psfBuilder.build();
+			}
+		}
+		return psf;
 	}
 
 	/**
@@ -2157,21 +2228,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Bounds are relative to the image source
 		results.setBounds(new Rectangle(settings.getSize(), settings.getSize()));
 
-		PSF psf;
-		if (astigmatismModel != null)
-		{
-			psf = PSFProtosHelper.createPSF(astigmatismModel, DistanceUnit.PIXEL, DistanceUnit.PIXEL);
-		}
-		else
-		{
-			PSF.Builder psfBuilder;
-			// Set the PSF as a Gaussian using the width at z=0. 
-			// In future this could be improved for other PSFs.S
-			psfBuilder = PSFProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
-			psfBuilder.getParametersBuilder(PSFHelper.INDEX_SX).setValue(psfSD);
-			psf = psfBuilder.build();
-		}
-		results.setPSF(psf);
+		results.setPSF(createPSF(psfSD));
 		MemoryPeakResults.addResults(results);
 
 		setBenchmarkResults(imp, results);
@@ -5866,7 +5923,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		SimulationParameters p = new SimulationParameters(molecules, fullSimulation, s, a, minSignal, maxSignal,
 				signalPerFrame, depth, fixedDepth, bias, gain, qe, readNoise, cal.getCameraType(),
-				cal.getCameraModelName(), modelBounds, b, b2);
+				cal.getCameraModelName(), modelBounds, b, b2, createPSF(s / a));
 		p.loaded = true;
 		return p;
 	}
