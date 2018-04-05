@@ -22,6 +22,7 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.results.count.FrameCounter;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.procedures.BIRResultProcedure;
 import gdsc.smlm.results.procedures.BIXYResultProcedure;
 import gdsc.smlm.results.procedures.BIXYZResultProcedure;
 import gdsc.smlm.results.procedures.BResultProcedure;
@@ -1460,6 +1461,37 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			procedure.executeB(ic.convert(getf(i).getBackground()));
+		}
+	}
+
+	/**
+	 * For each result execute the procedure using the specified units.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
+	 *
+	 * @param intensityUnit
+	 *            the intensity unit
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
+	 */
+	public void forEach(IntensityUnit intensityUnit, BIRResultProcedure procedure)
+			throws ConversionException, ConfigurationException
+	{
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			final PeakResult r = getf(i);
+			//@formatter:off
+			procedure.executeBIR(
+					ic.convert(r.getBackground()), 
+					ic.convert(r.getSignal()), 
+					r);
+			//@formatter:on
 		}
 	}
 
