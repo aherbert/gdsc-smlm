@@ -72,7 +72,9 @@ public class BenchmarkFit implements PlugIn
 	private static double offsetRangeZ = 0.5;
 
 	private static boolean backgroundFitting = true;
+	private static boolean estimateBackground = true;
 	private static boolean signalFitting = true;
+	private static boolean estimateSignal = true;
 	private static boolean showHistograms = false;
 	private static boolean saveRawData = false;
 	private static String rawDataDirectory = "";
@@ -264,11 +266,11 @@ public class BenchmarkFit implements PlugIn
 			double[] data = SimpleArrayUtils.toDouble(this.data);
 
 			// Get the background and signal estimate for fitting in the correct units
-			final double b = (backgroundFitting) ? getBackground(data, size, size)
+			final double b = (backgroundFitting && estimateBackground) ? getBackground(data, size, size)
 					// Convert the answer to the correct units
 					: answer[Gaussian2DFunction.BACKGROUND] *
 							((fitConfig.isFitCameraCounts()) ? benchmarkParameters.gain : 1);
-			final double signal = (signalFitting) ? getSignal(data, b)
+			final double signal = (signalFitting && estimateSignal) ? getSignal(data, b)
 					// Convert the answer to the correct units
 					: answer[Gaussian2DFunction.SIGNAL] *
 							((fitConfig.isFitCameraCounts()) ? benchmarkParameters.gain : 1);
@@ -602,7 +604,11 @@ public class BenchmarkFit implements PlugIn
 		if (lastS != benchmarkParameters.s)
 		{
 			lastS = benchmarkParameters.s;
-			fitConfig.setInitialPeakStdDev(sa);
+			fitConfig.setInitialPeakStdDev(benchmarkParameters.s / benchmarkParameters.a);
+			// The adjusted width is only relevant when using a single point approximation 
+			// for a Gaussian over the pixel. Using the ERF function computes the actual 
+			// integral over the pixel.
+			//fitConfig.setInitialPeakStdDev(sa);
 		}
 
 		gd.addSlider("Region_size", 2, 20, regionSize);
@@ -668,7 +674,6 @@ public class BenchmarkFit implements PlugIn
 		gd.addCheckbox("Zero_offset", zeroOffset);
 		gd.addNumericField("Offset_points", offsetPoints, 0, new OptionListener<Double>()
 		{
-
 			public boolean collectOptions(Double value)
 			{
 				offsetPoints = Math.max(0, value);
@@ -698,10 +703,62 @@ public class BenchmarkFit implements PlugIn
 				return true;
 			}
 		});
-		gd.addCheckbox("Background_fitting", backgroundFitting);
+		gd.addCheckbox("Background_fitting", backgroundFitting, new OptionListener<Boolean>()
+		{
+			public boolean collectOptions(Boolean value)
+			{
+				backgroundFitting = value;
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				if (!backgroundFitting)
+					return false;
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Background fitting");
+				egd.addCheckbox("Estimate_background", estimateBackground);
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				estimateBackground = egd.getNextBoolean();
+				return true;
+			}
+		});
 		gd.addMessage("Signal fitting can be disabled for " + PSFProtosHelper.getName(PSFType.ONE_AXIS_GAUSSIAN_2D) +
 				" function");
-		gd.addCheckbox("Signal_fitting", signalFitting);
+		gd.addCheckbox("Signal_fitting", signalFitting, new OptionListener<Boolean>()
+		{
+			public boolean collectOptions(Boolean value)
+			{
+				signalFitting = value;
+				return collectOptions(false);
+			}
+
+			public boolean collectOptions()
+			{
+				return collectOptions(true);
+			}
+
+			private boolean collectOptions(boolean silent)
+			{
+				if (!signalFitting)
+					return false;
+				ExtendedGenericDialog egd = new ExtendedGenericDialog("Signal fitting");
+				egd.addCheckbox("Estimate_signal", estimateSignal);
+				egd.setSilent(silent);
+				egd.showDialog(true, gd);
+				if (egd.wasCanceled())
+					return false;
+				estimateSignal = egd.getNextBoolean();
+				return true;
+			}
+		});
 		gd.addCheckbox("Show_histograms", showHistograms);
 		gd.addCheckbox("Save_raw_data", saveRawData);
 
@@ -750,7 +807,7 @@ public class BenchmarkFit implements PlugIn
 		fitConfig.setCalibration(calibration.getCalibration());
 
 		fitConfig.setCameraModelName(benchmarkParameters.cameraModelName);
-		
+
 		if (!PeakFit.configurePSFModel(config))
 			return false;
 
