@@ -277,4 +277,16 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 			return null;
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		return String.format("s0x=%f s0y=%f gamma=%f 1/d^2=%f Ax=%f Bx=%f Ay=%f By=%f", s0x, s0y, gamma, one_d2, Ax, Bx,
+				Ay, By);
+	}
 }
