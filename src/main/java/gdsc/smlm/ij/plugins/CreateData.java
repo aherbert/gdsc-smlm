@@ -92,6 +92,10 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
+import gdsc.smlm.function.LikelihoodFunction;
+import gdsc.smlm.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.function.PoissonGaussianFunction;
+import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
@@ -292,6 +296,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	// Hold private variables for settings that are ignored in simple/benchmark mode 
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
+
+	// Compute the CRLB for the PSF using a likelihood function
+	private LikelihoodFunction[] likelihoodFunction = null;
+	// Counter for the number of CRLB to compute
+	private AtomicInteger crlbCount = new AtomicInteger();
 
 	// Store the parameters
 	public static class BaseParameters
@@ -987,15 +996,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Store the benchmark settings when not using variable photons
 		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
 		{
-			// TODO - Over the region of the simulation compute the CRLB for BIXYZ
-			// i.e. all standard parameters of any PSF model.
-			// For a Gaussian we can use the Mortensen formulas.
-			// For Astigmatism for Poisson data we can approximate using the Smith et al method
-			// For all others (Airy/ImagePSF) we can approximate using numerical gradients
-			// of the log-likelihood function.
-			
-			
-			
+			// Flag that CRLB should be computed
+			crlbCount.set(1);
+
 			final double qe = getQuantumEfficiency();
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
@@ -1400,7 +1403,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					astigmatismModel = AstigmatismModelManager.getModel(settings.getAstigmatismModel());
 				if (astigmatismModel == null)
 					throw new IllegalArgumentException("Failed to load model: " + settings.getAstigmatismModel());
-				
+
 				// Assume conversion for simulation
 				try
 				{
@@ -2027,7 +2030,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 			c.setCountPerPhoton(helper.getTotalGainSafe());
 			c.setBias(settings.getBias());
-			c.setReadNoise(settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1));
+			c.setReadNoise(helper.getReadNoiseInCounts());
 			c.setQuantumEfficiency(helper.getQuantumEfficiency());
 		}
 
@@ -2050,6 +2053,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Create the camera noise model
 		createPerPixelCameraModelData(cameraModel);
 
+		// Set-up computation of CRLB
+		int threadCount = Prefs.getThreads();
+		if (benchmarkMode)
+		{
+			crlbCount.set(threadCount);
+			createLikelihoodFunction();
+		}
+
 		IJ.showStatus("Drawing image ...");
 
 		// Multi-thread for speed
@@ -2058,7 +2069,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// blocking queue.
 		// http://stackoverflow.com/questions/1800317/impossible-to-make-a-cached-thread-pool-with-a-size-limit
 		// ExecutorService threadPool = Executors.newCachedThreadPool();
-		int threadCount = Prefs.getThreads();
 		PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
 		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 		List<Future<?>> futures = new LinkedList<Future<?>>();
@@ -2541,18 +2551,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		float bias = settings.getBias();
 		float gain = 1f;
-		float readNoise = 0;
 
 		if (settings.getCameraGain() != 0)
 			gain = (float) settings.getCameraGain();
 
-		if (settings.getReadNoise() > 0)
-		{
-			readNoise = (float) settings.getReadNoise();
-			// Read noise is in electrons. Apply camera gain to get the noise in ADUs.
-			if (settings.getCameraGain() != 0)
-				readNoise *= settings.getCameraGain();
-		}
+		float readNoise = (float) new CreateDataSettingsHelper(settings).getReadNoiseInCounts();
 
 		return new FixedPixelCameraModel(bias, gain, (float) Maths.pow2(readNoise));
 	}
@@ -4631,6 +4634,41 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		double qe = settings.getQuantumEfficiency();
 		return (qe > 0 && qe < 1) ? qe : 1;
+	}
+
+	/**
+	 * Creates the likelihood function. This is used for CRLB computation.
+	 */
+	private void createLikelihoodFunction()
+	{
+		CameraType cameraType = settings.getCameraType();
+		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
+		likelihoodFunction = new LikelihoodFunction[settings.getSize() * settings.getSize()];
+		if (isCCD)
+		{
+			LikelihoodFunction f;
+			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
+			double readNoise = helper.getReadNoiseInCounts();
+
+			if (cameraType == CameraType.EMCCD)
+			{
+				f = new PoissonGammaGaussianFunction(1.0 / helper.getTotalGain(), readNoise);
+			}
+			else
+			{
+				f = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / helper.getTotalGain(), readNoise);
+			}
+			Arrays.fill(likelihoodFunction, f);
+		}
+		else if (cameraType == CameraType.SCMOS)
+		{
+			// Build per-pixel likelihood function
+		}
+		else
+		{
+			throw new IllegalArgumentException(
+					"Unsupported camera type: " + CalibrationProtosHelper.getName(cameraType));
+		}
 	}
 
 	/**

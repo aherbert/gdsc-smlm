@@ -23,17 +23,21 @@ import org.apache.commons.math3.util.FastMath;
  * The implementation uses the saddle-point approximation described in Snyder, et al (1995) Compensation for readout
  * noise in CCD images. J.Opt. Soc. Am. 12, 272-283. The method is adapted from the C source code provided in the
  * appendix.
+ * <p>
+ * The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a
+ * Poisson process of emitted light, converted to electrons on the camera chip, amplified by a gain and then read with
+ * Gaussian noise.
  */
 public class PoissonGaussianFunction implements LikelihoodFunction
 {
 	/**
-	 * The inverse of the EM-gain multiplication factor
+	 * The inverse of the on-chip gain multiplication factor
 	 */
 	final double alpha;
 
 	private static final double EPSILON = 1e-4; // 1e-6
-	private static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
-	private static final double LOG_NORMALISATION = Math.log(NORMALISATION);
+	static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
+	static final double LOG_NORMALISATION = Math.log(NORMALISATION);
 
 	/**
 	 * Number of Picard iterations to use
@@ -50,13 +54,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 
 	/**
 	 * @param alpha
-	 *            The inverse of the EM-gain multiplication factor
+	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param sigmasquared
-	 *            The variance of the Gaussian distribution (must be positive)
+	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 */
-	private PoissonGaussianFunction(final double alpha, final double mu, final double sigmasquared)
+	private PoissonGaussianFunction(final double alpha, double mu, double sigmasquared)
 	{
 		this.alpha = Math.abs(alpha);
 		noPoisson = (mu <= 0);
@@ -64,7 +68,15 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		//	throw new IllegalArgumentException("Poisson mean must be strictly positive");
 		if (sigmasquared <= 0)
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
-		this.mu = mu * alpha;
+		
+		// Apply gain to the mean and readout standard deviation. 
+		// This compresses the probability distribution by alpha. Thus we can compute the
+		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
+		// output probability so the cumulative probability is 1 over the uncompressed range.
+		mu *= alpha;
+		//sigmasquared *= (alpha * alpha); 
+		
+		this.mu = mu;
 		this.sigmasquared = sigmasquared;
 
 		probabilityNormalisation = ((noPoisson) ? getProbabilityNormalisation(sigmasquared) : 1) * alpha;
@@ -73,11 +85,11 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 
 	/**
 	 * @param alpha
-	 *            The inverse of the EM-gain multiplication factor
+	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param s
-	 *            The standard deviation of the Gaussian distribution
+	 *            The standard deviation of the Gaussian distribution at readout
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
@@ -89,11 +101,11 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 
 	/**
 	 * @param alpha
-	 *            The inverse of the EM-gain multiplication factor
+	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
 	 *            The mean of the Poisson distribution
 	 * @param var
-	 *            The variance of the Gaussian distribution (must be positive)
+	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 * @throws IllegalArgumentException
 	 *             if the mean or variance is zero or below
 	 */
@@ -106,7 +118,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * Get the probability of observation x
 	 * 
 	 * @param x
-	 *            The observation value
+	 *            The observation value (after gain)
 	 * @return The probability
 	 */
 	public double probability(double x)
@@ -121,9 +133,9 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * mu was below zero on construction and is above zero now, or vice-versa.
 	 * 
 	 * @param x
-	 *            The observation value
+	 *            The observation value (after gain)
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution (before gain)
 	 * @return The probability
 	 */
 	public double probability(double x, double mu)
@@ -190,7 +202,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		return getProbability(x, mu, sigmasquared, usePicardApproximation);
 	}
 
-	private static double getProbabilityNormalisation(double sigmasquared)
+	static double getProbabilityNormalisation(double sigmasquared)
 	{
 		return NORMALISATION / Math.sqrt(sigmasquared);
 	}
@@ -240,7 +252,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		return getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
 	}
 
-	private static double getLogNormalisation(double sigmasquared)
+	static double getLogNormalisation(double sigmasquared)
 	{
 		return LOG_NORMALISATION - Math.log(sigmasquared) * 0.5;
 	}
@@ -307,7 +319,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param sigmasquared
 	 * @return The saddle point
 	 */
-	private static double pade(final double x, final double mu, final double sigmasquared)
+	static double pade(final double x, final double mu, final double sigmasquared)
 	{
 		final double bterm = x - 2 * sigmasquared - mu;
 
@@ -337,7 +349,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param sigmasquared
 	 * @return The saddle point
 	 */
-	private static double picard(final double x, final double mu, final double sigmasquared)
+	static double picard(final double x, final double mu, final double sigmasquared)
 	{
 		// Use Taylor approximation to obtain the starting point for Picard iteration
 		final double taylor = (mu - x) / (mu + sigmasquared);
@@ -363,7 +375,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param initial_saddlepoint
 	 * @return The saddle point
 	 */
-	private static double newton_iteration(final double x, final double mu, final double sigmasquared,
+	static double newton_iteration(final double x, final double mu, final double sigmasquared,
 			final double initial_saddlepoint)
 	{
 		double change = 0;
@@ -406,7 +418,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param saddlepoint
 	 * @return The saddlepoint approximation
 	 */
-	private static double sp_approx(final double x, final double mu, final double sigmasquared,
+	static double sp_approx(final double x, final double mu, final double sigmasquared,
 			final double saddlepoint)
 	{
 		final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);

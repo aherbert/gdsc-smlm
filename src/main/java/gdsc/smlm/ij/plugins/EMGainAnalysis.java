@@ -30,7 +30,7 @@ import gdsc.smlm.function.Bessel;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.PoissonFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
-import gdsc.smlm.function.PoissonGaussianFunction;
+import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.utils.Convolution;
 import ij.IJ;
 import ij.ImagePlus;
@@ -818,8 +818,12 @@ public class EMGainAnalysis implements PlugInFilter
 				fun = new PoissonFunction(1.0 / _gain, true);
 				break;
 			case 2:
-				// The mean does not matter so just use zero
-				fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / _gain, 0, _noise);
+				// The mean does not matter (as normalisation is done dynamically for 
+				// PoissonGaussianFunction.likelihood(double, double) so just use zero
+				//fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / _gain, 0, _noise);
+				
+				// Use adaptive normalisation
+				fun = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / _gain, _noise);
 				break;
 			case 1:
 				myNoise = 0;

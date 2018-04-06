@@ -39,11 +39,15 @@ import org.apache.commons.math3.util.FastMath;
  * The mean of the Poisson distribution is set using the expected value. The scale (EM-gain) for the Gamma distribution
  * and standard deviation of the Gaussian is fixed and set in the constructor. The mean of the Gaussian is assumed to be
  * zero.
+ * <p>
+ * The likelihood function is designed to model on-chip amplification of a EMCCD camera which captures a
+ * Poisson process of emitted light, converted to electrons on the camera chip, amplified by gain modelled by the Gamma
+ * distribution and then read with Gaussian noise.
  */
-public class PoissonGammaGaussianFunction implements LikelihoodFunction
+public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
 	/**
-	 * The inverse scale of the Gamma distribution (e.g. the inverse of the EM-gain multiplication factor)
+	 * The inverse scale of the Gamma distribution (e.g. the inverse of the on-chip gain multiplication factor)
 	 */
 	final private double alpha;
 	/**
@@ -60,17 +64,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 	private double minimumProbability = Double.MIN_VALUE;
 
 	/**
-	 * Initialise the function.
-	 * <p>
-	 * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
-	 * indices should be passed in to the functions to obtain the value (and gradient).
-	 * <p>
-	 * Note: Negative parameters are made absolute
-	 * 
+	 * Instantiates a new poisson gamma gaussian function.
+	 *
 	 * @param alpha
 	 *            Inverse gain of the EMCCD chip
 	 * @param s
-	 *            The Gaussian standard deviation
+	 *            The Gaussian standard deviation at readout
 	 */
 	public PoissonGammaGaussianFunction(double alpha, double s)
 	{
@@ -354,6 +353,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction
 	 * @param e
 	 *            The expected count
 	 * @return The log-likelihood
+	 * 
+	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	public double logLikelihood(final double o, final double e)
 	{

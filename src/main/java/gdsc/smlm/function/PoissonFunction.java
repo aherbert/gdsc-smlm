@@ -21,13 +21,21 @@ import org.apache.commons.math3.util.FastMath;
  * Implements the probability density function for a Poisson distribution.
  * <p>
  * This is a simple implementation of the LikelihoodFunction interface.
+ * <p>
+ * The likelihood function is designed to model on-chip amplification of a EMCCD/CCD/sCMOS camera which captures a
+ * Poisson process of emitted light, converted to electrons on the camera chip, amplified by a gain and then read.
  */
-public class PoissonFunction implements LikelihoodFunction
+public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
 	/**
-	 * The inverse of the EM-gain multiplication factor
+	 * The inverse of the on-chip gain multiplication factor
 	 */
 	final double alpha;
+
+	/**
+	 * The log of the inverse on-chip gain multiplication factor
+	 */
+	final double logAlpha;
 
 	/**
 	 * Allow non-integer observed values
@@ -36,13 +44,14 @@ public class PoissonFunction implements LikelihoodFunction
 
 	/**
 	 * @param alpha
-	 *            The inverse of the EM-gain multiplication factor
+	 *            The inverse of the on-chip gain multiplication factor
 	 * @param nonInteger
 	 *            Allow non-integer observed values
 	 */
 	public PoissonFunction(double alpha, boolean nonInteger)
 	{
 		this.alpha = Math.abs(alpha);
+		logAlpha = Math.log(alpha);
 		this.nonInteger = nonInteger;
 	}
 
@@ -99,5 +108,33 @@ public class PoissonFunction implements LikelihoodFunction
 		if (k <= 1)
 			return 1;
 		return Gamma.gamma(k + 1);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
+	 */
+	public double logLikelihood(double o, double e)
+	{
+		if (o < 0 || e <= 0)
+			return Double.NEGATIVE_INFINITY;
+
+		// convert to photons
+		e *= alpha;
+		o *= alpha;
+
+		// Allow non-integer observed value using the gamma function to provide a factorial for non-integer values
+		// PMF(l,k) = C * e^-l * l^k / gamma(k+1)
+		// log(PMF) = -l + k * log(l) - logGamma(k+1)
+		if (nonInteger)
+		{
+			//return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
+
+			final double ll = -e + o * Math.log(e) - logFactorial(o);
+			return ll + logAlpha;
+		}
+
+		return new PoissonDistribution(e).logProbability((int) o) + logAlpha;
 	}
 }

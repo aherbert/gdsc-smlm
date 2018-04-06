@@ -26,10 +26,10 @@ public class CreateDataSettingsHelper
 	private double totalGain = 0;
 
 	/**
-	 * Instantiates a new creates the data settings helper.
+	 * Instantiates a new creates the data createDataSettings helper.
 	 *
 	 * @param createDataSettings
-	 *            the create data settings
+	 *            the create data createDataSettings
 	 */
 	public CreateDataSettingsHelper(CreateDataSettingsOrBuilder createDataSettings)
 	{
@@ -148,5 +148,23 @@ public class CreateDataSettingsHelper
 		}
 		// Set a default
 		return DiffusionType.RANDOM_WALK;
+	}
+
+	/**
+	 * Gets the read noise in Counts. This is the read noise in electrons multiplied by the camera gain.
+	 *
+	 * @return the read noise in Counts
+	 */
+	public double getReadNoiseInCounts()
+	{
+		double readNoise = 0;
+		if (createDataSettings.getReadNoise() > 0)
+		{
+			readNoise = createDataSettings.getReadNoise();
+			// Read noise is in electrons. Apply camera gain to get the noise in ADUs.
+			if (createDataSettings.getCameraGain() != 0)
+				readNoise *= createDataSettings.getCameraGain();
+		}
+		return readNoise;
 	}
 }

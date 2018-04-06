@@ -47,7 +47,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 	 * @param alpha
 	 *            Inverse gain of the EMCCD chip
 	 * @param s
-	 *            The Gaussian standard deviation
+	 *            The Gaussian standard deviation at readout
 	 */
 	public PoissonGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha, double s)
 	{
