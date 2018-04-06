@@ -282,7 +282,7 @@ public class MeanVarianceTest implements PlugIn
 		{
 			// Ask the user for the camera gain ...
 			gd.addMessage("Estimating the EM-gain requires the camera gain without EM readout enabled");
-			gd.addNumericField("Camera_gain (ADU/e-)", cameraGain, 4);
+			gd.addNumericField("Camera_gain (Count/e-)", cameraGain, 4);
 		}
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -367,7 +367,7 @@ public class MeanVarianceTest implements PlugIn
 					
 				mean[j] = pair.getMean();
 				variance[j] = pair.variance;
-				// Gain is in ADU / e
+				// Gain is in Count / e
 				double gain = variance[j] / (mean[j] - bias);
 				gainStats.add(gain);
 				obs.add(mean[j], variance[j]);
@@ -435,14 +435,14 @@ public class MeanVarianceTest implements PlugIn
 			{
 				final double totalGain = gain;
 				final double emGain = totalGain / cameraGain;
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(cameraGain, 4));
+				Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(cameraGain, 4));
 				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-				Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+				Utils.log("  Total Gain = %s (Count/e-)", Utils.rounded(totalGain, 4));
 			}
 			else
 			{
 				cameraGain = gain;
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(cameraGain, 4));
+				Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(cameraGain, 4));
 			}
 		}
 		else
@@ -464,7 +464,7 @@ public class MeanVarianceTest implements PlugIn
 
 			if (showCharts)
 			{
-				// Plot mean verses variance. Gradient is gain in ADU/e.
+				// Plot mean verses variance. Gradient is gain in Count/e.
 				String title = TITLE + " results";
 				Plot2 plot = new Plot2(title, "Mean", "Variance");
 				double[] xlimits = Maths.limits(mean);
@@ -488,30 +488,30 @@ public class MeanVarianceTest implements PlugIn
 
 			Utils.log(TITLE);
 			Utils.log("  Directory = %s", inputDirectory);
-			Utils.log("  Bias = %s +/- %s (ADU)", Utils.rounded(bias, 4), Utils.rounded(avBiasNoise, 4));
+			Utils.log("  Bias = %s +/- %s (Count)", Utils.rounded(bias, 4), Utils.rounded(avBiasNoise, 4));
 			Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
 			if (emMode)
 			{
 				final double emGain = best[1] / (2 * cameraGain);
 
-				// Noise is standard deviation of the bias image divided by the total gain (in ADU/e-)
+				// Noise is standard deviation of the bias image divided by the total gain (in Count/e-)
 				final double totalGain = emGain * cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(avBiasNoise / totalGain, 4),
+				Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(avBiasNoise / totalGain, 4),
 						Utils.rounded(avBiasNoise, 4));
 
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
+				Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(1 / cameraGain, 4));
 				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
-				Utils.log("  Total Gain = %s (ADU/e-)", Utils.rounded(totalGain, 4));
+				Utils.log("  Total Gain = %s (Count/e-)", Utils.rounded(totalGain, 4));
 			}
 			else
 			{
-				// Noise is standard deviation of the bias image divided by the gain (in ADU/e-)
+				// Noise is standard deviation of the bias image divided by the gain (in Count/e-)
 				cameraGain = best[1];
 				final double readNoise = avBiasNoise / cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", Utils.rounded(readNoise, 4),
+				Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(readNoise, 4),
 						Utils.rounded(readNoise * cameraGain, 4));
 
-				Utils.log("  Gain = 1 / %s (ADU/e-)", Utils.rounded(1 / cameraGain, 4));
+				Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(1 / cameraGain, 4));
 			}
 		}
 		IJ.showStatus("");
