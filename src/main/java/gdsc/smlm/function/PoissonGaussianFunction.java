@@ -56,38 +56,44 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution at readout
 	 * @param sigmasquared
 	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 */
-	private PoissonGaussianFunction(final double alpha, double mu, double sigmasquared)
+	private PoissonGaussianFunction(double alpha, double mu, double sigmasquared)
 	{
-		this.alpha = Math.abs(alpha);
-		noPoisson = (mu <= 0);
-		//if (mu <= 0)
-		//	throw new IllegalArgumentException("Poisson mean must be strictly positive");
 		if (sigmasquared <= 0)
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
-		
+		alpha = Math.abs(alpha);
+		noPoisson = (mu <= 0);
+
 		// Apply gain to the mean and readout standard deviation. 
 		// This compresses the probability distribution by alpha. Thus we can compute the
 		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
 		// output probability so the cumulative probability is 1 over the uncompressed range.
 		mu *= alpha;
-		//sigmasquared *= (alpha * alpha); 
-		
+		sigmasquared *= (alpha * alpha);
+
+		//System.out.printf("mu=%f s^2=%f\n", mu, sigmasquared);
+
+		this.alpha = alpha;
 		this.mu = mu;
 		this.sigmasquared = sigmasquared;
 
 		probabilityNormalisation = ((noPoisson) ? getProbabilityNormalisation(sigmasquared) : 1) * alpha;
-		logNormalisation = ((noPoisson) ? getLogNormalisation(sigmasquared) : LOG_NORMALISATION) + Math.log(alpha);
+
+		logNormalisation = ((noPoisson) ? getLogNormalisation(sigmasquared)
+				// Note that this uses the LOG_NORMALISATION (not zero) as the logProbability function 
+				// uses the getPseudoLikelihood function. It would be zero if the static logProbability
+				// was called.
+				: LOG_NORMALISATION) + Math.log(alpha);
 	}
 
 	/**
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution at readout
 	 * @param s
 	 *            The standard deviation of the Gaussian distribution at readout
 	 * @throws IllegalArgumentException
@@ -103,7 +109,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
-	 *            The mean of the Poisson distribution
+	 *            The mean of the Poisson distribution at readout
 	 * @param var
 	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 * @throws IllegalArgumentException
@@ -144,7 +150,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		x *= alpha;
 
 		return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisation
-				: getProbability(x, mu, sigmasquared, usePicardApproximation) * alpha;
+				: getProbability(x, mu, sigmasquared, usePicardApproximation) * probabilityNormalisation;
 	}
 
 	/**
@@ -202,6 +208,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		return getProbability(x, mu, sigmasquared, usePicardApproximation);
 	}
 
+	/**
+	 * Gets the probability normalisation for the Gaussian distribution so the cumulative probability is 1.
+	 *
+	 * @param sigmasquared
+	 *            the sigma squared
+	 * @return the probability normalisation
+	 */
 	static double getProbabilityNormalisation(double sigmasquared)
 	{
 		return NORMALISATION / Math.sqrt(sigmasquared);
@@ -252,6 +265,13 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		return getPseudoLikelihood(x, mu, sigmasquared, usePicardApproximation) + LOG_NORMALISATION;
 	}
 
+	/**
+	 * Gets the log probability normalisation for the Gaussian distribution.
+	 *
+	 * @param sigmasquared
+	 *            the sigma squared
+	 * @return the log probability normalisation
+	 */
 	static double getLogNormalisation(double sigmasquared)
 	{
 		return LOG_NORMALISATION - Math.log(sigmasquared) * 0.5;
@@ -418,8 +438,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param saddlepoint
 	 * @return The saddlepoint approximation
 	 */
-	static double sp_approx(final double x, final double mu, final double sigmasquared,
-			final double saddlepoint)
+	static double sp_approx(final double x, final double mu, final double sigmasquared, final double saddlepoint)
 	{
 		final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
 		final double phi2 = sigmasquared + mu_exp_minus_s;

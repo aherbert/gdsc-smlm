@@ -11,9 +11,19 @@ import org.junit.Test;
 
 public class PoissonGaussianFunctionTest
 {
-	double[] gain = { 1, 2, 4, 8, 16 };
-	double[] photons = { -1, 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
-	double[] noise = { 1, 2, 4, 8 };
+	// Note: Realistic gain values:
+	// Photometrics EM-CCD in CCD mode: 
+	// Gain = 3.0, 1.5, 0.5 e-/ADU => 0.33, 0.66, 2 ADU/e-
+	// Noise = 14.3 to 5.8 electrons
+	// Note that this has a large well capacity and may not be indicative of 
+	// a standard CCD
+	// sCMOS camera: 
+	// Gain has a range of 1.44 to 5.8, mean = 1.737 ADU/e-
+	// Noise variance 4 to 141 ADUs => 1.1 to 7 electrons 
+
+	static double[] gain = { 0.25, 0.5, 1, 2, 4, 8, 16 }; // ADU/electron
+	static double[] photons = { -1, 0, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
+	static double[] noise = { 1, 2, 4, 8, 16 }; // electrons
 
 	@Test
 	public void cumulativeProbabilityIsOneWithPicard()
@@ -30,7 +40,32 @@ public class PoissonGaussianFunctionTest
 		for (double g : gain)
 			for (double p : photons)
 				for (double s : noise)
-					cumulativeProbabilityIsOne(g, p, s, true);
+					cumulativeProbabilityIsOne(g, p, s, false);
+	}
+
+	@Test
+	public void cumulativeProbabilityIsNotOneWhenMeanIsLowAndNoiseIsLow()
+	{
+		// The cumulative probability is poor for low mean and low noise. 
+		// It can over-predict or under predict. The pattern of over/under is unknown. 
+		// For example in the following:
+
+		// OVER
+		Assert.assertTrue(1.02 < cumulativeProbability(1.7, 0.25, 0.01, true));
+		Assert.assertTrue(1.02 < cumulativeProbability(1.7, 0.25, 0.1, true));
+		// OK
+		Assert.assertEquals(1, cumulativeProbability(1.7, 0.25, 0.3, true), 0.02);
+		// UNDER
+		Assert.assertTrue(0.98 > cumulativeProbability(1.7, 0.25, 0.5, true));
+		// OK
+		Assert.assertEquals(1, cumulativeProbability(1.7, 0.25, 0.75, true), 0.02);
+
+		// Fine with higher mean
+		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.01, true), 0.02);
+		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.1, true), 0.02);
+		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.3, true), 0.02);
+		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.5, true), 0.02);
+		Assert.assertEquals(1, cumulativeProbability(1.7, 10, 0.75, true), 0.02);
 	}
 
 	@Test
@@ -116,8 +151,16 @@ public class PoissonGaussianFunctionTest
 
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
 	{
-		// Note: The input mu is pre-gain.
-		final PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain, s);
+		double p2 = cumulativeProbability(gain, mu, s, usePicard);
+		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		Assert.assertEquals(msg, 1, p2, 0.02);
+	}
+
+	private double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)
+	{
+		// Note: The input mu & s parameters are pre-gain.
+		final PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain,
+				s * gain);
 		f.setUsePicardApproximation(usePicard);
 		double p = 0;
 		int min = 1;
@@ -129,8 +172,9 @@ public class PoissonGaussianFunctionTest
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
-			min = getMin(s);
-			max = getMax(gain, mu);
+			int[] range = getRange(gain, mu, s);
+			min = range[0];
+			max = range[1];
 			for (int x = min; x <= max; x++)
 			{
 				final double pp = f.probability(x);
@@ -165,7 +209,7 @@ public class PoissonGaussianFunctionTest
 
 		// Do a formal integration
 		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
 			public double value(double x)
@@ -174,40 +218,39 @@ public class PoissonGaussianFunctionTest
 			}
 		}, min, max);
 
-		// Current this fails when the standard deviation is scaled by the gain.
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
-		if (p < 0.98 || p > 1.02)
-			System.out.printf("%s p=%f  %f\n", msg, p, p2);
-		//Assert.assertEquals(msg, 1, p2, 0.02);
+		if (p2 < 0.98 || p2 > 1.02)
+			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+
+		return p2;
 	}
 
-	private int getMin(final double s)
+	static int[] getRange(final double gain, final double mu, final double s)
 	{
-		int min;
-		min = (int) -Math.ceil(3 * s);
-		return min;
-	}
-
-	private int getMax(final double gain, final double mu)
-	{
-		int max;
-		max = (int) Math.ceil(gain * (mu + 3 * Math.sqrt(mu)));
-		return max;
+		// Evaluate an initial range. 
+		// Gaussian should have >99% within +/- s
+		// Poisson will have mean mu with a variance mu. 
+		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
+		double range = Math.max(s, Math.sqrt(mu));
+		int min = (int) Math.floor(gain * (mu - 3 * range));
+		int max = (int) Math.ceil(gain * (mu + 3 * range));
+		return new int[]{min, max};
 	}
 
 	private void probabilityMatchesLogProbability(final double gain, final double mu, final double s,
 			final boolean usePicard)
 	{
-		// Note: The input mu is pre-gain.
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain, s);
+		// Note: The input mu & s parameters are pre-gain.
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain,
+				s * gain);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range. 
 		// Gaussian should have >99% within +/- s
 		// Poisson will have mean mu with a variance mu. 
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		int min = getMin(s);
-		int max = getMax(gain, mu);
+		int[] range = getRange(gain, mu, s);
+		int min = range[0];
+		int max = range[1];
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.probability(x);
@@ -222,18 +265,20 @@ public class PoissonGaussianFunctionTest
 	private void staticMethodsMatchInstanceMethods(final double gain, final double mu, final double s,
 			final boolean usePicard)
 	{
-		// Note: The input mu is pre-gain.
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain, s);
+		// Note: The input mu & s parameters are pre-gain.
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain,
+				s * gain);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range. 
 		// Gaussian should have >99% within +/- s
 		// Poisson will have mean mu with a variance mu. 
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
-		int min = getMin(s);
-		int max = getMax(gain, mu);
+		int[] range = getRange(gain, mu, s);
+		int min = range[0];
+		int max = range[1];
 		final double logGain = Math.log(gain);
-		final double s2 = Maths.pow2(s / gain);
+		final double s2 = Maths.pow2(s);
 		for (int x = min; x <= max; x++)
 		{
 			double p = f.probability(x);

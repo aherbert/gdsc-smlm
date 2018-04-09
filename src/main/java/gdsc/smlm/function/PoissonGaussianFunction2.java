@@ -52,11 +52,19 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 	 * @param sigmasquared
 	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 */
-	private PoissonGaussianFunction2(final double alpha, final double sigmasquared)
+	private PoissonGaussianFunction2(double alpha, double sigmasquared)
 	{
-		this.alpha = Math.abs(alpha);
 		if (sigmasquared <= 0)
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+		alpha = Math.abs(alpha);
+		
+		// Apply gain to the readout standard deviation. 
+		// This compresses the probability distribution by alpha. Thus we can compute the
+		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
+		// output probability so the cumulative probability is 1 over the uncompressed range.
+		sigmasquared *= (alpha * alpha); 
+		
+		this.alpha = alpha;
 		this.sigmasquared = sigmasquared;
 
 		// As per PoissonGaussianFunction
