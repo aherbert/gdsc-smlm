@@ -166,10 +166,13 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private int[] simulateFromPDF()
 	{
-		final double[] g = pdf(0, _photons, _gain, _noise, (int) _bias);
+		double step = getStepSize(_photons, _gain, _noise);
+
+		PDF pdf = pdf(0, step, _photons, _gain, _noise);
 
 		// Debug this
-		double[] x = SimpleArrayUtils.newArray(g.length, 0, 1.0);
+		double[] g = pdf.p;
+		double[] x = pdf.x;
 		Utils.display(TITLE + " PDF", new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
 
 		// Get cumulative probability
@@ -187,21 +190,50 @@ public class EMGainAnalysis implements PlugInFilter
 
 		// Randomly sample
 		RandomGenerator random = new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
-		int[] h = new int[g.length];
+		int bias = (int) _bias;
+		int[] bins = new int[x.length];
+		for (int i = 0; i < x.length; i++)
+			bins[i] = bias + (int) x[i];
+		int[] h = new int[bins[bins.length - 1] + 1];
 		final int steps = simulationSize;
 		for (int n = 0; n < steps; n++)
 		{
 			if (n % 64 == 0)
 				IJ.showProgress(n, steps);
 			final double p = random.nextDouble();
-			for (int i = 0; i < g.length; i++)
-				if (p <= g[i])
-				{
-					h[i]++;
-					break;
-				}
+			int i = binarySearch(g, p);
+			if (i < 0)
+				i = -(i + 1);
+			h[bins[i]]++;
+
+			//for (int i = 0; i < g.length; i++)
+			//	if (p <= g[i])
+			//	{
+			//		h[i]++;
+			//		break;
+			//	}
 		}
 		return h;
+	}
+
+	private static int binarySearch(double[] a, double key)
+	{
+		int low = 0;
+		int high = a.length - 1;
+
+		while (low <= high)
+		{
+			int mid = (low + high) >>> 1;
+			double midVal = a[mid];
+
+			if (midVal < key)
+				low = mid + 1; // Neither val is NaN, thisVal is smaller
+			else if (midVal > key)
+				high = mid - 1; // Neither val is NaN, thisVal is larger
+			else
+				return mid; // Key found
+		}
+		return -(low + 1); // key not found.
 	}
 
 	/**
@@ -521,25 +553,28 @@ public class EMGainAnalysis implements PlugInFilter
 	 * so that the cumulative probability does not change.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
+	 * @param step
+	 *            the step between counts to evaluate
 	 * @param p
 	 *            The average number of photons per pixel input to the EM-camera
 	 * @param m
 	 *            The multiplication factor (gain)
 	 * @return The PDF
 	 */
-	private double[] pdfEMGain(final double p, final double m)
+	private static double[] pdfEMGain(final double step, final double p, final double m)
 	{
 		StoredDataStatistics stats = new StoredDataStatistics(100);
 		stats.add(FastMath.exp(-p));
 		for (int c = 1;; c++)
 		{
-			final double g = pEMGain(c, p, m);
+			final double g = pEMGain(c * step, p, m);
 			stats.add(g);
 			final double delta = g / stats.getSum();
 			if (delta < 1e-5)
 				break;
 		}
+		//System.out.printf("Sum = %f\n", stats.getSum() * step);
 		return stats.getValues();
 	}
 
@@ -558,9 +593,10 @@ public class EMGainAnalysis implements PlugInFilter
 	 *            The multiplication factor (gain)
 	 * @return The PDF
 	 */
-	private double pEMGain(int c, double p, double m)
+	private static double pEMGain(double c, double p, double m)
 	{
 		// The default evaluation is:
+		//if (true)
 		//return Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
 
 		// Bessel.I1(x) -> Infinity
@@ -612,28 +648,110 @@ public class EMGainAnalysis implements PlugInFilter
 	 * Calculate the probability density function for EM-gain.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * 
+	 *
 	 * @param max
 	 *            The maximum count to evaluate
+	 * @param step
+	 *            the step between counts to evaluate
 	 * @param p
 	 *            The average number of photons per pixel input to the EM-camera
 	 * @param m
 	 *            The multiplication factor (gain)
 	 * @return The PDF
 	 */
-	private double[] pdfEMGain(final int max, final double p, final double m)
+	private double[] pdfEMGain(final int max, final double step, final double p, final double m)
 	{
 		if (max == 0)
-			return pdfEMGain(p, m);
+			return pdfEMGain(step, p, m);
 		double[] g = new double[max + 1];
 		g[0] = FastMath.exp(-p);
-		for (int c = 1; c <= max; c++)
+		for (int c = 1;; c++)
 		{
-			g[c] = pEMGain(c, p, m);
-			if (g[c] == 0)
+			double count = c * step;
+			g[c] = pEMGain(count, p, m);
+			if (g[c] == 0 || count >= max)
 				break;
 		}
 		return g;
+	}
+
+	private class PDF
+	{
+		final double[] x, p;
+
+		PDF(double[] x, double[] p)
+		{
+			this.x = x;
+			this.p = p;
+		}
+	}
+
+	/**
+	 * Calculate the probability density function for EM-gain, convolve with a Gaussian and then add a constant offset.
+	 * <p>
+	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI.
+	 * 
+	 * @param max
+	 *            The maximum count to evaluate
+	 * @param step
+	 *            the step between counts to evaluate
+	 * @param p
+	 *            The average number of photons per pixel input to the EM-camera
+	 * @param m
+	 *            The multiplication factor (gain)
+	 * @param s
+	 *            The read noise (Gaussian standard deviation)
+	 * @return The PDF
+	 */
+	private PDF pdf(final int max, final double step, final double p, final double m, final double s)
+	{
+		double[] g = pdfEMGain(max, step, p, m);
+		double[] gg;
+
+		int zero = 0;
+
+		if (s > 0)
+		{
+			// Convolve with Gaussian kernel up to 4 times the standard deviation
+			final int radius = (int) Math.ceil(Math.abs(s) * 4 / step) + 1;
+			double[] kernel = new double[2 * radius + 1];
+			final double norm = -0.5 / (s * s);
+			for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
+				kernel[j] = kernel[jj] = FastMath.exp(norm * Maths.pow2(i * step));
+			// Normalise
+			double sum = 0;
+			for (int j = 0; j < kernel.length; j++)
+				sum += kernel[j];
+			for (int j = 0; j < kernel.length; j++)
+				kernel[j] /= sum;
+
+			if (extraOptions)
+			{
+				// Debug
+				String title = "Poisson-Gamma";
+				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, 0, step), g);
+				Utils.display(title, plot);
+
+				title = "Gaussian";
+				plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, radius * -step, step),
+						kernel);
+				Utils.display(title, plot);
+			}
+
+			gg = Convolution.convolveFast(g, kernel);
+			// The convolution will have created a larger array so we must adjust the offset for this
+			zero = radius;
+		}
+		else
+		{
+			gg = g;
+		}
+
+		double[] x = new double[gg.length];
+		for (int i = 0, j = -zero; i < x.length; i++, j++)
+			x[i] = j * step;
+
+		return new PDF(x, gg);
 	}
 
 	/**
@@ -797,16 +915,17 @@ public class EMGainAnalysis implements PlugInFilter
 		return (simulate) ? NO_IMAGE_REQUIRED : FLAGS;
 	}
 
+	@SuppressWarnings("unused")
 	private void plotPMF()
 	{
 		if (!showPMFDialog())
 			return;
 
-		final int gaussWidth = 5;
-		int dummyBias = (int) Math.max(500, gaussWidth * _noise + 1);
+		double step = getStepSize(_photons, _gain, _noise);
 
-		double[] pmf = pdf(0, _photons, _gain, _noise, dummyBias);
-		double[] x = SimpleArrayUtils.newArray(pmf.length, 0, 1.0);
+		PDF pdf = pdf(0, step, _photons, _gain, _noise);
+		double[] pmf = pdf.p;
+		double[] x = pdf.x;
 		double yMax = Maths.max(pmf);
 
 		// Get the approximation
@@ -821,7 +940,7 @@ public class EMGainAnalysis implements PlugInFilter
 				// The mean does not matter (as normalisation is done dynamically for 
 				// PoissonGaussianFunction.likelihood(double, double) so just use zero
 				//fun = PoissonGaussianFunction.createWithStandardDeviation(1.0 / _gain, 0, _noise);
-				
+
 				// Use adaptive normalisation
 				fun = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / _gain, _noise);
 				break;
@@ -837,43 +956,62 @@ public class EMGainAnalysis implements PlugInFilter
 		if (offset != 0)
 			expected += offset * expected / 100.0;
 		expected *= _gain;
-		
+
+		// Normalise 
+		boolean normalise = false;
+		if (normalise)
+		{
+			double sum = Maths.sum(pmf);
+			for (int i = pmf.length; i-- > 0;)
+				pmf[i] /= sum;
+		}
+
 		// Get CDF
 		double sum = 0;
 		double sum2 = 0;
+		double prev = 0;
+		double prev2 = 0;
 		double[] f = new double[x.length];
 		double[] cdf1 = new double[pmf.length];
 		double[] cdf2 = new double[pmf.length];
+		double step_2 = step / 2;
 		for (int i = 0; i < cdf1.length; i++)
 		{
-			sum += pmf[i];
+			// Trapezoid integration
+			//sum += (pmf[i] + prev) * step_2;
+			sum += pmf[i] * step;
 			cdf1[i] = sum;
-			// Adjust the x-values to remove the dummy bias
-			x[i] -= dummyBias;
-			f[i] =  fun.likelihood(x[i], expected);
-			sum2 += f[i];
+			prev = pmf[i];
+			f[i] = fun.likelihood(x[i], expected);
+			//sum2 += (f[i] + prev2) * step_2;
+			sum2 += f[i] * step;
 			cdf2[i] = sum2;
+			prev2 = f[i];
 		}
-		
+
 		// Truncate x for plotting
 		int max = 0;
-		sum = 0;
+		sum = prev = 0;
 		double p = 1 - tail;
 		while (sum < p && max < pmf.length)
 		{
-			sum += pmf[max];
+			//sum += (pmf[max] + prev) * step_2;
+			sum += pmf[max] * step;
+			prev = pmf[max];
 			if (sum > 0.5 && pmf[max] == 0)
 				break;
 			max++;
 		}
 
 		int min = pmf.length;
-		sum = 0;
+		sum = prev = 0;
 		p = 1 - head;
 		while (sum < p && min > 0)
 		{
 			min--;
-			sum += pmf[min];
+			//sum += (pmf[min] + prev) * step_2;
+			sum += pmf[min] * step;
+			prev = pmf[min];
 			if (sum > 0.5 && pmf[min] == 0)
 				break;
 		}
@@ -940,20 +1078,19 @@ public class EMGainAnalysis implements PlugInFilter
 		// difference between the two cumulative probability distributions.
 		// https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test
 		double kolmogorovDistance = 0;
-		int xd = 0;
+		double xd = x[0];
 		for (int i = 0; i < cdf1.length; i++)
 		{
 			double dist = Math.abs(cdf1[i] - cdf2[i]);
 			if (kolmogorovDistance < dist)
 			{
 				kolmogorovDistance = dist;
-				xd = i;
+				xd = pdf.x[i];
 			}
 		}
-		xd -= dummyBias;
 		cdf1 = Arrays.copyOfRange(cdf1, min, max);
 		cdf2 = Arrays.copyOfRange(cdf2, min, max);
-		
+
 		Plot2 plot3 = new Plot2("CDF", "ADUs", "p");
 		yMax = 1.05;
 		plot3.setLimits(x[0], x[x.length - 1], 0, yMax);
@@ -967,14 +1104,37 @@ public class EMGainAnalysis implements PlugInFilter
 		plot3.drawDottedLine(xd, 0, xd, yMax, 2);
 		plot3.setColor(Color.black);
 		plot3.addLabel(0, 0, label + ", Kolmogorov distance = " + Utils.rounded(kolmogorovDistance) + " @ " + xd);
+		plot3.addLegend("CDF\nApprox");
 		PlotWindow win3 = Utils.display("CDF", plot3);
-		
+
 		if (Utils.isNewWindow())
 		{
 			Point p2 = win1.getLocation();
 			p2.x += win1.getWidth();
 			win3.setLocation(p2);
 		}
+	}
+
+	private static double getStepSize(double photons, double gain, double noise)
+	{
+		// Note: This is not valid as the PMF should only accept integer input.
+		return 1;
+
+		//		// Determine the best step to plot the PMF. 
+		//		// Ensure there are enough points on the chart.
+		//		double step = 1.0;
+		//
+		//		int poissonGammaWidth = pdfEMGain(step, photons, gain).length;
+		//
+		//		while (step > 0.001)
+		//		{
+		//			int gaussianWidth = (int) Math.ceil(Math.abs(noise) * 4 / step);
+		//			if (gaussianWidth * 2 + poissonGammaWidth / step < 300)
+		//				step /= 2;
+		//			else
+		//				break;
+		//		}
+		//		return step;
 	}
 
 	private boolean showPMFDialog()
@@ -984,8 +1144,8 @@ public class EMGainAnalysis implements PlugInFilter
 
 		gd.addMessage("Plot the probability mass function for EM-gain");
 
-		gd.addNumericField("Gain", _gain, 2);
-		gd.addNumericField("Noise", _noise, 2);
+		gd.addNumericField("Gain", _gain, 2, 6, "Count/electron");
+		gd.addNumericField("Noise", _noise, 2, 6, "Count");
 		gd.addNumericField("Photons", _photons, 2);
 		gd.addChoice("Approx", APPROXIMATION, APPROXIMATION[approximation]);
 		gd.addCheckbox("Show_approximation", showApproximation);
