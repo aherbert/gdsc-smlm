@@ -28107,6 +28107,904 @@ public final class GUIProtos {
 
   }
 
+  public interface CameraModelAnalysisSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CameraModelAnalysisSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>double photons = 1;</code>
+     */
+    double getPhotons();
+
+    /**
+     * <code>int32 mode = 2;</code>
+     */
+    int getMode();
+
+    /**
+     * <code>double gain = 3;</code>
+     */
+    double getGain();
+
+    /**
+     * <code>double noise = 4;</code>
+     */
+    double getNoise();
+
+    /**
+     * <code>int32 seed = 5;</code>
+     */
+    int getSeed();
+
+    /**
+     * <code>int32 samples = 6;</code>
+     */
+    int getSamples();
+
+    /**
+     * <code>int32 noiseSamples = 7;</code>
+     */
+    int getNoiseSamples();
+
+    /**
+     * <code>int32 model = 8;</code>
+     */
+    int getModel();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Camera Model Analysis plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.CameraModelAnalysisSettings}
+   */
+  public  static final class CameraModelAnalysisSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CameraModelAnalysisSettings)
+      CameraModelAnalysisSettingsOrBuilder {
+    // Use CameraModelAnalysisSettings.newBuilder() to construct.
+    private CameraModelAnalysisSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CameraModelAnalysisSettings() {
+      photons_ = 0D;
+      mode_ = 0;
+      gain_ = 0D;
+      noise_ = 0D;
+      seed_ = 0;
+      samples_ = 0;
+      noiseSamples_ = 0;
+      model_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private CameraModelAnalysisSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 9: {
+
+              photons_ = input.readDouble();
+              break;
+            }
+            case 16: {
+
+              mode_ = input.readInt32();
+              break;
+            }
+            case 25: {
+
+              gain_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              noise_ = input.readDouble();
+              break;
+            }
+            case 40: {
+
+              seed_ = input.readInt32();
+              break;
+            }
+            case 48: {
+
+              samples_ = input.readInt32();
+              break;
+            }
+            case 56: {
+
+              noiseSamples_ = input.readInt32();
+              break;
+            }
+            case 64: {
+
+              model_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.class, gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.Builder.class);
+    }
+
+    public static final int PHOTONS_FIELD_NUMBER = 1;
+    private double photons_;
+    /**
+     * <code>double photons = 1;</code>
+     */
+    public double getPhotons() {
+      return photons_;
+    }
+
+    public static final int MODE_FIELD_NUMBER = 2;
+    private int mode_;
+    /**
+     * <code>int32 mode = 2;</code>
+     */
+    public int getMode() {
+      return mode_;
+    }
+
+    public static final int GAIN_FIELD_NUMBER = 3;
+    private double gain_;
+    /**
+     * <code>double gain = 3;</code>
+     */
+    public double getGain() {
+      return gain_;
+    }
+
+    public static final int NOISE_FIELD_NUMBER = 4;
+    private double noise_;
+    /**
+     * <code>double noise = 4;</code>
+     */
+    public double getNoise() {
+      return noise_;
+    }
+
+    public static final int SEED_FIELD_NUMBER = 5;
+    private int seed_;
+    /**
+     * <code>int32 seed = 5;</code>
+     */
+    public int getSeed() {
+      return seed_;
+    }
+
+    public static final int SAMPLES_FIELD_NUMBER = 6;
+    private int samples_;
+    /**
+     * <code>int32 samples = 6;</code>
+     */
+    public int getSamples() {
+      return samples_;
+    }
+
+    public static final int NOISESAMPLES_FIELD_NUMBER = 7;
+    private int noiseSamples_;
+    /**
+     * <code>int32 noiseSamples = 7;</code>
+     */
+    public int getNoiseSamples() {
+      return noiseSamples_;
+    }
+
+    public static final int MODEL_FIELD_NUMBER = 8;
+    private int model_;
+    /**
+     * <code>int32 model = 8;</code>
+     */
+    public int getModel() {
+      return model_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (photons_ != 0D) {
+        output.writeDouble(1, photons_);
+      }
+      if (mode_ != 0) {
+        output.writeInt32(2, mode_);
+      }
+      if (gain_ != 0D) {
+        output.writeDouble(3, gain_);
+      }
+      if (noise_ != 0D) {
+        output.writeDouble(4, noise_);
+      }
+      if (seed_ != 0) {
+        output.writeInt32(5, seed_);
+      }
+      if (samples_ != 0) {
+        output.writeInt32(6, samples_);
+      }
+      if (noiseSamples_ != 0) {
+        output.writeInt32(7, noiseSamples_);
+      }
+      if (model_ != 0) {
+        output.writeInt32(8, model_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (photons_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1, photons_);
+      }
+      if (mode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, mode_);
+      }
+      if (gain_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, gain_);
+      }
+      if (noise_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, noise_);
+      }
+      if (seed_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, seed_);
+      }
+      if (samples_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, samples_);
+      }
+      if (noiseSamples_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, noiseSamples_);
+      }
+      if (model_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, model_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings other = (gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) obj;
+
+      boolean result = true;
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPhotons())
+          == java.lang.Double.doubleToLongBits(
+              other.getPhotons()));
+      result = result && (getMode()
+          == other.getMode());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getGain())
+          == java.lang.Double.doubleToLongBits(
+              other.getGain()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getNoise())
+          == java.lang.Double.doubleToLongBits(
+              other.getNoise()));
+      result = result && (getSeed()
+          == other.getSeed());
+      result = result && (getSamples()
+          == other.getSamples());
+      result = result && (getNoiseSamples()
+          == other.getNoiseSamples());
+      result = result && (getModel()
+          == other.getModel());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PHOTONS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getPhotons()));
+      hash = (37 * hash) + MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getMode();
+      hash = (37 * hash) + GAIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getGain()));
+      hash = (37 * hash) + NOISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getNoise()));
+      hash = (37 * hash) + SEED_FIELD_NUMBER;
+      hash = (53 * hash) + getSeed();
+      hash = (37 * hash) + SAMPLES_FIELD_NUMBER;
+      hash = (53 * hash) + getSamples();
+      hash = (37 * hash) + NOISESAMPLES_FIELD_NUMBER;
+      hash = (53 * hash) + getNoiseSamples();
+      hash = (37 * hash) + MODEL_FIELD_NUMBER;
+      hash = (53 * hash) + getModel();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Camera Model Analysis plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.CameraModelAnalysisSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CameraModelAnalysisSettings)
+        gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.class, gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        photons_ = 0D;
+
+        mode_ = 0;
+
+        gain_ = 0D;
+
+        noise_ = 0D;
+
+        seed_ = 0;
+
+        samples_ = 0;
+
+        noiseSamples_ = 0;
+
+        model_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings build() {
+        gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings result = new gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings(this);
+        result.photons_ = photons_;
+        result.mode_ = mode_;
+        result.gain_ = gain_;
+        result.noise_ = noise_;
+        result.seed_ = seed_;
+        result.samples_ = samples_;
+        result.noiseSamples_ = noiseSamples_;
+        result.model_ = model_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings.getDefaultInstance()) return this;
+        if (other.getPhotons() != 0D) {
+          setPhotons(other.getPhotons());
+        }
+        if (other.getMode() != 0) {
+          setMode(other.getMode());
+        }
+        if (other.getGain() != 0D) {
+          setGain(other.getGain());
+        }
+        if (other.getNoise() != 0D) {
+          setNoise(other.getNoise());
+        }
+        if (other.getSeed() != 0) {
+          setSeed(other.getSeed());
+        }
+        if (other.getSamples() != 0) {
+          setSamples(other.getSamples());
+        }
+        if (other.getNoiseSamples() != 0) {
+          setNoiseSamples(other.getNoiseSamples());
+        }
+        if (other.getModel() != 0) {
+          setModel(other.getModel());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private double photons_ ;
+      /**
+       * <code>double photons = 1;</code>
+       */
+      public double getPhotons() {
+        return photons_;
+      }
+      /**
+       * <code>double photons = 1;</code>
+       */
+      public Builder setPhotons(double value) {
+        
+        photons_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double photons = 1;</code>
+       */
+      public Builder clearPhotons() {
+        
+        photons_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int mode_ ;
+      /**
+       * <code>int32 mode = 2;</code>
+       */
+      public int getMode() {
+        return mode_;
+      }
+      /**
+       * <code>int32 mode = 2;</code>
+       */
+      public Builder setMode(int value) {
+        
+        mode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 mode = 2;</code>
+       */
+      public Builder clearMode() {
+        
+        mode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double gain_ ;
+      /**
+       * <code>double gain = 3;</code>
+       */
+      public double getGain() {
+        return gain_;
+      }
+      /**
+       * <code>double gain = 3;</code>
+       */
+      public Builder setGain(double value) {
+        
+        gain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double gain = 3;</code>
+       */
+      public Builder clearGain() {
+        
+        gain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double noise_ ;
+      /**
+       * <code>double noise = 4;</code>
+       */
+      public double getNoise() {
+        return noise_;
+      }
+      /**
+       * <code>double noise = 4;</code>
+       */
+      public Builder setNoise(double value) {
+        
+        noise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double noise = 4;</code>
+       */
+      public Builder clearNoise() {
+        
+        noise_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int seed_ ;
+      /**
+       * <code>int32 seed = 5;</code>
+       */
+      public int getSeed() {
+        return seed_;
+      }
+      /**
+       * <code>int32 seed = 5;</code>
+       */
+      public Builder setSeed(int value) {
+        
+        seed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 seed = 5;</code>
+       */
+      public Builder clearSeed() {
+        
+        seed_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int samples_ ;
+      /**
+       * <code>int32 samples = 6;</code>
+       */
+      public int getSamples() {
+        return samples_;
+      }
+      /**
+       * <code>int32 samples = 6;</code>
+       */
+      public Builder setSamples(int value) {
+        
+        samples_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 samples = 6;</code>
+       */
+      public Builder clearSamples() {
+        
+        samples_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int noiseSamples_ ;
+      /**
+       * <code>int32 noiseSamples = 7;</code>
+       */
+      public int getNoiseSamples() {
+        return noiseSamples_;
+      }
+      /**
+       * <code>int32 noiseSamples = 7;</code>
+       */
+      public Builder setNoiseSamples(int value) {
+        
+        noiseSamples_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 noiseSamples = 7;</code>
+       */
+      public Builder clearNoiseSamples() {
+        
+        noiseSamples_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int model_ ;
+      /**
+       * <code>int32 model = 8;</code>
+       */
+      public int getModel() {
+        return model_;
+      }
+      /**
+       * <code>int32 model = 8;</code>
+       */
+      public Builder setModel(int value) {
+        
+        model_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 model = 8;</code>
+       */
+      public Builder clearModel() {
+        
+        model_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CameraModelAnalysisSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CameraModelAnalysisSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CameraModelAnalysisSettings>
+        PARSER = new com.google.protobuf.AbstractParser<CameraModelAnalysisSettings>() {
+      public CameraModelAnalysisSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new CameraModelAnalysisSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CameraModelAnalysisSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CameraModelAnalysisSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CubicSplineManagerSettingsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineManagerSettings)
       com.google.protobuf.MessageOrBuilder {
@@ -40571,6 +41469,11 @@ public final class GUIProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -40789,91 +41692,95 @@ public final class GUIProtos {
       "reshold\030( \001(\001\"q\n\032CameraModelManagerSetti" +
       "ngs\022\016\n\006option\030\001 \001(\005\022\020\n\010origin_x\030\002 \001(\005\022\020\n" +
       "\010origin_y\030\003 \001(\005\022\r\n\005image\030\004 \001(\t\022\020\n\010select" +
-      "ed\030\005 \001(\t\"\227\001\n\032CubicSplineManagerSettings\022" +
+      "ed\030\005 \001(\t\"\235\001\n\033CameraModelAnalysisSettings" +
+      "\022\017\n\007photons\030\001 \001(\001\022\014\n\004mode\030\002 \001(\005\022\014\n\004gain\030" +
+      "\003 \001(\001\022\r\n\005noise\030\004 \001(\001\022\014\n\004seed\030\005 \001(\005\022\017\n\007sa" +
+      "mples\030\006 \001(\005\022\024\n\014noiseSamples\030\007 \001(\005\022\r\n\005mod" +
+      "el\030\010 \001(\005\"\227\001\n\032CubicSplineManagerSettings\022",
       "\016\n\006option\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rmag" +
       "nification\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_shi" +
       "ft\030\005 \001(\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007 \001" +
-      "(\001\"\362\010\n\030FailCountManagerSettings\022\016\n\006optio",
+      "(\001\"\362\010\n\030FailCountManagerSettings\022\016\n\006optio" +
       "n\030\001 \001(\005\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_coun" +
       "t_limit\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 \001(" +
       "\010\022\034\n\024target_pass_fraction\030\005 \001(\001\022\020\n\010filen" +
       "ame\030\006 \001(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_rol" +
       "ling_window\030\010 \001(\005\022\030\n\020plot_pass_weight\030\t " +
-      "\001(\005\022\030\n\020plot_fail_weight\030\n \001(\005\022\033\n\023plot_re" +
+      "\001(\005\022\030\n\020plot_fail_weight\030\n \001(\005\022\033\n\023plot_re",
       "set_fraction\030\013 \001(\001\022\031\n\021plot_fixed_x_axis\030" +
       "\014 \001(\010\022\023\n\013table_top_n\030\r \001(\005\022,\n$rolling_co" +
       "unter_min_allowed_failures\030\016 \001(\005\022,\n$roll" +
-      "ing_counter_max_allowed_failures\030\017 \001(\005\022\"",
+      "ing_counter_max_allowed_failures\030\017 \001(\005\022\"" +
       "\n\032rolling_counter_min_window\030\020 \001(\005\022\"\n\032ro" +
       "lling_counter_max_window\030\021 \001(\005\022-\n%weight" +
       "ed_counter_min_allowed_failures\030\022 \001(\005\022-\n" +
       "%weighted_counter_max_allowed_failures\030\023" +
       " \001(\005\022+\n#weighted_counter_min_pass_decrem" +
-      "ent\030\024 \001(\005\022+\n#weighted_counter_max_pass_d" +
+      "ent\030\024 \001(\005\022+\n#weighted_counter_max_pass_d",
       "ecrement\030\025 \001(\005\022.\n&resetting_counter_min_" +
       "allowed_failures\030\026 \001(\005\022.\n&resetting_coun" +
       "ter_max_allowed_failures\030\027 \001(\005\022,\n$resett" +
-      "ing_counter_min_reset_fraction\030\030 \001(\001\022,\n$",
+      "ing_counter_min_reset_fraction\030\030 \001(\001\022,\n$" +
       "resetting_counter_max_reset_fraction\030\031 \001" +
       "(\001\022,\n$resetting_counter_inc_reset_fracti" +
       "on\030\032 \001(\001\022,\n$pass_rate_counter_min_allowe" +
       "d_counts\030\033 \001(\005\022,\n$pass_rate_counter_max_" +
       "allowed_counts\030\034 \001(\005\022\'\n\037pass_rate_counte" +
-      "r_min_pass_rate\030\035 \001(\001\022\'\n\037pass_rate_count" +
+      "r_min_pass_rate\030\035 \001(\001\022\'\n\037pass_rate_count",
       "er_max_pass_rate\030\036 \001(\001\022\'\n\037pass_rate_coun" +
       "ter_inc_pass_rate\030\037 \001(\001\"\266\005\n\037AstigmatismM" +
       "odelManagerSettings\022\016\n\006option\030\001 \001(\005\022\024\n\014n" +
-      "m_per_slice\030\002 \001(\001\022E\n\023fit_engine_settings",
+      "m_per_slice\030\002 \001(\001\022E\n\023fit_engine_settings" +
       "\030\003 \001(\0132(.gdsc.smlm.data.config.FitEngine" +
       "Settings\022\'\n\003psf\030\004 \001(\0132\032.gdsc.smlm.data.c" +
       "onfig.PSF\0227\n\013calibration\030\005 \001(\0132\".gdsc.sm" +
       "lm.data.config.Calibration\022\016\n\006radius\030\006 \001" +
       "(\001\022\030\n\020log_fit_progress\030\007 \001(\010\022\021\n\tsmoothin" +
-      "g\030\010 \001(\001\022\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_es" +
+      "g\030\010 \001(\001\022\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_es",
       "timated_curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmo" +
       "del_name\030\014 \001(\t\022\022\n\nsave_model\030\016 \001(\010\022\026\n\016sa" +
       "ve_fit_width\030\017 \001(\010\022\020\n\010selected\030\r \001(\t\022\033\n\023" +
-      "show_depth_of_focus\030\020 \001(\010\022\033\n\023show_combin",
+      "show_depth_of_focus\030\020 \001(\010\022\033\n\023show_combin" +
       "ed_width\030\026 \001(\010\022\020\n\010show_psf\030\022 \001(\010\022<\n\017z_di" +
       "stance_unit\030\023 \001(\0162#.gdsc.smlm.data.confi" +
       "g.DistanceUnit\022<\n\017s_distance_unit\030\024 \001(\0162" +
       "#.gdsc.smlm.data.config.DistanceUnit\022\030\n\020" +
       "calibrated_image\030\025 \001(\010\022\020\n\010filename\030\021 \001(\t" +
-      "\"\305\002\n\023CropResultsSettings\022\024\n\014input_option" +
+      "\"\305\002\n\023CropResultsSettings\022\024\n\014input_option",
       "\030\001 \001(\t\022\016\n\006border\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004" +
       " \001(\001\022\r\n\005width\030\005 \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n\rs" +
       "elect_region\030\007 \001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n\tr" +
-      "oi_image\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010\022\023\n\013",
+      "oi_image\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010\022\023\n\013" +
       "output_name\030\013 \001(\t\022\023\n\013name_option\030\014 \001(\005\022\023" +
       "\n\013name_suffix\030\r \001(\t\022\024\n\014name_counter\030\016 \001(" +
       "\005\022\017\n\007limit_z\030\017 \001(\010\022\r\n\005min_z\030\020 \001(\001\022\r\n\005max" +
       "_z\030\021 \001(\001\"\346\001\n\030SummariseResultsSettings\022\027\n" +
       "\017plot_background\030\001 \001(\010\022\023\n\013plot_signal\030\002 " +
-      "\001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006p" +
+      "\001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006p",
       "lot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plot_" +
       "snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rhis" +
       "tgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n \001(" +
-      "\005\"\214\006\n\035ImageJ3DResultsViewerSettings\022\024\n\014i",
+      "\005\"\214\006\n\035ImageJ3DResultsViewerSettings\022\024\n\014i" +
       "nput_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014trans" +
       "parency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trendering\030" +
       "\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001(\010" +
       "\022\021\n\tsize_mode\030\010 \001(\005\022\022\n\npixel_size\030\t \001(\001\022" +
       "K\n\026results_table_settings\030\n \001(\0132+.gdsc.s" +
-      "mlm.data.config.ResultsTableSettings\022\022\n\n" +
+      "mlm.data.config.ResultsTableSettings\022\022\n\n",
       "depth_mode\030\013 \001(\005\022\023\n\013depth_range\030\014 \001(\001\022\023\n" +
       "\013dither_seed\030\r \001(\005\022\031\n\021transparency_mode\030" +
       "\016 \001(\005\022\030\n\020min_transparency\030\017 \001(\001\022\030\n\020max_t" +
-      "ransparency\030\020 \001(\001\022\021\n\tsort_mode\030\021 \001(\005\022\030\n\020",
+      "ransparency\030\020 \001(\001\022\021\n\tsort_mode\030\021 \001(\005\022\030\n\020" +
       "sort_direction_x\030\022 \001(\001\022\030\n\020sort_direction" +
       "_y\030\023 \001(\001\022\030\n\020sort_direction_z\030\024 \001(\001\022\022\n\nso" +
       "rt_eye_x\030\025 \001(\001\022\022\n\nsort_eye_y\030\026 \001(\001\022\022\n\nso" +
       "rt_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010\022\030" +
       "\n\020highlight_colour\030\031 \001(\t\022\023\n\013output_name\030" +
-      "\032 \001(\t\022\023\n\013name_option\030\033 \001(\005\022\023\n\013name_suffi" +
+      "\032 \001(\t\022\023\n\013name_option\030\033 \001(\005\022\023\n\013name_suffi",
       "x\030\034 \001(\t\022\024\n\014name_counter\030\035 \001(\005\022$\n\034support" +
       "_dynamic_transparency\030\036 \001(\010\022#\n\033enable_dy" +
       "namic_transparency\030\037 \001(\010\"\220\001\n\030TranslateRe" +
-      "sultsSettings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002d",
+      "sultsSettings\022\024\n\014input_option\030\001 \001(\t\022\n\n\002d" +
       "x\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdista" +
       "nce_unit\030\005 \001(\0162#.gdsc.smlm.data.config.D" +
       "istanceUnit*O\n\014TemplateType\022\023\n\017INLINE_TE" +
@@ -40981,44 +41888,50 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraModelManagerSettings_descriptor,
         new java.lang.String[] { "Option", "OriginX", "OriginY", "Image", "Selected", });
-    internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor =
+    internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor =
       getDescriptor().getMessageTypes().get(14);
+    internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_CameraModelAnalysisSettings_descriptor,
+        new java.lang.String[] { "Photons", "Mode", "Gain", "Noise", "Seed", "Samples", "NoiseSamples", "Model", });
+    internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor =
+      getDescriptor().getMessageTypes().get(15);
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor,
         new java.lang.String[] { "Option", "Selected", "Magnification", "Scale", "XShift", "YShift", "ZShift", });
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_gdsc_smlm_data_config_FailCountManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_FailCountManagerSettings_descriptor,
         new java.lang.String[] { "Option", "MaxFrames", "FailCountLimit", "SaveAfterFitting", "TargetPassFraction", "Filename", "PlotItem", "PlotRollingWindow", "PlotPassWeight", "PlotFailWeight", "PlotResetFraction", "PlotFixedXAxis", "TableTopN", "RollingCounterMinAllowedFailures", "RollingCounterMaxAllowedFailures", "RollingCounterMinWindow", "RollingCounterMaxWindow", "WeightedCounterMinAllowedFailures", "WeightedCounterMaxAllowedFailures", "WeightedCounterMinPassDecrement", "WeightedCounterMaxPassDecrement", "ResettingCounterMinAllowedFailures", "ResettingCounterMaxAllowedFailures", "ResettingCounterMinResetFraction", "ResettingCounterMaxResetFraction", "ResettingCounterIncResetFraction", "PassRateCounterMinAllowedCounts", "PassRateCounterMaxAllowedCounts", "PassRateCounterMinPassRate", "PassRateCounterMaxPassRate", "PassRateCounterIncPassRate", });
     internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_AstigmatismModelManagerSettings_descriptor,
         new java.lang.String[] { "Option", "NmPerSlice", "FitEngineSettings", "Psf", "Calibration", "Radius", "LogFitProgress", "Smoothing", "WeightedFit", "ShowEstimatedCurve", "Image", "ModelName", "SaveModel", "SaveFitWidth", "Selected", "ShowDepthOfFocus", "ShowCombinedWidth", "ShowPsf", "ZDistanceUnit", "SDistanceUnit", "CalibratedImage", "Filename", });
     internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_gdsc_smlm_data_config_CropResultsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CropResultsSettings_descriptor,
         new java.lang.String[] { "InputOption", "Border", "X", "Y", "Width", "Height", "SelectRegion", "UseRoi", "RoiImage", "ResetOrigin", "OutputName", "NameOption", "NameSuffix", "NameCounter", "LimitZ", "MinZ", "MaxZ", });
     internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_gdsc_smlm_data_config_SummariseResultsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_SummariseResultsSettings_descriptor,
         new java.lang.String[] { "PlotBackground", "PlotSignal", "PlotX", "PlotY", "PlotZ", "PlotNoise", "PlotSnr", "PlotPrecision", "HistgramBins", "RemoveOutliers", });
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
         new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", "OutputName", "NameOption", "NameSuffix", "NameCounter", "SupportDynamicTransparency", "EnableDynamicTransparency", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor,

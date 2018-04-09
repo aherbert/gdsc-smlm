@@ -451,6 +451,18 @@ message CameraModelManagerSettings {
 	string selected = 5;
 }
 
+// Contains settings for the Camera Model Analysis plugin
+message CameraModelAnalysisSettings {
+	double photons = 1;
+	int32 mode = 2;
+	double gain = 3;
+	double noise = 4;
+	int32 seed = 5;
+	int32 samples = 6;
+	int32 noiseSamples = 7;
+	int32 model = 8;
+}
+
 // Contains settings for the Cubic Spline Manager plugin
 message CubicSplineManagerSettings {
 	int32 option = 1;

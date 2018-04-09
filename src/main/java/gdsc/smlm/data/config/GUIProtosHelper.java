@@ -9,6 +9,7 @@ import gdsc.smlm.data.config.FitProtos.FilterSettings;
 import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
+import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
@@ -282,6 +283,19 @@ public class GUIProtosHelper
 		defaultCameraModelManagerSettings = CameraModelManagerSettings.getDefaultInstance();
 	}
 
+	/** The default CameraModelAnalysisSettings */
+	public static final CameraModelAnalysisSettings defaultCameraModelAnalysisSettings;
+	static
+	{
+		CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
+		builder.setPhotons(10);
+		builder.setGain(2.2);
+		builder.setNoise(1.6);
+		builder.setSamples(2000);
+		builder.setNoiseSamples(10);
+		defaultCameraModelAnalysisSettings = builder.build();
+	}
+	
 	/** The default CubicSplineManagerSettings */
 	public static final CubicSplineManagerSettings defaultCubicSplineManagerSettings;
 	static
