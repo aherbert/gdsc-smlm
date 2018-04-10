@@ -138,7 +138,8 @@ public class GUIProtosHelper
 
 	/** The default LoadLocalisationsSettings */
 	public static final LoadLocalisationsSettings defaultLoadLocalisationsSettings;
-	static {
+	static
+	{
 		LoadLocalisationsSettings.Builder builder = LoadLocalisationsSettings.newBuilder();
 		builder.setFieldT(0);
 		builder.setFieldId(-1);
@@ -289,13 +290,18 @@ public class GUIProtosHelper
 	{
 		CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
 		builder.setPhotons(10);
-		builder.setGain(2.2);
-		builder.setNoise(1.6);
+		// Note that the camera gain is likely to be very different if using EM-gain 
+		// so these are separate
+		builder.setGain(2.2); // Count/electron
+		builder.setEmGain(300);
+		builder.setCameraGain(40.0 / 300);
+		builder.setNoise(1.6); // Counts
 		builder.setSamples(2000);
 		builder.setNoiseSamples(10);
+		builder.setEmSamples(5);
 		defaultCameraModelAnalysisSettings = builder.build();
 	}
-	
+
 	/** The default CubicSplineManagerSettings */
 	public static final CubicSplineManagerSettings defaultCubicSplineManagerSettings;
 	static
@@ -351,10 +357,10 @@ public class GUIProtosHelper
 		builder.setSaveFitWidth(true);
 		builder.setSaveModel(true);
 		FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
-		
+
 		// Adjust for a wider fit range
 		b.getFittingBuilder().setValue(10).setAbsolute(true);
-		
+
 		// Simple filter
 		FilterSettings.Builder fb = b.getFitSettingsBuilder().getFilterSettingsBuilder();
 		fb.setSmartFilter(false);
@@ -366,7 +372,7 @@ public class GUIProtosHelper
 		fb.setMaxWidthFactor(5);
 		fb.setPrecisionThreshold(50);
 		fb.setPrecisionMethodValue(PrecisionMethod.POISSON_CRLB_VALUE);
-		
+
 		builder.setFitEngineSettings(b);
 		builder.setPsf(PSFProtosHelper.defaultTwoAxisGaussian2DPSF);
 
