@@ -65,6 +65,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private boolean dirty = true;
 	private CameraModelAnalysisSettings lastSettings = null;
 	private ExtendedGenericDialog gd;
+	private IntHistogram lastHistogram = null;
+	private CameraModelAnalysisSettings lastSimulationSettings = null;
 
 	private static String[] MODE = { "CCD", "EM-CCD" };
 	private static String[] MODEL = { "Poisson (Discrete)", "Poisson (Continuous)", "Poisson+Gaussian",
@@ -261,9 +263,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			return true;
 		lastSettings = settings;
 
-		PseudoRandomGenerator random = getRandomGenerator();
-
-		IntHistogram h = simulateHistogram(settings, random);
+		IntHistogram h = getHistogram(settings);
 
 		// Build cumulative distribution
 		double[][] cdf1 = cumulativeHistogram(h);
@@ -315,6 +315,52 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		// Q. Plot PMF as well using the CDF to generate it?
 		return true;
+	}
+
+	private IntHistogram getHistogram(CameraModelAnalysisSettings settings)
+	{
+		if (lastHistogram == null || newSimulationSettings(settings, lastSimulationSettings))
+		{
+			// Ensure this is the same each time
+			PseudoRandomGenerator random = getRandomGenerator().clone();
+			random.setSeed(settings.getSeed());
+			lastHistogram = simulateHistogram(settings, random);
+			lastSimulationSettings = settings;
+		}
+		return lastHistogram;
+	}
+
+	private boolean newSimulationSettings(CameraModelAnalysisSettings s1,
+			CameraModelAnalysisSettings s2)
+	{
+		// Check those settings for the simulation
+		if (s1.getPhotons() != s2.getPhotons())
+			return true;
+		if (s1.getMode() != s2.getMode())
+			return true;
+		if (s1.getNoise() != s2.getNoise())
+			return true;
+		if (s1.getSamples() != s2.getSamples())
+			return true;
+		if (s1.getNoiseSamples() != s2.getNoiseSamples())
+			return true;
+		if (s1.getSeed() != s2.getSeed())
+			return true;
+		if (s1.getMode() == 0)
+		{
+			if (s1.getGain() != s2.getGain())
+				return true;
+		}
+		else
+		{
+			if (s1.getCameraGain() != s2.getCameraGain())
+				return true;
+			if (s1.getEmGain() != s2.getEmGain())
+				return true;
+			if (s1.getEmSamples() != s2.getEmSamples())
+				return true;
+		}			
+		return false;
 	}
 
 	/**
