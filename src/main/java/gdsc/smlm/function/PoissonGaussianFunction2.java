@@ -83,7 +83,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 	 *            The standard deviation of the Gaussian distribution at readout
 	 * @return the poisson gaussian function 2
 	 * @throws IllegalArgumentException
-	 *             if the mean or variance is zero or below
+	 *             if the variance is zero or below
 	 */
 	public static PoissonGaussianFunction2 createWithStandardDeviation(final double alpha, final double s)
 	{
@@ -99,7 +99,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 * @return the poisson gaussian function 2
 	 * @throws IllegalArgumentException
-	 *             if the mean or variance is zero or below
+	 *             if the variance is zero or below
 	 */
 	public static PoissonGaussianFunction2 createWithVariance(final double alpha, final double var)
 	{
