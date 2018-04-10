@@ -290,13 +290,14 @@ public class GUIProtosHelper
 	{
 		CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
 		builder.setPhotons(10);
-		// Note that the camera gain is likely to be very different if using EM-gain 
+		// Note that the total gain is likely to be very different if using EM-CCD 
 		// so these are separate
 		builder.setGain(2.2); // Count/electron
-		builder.setEmGain(300);
-		builder.setCameraGain(40.0 / 300);
-		builder.setNoise(1.6); // Counts
-		builder.setSamples(2000);
+		builder.setEmGain(30); // This is the total gain in Count/electron
+		// Use counts as it is simpler to understand than manufacturers specification sheets
+		builder.setNoise(8); // Count
+		builder.setEmNoise(13); // Count
+		builder.setSamples(20000);
 		builder.setNoiseSamples(10);
 		builder.setEmSamples(5);
 		defaultCameraModelAnalysisSettings = builder.build();

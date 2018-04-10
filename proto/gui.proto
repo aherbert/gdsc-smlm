@@ -463,7 +463,7 @@ message CameraModelAnalysisSettings {
 	int32 model = 8;
 	double em_gain = 9;
 	int32 em_samples = 10;
-	double camera_gain = 11;
+	double em_noise = 11;
 }
 
 // Contains settings for the Cubic Spline Manager plugin
