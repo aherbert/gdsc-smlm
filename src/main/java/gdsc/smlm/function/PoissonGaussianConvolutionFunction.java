@@ -51,20 +51,32 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	private final double logNormalisationGaussian;
 
 	/**
+	 * Instantiates a new poisson gaussian convolution function.
+	 *
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
-	 * @param sigmasquared
+	 * @param variance
 	 *            The variance of the Gaussian distribution at readout (must be positive)
+	 * @param isVariance
+	 *            Set to true if the input parameter is variance; otherwise is is standard deviation
 	 */
-	private PoissonGaussianConvolutionFunction(double alpha, double sigmasquared)
+	private PoissonGaussianConvolutionFunction(double alpha, double variance, boolean isVariance)
 	{
-		if (sigmasquared <= 0)
+		if (variance <= 0)
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
 		alpha = Math.abs(alpha);
 
 		this.g = 1.0 / alpha;
-		this.var = sigmasquared;
-		s = Math.sqrt(var);
+		if (isVariance)
+		{
+			s = Math.sqrt(variance);
+			this.var = variance;
+		}
+		else
+		{
+			s = variance;
+			this.var = s * s;
+		}
 		var_by_2 = var * 2;
 
 		// Determine the normalisation factor A in the event that the probability 
@@ -85,7 +97,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 */
 	public static PoissonGaussianConvolutionFunction createWithStandardDeviation(final double alpha, final double s)
 	{
-		return new PoissonGaussianConvolutionFunction(alpha, s * s);
+		return new PoissonGaussianConvolutionFunction(alpha, s, false);
 	}
 
 	/**
@@ -101,7 +113,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 */
 	public static PoissonGaussianConvolutionFunction createWithVariance(final double alpha, final double var)
 	{
-		return new PoissonGaussianConvolutionFunction(alpha, var);
+		return new PoissonGaussianConvolutionFunction(alpha, var, true);
 	}
 
 	/*
