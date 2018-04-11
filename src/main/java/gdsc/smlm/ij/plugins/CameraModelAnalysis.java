@@ -20,10 +20,12 @@ import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.PoissonFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.function.PoissonGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.function.PoissonPoissonFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
@@ -68,8 +70,34 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private CameraModelAnalysisSettings lastSimulationSettings = null;
 
 	private static String[] MODE = { "CCD", "EM-CCD", "sCMOS" };
-	private static String[] MODEL = { "Poisson (Discrete)", "Poisson (Continuous)", "Poisson+Gaussian",
-			"Poisson+Poisson", "Poisson+Gamma+Gaussian" };
+	//@formatter:off
+	private static String[] MODEL = { 
+			"Poisson (Discrete)", 
+			"Poisson (Continuous)", 
+			"Poisson*Gaussian convolution",
+			"Poisson+Gaussian approximation",
+			"Poisson+Poisson", 
+			"Poisson+Gamma+Gaussian" };
+
+	private static abstract class Round
+	{
+		abstract int round(double d);
+	}
+	private static class RoundDown extends Round
+	{
+		int round(double d) { return (int) Math.floor(d); }
+	}
+	private static class RoundUpDown extends Round
+	{
+		int round(double d) { return (int) Math.round(d); }
+	}
+	private static Round ROUND_DOWN = new RoundDown();
+	private static Round ROUND_UP_DOWN = new RoundUpDown();
+	private static Round getRound(CameraModelAnalysisSettings settings)
+	{
+		return (settings.getRoundDown()) ? ROUND_DOWN : ROUND_UP_DOWN;
+	}
+	//@formatter:on
 
 	private static PseudoRandomGenerator random = new PseudoRandomGenerator(new double[1]);
 	private static int seed = 0;
@@ -182,7 +210,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			gd.addNumericField("Seed", settings.getSeed(), 0);
 		gd.addNumericField("Samples", settings.getSamples(), 0);
 		gd.addNumericField("Noise_samples", settings.getNoiseSamples(), 0);
+		gd.addCheckbox("Round_down", settings.getRoundDown());
 		gd.addChoice("Model", MODEL, settings.getModel());
+		gd.addCheckbox("Full_integration", settings.getSimpsonIntegration());
 		gd.addOptionCollectedListener(this);
 		gd.addDialogListener(this);
 		gd.addPreviewCheckbox(pfr);
@@ -210,7 +240,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			settings.setSeed((int) gd.getNextNumber());
 		settings.setSamples(Math.max(1, (int) gd.getNextNumber()));
 		settings.setNoiseSamples(Math.max(1, (int) gd.getNextNumber()));
+		settings.setRoundDown(gd.getNextBoolean());
 		settings.setModel(gd.getNextChoiceIndex());
+		settings.setSimpsonIntegration(gd.getNextBoolean());
 		if (gd.getPreviewCheckbox().getState())
 		{
 			return execute();
@@ -356,6 +388,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			return true;
 		if (s1.getSeed() != s2.getSeed())
 			return true;
+		if (s1.getRoundDown() != s2.getRoundDown())
+			return true;
 		if (s1.getMode() == 0)
 		{
 			if (s1.getGain() != s2.getGain())
@@ -396,10 +430,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		IntHistogram h;
 		switch (settings.getMode())
 		{
+			// EM-CCD
 			case 1:
 				h = simulatePoissonGammaGaussian(settings, random);
 				break;
 
+			// CCD or sCMOS				
 			case 2:
 			case 0:
 				h = simulatePoissonGaussian(settings, random);
@@ -430,7 +466,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 
 		final double gain = getGain(settings);
-		
+
 		// Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
 		// is the same as applying the total gain in the gamma distribution and no camera gain 
 		// later, i.e. the Gamma distribution is just squeezed.
@@ -443,6 +479,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		final int noiseSamples = (noise > 0) ? settings.getNoiseSamples() : 1;
 		int[] sample = new int[samples * emSamples * noiseSamples];
 		int count = 0;
+		Round round = getRound(settings);
 		// Too fast for a ticker
 		//Ticker ticker = Ticker.createStarted(new IJTrackProgress(), samples, false);
 		for (int n = samples; n-- > 0;)
@@ -464,7 +501,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					for (int j = noiseSamples; j-- > 0;)
 					{
 						// Convert the sample to a count 
-						sample[count++] = (int) Math.round(d2 + noise * random2.nextGaussian());
+						sample[count++] = round.round(d2 + noise * random2.nextGaussian());
 					}
 				}
 			}
@@ -474,7 +511,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				for (int j = noiseSamples; j-- > 0;)
 				{
 					// Convert the sample to a count 
-					sample[count++] = (int) Math.round(noise * random2.nextGaussian());
+					sample[count++] = round.round(noise * random2.nextGaussian());
 				}
 			}
 
@@ -510,6 +547,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		final int noiseSamples = (noise > 0) ? settings.getNoiseSamples() : 1;
 		int[] sample = new int[samples * noiseSamples];
 		int count = 0;
+		Round round = getRound(settings);
 		// Too fast for a ticker
 		//Ticker ticker = Ticker.createStarted(new IJTrackProgress(), samples, false);
 		for (int n = samples; n-- > 0;)
@@ -524,7 +562,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			for (int j = noiseSamples; j-- > 0;)
 			{
 				// Convert the sample to a count 
-				sample[count++] = (int) Math.round(d + noise * random2.nextGaussian());
+				sample[count++] = round.round(d + noise * random2.nextGaussian());
 			}
 			//ticker.tick();
 		}
@@ -557,10 +595,17 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			case 1:
 				return new PoissonFunction(alpha, true);
 			case 2:
-				return PoissonGaussianFunction2.createWithStandardDeviation(alpha, noise);
+				return PoissonGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
 			case 3:
-				return PoissonPoissonFunction.createWithStandardDeviation(alpha, noise);
+				return PoissonGaussianFunction2.createWithStandardDeviation(alpha, noise);
 			case 4:
+				return PoissonPoissonFunction.createWithStandardDeviation(alpha, noise);
+				
+			// Add PoissonGammaGaussianConvolution ...
+			// Get the Poisson-Gamma from EMGainAnalysis. 
+			// Add a convolution with a range as in the PoissonGaussianConvolutionFunction
+				
+			case 5:
 				return new PoissonGammaGaussianFunction(alpha, noise);
 
 			default:
@@ -623,7 +668,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	}
 
 	private static double[][] cumulativeDistribution(CameraModelAnalysisSettings settings, double[][] cdf,
-			LikelihoodFunction f)
+			LikelihoodFunction fun)
 	{
 		// Q. How to match this is the discrete cumulative histogram using the continuous 
 		// likelihood function:
@@ -639,17 +684,17 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double[] x = cdf[0];
 		double[] y = new double[x.length];
 		for (int i = 0; i < x.length; i++)
-			y[i] = f.likelihood(x[i], e);
+			y[i] = fun.likelihood(x[i], e);
 		// Add more until the probability change is marginal
 		final double delta = 1e-6;
 		double sum = Maths.sum(y);
 		TDoubleArrayList list = new TDoubleArrayList(y);
 		for (int o = (int) x[x.length - 1] + 1;; o++)
 		{
-			double p = f.likelihood(o, e);
+			double p = fun.likelihood(o, e);
+			list.add(p);
 			if (p == 0)
 				break;
-			list.add(p);
 			sum += p;
 			if (p / sum < delta)
 				break;
@@ -657,10 +702,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		TDoubleArrayList list2 = new TDoubleArrayList(10);
 		for (int o = (int) x[0] - 1;; o--)
 		{
-			double p = f.likelihood(o, e);
+			double p = fun.likelihood(o, e);
+			list2.add(p);
 			if (p == 0)
 				break;
-			list2.add(p);
 			sum += p;
 			if (p / sum < delta)
 				break;
@@ -676,6 +721,69 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		y = list.toArray();
 		x = SimpleArrayUtils.newArray(y.length, start, 1.0);
+
+		if (settings.getSimpsonIntegration())
+		{
+			// Use Simpson's integration with n=4 to get the integral of the probability 
+			// over the range of each count.
+			int n = 4;
+			int n_2 = n / 2;
+			double h = 1.0 / n;
+
+			// Compute the extra function points
+			double[] f = new double[y.length * n + 1];
+			{
+				int i = f.length;
+
+				final int mod;
+				if (settings.getRoundDown())
+				{
+					// Do this final value outside the loop as y[i/n] does not exists
+					mod = 0;
+					i--;
+					f[i] = fun.likelihood(start + i * h, e);
+				}
+				else
+				{
+					// Used when computing for rounding up/down
+					mod = n_2;
+					start -= n_2 * h;
+				}
+
+				while (i-- > 0)
+				{
+					if (i % n == mod)
+						f[i] = y[i / n];
+					else
+						f[i] = fun.likelihood(start + i * h, e);
+				}
+			}
+
+			// Compute indices for the integral
+			TIntArrayList tmp = new TIntArrayList(n);
+			for (int j = 1; j <= n_2 - 1; j++)
+				tmp.add(2 * j);
+			int[] i2 = tmp.toArray();
+			tmp.resetQuick();
+			for (int j = 1; j <= n_2; j++)
+				tmp.add(2 * j - 1);
+			int[] i4 = tmp.toArray();
+
+			// Compute integral
+			for (int i = 0; i < y.length; i++)
+			{
+				int a = i * n;
+				int b = a + n;
+				double s = f[a] + f[b];
+				for (int j = i2.length; j-- > 0;)
+					s += 2 * f[a + i2[j]];
+				for (int j = i4.length; j-- > 0;)
+					s += 4 * f[a + i4[j]];
+				s *= h / 3;
+				//System.out.printf("y[%d] = %f => %f\n", i, y[i], s);
+				y[i] = s;
+			}
+		}
 
 		// Simple flat-top integration
 		sum = 0;
