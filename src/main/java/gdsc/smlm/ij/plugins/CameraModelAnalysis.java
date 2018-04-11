@@ -36,6 +36,7 @@ import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot2;
+import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
@@ -77,7 +78,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			"Poisson*Gaussian convolution",
 			"Poisson+Gaussian approximation",
 			"Poisson+Poisson", 
-			"Poisson+Gamma+Gaussian" };
+			"Poisson*Gamma*Gaussian convolution", 
+			"Poisson+Gamma+Gaussian approximation" 
+			};
 
 	private static abstract class Round
 	{
@@ -337,7 +340,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		Arrays.fill(y1b, offset + y1.length, y2.length, y1[y1.length - 1]);
 
 		// Plot
-		String title = TITLE;
+		WindowOrganiser wo = new WindowOrganiser();
+		String title = TITLE + " CDF";
 		Plot2 plot = new Plot2(title, "Count", "CDF");
 		double max = 1.05 * Maths.maxDefault(1, y2);
 		plot.setLimits(x2[0], x2[x2.length - 1], 0, max);
@@ -353,9 +357,19 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		plot.addLegend("CDF\nModel");
 		plot.addLabel(0, 0,
 				String.format("Distance=%s @ %.0f (Mean=%s)", Utils.rounded(distance), value, Utils.rounded(area)));
-		Utils.display(title, plot);
+		Utils.display(title, plot, 0, wo);
 
-		// Q. Plot PMF as well using the CDF to generate it?
+		// Show the histogram
+		title = TITLE + " Histogram";
+		plot = new Plot2(title, "Count", "Frequency");
+		plot.setLimits(x1[0] - 0.5, x1[x1.length - 1] + 1.5, 0, Maths.max(h.h) * 1.05);
+		plot.setColor(Color.blue);
+		//plot.addPoints(x2, y1b, Plot2.LINE);
+		plot.addPoints(x1, SimpleArrayUtils.toDouble(h.h), Plot2.BAR);
+		Utils.display(title, plot, 0, wo);
+		
+		wo.tile();
+		
 		return true;
 	}
 
@@ -600,13 +614,19 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				return PoissonGaussianFunction2.createWithStandardDeviation(alpha, noise);
 			case 4:
 				return PoissonPoissonFunction.createWithStandardDeviation(alpha, noise);
-				
+
 			// Add PoissonGammaGaussianConvolution ...
 			// Get the Poisson-Gamma from EMGainAnalysis. 
 			// Add a convolution with a range as in the PoissonGaussianConvolutionFunction
-				
+
 			case 5:
-				return new PoissonGammaGaussianFunction(alpha, noise);
+			case 6:
+				PoissonGammaGaussianFunction f = new PoissonGammaGaussianFunction(alpha, noise);
+				// The full-integration here does not appear to work !
+				f.setUseApproximation(settings.getModel() == 6);
+				f.setUseSimpleIntegration(false);
+				f.setMinimumProbability(0);
+				return f;
 
 			default:
 				throw new IllegalStateException();
