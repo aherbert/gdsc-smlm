@@ -290,13 +290,23 @@ public class GUIProtosHelper
 	{
 		CameraModelAnalysisSettings.Builder builder = CameraModelAnalysisSettings.newBuilder();
 		builder.setPhotons(10);
-		// Note that the total gain is likely to be very different if using EM-CCD 
-		// so these are separate
-		builder.setGain(2.2); // Count/electron
-		builder.setEmGain(30); // This is the total gain in Count/electron
-		// Use counts as it is simpler to understand than manufacturers specification sheets
-		builder.setNoise(8); // Count
+		// Note that the total gain is likely to be very different if using EM-CCD/CCD/sCMOS 
+		// so these are separate.
+		// Use counts as it is simpler to understand (and measure) than electrons on manufacturers 
+		// specification sheets.
+		
+		// Need a better CCD estimate. This is Photometrics CoolSNAP HQ2
+		builder.setGain(1); // Count/electron
+		builder.setNoise(5.5); // Count
+		
+		// EM-CCD: Photometrics Evolve 512 
+		builder.setEmGain(40); // This is the total gain in Count/electron
 		builder.setEmNoise(13); // Count
+		
+		// sCMOS: Photometrics Prime95b
+		builder.setCmosGain(1.7); // Count/electron
+		builder.setCmosNoise(3.4); // Count
+		
 		builder.setSamples(20000);
 		builder.setNoiseSamples(10);
 		builder.setEmSamples(5);

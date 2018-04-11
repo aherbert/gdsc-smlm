@@ -10,9 +10,7 @@ import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.Well19937c;
 
-import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
-import gdsc.core.logging.Ticker;
 import gdsc.core.math.Geometry;
 import gdsc.core.threshold.IntHistogram;
 import gdsc.core.utils.Maths;
@@ -69,7 +67,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private IntHistogram lastHistogram = null;
 	private CameraModelAnalysisSettings lastSimulationSettings = null;
 
-	private static String[] MODE = { "CCD", "EM-CCD" };
+	private static String[] MODE = { "CCD", "EM-CCD", "sCMOS" };
 	private static String[] MODEL = { "Poisson (Discrete)", "Poisson (Continuous)", "Poisson+Gaussian",
 			"Poisson+Poisson", "Poisson+Gamma+Gaussian" };
 
@@ -151,6 +149,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					egd.addNumericField("Noise", settings.getEmNoise(), 2, 6, "Count");
 					egd.addNumericField("EM_samples", settings.getEmSamples(), 0);
 				}
+				else if (mode == 2)
+				{
+					egd.addNumericField("Gain", settings.getCmosGain(), 2, 6, "Count/electrons");
+					egd.addNumericField("Noise", settings.getCmosNoise(), 2, 6, "Count");
+				}
 				else
 					throw new IllegalStateException();
 				egd.showDialog(true, gd);
@@ -161,11 +164,16 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					settings.setGain(egd.getNextNumber());
 					settings.setNoise(egd.getNextNumber());
 				}
-				else
+				else if (mode == 1)
 				{
 					settings.setEmGain(egd.getNextNumber());
 					settings.setEmNoise(egd.getNextNumber());
 					settings.setEmSamples(Math.max(1, (int) egd.getNextNumber()));
+				}
+				else
+				{
+					settings.setCmosGain(egd.getNextNumber());
+					settings.setCmosNoise(egd.getNextNumber());
 				}
 				return true;
 			}
@@ -249,7 +257,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		dirty = false;
 
 		CameraModelAnalysisSettings settings = this.settings.build();
-		if (!(getTotalGain(settings) > 0))
+		if (!(getGain(settings) > 0))
 		{
 			Utils.log(TITLE + "Error: No total gain");
 			return false;
@@ -355,6 +363,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			if (s1.getNoise() != s2.getNoise())
 				return true;
 		}
+		else if (s1.getMode() == 2)
+		{
+			if (s1.getCmosGain() != s2.getCmosGain())
+				return true;
+			if (s1.getCmosNoise() != s2.getCmosNoise())
+				return true;
+		}
 		else
 		{
 			if (s1.getEmGain() != s2.getEmGain())
@@ -385,6 +400,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				h = simulatePoissonGammaGaussian(settings, random);
 				break;
 
+			case 2:
 			case 0:
 				h = simulatePoissonGaussian(settings, random);
 				break;
@@ -413,13 +429,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
 				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 
+		final double gain = getGain(settings);
+		
 		// Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
 		// is the same as applying the total gain in the gamma distribution and no camera gain 
 		// later, i.e. the Gamma distribution is just squeezed.
-		CustomGammaDistribution gamma = new CustomGammaDistribution(random.clone(), 1, settings.getEmGain(),
+		CustomGammaDistribution gamma = new CustomGammaDistribution(random.clone(), 1, gain,
 				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
-		final double noise = getEmNoise(settings);
+		final double noise = getReadNoise(settings);
 		final int samples = settings.getSamples();
 		final int emSamples = settings.getEmSamples();
 		final int noiseSamples = (noise > 0) ? settings.getNoiseSamples() : 1;
@@ -486,8 +504,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
 				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 
-		final double gain = settings.getGain();
-		final double noise = getNoise(settings);
+		final double gain = getGain(settings);
+		final double noise = getReadNoise(settings);
 		final int samples = settings.getSamples();
 		final int noiseSamples = (noise > 0) ? settings.getNoiseSamples() : 1;
 		int[] sample = new int[samples * noiseSamples];
@@ -530,7 +548,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 	private static LikelihoodFunction getLikelihoodFunction(CameraModelAnalysisSettings settings)
 	{
-		double alpha = 1.0 / getTotalGain(settings);
+		double alpha = 1.0 / getGain(settings);
 		double noise = getReadNoise(settings);
 		switch (settings.getModel())
 		{
@@ -550,17 +568,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		}
 	}
 
-	private static double getNoise(CameraModelAnalysisSettings settings)
-	{
-		return settings.getNoise();
-	}
-
-	private static double getEmNoise(CameraModelAnalysisSettings settings)
-	{
-		return settings.getEmNoise();
-	}
-
-	private static double getTotalGain(CameraModelAnalysisSettings settings)
+	private static double getGain(CameraModelAnalysisSettings settings)
 	{
 		switch (settings.getMode())
 		{
@@ -568,6 +576,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				return settings.getGain();
 			case 1:
 				return settings.getEmGain();
+			case 2:
+				return settings.getCmosGain();
 			default:
 				throw new IllegalStateException();
 		}
@@ -578,9 +588,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		switch (settings.getMode())
 		{
 			case 0:
-				return getNoise(settings);
+				return settings.getNoise();
 			case 1:
-				return getEmNoise(settings);
+				return settings.getEmNoise();
+			case 2:
+				return settings.getCmosNoise();
 			default:
 				throw new IllegalStateException();
 		}
@@ -623,7 +635,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// The simplest is a flat-top integration.
 
 		// Compute the probability at each value
-		double e = settings.getPhotons() * getTotalGain(settings);
+		double e = settings.getPhotons() * getGain(settings);
 		double[] x = cdf[0];
 		double[] y = new double[x.length];
 		for (int i = 0; i < x.length; i++)
