@@ -8,11 +8,13 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.math.Geometry;
 import gdsc.core.threshold.IntHistogram;
+import gdsc.core.utils.CachedRandomGenerator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.SimpleArrayUtils;
@@ -102,15 +104,17 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	}
 	//@formatter:on
 
-	private static PseudoRandomGenerator random = new PseudoRandomGenerator(new double[1]);
-	private static int seed = 0;
+	private static CachedRandomGenerator random = null;
+	private static int currentSeed = 0;
 
-	private PseudoRandomGenerator getRandomGenerator()
+	private CachedRandomGenerator getRandomGenerator()
 	{
-		if (random.getLength() < settings.getSamples() || seed != settings.getSeed())
+		if (random == null || currentSeed != settings.getSeed())
 		{
-			random = new PseudoRandomGenerator(settings.getSamples(), new Well19937c(settings.getSeed()));
-			seed = settings.getSeed();
+			currentSeed = settings.getSeed();
+			// Ensure some bits are set in the default seed of zero
+			long seed = (currentSeed == 0) ? Double.doubleToRawLongBits(Math.PI) : currentSeed;
+			random = new CachedRandomGenerator(settings.getSamples(), new Well19937c(seed));
 		}
 		return random;
 	}
@@ -367,9 +371,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		//plot.addPoints(x2, y1b, Plot2.LINE);
 		plot.addPoints(x1, SimpleArrayUtils.toDouble(h.h), Plot2.BAR);
 		Utils.display(title, plot, 0, wo);
-		
+
 		wo.tile();
-		
+
 		return true;
 	}
 
@@ -379,9 +383,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		{
 			IJ.showStatus("Simulating histogram ...");
 			StopWatch sw = StopWatch.createStarted();
-			// Ensure this is the same each time by using the same seed
-			PseudoRandomGenerator random = getRandomGenerator().clone();
-			random.setSeed(settings.getSeed());
+			CachedRandomGenerator random = getRandomGenerator();
 			lastHistogram = simulateHistogram(settings, random);
 			lastSimulationSettings = settings;
 			IJ.showStatus("Simulated in " + sw.toString());
@@ -439,7 +441,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 *            the random
 	 * @return The histogram
 	 */
-	private static IntHistogram simulateHistogram(CameraModelAnalysisSettings settings, PseudoRandomGenerator random)
+	private static IntHistogram simulateHistogram(CameraModelAnalysisSettings settings, CachedRandomGenerator random)
 	{
 		IntHistogram h;
 		switch (settings.getMode())
@@ -471,21 +473,20 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * @return The histogram
 	 */
 	private static IntHistogram simulatePoissonGammaGaussian(CameraModelAnalysisSettings settings,
-			PseudoRandomGenerator random)
+			CachedRandomGenerator random)
 	{
-		// Randomly sample
-		PseudoRandomGenerator random2 = random.clone();
+		int[] poissonSample = simulatePoisson(settings, random);
 
-		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
-				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+		// Randomly sample re-using the sequence
+		RandomGenerator random2 = random.getPseudoRandomGenerator();
 
 		final double gain = getGain(settings);
 
 		// Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
 		// is the same as applying the total gain in the gamma distribution and no camera gain 
 		// later, i.e. the Gamma distribution is just squeezed.
-		CustomGammaDistribution gamma = new CustomGammaDistribution(random.clone(), 1, gain,
-				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+		CustomGammaDistribution gamma = new CustomGammaDistribution(random.getPseudoRandomGenerator(),
+				settings.getPhotons(), gain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 		final double noise = getReadNoise(settings);
 		final int samples = settings.getSamples();
@@ -494,17 +495,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		int[] sample = new int[samples * emSamples * noiseSamples];
 		int count = 0;
 		Round round = getRound(settings);
-		// Too fast for a ticker
-		//Ticker ticker = Ticker.createStarted(new IJTrackProgress(), samples, false);
-		for (int n = samples; n-- > 0;)
+		for (int n = poissonSample.length; n-- > 0;)
 		{
-			// Poisson
-			double d = poisson.sample();
-
-			if (d != 0)
+			if (poissonSample[n] != 0)
 			{
 				// Gamma
-				gamma.setShapeUnsafe(d);
+				gamma.setShapeUnsafe(poissonSample[n]);
 
 				// Over-sample the Gamma
 				for (int k = emSamples; k-- > 0;)
@@ -521,20 +517,29 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			}
 			else
 			{
-				// Over-sample the Gaussian
-				for (int j = noiseSamples; j-- > 0;)
+				// Still over-sample the Gamma even though it was zero
+				for (int k = emSamples; k-- > 0;)
 				{
-					// Convert the sample to a count 
-					sample[count++] = round.round(noise * random2.nextGaussian());
+					// Over-sample the Gaussian
+					for (int j = noiseSamples; j-- > 0;)
+					{
+						// Convert the sample to a count 
+						sample[count++] = round.round(noise * random2.nextGaussian());
+					}
 				}
 			}
-
-			//ticker.tick();
 		}
 
-		//ticker.stop();
-
 		return createHistogram(sample, count);
+	}
+
+	private static int[] simulatePoisson(CameraModelAnalysisSettings settings, CachedRandomGenerator random)
+	{
+		// Ensure we reuse random numbers if possible
+		random.reset();
+		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
+				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+		return poisson.sample(settings.getSamples());
 	}
 
 	/**
@@ -547,13 +552,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * @return The histogram
 	 */
 	private static IntHistogram simulatePoissonGaussian(CameraModelAnalysisSettings settings,
-			PseudoRandomGenerator random)
+			CachedRandomGenerator random)
 	{
-		// Randomly sample
-		PseudoRandomGenerator random2 = random.clone();
+		int[] poissonSample = simulatePoisson(settings, random);
 
-		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
-				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+		// Randomly sample re-using the sequence
+		PseudoRandomGenerator random2 = random.getPseudoRandomGenerator();
 
 		final double gain = getGain(settings);
 		final double noise = getReadNoise(settings);
@@ -562,15 +566,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		int[] sample = new int[samples * noiseSamples];
 		int count = 0;
 		Round round = getRound(settings);
-		// Too fast for a ticker
-		//Ticker ticker = Ticker.createStarted(new IJTrackProgress(), samples, false);
-		for (int n = samples; n-- > 0;)
+		for (int n = poissonSample.length; n-- > 0;)
 		{
-			// Poisson
-			double d = poisson.sample();
-
 			// Fixed camera gain
-			d *= gain;
+			double d = poissonSample[n] * gain;
 
 			// Over-sample the Gaussian
 			for (int j = noiseSamples; j-- > 0;)
@@ -578,10 +577,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// Convert the sample to a count 
 				sample[count++] = round.round(d + noise * random2.nextGaussian());
 			}
-			//ticker.tick();
 		}
-
-		//ticker.stop();
 
 		return createHistogram(sample, count);
 	}
