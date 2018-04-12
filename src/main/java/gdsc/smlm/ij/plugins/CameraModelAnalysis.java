@@ -78,12 +78,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private static String[] MODEL = { 
 			"Poisson (Discrete)", 
 			"Poisson (Continuous)", 
-			"Poisson*Gaussian convolution",
+			"Poisson*Gaussian convolution", // Best for CCD/sCMOS
 			"Poisson+Gaussian approximation",
 			"Poisson+Poisson", 
-			"Poisson*Gamma*Gaussian convolution", 
+			"Poisson*Gamma*Gaussian convolution", // Best for EM-CCD
 			"Poisson+Gamma+Gaussian approximation", 
-			"Poisson*Gamma*Gaussian convolution2", 
+			"Poisson+Gamma*Gaussian convolution", 
 			};
 
 	private static abstract class Round
