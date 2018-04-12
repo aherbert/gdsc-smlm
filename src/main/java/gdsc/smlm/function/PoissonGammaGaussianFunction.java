@@ -160,7 +160,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		}
 		else
 		{
-			// This code is the full evaluation of equation 7 from the supplementary information  
+			// This code is the full evaluation of equation 7 from the online methods  
 			// of the paper Chao, et al (2013) Nature Methods 10, 335-338.
 			// It is the full evaluation of a Poisson-Gamma-Gaussian convolution PMF. 
 
@@ -180,7 +180,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			{
 				public double value(double u)
 				{
-					return eval(sqrt2sigma, z, vk_g, g, u);
+					final double f1 = (z - u) / sqrt2sigma;
+					final double f2 = Math.sqrt(vk_g * u);
+					return FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
 				}
 			};
 
@@ -332,13 +334,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		//}
 
 		return (temp > minimumProbability) ? temp : minimumProbability;
-	}
-
-	private double eval(double sqrt2sigma, double z, double vk_g, double g, double u)
-	{
-		final double f1 = (z - u) / sqrt2sigma;
-		final double f2 = Math.sqrt(vk_g * u);
-		return FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
 	}
 
 	/**

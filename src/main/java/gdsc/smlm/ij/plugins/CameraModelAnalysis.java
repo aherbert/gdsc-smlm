@@ -21,6 +21,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.PoissonFunction;
+import gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
 import gdsc.smlm.function.PoissonGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
@@ -81,7 +82,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			"Poisson+Gaussian approximation",
 			"Poisson+Poisson", 
 			"Poisson*Gamma*Gaussian convolution", 
-			"Poisson+Gamma+Gaussian approximation" 
+			"Poisson+Gamma+Gaussian approximation", 
+			"Poisson*Gamma*Gaussian convolution2", 
 			};
 
 	private static abstract class Round
@@ -261,9 +263,20 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		if (gd.getPreviewCheckbox().getState())
 		{
-			if (!execute())
+			boolean ok = false;
+			try
 			{
-				gd.getPreviewCheckbox().setState(false);
+				ok = execute();
+			}
+			catch (Exception ex)
+			{
+				// Catch as this is run within a AWT dispatch thread 
+				Utils.log(TITLE + "Error: " + ex.getMessage());
+			}
+			finally
+			{
+				if (!ok)
+					gd.getPreviewCheckbox().setState(false);
 			}
 		}
 	}
@@ -485,8 +498,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
 		// is the same as applying the total gain in the gamma distribution and no camera gain 
 		// later, i.e. the Gamma distribution is just squeezed.
-		CustomGammaDistribution gamma = new CustomGammaDistribution(random.getPseudoRandomGenerator(),
-				settings.getPhotons(), gain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+		CustomGammaDistribution gamma = new CustomGammaDistribution(random.getPseudoRandomGenerator(), 1, gain,
+				GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 		final double noise = getReadNoise(settings);
 		final int samples = settings.getSamples();
@@ -623,6 +636,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				f.setUseSimpleIntegration(false);
 				f.setMinimumProbability(0);
 				return f;
+
+			case 7:
+				return PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
 
 			default:
 				throw new IllegalStateException();
