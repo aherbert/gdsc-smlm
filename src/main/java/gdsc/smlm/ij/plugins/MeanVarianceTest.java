@@ -492,24 +492,37 @@ public class MeanVarianceTest implements PlugIn
 			Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
 			if (emMode)
 			{
+				// The gradient is the observed gain of the noise. 
+				// In an EM-CCD there is a noise factor of 2.
+				// Q. Is this true for a correct noise factor calibration:
+				//double noiseFactor = (Read Noise EM-CCD) / (Read Noise CCD)
+				
+				// Em-gain is the observed gain divided by the noise factor multiplied by camera gain
 				final double emGain = best[1] / (2 * cameraGain);
 
-				// Noise is standard deviation of the bias image divided by the total gain (in Count/e-)
+				// Compute total gain
 				final double totalGain = emGain * cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(avBiasNoise / totalGain, 4),
+				
+				// This should be 2x the read noise without EM ???
+				double readNoise = avBiasNoise / cameraGain;
+				// Effective noise is standard deviation of the bias image divided by the total gain (in Count/e-)
+				double readNoiseE = avBiasNoise / totalGain;
+				Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(readNoise, 4),
 						Utils.rounded(avBiasNoise, 4));
 
 				Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(1 / cameraGain, 4));
 				Utils.log("  EM-Gain = %s", Utils.rounded(emGain, 4));
 				Utils.log("  Total Gain = %s (Count/e-)", Utils.rounded(totalGain, 4));
+				Utils.log("  Effective Read Noise = %s (e-) (Read Noise/Total Gain)", Utils.rounded(readNoiseE, 4));
 			}
 			else
 			{
-				// Noise is standard deviation of the bias image divided by the gain (in Count/e-)
+				// The gradient is the observed gain of the noise. 
 				cameraGain = best[1];
+				// Noise is standard deviation of the bias image divided by the gain (in Count/e-)
 				final double readNoise = avBiasNoise / cameraGain;
 				Utils.log("  Read Noise = %s (e-) [%s (Count)]", Utils.rounded(readNoise, 4),
-						Utils.rounded(readNoise * cameraGain, 4));
+						Utils.rounded(avBiasNoise, 4));
 
 				Utils.log("  Gain = 1 / %s (Count/e-)", Utils.rounded(1 / cameraGain, 4));
 			}
