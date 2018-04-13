@@ -10,6 +10,7 @@ import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.math.Geometry;
@@ -62,7 +63,11 @@ import ij.process.ImageProcessor;
  */
 public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener, OptionCollectedListener
 {
+	// Add mode to compute the distance over a range of photons at a set gain and variance
+	// Compute distance to simulation. Compute distance to another distribution. 
+
 	private static final String TITLE = "Camera Model Analysis";
+	private static final KolmogorovSmirnovTest kolmogorovSmirnovTest = new KolmogorovSmirnovTest();
 
 	private CameraModelAnalysisSettings.Builder settings;
 
@@ -78,12 +83,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private static String[] MODEL = { 
 			"Poisson (Discrete)", 
 			"Poisson (Continuous)", 
-			"Poisson*Gaussian convolution", // Best for CCD/sCMOS
-			"Poisson+Gaussian approximation",
-			"Poisson+Poisson", 
-			"Poisson*Gamma*Gaussian convolution", // Best for EM-CCD
-			"Poisson+Gamma+Gaussian approximation", 
-			"Poisson+Gamma*Gaussian convolution", 
+			// Best for CCD/sCMOS
+			"Poisson*Gaussian convolution", // Poisson convolved with Gaussian
+			"Poisson+Gaussian approximation", // Saddle-point approximation
+			"Poisson+Poisson", // Mixed Poisson distribution (Noise is added as a second Poisson)
+			// Best for EM-CCD
+			"Poisson+Gamma+Gaussian integration", 
+			"Poisson+Gamma+Gaussian approximation", // Mortensen approximation 
+			"Poisson+Gamma*Gaussian convolution", // Poisson+Gamma approximation convolved with Gaussian
 			};
 
 	private static abstract class Round
@@ -356,6 +363,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		System.arraycopy(y1, 0, y1b, offset, y1.length);
 		Arrays.fill(y1b, offset + y1.length, y2.length, y1[y1.length - 1]);
 
+		// KolmogorovSmirnovTest
+		// n is the number of samples used to build the probability distribution.
+		int n = (int) Maths.sum(h.h);
+		
+		// From KolmogorovSmirnovTest.kolmogorovSmirnovTest(RealDistribution distribution, double[] data, boolean exact):
+		// Returns the p-value associated with the null hypothesis that data is a sample from distribution.
+		// E.g. If p<0.05 then the null hypothesis is rejected and the data do not match the distribution.
+		double p = 1d - kolmogorovSmirnovTest.cdf(distance, n);
+
 		// Plot
 		WindowOrganiser wo = new WindowOrganiser();
 		String title = TITLE + " CDF";
@@ -372,8 +388,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		plot.drawLine(value, 0, value, max);
 		plot.setColor(Color.black);
 		plot.addLegend("CDF\nModel");
-		plot.addLabel(0, 0,
-				String.format("Distance=%s @ %.0f (Mean=%s)", Utils.rounded(distance), value, Utils.rounded(area)));
+		plot.addLabel(0, 0, String.format("Distance=%s @ %.0f (Mean=%s) : p=%s", Utils.rounded(distance), value,
+				Utils.rounded(area), Utils.rounded(p)));
 		Utils.display(title, plot, 0, wo);
 
 		// Show the histogram
