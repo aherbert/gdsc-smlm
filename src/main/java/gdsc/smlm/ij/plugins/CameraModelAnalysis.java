@@ -11,9 +11,11 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
+import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.math.Geometry;
+import gdsc.core.threshold.FloatHistogram;
 import gdsc.core.threshold.IntHistogram;
 import gdsc.core.utils.CachedRandomGenerator;
 import gdsc.core.utils.Maths;
@@ -21,6 +23,7 @@ import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import gdsc.smlm.function.LikelihoodFunction;
+import gdsc.smlm.function.LogFactorial;
 import gdsc.smlm.function.PoissonFunction;
 import gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
@@ -28,6 +31,7 @@ import gdsc.smlm.function.PoissonGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.function.PoissonPoissonFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.utils.Convolution;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
@@ -39,6 +43,7 @@ import ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingExtendedGenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.WindowOrganiser;
 import ij.plugin.filter.ExtendedPlugInFilter;
@@ -76,6 +81,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private CameraModelAnalysisSettings lastSettings = null;
 	private ExtendedGenericDialog gd;
 	private IntHistogram lastHistogram = null;
+	private double[][] floatHistogram = null;
 	private CameraModelAnalysisSettings lastSimulationSettings = null;
 
 	private static String[] MODE = { "CCD", "EM-CCD", "sCMOS" };
@@ -366,7 +372,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// KolmogorovSmirnovTest
 		// n is the number of samples used to build the probability distribution.
 		int n = (int) Maths.sum(h.h);
-		
+
 		// From KolmogorovSmirnovTest.kolmogorovSmirnovTest(RealDistribution distribution, double[] data, boolean exact):
 		// Returns the p-value associated with the null hypothesis that data is a sample from distribution.
 		// E.g. If p<0.05 then the null hypothesis is rejected and the data do not match the distribution.
@@ -399,6 +405,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		plot.setColor(Color.blue);
 		//plot.addPoints(x2, y1b, Plot2.LINE);
 		plot.addPoints(x1, SimpleArrayUtils.toDouble(h.h), Plot2.BAR);
+
+		plot.setColor(Color.red);
+		double[] y = floatHistogram[1].clone();
+		double scale = n / Maths.sum(y);
+		for (int i = 0; i < y.length; i++)
+			y[i] *= scale;
+		plot.addPoints(floatHistogram[0], y, Plot2.BAR);
+
 		Utils.display(title, plot, 0, wo);
 
 		wo.tile();
@@ -416,6 +430,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			lastHistogram = simulateHistogram(settings, random);
 			lastSimulationSettings = settings;
 			IJ.showStatus("Simulated in " + sw.toString());
+
+			// Convolve 
+			floatHistogram = convolveHistogram(settings);
 		}
 		return lastHistogram;
 	}
@@ -621,6 +638,268 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		for (int i = count; i-- > 0;)
 			h[sample[i] - min]++;
 		return new IntHistogram(h, min);
+	}
+
+	/**
+	 * Convolve the histogram. The output is a discrete probability distribution.
+	 *
+	 * @param settings
+	 *            the settings
+	 * @return The histogram
+	 */
+	private static double[][] convolveHistogram(CameraModelAnalysisSettings settings)
+	{
+		final double lower = 1e-6;
+		final double upper = 1 - lower;
+
+		// Sample Poisson
+		TDoubleArrayList list = new TDoubleArrayList();
+		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
+				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+		int maxn = poisson.inverseCumulativeProbability(upper);
+
+		final double gain = getGain(settings);
+
+		boolean debug = true;
+
+		// EM-CCD 
+		if (settings.getMode() == 1)
+		{
+			// Poisson-Gamma
+			CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
+					GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+			int minn = Math.max(1, poisson.inverseCumulativeProbability(lower));
+			//int minc = (int) gamma.inverseCumulativeProbability(lower);
+			int maxc = (int) gamma.inverseCumulativeProbability(upper);
+
+			// See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+
+			// Note this is not a convolution of a single Gamma distribution since the shape
+			// is modified not the count. So it is a convolution of a distribution made with
+			// a gamma of fixed count and variable shape.
+
+			// Note: The gamma convolution is only relevant when photon number n>0,
+			// i.e. only convolve the Poisson with the Gamma for n>0.
+			// Then add a delta function at n=0.
+			final double m = gain;
+			final double p = settings.getPhotons();
+			list.add(FastMath.exp(-p));
+
+			if ((maxn - minn) * maxc < 1000000)
+			{
+				// Full computation
+
+				//G(c) = sum n {  (1 / n!) p^n e^-p (1 / ((n-1!)m^n)) c^n-1 e^-c/m };
+				// Compute as a log
+				// - log(n!) + n*log(p)-p -log((n-1)!) - n * log(m) + (n-1) * log(c) -c/m
+
+				LogFactorial.increaseTableMaxN(maxn);
+				double[] f = new double[maxn + 1];
+				final double logm = Math.log(m);
+				final double logp = Math.log(p);
+				for (int n = minn; n <= maxn; n++)
+				{
+					f[n] = -LogFactorial.logF(n) + n * logp - p - LogFactorial.logF(n - 1) - n * logm;
+				}
+
+				for (int c = 1; c <= maxc; c++)
+				{
+					// Cannot do this as the graph is truncated
+					//if (c < minc)
+					//{
+					//	list.add(0);
+					//	continue;
+					//}
+
+					double sum = 0;
+					final double c_m = c / m;
+					final double logc = Math.log(c);
+					for (int n = minn; n <= maxn; n++)
+					{
+						sum += FastMath.exp(f[n] + (n - 1) * logc - c_m);
+					}
+					list.add(sum);
+
+					//// This should match the approximation
+					//double check = PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m);
+					//System.out.printf("sum=%g check=%g error=%g\n", sum, check,
+					//		gdsc.core.utils.DoubleEquality.relativeError(sum, check));
+				}
+			}
+			else
+			{
+				// Approximate
+				for (int c = 1; c <= maxc; c++)
+					list.add(PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m));
+			}
+
+			if (debug)
+			{
+				String title = "Poisson-Gamma";
+				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, 1.0), list.toArray());
+				Utils.display(title, plot);
+			}
+		}
+		else
+		{
+			// Poisson
+			for (int n = 0; n <= maxn; n++)
+			{
+				list.add(poisson.probability(n));
+			}
+			double p = poisson.probability(list.size());
+			if (p != 0)
+				list.add(p);
+
+			// Debug
+			if (debug)
+			{
+				String title = "Poisson";
+				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, 1.0), list.toArray());
+				Utils.display(title, plot);
+			}
+
+			// Fixed gain. Expand the Poisson by the gain.
+			if (gain != 1)
+			{
+				// Simple non-interpolated expansion
+				boolean simple = true;
+				if (simple)
+				{
+					double[] pd = list.toArray();
+					list.resetQuick();
+
+					int maxc = (int) Math.ceil((pd.length + 1) * gain);
+					double[] g = new double[maxc];
+					for (int n = pd.length; n-- > 0;)
+					{
+						// TODO - account for rounding.
+						// If done here then it is OK with no Gaussian.
+						// The simulation effectively keeps a discrete poisson on 
+						// a continuous scale, adds a Gaussian and then rounds.
+						// Q. How to do the same?
+						g[(int) (n * gain)] += pd[n];
+					}
+					list.add(g);
+				}
+				else
+				{
+					// Add zeros to avoid index-out-of bounds
+					for (int i = (int) Math.ceil(gain); i-- > 0;)
+						list.add(0);
+					double[] pd = list.toArray();
+
+					for (int i = 0; i < pd.length; i++)
+						pd[i] /= gain;
+
+					list.resetQuick();
+					if (gain == (int) gain)
+					{
+						// Simple expansion
+						int ig = (int) gain;
+						for (int i = 0; i < pd.length; i++)
+						{
+							for (int j = ig; j-- > 0;)
+								list.add(pd[i]);
+						}
+					}
+					else if (gain > 1)
+					{
+						int maxc = (int) Math.ceil(maxn * gain);
+						double step = 1.0 / gain;
+						for (int c = 1; c <= maxc; c++)
+						{
+							double l = (c - 1) * step;
+							double u = (c * step);
+							int il = (int) l;
+							int iu = (int) u;
+							if (il == iu)
+							{
+								// In point of histogram 
+								list.add(pd[il]);
+							}
+							else
+							{
+								// Spans original histogram
+								list.add(pd[iu] * (u - iu) + pd[il] * (iu - l));
+							}
+						}
+					}
+					else // gain < 1
+					{
+						int maxc = (int) Math.ceil(maxn * gain);
+						double step = 1.0 / gain;
+						for (int c = 1; c <= maxc; c++)
+						{
+							double l = (c - 1) * step;
+							double u = (c * step);
+							int il = (int) l;
+							int ilp = il + 1;
+							int iu = (int) u;
+
+							// Spans original histogram
+							double pp = pd[iu] * (u - iu) + pd[il] * (ilp - l);
+							while (ilp < iu)
+							{
+								pp += pd[ilp++];
+							}
+							list.add(pp);
+						}
+					}
+				}
+
+				// Debug
+				if (debug)
+				{
+					String title = "Poisson x gain";
+					Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, 1.0),
+							list.toArray());
+					Utils.display(title, plot);
+				}
+			}
+		}
+
+		double[] g = list.toArray();
+
+		int zero = 0;
+
+		// Sample Gaussian
+		final double noise = getReadNoise(settings);
+		if (noise > 0)
+		{
+			// Convolve with Gaussian kernel up to 4 times the standard deviation
+			final int radius = (int) Math.ceil(Math.abs(noise) * 4) + 1;
+			double[] kernel = new double[2 * radius + 1];
+			final double norm = -0.5 / (noise * noise);
+			for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
+				kernel[j] = kernel[jj] = FastMath.exp(norm * Maths.pow2(i));
+			// Normalise
+			double sum = 0;
+			for (int j = 0; j < kernel.length; j++)
+				sum += kernel[j];
+			for (int j = 0; j < kernel.length; j++)
+				kernel[j] /= sum;
+
+			g = Convolution.convolveFast(g, kernel);
+			// The convolution will have created a larger array so we must adjust the offset for this
+			zero += radius;
+
+			// Debug
+			if (debug)
+			{
+				String title = "Gaussian";
+				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, -radius, 1.0), kernel);
+				Utils.display(title, plot);
+
+				title = (settings.getMode() == 1) ? "Poisson-Gamma-Gaussian" : "Poisson-Gaussian";
+				plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, -zero, 1.0), g);
+				Utils.display(title, plot);
+			}
+		}
+
+		// TODO - adjust for rounding in the simulation
+
+		return new double[][] { SimpleArrayUtils.newArray(g.length, -zero, 1.0), g };
 	}
 
 	private static LikelihoodFunction getLikelihoodFunction(CameraModelAnalysisSettings settings)
