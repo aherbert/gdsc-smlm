@@ -80,8 +80,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		sqrt2piSigma2 = Math.sqrt(2 * Math.PI * s * s);
 	}
 
+	/** 2 * Math.sqrt(Math.PI). */
 	private static final double twoSqrtPi = 2 * Math.sqrt(Math.PI);
+	/** Math.sqrt(2 * Math.PI). */
 	private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
+	/** Math.log(2 * Math.sqrt(Math.PI)) */
+	private static final double logTwoSqrtPi = Math.log(twoSqrtPi);
 
 	/**
 	 * Compute the likelihood
@@ -180,8 +184,42 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			{
 				public double value(double u)
 				{
+					double vk_g_by_u = vk_g * u;
 					final double f1 = (z - u) / sqrt2sigma;
-					final double f2 = Math.sqrt(vk_g * u);
+					final double f2 = Math.sqrt(vk_g_by_u);
+
+					// DEBUG
+					//double p = FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
+					//
+					//System.out.printf("f2=%g\n", f2);
+					//if (f2 > 50)
+					//{
+					//	final double t = -(f1 * f1) - u / g + 2 * f2 - logTwoSqrtPi + 0.5 * Math.log(f2) - Math.log(u);
+					//	double pp = FastMath.exp(t);
+					//	System.out.printf("p=%g, pp=%g  error=%g\n", p, pp,
+					//			gdsc.core.utils.DoubleEquality.relativeError(pp, p));
+					//}
+
+					// Approximate Bessel function i1(x) when using large x:
+					// i1(x) ~ exp(x)/sqrt(2*pi*x)
+					// x = 2 * Math.sqrt(vk_g * u)
+					// Same limit of 10000 for used elsewhere for eta * nij
+					if (vk_g_by_u > 10000)
+					{
+						// t = -(f1 * f1) - u / g + log(f2) + log(Bessel.I1(2 * f2)) - log(u)
+						// t = -(f1 * f1) - u / g + log(f2) + log(exp(2 * f2) / sqrt(2*pi*2*f2)) - log(u)
+						// t = -(f1 * f1) - u / g + log(f2) + log(exp(2 * f2)) - log(sqrt(2*pi*2*f2)) - log(u)
+						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2*f2)) - log(u)
+						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2)*sqrt(f2)) - log(u)
+						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2)) - log(sqrt(f2)) - log(u)
+						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2)) - 0.5 * log(f2) - log(u)
+						// t = -(f1 * f1) - u / g           + 2 * f2 - log(sqrt(2*pi*2)) + 0.5 * log(f2) - log(u)
+						// t = -(f1 * f1) - u / g           + 2 * f2 - log(sqrt(2*pi*2)) + 0.5 * log(f2) - log(u)
+						// t = -(f1 * f1) - u / g           + 2 * f2 - log(2*sqrt(pi)) + 0.5 * log(f2) - log(u)
+						final double t = -(f1 * f1) - u / g + 2 * f2 - logTwoSqrtPi + 0.5 * Math.log(f2) - Math.log(u);
+						return FastMath.exp(t);
+					}
+
 					return FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
 				}
 			};

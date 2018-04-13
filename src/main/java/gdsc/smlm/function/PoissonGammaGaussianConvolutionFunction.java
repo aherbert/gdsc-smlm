@@ -246,7 +246,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 			return Double.NEGATIVE_INFINITY;
 		}
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
