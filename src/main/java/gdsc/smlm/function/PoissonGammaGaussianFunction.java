@@ -331,13 +331,26 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// This code is adapted from the Python source code within the supplementary information of 
 		// the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
 
+		// The implementation of the approximation is not documented.
+		// This is meant to be convolving a PMF of a Poisson-Gamma mixture with the PDF of a Gaussian.
+
+		// See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+		// G n>0 (c) = sum n {  (1 / n!) p^n e^-p (1 / ((n-1!)m^n)) c^n-1 e^-c/m }
+		// G n>0 (c) = sqrt(p/(c*m)) * exp(-c/m - p) * Bessel.I1(2 * sqrt(c*p/m))
+		// G n>0 (c) = sqrt(p/(c*m)) * exp(-c/m - p) * exp(2 * sqrt(c*p/m)) / sqrt(2*pi*sqrt(c*p/m))
+		// G n=0 (c) = exp(-p)
+
+		// p = eta
+		// m = 1/alpha
+		// c = cij
+
 		// [Poisson PMF] multiplied by the [value at zero]:
 		// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
 		// FastMath.exp(-eta) * [eta * alpha]
-		final double f0 = alpha * FastMath.exp(-eta) * eta;
+		double f0 = alpha * FastMath.exp(-eta) * eta;
 
 		// ?
-		final double fp0 = f0 * 0.5 * alpha * (eta - 2);
+		double fp0 = f0 * 0.5 * alpha * (eta - 2);
 
 		// The cumulative normal distribution of the read noise
 		// at the observed count
@@ -349,7 +362,18 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
 
 		// ? 
-		double temp = (f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij));
+		double temp = f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij);
+
+//		// TESTING
+//		// Simple method:
+//		temp = FastMath.exp(-eta) * gauss(cij); // G(c==0) * Gaussian;
+//		if (cij <= 0)
+//			return temp;
+//		// Reset. The remaining will be the Poisson-Gamma and no convolution
+//		f0 = fp0 = 0;
+//
+//		// Q. How to normalise so that at low cij there is a mixture and at high cij there is no mixture
+//		// and the result is the Poisson-Gamma. Perhaps this is what the above code is doing.
 
 		if (cij > 0.0)
 		{
@@ -378,7 +402,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// 0.5 * log(alpha * eta / cij) - nij - eta + x - 0.5 * log(2*pi* x)
 				final double x = 2 * Math.sqrt(eta * nij);
 				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + x - 0.5 * Math.log(twoPi * x);
-				temp += (FastMath.exp(transform) - f0 - fp0 * cij);
+				temp += FastMath.exp(transform) - f0 - fp0 * cij;
 			}
 			else
 			{
@@ -386,8 +410,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// -f0-fp0*cij term is.
 				// This indicates that temp should already be the first
 				// part of eq.135: exp(-eta)*delta(cij)
-				temp += (Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij)) -
-						f0 - fp0 * cij);
+				temp += Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij)) -
+						f0 - fp0 * cij;
 			}
 		}
 
