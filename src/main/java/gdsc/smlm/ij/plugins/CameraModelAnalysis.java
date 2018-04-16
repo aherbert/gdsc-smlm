@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
@@ -15,7 +18,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.math.Geometry;
-import gdsc.core.threshold.FloatHistogram;
 import gdsc.core.threshold.IntHistogram;
 import gdsc.core.utils.CachedRandomGenerator;
 import gdsc.core.utils.Maths;
@@ -408,7 +410,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		plot.setColor(Color.red);
 		double[] y = floatHistogram[1].clone();
-		double scale = n / Maths.sum(y);
+		double scale = n / (Maths.sum(y) * (floatHistogram[0][1] - floatHistogram[0][0]));
 		for (int i = 0; i < y.length; i++)
 			y[i] *= scale;
 		plot.addPoints(floatHistogram[0], y, Plot2.BAR);
@@ -649,28 +651,38 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 */
 	private static double[][] convolveHistogram(CameraModelAnalysisSettings settings)
 	{
-		final double lower = 1e-6;
-		final double upper = 1 - lower;
+		final double LOWER = 1e-6;
+		final double UPPER = 1 - LOWER;
 
-		// Sample Poisson
-		TDoubleArrayList list = new TDoubleArrayList();
+		// Find the range of the Poisson
 		PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
 				PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-		int maxn = poisson.inverseCumulativeProbability(upper);
+		int maxn = poisson.inverseCumulativeProbability(UPPER);
 
 		final double gain = getGain(settings);
 
-		boolean debug = true;
+		boolean debug = false;
+
+		TDoubleArrayList list = new TDoubleArrayList();
+
+		// Build the Probabity Mass Function (PMF) of the discrete distribution:
+		// either a Poisson-Gamma or a Poisson. The PMF is 0 at all values apart from
+		// the step interval
+		double step;
+		String name;
 
 		// EM-CCD 
 		if (settings.getMode() == 1)
 		{
-			// Poisson-Gamma
+			name = "Poisson-Gamma";
+			// This computes a discrete PMF
+			step = 1.0;
+
 			CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
 					GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-			int minn = Math.max(1, poisson.inverseCumulativeProbability(lower));
+			int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
 			//int minc = (int) gamma.inverseCumulativeProbability(lower);
-			int maxc = (int) gamma.inverseCumulativeProbability(upper);
+			int maxc = (int) gamma.inverseCumulativeProbability(UPPER);
 
 			// See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 
@@ -732,17 +744,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				for (int c = 1; c <= maxc; c++)
 					list.add(PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m));
 			}
-
-			if (debug)
-			{
-				String title = "Poisson-Gamma";
-				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, 1.0), list.toArray());
-				Utils.display(title, plot);
-			}
 		}
 		else
 		{
-			// Poisson
+			name = "Poisson";
+			// Apply fixed gain. Just change the step interval of the PMF.
+			step = gain;
+
 			for (int n = 0; n <= maxn; n++)
 			{
 				list.add(poisson.probability(n));
@@ -750,129 +758,45 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			double p = poisson.probability(list.size());
 			if (p != 0)
 				list.add(p);
-
-			// Debug
-			if (debug)
-			{
-				String title = "Poisson";
-				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, 1.0), list.toArray());
-				Utils.display(title, plot);
-			}
-
-			// Fixed gain. Expand the Poisson by the gain.
-			if (gain != 1)
-			{
-				// Simple non-interpolated expansion
-				boolean simple = true;
-				if (simple)
-				{
-					double[] pd = list.toArray();
-					list.resetQuick();
-
-					int maxc = (int) Math.ceil((pd.length + 1) * gain);
-					double[] g = new double[maxc];
-					for (int n = pd.length; n-- > 0;)
-					{
-						// TODO - account for rounding.
-						// If done here then it is OK with no Gaussian.
-						// The simulation effectively keeps a discrete poisson on 
-						// a continuous scale, adds a Gaussian and then rounds.
-						// Q. How to do the same?
-						g[(int) (n * gain)] += pd[n];
-					}
-					list.add(g);
-				}
-				else
-				{
-					// Add zeros to avoid index-out-of bounds
-					for (int i = (int) Math.ceil(gain); i-- > 0;)
-						list.add(0);
-					double[] pd = list.toArray();
-
-					for (int i = 0; i < pd.length; i++)
-						pd[i] /= gain;
-
-					list.resetQuick();
-					if (gain == (int) gain)
-					{
-						// Simple expansion
-						int ig = (int) gain;
-						for (int i = 0; i < pd.length; i++)
-						{
-							for (int j = ig; j-- > 0;)
-								list.add(pd[i]);
-						}
-					}
-					else if (gain > 1)
-					{
-						int maxc = (int) Math.ceil(maxn * gain);
-						double step = 1.0 / gain;
-						for (int c = 1; c <= maxc; c++)
-						{
-							double l = (c - 1) * step;
-							double u = (c * step);
-							int il = (int) l;
-							int iu = (int) u;
-							if (il == iu)
-							{
-								// In point of histogram 
-								list.add(pd[il]);
-							}
-							else
-							{
-								// Spans original histogram
-								list.add(pd[iu] * (u - iu) + pd[il] * (iu - l));
-							}
-						}
-					}
-					else // gain < 1
-					{
-						int maxc = (int) Math.ceil(maxn * gain);
-						double step = 1.0 / gain;
-						for (int c = 1; c <= maxc; c++)
-						{
-							double l = (c - 1) * step;
-							double u = (c * step);
-							int il = (int) l;
-							int ilp = il + 1;
-							int iu = (int) u;
-
-							// Spans original histogram
-							double pp = pd[iu] * (u - iu) + pd[il] * (ilp - l);
-							while (ilp < iu)
-							{
-								pp += pd[ilp++];
-							}
-							list.add(pp);
-						}
-					}
-				}
-
-				// Debug
-				if (debug)
-				{
-					String title = "Poisson x gain";
-					Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, 1.0),
-							list.toArray());
-					Utils.display(title, plot);
-				}
-			}
 		}
 
-		double[] g = list.toArray();
+		// Debug
+		if (debug)
+		{
+			String title = name;
+			Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, step), list.toArray());
+			Utils.display(title, plot);
+		}
 
-		int zero = 0;
+		double zero = 0;
+		double[] g = list.toArray();
 
 		// Sample Gaussian
 		final double noise = getReadNoise(settings);
 		if (noise > 0)
 		{
+			// The PMF is discrete and (if Poisson with gain) may be on a non-integer scale.
+			// Upsample the PMF to allow appropriate convolution and rounding to the integer 
+			// scale.
+			int upsample = 100;
+			list.resetQuick();
+			double[] pad = new double[upsample - 1];
+			list.add(g[0]);
+			for (int i = 1; i < g.length; i++)
+			{
+				list.add(pad);
+				list.add(g[i]);
+			}
+			step /= upsample;
+
+			g = list.toArray();
+
 			// Convolve with Gaussian kernel up to 4 times the standard deviation
-			final int radius = (int) Math.ceil(Math.abs(noise) * 4) + 1;
+			final int radius = (int) Math.ceil(Math.abs(noise) * 4 / step) + 1;
 			double[] kernel = new double[2 * radius + 1];
 			final double norm = -0.5 / (noise * noise);
 			for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
-				kernel[j] = kernel[jj] = FastMath.exp(norm * Maths.pow2(i));
+				kernel[j] = kernel[jj] = FastMath.exp(norm * Maths.pow2(i * step));
 			// Normalise
 			double sum = 0;
 			for (int j = 0; j < kernel.length; j++)
@@ -882,24 +806,105 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 			g = Convolution.convolveFast(g, kernel);
 			// The convolution will have created a larger array so we must adjust the offset for this
-			zero += radius;
+			zero -= radius * step;
 
 			// Debug
 			if (debug)
 			{
 				String title = "Gaussian";
-				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, -radius, 1.0), kernel);
+				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, -radius, step), kernel);
 				Utils.display(title, plot);
 
-				title = (settings.getMode() == 1) ? "Poisson-Gamma-Gaussian" : "Poisson-Gaussian";
-				plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, -zero, 1.0), g);
+				title = name + "-Gaussian";
+				plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, zero, step), g);
 				Utils.display(title, plot);
+			}
+
+			// Down-sample to 1.0 pixel step interval.
+
+			// Build cumulative distribution.
+			double lowerSum = 0;
+			for (int i = 0; i < g.length; i++)
+			{
+				lowerSum += g[i];
+				g[i] = lowerSum;
+			}
+			for (int i = 0; i < g.length; i++)
+				g[i] /= lowerSum;
+			g[g.length - 1] = 1.0;
+
+			double offset = (settings.getRoundDown()) ? 0 : -0.5;
+
+			// Note the interpolation of the CDF is good when the step is much smaller than 1.
+			// When the step is above 1 then the gain is likely to be very low and thus 
+			// unrealistic for modelling. This case is ignored.
+
+			// Subtract the CDF to the upper bounds from the CDF of the lower bound
+			// to get the discrete PMF
+
+			// Pad the CDF to avoid index-out-of bounds during interpolation
+			list.resetQuick();
+			int padSize = (int) Math.ceil(1 / step) + 2;
+			list.add(new double[padSize]);
+			list.add(g);
+			for (int i = padSize; i-- > 0;)
+				list.add(1);
+			double[] pd = list.toArray();
+
+			list.resetQuick();
+
+			double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
+
+			UnivariateInterpolator in =
+					//new SplineInterpolator()
+					new LinearInterpolator();
+			UnivariateFunction f = in.interpolate(x, pd);
+
+			int bound = (int) Math.floor(zero);
+
+			double upperSum = 0;
+			while (upperSum < 1)
+			{
+				bound++;
+
+				// Find the point at which the CDF should be computed
+				lowerSum = upperSum;
+				upperSum = f.value(bound + offset);
+				list.add(upperSum - lowerSum);
+			}
+
+			g = list.toArray();
+			zero = (int) Math.floor(zero);
+			step = 1.0;
+		}
+		else
+		{
+			// No convolution means we have the PMF already
+			if (step != 1)
+			{
+				// Sample to 1.0 pixel step interval.
+
+				// Simple non-interpolated expansion.
+				// This should be used when there is no Gaussian convolution.
+				double[] pd = g;
+				list.resetQuick();
+
+				// Account for rounding.
+				Round round = getRound(settings);
+
+				int maxc = round.round((pd.length + 1) * gain);
+				g = new double[maxc];
+				for (int n = pd.length; n-- > 0;)
+				{
+					g[round.round(n * gain)] += pd[n];
+				}
+
+				step = 1.0;
 			}
 		}
 
-		// TODO - adjust for rounding in the simulation
+		return new double[][] { SimpleArrayUtils.newArray(g.length, zero, step), g };
 
-		return new double[][] { SimpleArrayUtils.newArray(g.length, -zero, 1.0), g };
 	}
 
 	private static LikelihoodFunction getLikelihoodFunction(CameraModelAnalysisSettings settings)
