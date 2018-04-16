@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -398,24 +398,30 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		plot.addLegend("CDF\nModel");
 		plot.addLabel(0, 0, String.format("Distance=%s @ %.0f (Mean=%s) : p=%s", Utils.rounded(distance), value,
 				Utils.rounded(area), Utils.rounded(p)));
-		Utils.display(title, plot, 0, wo);
+		Utils.display(title, plot, Utils.NO_TO_FRONT, wo);
 
 		// Show the histogram
 		title = TITLE + " Histogram";
 		plot = new Plot2(title, "Count", "Frequency");
+		// Update X1 so that the histogram bars are centred over the x value
+		for (int i = x1.length; i-- > 0;)
+			x1[i] -= 0.5;
 		plot.setLimits(x1[0] - 0.5, x1[x1.length - 1] + 1.5, 0, Maths.max(h.h) * 1.05);
 		plot.setColor(Color.blue);
 		//plot.addPoints(x2, y1b, Plot2.LINE);
 		plot.addPoints(x1, SimpleArrayUtils.toDouble(h.h), Plot2.BAR);
 
 		plot.setColor(Color.red);
+		double[] x = floatHistogram[0].clone();
 		double[] y = floatHistogram[1].clone();
-		double scale = n / (Maths.sum(y) * (floatHistogram[0][1] - floatHistogram[0][0]));
+		double scale = n / (Maths.sum(y) * (x[1] - x[0]));
 		for (int i = 0; i < y.length; i++)
 			y[i] *= scale;
-		plot.addPoints(floatHistogram[0], y, Plot2.BAR);
+		plot.addPoints(x, y, Plot2.LINE);
 
-		Utils.display(title, plot, 0, wo);
+		plot.setColor(Color.black);
+		plot.addLegend("Sample\nExpected");
+		Utils.display(title, plot, Utils.NO_TO_FRONT, wo);
 
 		wo.tile();
 
@@ -856,12 +862,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
 
 			UnivariateInterpolator in =
-					//new SplineInterpolator()
-					new LinearInterpolator();
+					new SplineInterpolator()
+					//new LinearInterpolator()
+					;
 			UnivariateFunction f = in.interpolate(x, pd);
 
 			int bound = (int) Math.floor(zero);
 
+			list.add(0);
+			zero--;
 			double upperSum = 0;
 			while (upperSum < 1)
 			{
@@ -872,6 +881,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				upperSum = f.value(bound + offset);
 				list.add(upperSum - lowerSum);
 			}
+			list.add(0);
 
 			g = list.toArray();
 			zero = (int) Math.floor(zero);
@@ -897,6 +907,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				for (int n = pd.length; n-- > 0;)
 				{
 					g[round.round(n * gain)] += pd[n];
+				}
+
+				if (g[0] != 0)
+				{
+					list.add(0);
+					list.add(g);
+					g = list.toArray();
+					zero--;
 				}
 
 				step = 1.0;
