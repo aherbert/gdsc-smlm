@@ -80,6 +80,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		sqrt2piSigma2 = Math.sqrt(2 * Math.PI * s * s);
 	}
 
+	/** 2 * Math.PI. */
+	private static final double twoPi = 2 * Math.PI;
 	/** 2 * Math.sqrt(Math.PI). */
 	private static final double twoSqrtPi = 2 * Math.sqrt(Math.PI);
 	/** Math.sqrt(2 * Math.PI). */
@@ -137,8 +139,21 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					// evaluated then raised to e to prevent overflow error on 
 					// large exp(x)
 
-					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-							Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+					//final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+					//		Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+
+					// Avoid power function ...
+					// sqrt(alpha * eta / cij) * exp(-nij - eta) * Bessel.I1(2 * sqrt(eta * nij))
+					// sqrt(alpha * eta / cij) * exp(-nij - eta) * exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij))
+					// Log
+					// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij)))
+					// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij))) - log(sqrt(2*pi*2 * sqrt(eta * nij)))
+					// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi*2 * sqrt(eta * nij))
+					// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi* 2*sqrt(eta * nij))
+					// 0.5 * log(alpha * eta / cij) - nij - eta + x - 0.5 * log(2*pi* x)
+					final double x = 2 * Math.sqrt(eta * nij);
+					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + x -
+							0.5 * Math.log(twoPi * x);
 					p = FastMath.exp(transform);
 				}
 				else
@@ -349,8 +364,20 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// evaluated then raised to e to prevent overflow error on 
 				// large exp(x)
 
-				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-						Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+				//final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+				//		Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+
+				// Avoid power function ...
+				// sqrt(alpha * eta / cij) * exp(-nij - eta) * Bessel.I1(2 * sqrt(eta * nij))
+				// sqrt(alpha * eta / cij) * exp(-nij - eta) * exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij))
+				// Log
+				// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij)))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij))) - log(sqrt(2*pi*2 * sqrt(eta * nij)))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi*2 * sqrt(eta * nij))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi* 2*sqrt(eta * nij))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + x - 0.5 * log(2*pi* x)
+				final double x = 2 * Math.sqrt(eta * nij);
+				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + x - 0.5 * Math.log(twoPi * x);
 				temp += (FastMath.exp(transform) - f0 - fp0 * cij);
 			}
 			else
