@@ -175,7 +175,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					}
 					catch (TooManyEvaluationsException ex)
 					{
-						System.out.printf("Integration failed: o=%g, e=%g\n", o, e);
+						//System.out.printf("Integration failed: o=%g, e=%g\n", o, e);
 						return mortensenApproximation(o, e);
 					}
 				}
