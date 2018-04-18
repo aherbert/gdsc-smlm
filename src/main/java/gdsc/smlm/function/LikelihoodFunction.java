@@ -14,18 +14,21 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Provides functions to compute the likelihood for a distribution.
+ * Provides functions to compute the likelihood for a univariate distribution.
  */
 public interface LikelihoodFunction
 {
 	/**
-	 * Compute the likelihood of an observation given an expected value
+	 * Compute the likelihood of an observation x given a parameter value theta.
+	 * <p>
+	 * This is the probability mass function P(X=x|θ) or the probability density function f(x|θ) depending on parameter
+	 * θ.
 	 * 
 	 * @param o
-	 *            The observed count
-	 * @param e
-	 *            The expected count
+	 *            The observed value (x)
+	 * @param t
+	 *            The parameter value (θ)
 	 * @return The likelihood
 	 */
-	public double likelihood(final double o, final double e);
+	public double likelihood(final double o, final double t);
 }

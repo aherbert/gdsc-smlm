@@ -126,7 +126,7 @@ public class PoissonFunctionTest
 
 	private int[] cumulativeProbabilityIsOneWithInteger(final double gain, final double mu)
 	{
-		final double o = mu * gain;
+		final double o = mu;
 
 		PoissonFunction f = new PoissonFunction(1.0 / gain, false);
 		double p = 0;
@@ -192,7 +192,7 @@ public class PoissonFunctionTest
 
 	private void cumulativeProbabilityIsOneWithRealAbove4(final double gain, final double mu, int min, int max)
 	{
-		final double o = mu * gain;
+		final double o = mu;
 
 		final PoissonFunction f = new PoissonFunction(1.0 / gain, true);
 		double p = 0;

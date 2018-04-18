@@ -75,7 +75,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the likelihood score. Returns positive infinity if the likelihood is zero at any point in the observed
+	 * Compute the negative log likelihood. Returns positive infinity if the likelihood is zero at any point in the
+	 * observed
 	 * values.
 	 * 
 	 * @param variables
@@ -94,7 +95,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the likelihood score. Returns positive infinity if the likelihood is zero at any point in the observed
+	 * Compute the negative log likelihood. Returns positive infinity if the likelihood is zero at any point in the
+	 * observed
 	 * values.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called.
@@ -104,7 +106,7 @@ public abstract class LikelihoodWrapper
 	protected abstract double computeLikelihood();
 
 	/**
-	 * Compute the likelihood score and the gradient. Returns positive infinity if the likelihood is zero
+	 * Compute the negative log likelihood and the gradient. Returns positive infinity if the likelihood is zero
 	 * at any point in the observed values. In this case the gradient computed is invalid.
 	 * 
 	 * @param variables
@@ -123,7 +125,7 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the likelihood score and the gradient. Returns positive infinity if the likelihood is zero
+	 * Compute the negative log likelihood and the gradient. Returns positive infinity if the likelihood is zero
 	 * at any point in the observed values. In this case the gradient computed is invalid.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called
@@ -140,7 +142,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the likelihood score at observed value i. Returns positive infinity if the likelihood is zero at the
+	 * Compute the negative log likelihood at observed value i. Returns positive infinity if the likelihood is zero at
+	 * the
 	 * observed value.
 	 * 
 	 * @param variables
@@ -156,7 +159,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the likelihood score at observed value i. Returns positive infinity if the likelihood is zero at the
+	 * Compute the negative log likelihood at observed value i. Returns positive infinity if the likelihood is zero at
+	 * the
 	 * observed value.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called
@@ -168,8 +172,8 @@ public abstract class LikelihoodWrapper
 	protected abstract double computeLikelihood(int i);
 
 	/**
-	 * Compute the likelihood score and gradient of the function at observed value i. Returns positive infinity if the
-	 * likelihood is zero at the observed value. In this case the gradient computed will be invalid.
+	 * Compute the negative log likelihood and gradient of the function at observed value i. Returns positive infinity
+	 * if the likelihood is zero at the observed value. In this case the gradient computed will be invalid.
 	 * 
 	 * @param variables
 	 *            The variables of the function
@@ -188,8 +192,8 @@ public abstract class LikelihoodWrapper
 	}
 
 	/**
-	 * Compute the likelihood score and gradient of the function at observed value i. Returns positive infinity if the
-	 * likelihood is zero at the observed value. In this case the gradient computed will be invalid.
+	 * Compute the negative log likelihood and gradient of the function at observed value i. Returns positive infinity
+	 * if the likelihood is zero at the observed value. In this case the gradient computed will be invalid.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called
 	 * 

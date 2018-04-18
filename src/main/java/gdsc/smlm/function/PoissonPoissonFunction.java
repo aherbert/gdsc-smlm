@@ -126,7 +126,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 	public double likelihood(double o, double e)
 	{
 		// convert to photons
-		e = e * alpha + var_g2;
+		e = e + var_g2;
 		o = o * alpha + var_g2;
 		if (o < 0 || e <= 0)
 			return 0;
@@ -184,7 +184,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 	public double logLikelihood(double o, double e)
 	{
 		// convert to photons
-		e = e * alpha + var_g2;
+		e = e + var_g2;
 		o = o * alpha + var_g2;
 		if (o < 0 || e <= 0)
 			return Double.NEGATIVE_INFINITY;

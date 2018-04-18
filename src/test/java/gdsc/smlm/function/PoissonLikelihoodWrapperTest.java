@@ -585,12 +585,12 @@ public class PoissonLikelihoodWrapperTest
 
 			public double eval(int x)
 			{
-				return mu / alpha;
+				return mu;
 			}
 
 			public double eval(int x, double[] dyda)
 			{
-				return mu / alpha;
+				return mu;
 			}
 
 			public boolean canComputeWeights()

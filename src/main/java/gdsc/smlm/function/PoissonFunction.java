@@ -66,7 +66,6 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			return 0;
 
 		// convert to photons
-		e *= alpha;
 		o *= alpha;
 
 		// Allow non-integer observed value using the gamma function to provide a factorial for non-integer values
@@ -121,7 +120,6 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			return Double.NEGATIVE_INFINITY;
 
 		// convert to photons
-		e *= alpha;
 		o *= alpha;
 
 		// Allow non-integer observed value using the gamma function to provide a factorial for non-integer values

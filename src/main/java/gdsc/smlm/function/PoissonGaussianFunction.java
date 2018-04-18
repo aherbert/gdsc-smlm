@@ -28,12 +28,14 @@ import org.apache.commons.math3.util.FastMath;
  * Poisson process of emitted light, converted to electrons on the camera chip, amplified by a gain and then read with
  * Gaussian noise.
  */
-public class PoissonGaussianFunction implements LikelihoodFunction
+public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
 	/**
 	 * The inverse of the on-chip gain multiplication factor
 	 */
 	final double alpha;
+	
+	final double logAlpha;
 
 	private static final double EPSILON = 1e-4; // 1e-6
 	static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
@@ -56,7 +58,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
-	 *            The mean of the Poisson distribution at readout
+	 *            The mean of the Poisson distribution before gain
 	 * @param sigmasquared
 	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 */
@@ -71,7 +73,6 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 		// This compresses the probability distribution by alpha. Thus we can compute the
 		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
 		// output probability so the cumulative probability is 1 over the uncompressed range.
-		mu *= alpha;
 		sigmasquared *= (alpha * alpha);
 
 		//System.out.printf("mu=%f s^2=%f\n", mu, sigmasquared);
@@ -82,18 +83,19 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 
 		probabilityNormalisation = ((noPoisson) ? getProbabilityNormalisation(sigmasquared) : 1) * alpha;
 
+		logAlpha = Math.log(alpha);
 		logNormalisation = ((noPoisson) ? getLogNormalisation(sigmasquared)
 				// Note that this uses the LOG_NORMALISATION (not zero) as the logProbability function 
 				// uses the getPseudoLikelihood function. It would be zero if the static logProbability
 				// was called.
-				: LOG_NORMALISATION) + Math.log(alpha);
+				: LOG_NORMALISATION) + logAlpha;
 	}
 
 	/**
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
-	 *            The mean of the Poisson distribution at readout
+	 *            The mean of the Poisson distribution before gain
 	 * @param s
 	 *            The standard deviation of the Gaussian distribution at readout
 	 * @throws IllegalArgumentException
@@ -109,7 +111,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 * @param alpha
 	 *            The inverse of the on-chip gain multiplication factor
 	 * @param mu
-	 *            The mean of the Poisson distribution at readout
+	 *            The mean of the Poisson distribution before gain
 	 * @param var
 	 *            The variance of the Gaussian distribution at readout (must be positive)
 	 * @throws IllegalArgumentException
@@ -473,9 +475,16 @@ public class PoissonGaussianFunction implements LikelihoodFunction
 	 */
 	public double likelihood(double o, double e)
 	{
-		// convert to photons
-		o *= alpha;
-		e *= alpha;
-		return probability(o, e, sigmasquared, usePicardApproximation) * alpha;
+		return probability(o, e);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
+	 */
+	public double logLikelihood(double o, double e)
+	{
+		return logProbability(o, e);
 	}
 }

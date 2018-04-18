@@ -40,7 +40,7 @@ public class PoissonPoissonFunctionTest
 		double p2 = cumulativeProbability(gain, mu, s);
 		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		// Only true with continuous distribution if the combined Poisson mean is above 4
-		if (mu + s / gain / gain > 4)
+		if (mu + s / gain > 4)
 			Assert.assertEquals(msg, 1, p2, 0.02);
 	}
 
@@ -57,7 +57,7 @@ public class PoissonPoissonFunctionTest
 		int max = 0;
 
 		// Note: The input mu parameter is pre-gain.
-		final double e = mu * gain;
+		final double e = mu;
 
 		// Evaluate an initial range. 
 		// Gaussian should have >99% within +/- s
@@ -131,7 +131,7 @@ public class PoissonPoissonFunctionTest
 		int min = range[0];
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
-		final double e = mu * gain;
+		final double e = mu;
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);

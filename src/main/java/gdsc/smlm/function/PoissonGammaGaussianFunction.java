@@ -14,7 +14,7 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 //import org.apache.commons.math3.special.Erf;
@@ -82,28 +82,19 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 	/** 2 * Math.PI. */
 	private static final double twoPi = 2 * Math.PI;
-	/** 2 * Math.sqrt(Math.PI). */
-	private static final double twoSqrtPi = 2 * Math.sqrt(Math.PI);
 	/** Math.sqrt(2 * Math.PI). */
 	private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
-	/** Math.log(2 * Math.sqrt(Math.PI)) */
-	private static final double logTwoSqrtPi = Math.log(twoSqrtPi);
 
 	/**
-	 * Compute the likelihood
+	 * {@inheritDoc}
+	 * <p>
+	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
+	 * al (2010) Nature Methods 7, 377-383.
 	 * 
-	 * @param o
-	 *            The observed count
-	 * @param e
-	 *            The expected count
-	 * @return The likelihood
+	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	public double likelihood(final double o, final double e)
 	{
-		// Use the same variables as the Python code
-		final double cij = o;
-		final double eta = alpha * e; // convert to photons
-
 		// This did not speed up MLE fitting so has been commented out.
 		//		// When the observed ADUs and expected ADUs are much higher than the sigma then 
 		//		// there is no point in convolving with a Gaussian
@@ -121,206 +112,132 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		if (sigma == 0)
 		{
 			// No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
-			final double p;
-
-			// Any observed count above zero
-			if (cij > 0.0)
-			{
-				// The observed count converted to photons
-				final double nij = alpha * cij;
-
-				// The current implementation of Bessel.I1(x) is Infinity at x==710
-				// The limit on eta * nij is therefore (709/2)^2 = 125670.25
-				if (eta * nij > 10000)
-				{
-					// Approximate Bessel function i1(x) when using large x:
-					// i1(x) ~ exp(x)/sqrt(2*pi*x)
-					// However the entire equation is logged (creating transform),
-					// evaluated then raised to e to prevent overflow error on 
-					// large exp(x)
-
-					//final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-					//		Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
-
-					// Avoid power function ...
-					// sqrt(alpha * eta / cij) * exp(-nij - eta) * Bessel.I1(2 * sqrt(eta * nij))
-					// sqrt(alpha * eta / cij) * exp(-nij - eta) * exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij))
-					// Log
-					// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij)))
-					// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij))) - log(sqrt(2*pi*2 * sqrt(eta * nij)))
-					// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi*2 * sqrt(eta * nij))
-					// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi* 2*sqrt(eta * nij))
-					// 0.5 * log(alpha * eta / cij) - nij - eta + x - 0.5 * log(2*pi* x)
-					final double x = 2 * Math.sqrt(eta * nij);
-					final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + x -
-							0.5 * Math.log(twoPi * x);
-					p = FastMath.exp(transform);
-				}
-				else
-				{
-					// Second part of equation 135
-					p = Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij));
-				}
-			}
-			else if (cij == 0.0)
-			{
-				p = FastMath.exp(-eta);
-			}
-			else
-			{
-				p = 0;
-			}
-
+			final double p = poissonGamma(o, e);
 			return (p > minimumProbability) ? p : minimumProbability;
 		}
 		else if (useApproximation)
 		{
-			return mortensenApproximation(cij, eta);
+			return mortensenApproximation(o, e);
 		}
 		else
 		{
-			// This code is the full evaluation of equation 7 from the online methods  
-			// of the paper Chao, et al (2013) Nature Methods 10, 335-338.
 			// It is the full evaluation of a Poisson-Gamma-Gaussian convolution PMF. 
-
-			final double sk = sigma; // Read noise
-			final double g = 1.0 / alpha; // Gain
-			final double z = o; // Observed pixel value
-			final double vk = eta; // Expected number of photons
-
-			// Compute the integral to infinity of:
-			// exp( -((z-u)/(sqrt(2)*s)).^2 - u/g ) * sqrt(vk*u/g) .* besseli(1, 2 * sqrt(vk*u/g)) ./ u;
-
-			final double vk_g = vk * alpha; // vk / g
-			final double sqrt2sigma = Math.sqrt(2) * sk;
-
 			// Specify the function to integrate
 			UnivariateFunction f = new UnivariateFunction()
 			{
 				public double value(double u)
 				{
-					double vk_g_by_u = vk_g * u;
-					final double f1 = (z - u) / sqrt2sigma;
-					final double f2 = Math.sqrt(vk_g_by_u);
-
-					// DEBUG
-					//double p = FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
-					//
-					//System.out.printf("f2=%g\n", f2);
-					//if (f2 > 50)
-					//{
-					//	final double t = -(f1 * f1) - u / g + 2 * f2 - logTwoSqrtPi + 0.5 * Math.log(f2) - Math.log(u);
-					//	double pp = FastMath.exp(t);
-					//	System.out.printf("p=%g, pp=%g  error=%g\n", p, pp,
-					//			gdsc.core.utils.DoubleEquality.relativeError(pp, p));
-					//}
-
-					// Approximate Bessel function i1(x) when using large x:
-					// i1(x) ~ exp(x)/sqrt(2*pi*x)
-					// x = 2 * Math.sqrt(vk_g * u)
-					// Same limit of 10000 for used elsewhere for eta * nij
-					if (vk_g_by_u > 10000)
-					{
-						// t = -(f1 * f1) - u / g + log(f2) + log(Bessel.I1(2 * f2)) - log(u)
-						// t = -(f1 * f1) - u / g + log(f2) + log(exp(2 * f2) / sqrt(2*pi*2*f2)) - log(u)
-						// t = -(f1 * f1) - u / g + log(f2) + log(exp(2 * f2)) - log(sqrt(2*pi*2*f2)) - log(u)
-						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2*f2)) - log(u)
-						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2)*sqrt(f2)) - log(u)
-						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2)) - log(sqrt(f2)) - log(u)
-						// t = -(f1 * f1) - u / g + log(f2) + 2 * f2 - log(sqrt(2*pi*2)) - 0.5 * log(f2) - log(u)
-						// t = -(f1 * f1) - u / g           + 2 * f2 - log(sqrt(2*pi*2)) + 0.5 * log(f2) - log(u)
-						// t = -(f1 * f1) - u / g           + 2 * f2 - log(sqrt(2*pi*2)) + 0.5 * log(f2) - log(u)
-						// t = -(f1 * f1) - u / g           + 2 * f2 - log(2*sqrt(pi)) + 0.5 * log(f2) - log(u)
-						final double t = -(f1 * f1) - u / g + 2 * f2 - logTwoSqrtPi + 0.5 * Math.log(f2) - Math.log(u);
-						return FastMath.exp(t);
-					}
-
-					return FastMath.exp(-(f1 * f1) - u / g) * f2 * Bessel.I1(2 * f2) / u;
+					return poissonGamma(u, e) * gaussian(u - o);
 				}
 			};
 
 			// Integrate to infinity is not necessary. The convolution of the function with the 
-			// Gaussian should be adequately sampled using a nxSD around the maximum.
-			// Find a bracket containing the maximum
-			double lower, upper;
-			double maxU = Math.max(1, o);
-			double rLower = maxU;
-			double rUpper = maxU + 1;
-			double f1 = f.value(rLower);
-			double f2 = f.value(rUpper);
+			// Gaussian should be adequately sampled using a nxSD around the function value.
+			// Find a bracket around the value.
+			double range = 5 * sigma;
+			int upper = (int) Math.ceil(o + range);
+			if (upper < 0)
+				return 0;
+			int lower = (int) Math.floor(o - range);
+			if (lower < 0)
+				lower = 0;
 
-			// Calculate the simple integral and the range
-			double sum = f1 + f2;
-			boolean searchUp = f2 > f1;
-
-			if (searchUp)
+			double p = 0;
+			if (useSimpleIntegration)
 			{
-				while (f2 > f1)
+				// Use a simple integration by adding the points in the range.
+				for (int u = lower; u <= upper; u++)
 				{
-					f1 = f2;
-					rUpper += 1;
-					f2 = f.value(rUpper);
-					sum += f2;
-				}
-				maxU = rUpper - 1;
-			}
-			else
-			{
-				// Ensure that u stays above zero
-				while (f1 > f2 && rLower > 1)
-				{
-					f2 = f1;
-					rLower -= 1;
-					f1 = f.value(rLower);
-					sum += f1;
-				}
-				maxU = (rLower > 1) ? rLower + 1 : rLower;
-			}
-
-			lower = Math.max(0, maxU - 5 * sk);
-			upper = maxU + 5 * sk;
-
-			if (useSimpleIntegration && lower > 0)
-			{
-				// If we are not at the zero boundary then we can use a simple integration by adding the 
-				// remaining points in the range
-				for (double u = rLower - 1; u >= lower; u -= 1)
-				{
-					sum += f.value(u);
-				}
-				for (double u = rUpper + 1; u <= upper; u += 1)
-				{
-					sum += f.value(u);
+					p += f.value(u);
 				}
 			}
 			else
 			{
-				// Use Legendre-Gauss integrator
-				try
+				// Use integrator. Must have a range.
+				if (lower != upper)
 				{
-					final double relativeAccuracy = 1e-4;
-					final double absoluteAccuracy = 1e-8;
-					final int minimalIterationCount = 3;
-					final int maximalIterationCount = 32;
-					final int integrationPoints = 16;
+					try
+					{
+						final double relativeAccuracy = 1e-4;
+						final double absoluteAccuracy = 1e-8;
+						final int minimalIterationCount = 3;
+						
+						//final int maximalIterationCount = 32;
+						//final int integrationPoints = 16;
 
-					// Use an integrator that does not use the boundary since u=0 is undefined (divide by zero)
-					UnivariateIntegrator i = new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
-							absoluteAccuracy, minimalIterationCount, maximalIterationCount);
+						UnivariateIntegrator i = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy,
+								minimalIterationCount, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT)
+						//new IterativeLegendreGaussIntegrator(integrationPoints, relativeAccuracy,
+						//		absoluteAccuracy, minimalIterationCount, maximalIterationCount)
+						;
 
-					sum = i.integrate(2000, f, lower, upper);
+						p = i.integrate(2000, f, lower, upper);
+					}
+					catch (TooManyEvaluationsException ex)
+					{
+						System.out.printf("Integration failed: o=%g, e=%g\n", o, e);
+						return mortensenApproximation(o, e);
+					}
 				}
-				catch (TooManyEvaluationsException ex)
+				else
 				{
-					return mortensenApproximation(cij, eta);
+					// Rare edge case 
+					p = f.value(lower);
 				}
 			}
-
-			// Compute the final probability
-			//final double 
-			f1 = z / sqrt2sigma;
-			final double p = (FastMath.exp(-vk) / (sqrt2pi * sk)) * (FastMath.exp(-(f1 * f1)) + sum);
 			return (p > minimumProbability) ? p : minimumProbability;
+		}
+	}
+
+	private double poissonGamma(final double cij, final double eta)
+	{
+		// Use the same variables as the Mortensen Python code
+
+		// Any observed count above zero
+		if (cij > 0.0)
+		{
+			// The observed count converted to photons
+			final double nij = alpha * cij;
+
+			// The current implementation of Bessel.I1(x) is Infinity at x==710
+			// The limit on eta * nij is therefore (709/2)^2 = 125670.25
+			if (eta * nij > 10000)
+			{
+				// Approximate Bessel function i1(x) when using large x:
+				// i1(x) ~ exp(x)/sqrt(2*pi*x)
+				// However the entire equation is logged (creating transform),
+				// evaluated then raised to e to prevent overflow error on 
+				// large exp(x)
+
+				//final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
+				//		Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
+
+				// Avoid power function ...
+				// sqrt(alpha * eta / cij) * exp(-nij - eta) * Bessel.I1(2 * sqrt(eta * nij))
+				// sqrt(alpha * eta / cij) * exp(-nij - eta) * exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij))
+				// Log
+				// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij)))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij))) - log(sqrt(2*pi*2 * sqrt(eta * nij)))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi*2 * sqrt(eta * nij))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi* 2*sqrt(eta * nij))
+				// 0.5 * log(alpha * eta / cij) - nij - eta + x - 0.5 * log(2*pi* x)
+				final double x = 2 * Math.sqrt(eta * nij);
+				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + x - 0.5 * Math.log(twoPi * x);
+				return FastMath.exp(transform);
+			}
+			else
+			{
+				// Second part of equation 135
+				return Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij));
+			}
+		}
+		else if (cij == 0.0)
+		{
+			return FastMath.exp(-eta);
+		}
+		else
+		{
+			return 0;
 		}
 	}
 
@@ -362,18 +279,18 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / sqrt2pi + cij * conv0;
 
 		// ? 
-		double temp = f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gauss(cij);
+		double temp = f0 * conv0 + fp0 * conv1 + FastMath.exp(-eta) * gaussian(cij);
 
-//		// TESTING
-//		// Simple method:
-//		temp = FastMath.exp(-eta) * gauss(cij); // G(c==0) * Gaussian;
-//		if (cij <= 0)
-//			return temp;
-//		// Reset. The remaining will be the Poisson-Gamma and no convolution
-//		f0 = fp0 = 0;
-//
-//		// Q. How to normalise so that at low cij there is a mixture and at high cij there is no mixture
-//		// and the result is the Poisson-Gamma. Perhaps this is what the above code is doing.
+		//		// TESTING
+		//		// Simple method:
+		//		temp = FastMath.exp(-eta) * gauss(cij); // G(c==0) * Gaussian;
+		//		if (cij <= 0)
+		//			return temp;
+		//		// Reset. The remaining will be the Poisson-Gamma and no convolution
+		//		f0 = fp0 = 0;
+		//
+		//		// Q. How to normalise so that at low cij there is a mixture and at high cij there is no mixture
+		//		// and the result is the Poisson-Gamma. Perhaps this is what the above code is doing.
 
 		if (cij > 0.0)
 		{
@@ -426,6 +343,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	}
 
 	/**
+	 * {@inheritDoc}
+	 * <p>
 	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
 	 * al (2010) Nature Methods 7, 377-383.
 	 * <p>
@@ -445,7 +364,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		return Math.log(likelihood(o, e));
 	}
 
-	private double gauss(final double x)
+	private double gaussian(final double x)
 	{
 		return FastMath.exp(-(x * x) / twoSigma2) / sqrt2piSigma2;
 	}

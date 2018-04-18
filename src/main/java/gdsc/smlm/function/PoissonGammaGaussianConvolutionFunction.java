@@ -81,7 +81,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		var_by_2 = var * 2;
 
 		// Use a range to cover the Gaussian convolution
-		range = 5 * Math.max(this.s, 1);
+		range = 5 * this.s;
 
 		// Determine the normalisation factor A in the event that the probability 
 		// distribution is being used as a discrete distribution.
@@ -246,7 +246,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 			return Double.NEGATIVE_INFINITY;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -271,25 +271,62 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 			// Poisson-Gamma distribution. 
 
 			// Use a range to cover the Gaussian convolution
-			int cmax = (int) Math.ceil((o + range));
-			if (cmax < 0)
+			double max = o + range;
+			if (max < 0)
 				return 0;
-			int cmin = (int) Math.floor((o - range));
-			if (cmin < 0)
-				cmin = 0;
+			double min = o - range;
+			if (min < 0)
+				min = 0;
 
-			final double u = e / g;
-			double p = 0;
-			for (int c = cmin; c <= cmax; c++)
-			{
-				p += FastMath.exp(
-						// Poisson-Gamma
-						logPoissonGamma(c, u, g)
-						// Gaussian
-								- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
-			}
-			return p;
+			return computeP(o, e, max, min);
 		}
+	}
+
+	private double computeP(final double o, final double e, double max, double min)
+	{
+		double p = 0;
+
+		// Overcome the problem with small variance using a set number of steps to 
+		// cover the range. This effectively makes the Poisson-Gamma a continuous
+		// probability distribution.
+		// Note:
+		// This does seem to be valid. The Poisson-Gamma is a discrete PMF.
+		// The CameraModelAnalysis plugin works with full integration if this function
+		// is computed using integer steps.
+
+		//		if (s < 0)
+		//		{
+		//			double step = (max - min) / 10;
+		//
+		//			for (int i = 0; i <= 10; i++)
+		//			{
+		//				double c = min + i * step;
+		//				p += FastMath.exp(
+		//						// Poisson-Gamma
+		//						logPoissonGamma(c, e, g)
+		//						// Gaussian
+		//								- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
+		//			}
+		//			p *= step;
+		//		}
+		//		else
+		//		{
+
+		int cmax = (int) Math.ceil(max);
+		int cmin = (int) Math.floor(min);
+
+		for (int c = cmin; c <= cmax; c++)
+		{
+			p += FastMath.exp(
+					// Poisson-Gamma
+					logPoissonGamma(c, e, g)
+					// Gaussian
+							- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
+		}
+
+		//		}
+
+		return p;
 	}
 
 	/*
@@ -306,25 +343,14 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		}
 		else
 		{
-			// Use a range of +/- 5 SD to cover the Gaussian convolution
-			int cmax = (int) Math.ceil((o + range));
-			if (cmax < 0)
+			double max = o + range;
+			if (max < 0)
 				return Double.NEGATIVE_INFINITY;
-			int cmin = (int) Math.floor((o - range));
-			if (cmin < 0)
-				cmin = 0;
+			double min = o - range;
+			if (min < 0)
+				min = 0;
 
-			final double u = e / g;
-			double p = 0;
-			for (int c = cmin; c <= cmax; c++)
-			{
-				p += FastMath.exp(
-						// Poisson-Gamma
-						logPoissonGamma(c, u, g)
-						// Gaussian
-								- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
-			}
-			return Math.log(p);
+			return Math.log(computeP(o, e, max, min));
 		}
 	}
 }

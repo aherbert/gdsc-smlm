@@ -955,7 +955,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double expected = _photons;
 		if (offset != 0)
 			expected += offset * expected / 100.0;
-		expected *= _gain;
+		//expected *= _gain;
 
 		// Normalise 
 		boolean normalise = false;

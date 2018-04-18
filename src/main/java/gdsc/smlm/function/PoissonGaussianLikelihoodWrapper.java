@@ -27,7 +27,7 @@ package gdsc.smlm.function;
  */
 public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 {
-	private PoissonGaussianFunction p0, p1;
+	private PoissonGaussianFunction2 p;
 	final private boolean usePicard = false;
 
 	/**
@@ -52,12 +52,8 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 	public PoissonGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n, double alpha, double s)
 	{
 		super(f, a, k, n);
-		// We have two functions: One for no poisson counts and one for poisson counts.
-		// They differ in their normalisation.
-		p0 = PoissonGaussianFunction.createWithStandardDeviation(alpha, 0, s);
-		p0.setUsePicardApproximation(usePicard);
-		p1 = PoissonGaussianFunction.createWithStandardDeviation(alpha, 1, s);
-		p1.setUsePicardApproximation(usePicard);
+		p = PoissonGaussianFunction2.createWithStandardDeviation(alpha, s);
+		p.setUsePicardApproximation(usePicard);
 	}
 
 	/*
@@ -71,12 +67,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double e = f.eval(i);
-			if (e <= 0)
-				// Use the function with the non-Poisson normalisation
-				ll -= p0.logProbability(data[i], e);
-			else
-				ll -= p1.logProbability(data[i], e);
+			ll -= p.logLikelihood(data[i], f.eval(i));
 		}
 		return ll;
 	}
@@ -88,10 +79,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public double computeLikelihood(int i)
 	{
-		final double e = f.eval(i);
-		if (e <= 0)
-			return p0.logProbability(data[i], e);
-		return p1.logProbability(data[i], e);
+		return -p.logLikelihood(data[i], f.eval(i));
 	}
 
 	/*

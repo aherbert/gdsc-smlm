@@ -14,18 +14,21 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Provides functions to compute the log likelihood for a distribution.
+ * Provides functions to compute the log likelihood for a univariate distribution.
  */
 public interface LogLikelihoodFunction
 {
 	/**
-	 * Compute the log-likelihood of an observation given an expected value
+	 * Compute the log-likelihood of an observation x given a parameter value theta.
+	 * <p>
+	 * This is the log of the probability mass function P(X=x|θ) or the probability density function f(x|θ) for random
+	 * variable X depending on parameter θ.
 	 * 
 	 * @param o
-	 *            The observed count
-	 * @param e
-	 *            The expected count
+	 *            The observed value (x)
+	 * @param t
+	 *            The parameter value (θ)
 	 * @return The log-likelihood
 	 */
-	public double logLikelihood(final double o, final double e);
+	public double logLikelihood(final double o, final double t);
 }

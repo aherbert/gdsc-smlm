@@ -132,7 +132,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		{
 			// Use same nomenclature as Huang et al
 
-			final double u = e / g; // expected photoelectrons
+			final double u = e; // expected photoelectrons
 			final double D = o; // Camera counts
 			// g == gain
 			// var = readout variance
@@ -206,7 +206,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		{
 			// Use same nomenclature as Huang et al
 
-			final double u = e / g; // expected photoelectrons
+			final double u = e; // expected photoelectrons
 			final double D = o; // Camera counts
 			// g == gain
 			// var = readout variance

@@ -51,7 +51,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		int max = 0;
 
 		// Note: The input mu parameter is pre-gain.
-		final double e = mu * gain;
+		final double e = mu;
 
 		// Evaluate an initial range. 
 		// Gaussian should have >99% within +/- s
@@ -129,7 +129,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		int min = range[0];
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
-		final double e = mu * gain;
+		final double e = mu;
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);

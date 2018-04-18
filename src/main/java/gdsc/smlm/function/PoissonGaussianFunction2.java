@@ -143,7 +143,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 		}
 		else
 		{
-			e *= alpha;
+			//e *= alpha;
 			double saddlepoint = (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
 					: PoissonGaussianFunction.pade(o, e, sigmasquared);
 			saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);
@@ -168,7 +168,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
 		}
 		else
 		{
-			e *= alpha;
+			//e *= alpha;
 			double saddlepoint = (usePicardApproximation) ? PoissonGaussianFunction.picard(o, e, sigmasquared)
 					: PoissonGaussianFunction.pade(o, e, sigmasquared);
 			saddlepoint = PoissonGaussianFunction.newton_iteration(o, e, sigmasquared, saddlepoint);

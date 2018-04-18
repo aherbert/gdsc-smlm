@@ -159,8 +159,7 @@ public class PoissonGaussianFunctionTest
 	private double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)
 	{
 		// Note: The input mu & s parameters are pre-gain.
-		final PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain,
-				s * gain);
+		final PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s * gain);
 		f.setUsePicardApproximation(usePicard);
 		double p = 0;
 		int min = 1;
@@ -233,15 +232,14 @@ public class PoissonGaussianFunctionTest
 		double range = Math.max(s, Math.sqrt(mu));
 		int min = (int) Math.floor(gain * (mu - 3 * range));
 		int max = (int) Math.ceil(gain * (mu + 3 * range));
-		return new int[]{min, max};
+		return new int[] { min, max };
 	}
 
 	private void probabilityMatchesLogProbability(final double gain, final double mu, final double s,
 			final boolean usePicard)
 	{
 		// Note: The input mu & s parameters are pre-gain.
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain,
-				s * gain);
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s * gain);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range. 
@@ -266,8 +264,7 @@ public class PoissonGaussianFunctionTest
 			final boolean usePicard)
 	{
 		// Note: The input mu & s parameters are pre-gain.
-		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu * gain,
-				s * gain);
+		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s * gain);
 		f.setUsePicardApproximation(usePicard);
 
 		// Evaluate an initial range. 

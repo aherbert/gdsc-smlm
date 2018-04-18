@@ -91,13 +91,22 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private static String[] MODEL = { 
 			"Poisson (Discrete)", 
 			"Poisson (Continuous)", 
-			// Best for CCD/sCMOS
 			"Poisson*Gaussian convolution", // Poisson convolved with Gaussian
+			// Best for CCD/sCMOS
 			"Poisson+Gaussian approximation", // Saddle-point approximation
 			"Poisson+Poisson", // Mixed Poisson distribution (Noise is added as a second Poisson)
-			// Best for EM-CCD
-			"Poisson+Gamma+Gaussian integration", 
-			"Poisson+Gamma+Gaussian approximation", // Mortensen approximation 
+			
+			// There is no obvious best for EM-CCD:
+			// This requires a full range test to determine the best function for which
+			// parameters.
+			
+			// Good when read noise is low
+			"Poisson+Gamma+Gaussian integration",
+			
+			// Relatively worse as the read noise increases
+			"Poisson+Gamma+Gaussian approximation", // Mortensen approximation
+			
+			// Good when the total gain is low or read noise is >>1
 			"Poisson+Gamma*Gaussian convolution", // Poisson+Gamma approximation convolved with Gaussian
 			};
 
@@ -1030,7 +1039,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// The simplest is a flat-top integration.
 
 		// Compute the probability at each value
-		double e = settings.getPhotons() * getGain(settings);
+		double e = settings.getPhotons();
 		double[] x = cdf[0];
 		double[] y = new double[x.length];
 		for (int i = 0; i < x.length; i++)

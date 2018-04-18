@@ -78,12 +78,7 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 		double ll = 0;
 		for (int i = 0; i < n; i++)
 		{
-			final double l = p.logLikelihood(data[i], f.eval(i));
-			if (l == Double.NEGATIVE_INFINITY)
-			{
-				return Double.POSITIVE_INFINITY;
-			}
-			ll -= l;
+			ll -= p.logLikelihood(data[i], f.eval(i));
 		}
 		return ll;
 	}
