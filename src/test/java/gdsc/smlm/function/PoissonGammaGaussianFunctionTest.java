@@ -14,33 +14,28 @@ import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 
 public class PoissonGammaGaussianFunctionTest
 {
-	// Change so noise is in Counts and gain is total gain.
+	// Noise is in Counts and gain is total gain.
 	// This makes more sense when testing as the 
-	// PoissonGammaGaussian accepts 1/gain and noise as parameters. 
+	// PoissonGammaGaussianFunction accepts 1/gain and noise as parameters.
+	
+	// TODO Fix these test conditions
 
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	double[] highPhotons = { 5000, 10000 };
-	double[] noise = { 30, 45, 76 }; // in electrons
-	double[] cameraGain = { 6.5, 45 }; // ADU/e
-	double emGain = 250;
-
-	// Realistic parameters for speed test
-	double s = 7.16;
-	double g = 39.1;
+	double[] noise = { 0.3, 1, 3, 10 }; // in counts
+	double[] totalGain = { 6.5, 45 };
 
 	@Test
 	public void cumulativeGaussianProbabilityIsCorrect()
 	{
-		for (double rn : noise)
-			for (double cg : cameraGain)
-				cumulativeGaussianProbabilityIsCorrect(rn, cg);
+		for (double s : noise)
+			for (double g : totalGain)
+				cumulativeGaussianProbabilityIsCorrect(s, g);
 	}
 
-	private void cumulativeGaussianProbabilityIsCorrect(double rn, double cg)
+	private void cumulativeGaussianProbabilityIsCorrect(double s, double g)
 	{
 		// Read noise should be in proportion to the camera gain
-		double s = rn / cg;
-		double g = emGain / cg;
 		final PoissonGammaGaussianFunction f = new PoissonGammaGaussianFunction(1 / g, s);
 		double range = 5 * s;
 		int upper = (int) Math.ceil(range);
@@ -68,7 +63,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : photons)
 			for (double rn : noise)
-				for (double cg : cameraGain)
+				for (double cg : totalGain)
 					cumulativeProbabilityIsOne(p, rn, cg, ConvolutionMode.APPROXIMATION);
 	}
 
@@ -98,10 +93,9 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : photons)
 			for (double s : noise)
-				for (double g : cameraGain)
+				for (double g : totalGain)
 				{
-					double eg = emGain / g;
-					if (eg <= 10)
+					if (g <= 10)
 						continue;
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
 				}
@@ -112,18 +106,16 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : photons)
 			for (double s : noise)
-				for (double g : cameraGain)
+			{
+				// Integration using a sample space of 1 is not valid when the 
+				// effective read noise in counts is low 
+				if (s <= 2)
+					continue;
+				for (double g : totalGain)
 				{
-					double eg = emGain / g;
-					if (eg <= 10)
-						continue;
-					//					// Integration using a sample space of 1 is not valid when the 
-					//					// effective read noise in counts is low 
-					//					double es = s / g;
-					//					if (es <= 4)
-					//						continue;
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF);
 				}
+			}
 	}
 
 	@Test
@@ -166,7 +158,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : highPhotons)
 			for (double s : noise)
-				for (double g : cameraGain)
+				for (double g : totalGain)
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION);
 	}
 
@@ -175,7 +167,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : highPhotons)
 			for (double s : noise)
-				for (double g : cameraGain)
+				for (double g : totalGain)
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF);
 	}
 
@@ -184,7 +176,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		for (double p : highPhotons)
 			for (double s : noise)
-				for (double g : cameraGain)
+				for (double g : totalGain)
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
 	}
 
@@ -240,24 +232,17 @@ public class PoissonGammaGaussianFunctionTest
 		fasterThan(ConvolutionMode.LEGENDRE_GAUSS_PDF, ConvolutionMode.SIMPSON_PDF);
 	}
 
-	private void cumulativeProbabilityIsOne(final double mu, final double rn, final double cg,
+	private void cumulativeProbabilityIsOne(final double mu, final double s, final double g,
 			ConvolutionMode convolutionMode)
 	{
-		double p = cumulativeProbability(mu, rn, cg, convolutionMode);
-		double s = rn / cg;
-		double g = emGain / cg;
-		System.out.printf("%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%f\n", getName(convolutionMode), mu, rn, cg, s, g,
-				p);
-		//Assert.assertEquals(String.format("mu=%f, rn=%f, cg=%f, s=%f, g=%f", mu, rn, cg, s, g), 1, p, 0.02);
+		double p = cumulativeProbability(mu, s, g, convolutionMode);
+		System.out.printf("%s : mu=%f, s=%f, g=%f, p=%f\n", getName(convolutionMode), mu, s, g, p);
+		Assert.assertEquals(String.format("mu=%f, s=%f, g=%f", mu, s, g), 1, p, 0.02);
 	}
 
-	private double cumulativeProbability(final double mu, final double rn, final double cg,
+	private double cumulativeProbability(final double mu, final double s, final double g,
 			ConvolutionMode convolutionMode)
 	{
-		// Read noise should be in proportion to the camera gain
-		double s = rn / cg;
-		double g = emGain / cg;
-
 		final PoissonGammaGaussianFunction f = new PoissonGammaGaussianFunction(1 / g, s);
 		f.setConvolutionMode(convolutionMode);
 		f.setMinimumProbability(0);
@@ -319,8 +304,8 @@ public class PoissonGammaGaussianFunctionTest
 					return f.likelihood(x, mu);
 				}
 			}, min, max);
-			System.out.printf("%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g\n", getName(convolutionMode), mu, rn,
-					cg, s, g, p, pp);
+			System.out.printf("%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g\n", getName(convolutionMode), mu, s, g,
+					s, g, p, pp);
 			p = pp;
 		}
 
@@ -331,15 +316,12 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		//DoubleEquality eq = new DoubleEquality(error, 1e-7);
 		double[] maxError = new double[2];
-		for (double rn : noise)
-			for (double cg : cameraGain)
+		for (double s : noise)
+			for (double g : totalGain)
 			{
-				// Read noise should be in proportion to the camera gain
-				double s = rn / cg;
 				if (s < 4)
 					continue;
 
-				double g = emGain / cg;
 				PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
 				f1.setConvolutionMode(ConvolutionMode.DISCRETE_CDF);
 				f1.setMinimumProbability(0);
@@ -367,8 +349,8 @@ public class PoissonGammaGaussianFunctionTest
 							if (p1 < 1e-3)
 								continue;
 
-							Assert.fail(String.format("rn=%g, cg=%g, s=%g, g=%g, p=%g, x=%g: %g != %g (%g)", rn, cg, s,
-									g, p, x, p1, p2, relativeError));
+							Assert.fail(String.format("s=%g, g=%g, p=%g, x=%g: %g != %g (%g)", s, g, p, x, p1, p2,
+									relativeError));
 						}
 						if (maxError[0] < relativeError)
 							maxError[0] = relativeError;
@@ -383,6 +365,10 @@ public class PoissonGammaGaussianFunctionTest
 	private void fasterThan(ConvolutionMode slow, ConvolutionMode fast)
 	{
 		//org.junit.Assume.assumeTrue(false);
+		
+		// Realistic EM-CCD parameters for speed test
+		double s = 7.16;
+		double g = 39.1;
 
 		PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
 		f1.setConvolutionMode(slow);
