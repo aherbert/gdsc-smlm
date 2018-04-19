@@ -29,6 +29,7 @@ import gdsc.smlm.function.LogFactorial;
 import gdsc.smlm.function.PoissonFunction;
 import gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
+import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import gdsc.smlm.function.PoissonGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.function.PoissonPoissonFunction;
@@ -100,11 +101,20 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			// This requires a full range test to determine the best function for which
 			// parameters.
 			
-			// Good when read noise is low
-			"Poisson+Gamma+Gaussian integration",
-			
 			// Relatively worse as the read noise increases
 			"Poisson+Gamma+Gaussian approximation", // Mortensen approximation
+			
+			// Good when read noise is low
+			"Poisson+Gamma+Gaussian PDF integration",
+			
+			// ?
+			"Poisson+Gamma+Gaussian CDF integration",
+			
+			// Invalid
+			"Poisson+Gamma+Gaussian Simpson's integration",
+			
+			// Invalid
+			"Poisson+Gamma+Gaussian Legendre-Gauss integration",
 			
 			// Good when the total gain is low or read noise is >>1
 			"Poisson+Gamma*Gaussian convolution", // Poisson+Gamma approximation convolved with Gaussian
@@ -759,6 +769,19 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				for (int c = 1; c <= maxc; c++)
 					list.add(PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m));
 			}
+
+			//			// Debug 
+			//			TDoubleArrayList list2 = new TDoubleArrayList();
+			//			int n = 5;
+			//			double s = 1.0/n;
+			//			for (int c = 0; c <= maxc; c++)
+			//			{
+			//				for (int i=0; i<n; i++)
+			//					list2.add(PoissonGammaGaussianConvolutionFunction.poissonGamma(c+i*s, p, m));
+			//			}
+			//			String title = "Poisson-Gamma PDF";
+			//			Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list2.size(), 0, s), list2.toArray());
+			//			Utils.display(title, plot);
 		}
 		else
 		{
@@ -870,10 +893,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 			double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
 
-			UnivariateInterpolator in =
-					new SplineInterpolator()
-					//new LinearInterpolator()
-					;
+			UnivariateInterpolator in = new SplineInterpolator()
+			//new LinearInterpolator()
+			;
 			UnivariateFunction f = in.interpolate(x, pd);
 
 			int bound = (int) Math.floor(zero);
@@ -951,21 +973,41 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			case 4:
 				return PoissonPoissonFunction.createWithStandardDeviation(alpha, noise);
 
-			// Add PoissonGammaGaussianConvolution ...
-			// Get the Poisson-Gamma from EMGainAnalysis. 
-			// Add a convolution with a range as in the PoissonGaussianConvolutionFunction
+			case 10:
+				return PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
 
 			case 5:
 			case 6:
+			case 7:
+			case 8:
+			case 9:
 				PoissonGammaGaussianFunction f = new PoissonGammaGaussianFunction(alpha, noise);
-				// The full-integration here does not appear to work !
-				f.setUseApproximation(settings.getModel() == 6);
-				f.setUseSimpleIntegration(false);
 				f.setMinimumProbability(0);
+				ConvolutionMode mode = getConvolutionMode(settings.getModel());
+				f.setConvolutionMode(mode);
+				if (!mode.validAtBoundary())
+					f.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_CDF);
 				return f;
 
+			default:
+				throw new IllegalStateException();
+		}
+	}
+
+	private static ConvolutionMode getConvolutionMode(int model)
+	{
+		switch (model)
+		{
+			case 5:
+				return ConvolutionMode.APPROXIMATION;
+			case 6:
+				return ConvolutionMode.DISCRETE_PDF;
 			case 7:
-				return PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
+				return ConvolutionMode.DISCRETE_CDF;
+			case 8:
+				return ConvolutionMode.SIMPSON_PDF;
+			case 9:
+				return ConvolutionMode.LEGENDRE_GAUSS_PDF;
 
 			default:
 				throw new IllegalStateException();

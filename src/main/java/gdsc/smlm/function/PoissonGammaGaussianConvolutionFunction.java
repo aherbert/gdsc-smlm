@@ -284,6 +284,19 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 
 	private double computeP(final double o, final double e, double max, double min)
 	{
+		int cmax = (int) Math.ceil(max);
+		int cmin = (int) Math.floor(min);
+
+		if (cmin == cmax)
+		{
+			// Edge case with no range			
+			return FastMath.exp(
+					// Poisson-Gamma
+					logPoissonGamma(cmin, e, g)
+					// Gaussian
+							- (Maths.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
+		}
+
 		double p = 0;
 
 		// Overcome the problem with small variance using a set number of steps to 
@@ -311,10 +324,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		//		}
 		//		else
 		//		{
-
-		int cmax = (int) Math.ceil(max);
-		int cmin = (int) Math.floor(min);
-
+		
 		for (int c = cmin; c <= cmax; c++)
 		{
 			p += FastMath.exp(

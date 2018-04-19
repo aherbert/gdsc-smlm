@@ -6,6 +6,8 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
+
 public class PoissonGammaGaussianConvolutionFunctionTest
 {
 	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
@@ -45,8 +47,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 				.createWithStandardDeviation(1.0 / gain, s);
 
 		final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, s);
-		f2.setUseApproximation(false);
-		f2.setUseSimpleIntegration(true);
+		f2.setConvolutionMode(ConvolutionMode.DISCRETE_PDF);
 
 		double p = 0;
 		int min = 1;
