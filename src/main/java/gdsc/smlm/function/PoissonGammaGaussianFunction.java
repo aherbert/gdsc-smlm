@@ -49,6 +49,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	/** The minimum read-noise. Values below this will be set to zerro and read-noise is not modelled. */
 	public static final double MIN_READ_NOISE = 1e-3;
 
+	/** 2 * Math.PI. */
+	private static final double twoPi = 2 * Math.PI;
+	/** Math.sqrt(2 * Math.PI). */
+	private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
+
 	/**
 	 * Define the convolution mode for combining the Poisson-Gamma PMF with the Gaussian PDF
 	 */
@@ -177,11 +182,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		}
 	}
 
-	/** 2 * Math.PI. */
-	private static final double twoPi = 2 * Math.PI;
-	/** Math.sqrt(2 * Math.PI). */
-	private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
-
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -247,13 +247,33 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			}
 
 			double p = 0;
+
+			// Special case:
+			// Due to the Poisson-Gamma function delta function at u=0
+			// The probability at u=0 may be very large compared to the rest of 
+			// the Poisson-Gamma when e is low. To compensate always compute the 
+			// full CDF integration at u=0.
+			double erf2 = gaussianErf(-o + 0.5);
+			if (erf2 != -1)
+			{
+				// Assume u==0
+				p = FastMath.exp(-e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
+			}
+			// Mark that u==0 has been computed
+			if (lower == 0)
+			{
+				lower++;
+				if (lower >= upper)
+					// Nothing more to compute
+					return checkMinProbability(p);
+			}
+
 			if (mode == ConvolutionMode.DISCRETE_PDF)
 			{
 				// Use a simple integration by adding the points in the range.
 				if (lower == upper)
 				{
-					// Given that sigma>0 this rare edge case 
-					// where lower == upper is at upper=0.
+					// Avoid double computation when lower==upper
 					p = poissonGamma(lower, e) * gaussianPDF(lower - o);
 				}
 				else
@@ -269,12 +289,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// Use a simple integration by adding the points in the range.
 				// Use the error function to obtain the integral of the Gaussian
 				double u_o = lower - o - 0.5;
-				double erf = gaussianCDF(u_o);
+				double erf = gaussianErf(u_o);
 				if (lower == upper)
 				{
-					// Given that sigma>0 this rare edge case 
-					// where lower == upper is at upper=0.
-					p = poissonGamma(lower, e) * (gaussianCDF(u_o + 1) - erf);
+					// Avoid double computation when lower==upper
+					p = poissonGamma(lower, e) * (gaussianErf(u_o + 1) - erf) * 0.5;
 				}
 				else
 				{
@@ -282,8 +301,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					{
 						final double prevErf = erf;
 						u_o += 1.0;
-						erf = gaussianCDF(u_o);
-						p += poissonGamma(u, e) * (erf - prevErf);
+						erf = gaussianErf(u_o);
+						p += poissonGamma(u, e) * (erf - prevErf) * 0.5;
 					}
 				}
 			}
@@ -520,11 +539,45 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 */
 	double gaussianCDF(final double x)
 	{
-		//return 0.5 * (1 + org.apache.commons.math3.special.Erf.erf(x / (sqrt2sigma2)));
+		//return 0.5 * (1 + org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2));
 		// This may not be precise enough. 
 		// Absolute error is <3e-7. Not sure what relative error is.
 		// The standard Erf is much slower.
-		return 0.5 * (1 + Erf.erf(x / (sqrt2sigma2)));
+		return 0.5 * (1 + Erf.erf(x / sqrt2sigma2));
+	}
+
+	/**
+	 * Gaussian CDF.
+	 *
+	 * @param x
+	 *            the x
+	 * @param x2
+	 *            the x 2
+	 * @return the cumulative density
+	 */
+	double gaussianCDF(final double x, final double x2)
+	{
+		//return 0.5 * (1 + org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2));
+		// This may not be precise enough. 
+		// Absolute error is <3e-7. Not sure what relative error is.
+		// The standard Erf is much slower.
+		return 0.5 * Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2);
+	}
+
+	/**
+	 * Gaussian CDF.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the cumulative density
+	 */
+	double gaussianErf(final double x)
+	{
+		//return org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2);
+		// This may not be precise enough. 
+		// Absolute error is <3e-7. Not sure what relative error is.
+		// The standard Erf is much slower.
+		return Erf.erf(x / sqrt2sigma2);
 	}
 
 	/**

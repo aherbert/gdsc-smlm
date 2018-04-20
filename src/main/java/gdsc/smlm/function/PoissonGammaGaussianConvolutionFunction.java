@@ -306,6 +306,14 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		// This does seem to be valid. The Poisson-Gamma is a discrete PMF.
 		// The CameraModelAnalysis plugin works with full integration if this function
 		// is computed using integer steps.
+		//
+		// This is to computing:
+		// Poisson-Gamma PMF(c)  x  Gaussian PDF(c-o) 
+		//
+		// The solution is to compute:
+		// Poisson-Gamma PMF(c)  x  Gaussian CDF(c-o-0.5,c-o+0.5)
+		//
+		// This can be done in the PoissonGammaGaussianFunction.
 
 		//		if (s < 0)
 		//		{
