@@ -101,23 +101,28 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			// This requires a full range test to determine the best function for which
 			// parameters.
 			
-			// Relatively worse as the read noise increases
+			// Good but relatively worse as the read noise increases.
+			// Requires full integration when read noise is low (<1).
 			"Poisson+Gamma+Gaussian approximation", // Mortensen approximation
 			
-			// Good when read noise is low
-			"Poisson+Gamma+Gaussian PDF integration",
+			// Good when read noise is >>1.
+			// Requires full integration when read noise is low (<1).
+			"Poisson+Gamma+Gaussian PDF integration", // Poisson+Gamma PMF approximation convolved with Gaussian PDF
 			
-			// ?
-			"Poisson+Gamma+Gaussian CDF integration",
+			// Best for EM-CCD. 
+			// Very robust and does not require full integration (computes a PMF).
+			// Slow
+			"Poisson+Gamma+Gaussian CDF integration", // Poisson+Gamma PMF approximation convolved with Gaussian CDF
 			
-			// Invalid
-			"Poisson+Gamma+Gaussian Simpson's integration",
+			// Good
+			"Poisson+Gamma+Gaussian Simpson's integration", // Poisson+Gamma PMF approximation convolved with Gaussian PDF using Simpson integration
 			
-			// Invalid
-			"Poisson+Gamma+Gaussian Legendre-Gauss integration",
+			// Good
+			"Poisson+Gamma+Gaussian Legendre-Gauss integration", // Poisson+Gamma PMF approximation convolved with Gaussian PDF using Legendre-Gauss integration
 			
-			// Good when the total gain is low or read noise is >>1
-			"Poisson+Gamma*Gaussian convolution", // Poisson+Gamma approximation convolved with Gaussian
+			// Good when read noise is >>1.
+			// Requires full integration when read noise is low (<1).
+			"Poisson+Gamma*Gaussian convolution", // Poisson+Gamma PMF approximation convolved with Gaussian PDF
 			};
 
 	private static abstract class Round
