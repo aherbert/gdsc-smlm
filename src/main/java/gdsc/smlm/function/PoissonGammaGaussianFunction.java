@@ -46,6 +46,9 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
+	/** The minimum read-noise. Values below this will be set to zerro and read-noise is not modelled. */
+	public static final double MIN_READ_NOISE = 1e-3;
+
 	/**
 	 * Define the convolution mode for combining the Poisson-Gamma PMF with the Gaussian PDF
 	 */
@@ -151,14 +154,27 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 *            Inverse gain of the EMCCD chip
 	 * @param s
 	 *            The Gaussian standard deviation at readout
+	 * @throws IllegalArgumentException
+	 *             If the gain is below 1 (the Gamma distribution is not modelled for a scale below 1).
 	 */
-	public PoissonGammaGaussianFunction(double alpha, double s)
+	public PoissonGammaGaussianFunction(double alpha, double s) throws IllegalArgumentException
 	{
+		if (alpha > 1)
+			throw new IllegalArgumentException("Gain must be above 1");
 		this.alpha = Math.abs(alpha);
-		this.sigma = Math.abs(s);
-		twoSigma2 = 2 * s * s;
-		sqrt2sigma2 = Math.sqrt(2 * s * s);
-		sqrt2piSigma2 = Math.sqrt(2 * Math.PI * s * s);
+		s = Math.abs(s);
+		// Ignore tiny read noise
+		if (s < MIN_READ_NOISE)
+		{
+			sigma = twoSigma2 = sqrt2sigma2 = sqrt2piSigma2 = 0;
+		}
+		else
+		{
+			sigma = s;
+			twoSigma2 = 2 * s * s;
+			sqrt2sigma2 = Math.sqrt(2 * s * s);
+			sqrt2piSigma2 = Math.sqrt(2 * Math.PI * s * s);
+		}
 	}
 
 	/** 2 * Math.PI. */
