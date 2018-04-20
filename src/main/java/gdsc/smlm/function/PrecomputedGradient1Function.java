@@ -17,10 +17,60 @@ package gdsc.smlm.function;
  * Wraps a value function to add pre-computed values to the forEach procedure
  */
 public class PrecomputedGradient1Function extends PrecomputedValueFunction
-		implements Gradient1Function, Gradient1Procedure
+		implements Gradient1Function, Gradient1Procedure, NonLinearFunction
 {
 	protected final Gradient1Function f1;
 	protected Gradient1Procedure procedure;
+
+	/**
+	 * Class for evaluating a function and storing the values and gradients
+	 */
+	protected class FunctionStore implements Gradient1Procedure
+	{
+		private int i;
+
+		public final double[] values;
+		public final double[][] dyda;
+		public final int length;
+
+		public FunctionStore(double[] values, double[][] dyda)
+		{
+			length = f1.getNumberOfGradients();
+			if (values == null)
+			{
+				values = new double[f1.size()];
+				dyda = new double[values.length][length];
+			}
+			this.values = values;
+			this.dyda = dyda;
+		}
+
+		/**
+		 * Gets the values.
+		 */
+		public void getValues()
+		{
+			i = 0;
+			f1.forEach(this);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
+		 */
+		public void execute(double value, double[] dy_da)
+		{
+			values[i] = value;
+			System.arraycopy(dy_da, 0, dyda[i], 0, length);
+			i++;
+		}
+	}
+
+	// Used to store all the values and gradients for the NonLinearFunction interface
+	protected FunctionStore store = null;
+	protected double[] all_values;
+	protected double[][] all_dyda;
 
 	/**
 	 * Instantiates a new precomputed gradient1 function.
@@ -43,14 +93,15 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 		super(pre, values2);
 		f1 = (Gradient1Function) f;
 	}
-	
+
 	public Gradient1Function getGradient1Function()
 	{
 		return f1;
 	}
-	
+
 	public void initialise(double[] a)
 	{
+		store = null;
 		f1.initialise(a);
 		i = 0;
 	}
@@ -98,10 +149,52 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 			// Avoid multiple wrapping
 			if (func instanceof PrecomputedGradient1Function)
 			{
-				return new PrecomputedGradient1Function((PrecomputedGradient1Function)func, b);
+				return new PrecomputedGradient1Function((PrecomputedGradient1Function) func, b);
 			}
 			return new PrecomputedGradient1Function(func, b);
 		}
 		return func;
+	}
+
+	public double eval(int x, double[] dyda)
+	{
+		createStore();
+		System.arraycopy(all_dyda[i], 0, dyda, 0, store.length);
+		return all_values[x];
+	}
+
+	private void createStore()
+	{
+		if (store == null)
+		{
+			store = new FunctionStore(all_values, all_dyda);
+			store.getValues();
+			// Re-use space
+			all_values = store.values;
+			all_dyda = store.dyda;
+		}
+	}
+
+	public double eval(int x)
+	{
+		createStore();
+		return store.values[x];
+	}
+
+	public double eval(int x, double[] dyda, double[] w)
+	{
+		w[0] = 1;
+		return eval(x, dyda);
+	}
+
+	public double evalw(int x, double[] w)
+	{
+		w[0] = 1;
+		return eval(x);
+	}
+
+	public boolean canComputeWeights()
+	{
+		return false;
 	}
 }

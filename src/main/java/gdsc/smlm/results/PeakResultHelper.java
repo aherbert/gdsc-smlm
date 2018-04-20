@@ -46,12 +46,11 @@ public class PeakResultHelper
 	}
 
 	/**
-	 * Convert the local background to an estimate of noise. Local background and noise are in ADU count units.
+	 * Convert the local background to an estimate of noise. Local background and noise are in photons units.
 	 * <p>
-	 * This assumes the local background is photon shot noise. The background is first converted to photons using the
-	 * gain. The shot noise is taken assuming a Poisson distribution (thus the variance equals the number of photons).
-	 * This is amplified by 2 if the data was taken on an EM-CCD camera. The square root is the noise in photons. This
-	 * is converted back to ADUs using the gain. E.G.
+	 * This assumes the local background is photon shot noise. 
+	 * The shot noise is taken assuming a Poisson distribution (thus the variance equals the number of photons).
+	 * This is amplified by 2 if the data was taken on an EM-CCD camera. The square root is the noise in photons.
 	 * 
 	 * <pre>
 	 * return Math.sqrt((background) * ((emCCD) ? 2 : 1));

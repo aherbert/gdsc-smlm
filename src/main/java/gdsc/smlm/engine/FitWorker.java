@@ -2688,9 +2688,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		private double getFitValue()
 		{
 			FunctionSolver solver = gf.getFunctionSolver();
-			if (solver.getType() == FunctionSolverType.MLE)
+			FunctionSolverType solverType = solver.getType();
+			if (solverType == FunctionSolverType.MLE)
 				return ((MLEFunctionSolver) solver).getLogLikelihood();
-			else if (solver.getType() == FunctionSolverType.WLSE)
+			else if (solverType == FunctionSolverType.WLSE)
 				return ((WLSEFunctionSolver) solver).getChiSquared();
 			else
 				return ((LSEFunctionSolver) solver).getAdjustedCoefficientOfDetermination();
@@ -2698,10 +2699,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		private String getFitValueName()
 		{
-			FunctionSolver solver = gf.getFunctionSolver();
-			if (solver.getType() == FunctionSolverType.MLE)
+			FunctionSolverType solverType = gf.getFunctionSolver().getType();
+			if (solverType == FunctionSolverType.MLE)
 				return "Log-likelihood";
-			else if (solver.getType() == FunctionSolverType.WLSE)
+			else if (solverType == FunctionSolverType.WLSE)
 				return "Chi-Squared";
 			else
 				return "Adjusted R^2";
@@ -2966,8 +2967,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				double ic1 = Double.NaN, ic2 = Double.NaN;
 				final boolean improvement;
 
-				FunctionSolver solver = gf.getFunctionSolver();
-				if (solver.getType() == FunctionSolverType.MLE
+				FunctionSolverType solverType = gf.getFunctionSolver().getType();
+				if (solverType == FunctionSolverType.MLE
 				//&& fitConfig.isModelCamera()
 				)
 				{
@@ -2987,7 +2988,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						logger.info("Model improvement - Log likelihood (IC) : %f (%f) => %f (%f) : %f", singleValue,
 								ic1, doubleValue, ic2, ic1 - ic2);
 				}
-				else if (solver.getType() == FunctionSolverType.WLSE)
+				else if (solverType == FunctionSolverType.WLSE)
 				{
 					// If using the weighted least squares estimator then we can get the log likelihood from an approximation
 					ic1 = Maths.getBayesianInformationCriterionFromResiduals(singleValue, length,
@@ -3000,7 +3001,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						logger.info("Model improvement - Chi-squared (IC) : %f (%f) => %f (%f) : %f", singleValue, ic1,
 								doubleValue, ic2, ic1 - ic2);
 				}
-				else if (solver.getType() == FunctionSolverType.LSE)
+				else if (solverType == FunctionSolverType.LSE)
 				{
 					// Adjusted r^2 should be higher
 					improvement = doubleValue > singleValue;
@@ -3429,7 +3430,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				// Initial guess using the noise (assuming all noise is from Poisson background).
 				// EMCCD will have increase noise by a factor of sqrt(2)
 				CalibrationReader r = new CalibrationReader(fitConfig.getCalibration());
-				double gain = (fitConfig.isFitCameraCounts()) ? r.getCountPerPhoton() : 1;
+				double gain = (isFitCameraCounts) ? r.getCountPerPhoton() : 1;
 				background = (float) (PeakResultHelper.noiseToLocalBackground(noise, gain, r.isEMCCD()));
 			}
 			else

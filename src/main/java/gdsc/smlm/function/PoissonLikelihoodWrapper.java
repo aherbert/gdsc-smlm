@@ -48,7 +48,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	private final double sumLogFactorialK;
 	private final double alpha, logAlpha;
 
-	private boolean allowNegativExpectedValues = true;
+	private boolean allowNegativeExpectedValues = true;
 
 	private static boolean initialiseFactorial(double[] data)
 	{
@@ -133,7 +133,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
 			{
-				if (allowNegativExpectedValues)
+				if (allowNegativeExpectedValues)
 					l = Double.MIN_VALUE;
 				else
 					// Since ln(0) -> -Infinity
@@ -176,7 +176,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 			// Check for zero and return the worst likelihood score
 			if (l <= 0)
 			{
-				if (allowNegativExpectedValues)
+				if (allowNegativeExpectedValues)
 					l = Double.MIN_VALUE;
 				else
 					// Since ln(0) -> -Infinity
@@ -211,7 +211,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
 		{
-			if (allowNegativExpectedValues)
+			if (allowNegativeExpectedValues)
 				l = Double.MIN_VALUE;
 			else
 				// Since ln(0) -> -Infinity
@@ -239,7 +239,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 		// Check for zero and return the worst likelihood score
 		if (l <= 0)
 		{
-			if (allowNegativExpectedValues)
+			if (allowNegativeExpectedValues)
 				l = Double.MIN_VALUE;
 			else
 				// Since ln(0) -> -Infinity
@@ -323,7 +323,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public boolean isAllowNegativeExpectedValues()
 	{
-		return allowNegativExpectedValues;
+		return allowNegativeExpectedValues;
 	}
 
 	/**
@@ -335,6 +335,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 */
 	public void setAllowNegativeExpectedValues(boolean allowNegativeExpectedValues)
 	{
-		this.allowNegativExpectedValues = allowNegativeExpectedValues;
+		this.allowNegativeExpectedValues = allowNegativeExpectedValues;
 	}
 }

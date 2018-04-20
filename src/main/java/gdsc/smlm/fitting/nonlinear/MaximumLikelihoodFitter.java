@@ -623,7 +623,8 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 				// However the variance for the position estimates of a 2D PSF can be 
 				// scaled by a factor of 2 as in Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3.
 				// Since the type of function is unknown this cannot be done here. 
-				FisherInformationMatrix m = new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
+				FisherInformationMatrix m = new FisherInformationMatrix(
+						maximumLikelihoodFunction.fisherInformation(solution));
 				setDeviations(aDev, m);
 			}
 
@@ -962,7 +963,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 
 		// Reverse negative log likelihood for maximum likelihood score
 		value = -l;
-		
+
 		return true;
 	}
 
@@ -971,13 +972,14 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	{
 		final int n = y.length;
 		LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper((NonLinearFunction) f, n, y, a);
+		double[] solution = getInitialSolution(a);
 		// Compute assuming a Poisson process.
 		// Note: 
 		// If using a Poisson-Gamma-Gaussian model then these will be incorrect.
 		// However the variance for the position estimates of a 2D PSF can be 
 		// scaled by a factor of 2 as in Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3.
 		// Since the type of function is unknown this cannot be done here. 
-		return new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(a));
+		return new FisherInformationMatrix(maximumLikelihoodFunction.fisherInformation(solution));
 	}
 
 	@Override
@@ -986,8 +988,20 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		if (lastY != null)
 		{
 			final int n = y.length;
-			LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(new FixedNonLinearFunction(y), n, y,
-					a);
+			// The function value must be scaled to the expected value of a Poisson process. 
+			double[] e;
+			if (alpha != 0)
+			{
+				e = new double[n];
+				for (int i = n; i-- > 0;)
+					e[i] = y[i] * alpha;
+			}
+			else
+			{
+				e = y;
+			}
+			LikelihoodWrapper maximumLikelihoodFunction = createLikelihoodWrapper(new FixedNonLinearFunction(e), n,
+					lastY, a);
 
 			final double l = maximumLikelihoodFunction.likelihood(a);
 			if (l == Double.POSITIVE_INFINITY)

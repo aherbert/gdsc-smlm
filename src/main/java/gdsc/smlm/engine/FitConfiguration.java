@@ -6,6 +6,7 @@ import gdsc.core.match.FractionalAssignment;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.NotImplementedException;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
@@ -32,6 +33,8 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
 import gdsc.smlm.fitting.Gaussian2DFitConfiguration;
+import gdsc.smlm.fitting.MLEScaledFunctionSolver;
+import gdsc.smlm.fitting.ScaledFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BacktrackingFastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
@@ -377,6 +380,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		nmPerPixel = calibration.getNmPerPixel();
 		gain = calibration.getCountPerPhoton();
 		emCCD = calibration.isEMCCD();
+
+		if (isRawFit())
+		{
+			// No camera calibration so assume raw data is in photons 
+			gain = 1;
+		}
 
 		if (isFitCameraCounts())
 		{
@@ -3024,6 +3033,22 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Check if performing raw data fitting. In this mode then no camera model is available to map the data counts to
+	 * photons. The gain is assumed to be 1.
+	 * 
+	 * @return Set to true if raw fitting
+	 */
+	public boolean isRawFit()
+	{
+		// This is only true if there is no camera calibration.
+		// Otherwise the camera details can be used to convert input data in camera counts
+		// to photo-electrons and all fitting is done assuming the signal is photo-electrons.  
+		if (calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE)
+			return true;
+		return false;
+	}
+
+	/**
 	 * Checks if is a full maximum likelihood estimator (MLE) modelling the CCD camera.
 	 *
 	 * @return true, if is a MLE modelling the camera
@@ -3106,8 +3131,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			}
 		}
 
+		// Special case where the data and estimate are in counts but
+		// the function solver requires the function to output an expected 
+		// number of photons.
+		boolean doScaling = getFitSolverValue() == FitSolver.MLE_VALUE;
+		assert !doScaling || functionSolver instanceof MaximumLikelihoodFitter;
+
 		if (precomputedFunctionValues != null)
 		{
+			if (doScaling)
+			{
+				// Scale the pre-computed function. It is assumes that this was
+				// set using output fitted parameters (which would be unscaled).
+				// This may be reused by the calling code so don't destroy it.
+				double[] f = new double[precomputedFunctionValues.length];
+				for (int i = precomputedFunctionValues.length; i-- > 0;)
+					f[i] = precomputedFunctionValues[i] * signalToPhotons;
+				precomputedFunctionValues = f;
+			}
+
 			functionSolver.setGradientFunction((GradientFunction) PrecomputedFunctionFactory
 					.wrapFunction(gaussianFunction, precomputedFunctionValues));
 			precomputedFunctionValues = null;
@@ -3115,6 +3157,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (functionSolver.isWeighted())
 		{
 			functionSolver.setWeights(observationWeights);
+		}
+
+		if (doScaling)
+		{
+			// Scale the background and signal estimates
+			int[] indices = new int[1 + gaussianFunction.getNPeaks()];
+			indices[0] = Gaussian2DFunction.BACKGROUND;
+			for (int i = 1; i < indices.length; i++)
+				indices[i] = (i - 1) * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL;
+
+			// signalToPhotons should be 1.0/gain
+			return new MLEScaledFunctionSolver((MaximumLikelihoodFitter) functionSolver, signalToPhotons, indices);
 		}
 
 		return functionSolver;
@@ -4087,6 +4141,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					break;
 
 				case CameraType.SCMOS_VALUE:
+					// Impossible to create a per-pixel model with the current configuration.
+					// The model must be passed in.
+
 				default:
 					throw new IllegalStateException("No camera model for camera type: " + getCameraType());
 			}
