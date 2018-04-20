@@ -953,7 +953,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		}
 
 		return new double[][] { SimpleArrayUtils.newArray(g.length, zero, step), g };
-
 	}
 
 	private static LikelihoodFunction getLikelihoodFunction(CameraModelAnalysisSettings settings)
@@ -1193,6 +1192,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			sum += y[i];
 			y[i] = sum;
 		}
+		
+		// Check if sum is approximately 1
+		//System.out.printf("gain=%g, sum=%g\n", getGain(settings), sum);		
 
 		return new double[][] { x, y };
 	}
