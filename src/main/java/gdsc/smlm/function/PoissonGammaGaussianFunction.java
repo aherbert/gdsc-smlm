@@ -187,6 +187,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 * <p>
 	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
 	 * al (2010) Nature Methods 7, 377-383.
+	 * <p>
+	 * The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
@@ -216,7 +218,11 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// If no Poisson mean then just use the Gaussian (Poisson-Gamma p=1 at x=0, p=0 otherwise)
 		if (e <= 0)
 		{
-			return checkMinProbability(gaussianPDF(o));
+			// Output as PDF
+			//return checkMinProbability(gaussianPDF(o));
+			
+			// Output as PMF
+			return checkMinProbability(gaussianCDF(o - 0.5, o + 0.5));
 		}
 
 		if (convolutionMode == ConvolutionMode.APPROXIMATION)
@@ -274,7 +280,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				if (lower == upper)
 				{
 					// Avoid double computation when lower==upper
-					p = poissonGamma(lower, e) * gaussianPDF(lower - o);
+					p += poissonGamma(lower, e) * gaussianPDF(lower - o);
 				}
 				else
 				{
@@ -293,7 +299,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				if (lower == upper)
 				{
 					// Avoid double computation when lower==upper
-					p = poissonGamma(lower, e) * (gaussianErf(u_o + 1) - erf) * 0.5;
+					p += poissonGamma(lower, e) * (gaussianErf(u_o + 1) - erf) * 0.5;
 				}
 				else
 				{
@@ -322,7 +328,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 				try
 				{
-					p = createIntegrator().integrate(2000, f, lower, upper);
+					p += createIntegrator().integrate(2000, f, lower, upper);
 				}
 				catch (TooManyEvaluationsException ex)
 				{
@@ -499,11 +505,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This code is adapted from the Python source code within the supplementary information of the paper Mortensen, et
-	 * al (2010) Nature Methods 7, 377-383.
+	 * This computes the log of {@link #likelihood(double, double)}.
 	 * <p>
-	 * Note this will return Double.NEGATIVE_INFINITY if there is no Gaussian standard deviation and the observed count
-	 * is below zero (since the likelihood is zero).
+	 * The output is a PMF. Ideally the input x should be discrete but this is not a requirement.
 	 * 
 	 * @param o
 	 *            The observed count
@@ -511,6 +515,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 *            The expected count
 	 * @return The log-likelihood
 	 * 
+	 * @see #likelihood(double, double)
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	public double logLikelihood(final double o, final double e)

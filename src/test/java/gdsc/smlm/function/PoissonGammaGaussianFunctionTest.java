@@ -17,11 +17,32 @@ public class PoissonGammaGaussianFunctionTest
 	// Noise is in Counts and gain is total gain.
 	// This makes more sense when testing as the 
 	// PoissonGammaGaussianFunction accepts 1/gain and noise as parameters.
-	
+
+	// Poisson-Gamma convolution approximation does not sum to 1 at lower gain.
+	// Store the expected sum at different gain below 10 for testing.
+	static double[] pgSum = new double[11];
+	static
+	{
+		// Compute the sum at expected photons=1. This appears to produce 
+		// the lowest sum no matter what the gain.
+		// These are rounded down to to 3 d.p. provide a safer lower bound.
+		pgSum[1] = 0.831;
+		pgSum[2] = 0.911;
+		pgSum[3] = 0.940;
+		pgSum[4] = 0.954;
+		pgSum[5] = 0.963;
+		pgSum[6] = 0.969;
+		pgSum[7] = 0.974;
+		pgSum[8] = 0.977;
+		pgSum[9] = 0.979;
+		pgSum[10] = 0.981;
+	}
+
 	// TODO Fix these test conditions
 
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	double[] highPhotons = { 5000, 10000 };
+	double[] lowPhotons = { 1e-2, 1e-4, 1e-6 };
 	double[] noise = { 0.3, 1, 3, 10 }; // in counts
 	double[] totalGain = { 6.5, 45 };
 
@@ -54,157 +75,232 @@ public class PoissonGammaGaussianFunctionTest
 			double lx = u - 0.5;
 			double e = in.integrate(20000, uf, lx, ux);
 			double o = f.gaussianCDF(ux) - f.gaussianCDF(lx);
+			double o2 = f.gaussianCDF(lx, ux);
 			Assert.assertEquals(e, o, e * 0.1);
+			Assert.assertEquals(o, o2, o * 1e-6);
 		}
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithApproximation()
-	{
-		for (double p : photons)
-			for (double rn : noise)
-				for (double cg : totalGain)
-					cumulativeProbabilityIsOne(p, rn, cg, ConvolutionMode.APPROXIMATION);
-	}
-
-	// TODO - Figure out why these do not fail since they do not match the Discrete CDF 
-	// integration and do not look correct in the CameraModelAnalysis plugin.
-
-	//	@Test(expected = AssertionError.class)
-	//	public void cumulativeProbabilityIsNotOneWithLegendreGaussIntegration()
-	//	{
-	//		for (double p : photons)
-	//			for (double s : noise)
-	//				for (double g : cameraGain)
-	//					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF);
-	//	}
-	//
-	//	@Test(expected = AssertionError.class)
-	//	public void cumulativeProbabilityIsNotOneWithSimpsonIntegration()
-	//	{
-	//		for (double p : photons)
-	//			for (double s : noise)
-	//				for (double g : cameraGain)
-	//					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF);
-	//	}
-
-	@Test
-	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegrationWhenEffectiveGainIsAbove10()
+	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegration()
 	{
 		for (double p : photons)
 			for (double s : noise)
 				for (double g : totalGain)
 				{
-					if (g <= 10)
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegration()
+	{
+		for (double p : photons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF);
+				}
+	}
+
+	// Since the Poisson-Gamma approximation is poor at gain < 10 the
+	// following methods that use integration as an approximation 
+	// (with the Poisson-Gamma PMF x Gaussian PDF) underestimate the total sum. 
+	
+	@Test
+	public void cumulativeProbabilityIsOneWithApproximationAtGainAbove10()
+	{
+		for (double p : photons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
 						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAtGainAbove10()
+	{
+		for (double p : photons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAtGainAbove10()
+	{
+		for (double p : photons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegrationAtHighPhotons()
+	{
+		for (double p : highPhotons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
 				}
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationWhenEffectiveReadNoiseIsFarAbove1()
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAtHighPhotons()
 	{
-		for (double p : photons)
+		for (double p : highPhotons)
 			for (double s : noise)
-			{
-				// Integration using a sample space of 1 is not valid when the 
-				// effective read noise in counts is low 
-				if (s <= 2)
-					continue;
 				for (double g : totalGain)
 				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF);
 				}
-			}
 	}
 
+	// Since the Poisson-Gamma approximation is poor at gain < 10 the
+	// following methods that use integration as an approximation 
+	// (with the Poisson-Gamma PMF x Gaussian PDF) underestimate the total sum. 
+	
 	@Test
-	public void cumulativeProbabilityIsOneWithApproximationAndDifficultParameters()
+	public void cumulativeProbabilityIsOneWithApproximationAtHighPhotonsAtGainAbove10()
 	{
-		Assert.assertEquals(1, cumulativeProbability(10, 3, 45, ConvolutionMode.APPROXIMATION), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(1000, 30, 45, ConvolutionMode.APPROXIMATION), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(10000, 30, 45, ConvolutionMode.APPROXIMATION), 0.02);
-		// Slow ... but passes
-		//Assert.assertEquals(1, cumulativeProbability(100000, 30, 45, ConvolutionMode.LEGENDRE_GAUSS_PDF), 0.02);
-	}
-
-	@Test
-	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegrationAndDifficultParameters()
-	{
-		Assert.assertEquals(1, cumulativeProbability(0.5, 30, 4, ConvolutionMode.DISCRETE_CDF), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(10, 3, 45, ConvolutionMode.DISCRETE_CDF), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(1000, 30, 45, ConvolutionMode.DISCRETE_CDF), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(10000, 30, 45, ConvolutionMode.DISCRETE_CDF), 0.02);
-	}
-
-	@Test
-	public void cumulativeProbabilityIsNotOneWithDiscretePDFIntegrationAndDifficultParameters()
-	{
-		// Integration using a sample space of 1 is not valid when the 
-		// effective read noise in counts is below 1 
-
-		// Read noise 3/45 = 0.067
-		Assert.assertNotEquals(1, cumulativeProbability(0.5, 3, 45, ConvolutionMode.DISCRETE_PDF), 0.02);
-
-		// Read noise 30/45 = 0.67
-
-		// Fails when the total gain is low, OK when gain is high
-		Assert.assertNotEquals(1, cumulativeProbability(0.5, 30, 45, ConvolutionMode.DISCRETE_PDF), 0.02);
-		Assert.assertEquals(1, cumulativeProbability(0.5, 30 * 10, 45 / 10, ConvolutionMode.DISCRETE_PDF), 0.02);
-	}
-
-	@Test
-	public void cumulativeProbabilityIsOneWithApproximationAndHighPhotons()
-	{
-		for (double p : highPhotons)
+		for (double p : photons)
 			for (double s : noise)
 				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION);
+				}
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAndHighPhotons()
+	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAtHighPhotonsAtGainAbove10()
 	{
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
-					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF);
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF);
+				}
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegrationAndHighPhotons()
+	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAtHighPhotonsAtGainAbove10()
 	{
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegrationAtLowPhotons()
+	{
+		for (double p : lowPhotons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
+				}
 	}
 
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAtLowPhotons()
+	{
+		for (double p : lowPhotons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF);
+				}
+	}
+
+	// Since the Poisson-Gamma approximation is poor at gain < 10 the
+	// following methods that use integration as an approximation 
+	// (with the Poisson-Gamma PMF x Gaussian PDF) underestimate the total sum. 
+	
+	@Test
+	public void cumulativeProbabilityIsOneWithApproximationAtLowPhotonsAtGainAbove10()
+	{
+		for (double p : photons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAtLowPhotonsAtGainAbove10()
+	{
+		for (double p : lowPhotons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAtLowPhotonsAtGainAbove10()
+	{
+		for (double p : lowPhotons)
+			for (double s : noise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF);
+				}
+	}
+		
+	@Test
+	public void discretePDFIntegrationCloselyMatchesDiscreteCDFIntegration()
+	{
+		double[] e = closelyMatchesDiscreteCDFIntegration(0.34, ConvolutionMode.DISCRETE_PDF);
+		System.out.printf("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
+	}
+	
 	@Test
 	public void approximationCloselyMatchesDiscreteCDFIntegration()
 	{
-		double[] e = closelyMatchesDiscreteCDFIntegration(0.05, ConvolutionMode.APPROXIMATION);
+		double[] e = closelyMatchesDiscreteCDFIntegration(0.15, ConvolutionMode.APPROXIMATION);
 		System.out.printf("Approximation max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
 	@Test
-	public void discretePDFIntegrationCloselyMatchesDiscreteCDFIntegration()
+	public void simpsonIntegrationMatchesDiscreteCDFIntegration()
 	{
-		double[] e = closelyMatchesDiscreteCDFIntegration(0.05, ConvolutionMode.DISCRETE_PDF);
-		System.out.printf("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
-	}
-
-	@Test(expected = AssertionError.class)
-	public void simpsonIntegrationDoesNotMatchDiscreteCDFIntegration()
-	{
-		double[] e = closelyMatchesDiscreteCDFIntegration(0.05, ConvolutionMode.SIMPSON_PDF);
+		double[] e = closelyMatchesDiscreteCDFIntegration(0.25, ConvolutionMode.SIMPSON_PDF);
 		System.out.printf("Simpson integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
-	@Test(expected = AssertionError.class)
-	public void legedreGaussIntegrationDoesNotMatchDiscreteCDFIntegration()
+	@Test
+	public void legedreGaussIntegrationMatchesDiscreteCDFIntegration()
 	{
-		double[] e = closelyMatchesDiscreteCDFIntegration(0.05, ConvolutionMode.LEGENDRE_GAUSS_PDF);
+		double[] e = closelyMatchesDiscreteCDFIntegration(0.15, ConvolutionMode.LEGENDRE_GAUSS_PDF);
 		System.out.printf("Simpson integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
@@ -237,7 +333,19 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		double p = cumulativeProbability(mu, s, g, convolutionMode);
 		System.out.printf("%s : mu=%f, s=%f, g=%f, p=%f\n", getName(convolutionMode), mu, s, g, p);
-		Assert.assertEquals(String.format("mu=%f, s=%f, g=%f", mu, s, g), 1, p, 0.02);
+
+		// Poisson-Gamma convolution approximation does not sum to 1 at lower gain 
+		// so account for this during the test.
+		double delta = 0.02;
+		double upper = 1 + delta;
+		double lower = 1 - delta;
+		if (g < 10)
+		{
+			lower = pgSum[(int) g] - delta;
+		}
+
+		if (p < lower || p > upper)
+			Assert.fail(String.format("mu=%f, s=%f, g=%f, p=%g", mu, s, g, p));
 	}
 
 	private double cumulativeProbability(final double mu, final double s, final double g,
@@ -319,7 +427,7 @@ public class PoissonGammaGaussianFunctionTest
 		for (double s : noise)
 			for (double g : totalGain)
 			{
-				if (s < 4)
+				if (g < 10)
 					continue;
 
 				PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
@@ -365,7 +473,7 @@ public class PoissonGammaGaussianFunctionTest
 	private void fasterThan(ConvolutionMode slow, ConvolutionMode fast)
 	{
 		//org.junit.Assume.assumeTrue(false);
-		
+
 		// Realistic EM-CCD parameters for speed test
 		double s = 7.16;
 		double g = 39.1;
