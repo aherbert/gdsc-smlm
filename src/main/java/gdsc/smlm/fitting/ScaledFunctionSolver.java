@@ -118,6 +118,8 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 
 	private void scaleParameters(double[] in, double[] out, double scale)
 	{
+		// Copy back all fitted parameters
+		System.arraycopy(in, 0, out, 0, in.length);
 		for (int i = indices.length; i-- > 0;)
 			out[indices[i]] = in[indices[i]] * scale;
 	}
@@ -127,6 +129,8 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		// Only on output so check if null
 		if (in == null)
 			return;
+		// Copy back all fitted parameters
+		System.arraycopy(in, 0, out, 0, in.length);
 		// Deviations are variances so multiply by the square of the scale
 		scale *= scale;
 		for (int i = indices.length; i-- > 0;)
