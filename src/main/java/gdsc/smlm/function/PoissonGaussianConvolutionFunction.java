@@ -178,8 +178,8 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			if (useCDF)
 			{
 				// This actually computes a discrete PMF
-				// where the Poisson PMF is scaled using the gain and rounded to the 
-				// nearest integer x. The Gaussian CDF over the range x-0.5 to x+0.5 is
+				// where the Poisson PMF is scaled using the gain to generate a PMF for (X=x).
+				// The Gaussian CDF over the range x-0.5 to x+0.5 is
 				// computed to provide the equivalent of the convolution of the CDF of 
 				// the scaled Poisson and the Gaussian.
 
@@ -189,7 +189,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 				for (int q = qmin; q <= qmax; q++)
 				{
-					double x = Math.round(D - q * g);
+					double x = getX(D, q);
 					if (x != lastX)
 					{
 						// X will be decrementing. 
@@ -239,6 +239,13 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 			return p;
 		}
+	}
+
+	private double getX(final double D, int q)
+	{
+		// Do not round to compute the convolution point x
+		//return Math.round(D - q * g);
+		return D - q * g;
 	}
 
 	/**
@@ -310,7 +317,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 				for (int q = qmin; q <= qmax; q++)
 				{
-					double x = Math.round(D - q * g);
+					double x = getX(D, q);
 					if (x != lastX)
 					{
 						upper = (x == lastX - 1) ? lower : gaussianCDF(x + 0.5);

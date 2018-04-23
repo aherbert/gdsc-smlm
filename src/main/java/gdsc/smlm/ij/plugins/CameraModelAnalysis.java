@@ -100,9 +100,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		POISSON_DISRECTE { public String getName() { return "Poisson (Discrete)"; } },
 		POISSON_CONTINUOUS { public String getName() { return "Poisson (Continuous)"; } },
 		POISSON_GAUSSIAN_PDF { public String getName() { return "Poisson+Gaussian PDF integration"; } },
+		
+		// Best for CCD/sCMOS ?
 		POISSON_GAUSSIAN_CDF { public String getName() { return "Poisson+Gaussian CDF integration"; } },
-		// Best for CCD/sCMOS
-		 // Saddle-point approximation
+		// Saddle-point approximation.
+		// Very good
 		POISSON_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gaussian approximation"; } },
 		 // Mixed Poisson distribution (Noise is added as a second Poisson)
 		POISSON_POISSON { public String getName() { return "Poisson+Poisson"; } },
