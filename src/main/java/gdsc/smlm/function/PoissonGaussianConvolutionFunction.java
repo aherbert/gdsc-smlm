@@ -47,8 +47,11 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	private final double var;
 	private final double s;
 	private final double var_by_2;
+	private final double sqrt_var_by_2;
 
 	private final double logNormalisationGaussian;
+
+	private boolean useCDF = false;
 
 	/**
 	 * Instantiates a new poisson gaussian convolution function.
@@ -78,6 +81,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			this.var = s * s;
 		}
 		var_by_2 = var * 2;
+		sqrt_var_by_2 = Math.sqrt(var_by_2);
 
 		// Determine the normalisation factor A in the event that the probability 
 		// distribution is being used as a discrete distribution.
@@ -126,6 +130,11 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		if (e <= 0)
 		{
 			// If no Poisson mean then just use the Gaussian
+			if (useCDF)
+			{
+				double x = Math.round(o);
+				return (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
+			}
 			return FastMath.exp((-0.5 * o * o / var) + logNormalisationGaussian);
 		}
 		else
@@ -147,7 +156,12 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 				return 0;
 			int qmin = (int) Math.floor((D - 5 * s) / g);
 			if (qmin < 0)
+			{
 				qmin = 0;
+				// Collision check to avoid double computing
+				if (qmax == 0)
+					qmax++;
+			}
 
 			// Note: If D is camera counts then it will likely be limited to a 16-bit range
 			// Assuming the gain is at least 1 then the max q is:
@@ -158,28 +172,65 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 			final double logu = Math.log(u);
 			double p = 0;
-			for (int q = qmin; q <= qmax; q++)
+
+			// Optionally use the error function for a full convolution between 
+			// the Poisson PMF and Gaussian PDF
+			if (useCDF)
 			{
-				// P(D|q) = e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)
-				// log(P(D|q) = -u + q * log(u) - log(q!) - (D-q*g)^2/2*var - log(sqrt(2pi var))
+				// This actually computes a discrete PMF
+				// where the Poisson PMF is scaled using the gain and rounded to the 
+				// nearest integer x. The Gaussian CDF over the range x-0.5 to x+0.5 is
+				// computed to provide the equivalent of the convolution of the CDF of 
+				// the scaled Poisson and the Gaussian.
 
-				//// Poisson
-				//double pp = q * logu - u - LogFactorial.logF(q);
-				//
-				//// Gaussian
-				//double gp = -(Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian;
-				//
-				////System.out.printf("D=%f,q=%d,pp=%g,gp=%g  %g\n", D, q, FastMath.exp(pp), FastMath.exp(gp)
-				////		, FastMath.exp(-(Maths.pow2(D - q * g) / var_by_2)) / Math.sqrt(Math.PI*var_by_2));
-				//
-				//// Combine
-				//p += FastMath.exp(pp + gp);
+				// Cache erf
+				double lastX = Double.NaN;
+				double upper = 0, lower = 0, cdf = 0;
 
-				p += FastMath.exp(
-						// Poisson
-						q * logu - u - LogFactorial.logF(q)
-						// Gaussian
-								- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+				for (int q = qmin; q <= qmax; q++)
+				{
+					double x = Math.round(D - q * g);
+					if (x != lastX)
+					{
+						// X will be decrementing. 
+						// If the spacing is a step of 1 we can re-use the CDF.
+						upper = (x == lastX - 1) ? lower : gaussianCDF(x + 0.5);
+						lower = gaussianCDF(x - 0.5);
+						lastX = x;
+						cdf = (upper - lower) * 0.5;
+					}
+					p +=
+							// Poisson PMF
+							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
+									// Gaussian CDF
+									cdf;
+				}
+			}
+			else
+			{
+				for (int q = qmin; q <= qmax; q++)
+				{
+					// P(D|q) = e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)
+					// log(P(D|q) = -u + q * log(u) - log(q!) - (D-q*g)^2/2*var - log(sqrt(2pi var))
+
+					//// Poisson
+					//double pp = q * logu - u - LogFactorial.logF(q);
+					//
+					//// Gaussian
+					//double gp = -(Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian;
+					//
+					////System.out.printf("D=%f,q=%d,pp=%g,gp=%g  %g\n", D, q, FastMath.exp(pp), FastMath.exp(gp)
+					////		, FastMath.exp(-(Maths.pow2(D - q * g) / var_by_2)) / Math.sqrt(Math.PI*var_by_2));
+					//
+					//// Combine
+					//p += FastMath.exp(pp + gp);
+
+					p += FastMath.exp(
+							// Poisson
+							q * logu - u - LogFactorial.logF(q)
+							// Gaussian
+									- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+				}
 			}
 
 			// Determine normalisation
@@ -190,6 +241,22 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		}
 	}
 
+	/**
+	 * Gaussian CDF.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the cumulative density
+	 */
+	double gaussianCDF(final double x)
+	{
+		//return org.apache.commons.math3.special.CDF.erf(x / sqrt_var_by_2);
+		// This may not be precise enough. 
+		// Absolute error is <3e-7. Not sure what relative error is.
+		// The standard CDF is much slower.
+		return Erf.erf(x / sqrt_var_by_2);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -197,53 +264,100 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 */
 	public double logLikelihood(double o, double e)
 	{
+		// As above but return the log
+
 		if (e <= 0)
 		{
 			// If no Poisson mean then just use the Gaussian
+			if (useCDF)
+			{
+				double x = Math.round(o);
+				return Math.log((gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5);
+			}
 			return (-0.5 * o * o / var) + logNormalisationGaussian;
 		}
 		else
 		{
-			// Use same nomenclature as Huang et al
-
 			final double u = e; // expected photoelectrons
 			final double D = o; // Camera counts
-			// g == gain
-			// var = readout variance
-
-			// This is the probability of a Poisson convolved with a Gaussian.
-			// Evaluate the Poisson only in the range where the Gaussian is significant.
-			// I.e. when the Gaussian probability is zero then the Poisson is not relevant.
-			// Use +/- 5 SD
-			// x = D - q*g => q = (D-x) / g
 			int qmax = (int) Math.ceil((D + 5 * s) / g);
 			if (qmax < 0)
 				return Double.NEGATIVE_INFINITY;
 			int qmin = (int) Math.floor((D - 5 * s) / g);
 			if (qmin < 0)
+			{
 				qmin = 0;
-
+				// Collision check to avoid double computing
+				if (qmax == 0)
+					qmax++;
+			}
 			logFactorial.ensureRange(qmin, qmax);
-
 			final double logu = Math.log(u);
 			double p = 0;
-			for (int q = qmin; q <= qmax; q++)
+			// Optionally use the error function for a full convolution between 
+			// the Poisson PMF and Gaussian PDF
+			if (useCDF)
 			{
-				// P(D|q) = e^-u * u^q / q! * 1/sqrt(2pi var) * e ^ -((D-q*g)^2 / 2*var)
-				// log(P(D|q) = -u + q * log(u) - log(q!) - (D-q*g)^2/2*var - log(sqrt(2pi var))
+				// This actually computes a discrete PMF
+				// where the Poisson PMF is scaled using the gain and rounded to the 
+				// nearest integer x. The Gaussian CDF over the range x-0.5 to x+0.5 is
+				// computed to provide the equivalent of the convolution of the CDF of 
+				// the scaled Poisson and the Gaussian.
 
-				p += FastMath.exp(
-						// Poisson
-						q * logu - u - LogFactorial.logF(q)
-						// Gaussian
-								- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+				// Cache erf
+				double lastX = Double.NaN;
+				double upper = 0, lower = 0, cdf = 0;
+
+				for (int q = qmin; q <= qmax; q++)
+				{
+					double x = Math.round(D - q * g);
+					if (x != lastX)
+					{
+						upper = (x == lastX - 1) ? lower : gaussianCDF(x + 0.5);
+						lower = gaussianCDF(x - 0.5);
+						lastX = x;
+						cdf = (upper - lower) * 0.5;
+					}
+					p +=
+							// Poisson PMF
+							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
+									// Gaussian CDF
+									cdf;
+				}
 			}
-
-			// Determine normalisation
-			// Note: This is needed when using this as a discrete probability distribution, 
-			// e.g. input observed count is integer
-
+			else
+			{
+				for (int q = qmin; q <= qmax; q++)
+				{
+					p += FastMath.exp(
+							// Poisson
+							q * logu - u - LogFactorial.logF(q)
+							// Gaussian
+									- (Maths.pow2(D - q * g) / var_by_2) + logNormalisationGaussian);
+				}
+			}
 			return Math.log(p);
 		}
+	}
+
+	/**
+	 * Checks if using the full Gaussian CDF to convolve with the Poisson PMF.
+	 *
+	 * @return true, if using the full Gaussian CDF to convolve with the Poisson PMF
+	 */
+	public boolean isUseCDF()
+	{
+		return useCDF;
+	}
+
+	/**
+	 * Sets the CDF flag. Set to true to use the full Gaussian CDF to convolve with the Poisson PMF.
+	 *
+	 * @param useCDF
+	 *            the new use CDF flag
+	 */
+	public void setUseCDF(boolean useCDF)
+	{
+		this.useCDF = useCDF;
 	}
 }
