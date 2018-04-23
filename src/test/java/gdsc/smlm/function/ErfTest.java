@@ -452,4 +452,34 @@ public class ErfTest
 				Assert.assertTrue(x + " : " + e + " != " + g, false);
 		}
 	}
+
+	@Test
+	public void canComputePower4()
+	{
+		for (int i = -10; i <= 10; i++)
+		{
+			for (double d : new double[] { 0, 0.1, 0.01, 0.001 })
+			{
+				double f = i + d;
+				double e = Math.pow(f, 4);
+				double o = gdsc.smlm.function.Erf.power4(f);
+				Assert.assertEquals("x=" + f, e, o, e * 1e-10);
+			}
+		}
+	}
+
+	@Test
+	public void canComputePower16()
+	{
+		for (int i = -10; i <= 10; i++)
+		{
+			for (double d : new double[] { 0, 0.1, 0.01, 0.001 })
+			{
+				double f = i + d;
+				double e = Math.pow(f, 16);
+				double o = gdsc.smlm.function.Erf.power16(f);
+				Assert.assertEquals("x=" + f, e, o, e * 1e-10);
+			}
+		}
+	}
 }

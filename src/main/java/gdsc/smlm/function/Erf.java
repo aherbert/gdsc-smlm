@@ -64,7 +64,7 @@ public class Erf
 		return (negative) ? -ret : ret;
 	}
 
-	private static double power4(double d)
+	static double power4(double d)
 	{
 		d = d * d; // power 2
 		return d * d;
@@ -125,8 +125,9 @@ public class Erf
 		return (negative) ? -ret : ret;
 	}
 
-	private static double power16(double d)
+	static double power16(double d)
 	{
+		//return Math.pow(d, 16);
 		d = d * d; // power2
 		d = d * d; // power4
 		d = d * d; // power8
