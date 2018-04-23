@@ -23,6 +23,7 @@ import gdsc.core.utils.CachedRandomGenerator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.LogFactorial;
@@ -88,43 +89,68 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private CameraModelAnalysisSettings lastSimulationSettings = null;
 
 	private static String[] MODE = { "CCD", "EM-CCD", "sCMOS" };
-	//@formatter:off
-	private static String[] MODEL = { 
-			"Poisson (Discrete)", 
-			"Poisson (Continuous)", 
-			"Poisson*Gaussian convolution", // Poisson convolved with Gaussian
-			// Best for CCD/sCMOS
-			"Poisson+Gaussian approximation", // Saddle-point approximation
-			"Poisson+Poisson", // Mixed Poisson distribution (Noise is added as a second Poisson)
-			
-			// There is no obvious best for EM-CCD:
-			// This requires a full range test to determine the best function for which
-			// parameters.
-			
-			// Good but relatively worse as the read noise increases.
-			// Requires full integration when read noise is low (<1).
-			"Poisson+Gamma+Gaussian approximation", // Mortensen approximation
-			
-			// Good when read noise is >>1.
-			// Requires full integration when read noise is low (<1).
-			"Poisson+Gamma+Gaussian PDF integration", // Poisson+Gamma PMF approximation convolved with Gaussian PDF
-			
-			// Best for EM-CCD. 
-			// Very robust and does not require full integration (computes a PMF).
-			// Slow
-			"Poisson+Gamma+Gaussian CDF integration", // Poisson+Gamma PMF approximation convolved with Gaussian CDF
-			
-			// Good
-			"Poisson+Gamma+Gaussian Simpson's integration", // Poisson+Gamma PMF approximation convolved with Gaussian PDF using Simpson integration
-			
-			// Good
-			"Poisson+Gamma+Gaussian Legendre-Gauss integration", // Poisson+Gamma PMF approximation convolved with Gaussian PDF using Legendre-Gauss integration
-			
-			// Good when read noise is >>1.
-			// Requires full integration when read noise is low (<1).
-			"Poisson+Gamma*Gaussian convolution", // Poisson+Gamma PMF approximation convolved with Gaussian PDF
-			};
 
+	//@formatter:off
+	private enum Model implements NamedObject
+	{
+		///////////////
+		// CCD / sCMOS 
+		///////////////
+		
+		POISSON_DISRECTE { public String getName() { return "Poisson (Discrete)"; } },
+		POISSON_CONTINUOUS { public String getName() { return "Poisson (Continuous)"; } },
+		POISSON_GAUSSIAN_PDF { public String getName() { return "Poisson+Gaussian PDF integration"; } },
+		POISSON_GAUSSIAN_CDF { public String getName() { return "Poisson+Gaussian CDF integration"; } },
+		// Best for CCD/sCMOS
+		 // Saddle-point approximation
+		POISSON_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gaussian approximation"; } },
+		 // Mixed Poisson distribution (Noise is added as a second Poisson)
+		POISSON_POISSON { public String getName() { return "Poisson+Poisson"; } },
+		
+		///////////////
+		// EMCCD 
+		///////////////
+		// There is no obvious best for EM-CCD:
+		// This requires a full range test to determine the best function for which
+		// parameters.
+		
+		// Good but relatively worse as the read noise increases.
+		// Requires full integration when read noise is low (<1).
+		POISSON_GAMMA_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gamma+Gaussian approximation"; } },
+		// Good when read noise is >>1.
+		// Requires full integration when read noise is low (<1).
+		POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian PDF integration"; } },
+		// Best for EM-CCD. 
+		// Very robust and does not require full integration (computes a PMF).
+		// Slow
+		POISSON_GAMMA_GAUSSIAN_CDF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian CDF integration"; } },
+		// Good
+		POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Simpson's integration"; } },
+		// Good
+		POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Legendre-Gauss integration"; } },
+		// Independent implementation of POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION.
+		// Good when read noise is >>1.
+		// Requires full integration when read noise is low (<1).
+		POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION { public String getName() { return "Poisson+Gamma*Gaussian convolution"; } },
+		;
+
+
+		public String getShortName()
+		{
+			return getName();
+		}		
+		
+		public static Model forNumber(int number)
+		{
+			Model[] values = Model.values();
+			if (number < 0 || number >= values.length)
+				number = 0;
+			return values[number];
+		}
+	}
+	
+	private static String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
+	
 	private static abstract class Round
 	{
 		abstract int round(double d);
@@ -964,53 +990,58 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		double alpha = 1.0 / getGain(settings);
 		double noise = getReadNoise(settings);
-		switch (settings.getModel())
+		Model model = Model.forNumber(settings.getModel());
+		switch (model)
 		{
-			case 0:
+			case POISSON_DISRECTE:
 				return new PoissonFunction(alpha, false);
-			case 1:
+			case POISSON_CONTINUOUS:
 				return new PoissonFunction(alpha, true);
-			case 2:
-				return PoissonGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
-			case 3:
+			case POISSON_GAUSSIAN_PDF:
+			case POISSON_GAUSSIAN_CDF:
+				PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction
+						.createWithStandardDeviation(alpha, noise);
+				f1.setUseCDF(model == Model.POISSON_GAUSSIAN_CDF);
+				return f1;
+			case POISSON_GAUSSIAN_APPROX:
 				return PoissonGaussianFunction2.createWithStandardDeviation(alpha, noise);
-			case 4:
+			case POISSON_POISSON:
 				return PoissonPoissonFunction.createWithStandardDeviation(alpha, noise);
 
-			case 10:
+			case POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION:
 				return PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
 
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-				PoissonGammaGaussianFunction f = new PoissonGammaGaussianFunction(alpha, noise);
-				f.setMinimumProbability(0);
-				ConvolutionMode mode = getConvolutionMode(settings.getModel());
-				f.setConvolutionMode(mode);
+			case POISSON_GAMMA_GAUSSIAN_APPROX:
+			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_CDF_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:
+				PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(alpha, noise);
+				f2.setMinimumProbability(0);
+				ConvolutionMode mode = getConvolutionMode(model);
+				f2.setConvolutionMode(mode);
 				if (!mode.validAtBoundary())
-					f.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_CDF);
-				return f;
+					f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_CDF);
+				return f2;
 
 			default:
 				throw new IllegalStateException();
 		}
 	}
 
-	private static ConvolutionMode getConvolutionMode(int model)
+	private static ConvolutionMode getConvolutionMode(Model model)
 	{
 		switch (model)
 		{
-			case 5:
+			case POISSON_GAMMA_GAUSSIAN_APPROX:
 				return ConvolutionMode.APPROXIMATION;
-			case 6:
+			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
 				return ConvolutionMode.DISCRETE_PDF;
-			case 7:
+			case POISSON_GAMMA_GAUSSIAN_CDF_INTEGRATION:
 				return ConvolutionMode.DISCRETE_CDF;
-			case 8:
+			case POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION:
 				return ConvolutionMode.SIMPSON_PDF;
-			case 9:
+			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:
 				return ConvolutionMode.LEGENDRE_GAUSS_PDF;
 
 			default:
@@ -1197,7 +1228,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			sum += y[i];
 			y[i] = sum;
 		}
-		
+
 		// Check if sum is approximately 1
 		//System.out.printf("gain=%g, sum=%g\n", getGain(settings), sum);		
 
