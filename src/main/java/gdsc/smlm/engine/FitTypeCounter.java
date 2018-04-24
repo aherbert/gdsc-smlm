@@ -2,6 +2,8 @@ package gdsc.smlm.engine;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math3.util.FastMath;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -24,7 +26,7 @@ public class FitTypeCounter
 
 	public FitTypeCounter()
 	{
-		this.count = new AtomicInteger[(int) Math.pow(2, FitType.NO_OF_FLAGS)];
+		this.count = new AtomicInteger[(int) FastMath.pow(2, FitType.NO_OF_FLAGS)];
 		for (int i = 0; i < count.length; i++)
 			count[i] = new AtomicInteger();
 	}

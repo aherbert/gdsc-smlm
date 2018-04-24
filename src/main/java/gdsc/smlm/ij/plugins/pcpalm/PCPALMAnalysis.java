@@ -109,7 +109,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if ("save".equalsIgnoreCase(arg))
 			return saveResults();
 		if ("load".equalsIgnoreCase(arg))
@@ -190,8 +190,8 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	private void saveResult(XStream xs, CorrelationResult result)
 	{
-		String outputFilename = String.format("%s/%s.%d.xml", resultsDirectory, (result.spatialDomain) ? "Spatial"
-				: "Frequency", result.id);
+		String outputFilename = String.format("%s/%s.%d.xml", resultsDirectory,
+				(result.spatialDomain) ? "Spatial" : "Frequency", result.id);
 		FileOutputStream fs = null;
 		try
 		{
@@ -777,7 +777,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
 		plot.setLimits(0, x[x.length - 1], Maths.min(y) * 0.95, Maths.max(y) * 1.05);
 		plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
-		
+
 		Utils.display(plotTitle, plot);
 
 		if (showErrorBars && !barChart)
@@ -790,7 +790,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			}
 			Utils.display(plotTitle, plot);
 		}
-		
+
 		return plot;
 	}
 
@@ -1103,16 +1103,18 @@ public class PCPALMAnalysis implements PlugInFilter
 
 	private int nextPowerOfTwo(final int size)
 	{
-		int newSize = 0;
-		for (int i = 4; i < 15; i++)
-		{
-			newSize = (int) Math.pow(2.0, i);
-			if (size <= newSize)
-			{
-				break;
-			}
-		}
-		return newSize;
+		return Maths.nextPow2(size);
+
+		//		int newSize = 0;
+		//		for (int i = 4; i < 15; i++)
+		//		{
+		//			newSize = (int) Math.pow(2.0, i);
+		//			if (size <= newSize)
+		//			{
+		//				break;
+		//			}
+		//		}
+		//		return newSize;
 	}
 
 	/**

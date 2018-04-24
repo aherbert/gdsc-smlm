@@ -246,7 +246,7 @@ public class PoissonCalculatorTest
 		});		
 		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
-			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
+			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
 		});		
 		//@formatter:on
 	}
@@ -352,7 +352,7 @@ public class PoissonCalculatorTest
 		});		
 		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
-			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
+			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
 		});		
 		//@formatter:on
 	}
@@ -410,15 +410,15 @@ public class PoissonCalculatorTest
 		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(
 		new BaseNonLinearFunction("Gaussian")
 		{
-			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
+			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
 		},
 		new BaseNonLinearFunction("Gaussian")
 		{
-			public double eval(int x) {	return 0.2 + 50 * FastMath.exp(-0.5 * Math.pow(x - n3, 2) / (a[0] * a[0])); }
+			public double eval(int x) {	return 0.2 + 50 * FastMath.exp(-0.5 * Maths.pow2(x - n3) / (a[0] * a[0])); }
 		},
 		new BaseNonLinearFunction("Gaussian")
 		{
-			public double eval(int x) {	return 0.3 + 75 * FastMath.exp(-0.5 * Math.pow(x - n4, 2) / (a[0] * a[0])); }
+			public double eval(int x) {	return 0.3 + 75 * FastMath.exp(-0.5 * Maths.pow2(x - n4) / (a[0] * a[0])); }
 		});		
 		//@formatter:on
 	}

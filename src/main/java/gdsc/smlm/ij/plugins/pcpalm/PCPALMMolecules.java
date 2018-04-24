@@ -1123,7 +1123,7 @@ public class PCPALMMolecules implements PlugIn
 					// Generate a mask of circles then sample from that.
 					// If we want to fill the mask completely then adjust the total steps to be the number of 
 					// circles that can fit inside the mask.
-					totalSteps = (int) (maskSize * maskSize / (Math.PI * Math.pow(clusterRadius / maskScale, 2)));
+					totalSteps = (int) (maskSize * maskSize / (Math.PI * Maths.pow2(clusterRadius / maskScale)));
 				}
 
 				while ((centre = maskDistribution.next()) != null && clusterCentres.size() < totalSteps)

@@ -197,7 +197,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		{
 			throw new NotStrictlyPositiveException(LocalizedFormats.SHAPE, shape);
 		}
-		this.shape = shape;
+		setShapeUnsafe(shape);
 	}
 
 	/**

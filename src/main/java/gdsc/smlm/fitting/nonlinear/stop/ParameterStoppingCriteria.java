@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting.nonlinear.stop;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
@@ -156,7 +158,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria
 	{
 		this.significantDigits = significantDigits;
 		eq.setMaxRelativeError(DoubleEquality.getMaxRelativeError(significantDigits));
-		angleLimit = 1.0 / Math.pow(10, significantDigits - 1);
+		angleLimit = 1.0 / FastMath.pow(10, significantDigits - 1);
 	}
 
 	/**

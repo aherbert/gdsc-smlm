@@ -26,9 +26,9 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.function.Bessel;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.PoissonFunction;
+import gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.utils.Convolution;
@@ -578,8 +578,6 @@ public class EMGainAnalysis implements PlugInFilter
 		return stats.getValues();
 	}
 
-	private static final double twoSqrtPi = 2 * Math.sqrt(Math.PI);
-
 	/**
 	 * Calculate the probability density function for EM-gain.
 	 * <p>
@@ -595,53 +593,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private static double pEMGain(double c, double p, double m)
 	{
-		// The default evaluation is:
-		//if (true)
-		//return Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
-
-		// Bessel.I1(x) -> Infinity
-		// The current implementation of Bessel.I1(x) is Infinity at x==710
-
-		// This has been fixed in the PoissonGammaGaussianFunction class so copy that code.
-		final double alpha = 1 / m;
-
-		final double cij = c;
-		final double eta = p;
-
-		// Any observed count above zero
-		if (cij > 0.0)
-		{
-			// The observed count converted to photons
-			final double nij = alpha * cij;
-
-			// The current implementation of Bessel.I1(x) is Infinity at x==710
-			// The limit on eta * nij is therefore (709/2)^2 = 125670.25
-			if (eta * nij > 10000)
-			{
-				// Approximate Bessel function i1(x) when using large x:
-				// i1(x) ~ exp(x)/sqrt(2*pi*x)
-				// However the entire equation is logged (creating transform),
-				// evaluated then raised to e to prevent overflow error on 
-				// large exp(x)
-
-				final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-						Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
-				return FastMath.exp(transform);
-			}
-			else
-			{
-				// Second part of equation 135
-				return Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij));
-			}
-		}
-		else if (cij == 0.0)
-		{
-			return FastMath.exp(-eta);
-		}
-		else
-		{
-			return 0;
-		}
+		return PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m);
 	}
 
 	/**

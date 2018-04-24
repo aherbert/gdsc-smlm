@@ -664,6 +664,8 @@ public class BinomialFitter
 			// Compute the gradient using analytical differentiation
 			final int n = trials;
 
+			// Note FastMath has specific case for integer power argument which is faster.
+
 			if (startIndex == 0)
 			{
 				for (int k = 0; k <= n; ++k)
@@ -672,8 +674,12 @@ public class BinomialFitter
 					//		nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
 
 					// Optimise
-					jacobian[k][0] = nC[k] * (k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) -
-							Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1));
+					final double pk_1 = FastMath.pow(p, k - 1);
+					final double pk = p * pk_1;
+					final double q = 1 - p;
+					final double q_n_k_1 = FastMath.pow(q, n - k - 1);
+					final double q_n_k = q * q_n_k_1;
+					jacobian[k][0] = nC[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
 				}
 			}
 			else
@@ -690,19 +696,21 @@ public class BinomialFitter
 				// So far we have only computed g' for the original Binomial
 
 				//double pi = dist.probability(0);
-				final double p_n = Math.pow(1 - p, n);
+				final double q = 1 - p;
+				final double p_n = FastMath.pow(1 - p, n);
 				final double f = 1.0 / (1.0 - nC[0] * p_n);
-				final double ff = -1 / Math.pow(1.0 - nC[0] * p_n, 2) + n * Math.pow(1 - p, n - 1);
+				final double ff = -1 / FastMath.pow(1.0 - nC[0] * p_n, 2) + n * FastMath.pow(q, n - 1);
 
 				for (int k = 1; k <= n; ++k)
 				{
-					final double pk = Math.pow(p, k);
-					final double p_n_k = Math.pow(1 - p, n - k);
+					final double pk_1 = FastMath.pow(p, k - 1);
+					final double pk = p * pk_1;
+					final double q_n_k_1 = FastMath.pow(q, n - k - 1);
+					final double q_n_k = q * q_n_k_1;
 
-					final double g = nC[k] * pk * p_n_k;
+					final double g = nC[k] * pk * q_n_k;
 					// Differentiate as above
-					final double gg = nC[k] *
-							(k * Math.pow(p, k - 1) * p_n_k - pk * (n - k) * Math.pow(1 - p, n - k - 1));
+					final double gg = nC[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
 					jacobian[k][0] = ff * g + f * gg;
 				}
 			}

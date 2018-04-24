@@ -52,6 +52,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.ij.BufferedTextWindow;
 import gdsc.core.ij.Utils;
@@ -5957,7 +5958,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private long countCombinations(int n)
 	{
-		return (long) Math.pow(2, n) - 1;
+		return (long) FastMath.pow(2, n) - 1;
 
 		// This returns the same as (2^n)-1
 		//long total = 0;

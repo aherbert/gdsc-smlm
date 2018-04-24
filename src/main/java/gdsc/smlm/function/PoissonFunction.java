@@ -1,5 +1,7 @@
 package gdsc.smlm.function;
 
+import org.apache.commons.math3.distribution.CustomPoissonDistribution;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -13,7 +15,6 @@ package gdsc.smlm.function;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
@@ -27,6 +28,8 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunction
 {
+	private final CustomPoissonDistribution pd;
+	
 	/**
 	 * The inverse of the on-chip gain multiplication factor
 	 */
@@ -53,6 +56,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 		this.alpha = Math.abs(alpha);
 		logAlpha = Math.log(alpha);
 		this.nonInteger = nonInteger;
+		pd = (nonInteger) ? new CustomPoissonDistribution(null, 1) : null;
 	}
 
 	/*
@@ -79,8 +83,8 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			return FastMath.exp(ll) * alpha;
 		}
 
-		//return new PoissonDistribution(e).probability((int) Math.round(o)) * alpha;
-		return new PoissonDistribution(e).probability((int) o) * alpha;
+		pd.setMeanUnsafe(e);
+		return pd.probability((int) o) * alpha;
 	}
 
 	/**
@@ -133,6 +137,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			return ll + logAlpha;
 		}
 
-		return new PoissonDistribution(e).logProbability((int) o) + logAlpha;
+		pd.setMeanUnsafe(e);
+		return pd.logProbability((int) o) + logAlpha;
 	}
 }
