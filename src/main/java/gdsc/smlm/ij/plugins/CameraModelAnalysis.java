@@ -102,7 +102,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		POISSON_GAUSSIAN_PDF { public String getName() { return "Poisson+Gaussian PDF integration"; } },
 		
 		// Best for CCD/sCMOS ?
-		POISSON_GAUSSIAN_CDF { public String getName() { return "Poisson+Gaussian CDF integration"; } },
+		POISSON_GAUSSIAN_PMF { public String getName() { return "Poisson+Gaussian PMF integration"; } },
 		// Saddle-point approximation.
 		// Very good
 		POISSON_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gaussian approximation"; } },
@@ -125,7 +125,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Best for EM-CCD. 
 		// Very robust and does not require full integration (computes a PMF).
 		// Slow
-		POISSON_GAMMA_GAUSSIAN_CDF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian CDF integration"; } },
+		POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian PMF integration"; } },
 		// Good
 		POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Simpson's integration"; } },
 		// Good
@@ -1000,10 +1000,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			case POISSON_CONTINUOUS:
 				return new PoissonFunction(alpha, true);
 			case POISSON_GAUSSIAN_PDF:
-			case POISSON_GAUSSIAN_CDF:
+			case POISSON_GAUSSIAN_PMF:
 				PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction
 						.createWithStandardDeviation(alpha, noise);
-				f1.setUseCDF(model == Model.POISSON_GAUSSIAN_CDF);
+				f1.setComputePMF(model == Model.POISSON_GAUSSIAN_PMF);
 				return f1;
 			case POISSON_GAUSSIAN_APPROX:
 				return PoissonGaussianFunction2.createWithStandardDeviation(alpha, noise);
@@ -1015,7 +1015,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 			case POISSON_GAMMA_GAUSSIAN_APPROX:
 			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
-			case POISSON_GAMMA_GAUSSIAN_CDF_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION:
 			case POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION:
 			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:
 				PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(alpha, noise);
@@ -1023,7 +1023,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				ConvolutionMode mode = getConvolutionMode(model);
 				f2.setConvolutionMode(mode);
 				if (!mode.validAtBoundary())
-					f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_CDF);
+					f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_PMF);
 				return f2;
 
 			default:
@@ -1039,8 +1039,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				return ConvolutionMode.APPROXIMATION;
 			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
 				return ConvolutionMode.DISCRETE_PDF;
-			case POISSON_GAMMA_GAUSSIAN_CDF_INTEGRATION:
-				return ConvolutionMode.DISCRETE_CDF;
+			case POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION:
+				return ConvolutionMode.DISCRETE_PMF;
 			case POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION:
 				return ConvolutionMode.SIMPSON_PDF;
 			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:

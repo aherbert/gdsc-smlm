@@ -17,7 +17,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	double[] noise = PoissonGaussianFunctionTest.noise;
 
 	@Test
-	public void cumulativeProbabilityIsOne()
+	public void cumulativeProbabilityIsOneWithPDF()
 	{
 		for (double g : gain)
 			for (double p : photons)
@@ -26,7 +26,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithCDF()
+	public void cumulativeProbabilityIsOneWithPMF()
 	{
 		for (double g : gain)
 			for (double p : photons)
@@ -35,7 +35,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	}
 
 	@Test
-	public void probabilityMatchesLogProbability()
+	public void probabilityMatchesLogProbabilityWithPDF()
 	{
 		for (double g : gain)
 			for (double p : photons)
@@ -44,7 +44,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	}
 
 	@Test
-	public void probabilityMatchesLogProbabilityWithCDF()
+	public void probabilityMatchesLogProbabilityWithPMF()
 	{
 		for (double g : gain)
 			for (double p : photons)
@@ -52,19 +52,19 @@ public class PoissonGaussianConvolutionFunctionTest
 					probabilityMatchesLogProbability(g, p, s, true);
 	}
 
-	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, boolean useCDF)
+	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, boolean computePMF)
 	{
-		double p2 = cumulativeProbability(gain, mu, s, useCDF);
-		String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, useCDF);
+		double p2 = cumulativeProbability(gain, mu, s, computePMF);
+		String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 		Assert.assertEquals(msg, 1, p2, 0.02);
 	}
 
-	private double cumulativeProbability(final double gain, final double mu, final double s, boolean useCDF)
+	private double cumulativeProbability(final double gain, final double mu, final double s, boolean computePMF)
 	{
 		// Note: The input s parameter is pre-gain.
 		final PoissonGaussianConvolutionFunction f = PoissonGaussianConvolutionFunction
 				.createWithStandardDeviation(1.0 / gain, s * gain);
-		f.setUseCDF(useCDF);
+		f.setComputePMF(computePMF);
 
 		//final PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1.0 / gain, mu*gain, s * gain);
 		//f2.setUsePicardApproximation(usePicard);
@@ -118,19 +118,22 @@ public class PoissonGaussianConvolutionFunctionTest
 				break;
 		}
 
-		if (p < 0.98 || p > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
-
-		// Do a formal integration
-		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
+		double p2 = p;
+		if (!computePMF)
 		{
-			public double value(double x)
+			// Do a formal integration if the PDF
+			if (p < 0.98 || p > 1.02)
+				System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
+			UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4,
+					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
-				return f.likelihood(x, e);
-			}
-		}, min, max);
+				public double value(double x)
+				{
+					return f.likelihood(x, e);
+				}
+			}, min, max);
+		}
 
 		if (p2 < 0.98 || p2 > 1.02)
 			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
@@ -138,12 +141,12 @@ public class PoissonGaussianConvolutionFunctionTest
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, final double s, boolean useCDF)
+	private void probabilityMatchesLogProbability(final double gain, double mu, final double s, boolean computePMF)
 	{
 		// Note: The input s parameter is pre-gain.
 		PoissonGaussianConvolutionFunction f = PoissonGaussianConvolutionFunction
 				.createWithStandardDeviation(1.0 / gain, s * gain);
-		f.setUseCDF(useCDF);
+		f.setComputePMF(computePMF);
 
 		// Evaluate an initial range. 
 		// Gaussian should have >99% within +/- s
@@ -154,20 +157,19 @@ public class PoissonGaussianConvolutionFunctionTest
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
-		String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, useCDF);
+		String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(msg, Math.log(p), logP,
-					1e-3 * Math.abs(logP));
+			Assert.assertEquals(msg, Math.log(p), logP, 1e-3 * Math.abs(logP));
 		}
 	}
-	
+
 	@Test
-	public void pdfFasterUseCdf()
+	public void pdfFasterThanPMF()
 	{
 		//org.junit.Assume.assumeTrue(false);
 
@@ -175,11 +177,13 @@ public class PoissonGaussianConvolutionFunctionTest
 		double s = 7.16;
 		double g = 3.1;
 
-		PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g, s);
-		f1.setUseCDF(true);
+		PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
+				s);
+		f1.setComputePMF(true);
 
-		PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g, s);
-		f2.setUseCDF(false);
+		PoissonGaussianConvolutionFunction f2 = PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g,
+				s);
+		f2.setComputePMF(false);
 
 		// Generate realistic data from the probability mass function
 		double[][] samples = new double[photons.length][];
@@ -229,8 +233,8 @@ public class PoissonGaussianConvolutionFunctionTest
 			t2 += run(f2, samples, photons);
 
 		System.out.printf("cdf  %d -> pdf  %d = %f x\n", t1, t2, (double) t1 / t2);
-	}	
-	
+	}
+
 	private long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)
 	{
 		long start = System.nanoTime();
@@ -242,5 +246,5 @@ public class PoissonGaussianConvolutionFunctionTest
 		}
 		return System.nanoTime() - start;
 	}
-	
+
 }

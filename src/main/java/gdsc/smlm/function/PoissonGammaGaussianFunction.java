@@ -73,9 +73,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 		/**
 		 * Convolve the Poisson-Gamma on discrete (integer) intervals with the Gaussian cumulative probability density
-		 * function. This method is accurate for all read noise.
+		 * function. This method is accurate for all read noise. This computes a PMF(X=x) on the integer scale.
 		 */
-		DISCRETE_CDF,
+		DISCRETE_PMF,
 
 		//@formatter:off
 		/**
@@ -290,7 +290,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					}
 				}
 			}
-			else if (mode == ConvolutionMode.DISCRETE_CDF)
+			else if (mode == ConvolutionMode.DISCRETE_PMF)
 			{
 				// Use a simple integration by adding the points in the range.
 				// Use the error function to obtain the integral of the Gaussian

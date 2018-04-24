@@ -51,7 +51,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 	private final double logNormalisationGaussian;
 
-	private boolean useCDF = false;
+	private boolean computePMF = false;
 
 	/**
 	 * Instantiates a new poisson gaussian convolution function.
@@ -120,17 +120,21 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		return new PoissonGaussianConvolutionFunction(alpha, var, true);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true the function does
+	 * not error if the input x is non-integer.
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
+	 * @see #isComputePMF()
 	 */
 	public double likelihood(double o, double e)
 	{
 		if (e <= 0)
 		{
 			// If no Poisson mean then just use the Gaussian
-			if (useCDF)
+			if (computePMF)
 			{
 				double x = Math.round(o);
 				return (gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
@@ -175,35 +179,22 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 
 			// Optionally use the error function for a full convolution between 
 			// the Poisson PMF and Gaussian PDF
-			if (useCDF)
+			if (computePMF)
 			{
-				// This actually computes a discrete PMF
-				// where the Poisson PMF is scaled using the gain to generate a PMF for (X=x).
+				// The Poisson PMF is scaled using the gain to generate a PMF for (X=x).
 				// The Gaussian CDF over the range x-0.5 to x+0.5 is
-				// computed to provide the equivalent of the convolution of the CDF of 
-				// the scaled Poisson and the Gaussian.
-
-				// Cache erf
-				double lastX = Double.NaN;
-				double upper = 0, lower = 0, cdf = 0;
+				// computed to provide the equivalent of the convolution of the PMF of 
+				// the scaled Poisson and the PDF of the Gaussian over the discrete 
+				// integer range. The output is a PMF.
 
 				for (int q = qmin; q <= qmax; q++)
 				{
 					double x = getX(D, q);
-					if (x != lastX)
-					{
-						// X will be decrementing. 
-						// If the spacing is a step of 1 we can re-use the CDF.
-						upper = (x == lastX - 1) ? lower : gaussianCDF(x + 0.5);
-						lower = gaussianCDF(x - 0.5);
-						lastX = x;
-						cdf = (upper - lower) * 0.5;
-					}
 					p +=
 							// Poisson PMF
 							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
 									// Gaussian CDF
-									cdf;
+									(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 				}
 			}
 			else
@@ -264,10 +255,14 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		return Erf.erf(x / sqrt_var_by_2);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * The output is a PDF or PMF depending on the value of {@link #isComputePMF()}. If set to true the function does
+	 * not error if the input x is non-integer.
 	 * 
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
+	 * @see #isComputePMF()
 	 */
 	public double logLikelihood(double o, double e)
 	{
@@ -276,7 +271,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 		if (e <= 0)
 		{
 			// If no Poisson mean then just use the Gaussian
-			if (useCDF)
+			if (computePMF)
 			{
 				double x = Math.round(o);
 				return Math.log((gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5);
@@ -301,35 +296,16 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 			logFactorial.ensureRange(qmin, qmax);
 			final double logu = Math.log(u);
 			double p = 0;
-			// Optionally use the error function for a full convolution between 
-			// the Poisson PMF and Gaussian PDF
-			if (useCDF)
+			if (computePMF)
 			{
-				// This actually computes a discrete PMF
-				// where the Poisson PMF is scaled using the gain and rounded to the 
-				// nearest integer x. The Gaussian CDF over the range x-0.5 to x+0.5 is
-				// computed to provide the equivalent of the convolution of the CDF of 
-				// the scaled Poisson and the Gaussian.
-
-				// Cache erf
-				double lastX = Double.NaN;
-				double upper = 0, lower = 0, cdf = 0;
-
 				for (int q = qmin; q <= qmax; q++)
 				{
 					double x = getX(D, q);
-					if (x != lastX)
-					{
-						upper = (x == lastX - 1) ? lower : gaussianCDF(x + 0.5);
-						lower = gaussianCDF(x - 0.5);
-						lastX = x;
-						cdf = (upper - lower) * 0.5;
-					}
 					p +=
 							// Poisson PMF
 							FastMath.exp(q * logu - u - LogFactorial.logF(q)) *
 									// Gaussian CDF
-									cdf;
+									(gaussianCDF(x + 0.5) - gaussianCDF(x - 0.5)) * 0.5;
 				}
 			}
 			else
@@ -348,23 +324,29 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	}
 
 	/**
-	 * Checks if using the full Gaussian CDF to convolve with the Poisson PMF.
+	 * Checks if computing a PMF(X=x) (for integer x) using the Gaussian CDF to convolve with the Poisson PMF.
+	 * <p>
+	 * The default is a PDF(X=x). If set to true the function {@link #likelihood(double, double)} does not error if the
+	 * input x is non-integer.
 	 *
-	 * @return true, if using the full Gaussian CDF to convolve with the Poisson PMF
+	 * @return true, if computing a PMF(X=x).
 	 */
-	public boolean isUseCDF()
+	public boolean isComputePMF()
 	{
-		return useCDF;
+		return computePMF;
 	}
 
 	/**
-	 * Sets the CDF flag. Set to true to use the full Gaussian CDF to convolve with the Poisson PMF.
+	 * Set to true if computing a PMF(X=x) (for integer x) using the Gaussian CDF to convolve with the Poisson PMF.
+	 * <p>
+	 * The default is a PDF(X=x). If set to true the function {@link #likelihood(double, double)} does not error if the
+	 * input x is non-integer.
 	 *
-	 * @param useCDF
+	 * @param computePMF
 	 *            the new use CDF flag
 	 */
-	public void setUseCDF(boolean useCDF)
+	public void setComputePMF(boolean computePMF)
 	{
-		this.useCDF = useCDF;
+		this.computePMF = computePMF;
 	}
 }

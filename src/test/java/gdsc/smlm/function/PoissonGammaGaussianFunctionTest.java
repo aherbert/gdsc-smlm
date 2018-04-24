@@ -88,7 +88,7 @@ public class PoissonGammaGaussianFunctionTest
 			for (double s : noise)
 				for (double g : totalGain)
 				{
-					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PMF);
 				}
 	}
 
@@ -153,7 +153,7 @@ public class PoissonGammaGaussianFunctionTest
 			for (double s : noise)
 				for (double g : totalGain)
 				{
-					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PMF);
 				}
 	}
 
@@ -218,7 +218,7 @@ public class PoissonGammaGaussianFunctionTest
 			for (double s : noise)
 				for (double g : totalGain)
 				{
-					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_CDF);
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PMF);
 				}
 	}
 
@@ -313,13 +313,13 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void discretePDFIntegrationFasterThanDiscretePDFIntegration()
 	{
-		fasterThan(ConvolutionMode.DISCRETE_CDF, ConvolutionMode.DISCRETE_PDF);
+		fasterThan(ConvolutionMode.DISCRETE_PMF, ConvolutionMode.DISCRETE_PDF);
 	}
 
 	@Test
 	public void simpsonIntegrationFasterThanDiscreteCDFIntegration()
 	{
-		fasterThan(ConvolutionMode.DISCRETE_CDF, ConvolutionMode.SIMPSON_PDF);
+		fasterThan(ConvolutionMode.DISCRETE_PMF, ConvolutionMode.SIMPSON_PDF);
 	}
 
 	@Test
@@ -431,7 +431,7 @@ public class PoissonGammaGaussianFunctionTest
 					continue;
 
 				PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
-				f1.setConvolutionMode(ConvolutionMode.DISCRETE_CDF);
+				f1.setConvolutionMode(ConvolutionMode.DISCRETE_PMF);
 				f1.setMinimumProbability(0);
 
 				PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1 / g, s);
@@ -481,12 +481,12 @@ public class PoissonGammaGaussianFunctionTest
 		PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
 		f1.setConvolutionMode(slow);
 		if (!slow.validAtBoundary())
-			f1.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_CDF);
+			f1.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_PMF);
 
 		PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1 / g, s);
 		f2.setConvolutionMode(fast);
 		if (!fast.validAtBoundary())
-			f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_CDF);
+			f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_PMF);
 
 		// Generate realistic data from the probability mass function
 		double[][] samples = new double[photons.length][];
