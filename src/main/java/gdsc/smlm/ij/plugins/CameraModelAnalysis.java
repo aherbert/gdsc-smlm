@@ -101,10 +101,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		POISSON_CONTINUOUS { public String getName() { return "Poisson (Continuous)"; } },
 		POISSON_GAUSSIAN_PDF { public String getName() { return "Poisson+Gaussian PDF integration"; } },
 		
-		// Best for CCD/sCMOS ?
+		// Best for CCD/sCMOS
 		POISSON_GAUSSIAN_PMF { public String getName() { return "Poisson+Gaussian PMF integration"; } },
 		// Saddle-point approximation.
-		// Very good
+		// Very good. Relatively worse than POISSON_GAUSSIAN_PMF at very low photons.
 		POISSON_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gaussian approximation"; } },
 		 // Mixed Poisson distribution (Noise is added as a second Poisson)
 		POISSON_POISSON { public String getName() { return "Poisson+Poisson"; } },
@@ -117,7 +117,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// parameters.
 		
 		// Good but relatively worse as the read noise increases.
-		// Requires full integration when read noise is low (<1).
+		// Requires full integration when read noise is low (<1) and photons are low (<5).
 		POISSON_GAMMA_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gamma+Gaussian approximation"; } },
 		// Good when read noise is >>1.
 		// Requires full integration when read noise is low (<1).
