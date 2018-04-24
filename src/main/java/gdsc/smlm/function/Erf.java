@@ -59,12 +59,12 @@ public class Erf
 			return negative ? -1 : 1;
 
 		final double x2 = x * x;
-		final double ret = 1 - 1 / power4(1.0 + 0.278393 * x + 0.230389 * x2 + 0.000972 * x2 * x + 0.078108 * x2 * x2);
+		final double ret = 1 - 1 / pow4(1.0 + 0.278393 * x + 0.230389 * x2 + 0.000972 * x2 * x + 0.078108 * x2 * x2);
 
 		return (negative) ? -ret : ret;
 	}
 
-	static double power4(double d)
+	static double pow4(double d)
 	{
 		d = d * d; // power 2
 		return d * d;
@@ -119,15 +119,14 @@ public class Erf
 
 		final double x2 = x * x;
 		final double x3 = x2 * x;
-		final double ret = 1 - 1 / power16(1.0 + 0.0705230784 * x + 0.0422820123 * x2 + 0.0092705272 * x3 +
+		final double ret = 1 - 1 / pow16(1.0 + 0.0705230784 * x + 0.0422820123 * x2 + 0.0092705272 * x3 +
 				0.0001520143 * x2 * x2 + 0.0002765672 * x2 * x3 + 0.0000430638 * x3 * x3);
 
 		return (negative) ? -ret : ret;
 	}
 
-	static double power16(double d)
+	static double pow16(double d)
 	{
-		//return Math.pow(d, 16);
 		d = d * d; // power2
 		d = d * d; // power4
 		d = d * d; // power8

@@ -297,12 +297,12 @@ public class ErfTest
 		System.out.printf(erf.name + " Gaussian approx pixel unit max error = %f\n", max2);
 	}
 
-	private class MyTimingTask extends BaseTimingTask
+	private class ErfTimingTask extends BaseTimingTask
 	{
 		BaseErf erf;
 		double[] x;
 
-		public MyTimingTask(BaseErf erf, double[] x)
+		public ErfTimingTask(BaseErf erf, double[] x)
 		{
 			super(erf.name);
 			this.erf = erf;
@@ -339,10 +339,10 @@ public class ErfTest
 			x[i] = -range + i * step;
 
 		TimingService ts = new TimingService(5);
-		ts.execute(new MyTimingTask(new ApacheErf(), x));
-		ts.execute(new MyTimingTask(new Erf(), x));
-		ts.execute(new MyTimingTask(new Erf0(), x));
-		ts.execute(new MyTimingTask(new Erf2(), x));
+		ts.execute(new ErfTimingTask(new ApacheErf(), x));
+		ts.execute(new ErfTimingTask(new Erf(), x));
+		ts.execute(new ErfTimingTask(new Erf0(), x));
+		ts.execute(new ErfTimingTask(new Erf2(), x));
 
 		int size = ts.getSize();
 		ts.repeat(size);
@@ -462,7 +462,7 @@ public class ErfTest
 			{
 				double f = i + d;
 				double e = Math.pow(f, 4);
-				double o = gdsc.smlm.function.Erf.power4(f);
+				double o = gdsc.smlm.function.Erf.pow4(f);
 				Assert.assertEquals("x=" + f, e, o, e * 1e-10);
 			}
 		}
@@ -477,9 +477,110 @@ public class ErfTest
 			{
 				double f = i + d;
 				double e = Math.pow(f, 16);
-				double o = gdsc.smlm.function.Erf.power16(f);
+				double o = gdsc.smlm.function.Erf.pow16(f);
 				Assert.assertEquals("x=" + f, e, o, e * 1e-10);
 			}
+		}
+	}
+
+	// See if power functions are faster
+
+	//@formatter:off
+	private abstract class BasePow
+	{
+		String name;
+		BasePow(String name) { this.name = name; }
+		abstract double pow(double x);
+	}
+	private class MathPow4 extends BasePow
+	{
+		MathPow4() {	super("Math pow4"); }
+		double pow(double x) { return Math.pow(x, 4); }
+	}
+	private class FastMathPow4 extends BasePow
+	{
+		FastMathPow4() {	super("FastMath pow4"); }
+		double pow(double x) { return FastMath.pow(x, 4L); }
+	}
+	private class Pow4 extends BasePow
+	{
+		Pow4() {	super("pow4"); }
+		double pow(double x) { return gdsc.smlm.function.Erf.pow4(x); }
+	}
+	private class MathPow16 extends BasePow
+	{
+		MathPow16() {	super("Math pow16"); }
+		double pow(double x) { return Math.pow(x, 16); }
+	}
+	private class FastMathPow16 extends BasePow
+	{
+		FastMathPow16() {	super("FastMath pow16"); }
+		double pow(double x) { return FastMath.pow(x, 16); }
+	}
+	private class Pow16 extends BasePow
+	{
+		Pow16() {	super("pow16"); }
+		double pow(double x) { return gdsc.smlm.function.Erf.pow16(x); }
+	}
+	//@formatter:on
+
+	private class PowTimingTask extends BaseTimingTask
+	{
+		BasePow pow;
+		double[] x;
+
+		public PowTimingTask(BasePow pow, double[] x)
+		{
+			super(pow.name);
+			this.pow = pow;
+			this.x = x;
+		}
+
+		public int getSize()
+		{
+			return 1;
+		}
+
+		public Object getData(int i)
+		{
+			return null;
+		}
+
+		public Object run(Object data)
+		{
+			for (int i = 0; i < x.length; i++)
+				pow.pow(x[i]);
+			return null;
+		}
+	}
+
+	@Test
+	public void powerApproxIsFaster()
+	{
+		int range = 5000;
+		int steps = 100000;
+		final double[] x = new double[steps];
+		double step = range / steps;
+		for (int i = 0; i < steps; i++)
+			x[i] = i * step;
+
+		TimingService ts = new TimingService(5);
+		ts.execute(new PowTimingTask(new MathPow4(), x));
+		ts.execute(new PowTimingTask(new FastMathPow4(), x));
+		ts.execute(new PowTimingTask(new Pow4(), x));
+		ts.execute(new PowTimingTask(new MathPow16(), x));
+		ts.execute(new PowTimingTask(new FastMathPow16(), x));
+		ts.execute(new PowTimingTask(new Pow16(), x));
+
+		int size = ts.getSize();
+		ts.repeat(size);
+		ts.report();
+
+		for (int i = 0; i < 2; i++)
+		{
+			int j = -(1 + i * 3);
+			Assert.assertTrue(ts.get(j).getMean() < ts.get(j - 1).getMean());
+			Assert.assertTrue(ts.get(j).getMean() < ts.get(j - 2).getMean());
 		}
 	}
 }
