@@ -886,7 +886,8 @@ public class EMGainAnalysis implements PlugInFilter
 		switch (approximation)
 		{
 			case 3:
-				fun = new PoissonFunction(1.0 / _gain, true);
+				//fun = new InterpolatedPoissonFunction(1.0 / _gain, true);
+				fun = new PoissonFunction(1.0 / _gain);
 				break;
 			case 2:
 				// The mean does not matter (as normalisation is done dynamically for 

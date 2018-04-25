@@ -25,6 +25,7 @@ import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
+import gdsc.smlm.function.InterpolatedPoissonFunction;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.LogFactorial;
 import gdsc.smlm.function.PoissonFunction;
@@ -97,6 +98,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// CCD / sCMOS 
 		///////////////
 		
+		POISSON_PMF { public String getName() { return "Poisson PMF"; } },
 		POISSON_DISRECTE { public String getName() { return "Poisson (Discrete)"; } },
 		POISSON_CONTINUOUS { public String getName() { return "Poisson (Continuous)"; } },
 		POISSON_GAUSSIAN_PDF { public String getName() { return "Poisson+Gaussian PDF integration"; } },
@@ -995,10 +997,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		Model model = Model.forNumber(settings.getModel());
 		switch (model)
 		{
+			case POISSON_PMF:
+				return new PoissonFunction(alpha);
 			case POISSON_DISRECTE:
-				return new PoissonFunction(alpha, false);
+				return new InterpolatedPoissonFunction(alpha, false);
 			case POISSON_CONTINUOUS:
-				return new PoissonFunction(alpha, true);
+				return new InterpolatedPoissonFunction(alpha, true);
 			case POISSON_GAUSSIAN_PDF:
 			case POISSON_GAUSSIAN_PMF:
 				PoissonGaussianConvolutionFunction f1 = PoissonGaussianConvolutionFunction
