@@ -30,37 +30,41 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	private double shape;
 	/** The scale parameter. */
 	private final double scale;
+
+	/** The uninitialised flag. Indicates that the shape factors have not been computed for the current shape. */
+	private boolean uninitialised;
+
 	/**
 	 * The constant value of {@code shape + g + 0.5}, where {@code g} is the
 	 * Lanczos constant {@link Gamma#LANCZOS_G}.
 	 */
-	private final double shiftedShape;
+	private double shiftedShape;
 	/**
 	 * The constant value of {@code shape / scale * sqrt(e / (2 * pi * (shape + g + 0.5))) / L(shape)},
 	 * where {@code L(shape)} is the Lanczos approximation returned by {@link Gamma#lanczos(double)}. This prefactor is
 	 * used in {@link #density(double)}, when no overflow occurs with the natural
 	 * calculation.
 	 */
-	private final double densityPrefactor1;
+	private double densityPrefactor1;
 	/**
 	 * The constant value of {@code shape * sqrt(e / (2 * pi * (shape + g + 0.5))) / L(shape)},
 	 * where {@code L(shape)} is the Lanczos approximation returned by {@link Gamma#lanczos(double)}. This prefactor is
 	 * used in {@link #density(double)}, when overflow occurs with the natural
 	 * calculation.
 	 */
-	private final double densityPrefactor2;
+	private double densityPrefactor2;
 	/**
 	 * Lower bound on {@code y = x / scale} for the selection of the computation
 	 * method in {@link #density(double)}. For {@code y <= minY}, the natural
 	 * calculation overflows.
 	 */
-	private final double minY;
+	private double minY;
 	/**
 	 * Upper bound on {@code log(y)} ({@code y = x / scale}) for the selection
 	 * of the computation method in {@link #density(double)}. For {@code log(y) >= maxLogY}, the natural calculation
 	 * overflows.
 	 */
-	private final double maxLogY;
+	private double maxLogY;
 	/** Inverse cumulative probability accuracy. */
 	private final double solverAbsoluteAccuracy;
 
@@ -139,25 +143,14 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	{
 		super(rng);
 
-		if (shape <= 0)
-		{
-			throw new NotStrictlyPositiveException(LocalizedFormats.SHAPE, shape);
-		}
 		if (scale <= 0)
 		{
 			throw new NotStrictlyPositiveException(LocalizedFormats.SCALE, scale);
 		}
 
-		this.shape = shape;
+		setShape(shape);
 		this.scale = scale;
 		this.solverAbsoluteAccuracy = inverseCumAccuracy;
-		this.shiftedShape = shape + Gamma.LANCZOS_G + 0.5;
-		final double aux = FastMath.E / (2.0 * FastMath.PI * shiftedShape);
-		this.densityPrefactor2 = shape * FastMath.sqrt(aux) / Gamma.lanczos(shape);
-		this.densityPrefactor1 = this.densityPrefactor2 / scale * FastMath.pow(shiftedShape, -shape) *
-				FastMath.exp(shape + Gamma.LANCZOS_G);
-		this.minY = shape + Gamma.LANCZOS_G - FastMath.log(Double.MAX_VALUE);
-		this.maxLogY = FastMath.log(Double.MAX_VALUE) / (shape - 1.0);
 	}
 
 	/**
@@ -210,6 +203,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	public void setShapeUnsafe(double shape)
 	{
 		this.shape = shape;
+		uninitialised = true;
 	}
 
 	/**
@@ -282,6 +276,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		{
 			return 0;
 		}
+		computeFactors();
 		final double y = x / scale;
 		if ((y <= minY) || (FastMath.log(y) >= maxLogY))
 		{
@@ -297,6 +292,21 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		 * Natural calculation.
 		 */
 		return densityPrefactor1 * FastMath.exp(-y) * FastMath.pow(y, shape - 1);
+	}
+
+	private void computeFactors()
+	{
+		if (uninitialised)
+		{
+			this.shiftedShape = shape + Gamma.LANCZOS_G + 0.5;
+			final double aux = FastMath.E / (2.0 * FastMath.PI * shiftedShape);
+			this.densityPrefactor2 = shape * FastMath.sqrt(aux) / Gamma.lanczos(shape);
+			this.densityPrefactor1 = this.densityPrefactor2 / scale * FastMath.pow(shiftedShape, -shape) *
+					FastMath.exp(shape + Gamma.LANCZOS_G);
+			this.minY = shape + Gamma.LANCZOS_G - FastMath.log(Double.MAX_VALUE);
+			this.maxLogY = FastMath.log(Double.MAX_VALUE) / (shape - 1.0);
+			uninitialised = false;
+		}
 	}
 
 	/**
