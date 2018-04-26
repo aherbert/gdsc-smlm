@@ -616,18 +616,32 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				gamma.setShapeUnsafe(poissonSample[n]);
 
 				// Q. The Poisson-Gamma Function does not exactly match this
-				// when the mean is around 1. Check the Poisson-Gamma Function
-				// original paper. Is is a Poisson-Binomial Function?
+				// when the mean is around 1. The model from Ulbrich+Isacoff
+				// is using a gamma function. This returns a continuous value.
+				// Should it be rounded to make it a discrete PMF?
+				// Or should the model actually be integrated.
+				// Basically the value of the Poisson-Gamma from 0-0.5 should be
+				// added to the delta function at c=0 from the count at c=0.
+				// This would fix the function. Note that the function is undefined
+				// at c=0 so it needs to be integrated with a Legendre-Guass
+				// integrator.
 				
 				// Should we use the Tubb's model which uses:
 				//final double shape = count;
 				//final double scale = gain - 1 + 1 / shape;
 				//final double electrons = random.nextGamma(shape, scale) - 1;
+				//final double output = count + electrons; 
+				
+				// The Tubb's model is for additional electrons. So a count of 1
+				// can never generate an output of 0. This better fits the
+				// Ulbrich+Isacoff model when c=0 is undefined, i.e. you cannot
+				// model zero output for EM-gain.
 				
 				// Over-sample the Gamma
 				for (int k = emSamples; k-- > 0;)
 				{
-					final double d2 = gamma.sample();
+					//final double d2 = gamma.sample();
+					final double d2 = round.round(gamma.sample());
 
 					// Over-sample the Gaussian
 					for (int j = noiseSamples; j-- > 0;)
