@@ -284,7 +284,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				{
 					for (int u = lower; u <= upper; u++)
 					{
-						p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * gaussianPDF(u - o);
+						p += PoissonGammaFunction.poissonGammaNonZero(u, e, m) * gaussianPDF(u - o);
 					}
 				}
 			}
@@ -306,7 +306,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 						final double prevErf = erf;
 						u_o += 1.0;
 						erf = gaussianErf(u_o);
-						p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * (erf - prevErf) * 0.5;
+						p += PoissonGammaFunction.poissonGammaNonZero(u, e, m) * (erf - prevErf) * 0.5;
 					}
 				}
 			}

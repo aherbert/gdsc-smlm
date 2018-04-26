@@ -13,16 +13,22 @@ import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 public class PoissonGammaFunctionTest
 {
 	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
-	static double[] photons = PoissonGaussianFunctionTest.photons;
-	static double[] noise = { 1, 2, 4, 8, 16 }; // ADUs
+	static double[] photons = { 0.001, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 
 	@Test
-	public void cumulativeProbabilityIsOne()
+	public void cumulativeProbabilityIsOneWithPMF()
 	{
 		for (double g : gain)
 			for (double p : photons)
-				for (double s : noise)
-					cumulativeProbabilityIsOne(g, p, s);
+				cumulativeProbabilityIsOne(g, p, false);
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithPDFAtHighMean()
+	{
+		for (double g : gain)
+			for (double p : photons)
+				cumulativeProbabilityIsOne(g, p, true);
 	}
 
 	@Test
@@ -30,24 +36,34 @@ public class PoissonGammaFunctionTest
 	{
 		for (double g : gain)
 			for (double p : photons)
-				for (double s : noise)
-					probabilityMatchesLogProbability(g, p, s);
+				probabilityMatchesLogProbability(g, p);
 	}
 
-	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s)
+	private void cumulativeProbabilityIsOne(final double gain, final double mu, boolean pdf)
 	{
-		double p2 = cumulativeProbability(gain, mu, s);
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
-		// This only works when the mean is above 2 if the gain is low
-		if (mu > 2 || gain > 20)
-			Assert.assertEquals(msg, 1, p2, 0.02);
+		double p2 = cumulativeProbability(gain, mu, pdf);
+		String msg = String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf);
+		
+		if (pdf)
+		{
+			// This is not actually a PDF but is a PMF so the mean must be higher for
+			// a good integration.
+			if (mu > 2)
+				Assert.assertEquals(msg, 1, p2, 0.02);
+		}
+		else
+		{
+			// This only works when the mean is above 2 if the gain is low
+			if (mu > 2 || gain > 20)
+				Assert.assertEquals(msg, 1, p2, 0.02);
+		}
 	}
 
-	private double cumulativeProbability(final double gain, final double mu, double s)
+	private double cumulativeProbability(final double gain, final double mu, boolean pdf)
 	{
 		final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
-		final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, s);
+		final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, 0);
 		f2.setConvolutionMode(ConvolutionMode.DISCRETE_PDF);
 
 		double p = 0;
@@ -66,7 +82,7 @@ public class PoissonGammaFunctionTest
 		if (mu > 0)
 		{
 			// Note: The input s parameter is after-gain so adjust.
-			int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s / gain);
+			int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
 			min = range[0];
 			max = range[1];
 			for (int x = min; x <= max; x++)
@@ -107,27 +123,30 @@ public class PoissonGammaFunctionTest
 				break;
 		}
 
-		if (p < 0.98 || p > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
-
-		// Do a formal integration
-		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
+		double p2 = p;
+		if (pdf)
 		{
-			public double value(double x)
+			// Do a formal integration
+			if (p < 0.98 || p > 1.02)
+				System.out.printf("g=%f, mu=%f, p=%f\n", gain, mu, p);
+			UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4,
+					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
-				return f.likelihood(x, e);
-			}
-		}, min, max);
+				public double value(double x)
+				{
+					return f.likelihood(x, e);
+				}
+			}, min, max);
+		}
 
 		if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			System.out.printf("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
 
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, double s)
+	private void probabilityMatchesLogProbability(final double gain, double mu)
 	{
 		PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
@@ -136,7 +155,7 @@ public class PoissonGammaFunctionTest
 		// Poisson will have mean mu with a variance mu. 
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		// Note: The input s parameter is after-gain so adjust.
-		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, s / gain);
+		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
 		int min = range[0];
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
@@ -147,8 +166,7 @@ public class PoissonGammaFunctionTest
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP,
-					1e-3 * Math.abs(logP));
+			Assert.assertEquals(String.format("g=%f, mu=%f", gain, mu), Math.log(p), logP, 1e-6 * Math.abs(logP));
 		}
 	}
 
@@ -168,6 +186,7 @@ public class PoissonGammaFunctionTest
 				canComputePoissonGammaGradient(gain[j], photons[i], true);
 	}
 
+	@SuppressWarnings("unused")
 	private void canComputePoissonGammaGradient(final double gain, final double mu, boolean nonInteger)
 	{
 		final double o = mu;
