@@ -49,8 +49,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	/** The minimum read-noise. Values below this will be set to zerro and read-noise is not modelled. */
 	public static final double MIN_READ_NOISE = 1e-3;
 
-	/** 2 * Math.PI. */
-	private static final double twoPi = 2 * Math.PI;
 	/** Math.sqrt(2 * Math.PI). */
 	private static final double sqrt2pi = Math.sqrt(2 * Math.PI);
 
@@ -117,7 +115,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		public double value(double u)
 		{
 			i++;
-			double pg = poissonGamma(u, e);
+			double pg = PoissonGammaFunction.poissonGammaNonZero(u, e, m);
 			return (pg == 0) ? 0 : pg * gaussianPDF(u - o);
 		}
 	}
@@ -129,9 +127,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	private ConvolutionMode boundaryConvolutionMode = ConvolutionMode.APPROXIMATION;
 
 	/**
-	 * The inverse scale of the Gamma distribution (e.g. the inverse of the on-chip gain multiplication factor)
+	 * The scale of the Gamma distribution (e.g. the on-chip gain multiplication factor)
 	 */
-	final private double alpha;
+	final private double m;
 	/**
 	 * The standard deviation of the Gaussian (e.g. Width of the noise distribution in the EMCCD output)
 	 */
@@ -164,9 +162,9 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 */
 	public PoissonGammaGaussianFunction(double alpha, double s) throws IllegalArgumentException
 	{
-		if (alpha > 1)
+		if (!(alpha > 0 && alpha <= 1))
 			throw new IllegalArgumentException("Gain must be above 1");
-		this.alpha = Math.abs(alpha);
+		this.m = 1.0 / alpha;
 		s = Math.abs(s);
 		// Ignore tiny read noise
 		if (s < MIN_READ_NOISE)
@@ -212,7 +210,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		{
 			// No convolution with a Gaussian. Simply evaluate for a Poisson-Gamma distribution.
 			// This can handle e<=0.
-			return checkMinProbability(poissonGamma(o, e));
+			return checkMinProbability(PoissonGammaFunction.poissonGamma(o, e, m));
 		}
 
 		// If no Poisson mean then just use the Gaussian (Poisson-Gamma p=1 at x=0, p=0 otherwise)
@@ -220,7 +218,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		{
 			// Output as PDF
 			//return checkMinProbability(gaussianPDF(o));
-			
+
 			// Output as PMF
 			return checkMinProbability(gaussianCDF(o - 0.5, o + 0.5));
 		}
@@ -280,13 +278,13 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				if (lower == upper)
 				{
 					// Avoid double computation when lower==upper
-					p += poissonGamma(lower, e) * gaussianPDF(lower - o);
+					p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * gaussianPDF(lower - o);
 				}
 				else
 				{
 					for (int u = lower; u <= upper; u++)
 					{
-						p += poissonGamma(u, e) * gaussianPDF(u - o);
+						p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * gaussianPDF(u - o);
 					}
 				}
 			}
@@ -299,7 +297,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				if (lower == upper)
 				{
 					// Avoid double computation when lower==upper
-					p += poissonGamma(lower, e) * (gaussianErf(u_o + 1) - erf) * 0.5;
+					p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * (gaussianErf(u_o + 1) - erf) * 0.5;
 				}
 				else
 				{
@@ -308,7 +306,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 						final double prevErf = erf;
 						u_o += 1.0;
 						erf = gaussianErf(u_o);
-						p += poissonGamma(u, e) * (erf - prevErf) * 0.5;
+						p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * (erf - prevErf) * 0.5;
 					}
 				}
 			}
@@ -348,87 +346,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	}
 
 	/**
-	 * Poisson gamma.
-	 *
-	 * @param cij
-	 *            the cij
-	 * @param eta
-	 *            the eta
-	 * @return the double
-	 */
-	private double poissonGamma(final double cij, final double eta)
-	{
-		// Use the same variables as the Mortensen Python code
-
-		// Any observed count above zero
-		if (cij > 0.0)
-		{
-			return poissonGammaNonZero(cij, eta);
-		}
-		else if (cij == 0.0)
-		{
-			return FastMath.exp(-eta);
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	/**
-	 * Poisson gamma.
-	 *
-	 * @param cij
-	 *            the cij
-	 * @param eta
-	 *            the eta
-	 * @return the double
-	 */
-	private double poissonGammaNonZero(final double cij, final double eta)
-	{
-		// Use the same variables as the Mortensen Python code
-
-		// Assume observed count above zero
-
-		// The observed count converted to photons
-		final double nij = alpha * cij;
-
-		// The current implementation of Bessel.I1(x) is Infinity at x==710
-		// The limit on eta * nij is therefore (709/2)^2 = 125670.25
-		if (eta * nij > 10000)
-		{
-			// Approximate Bessel function i1(x) when using large x:
-			// i1(x) ~ exp(x)/sqrt(2*pi*x)
-			// However the entire equation is logged (creating transform),
-			// evaluated then raised to e to prevent overflow error on 
-			// large exp(x)
-
-			//final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + 2 * Math.sqrt(eta * nij) -
-			//		Math.log(twoSqrtPi * Math.pow(eta * nij, 0.25));
-
-			// Avoid power function ...
-			// sqrt(alpha * eta / cij) * exp(-nij - eta) * Bessel.I1(2 * sqrt(eta * nij))
-			// sqrt(alpha * eta / cij) * exp(-nij - eta) * exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij))
-			// Log
-			// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij)) / sqrt(2*pi*2 * sqrt(eta * nij)))
-			// 0.5 * log(alpha * eta / cij) - nij - eta + log(exp(2 * sqrt(eta * nij))) - log(sqrt(2*pi*2 * sqrt(eta * nij)))
-			// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi*2 * sqrt(eta * nij))
-			// 0.5 * log(alpha * eta / cij) - nij - eta + 2 * sqrt(eta * nij) - 0.5 * log(2*pi* 2*sqrt(eta * nij))
-			// 0.5 * log(alpha * eta / cij) - nij - eta + x - 0.5 * log(2*pi* x)
-			final double x = 2 * Math.sqrt(eta * nij);
-			final double transform = 0.5 * Math.log(alpha * eta / cij) - nij - eta + x - 0.5 * Math.log(twoPi * x);
-			return FastMath.exp(transform);
-		}
-		else
-		{
-			// Second part of equation 135
-			return Math.sqrt(alpha * eta / cij) * FastMath.exp(-nij - eta) * Bessel.I1(2 * Math.sqrt(eta * nij));
-		}
-	}
-
-	//private static double pMinObserved = 1;
-
-	/**
 	 * Mortensen approximation.
 	 *
 	 * @param cij
@@ -459,10 +376,10 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
 		// FastMath.exp(-eta) * [eta * alpha]
 		final double exp_eta = FastMath.exp(-eta);
-		double f0 = alpha * exp_eta * eta;
+		double f0 = exp_eta * eta / m;
 
 		// ?
-		double fp0 = f0 * 0.5 * alpha * (eta - 2);
+		double fp0 = f0 * 0.5 * (eta - 2) / m;
 
 		// The cumulative normal distribution of the read noise
 		// at the observed count
@@ -489,7 +406,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 		if (cij > 0.0)
 		{
-			temp += poissonGammaNonZero(cij, eta) - f0 - fp0 * cij;
+			temp += PoissonGammaFunction.poissonGammaNonZero(cij, eta, m) - f0 - fp0 * cij;
 		}
 
 		// XXX : Debugging: Store the smallest likelihood we ever see. 
@@ -592,7 +509,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 */
 	public double getAlpha()
 	{
-		return alpha;
+		return 1 / m;
 	}
 
 	/**

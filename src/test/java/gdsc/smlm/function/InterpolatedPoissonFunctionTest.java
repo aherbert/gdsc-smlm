@@ -276,7 +276,7 @@ public class InterpolatedPoissonFunctionTest
 	}
 
 	@Test
-	public void cumulativeProbabilityWithReal()
+	public void canComputeGradientWithReal()
 	{
 		for (int j = 0; j < gain.length; j++)
 			for (int i = 0; i < photons.length; i++)

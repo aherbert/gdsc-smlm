@@ -29,6 +29,7 @@ import gdsc.smlm.function.InterpolatedPoissonFunction;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.LogFactorial;
 import gdsc.smlm.function.PoissonFunction;
+import gdsc.smlm.function.PoissonGammaFunction;
 import gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
@@ -802,7 +803,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			{
 				// Approximate
 				for (int c = 1; c <= maxc; c++)
-					list.add(PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m));
+					list.add(PoissonGammaFunction.poissonGammaNonZero(c, p, m));
 			}
 
 			//			// Debug 

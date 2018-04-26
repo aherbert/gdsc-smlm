@@ -121,132 +121,6 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		return new PoissonGammaGaussianConvolutionFunction(alpha, var, true);
 	}
 
-	private static final double twoPi = 2 * Math.PI;
-
-	/**
-	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
-	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * <p>
-	 * Note: This implementation will underestimate the cumulative probability (sum<1) when the mean is close to 1 and
-	 * the gain is low (<10).
-	 * 
-	 * @param c
-	 *            The count to evaluate
-	 * @param p
-	 *            The average number of photons per pixel input to the EM-camera (must be positive)
-	 * @param m
-	 *            The multiplication factor (gain)
-	 * @return The probability
-	 */
-	public static double poissonGamma(double c, double p, double m)
-	{
-		// The default evaluation is:
-		//if (true)
-		//return Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
-
-		// However 
-		// Bessel.I1(x) -> Infinity
-		// The current implementation of Bessel.I1(x) is Infinity at x==710 so we switch 
-		// to an approximation...
-
-		// Any observed count above zero
-		if (c > 0.0)
-		{
-			// The observed count converted to photons
-			final double c_m = c / m;
-			final double cp_m = p * c_m;
-
-			// The current implementation of Bessel.I1(x) is Infinity at x==710
-			// The limit on (c * p / m) is therefore (709/2)^2 = 125670.25
-			final double x = 2 * Math.sqrt(cp_m);
-			if (cp_m > 10000)
-			{
-				// Approximate Bessel function i1(x) when using large x:
-				// i1(x) ~ exp(x)/sqrt(2*pi*x)
-				// However the entire equation is logged (creating transform),
-				// evaluated then raised to e to prevent overflow error on 
-				// large exp(x)
-
-				// p = sqrt(p / (c * m)) * exp(-c_m - p) * exp(2 * sqrt(cp_m)) / sqrt(2*pi*2*sqrt(cp_m))
-				// p = sqrt(p / (c * m)) * exp(-c_m - p) * exp(x) / sqrt(2*pi*x)
-				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + x - 0.5 * log(2*pi*x)
-
-				// This is the transform from the Python source code within the supplementary information of 
-				// the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
-				// p = sqrt(p / (c * m)) * exp(-c_m - p) * exp(2 * sqrt(cp_m)) / (sqrt(2*pi)*sqrt(2*sqrt(cp_m)))
-				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(sqrt(2*pi)*sqrt(2*sqrt(cp_m)))
-				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(sqrt(2)*sqrt(pi)*sqrt(2)*sqrt(sqrt(cp_m)))
-				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(2*sqrt(pi)*sqrt(sqrt(cp_m)))
-
-				// This avoids a call to Math.pow 
-				final double transform = 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x);
-
-				//final double transform2 = 0.5 * Math.log(p / (c * m)) - c_m - p + x -
-				//		Math.log(2 * Math.sqrt(Math.PI) * Math.pow(p * c_m, 0.25));
-				//System.out.printf("t1=%g, t2=%g error=%g\n", transform, transform2,
-				//		gdsc.core.utils.DoubleEquality.relativeError(transform, transform2));
-
-				return FastMath.exp(transform);
-			}
-			else
-			{
-				return Math.sqrt(p / (c * m)) * FastMath.exp(-c_m - p) * Bessel.I1(x);
-			}
-		}
-		else if (c == 0.0)
-		{
-			return FastMath.exp(-p);
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	/**
-	 * Calculate the log probability density function for a Poisson-Gamma distribution model of EM-gain.
-	 * <p>
-	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * <p>
-	 * Note: This implementation will underestimate the cumulative probability (sum<1) when the mean is close to 1 and
-	 * the gain is low (<10).
-	 * 
-	 * @param c
-	 *            The count to evaluate
-	 * @param p
-	 *            The average number of photons per pixel input to the EM-camera (must be positive)
-	 * @param m
-	 *            The multiplication factor (gain)
-	 * @return The log probability
-	 */
-	public static double logPoissonGamma(double c, double p, double m)
-	{
-		// As above without final exp
-		if (c > 0.0)
-		{
-			final double c_m = c / m;
-			final double cp_m = p * c_m;
-			final double x = 2 * Math.sqrt(cp_m);
-			if (cp_m > 10000)
-			{
-				return 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x);
-			}
-			else
-			{
-				return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.I1(x));
-			}
-		}
-		else if (c == 0.0)
-		{
-			return -p;
-		}
-		else
-		{
-			return Double.NEGATIVE_INFINITY;
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -292,7 +166,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 			// Edge case with no range			
 			return FastMath.exp(
 					// Poisson-Gamma
-					logPoissonGamma(cmin, e, g)
+					PoissonGammaFunction.logPoissonGamma(cmin, e, g)
 					// Gaussian
 							- (Maths.pow2(cmin - o) / var_by_2) + logNormalisationGaussian);
 		}
@@ -332,12 +206,12 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 		//		}
 		//		else
 		//		{
-		
+
 		for (int c = cmin; c <= cmax; c++)
 		{
 			p += FastMath.exp(
 					// Poisson-Gamma
-					logPoissonGamma(c, e, g)
+					PoissonGammaFunction.logPoissonGamma(c, e, g)
 					// Gaussian
 							- (Maths.pow2(c - o) / var_by_2) + logNormalisationGaussian);
 		}

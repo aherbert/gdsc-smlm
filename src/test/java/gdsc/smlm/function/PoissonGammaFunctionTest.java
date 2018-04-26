@@ -10,7 +10,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 
-public class PoissonGammaGaussianConvolutionFunctionTest
+public class PoissonGammaFunctionTest
 {
 	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
 	static double[] photons = PoissonGaussianFunctionTest.photons;
@@ -45,8 +45,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 
 	private double cumulativeProbability(final double gain, final double mu, double s)
 	{
-		final PoissonGammaGaussianConvolutionFunction f = PoissonGammaGaussianConvolutionFunction
-				.createWithStandardDeviation(1.0 / gain, s);
+		final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
 		final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, s);
 		f2.setConvolutionMode(ConvolutionMode.DISCRETE_PDF);
@@ -130,8 +129,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 
 	private void probabilityMatchesLogProbability(final double gain, double mu, double s)
 	{
-		PoissonGammaGaussianConvolutionFunction f = PoissonGammaGaussianConvolutionFunction
-				.createWithStandardDeviation(1.0 / gain, s);
+		PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
 		// Evaluate an initial range. 
 		// Gaussian should have >99% within +/- s
@@ -151,6 +149,82 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 			final double logP = f.logLikelihood(x, e);
 			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP,
 					1e-3 * Math.abs(logP));
+		}
+	}
+
+	@Test
+	public void canComputePoissonGammaGradientWithInteger()
+	{
+		for (int j = 0; j < gain.length; j++)
+			for (int i = 0; i < photons.length; i++)
+				canComputePoissonGammaGradient(gain[j], photons[i], false);
+	}
+
+	@Test
+	public void canComputePoissonGammaGradientWithReal()
+	{
+		for (int j = 0; j < gain.length; j++)
+			for (int i = 0; i < photons.length; i++)
+				canComputePoissonGammaGradient(gain[j], photons[i], true);
+	}
+
+	private void canComputePoissonGammaGradient(final double gain, final double mu, boolean nonInteger)
+	{
+		final double o = mu;
+		double delta = 1e-3; // * o;
+		double uo = o + delta;
+		double lo = o - delta;
+		double diff = uo - lo;
+
+		// The numerical gradient is poor around the switch between the use of the 
+		// Bessel function and the approximation. So just count the errors.
+		int fail = 0, total = 0;
+		double sum = 0;
+
+		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
+		int min = Math.max(0, range[0]);
+		int max = range[1];
+		double[] dp_dt = new double[1];
+		double step = (nonInteger) ? 0.5 : 1;
+
+		// When using the approximation the gradients are not as accurate
+		boolean approx = (2 * Math.sqrt(max * o / gain) > 709);
+		double tol = approx ? 0.05 : 1e-3;
+
+		for (double x = min; x <= max; x += step)
+		{
+			total++;
+
+			double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
+			double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
+			Assert.assertEquals(p1, p2, p1 * 1e-8);
+
+			double up = PoissonGammaFunction.poissonGamma(x, uo, gain);
+			double lp = PoissonGammaFunction.poissonGamma(x, lo, gain);
+
+			double eg = dp_dt[0];
+			double g = (up - lp) / diff;
+			double error = DoubleEquality.relativeError(g, eg);
+			double ox = x / gain;
+			//System.out.printf("g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g\n", gain, mu, x, ox, p1, g, eg,
+			//		error);
+
+			if (error > tol)
+			{
+				fail++;
+				sum += error;
+			}
+		}
+
+		double f = (double) fail / total;
+		System.out.printf("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
+		if (approx)
+		{
+			Assert.assertTrue(f < 0.2);
+		}
+		else
+		{
+			Assert.assertTrue(f < 0.01);
 		}
 	}
 }

@@ -28,7 +28,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.PoissonFunction;
-import gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
+import gdsc.smlm.function.PoissonGammaFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.utils.Convolution;
@@ -593,7 +593,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 */
 	private static double pEMGain(double c, double p, double m)
 	{
-		return PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m);
+		return PoissonGammaFunction.poissonGamma(c, p, m);
 	}
 
 	/**
