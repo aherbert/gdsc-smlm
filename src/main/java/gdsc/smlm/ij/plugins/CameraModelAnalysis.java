@@ -119,6 +119,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// This requires a full range test to determine the best function for which
 		// parameters.
 		
+		// Good when no noise.
+		// Under-estimates total probability when gain is low (<15) and photons are low (<2).
+		POISSON_GAMMA_PMF { public String getName() { return "Poisson+Gamma PMF"; } },
+		
 		// Good but relatively worse as the read noise increases.
 		// Requires full integration when read noise is low (<1) and photons are low (<5).
 		POISSON_GAMMA_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gamma+Gaussian approximation"; } },
@@ -611,6 +615,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// Gamma
 				gamma.setShapeUnsafe(poissonSample[n]);
 
+				// Q. The Poisson-Gamma Function does not exactly match this
+				// when the mean is around 1. Check the Poisson-Gamma Function
+				// original paper. Is is a Poisson-Binomial Function?
+				
+				// Should we use the Tubb's model which uses:
+				//final double shape = count;
+				//final double scale = gain - 1 + 1 / shape;
+				//final double electrons = random.nextGamma(shape, scale) - 1;
+				
 				// Over-sample the Gamma
 				for (int k = emSamples; k-- > 0;)
 				{
@@ -1018,6 +1031,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			case POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION:
 				return PoissonGammaGaussianConvolutionFunction.createWithStandardDeviation(alpha, noise);
 
+			case POISSON_GAMMA_PMF:
+				return PoissonGammaFunction.createWithAlpha(alpha);
+				
 			case POISSON_GAMMA_GAUSSIAN_APPROX:
 			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
 			case POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION:

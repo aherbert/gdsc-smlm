@@ -29,7 +29,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	/** The shape parameter. */
 	private double shape;
 	/** The scale parameter. */
-	private final double scale;
+	private double scale;
 
 	/** The uninitialised flag. Indicates that the shape factors have not been computed for the current shape. */
 	private boolean uninitialised;
@@ -143,13 +143,8 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	{
 		super(rng);
 
-		if (scale <= 0)
-		{
-			throw new NotStrictlyPositiveException(LocalizedFormats.SCALE, scale);
-		}
-
 		setShape(shape);
-		this.scale = scale;
+		setScale(scale);
 		this.solverAbsoluteAccuracy = inverseCumAccuracy;
 	}
 
@@ -230,6 +225,35 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		return scale;
 	}
 
+	/**
+	 * Set the scale parameter
+	 * 
+	 * @param scale
+	 * @throws NotStrictlyPositiveException
+	 *             if {@code scale <= 0}
+	 */
+	public void setScale(double scale)
+	{
+		if (scale <= 0)
+		{
+			throw new NotStrictlyPositiveException(LocalizedFormats.SCALE, scale);
+		}
+		setScaleUnsafe(scale);
+	}
+
+	/**
+	 * Set the scale parameter
+	 * <p>
+	 * Does not throw an exception if scale is not strictly positive
+	 * 
+	 * @param scale
+	 */
+	public void setScaleUnsafe(double scale)
+	{
+		this.scale = scale;
+		uninitialised = true;
+	}
+	
 	/** {@inheritDoc} */
 	public double density(double x)
 	{
