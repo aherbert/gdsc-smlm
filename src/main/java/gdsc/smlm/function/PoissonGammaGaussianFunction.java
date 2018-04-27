@@ -115,7 +115,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		public double value(double u)
 		{
 			i++;
-			double pg = PoissonGammaFunction.poissonGammaNonZero(u, e, m);
+			double pg = PoissonGammaFunction.poissonGammaN(u, e, m);
 			return (pg == 0) ? 0 : pg * gaussianPDF(u - o);
 		}
 	}
@@ -230,61 +230,49 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		else
 		{
 			// Full evaluation of a Poisson-Gamma-Gaussian convolution PMF.
+			// Note: Convolution uses the Poisson-Gamma without the dirac 
+			// delta function. This is added later.
+
 			ConvolutionMode mode = convolutionMode;
 
 			// Integrate to infinity is not necessary. The convolution of the function with the 
 			// Gaussian should be adequately sampled using a nxSD around the function value.
 			// Find a bracket around the value.
 			double range = 5 * sigma;
-			int upper = (int) Math.ceil(o + range);
-			if (upper < 0)
+			double upperu = o + range;
+			if (upperu < 0)
 				return 0;
-			int lower = (int) Math.floor(o - range);
-			if (lower < 0)
-				lower = 0;
-
-			if (lower == 0 && !mode.validAtBoundary())
+			double loweru = o - range;
+			if (loweru < 0)
 			{
-				mode = boundaryConvolutionMode;
-				if (mode == ConvolutionMode.APPROXIMATION)
-					return mortensenApproximation(o, e);
+				loweru = 0;
+				// Edge case
+				if (upperu == 0)
+					mode = ConvolutionMode.DISCRETE_PMF;
 			}
 
 			double p = 0;
 
-			// Special case:
-			// Due to the Poisson-Gamma function delta function at u=0
-			// The probability at u=0 may be very large compared to the rest of 
-			// the Poisson-Gamma when e is low. To compensate always compute the 
-			// full CDF integration at u=0.
-			double erf2 = gaussianErf(-o + 0.5);
-			if (erf2 != -1)
-			{
-				// Assume u==0
-				p = FastMath.exp(-e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
-			}
-			// Mark that u==0 has been computed
-			if (lower == 0)
-			{
-				lower++;
-				if (lower >= upper)
-					// Nothing more to compute
-					return checkMinProbability(p);
-			}
+			// PDF method does not work for small range
+			if (mode == ConvolutionMode.DISCRETE_PDF && range < 1)
+				mode = ConvolutionMode.DISCRETE_PMF;
 
 			if (mode == ConvolutionMode.DISCRETE_PDF)
 			{
+				int upper = (int) Math.ceil(upperu);
+				int lower = (int) Math.floor(loweru);
+
 				// Use a simple integration by adding the points in the range.
 				if (lower == upper)
 				{
 					// Avoid double computation when lower==upper
-					p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * gaussianPDF(lower - o);
+					p += PoissonGammaFunction.poissonGammaN(lower, e, m) * gaussianPDF(lower - o);
 				}
 				else
 				{
 					for (int u = lower; u <= upper; u++)
 					{
-						p += PoissonGammaFunction.poissonGammaNonZero(u, e, m) * gaussianPDF(u - o);
+						p += PoissonGammaFunction.poissonGammaN(u, e, m) * gaussianPDF(u - o);
 					}
 				}
 			}
@@ -292,12 +280,15 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			{
 				// Use a simple integration by adding the points in the range.
 				// Use the error function to obtain the integral of the Gaussian
+				int upper = (int) Math.ceil(upperu);
+				int lower = (int) Math.floor(loweru);
+
 				double u_o = lower - o - 0.5;
 				double erf = gaussianErf(u_o);
 				if (lower == upper)
 				{
 					// Avoid double computation when lower==upper
-					p += PoissonGammaFunction.poissonGammaNonZero(lower, e, m) * (gaussianErf(u_o + 1) - erf) * 0.5;
+					p += PoissonGammaFunction.poissonGammaN(lower, e, m) * (gaussianErf(u_o + 1) - erf) * 0.5;
 				}
 				else
 				{
@@ -306,7 +297,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 						final double prevErf = erf;
 						u_o += 1.0;
 						erf = gaussianErf(u_o);
-						p += PoissonGammaFunction.poissonGammaNonZero(u, e, m) * (erf - prevErf) * 0.5;
+						p += PoissonGammaFunction.poissonGammaN(u, e, m) * (erf - prevErf) * 0.5;
 					}
 				}
 			}
@@ -317,6 +308,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// Note that the Poisson-Gamma function has a delta function at u=0. 
 				// This prevents integration close to the zero boundary as the function 
 				// is not smooth.
+				// So integration is done using the non-delta function version.
 
 				// However the integrator may be faster when the range (upper-lower) 
 				// is large as it uses fewer points.
@@ -326,7 +318,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 				try
 				{
-					p += createIntegrator().integrate(2000, f, lower, upper);
+					p += createIntegrator().integrate(2000, f, loweru, upperu);
 				}
 				catch (TooManyEvaluationsException ex)
 				{
@@ -335,6 +327,26 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				}
 				//System.out.printf("Integration eval=%d\n", f.i);
 			}
+
+			// Special case:
+			// Due to the Poisson-Gamma function delta function at u=0
+			// The probability at u=0 may be very large compared to the rest of 
+			// the Poisson-Gamma when e is low. To compensate always compute the 
+			// full CDF integration at u=0.
+
+			//if (mode == ConvolutionMode.DISCRETE_PMF)
+			{
+				double erf2 = gaussianErf(-o + 0.5);
+				if (erf2 != -1)
+				{
+					// Assume u==0
+					p += PoissonGammaFunction.dirac(e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
+				}
+			}
+			//else
+			//{
+			//	p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
+			//}
 
 			return checkMinProbability(p);
 		}
@@ -406,7 +418,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
 		if (cij > 0.0)
 		{
-			temp += PoissonGammaFunction.poissonGammaNonZero(cij, eta, m) - f0 - fp0 * cij;
+			temp += PoissonGammaFunction.poissonGammaN(cij, eta, m) - f0 - fp0 * cij;
 		}
 
 		// XXX : Debugging: Store the smallest likelihood we ever see. 

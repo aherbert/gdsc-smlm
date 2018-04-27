@@ -129,11 +129,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Good when read noise is >>1.
 		// Requires full integration when read noise is low (<1).
 		POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian PDF integration"; } },
-		// Best for EM-CCD. 
-		// Very robust and does not require full integration (computes a PMF).
+		// Good
 		// Slow
 		POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian PMF integration"; } },
-		// Good
+		// Best for EM-CCD. 
+		// Very robust (computes the full convolution
+		// of the Gaussian and the Poisson-Gamma plus the delta function PMF contribution).
 		POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Simpson's integration"; } },
 		// Good
 		POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Legendre-Gauss integration"; } },
@@ -437,7 +438,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// From KolmogorovSmirnovTest.kolmogorovSmirnovTest(RealDistribution distribution, double[] data, boolean exact):
 		// Returns the p-value associated with the null hypothesis that data is a sample from distribution.
 		// E.g. If p<0.05 then the null hypothesis is rejected and the data do not match the distribution.
-		double p = 1d - kolmogorovSmirnovTest.cdf(distance, n);
+		double p = Double.NaN;
+		try
+		{
+			p = 1d - kolmogorovSmirnovTest.cdf(distance, n);
+		}
+		catch (Exception e)
+		{
+			// Ignore
+		}
 
 		// Plot
 		WindowOrganiser wo = new WindowOrganiser();
@@ -499,7 +508,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			IJ.showStatus("Simulated in " + sw.toString());
 
 			// Convolve 
+			//sw.reset();
 			floatHistogram = convolveHistogram(settings);
+			//IJ.log("Computed histogram ... " + sw.toString());
 		}
 		return lastHistogram;
 	}
@@ -625,23 +636,24 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// This would fix the function. Note that the function is undefined
 				// at c=0 so it needs to be integrated with a Legendre-Guass
 				// integrator.
-				
+
 				// Should we use the Tubb's model which uses:
 				//final double shape = count;
 				//final double scale = gain - 1 + 1 / shape;
 				//final double electrons = random.nextGamma(shape, scale) - 1;
 				//final double output = count + electrons; 
-				
+
 				// The Tubb's model is for additional electrons. So a count of 1
 				// can never generate an output of 0. This better fits the
 				// Ulbrich+Isacoff model when c=0 is undefined, i.e. you cannot
 				// model zero output for EM-gain.
-				
+
 				// Over-sample the Gamma
 				for (int k = emSamples; k-- > 0;)
 				{
-					//final double d2 = gamma.sample();
-					final double d2 = round.round(gamma.sample());
+					final double d2 = gamma.sample();
+					//final double d2 = round.round(gamma.sample());
+					//final double d2 = (int)(gamma.sample());
 
 					// Over-sample the Gaussian
 					for (int j = noiseSamples; j-- > 0;)
@@ -748,6 +760,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		int maxn = poisson.inverseCumulativeProbability(UPPER);
 
 		final double gain = getGain(settings);
+		final double noise = getReadNoise(settings);
 
 		boolean debug = false;
 
@@ -759,92 +772,132 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double step;
 		String name;
 
+		int upsample = 100;
+
 		// EM-CCD 
 		if (settings.getMode() == 1)
 		{
 			name = "Poisson-Gamma";
-			// This computes a discrete PMF
-			step = 1.0;
 
-			CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
-					GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-			int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
-			//int minc = (int) gamma.inverseCumulativeProbability(lower);
-			int maxc = (int) gamma.inverseCumulativeProbability(UPPER);
-
-			// See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-
-			// Note this is not a convolution of a single Gamma distribution since the shape
-			// is modified not the count. So it is a convolution of a distribution made with
-			// a gamma of fixed count and variable shape.
-
-			// Note: The gamma convolution is only relevant when photon number n>0,
-			// i.e. only convolve the Poisson with the Gamma for n>0.
-			// Then add a delta function at n=0.
 			final double m = gain;
 			final double p = settings.getPhotons();
-			list.add(FastMath.exp(-p));
 
-			if ((maxn - minn) * maxc < 1000000)
+			// Chose whether to compute a discrete PMF or a PDF.
+			// The PDF is not valid when used with a convolution. This is because
+			// the delta function at c=0 is from the PMF of the Poisson. So it is
+			// a discrete contribution.
+			boolean discrete = noise != 0;
+			if (discrete)
 			{
-				// Full computation
+				step = 1.0;
 
-				//G(c) = sum n {  (1 / n!) p^n e^-p (1 / ((n-1!)m^n)) c^n-1 e^-c/m };
-				// Compute as a log
-				// - log(n!) + n*log(p)-p -log((n-1)!) - n * log(m) + (n-1) * log(c) -c/m
+				CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
+						GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
-				LogFactorial.increaseTableMaxN(maxn);
-				double[] f = new double[maxn + 1];
-				final double logm = Math.log(m);
-				final double logp = Math.log(p);
-				for (int n = minn; n <= maxn; n++)
+				double upper;
+				if (settings.getPhotons() < 20)
+					upper = maxn;
+				else
+					// Approximate reasonable range of Poisson as a Gaussian
+					upper = settings.getPhotons() + Math.sqrt(settings.getPhotons());
+
+				gamma.setShapeUnsafe(upper);
+				int maxc = (int) gamma.inverseCumulativeProbability(0.999);
+
+				int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
+
+				// See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+
+				// Note this is not a convolution of a single Gamma distribution since the shape
+				// is modified not the count. So it is a convolution of a distribution made with
+				// a gamma of fixed count and variable shape.
+
+				// Note: The gamma convolution is only relevant when photon number n>0,
+				// The count=0 is a special case.
+				list.add(PoissonGammaFunction.poissonGamma(0, p, m));
+				//list.add(FastMath.exp(-p));
+
+				long total = (maxn - minn) * (long) maxc;
+
+				if (total < 1000000)
 				{
-					f[n] = -LogFactorial.logF(n) + n * logp - p - LogFactorial.logF(n - 1) - n * logm;
-				}
+					// Full computation
 
-				for (int c = 1; c <= maxc; c++)
-				{
-					// Cannot do this as the graph is truncated
-					//if (c < minc)
-					//{
-					//	list.add(0);
-					//	continue;
-					//}
+					//G(c) = sum n {  (1 / n!) p^n e^-p (1 / ((n-1!)m^n)) c^n-1 e^-c/m };
+					// Compute as a log
+					// - log(n!) + n*log(p)-p -log((n-1)!) - n * log(m) + (n-1) * log(c) -c/m
 
-					double sum = 0;
-					final double c_m = c / m;
-					final double logc = Math.log(c);
+					// Note: Both methods work
+
+					LogFactorial.increaseTableMaxN(maxn);
+					double[] f = new double[maxn + 1];
+					final double logm = Math.log(m);
+					final double logp = Math.log(p);
 					for (int n = minn; n <= maxn; n++)
 					{
-						sum += FastMath.exp(f[n] + (n - 1) * logc - c_m);
+						f[n] = -LogFactorial.logF(n) + n * logp - p - LogFactorial.logF(n - 1) - n * logm;
 					}
-					list.add(sum);
 
-					//// This should match the approximation
-					//double check = PoissonGammaGaussianConvolutionFunction.poissonGamma(c, p, m);
-					//System.out.printf("sum=%g check=%g error=%g\n", sum, check,
-					//		gdsc.core.utils.DoubleEquality.relativeError(sum, check));
+					// Use Poisson + Gamma distribution
+					//double[] pd = new double[maxn + 1];
+					//CustomGammaDistribution[] gd = new CustomGammaDistribution[maxn + 1];
+					//for (int n = minn; n <= maxn; n++)
+					//{
+					//	pd[n] = poisson.probability(n);
+					//	gd[n] = new CustomGammaDistribution(null, n, m);
+					//}
+
+					//double total = list.getQuick(0);
+					//double total2 = total;
+					for (int c = 1; c <= maxc; c++)
+					{
+						double sum = 0;
+						final double c_m = c / m;
+						final double logc = Math.log(c);
+						for (int n = minn; n <= maxn; n++)
+						{
+							sum += FastMath.exp(f[n] + (n - 1) * logc - c_m);
+							//sum2 += pd[n] * gd[n].density(c);
+						}
+						list.add(sum);
+						//total += sum;
+
+						// This should match the approximation
+						//double approx = PoissonGammaFunction.poissonGamma(c, p, m);
+						//total2 += approx;
+						//System.out.printf("c=%d sum=%g approx=%g error=%g\n", c, sum2, approx,
+						//		gdsc.core.utils.DoubleEquality.relativeError(sum2, approx));
+					}
+
+					//System.out.printf("sum=%g approx=%g error=%g\n", total, total2,
+					//		gdsc.core.utils.DoubleEquality.relativeError(total, total2));
+				}
+				else
+				{
+					// Approximate
+					for (int c = 1; c <= maxc; c++)
+						list.add(PoissonGammaFunction.poissonGamma(c, p, m));
 				}
 			}
 			else
 			{
-				// Approximate
-				for (int c = 1; c <= maxc; c++)
-					list.add(PoissonGammaFunction.poissonGammaNonZero(c, p, m));
+				// This computes a PDF using the approximation and up-samples together.
+				// It should only be done when no convolution with a Gaussian is used.
+				step = 1.0 / upsample;
+				upsample = 1;
+				list.add(PoissonGammaFunction.poissonGamma(0, p, m));
+				double max = 0;
+				for (int i = 1;; i++)
+				{
+					// Scale the probability so it can be used directly to build the CDF
+					double pp = PoissonGammaFunction.poissonGamma(i * step, p, m) * step;
+					if (max < pp)
+						max = pp;
+					if (pp / max < 1e-4)
+						break;
+					list.add(pp);
+				}
 			}
-
-			//			// Debug 
-			//			TDoubleArrayList list2 = new TDoubleArrayList();
-			//			int n = 5;
-			//			double s = 1.0/n;
-			//			for (int c = 0; c <= maxc; c++)
-			//			{
-			//				for (int i=0; i<n; i++)
-			//					list2.add(PoissonGammaGaussianConvolutionFunction.poissonGamma(c+i*s, p, m));
-			//			}
-			//			String title = "Poisson-Gamma PDF";
-			//			Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list2.size(), 0, s), list2.toArray());
-			//			Utils.display(title, plot);
 		}
 		else
 		{
@@ -873,22 +926,24 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double[] g = list.toArray();
 
 		// Sample Gaussian
-		final double noise = getReadNoise(settings);
 		if (noise > 0)
 		{
 			// The PMF is discrete and (if Poisson with gain) may be on a non-integer scale.
 			// Upsample the PMF to allow appropriate convolution and rounding to the integer 
 			// scale.
-			int upsample = 100;
-			list.resetQuick();
-			double[] pad = new double[upsample - 1];
-			list.add(g[0]);
-			for (int i = 1; i < g.length; i++)
+			if (upsample != 1)
 			{
-				list.add(pad);
-				list.add(g[i]);
+				list.resetQuick();
+				double[] pad = new double[upsample - 1];
+
+				list.add(g[0]);
+				for (int i = 1; i < g.length; i++)
+				{
+					list.add(pad);
+					list.add(g[i]);
+				}
+				step /= upsample;
 			}
-			step /= upsample;
 
 			g = list.toArray();
 
@@ -913,7 +968,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			if (debug)
 			{
 				String title = "Gaussian";
-				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, -radius, step), kernel);
+				Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(kernel.length, -radius * step, step),
+						kernel);
 				Utils.display(title, plot);
 
 				title = name + "-Gaussian";
@@ -921,61 +977,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				Utils.display(title, plot);
 			}
 
-			// Down-sample to 1.0 pixel step interval.
-
-			// Build cumulative distribution.
-			double lowerSum = 0;
-			for (int i = 0; i < g.length; i++)
-			{
-				lowerSum += g[i];
-				g[i] = lowerSum;
-			}
-			for (int i = 0; i < g.length; i++)
-				g[i] /= lowerSum;
-			g[g.length - 1] = 1.0;
-
-			double offset = (settings.getRoundDown()) ? 0 : -0.5;
-
-			// Note the interpolation of the CDF is good when the step is much smaller than 1.
-			// When the step is above 1 then the gain is likely to be very low and thus 
-			// unrealistic for modelling. This case is ignored.
-
-			// Subtract the CDF to the upper bounds from the CDF of the lower bound
-			// to get the discrete PMF
-
-			// Pad the CDF to avoid index-out-of bounds during interpolation
-			list.resetQuick();
-			int padSize = (int) Math.ceil(1 / step) + 2;
-			list.add(new double[padSize]);
-			list.add(g);
-			for (int i = padSize; i-- > 0;)
-				list.add(1);
-			double[] pd = list.toArray();
-
-			list.resetQuick();
-
-			double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
-
-			UnivariateInterpolator in = new SplineInterpolator()
-			//new LinearInterpolator()
-			;
-			UnivariateFunction f = in.interpolate(x, pd);
-
-			int bound = (int) Math.floor(zero);
-
-			list.add(0);
-			zero--;
-			double upperSum = 0;
-			while (upperSum < 1)
-			{
-				bound++;
-
-				// Find the point at which the CDF should be computed
-				lowerSum = upperSum;
-				upperSum = f.value(bound + offset);
-				list.add(upperSum - lowerSum);
-			}
-			list.add(0);
+			zero = downSampleCDF(settings, list, step, zero, g);
 
 			g = list.toArray();
 			zero = (int) Math.floor(zero);
@@ -983,32 +985,43 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		}
 		else
 		{
-			// No convolution means we have the PMF already
+			// No convolution means we have the Poisson PMF/Poisson-Gamma PDF already
 			if (step != 1)
 			{
 				// Sample to 1.0 pixel step interval.
-
-				// Simple non-interpolated expansion.
-				// This should be used when there is no Gaussian convolution.
-				double[] pd = g;
-				list.resetQuick();
-
-				// Account for rounding.
-				Round round = getRound(settings);
-
-				int maxc = round.round((pd.length + 1) * gain);
-				g = new double[maxc];
-				for (int n = pd.length; n-- > 0;)
+				if (settings.getMode() == 1)
 				{
-					g[round.round(n * gain)] += pd[n];
-				}
-
-				if (g[0] != 0)
-				{
-					list.add(0);
-					list.add(g);
+					// Poisson-Gamma PDF
+					zero = downSampleCDF(settings, list, step, zero, g);
 					g = list.toArray();
-					zero--;
+					zero = (int) Math.floor(zero);
+				}
+				else
+				{
+					// Poisson PMF
+
+					// Simple non-interpolated expansion.
+					// This should be used when there is no Gaussian convolution.
+					double[] pd = g;
+					list.resetQuick();
+
+					// Account for rounding.
+					Round round = getRound(settings);
+
+					int maxc = round.round(pd.length * step + 1);
+					g = new double[maxc];
+					for (int n = pd.length; n-- > 0;)
+					{
+						g[round.round(n * step)] += pd[n];
+					}
+
+					if (g[0] != 0)
+					{
+						list.add(0);
+						list.add(g);
+						g = list.toArray();
+						zero--;
+					}
 				}
 
 				step = 1.0;
@@ -1016,6 +1029,79 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		}
 
 		return new double[][] { SimpleArrayUtils.newArray(g.length, zero, step), g };
+	}
+
+	private static double downSampleCDF(CameraModelAnalysisSettings settings, TDoubleArrayList list, double step,
+			double zero, double[] g)
+	{
+		// Down-sample to 1.0 pixel step interval.
+
+		// Build cumulative distribution.
+		double lowerSum = 0;
+		for (int i = 0; i < g.length; i++)
+		{
+			lowerSum += g[i];
+			g[i] = lowerSum;
+		}
+		for (int i = 0; i < g.length; i++)
+			g[i] /= lowerSum;
+		g[g.length - 1] = 1.0;
+
+		double offset = (settings.getRoundDown()) ? 0 : -0.5;
+
+		// Note the interpolation of the CDF is good when the step is much smaller than 1.
+		// When the step is above 1 then the gain is likely to be very low and thus 
+		// unrealistic for modelling. This case is ignored.
+
+		// Subtract the CDF to the upper bounds from the CDF of the lower bound
+		// to get the discrete PMF
+
+		//		// Pad the CDF to avoid index-out-of bounds during interpolation
+		int padSize = 0;
+		//		padSize = (int) Math.ceil(1 / step) + 2;
+		//		list.resetQuick();
+		//		list.add(new double[padSize]);
+		//		list.add(g);
+		//		for (int i = padSize; i-- > 0;)
+		//			list.add(1);
+		//double[] pd = list.toArray();
+		double[] pd = g;
+
+		list.resetQuick();
+
+		double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
+
+		// Q. If the EM-CCD the distribution may have a dirac delta at c=0 which 
+		// should could break interpolation using a spline?
+		UnivariateInterpolator in =
+				//(settings.getMode() == 1) ? new LinearInterpolator() : 
+				new SplineInterpolator();
+		UnivariateFunction f = in.interpolate(x, pd);
+
+		int bound = (int) Math.floor(zero);
+
+		list.add(0);
+		zero--;
+		double upperSum = 0;
+		double min = x[0];
+		double max = x[x.length - 1];
+		while (upperSum < 1)
+		{
+			bound++;
+
+			// Find the point at which the CDF should be computed
+			lowerSum = upperSum;
+			double point = bound + offset;
+			if (point < min)
+				upperSum = 0;
+			else if (point > max)
+				upperSum = 1;
+			else
+				upperSum = f.value(point);
+			list.add(upperSum - lowerSum);
+		}
+		list.add(0);
+		return zero;
 	}
 
 	private static LikelihoodFunction getLikelihoodFunction(CameraModelAnalysisSettings settings)
@@ -1047,7 +1133,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 			case POISSON_GAMMA_PMF:
 				return PoissonGammaFunction.createWithAlpha(alpha);
-				
+
 			case POISSON_GAMMA_GAUSSIAN_APPROX:
 			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
 			case POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION:
@@ -1197,11 +1283,22 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		if (settings.getSimpsonIntegration())
 		{
+			if (settings.getMode() == 1)
+			{
+				// TODO - Fix this when the PDF has a spike at zero due to the 
+				// direc delta contribution. This relevant when noise < 0.1.
+				// The integration breaks when the values below c==0 are all zero.
+				// Perhaps a Trapezoid integrator would work?
+			}
+			
 			// Use Simpson's integration with n=4 to get the integral of the probability 
 			// over the range of each count.
 			int n = 4;
 			int n_2 = n / 2;
 			double h = 1.0 / n;
+
+			// Note the Poisson-Gamma function cannot be integrated with the 
+			// Dirac delta function at c==0
 
 			// Compute the extra function points
 			double[] f = new double[y.length * n + 1];

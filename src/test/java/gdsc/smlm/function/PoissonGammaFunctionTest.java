@@ -24,7 +24,7 @@ public class PoissonGammaFunctionTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithPDFAtHighMean()
+	public void cumulativeProbabilityIsOneWithPDF()
 	{
 		for (double g : gain)
 			for (double p : photons)
@@ -46,13 +46,11 @@ public class PoissonGammaFunctionTest
 		
 		if (pdf)
 		{
-			// This is not actually a PDF but is a PMF so the mean must be higher for
-			// a good integration.
-			if (mu > 2)
-				Assert.assertEquals(msg, 1, p2, 0.02);
+			Assert.assertEquals(msg, 1, p2, 0.02);
 		}
 		else
 		{
+			// This is not actually a PMF but is a PDF so requires integration.
 			// This only works when the mean is above 2 if the gain is low
 			if (mu > 2 || gain > 20)
 				Assert.assertEquals(msg, 1, p2, 0.02);
@@ -135,12 +133,15 @@ public class PoissonGammaFunctionTest
 			{
 				public double value(double x)
 				{
-					return f.likelihood(x, e);
+					//return f.likelihood(x, e);
+					return PoissonGammaFunction.poissonGammaN(x, mu, gain);
 				}
 			}, min, max);
+			
+			p2 += PoissonGammaFunction.dirac(mu);
 		}
 
-		if (p2 < 0.98 || p2 > 1.02)
+		//if (p2 < 0.98 || p2 > 1.02)
 			System.out.printf("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
 
 		return p2;

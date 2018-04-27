@@ -74,9 +74,6 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * <p>
-	 * Note: This implementation will underestimate the cumulative probability (sum<1) when the mean is close to 1 and
-	 * the gain is low (<10).
 	 * 
 	 * @param c
 	 *            The count to evaluate
@@ -88,15 +85,6 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 */
 	public static double poissonGamma(double c, double p, double m)
 	{
-		// The default evaluation is:
-		//if (true)
-		//return Math.sqrt(p / (c * m)) * FastMath.exp(-c / m - p) * Bessel.I1(2 * Math.sqrt(c * p / m));
-
-		// However 
-		// Bessel.I1(x) -> Infinity
-		// The current implementation of Bessel.I1(x) is Infinity at x==710 so we switch 
-		// to an approximation...
-
 		// Any observed count above zero
 		if (c > 0.0)
 		{
@@ -104,17 +92,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double c_m = c / m;
 			final double cp_m = p * c_m;
 
-			// The current implementation of Bessel.I0(x) is Infinity at x==710 ?
-			//for (int x=300; ; x++)
-			//{
-			//	double i0 = Bessel.I0(x);
-			//	double i1 = Bessel.I1(x);
-			//	System.out.printf("x=%d i0=%g  i1=%g\n", x, i0, i1);
-			//	if (i0 == Double.POSITIVE_INFINITY)
-			//		break;				
-			//}
-
-			// The current implementation of Bessel.I1(x) is Infinity at x==710
+			// The current implementation of Bessel.II(x) is Infinity at x==710
+			// due to the use of Math.exp(x). Switch to an approximation.
 			final double x = 2 * Math.sqrt(cp_m);
 			if (x > 709)
 			{
@@ -152,7 +131,29 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		}
 		else if (c == 0.0)
 		{
-			return FastMath.exp(-p);
+			// This is the Dirac delta function plus the probability of 
+			// the Poisson-Gamma distribution with shape n=1 at c=0 (reduced to an exponential):
+			// Dirac = exp^-p
+
+			// Note:
+			// Poisson:
+			// 1/n! p^n*e^-p
+			// Gamma:
+			// 1/((n-1)!m^n) c^(n-1) * e^-c/m
+
+			// If the Gamma takes positive integer arguments it is an Erlang distribution,
+			// i.e., the sum of n independent exponentially distributed random variables, 
+			// each of which has a mean of p.
+			// The Gamma is only non-zero at c==0 when n=1. 
+			// Then it is just an exponential distribution.
+
+			// Poisson probability of n=1: FastMath.exp(-p) * p 
+			// Gamma probability of c=0 given n=1, Gamma(shape=1,scale=m) = 1 / m
+
+			//System.out.printf("p=%g, m=%g gamma=%g  pp=%g\n", p, m, 
+			//		new CustomGammaDistribution(null, 1, m).density(0), 1/m);
+			
+			return FastMath.exp(-p) * (1 + p / m);
 		}
 		else
 		{
@@ -161,9 +162,14 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	}
 
 	/**
-	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
+	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain for observed Poisson
+	 * counts. This avoids the computation of the Dirac delta function at c=0. 
 	 * <p>
-	 * Warning: Assumes the count is non-zero so user beware!
+	 * This method is suitable for use in integration routines.
+	 * <p>
+	 * If c==0 then the true probability is obtained by adding Math.exp(-p).
+	 * <p>
+	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 	 * 
 	 * @param c
 	 *            The count to evaluate
@@ -171,25 +177,53 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 *            The average number of photons per pixel input to the EM-camera (must be positive)
 	 * @param m
 	 *            The multiplication factor (gain)
-	 * @return The probability
+	 * @return The probability function for observed Poisson counts
+	 * @see #poissonGamma(double, double, double)
+	 * @see #dirac(double)
 	 */
-	public static double poissonGammaNonZero(double c, double p, double m)
+	public static double poissonGammaN(double c, double p, double m)
 	{
-		// As above without checking input c.
-		// This is a package level function for use by other classes.
+		// As above with no Dirac delta function at c=0
 
-		final double c_m = c / m;
-		final double cp_m = p * c_m;
-
-		final double x = 2 * Math.sqrt(cp_m);
-		if (x > 709)
+		if (c > 0.0)
 		{
-			return FastMath.exp(0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x));
+			final double c_m = c / m;
+			final double cp_m = p * c_m;
+			final double x = 2 * Math.sqrt(cp_m);
+			if (x > 709)
+			{
+				return FastMath.exp(0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x));
+			}
+			else
+			{
+				return Math.sqrt(p / (c * m)) * FastMath.exp(-c_m - p) * Bessel.I1(x);
+			}
+		}
+		else if (c == 0.0)
+		{
+			// No Dirac delta function
+			return FastMath.exp(-p) * p / m;
 		}
 		else
 		{
-			return Math.sqrt(p / (c * m)) * FastMath.exp(-c_m - p) * Bessel.I1(x);
+			return 0;
 		}
+	}
+
+	/**
+	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain for no observed
+	 * Poisson counts. This is the Dirac delta function at c=0.
+	 * <p>
+	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 *
+	 * @param p
+	 *            The average number of photons per pixel input to the EM-camera (must be positive)
+	 * @return The probability function for observed Poisson counts
+	 * @see #poissonGamma(double, double, double)
+	 */
+	public static double dirac(double p)
+	{
+		return FastMath.exp(-p);
 	}
 
 	/**
@@ -219,9 +253,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double c_m = c / m;
 			final double cp_m = p * c_m;
 
-			// Approximation of Bessel.I0(x) = Bessel.I1(x)
-
-			// The current implementation of Bessel.I1(x) is Infinity at x==710
+			// The current implementation of Bessel.II(x) is Infinity at x==710
+			// due to the use of Math.exp(x). Switch to an approximation.
 			final double x = 2 * Math.sqrt(cp_m);
 			if (x > 709)
 			{
@@ -231,7 +264,6 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				final double transform = -c_m - p + x - 0.5 * Math.log(twoPi * x);
 				double ans = FastMath.exp(0.5 * Math.log(p / (c * m)) + transform);
 				dG_dp[0] = FastMath.exp(transform) / m - ans;
-				//dG_dp[0] = FastMath.exp(transform - Math.log(m)) - ans; 
 				return ans;
 			}
 			else
@@ -252,9 +284,10 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		}
 		else if (c == 0.0)
 		{
+			double scale = (1 + p / m);
 			double exp_p = FastMath.exp(-p);
-			dG_dp[0] = -exp_p;
-			return exp_p;
+			dG_dp[0] = -exp_p * scale + exp_p / m;
+			return exp_p * scale;
 		}
 		else
 		{
@@ -267,9 +300,6 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * Calculate the log probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
 	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
-	 * <p>
-	 * Note: This implementation will underestimate the cumulative probability (sum<1) when the mean is close to 1 and
-	 * the gain is low (<10).
 	 * 
 	 * @param c
 	 *            The count to evaluate
@@ -298,7 +328,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		}
 		else if (c == 0.0)
 		{
-			return -p;
+			// log (FastMath.exp(-p) * (1 + p / m))
+			return -p + Math.log(1 + p / m);
 		}
 		else
 		{
