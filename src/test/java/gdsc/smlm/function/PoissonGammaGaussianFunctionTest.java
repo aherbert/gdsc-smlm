@@ -18,27 +18,46 @@ public class PoissonGammaGaussianFunctionTest
 	// This makes more sense when testing as the 
 	// PoissonGammaGaussianFunction accepts 1/gain and noise as parameters.
 
-	// Poisson-Gamma convolution approximation does not sum to 1 at lower gain.
+	// TODO Fix these test conditions
+
+	// Poisson-Gamma convolution sums to above 1 at lower gain.
+	// due to the Dirac delta function.
 	// Store the expected sum at different gain below 10 for testing.
 	static double[] pgSum = new double[11];
 	static
 	{
-		// Compute the sum at expected photons=1. This appears to produce 
-		// the lowest sum no matter what the gain.
-		// These are rounded down to to 3 d.p. provide a safer lower bound.
-		pgSum[1] = 0.831;
-		pgSum[2] = 0.911;
-		pgSum[3] = 0.940;
-		pgSum[4] = 0.954;
-		pgSum[5] = 0.963;
-		pgSum[6] = 0.969;
-		pgSum[7] = 0.974;
-		pgSum[8] = 0.977;
-		pgSum[9] = 0.979;
-		pgSum[10] = 0.981;
-	}
+		//// Compute
+		//MathContext mc = new MathContext(4, RoundingMode.UP);
+		//for (int g = 1; g <= 10; g++)
+		//{
+		//	double sum = 0;
+		//	for (int c = 0;; c++)
+		//	{
+		//		double p = PoissonGammaFunction.poissonGamma(c, 1, g);
+		//		sum += p;
+		//		if (p / sum < 1e-6)
+		//			break;
+		//	}
+		//	pgSum[g] = sum;
+		//	BigDecimal bd = new BigDecimal(sum);
+		//	System.out.printf("pgSum[%d] = %.3f;\n", g, bd.round(mc).doubleValue());
+		//}
 
-	// TODO Fix these test conditions
+		// Compute the sum at expected photons=1. This produces 
+		// the highest sum as the contribution from the Poisson-Gamma to c=0
+		// will be the greatest.
+		// These are rounded up to 3 d.p. provide a safer upper bound.
+		pgSum[1] = 1.200;
+		pgSum[2] = 1.096;
+		pgSum[3] = 1.064;
+		pgSum[4] = 1.047;
+		pgSum[5] = 1.038;
+		pgSum[6] = 1.032;
+		pgSum[7] = 1.027;
+		pgSum[8] = 1.024;
+		pgSum[9] = 1.021;
+		pgSum[10] = 1.019;
+	}
 
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	double[] highPhotons = { 5000, 10000 };
@@ -81,6 +100,9 @@ public class PoissonGammaGaussianFunctionTest
 		}
 	}
 
+	// The Poisson-Gamma has a delta function at c=0. This causes problems
+	// if not correctly integrated.
+
 	@Test
 	public void cumulativeProbabilityIsOneWithDiscreteCDFIntegration()
 	{
@@ -103,10 +125,6 @@ public class PoissonGammaGaussianFunctionTest
 				}
 	}
 
-	// Since the Poisson-Gamma approximation is poor at gain < 10 the
-	// following methods that use integration as an approximation 
-	// (with the Poisson-Gamma PMF x Gaussian PDF) underestimate the total sum. 
-	
 	@Test
 	public void cumulativeProbabilityIsOneWithApproximationAtGainAbove10()
 	{
@@ -127,8 +145,6 @@ public class PoissonGammaGaussianFunctionTest
 			for (double s : noise)
 				for (double g : totalGain)
 				{
-					if (g < 10)
-						continue;
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF);
 				}
 	}
@@ -140,8 +156,6 @@ public class PoissonGammaGaussianFunctionTest
 			for (double s : noise)
 				for (double g : totalGain)
 				{
-					if (g < 10)
-						continue;
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF);
 				}
 	}
@@ -171,7 +185,7 @@ public class PoissonGammaGaussianFunctionTest
 	// Since the Poisson-Gamma approximation is poor at gain < 10 the
 	// following methods that use integration as an approximation 
 	// (with the Poisson-Gamma PMF x Gaussian PDF) underestimate the total sum. 
-	
+
 	@Test
 	public void cumulativeProbabilityIsOneWithApproximationAtHighPhotonsAtGainAbove10()
 	{
@@ -236,7 +250,7 @@ public class PoissonGammaGaussianFunctionTest
 	// Since the Poisson-Gamma approximation is poor at gain < 10 the
 	// following methods that use integration as an approximation 
 	// (with the Poisson-Gamma PMF x Gaussian PDF) underestimate the total sum. 
-	
+
 	@Test
 	public void cumulativeProbabilityIsOneWithApproximationAtLowPhotonsAtGainAbove10()
 	{
@@ -275,14 +289,14 @@ public class PoissonGammaGaussianFunctionTest
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF);
 				}
 	}
-		
+
 	@Test
 	public void discretePDFIntegrationCloselyMatchesDiscreteCDFIntegration()
 	{
 		double[] e = closelyMatchesDiscreteCDFIntegration(0.34, ConvolutionMode.DISCRETE_PDF);
 		System.out.printf("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
-	
+
 	@Test
 	public void approximationCloselyMatchesDiscreteCDFIntegration()
 	{
