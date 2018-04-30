@@ -1,4 +1,4 @@
-package org.apache.commons.math3;
+package org.apache.commons.math3.distribution;
 
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
