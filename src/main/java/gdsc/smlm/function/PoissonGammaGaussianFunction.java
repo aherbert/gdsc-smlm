@@ -15,7 +15,7 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.analysis.integration.CustomSimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.util.FastMath;
@@ -629,8 +629,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					// => 5 for 2 iterations
 					// => 9 for 3 iterations
 					minimalIterationCount = 2;
-					i = new SimpsonIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
-							SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+					i = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
+							CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 					break;
 
 				case LEGENDRE_GAUSS_PDF:

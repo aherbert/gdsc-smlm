@@ -6,11 +6,13 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.CustomSimpsonIntegrator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
@@ -1192,14 +1194,33 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:
 				PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(alpha, noise);
 				f2.setMinimumProbability(0);
-				ConvolutionMode mode = getConvolutionMode(model);
-				f2.setConvolutionMode(mode);
-				if (!mode.validAtBoundary())
-					f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_PMF);
+				f2.setConvolutionMode(getConvolutionMode(model));
+				// The function should return a PMF/PDF depending on how it is used
+				f2.setPmfMode(!settings.getSimpsonIntegration());
+
 				return f2;
 
 			default:
 				throw new IllegalStateException();
+		}
+	}
+
+	private static boolean isPoissonGammaLikelihoodFunction(CameraModelAnalysisSettings settings)
+	{
+		Model model = Model.forNumber(settings.getModel());
+		switch (model)
+		{
+			case POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION:
+			case POISSON_GAMMA_PMF:
+			case POISSON_GAMMA_GAUSSIAN_APPROX:
+			case POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION:
+			case POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION:
+				return true;
+
+			default:
+				return false;
 		}
 	}
 
@@ -1277,8 +1298,34 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		return new double[][] { x, y };
 	}
 
+	private static class CachingUnivariateFunction implements UnivariateFunction
+	{
+		final LikelihoodFunction fun;
+		final double p;
+		final TDoubleArrayList list = new TDoubleArrayList();
+
+		public CachingUnivariateFunction(LikelihoodFunction fun, double p)
+		{
+			this.fun = fun;
+			this.p = p;
+		}
+
+		public double value(double x)
+		{
+			double v = fun.likelihood(x, p);
+			list.add(x);
+			list.add(v);
+			return v;
+		}
+
+		public void reset()
+		{
+			list.resetQuick();
+		}
+	}
+
 	private static double[][] cumulativeDistribution(CameraModelAnalysisSettings settings, double[][] cdf,
-			LikelihoodFunction fun)
+			final LikelihoodFunction fun)
 	{
 		// Q. How to match this is the discrete cumulative histogram using the continuous 
 		// likelihood function:
@@ -1334,17 +1381,34 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		if (settings.getSimpsonIntegration())
 		{
-			if (settings.getMode() == MODE_EM_CCD)
+			int c0 = -1;
+			double dirac = 0;
+			int minc = 0, maxc = 0;
+			CachingUnivariateFunction uf = null;
+
+			if (settings.getMode() == MODE_EM_CCD && isPoissonGammaLikelihoodFunction(settings))
 			{
-				// TODO - Fix this when the PDF has a spike at zero due to the 
-				// Dirac delta contribution. This is relevant when noise < 0.1.
+				// A spike is expected at c=0 due to the Dirac delta contribution.
+				// This breaks integration, especially when noise < 0.1.
+				// Fix by integrating around c=0 fully then integrating the rest.
+				c0 = Arrays.binarySearch(x, 0);
 				double noise = getReadNoise(settings);
+				final double p = settings.getPhotons();
 				if (noise == 0)
 				{
-					// Pure Poisson-Gamma. Just subtract the delta 
+					// Pure Poisson-Gamma. Just subtract the delta, do the simple integration
+					// below and add the delta back. Only functions that support noise==0
+					// will be allowed so this solution works.
+					dirac = PoissonGammaFunction.dirac(p);
+					y[c0] -= dirac;
 				}
-				// The integration breaks when the values below c==0 are all zero.
-				// Perhaps a Trapezoid integrator would work?
+				else
+				{
+					// Fix integration around c=0 using the range of the Gaussian
+					minc = (int) Math.max(x[0], Math.floor(-5 * noise));
+					maxc = (int) Math.min(x[x.length - 1], Math.ceil(5 * noise));
+					uf = new CachingUnivariateFunction(fun, p);
+				}
 			}
 
 			// Use Simpson's integration with n=4 to get the integral of the probability 
@@ -1408,6 +1472,62 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				s *= h / 3;
 				//System.out.printf("y[%d] = %f => %f\n", i, y[i], s);
 				y[i] = s;
+			}
+
+			// Fix Poisson-Gamma ...
+			if (c0 != -1)
+			{
+				if (uf != null)
+				{
+					// Convolved Poisson-Gamma. Fix in the range of the Gaussian around c=0 
+					final double relativeAccuracy = 1e-4;
+					final double absoluteAccuracy = 1e-8;
+					CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, 3,
+							CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+					double lower = (settings.getRoundDown()) ? 0 : -0.5;
+					double upper = lower + 1;
+					// Switch from c<=maxc to c<maxc. Avoid double computation at minc==maxc
+					if (maxc != minc)
+						maxc++;
+					maxc++;
+					for (int c = minc, i = Arrays.binarySearch(x, minc); c < maxc; c++, i++)
+					{
+						uf.reset();
+						try
+						{
+							y[i] = in.integrate(2000, uf, c + lower, c + upper);
+						}
+						catch (TooManyEvaluationsException ex)
+						{
+							System.out.printf("Integration failed: c=%g-%g\n", c + lower, c + upper);
+							// Q. Is the last sum valid?
+							if (in.getLastSum() > 0)
+							{
+								y[i] = in.getLastSum();
+							}
+							else
+							{
+								// Otherwise use all the cached values to compute a sum
+								// using the trapezoid rule. This will underestimate the sum.
+
+								// Note: The Simpson integrator will have computed the edge values
+								// as the first two values in the cache.
+								double[] g = uf.list.toArray();
+								double dx = (g[3] - g[1]) / in.getN();
+								n = 1 + 2 * ((int) in.getN());
+								sum = 0;
+								for (int j = 4; j < n; j += 2)
+									sum += g[j];
+								y[i] = (g[0] + g[2] + 2 * sum) / dx;
+							}
+						}
+					}
+				}
+				else
+				{
+					// Pure Poisson-Gamma. Just add back the delta.
+					y[c0] += dirac;
+				}
 			}
 		}
 
