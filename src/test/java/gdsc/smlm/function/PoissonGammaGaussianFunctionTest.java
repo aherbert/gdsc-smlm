@@ -494,13 +494,9 @@ public class PoissonGammaGaussianFunctionTest
 
 		PoissonGammaGaussianFunction f1 = new PoissonGammaGaussianFunction(1 / g, s);
 		f1.setConvolutionMode(slow);
-		if (!slow.validAtBoundary())
-			f1.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_PMF);
 
 		PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1 / g, s);
 		f2.setConvolutionMode(fast);
-		if (!fast.validAtBoundary())
-			f2.setBoundaryConvolutionMode(ConvolutionMode.DISCRETE_PMF);
 
 		// Generate realistic data from the probability mass function
 		double[][] samples = new double[photons.length][];

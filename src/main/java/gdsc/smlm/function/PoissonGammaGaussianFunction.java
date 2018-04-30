@@ -75,30 +75,18 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		 */
 		DISCRETE_PMF,
 
-		//@formatter:off
 		/**
 		 * Convolve the Poisson-Gamma as a continuous PDF with the Gaussian using Simpson's Rule. If integration fails
 		 * then the approximation will be used.
 		 */
-		SIMPSON_PDF { @Override public boolean validAtBoundary() { return false; }},
+		SIMPSON_PDF,
 
 		/**
 		 * Convolve the Poisson-Gamma as a continuous PDF with the Gaussian using a
 		 * <a href="http://mathworld.wolfram.com/Legendre-GaussQuadrature.html">
 		 * Legendre-Gauss</a> quadrature. If integration fails then the approximation will be used.
 		 */
-		LEGENDRE_GAUSS_PDF { @Override public boolean validAtBoundary() { return false; }};
-		//@formatter:on
-
-		/**
-		 * Specify if this method is valid at the x=0 boundary.
-		 *
-		 * @return true, if valid when the Gaussian kernal can cross the x=0 boundary
-		 */
-		public boolean validAtBoundary()
-		{
-			return true;
-		}
+		LEGENDRE_GAUSS_PDF
 	}
 
 	private class PGGFunction implements UnivariateFunction
@@ -123,8 +111,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	/** The convolution mode. */
 	private ConvolutionMode convolutionMode = ConvolutionMode.APPROXIMATION;
 
-	/** The boundary convolution mode. */
-	private ConvolutionMode boundaryConvolutionMode = ConvolutionMode.APPROXIMATION;
+	/** The pmf mode flag for the convolution of the Dirac delta function at c=0. */
+	private boolean pmfMode = true;
 
 	/**
 	 * The scale of the Gamma distribution (e.g. the on-chip gain multiplication factor)
@@ -332,9 +320,15 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			// Due to the Poisson-Gamma function delta function at u=0
 			// The probability at u=0 may be very large compared to the rest of 
 			// the Poisson-Gamma when e is low. To compensate always compute the 
-			// full CDF integration at u=0.
+			// at u=0.
 
-			//if (mode == ConvolutionMode.DISCRETE_PMF)
+			// If this function is to be used as a PMF (with discrete integer observed values)
+			// then use the Gaussian CDF convolution. This is the best option for 
+			// EM-CCD data fitting.  
+			// If this function is to be used as a PDF (e.g. for integration routines)
+			// then use the Gaussian PDF convolution.
+
+			if (pmfMode)
 			{
 				double erf2 = gaussianErf(-o + 0.5);
 				if (erf2 != -1)
@@ -343,10 +337,10 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					p += PoissonGammaFunction.dirac(e) * (erf2 - gaussianErf(-o - 0.5)) * 0.5;
 				}
 			}
-			//else
-			//{
-			//	p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
-			//}
+			else
+			{
+				p += PoissonGammaFunction.dirac(e) * gaussianPDF(-o);
+			}
 
 			return checkMinProbability(p);
 		}
@@ -588,34 +582,32 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	}
 
 	/**
-	 * Gets the boundary convolution mode.
+	 * Checks if is PMF mode. This is a hint on how to convolve the Dirac delta contribution at observed count zero
+	 * (c=0) with the Gaussian. If using the function for full integration then it should be set to false. The default
+	 * is true for modelling discrete count data from an EM-CCD.
 	 *
-	 * @return the boundary convolution mode
+	 * @return true, if PMF mode
+	 * @see #likelihood(double, double)
+	 * @see #getConvolutionMode()
 	 */
-	public ConvolutionMode getBoundaryConvolutionMode()
+	public boolean isPmfMode()
 	{
-		return boundaryConvolutionMode;
+		return pmfMode;
 	}
 
 	/**
-	 * Sets the boundary convolution mode.
-	 * WARNING:
-	 * Currently the integration modes do not work when the Gaussian kernel will sample
-	 * across x=0. The delta contribution of the Poisson-Gamma at x=0 only
-	 * makes sense as part of a PMF. Using the Poisson-Gamma approximation
-	 * as a PDF is incorrect when the Gaussian will cross the x=0 boundary.
-	 * Using an invalid mode will cause an exception.
+	 * Sets the PMF mode flag. This is a hint on how to convolve the Dirac delta contribution at observed count zero
+	 * (c=0) with the Gaussian. If using the function for full integration then it should be set to false. The default
+	 * is true for modelling discrete count data from an EM-CCD.
 	 *
-	 * @param boundaryConvolutionMode
-	 *            the new boundary convolution mode
-	 * @throws IllegalArgumentException
-	 *             If the mode is not valid at the boundary
+	 * @param pmfMode
+	 *            the new PMF mode
+	 * @see #likelihood(double, double)
+	 * @see #setConvolutionMode(ConvolutionMode)
 	 */
-	public void setBoundaryConvolutionMode(ConvolutionMode boundaryConvolutionMode) throws IllegalArgumentException
+	public void setPmfMode(boolean pmfMode)
 	{
-		if (!boundaryConvolutionMode.validAtBoundary())
-			throw new IllegalArgumentException("Not valid at the boundary");
-		this.boundaryConvolutionMode = boundaryConvolutionMode;
+		this.pmfMode = pmfMode;
 	}
 
 	private UnivariateIntegrator createIntegrator()
