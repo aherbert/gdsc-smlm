@@ -1499,7 +1499,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 						}
 						catch (TooManyEvaluationsException ex)
 						{
-							System.out.printf("Integration failed: c=%g-%g\n", c + lower, c + upper);
+							//System.out.printf("Integration failed: c=%g-%g\n", c + lower, c + upper);
 							// Q. Is the last sum valid?
 							if (in.getLastSum() > 0)
 							{

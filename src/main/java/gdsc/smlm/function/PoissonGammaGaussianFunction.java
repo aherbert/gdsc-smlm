@@ -625,10 +625,12 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			switch (convolutionMode)
 			{
 				case SIMPSON_PDF:
-					// Number of function evaluations = 2^iteration + 1 
-					// => 5 for 2 iterations
-					// => 9 for 3 iterations
-					minimalIterationCount = 2;
+					// This is a CustomSimpsonIntegrator that computes 1 refinement 
+					// on the first iteration.
+					// Number of function evaluations = 2^(iteration+1) + 1 
+					// => 5 for 1 iterations
+					// => 9 for 2 iterations
+					minimalIterationCount = 1;
 					i = new CustomSimpsonIntegrator(relativeAccuracy, absoluteAccuracy, minimalIterationCount,
 							CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 					break;
