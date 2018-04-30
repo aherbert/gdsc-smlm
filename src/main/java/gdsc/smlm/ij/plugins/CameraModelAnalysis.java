@@ -91,6 +91,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	private CameraModelAnalysisSettings lastSimulationSettings = null;
 
 	private static String[] MODE = { "CCD", "EM-CCD", "sCMOS" };
+	private static final int MODE_CCD = 0;
+	private static final int MODE_EM_CCD = 1;
+	private static final int MODE_SCMOS = 2;
 
 	//@formatter:off
 	private enum Model implements NamedObject
@@ -250,18 +253,18 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			{
 				int mode = settings.getMode();
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-				if (mode == 0)
+				if (mode == MODE_CCD)
 				{
 					egd.addNumericField("Gain", settings.getGain(), 2, 6, "Count/electrons");
 					egd.addNumericField("Noise", settings.getNoise(), 2, 6, "Count");
 				}
-				else if (mode == 1)
+				else if (mode == MODE_EM_CCD)
 				{
 					egd.addNumericField("Gain", settings.getEmGain(), 2, 6, "Count/electrons");
 					egd.addNumericField("Noise", settings.getEmNoise(), 2, 6, "Count");
 					egd.addNumericField("EM_samples", settings.getEmSamples(), 0);
 				}
-				else if (mode == 2)
+				else if (mode == MODE_SCMOS)
 				{
 					egd.addNumericField("Gain", settings.getCmosGain(), 2, 6, "Count/electrons");
 					egd.addNumericField("Noise", settings.getCmosNoise(), 2, 6, "Count");
@@ -271,18 +274,18 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				egd.showDialog(true, gd);
 				if (egd.wasCanceled())
 					return false;
-				if (mode == 0)
+				if (mode == MODE_CCD)
 				{
 					settings.setGain(egd.getNextNumber());
 					settings.setNoise(egd.getNextNumber());
 				}
-				else if (mode == 1)
+				else if (mode == MODE_EM_CCD)
 				{
 					settings.setEmGain(egd.getNextNumber());
 					settings.setEmNoise(egd.getNextNumber());
 					settings.setEmSamples(Math.max(1, (int) egd.getNextNumber()));
 				}
-				else
+				else // MODE_SCMOS
 				{
 					settings.setCmosGain(egd.getNextNumber());
 					settings.setCmosNoise(egd.getNextNumber());
@@ -530,21 +533,21 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			return true;
 		if (s1.getRoundDown() != s2.getRoundDown())
 			return true;
-		if (s1.getMode() == 0)
+		if (s1.getMode() == MODE_CCD)
 		{
 			if (s1.getGain() != s2.getGain())
 				return true;
 			if (s1.getNoise() != s2.getNoise())
 				return true;
 		}
-		else if (s1.getMode() == 2)
+		else if (s1.getMode() == MODE_SCMOS)
 		{
 			if (s1.getCmosGain() != s2.getCmosGain())
 				return true;
 			if (s1.getCmosNoise() != s2.getCmosNoise())
 				return true;
 		}
-		else
+		else // MODE_EM_CCD
 		{
 			if (s1.getEmGain() != s2.getEmGain())
 				return true;
@@ -780,7 +783,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double dirac = 0;
 
 		// EM-CCD 
-		if (settings.getMode() == 1)
+		if (settings.getMode() == MODE_EM_CCD)
 		{
 			name = "Poisson-Gamma";
 
@@ -1023,7 +1026,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			if (step != 1)
 			{
 				// Sample to 1.0 pixel step interval.
-				if (settings.getMode() == 1)
+				if (settings.getMode() == MODE_EM_CCD)
 				{
 					// Poisson-Gamma PDF
 					zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1 - dirac);
@@ -1122,7 +1125,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Q. If the EM-CCD the distribution may have a dirac delta at c=0 which 
 		// should could break interpolation using a spline?
 		UnivariateInterpolator in =
-				//(settings.getMode() == 1) ? new LinearInterpolator() : 
+				//(settings.getMode() == MODE_EM_CCD) ? new LinearInterpolator() : 
 				new SplineInterpolator();
 		UnivariateFunction f = in.interpolate(x, pd);
 
@@ -1224,11 +1227,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		switch (settings.getMode())
 		{
-			case 0:
+			case MODE_CCD:
 				return settings.getGain();
-			case 1:
+			case MODE_EM_CCD:
 				return settings.getEmGain();
-			case 2:
+			case MODE_SCMOS:
 				return settings.getCmosGain();
 			default:
 				throw new IllegalStateException();
@@ -1239,11 +1242,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	{
 		switch (settings.getMode())
 		{
-			case 0:
+			case MODE_CCD:
 				return settings.getNoise();
-			case 1:
+			case MODE_EM_CCD:
 				return settings.getEmNoise();
-			case 2:
+			case MODE_SCMOS:
 				return settings.getCmosNoise();
 			default:
 				throw new IllegalStateException();
@@ -1331,10 +1334,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		if (settings.getSimpsonIntegration())
 		{
-			if (settings.getMode() == 1)
+			if (settings.getMode() == MODE_EM_CCD)
 			{
 				// TODO - Fix this when the PDF has a spike at zero due to the 
-				// direc delta contribution. This relevant when noise < 0.1.
+				// Dirac delta contribution. This is relevant when noise < 0.1.
+				double noise = getReadNoise(settings);
+				if (noise == 0)
+				{
+					// Pure Poisson-Gamma. Just subtract the delta 
+				}
 				// The integration breaks when the values below c==0 are all zero.
 				// Perhaps a Trapezoid integrator would work?
 			}
