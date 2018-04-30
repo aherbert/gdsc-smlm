@@ -764,15 +764,20 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		boolean debug = false;
 
+		// Build the Probabity Mass/Density Function (PDF) of the distribution:
+		// either a Poisson (PMF) or Poisson-Gamma (PDF). The PDF is 0 at all 
+		// values apart from the step interval.
+		// Note: The Poisson-Gamm is computed without the Dirac delta contribution 
+		// at c=0. This allows correct convolution with the Gaussian of the dirac delta
+		// and the rest of the Poisson-Gamma (so matching the simulation).
 		TDoubleArrayList list = new TDoubleArrayList();
-
-		// Build the Probabity Mass Function (PMF) of the discrete distribution:
-		// either a Poisson-Gamma or a Poisson. The PMF is 0 at all values apart from
-		// the step interval
 		double step;
 		String name;
 
 		int upsample = 100;
+
+		// Store the Dirac delta value at c=0. This must be convolved separately.
+		double dirac = 0;
 
 		// EM-CCD 
 		if (settings.getMode() == 1)
@@ -782,11 +787,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			final double m = gain;
 			final double p = settings.getPhotons();
 
-			// Chose whether to compute a discrete PMF or a PDF.
-			// The PDF is not valid when used with a convolution. This is because
-			// the delta function at c=0 is from the PMF of the Poisson. So it is
-			// a discrete contribution.
-			boolean discrete = noise != 0;
+			dirac = PoissonGammaFunction.dirac(p);
+
+			// Chose whether to compute a discrete PMF or a PDF using the approximation.
+			// Note: The delta function at c=0 is from the PMF of the Poisson. So it is
+			// a discrete contribution. This is omitted from the PDF and handled in
+			// a separate convolution.
+			boolean discrete = false; // noise != 0;
 			if (discrete)
 			{
 				step = 1.0;
@@ -812,10 +819,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// is modified not the count. So it is a convolution of a distribution made with
 				// a gamma of fixed count and variable shape.
 
-				// Note: The gamma convolution is only relevant when photon number n>0,
 				// The count=0 is a special case.
-				list.add(PoissonGammaFunction.poissonGamma(0, p, m));
-				//list.add(FastMath.exp(-p));
+				list.add(PoissonGammaFunction.poissonGammaN(0, p, m));
 
 				long total = (maxn - minn) * (long) maxc;
 
@@ -876,28 +881,49 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				{
 					// Approximate
 					for (int c = 1; c <= maxc; c++)
-						list.add(PoissonGammaFunction.poissonGamma(c, p, m));
+						list.add(PoissonGammaFunction.poissonGammaN(c, p, m));
 				}
 			}
 			else
 			{
 				// This computes a PDF using the approximation and up-samples together.
-				// It should only be done when no convolution with a Gaussian is used.
 				step = 1.0 / upsample;
 				upsample = 1;
-				list.add(PoissonGammaFunction.poissonGamma(0, p, m));
+				list.add(PoissonGammaFunction.poissonGammaN(0, p, m));
 				double max = 0;
 				for (int i = 1;; i++)
 				{
 					// Scale the probability so it can be used directly to build the CDF
-					double pp = PoissonGammaFunction.poissonGamma(i * step, p, m) * step;
+					double pp = PoissonGammaFunction.poissonGammaN(i * step, p, m);
 					if (max < pp)
 						max = pp;
-					if (pp / max < 1e-4)
+					if (pp / max < 1e-5)
 						break;
 					list.add(pp);
 				}
 			}
+
+			// Ensure the combined sum of PDF and Dirac is 1
+			double expected = 1 - dirac;
+			// Compute the sum using Simpson's rule:
+			// Require an odd number to get an even number (n) of sub-intervals:
+			if (list.size() % 2 == 0)
+				list.add(0);
+			double[] g = list.toArray();
+			// Number of sub intervals
+			int n = g.length - 1;
+			double h = 1; // h = (a-b) / n = sub-interval width 
+			double sum2 = 0, sum4 = 0;
+			for (int j = 1; j <= n / 2 - 1; j++)
+				sum2 += g[2 * j];
+			for (int j = 1; j <= n / 2; j++)
+				sum4 += g[2 * j - 1];
+			double sum = (h / 3) * (g[0] + 2 * sum2 + 4 * sum4 + g[n]);
+			// Check
+			//System.out.printf("Sum=%g Expected=%g\n", sum * step, expected);
+			SimpleArrayUtils.multiply(g, expected / sum);
+			list.resetQuick();
+			list.add(g);
 		}
 		else
 		{
@@ -928,11 +954,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Sample Gaussian
 		if (noise > 0)
 		{
-			// The PMF is discrete and (if Poisson with gain) may be on a non-integer scale.
-			// Upsample the PMF to allow appropriate convolution and rounding to the integer 
-			// scale.
 			if (upsample != 1)
 			{
+				// The PMF is discrete and (if Poisson with gain) may be on a non-integer scale.
+				// Upsample the PMF to allow appropriate convolution and rounding to the integer 
+				// scale.
 				list.resetQuick();
 				double[] pad = new double[upsample - 1];
 
@@ -964,6 +990,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			// The convolution will have created a larger array so we must adjust the offset for this
 			zero -= radius * step;
 
+			// Add convolution of the dirac delta function.
+			if (dirac != 0)
+			{
+				// We only need to convolve the Gaussian at c=0
+				for (int i = 0; i < kernel.length; i++)
+					g[i] += kernel[i] * dirac;
+			}
+
 			// Debug
 			if (debug)
 			{
@@ -977,7 +1011,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				Utils.display(title, plot);
 			}
 
-			zero = downSampleCDF(settings, list, step, zero, g);
+			zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1.0);
 
 			g = list.toArray();
 			zero = (int) Math.floor(zero);
@@ -992,9 +1026,18 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				if (settings.getMode() == 1)
 				{
 					// Poisson-Gamma PDF
-					zero = downSampleCDF(settings, list, step, zero, g);
+					zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1 - dirac);
 					g = list.toArray();
 					zero = (int) Math.floor(zero);
+
+					// Add the dirac delta function.
+					if (dirac != 0)
+					{
+						// Note: zero is the start of the x-axis. This value should be -1.
+						assert (int) zero == -1;
+						// Use as an offset to find the actual zero. 
+						g[-(int) zero] += dirac;
+					}
 				}
 				else
 				{
@@ -1026,13 +1069,18 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 				step = 1.0;
 			}
+			else
+			{
+				// Add the dirac delta function.
+				list.setQuick(0, list.getQuick(0) + dirac);
+			}
 		}
 
 		return new double[][] { SimpleArrayUtils.newArray(g.length, zero, step), g };
 	}
 
-	private static double downSampleCDF(CameraModelAnalysisSettings settings, TDoubleArrayList list, double step,
-			double zero, double[] g)
+	private static double downSampleCDFtoPMF(CameraModelAnalysisSettings settings, TDoubleArrayList list, double step,
+			double zero, double[] g, double sum)
 	{
 		// Down-sample to 1.0 pixel step interval.
 
@@ -1044,8 +1092,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			g[i] = lowerSum;
 		}
 		for (int i = 0; i < g.length; i++)
-			g[i] /= lowerSum;
-		g[g.length - 1] = 1.0;
+			g[i] *= sum / lowerSum;
+		g[g.length - 1] = sum;
 
 		double offset = (settings.getRoundDown()) ? 0 : -0.5;
 
@@ -1085,7 +1133,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double upperSum = 0;
 		double min = x[0];
 		double max = x[x.length - 1];
-		while (upperSum < 1)
+		while (upperSum < sum)
 		{
 			bound++;
 
@@ -1095,7 +1143,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			if (point < min)
 				upperSum = 0;
 			else if (point > max)
-				upperSum = 1;
+				upperSum = sum;
 			else
 				upperSum = f.value(point);
 			list.add(upperSum - lowerSum);
@@ -1290,7 +1338,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// The integration breaks when the values below c==0 are all zero.
 				// Perhaps a Trapezoid integrator would work?
 			}
-			
+
 			// Use Simpson's integration with n=4 to get the integral of the probability 
 			// over the range of each count.
 			int n = 4;
