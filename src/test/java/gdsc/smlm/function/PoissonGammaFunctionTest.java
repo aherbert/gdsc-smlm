@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
-import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 
 public class PoissonGammaFunctionTest
 {
@@ -61,9 +60,6 @@ public class PoissonGammaFunctionTest
 	{
 		final PoissonGammaFunction f = PoissonGammaFunction.createWithAlpha(1.0 / gain);
 
-		final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1.0 / gain, 0);
-		f2.setConvolutionMode(ConvolutionMode.DISCRETE_PDF);
-
 		double p = 0;
 		int min = 1;
 		int max = 0;
@@ -88,7 +84,7 @@ public class PoissonGammaFunctionTest
 				final double pp = f.likelihood(x, e);
 				//System.out.printf("x=%d, p=%g\n", x, pp);
 				if (debug)
-					System.out.printf("x=%d, p=%f   %f\n", x, pp, f2.likelihood(x, e));
+					System.out.printf("x=%d, p=%f\n", x, pp);
 				p += pp;
 			}
 			//if (p > 1.01)
@@ -104,7 +100,7 @@ public class PoissonGammaFunctionTest
 			final double pp = f.likelihood(x, e);
 			//System.out.printf("x=%d, p=%g\n", x, pp);
 			if (debug)
-				System.out.printf("x=%d, p=%f   %f\n", x, pp, f2.likelihood(x, e));
+				System.out.printf("x=%d, p=%f\n", x, pp);
 			p += pp;
 			if (pp == 0 || pp / p < changeTolerance)
 				break;
@@ -115,7 +111,7 @@ public class PoissonGammaFunctionTest
 			final double pp = f.likelihood(x, e);
 			//System.out.printf("x=%d, p=%g\n", x, pp);
 			if (debug)
-				System.out.printf("x=%d, p=%f   %f\n", x, pp, f2.likelihood(x, e));
+				System.out.printf("x=%d, p=%f\n", x, pp);
 			p += pp;
 			if (pp == 0 || pp / p < changeTolerance)
 				break;

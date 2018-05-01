@@ -90,12 +90,13 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		{
 			// The observed count converted to photons
 			final double c_m = c / m;
-			final double cp_m = p * c_m;
 
-			// The current implementation of Bessel.II(x) is Infinity at x==710
-			// due to the use of Math.exp(x). Switch to an approximation.
-			final double x = 2 * Math.sqrt(cp_m);
-			if (x > 709)
+			// The current implementation of Bessel.II(x) is Infinity at x==710. 
+			// Also exp(-c/m -p) will be sub-normal at < -709. 
+			// Switch to an approximation.
+			final double x = 2 * Math.sqrt(p * c_m);
+			final double _c_m_p = -c_m - p;
+			if (x > 709 || _c_m_p < -709)
 			{
 				// Approximate Bessel function i1(x) when using large x:
 				// i1(x) ~ exp(x)/sqrt(2*pi*x)
@@ -115,18 +116,18 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				// log(p) = 0.5 * log(p / (c * m)) - c_m - p + 2 * sqrt(cp_m) - log(2*sqrt(pi)*sqrt(sqrt(cp_m)))
 
 				// This avoids a call to Math.pow 
-				final double transform = 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x);
+				//final double transform = 0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x);
 
 				//final double transform2 = 0.5 * Math.log(p / (c * m)) - c_m - p + x -
 				//		Math.log(2 * Math.sqrt(Math.PI) * Math.pow(p * c_m, 0.25));
 				//System.out.printf("t1=%g, t2=%g error=%g\n", transform, transform2,
 				//		gdsc.core.utils.DoubleEquality.relativeError(transform, transform2));
 
-				return FastMath.exp(transform);
+				return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
 			}
 			else
 			{
-				return Math.sqrt(p / (c * m)) * FastMath.exp(-c_m - p) * Bessel.I1(x);
+				return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 			}
 		}
 		else if (c == 0.0)
@@ -152,7 +153,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 
 			//System.out.printf("p=%g, m=%g gamma=%g  pp=%g\n", p, m, 
 			//		new CustomGammaDistribution(null, 1, m).density(0), 1/m);
-			
+
 			return FastMath.exp(-p) * (1 + p / m);
 		}
 		else
@@ -163,7 +164,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 
 	/**
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain for observed Poisson
-	 * counts. This avoids the computation of the Dirac delta function at c=0. 
+	 * counts. This avoids the computation of the Dirac delta function at c=0.
 	 * <p>
 	 * This method is suitable for use in integration routines.
 	 * <p>
@@ -188,15 +189,15 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		if (c > 0.0)
 		{
 			final double c_m = c / m;
-			final double cp_m = p * c_m;
-			final double x = 2 * Math.sqrt(cp_m);
-			if (x > 709)
+			final double x = 2 * Math.sqrt(p * c_m);
+			final double _c_m_p = -c_m - p;
+			if (x > 709 || _c_m_p < -709)
 			{
-				return FastMath.exp(0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(twoPi * x));
+				return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
 			}
 			else
 			{
-				return Math.sqrt(p / (c * m)) * FastMath.exp(-c_m - p) * Bessel.I1(x);
+				return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 			}
 		}
 		else if (c == 0.0)
