@@ -378,9 +378,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 		// m = 1/alpha
 		// c = cij
 
-		// [Poisson PMF] multiplied by the [value at zero]:
-		// [(eta^0 / 0!) * FastMath.exp(-eta)] * [eta * alpha]
-		// FastMath.exp(-eta) * [eta * alpha]
+		// This is the value of the Poisson-Gamma at c=0: 
+		// PoissonGammaFunction.poissonGammaN(0, eta, m);
 		final double exp_eta = FastMath.exp(-eta);
 		double f0 = exp_eta * eta / m;
 

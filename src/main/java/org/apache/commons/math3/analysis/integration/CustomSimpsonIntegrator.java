@@ -89,7 +89,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 	@Override
 	protected double doIntegrate() throws TooManyEvaluationsException, MaxCountExceededException
 	{
-		// This is a modification from the base CustomSimpsonIntegrator.
+		// This is a modification from the base SimpsonIntegrator.
 		// That only computed a single iteration if getMinimalIterationCount() == 1.
 
 		// Simpson's rule requires at least two trapezoid stages.
