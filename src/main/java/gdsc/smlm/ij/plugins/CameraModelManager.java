@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import gdsc.core.ij.Utils;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
@@ -472,20 +473,68 @@ public class CameraModelManager implements PlugIn
 		ImageStack stack = imp.getImageStack();
 		for (int n = 1; n <= stack.getSize(); n++)
 			logStats(stack.getSliceLabel(n), stack.getProcessor(n));
-		imp.show();
+
+		// Show normalised variance: sqrt(var/g^2)
+		try
+		{
+			//float[] bias = (float[]) stack.getPixels(1);
+			float[] gain = (float[]) stack.getPixels(2);
+			float[] variance = (float[]) stack.getPixels(3);
+
+			Statistics stats = new Statistics();
+			double min = Math.sqrt(variance[0] / Maths.pow2(gain[0]));
+			double max = min;
+			for (int i = 1; i < gain.length; i++)
+			{
+				double f = Math.sqrt(variance[i] / Maths.pow2(gain[i]));
+				stats.add(f);
+				if (min > f)
+					min = f;
+				else if (max < f)
+					max = f;
+			}
+			logStats("sqrt(var/g^2)", stats, min, max);
+		}
+		catch (Exception e)
+		{
+			Utils.log("Failed to load camera model %s from file: %s. %s", name, resource.getFilename(), e.getMessage());
+		}
+
+		Utils.display(name, stack);
 	}
 
 	private void logStats(String name, ImageProcessor ip)
 	{
 		Statistics stats = new Statistics();
+		float min, max;
 		if (ip instanceof FloatProcessor)
-			stats.add((float[]) ip.getPixels());
+		{
+			float[] f = (float[]) ip.getPixels();
+			stats.add(f);
+			float[] limits = Maths.limits(f);
+			min = limits[0];
+			max = limits[1];
+		}
 		else
 		{
+			min = max = ip.getf(0);
 			for (int i = ip.getPixelCount(); i-- > 0;)
-				stats.add(ip.getf(i));
+			{
+				final float f = ip.getf(i);
+				stats.add(f);
+				if (min > f)
+					min = f;
+				else if (max < f)
+					max = f;
+			}
 		}
-		Utils.log("%s : %s += %s", name, Utils.rounded(stats.getMean()), Utils.rounded(stats.getStandardDeviation()));
+		logStats(name, stats, min, max);
+	}
+
+	private static void logStats(String name, Statistics stats, double min, double max)
+	{
+		Utils.log("%s : %s += %s : [%s to %s]", name, Utils.rounded(stats.getMean()), Utils.rounded(stats.getStandardDeviation()),
+				Utils.rounded(min), Utils.rounded(max));
 	}
 
 	private void printCameraModels()
