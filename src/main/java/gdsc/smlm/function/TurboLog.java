@@ -72,10 +72,10 @@ public class TurboLog extends FastLog
 			logExpD[i] = (float) ((i - 1023) * LN2);
 
 		// Get the mantissa bounds
-		assert ((Double.doubleToLongBits(LOWER_ONE_BOUND) >> 52) - 1023) == -1 : "lower bound exponent not -1";
-		assert ((Double.doubleToLongBits(UPPER_ONE_BOUND) >> 52) - 1023) == 0 : "upper bound exponent not 0";
-		lowerBoundMantissa = Double.doubleToLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
-		upperBoundMantissa = Double.doubleToLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
+		assert ((Double.doubleToRawLongBits(LOWER_ONE_BOUND) >> 52) - 1023) == -1 : "lower bound exponent not -1";
+		assert ((Double.doubleToRawLongBits(UPPER_ONE_BOUND) >> 52) - 1023) == 0 : "upper bound exponent not 0";
+		lowerBoundMantissa = Double.doubleToRawLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
+		upperBoundMantissa = Double.doubleToRawLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
 
 		assert ((Float.floatToIntBits((float) LOWER_ONE_BOUND) >> 23) - 127) == -1 : "lower bound exponent not -1";
 		assert ((Float.floatToIntBits((float) UPPER_ONE_BOUND) >> 23) - 127) == 0 : "upper bound exponent not 0";
@@ -301,7 +301,7 @@ public class TurboLog extends FastLog
 	@Override
 	public float log(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 
@@ -398,7 +398,7 @@ public class TurboLog extends FastLog
 	public float fastLog(double x)
 	{
 		// As above but no checks for NaN or infinity		
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 		if (e == 0)
@@ -413,7 +413,7 @@ public class TurboLog extends FastLog
 	@Override
 	public double logD(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 
@@ -511,7 +511,7 @@ public class TurboLog extends FastLog
 	public double fastLogD(double x)
 	{
 		// As above but no checks for NaN or infinity		
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 		if (e == 0)

@@ -329,7 +329,7 @@ public class ICSIFastLog extends FastLog
 	@Override
 	public float log2(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 
 		// Note the documentation from Double.longBitsToDouble(int):
 		// int s = ((bits >> 63) == 0) ? 1 : -1;
@@ -393,7 +393,7 @@ public class ICSIFastLog extends FastLog
 	@Override
 	public float fastLog2(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 		return (e + ddata[(int) (m >>> qd)]);
@@ -402,7 +402,7 @@ public class ICSIFastLog extends FastLog
 	@Override
 	public float log(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 
@@ -445,7 +445,7 @@ public class ICSIFastLog extends FastLog
 	 */
 	public float fastLog(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 		return (e + ddata[(int) (m >>> qd)]) * LN2F;

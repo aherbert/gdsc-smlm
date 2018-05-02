@@ -236,7 +236,7 @@ public class TurboLog2 extends TurboLog
 	@Override
 	public float log(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 
@@ -304,7 +304,7 @@ public class TurboLog2 extends TurboLog
 	public float fastLog(double x)
 	{
 		// As above but no checks for NaN or infinity		
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 		if (e == 0)
@@ -320,7 +320,7 @@ public class TurboLog2 extends TurboLog
 	@Override
 	public double logD(double x)
 	{
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 
@@ -389,7 +389,7 @@ public class TurboLog2 extends TurboLog
 	public double fastLogD(double x)
 	{
 		// As above but no checks for NaN or infinity		
-		final long bits = Double.doubleToLongBits(x);
+		final long bits = Double.doubleToRawLongBits(x);
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
 		final long m = (bits & 0xfffffffffffffL);
 		if (e == 0)

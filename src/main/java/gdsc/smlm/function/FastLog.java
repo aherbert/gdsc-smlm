@@ -321,4 +321,56 @@ public abstract class FastLog
 	{
 		return fastLog(x);
 	}
+
+	/**
+	 * Gets the signed exponent.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the signed exponent
+	 */
+	public static int getSignedExponent(float x)
+	{
+		final int bits = Float.floatToRawIntBits(x);
+
+		// Note the documentation from Float.intBitsToFloat(int):
+		// int s = ((bits >> 31) == 0) ? 1 : -1;
+		// int e = ((bits >> 23) & 0xff);
+		// int m = (e == 0) ?
+		//                 (bits & 0x7fffff) << 1 :
+		//                 (bits & 0x7fffff) | 0x800000;
+		// Then the floating-point result equals the value of the mathematical
+		// expression s x m x 2^(e-150):
+		// e-127 is the unbiased exponent. 23 is the mantissa precision
+		// = s x m x 2^(e-127-23) 
+
+		// Get the unbiased exponent
+		return ((bits >> 23) & 0xff) - 127;
+	}
+
+	/**
+	 * Gets the signed exponent.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the signed exponent
+	 */
+	public static int getSignedExponent(double x)
+	{
+		final long bits = Double.doubleToRawLongBits(x);
+
+		// Note the documentation from Double.longBitsToDouble(int):
+		// int s = ((bits >> 63) == 0) ? 1 : -1;
+		// int e = (int)((bits >>> 52) & 0x7ffL);
+		// long m = (e == 0) ?
+		//                 (bits & 0xfffffffffffffL) << 1 :
+		//                 (bits & 0xfffffffffffffL) | 0x10000000000000L;
+		// Then the floating-point result equals the value of the mathematical
+		// expression s x m x 2^(e-1075):
+		// e-1023 is the unbiased exponent. 52 is the mantissa precision
+		// = s x m x 2^(e-1023-52) 
+
+		// Get the unbiased exponent
+		return ((int) ((bits >>> 52) & 0x7ffL) - 1023);
+	}
 }
