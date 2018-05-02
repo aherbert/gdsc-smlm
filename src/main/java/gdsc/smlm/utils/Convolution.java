@@ -119,7 +119,7 @@ public class Convolution
 		// FFT
 		fft.realForwardFull(x);
 		fft.realForwardFull(h);
-		
+
 		// Complex multiply. Reuse data array
 		for (int i = 0; i < x.length; i += 2)
 		{
@@ -189,11 +189,95 @@ public class Convolution
 		if (x == null)
 			throw new IllegalArgumentException("Input x is null");
 		if (h == null)
-			throw new IllegalArgumentException("Input g is null");
+			throw new IllegalArgumentException("Input h is null");
 
 		if (x.length == 0 || h.length == 0)
 		{
 			throw new IllegalArgumentException("Input x or h have no length");
 		}
+	}
+
+	/**
+	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation sigma.
+	 * To avoid a step due to the cutoff at a finite value, the near-edge values are
+	 * replaced by a 2nd-order polynomial with its minimum=0 at the first out-of-kernel
+	 * pixel. Thus, the kernel function has a smooth 1st derivative in spite of finite
+	 * length.
+	 *
+	 * @param sigma
+	 *            Standard deviation
+	 * @param range
+	 *            the range
+	 * @return The kernel, decaying towards zero, which would be reached at the first out of kernel index
+	 * 
+	 */
+	public static double[] makeGaussianKernel(final double sigma, double range)
+	{
+		// Limit range for the Gaussian
+		if (range < 1)
+			range = 1;
+		else if (range > 38)
+			range = 38;
+
+		// Build half the kernel into the full kernel array. This is duplicated later.
+		int kRadius = getGaussianHalfWidth(sigma, range) + 1;
+		double[] kernel = new double[2 * kRadius - 1];
+
+		kernel[0] = 1;
+		final double s2 = sigma * sigma;
+		for (int i = 1; i < kRadius; i++)
+		{
+			// Gaussian function
+			kernel[i] = FastMath.exp(-0.5 * i * i / s2);
+		}
+
+		// Edge correction
+		if (kRadius > 3)
+		{
+			double sqrtSlope = Double.MAX_VALUE;
+			int r = kRadius;
+			while (r > kRadius / 2)
+			{
+				r--;
+				double a = Math.sqrt(kernel[r]) / (kRadius - r);
+				if (a < sqrtSlope)
+					sqrtSlope = a;
+				else
+					break;
+			}
+			//System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r, sqrtSlope);
+			for (int r1 = r + 2; r1 < kRadius; r1++)
+				kernel[r1] = ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
+		}
+
+		// Normalise
+		double sum = kernel[0];
+		for (int i = 1; i < kRadius; i++)
+			sum += 2 * kernel[i];
+		for (int i = 0; i < kRadius; i++)
+			kernel[i] /= sum;
+
+		// Create symmetrical
+		System.arraycopy(kernel, 0, kernel, kRadius - 1, kRadius);
+		for (int i = kRadius, j = i - 2; i < kernel.length; i++, j--)
+		{
+			kernel[j] = kernel[i];
+		}
+		return kernel;
+	}
+
+	/**
+	 * Get half the width of the region smoothed by a Gaussian filter for the specified standard deviation. The full
+	 * region size is 2N + 1
+	 *
+	 * @param sigma
+	 *            the sigma
+	 * @param range
+	 *            the range
+	 * @return The half width
+	 */
+	public static int getGaussianHalfWidth(double sigma, double range)
+	{
+		return (int) Math.ceil(sigma * range);
 	}
 }
