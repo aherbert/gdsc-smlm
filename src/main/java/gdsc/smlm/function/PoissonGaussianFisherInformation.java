@@ -384,6 +384,9 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// This may have to be changed.
 		int scale = Math.max(defaultScale, getScale(Math.sqrt(t)));
 
+		// XXX: Testing - The scale breaks things
+		//scale = 128;
+
 		// Get the Gaussian kernel
 		int index = Maths.log2(scale);
 		if (kernel[index] == null)
@@ -425,7 +428,16 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		int length = pg.length - scale;
 
 		// Compute the sum using Simpson's integration. 
-		// h = interval = 1/scale
+		// h = interval = (b-a)/n
+		// The integral range is:
+		// f(x0) = 0 where x0 = -1;
+		// f(xn) = 0 where xn = length;
+		// n = length-1 + 2 = length+1
+		// a = -1
+		// b = length
+		// h = (length - -1) / (length+1) = 1
+		double h = 1;
+
 		// We assume that the function values at the end are zero and so do not 
 		// include them in the sum. Just alternate totals.
 		boolean use38 = false;
@@ -450,7 +462,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 					sum3 += f;
 			}
 
-			sum = 3 * (sum3 * 3 + sum2 * 2) / (scale * 8);
+			sum = (3 * h / 8) * (sum3 * 3 + sum2 * 2);
 		}
 		else
 		{
@@ -473,13 +485,13 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 					sum2 += f;
 			}
 
-			sum = (sum4 * 4 + sum2 * 2) / (scale * 3);
+			sum = (h / 3) * (sum4 * 4 + sum2 * 2);
 		}
 
 		// Subtract the final 1 
 		sum -= 1;
 
-		System.out.printf("t=%g  scale=%d   sum=%s  pI = %g   pgI = %g\n", t, scale, sum, pI, 1/(t + s*s));
+		System.out.printf("t=%g  scale=%d   sum=%s  pI = %g   pgI = %g\n", t, scale, sum, pI, 1 / (t + s * s));
 
 		// Check limits. It should be worse than the Poisson Fisher information.
 		// Note a low Fisher information is worse as this is the amount of information
