@@ -68,7 +68,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
 		alpha = Math.abs(alpha);
 		noPoisson = (mu <= 0);
-
+		
 		// Apply gain to the mean and readout standard deviation. 
 		// This compresses the probability distribution by alpha. Thus we can compute the
 		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
