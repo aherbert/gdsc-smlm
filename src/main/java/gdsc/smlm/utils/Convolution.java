@@ -208,10 +208,11 @@ public class Convolution
 	 *            Standard deviation
 	 * @param range
 	 *            the range
+	 * @param edgeCorrection
+	 *            Set to true to perform the edge correction
 	 * @return The kernel, decaying towards zero, which would be reached at the first out of kernel index
-	 * 
 	 */
-	public static double[] makeGaussianKernel(final double sigma, double range)
+	public static double[] makeGaussianKernel(final double sigma, double range, boolean edgeCorrection)
 	{
 		// Limit range for the Gaussian
 		if (range < 1)
@@ -232,7 +233,7 @@ public class Convolution
 		}
 
 		// Edge correction
-		if (kRadius > 3)
+		if (edgeCorrection && kRadius > 3)
 		{
 			double sqrtSlope = Double.MAX_VALUE;
 			int r = kRadius;
@@ -245,7 +246,8 @@ public class Convolution
 				else
 					break;
 			}
-			//System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r, sqrtSlope);
+			System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r,
+					sqrtSlope);
 			for (int r1 = r + 2; r1 < kRadius; r1++)
 				kernel[r1] = ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
 		}
