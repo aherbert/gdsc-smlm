@@ -149,6 +149,9 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 	/** The cumulative probability of the Poisson distribution that is used. */
 	private double cumulativeProbability = DEFAULT_CUMULATIVE_PROBABILITY;
 
+	/** Set to true to use Simpson's 3/8 rule for cubic interpolation of the integral. */
+	private boolean use38 = true;
+
 	/** Store the limit of the Poisson distribution for small mean for the cumulative probability. */
 	private int[] limits = defaultLimits;
 
@@ -240,23 +243,61 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 	 */
 	public double getFisherInformation(double t) throws IllegalArgumentException
 	{
+		final double I = getPoissonGaussianI(t);
+
+		// Check limits.
+
+		// It should be worse than the Poisson Fisher information (upper limit) but 
+		// better than the Poisson-Gaussian Fisher information (lower limit).
+		// Note a low Fisher information is worse as this is the amount of information
+		// carried about the parameter.
+		final double lower = getPoissonGaussianApproximationI(t);
+		final double upper = getPoissonI(t);
+		return Maths.clip(lower, upper, I);
+	}
+
+	/**
+	 * Gets the Poisson-Gaussian Fisher information.
+	 * <p>
+	 * The input parameter refers to the mean of the Poisson distribution.
+	 * <p>
+	 * The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq
+	 * S7. Note that that equation computes the noise coefficient relative to a Poisson, this computes the Fisher
+	 * information. To get the noise coefficient multiply by the input parameter.
+	 * <p>
+	 * Note: This uses a convolution of an infinite integral over a finite range. It may under-estimate the information
+	 * when the mean is large. Use {@link #getFisherInformation(double)} for a checked return value, clipped to the
+	 * expected range for a Poisson and the Poisson-Gaussian approximation.
+	 *
+	 * @param t
+	 *            the Poisson mean
+	 * @return the Poisson Gaussian Fisher information
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
+	 */
+	public double getPoissonGaussianI(double t) throws IllegalArgumentException
+	{
 		if (t <= 0)
 		{
-			//throw new IllegalArgumentException("Poisson mean must be positive");
+			throw new IllegalArgumentException("Poisson mean must be positive");
 
+			// This is not valid as the information tends towards infinity...
 			// No Poisson. Return the Fisher information for a Gaussian
-			return getGaussianI();
+			//return getGaussianI();
 		}
 
 		if (t > meanThreshold)
-			return getPoissonGaussianI(t);
-
-		// Get the Fisher information for a Poisson. 
-		final double pI = getPoissonI(t);
+		{
+			// Use an approximation when the Poisson mean is large
+			return getPoissonGaussianApproximationI(t);
+		}
 
 		if (kernel == null)
+		{
 			// No Gaussian convolution
-			return pI;
+			// Get the Fisher information for a Poisson. 
+			return getPoissonI(t);
+		}
 
 		// This computes the convolution of a Poisson PMF and a Gaussian PDF.
 		// The value of this is p(z).
@@ -432,7 +473,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		int mini = scale;
 		int maxi = pg.length;
 		int offseti = -scale;
-		
+
 		// Compute the sum using Simpson's integration. 
 		// h = interval = (b-a)/n
 		// The integral range is:
@@ -446,26 +487,9 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 
 		// We assume that the function values at the end are zero and so do not 
 		// include them in the sum. Just alternate totals.
-		int integrationMode = 1;
-		if (integrationMode == 0)
+		if (use38)
 		{
-			// Trapezoid sum. This will under-estimate the sum.
-			sum = 0;
-			for (int i = mini; i < maxi; i++)
-			{
-				if (pg[i] == 0)
-				{
-					// No probability so the function is zero.
-					// This is the equivalent of only computing the Fisher information over 
-					// the valid range of z.
-					continue;
-				}
-				final double f = Maths.pow2(pg[i + offseti]) / pg[i];
-				sum += f;
-			}
-		}
-		else if (integrationMode == 1)
-		{
+			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
 			// This computes the sum as:
 			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
 			double sum3 = 0, sum2 = 0;
@@ -489,6 +513,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		}
 		else
 		{
+			// Simpson's rule.
 			// This computes the sum as:
 			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
 			double sum4 = 0, sum2 = 0;
@@ -514,54 +539,46 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// Subtract the final 1 
 		sum -= 1;
 
-		System.out.printf("t=%g x=%d-%d scale=%d   sum=%s  pI = %g   pgI = %g\n", t, minx, maxx, scale, sum, pI,
-				1 / (t + s * s));
+		//System.out.printf("s=%g t=%g x=%d-%d scale=%d   sum=%s  pI = %g   pgI = %g\n", s, t, minx, maxx, scale, sum,
+		//		getPoissonI(t), 1 / (t + s * s));
 
-		// Check limits.
-
-		// It should be worse than the Poisson Fisher information (upper limit) but 
-		// better than the Poisson-Gaussian Fisher information (lower limit).
-		// Note a low Fisher information is worse as this is the amount of information
-		// carried about the parameter.
-
-		return Maths.clip(pI, getPoissonGaussianI(t), sum);
-		//return Maths.max(getPoissonGaussianI(t), sum);
+		return sum;
 	}
 
 	/**
-	 * Gets the poisson Fisher information.
+	 * Gets the Poisson Fisher information.
 	 *
 	 * @param t
 	 *            the poisson mean
 	 * @return the poisson Fisher information
 	 */
-	private double getPoissonI(double t)
+	public double getPoissonI(double t)
 	{
 		return 1.0 / t;
 	}
 
 	/**
-	 * Gets the poisson-gaussian Fisher information.
+	 * Gets the approximate Poisson-Gaussian Fisher information.
 	 * Approximate the Poisson as a Gaussian with u=t and var=t.
 	 * Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2).
 	 * Fisher information of Gaussian mean is 1/variance.
 	 *
 	 * @param t
 	 *            the poisson mean
-	 * @return the poisson gaussian Fisher information
+	 * @return the Poisson Gaussian Fisher information
 	 */
-	private double getPoissonGaussianI(double t)
+	public double getPoissonGaussianApproximationI(double t)
 	{
 		return 1.0 / (t + s * s);
 	}
 
 	/**
-	 * Gets the gaussian Fisher information for mean 0.
+	 * Gets the Gaussian Fisher information for mean 0.
 	 * Fisher information of Gaussian mean is 1/variance.
 	 *
-	 * @return the gaussian Fisher information
+	 * @return the Gaussian Fisher information
 	 */
-	private double getGaussianI()
+	public double getGaussianI()
 	{
 		return 1.0 / (s * s);
 	}
@@ -630,5 +647,28 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 				Arrays.fill(tinyLimits, 0);
 			}
 		}
+	}
+
+	/**
+	 * If true, use Simpson's 3/8 rule for cubic interpolation of the integral. False uses Simpson's rule for
+	 * quadratic interpolation.
+	 *
+	 * @return the use 38
+	 */
+	public boolean getUse38()
+	{
+		return use38;
+	}
+
+	/**
+	 * Set to true to use Simpson's 3/8 rule for cubic interpolation of the integral. False uses Simpson's rule for
+	 * quadratic interpolation.
+	 *
+	 * @param use38
+	 *            the new use 38
+	 */
+	public void setUse38(boolean use38)
+	{
+		this.use38 = use38;
 	}
 }
