@@ -10,6 +10,7 @@ import gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
+import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
@@ -294,23 +295,34 @@ public class GUIProtosHelper
 		// so these are separate.
 		// Use counts as it is simpler to understand (and measure) than electrons on manufacturers 
 		// specification sheets.
-		
+
 		// Need a better CCD estimate. This is Photometrics CoolSNAP HQ2
 		builder.setGain(1); // Count/electron
 		builder.setNoise(5.5); // Count
-		
+
 		// EM-CCD: Photometrics Evolve 512 
 		builder.setEmGain(40); // This is the total gain in Count/electron
 		builder.setEmNoise(13); // Count
-		
+
 		// sCMOS: Photometrics Prime95b
 		builder.setCmosGain(1.7); // Count/electron
 		builder.setCmosNoise(3.4); // Count
-		
+
 		builder.setSamples(20000);
 		builder.setNoiseSamples(10);
 		builder.setEmSamples(5);
 		defaultCameraModelAnalysisSettings = builder.build();
+	}
+	/** The default CameraModelFisherInformationAnalysisSettings */
+	public static final CameraModelFisherInformationAnalysisSettings defaultCameraModelFisherInformationAnalysisSettings;
+	static
+	{
+		CameraModelFisherInformationAnalysisSettings.Builder builder = CameraModelFisherInformationAnalysisSettings
+				.newBuilder();
+		builder.setMinExponent(-6);
+		builder.setMaxExponent(2);
+		builder.setSubDivisions(1);
+		defaultCameraModelFisherInformationAnalysisSettings = builder.build();
 	}
 
 	/** The default CubicSplineManagerSettings */
