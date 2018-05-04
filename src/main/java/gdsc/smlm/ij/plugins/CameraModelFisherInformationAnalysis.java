@@ -9,6 +9,7 @@ import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSetti
 import gdsc.smlm.function.FisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
+import gdsc.smlm.function.RealPoissonGaussianFisherInformation;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
@@ -119,7 +120,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private void analyse()
 	{
-		PoissonGaussianFisherInformation pg = createPoissonGaussianFisherInformation();
+		PoissonGaussianFisherInformation pg = createPoissonGaussianFisherInformation(false);
 		if (pg == null)
 			return;
 		PoissonGaussianApproximationFisherInformation pga = createPoissonGaussianApproximationFisherInformation();
@@ -175,7 +176,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		wo.tile();
 	}
 
-	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation()
+	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(boolean discrete)
 	{
 		double s = settings.getCcdNoise() / settings.getCcdGain();
 		if (s <= 0)
@@ -183,7 +184,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "CCD noise must be positive");
 			return null;
 		}
-		return new PoissonGaussianFisherInformation(s);
+		return new RealPoissonGaussianFisherInformation(s);
 	}
 
 	private PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation()

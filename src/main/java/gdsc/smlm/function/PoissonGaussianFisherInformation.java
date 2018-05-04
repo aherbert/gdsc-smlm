@@ -26,17 +26,12 @@ import gnu.trove.list.array.TDoubleArrayList;
  * <p>
  * Uses the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq S7.
  * <p>
- * Performs a convolution with a finite Gaussian kernel. The Gaussian is constructed using a range of the standard
- * deviation (s) and sampled at least every s/2.
- * <p>
- * An optimisation is used to avoid computation on tiny Gaussian kernels (i.e. too small to be computed)
- * This will occur when the Gaussian standard deviation is less than 0.02. The result is no convolution and the result
- * computes Poisson Fisher information.
+ * Performs a convolution with a finite Gaussian kernel.
  * <p>
  * An optimisation is used when the mean of the Poisson is above a threshold. In this case the Poisson can be
  * approximated as a Gaussian and the Fisher information is returned for the Gaussian-Gaussian convolution.
  */
-public class PoissonGaussianFisherInformation implements FisherInformation
+public abstract class PoissonGaussianFisherInformation implements FisherInformation
 {
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-10;
 
@@ -129,16 +124,8 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 	/** The range of the Gaussian kernel (in SD units). */
 	public final double range;
 
-	/** The default scale for the kernel. */
-	private final int defaultScale;
-
 	/** The poisson distribution used to generate the Poisson probabilities. */
 	private CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
-
-	/**
-	 * The Gaussian convolution kernels for different scaling. The scale is 2^index, e.g. 1, 2, 4, 8, 16, 32, 64, 128.
-	 */
-	private final double[][] kernel;
 
 	/** Working space to store the Poisson probabilities. */
 	private TDoubleArrayList list = new TDoubleArrayList();
@@ -196,38 +183,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		range = Maths.clip(1, 38, range);
 
 		this.s = s;
-
-		// Check if the Gaussian standard deviation is above the threshold for computation.
-		// Also check if the gaussian filter will touch more than one Poisson value.
-		// Otherwise convolution is not possible.
-		// The limit s ==0.02 is based on the scale being 2/s = 100. Do not support scaling 
-		// greater than this. It is unlikely anyway.
-		if (s >= 0.02 && s * range >= 1)
-		{
-			this.range = range;
-
-			// Determine how much to up-sample so that the convolution with the Gaussian
-			// uses multiple values of the Gaussian.
-			defaultScale = getScale(s);
-
-			// Store the Gaussian kernels for convolution:
-			// 1, 2, 4, 8, 16, 32, 64, 128
-			kernel = new double[8][];
-		}
-		else
-		{
-			this.range = 0;
-			defaultScale = 0;
-			kernel = null;
-		}
-	}
-
-	private static int getScale(double s)
-	{
-		double scale = Math.ceil(2 / s);
-		if (scale > 128)
-			return 128;
-		return Maths.nextPow2((int) scale);
+		this.range = range;
 	}
 
 	/**
@@ -292,7 +248,8 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 			return getPoissonGaussianApproximationI(t);
 		}
 
-		if (kernel == null)
+		final int scale = getKernelScale(t);
+		if (scale == 0)
 		{
 			// No Gaussian convolution
 			// Get the Fisher information for a Poisson. 
@@ -419,24 +376,6 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// Unscaled Poisson
 		double[] p = list.toArray();
 
-		// Choose the kernel. A small mean requires more Gaussian samples.
-		// Note the default scale is the minimum required to sample at 0.5 SD units.
-		// Find the same for the Poisson using its variance.
-		// mean 4 => scale = 1
-		// mean <4 => scale = 2
-		// mean <1 => scale >= 4
-		// This may have to be changed.
-		int scale = Math.max(defaultScale, getScale(t / 2));
-
-		//scale = 1;
-		//scale = defaultScale;
-
-		// Get the Gaussian kernel
-		int index = log2(scale);
-		if (kernel[index] == null)
-			kernel[index] = Convolution.makeGaussianKernel(s * scale, range, true);
-		double[] g = kernel[index];
-
 		// Up-sample the Poisson
 		if (scale != 1)
 		{
@@ -452,6 +391,8 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		}
 
 		// Convolve with the Gaussian kernel
+		double[] g = getGaussianKernel(scale);
+
 		double[] pg = Convolution.convolveFast(p, g);
 
 		// In order for A(z) = P(z-1) to work sum A(z) must be 1
@@ -546,6 +487,24 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 	}
 
 	/**
+	 * Gets the scale for convolution. Return 0 if no convolution is possible.
+	 *
+	 * @param t
+	 *            the mean of the Poisson distribution
+	 * @return the scale
+	 */
+	protected abstract int getKernelScale(double t);
+
+	/**
+	 * Gets the gaussian kernel for convolution.
+	 *
+	 * @param scale
+	 *            the scale
+	 * @return the gaussian kernel
+	 */
+	protected abstract double[] getGaussianKernel(int scale);
+
+	/**
 	 * Gets the Poisson Fisher information.
 	 *
 	 * @param t
@@ -581,14 +540,6 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 	public double getGaussianI()
 	{
 		return 1.0 / (s * s);
-	}
-
-	private int log2(int scale)
-	{
-		int bits = 30;
-		while ((scale & (1 << bits)) == 0)
-			bits--;
-		return bits;
 	}
 
 	/**

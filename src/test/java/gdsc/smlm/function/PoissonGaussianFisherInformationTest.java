@@ -6,26 +6,50 @@ import org.junit.Test;
 public class PoissonGaussianFisherInformationTest
 {
 	@Test
-	public void canComputeFisherInformation()
+	public void canComputeRealFisherInformation()
 	{
 		//org.junit.Assume.assumeTrue(false);
 
-		canComputeFisherInformation(0.25);
-		canComputeFisherInformation(0.5);
-		canComputeFisherInformation(1);
-		canComputeFisherInformation(2);
+		canComputeRealFisherInformation(0.25);
+		canComputeRealFisherInformation(0.5);
+		canComputeRealFisherInformation(1);
+		canComputeRealFisherInformation(2);
 	}
 
-	private void canComputeFisherInformation(double s)
+	private void canComputeRealFisherInformation(double s)
 	{
-		PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(s);
+		canComputeFisherInformation(new RealPoissonGaussianFisherInformation(s));
+	}
+
+	@Test(expected=AssertionError.class)
+	public void cannotComputeDiscreteFisherInformation()
+	{
+		// TODO - The discrete version currently fails this test.
+		// Do the full differentiation of the PMF that is being used 
+		// to determine if it is computing a correct Fisher information. 
+		
+		//org.junit.Assume.assumeTrue(false);
+		
+		canComputeDiscreteFisherInformation(0.25);
+		canComputeDiscreteFisherInformation(0.5);
+		canComputeDiscreteFisherInformation(1);
+		canComputeDiscreteFisherInformation(2);
+	}
+
+	private void canComputeDiscreteFisherInformation(double s)
+	{
+		canComputeFisherInformation(new DiscretePoissonGaussianFisherInformation(s));
+	}
+	
+	private void canComputeFisherInformation(PoissonGaussianFisherInformation f)
+	{
 		f.setMeanThreshold(Double.MAX_VALUE);
 		for (int exp = -12; exp < 8; exp++)
 		{
 			canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
 		}
 	}
-
+	
 	private void canComputeFisherInformation(PoissonGaussianFisherInformation f, double u)
 	{
 		double I = f.getPoissonGaussianI(u);
