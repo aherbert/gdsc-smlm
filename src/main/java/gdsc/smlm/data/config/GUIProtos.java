@@ -29478,6 +29478,26 @@ public final class GUIProtos {
      * <code>int32 sub_divisions = 3;</code>
      */
     int getSubDivisions();
+
+    /**
+     * <code>double ccd_gain = 4;</code>
+     */
+    double getCcdGain();
+
+    /**
+     * <code>double ccd_noise = 5;</code>
+     */
+    double getCcdNoise();
+
+    /**
+     * <code>double em_ccd_gain = 6;</code>
+     */
+    double getEmCcdGain();
+
+    /**
+     * <code>double em_ccd_noise = 7;</code>
+     */
+    double getEmCcdNoise();
   }
   /**
    * <pre>
@@ -29498,6 +29518,10 @@ public final class GUIProtos {
       minExponent_ = 0;
       maxExponent_ = 0;
       subDivisions_ = 0;
+      ccdGain_ = 0D;
+      ccdNoise_ = 0D;
+      emCcdGain_ = 0D;
+      emCcdNoise_ = 0D;
     }
 
     @java.lang.Override
@@ -29538,6 +29562,26 @@ public final class GUIProtos {
             case 24: {
 
               subDivisions_ = input.readInt32();
+              break;
+            }
+            case 33: {
+
+              ccdGain_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              ccdNoise_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              emCcdGain_ = input.readDouble();
+              break;
+            }
+            case 57: {
+
+              emCcdNoise_ = input.readDouble();
               break;
             }
           }
@@ -29590,6 +29634,42 @@ public final class GUIProtos {
       return subDivisions_;
     }
 
+    public static final int CCD_GAIN_FIELD_NUMBER = 4;
+    private double ccdGain_;
+    /**
+     * <code>double ccd_gain = 4;</code>
+     */
+    public double getCcdGain() {
+      return ccdGain_;
+    }
+
+    public static final int CCD_NOISE_FIELD_NUMBER = 5;
+    private double ccdNoise_;
+    /**
+     * <code>double ccd_noise = 5;</code>
+     */
+    public double getCcdNoise() {
+      return ccdNoise_;
+    }
+
+    public static final int EM_CCD_GAIN_FIELD_NUMBER = 6;
+    private double emCcdGain_;
+    /**
+     * <code>double em_ccd_gain = 6;</code>
+     */
+    public double getEmCcdGain() {
+      return emCcdGain_;
+    }
+
+    public static final int EM_CCD_NOISE_FIELD_NUMBER = 7;
+    private double emCcdNoise_;
+    /**
+     * <code>double em_ccd_noise = 7;</code>
+     */
+    public double getEmCcdNoise() {
+      return emCcdNoise_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -29611,6 +29691,18 @@ public final class GUIProtos {
       if (subDivisions_ != 0) {
         output.writeInt32(3, subDivisions_);
       }
+      if (ccdGain_ != 0D) {
+        output.writeDouble(4, ccdGain_);
+      }
+      if (ccdNoise_ != 0D) {
+        output.writeDouble(5, ccdNoise_);
+      }
+      if (emCcdGain_ != 0D) {
+        output.writeDouble(6, emCcdGain_);
+      }
+      if (emCcdNoise_ != 0D) {
+        output.writeDouble(7, emCcdNoise_);
+      }
     }
 
     public int getSerializedSize() {
@@ -29629,6 +29721,22 @@ public final class GUIProtos {
       if (subDivisions_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, subDivisions_);
+      }
+      if (ccdGain_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, ccdGain_);
+      }
+      if (ccdNoise_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, ccdNoise_);
+      }
+      if (emCcdGain_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, emCcdGain_);
+      }
+      if (emCcdNoise_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, emCcdNoise_);
       }
       memoizedSize = size;
       return size;
@@ -29652,6 +29760,22 @@ public final class GUIProtos {
           == other.getMaxExponent());
       result = result && (getSubDivisions()
           == other.getSubDivisions());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getCcdGain())
+          == java.lang.Double.doubleToLongBits(
+              other.getCcdGain()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getCcdNoise())
+          == java.lang.Double.doubleToLongBits(
+              other.getCcdNoise()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getEmCcdGain())
+          == java.lang.Double.doubleToLongBits(
+              other.getEmCcdGain()));
+      result = result && (
+          java.lang.Double.doubleToLongBits(getEmCcdNoise())
+          == java.lang.Double.doubleToLongBits(
+              other.getEmCcdNoise()));
       return result;
     }
 
@@ -29668,6 +29792,18 @@ public final class GUIProtos {
       hash = (53 * hash) + getMaxExponent();
       hash = (37 * hash) + SUB_DIVISIONS_FIELD_NUMBER;
       hash = (53 * hash) + getSubDivisions();
+      hash = (37 * hash) + CCD_GAIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCcdGain()));
+      hash = (37 * hash) + CCD_NOISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCcdNoise()));
+      hash = (37 * hash) + EM_CCD_GAIN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getEmCcdGain()));
+      hash = (37 * hash) + EM_CCD_NOISE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getEmCcdNoise()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -29807,6 +29943,14 @@ public final class GUIProtos {
 
         subDivisions_ = 0;
 
+        ccdGain_ = 0D;
+
+        ccdNoise_ = 0D;
+
+        emCcdGain_ = 0D;
+
+        emCcdNoise_ = 0D;
+
         return this;
       }
 
@@ -29832,6 +29976,10 @@ public final class GUIProtos {
         result.minExponent_ = minExponent_;
         result.maxExponent_ = maxExponent_;
         result.subDivisions_ = subDivisions_;
+        result.ccdGain_ = ccdGain_;
+        result.ccdNoise_ = ccdNoise_;
+        result.emCcdGain_ = emCcdGain_;
+        result.emCcdNoise_ = emCcdNoise_;
         onBuilt();
         return result;
       }
@@ -29881,6 +30029,18 @@ public final class GUIProtos {
         }
         if (other.getSubDivisions() != 0) {
           setSubDivisions(other.getSubDivisions());
+        }
+        if (other.getCcdGain() != 0D) {
+          setCcdGain(other.getCcdGain());
+        }
+        if (other.getCcdNoise() != 0D) {
+          setCcdNoise(other.getCcdNoise());
+        }
+        if (other.getEmCcdGain() != 0D) {
+          setEmCcdGain(other.getEmCcdGain());
+        }
+        if (other.getEmCcdNoise() != 0D) {
+          setEmCcdNoise(other.getEmCcdNoise());
         }
         onChanged();
         return this;
@@ -29982,6 +30142,110 @@ public final class GUIProtos {
       public Builder clearSubDivisions() {
         
         subDivisions_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double ccdGain_ ;
+      /**
+       * <code>double ccd_gain = 4;</code>
+       */
+      public double getCcdGain() {
+        return ccdGain_;
+      }
+      /**
+       * <code>double ccd_gain = 4;</code>
+       */
+      public Builder setCcdGain(double value) {
+        
+        ccdGain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double ccd_gain = 4;</code>
+       */
+      public Builder clearCcdGain() {
+        
+        ccdGain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double ccdNoise_ ;
+      /**
+       * <code>double ccd_noise = 5;</code>
+       */
+      public double getCcdNoise() {
+        return ccdNoise_;
+      }
+      /**
+       * <code>double ccd_noise = 5;</code>
+       */
+      public Builder setCcdNoise(double value) {
+        
+        ccdNoise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double ccd_noise = 5;</code>
+       */
+      public Builder clearCcdNoise() {
+        
+        ccdNoise_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double emCcdGain_ ;
+      /**
+       * <code>double em_ccd_gain = 6;</code>
+       */
+      public double getEmCcdGain() {
+        return emCcdGain_;
+      }
+      /**
+       * <code>double em_ccd_gain = 6;</code>
+       */
+      public Builder setEmCcdGain(double value) {
+        
+        emCcdGain_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double em_ccd_gain = 6;</code>
+       */
+      public Builder clearEmCcdGain() {
+        
+        emCcdGain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double emCcdNoise_ ;
+      /**
+       * <code>double em_ccd_noise = 7;</code>
+       */
+      public double getEmCcdNoise() {
+        return emCcdNoise_;
+      }
+      /**
+       * <code>double em_ccd_noise = 7;</code>
+       */
+      public Builder setEmCcdNoise(double value) {
+        
+        emCcdNoise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double em_ccd_noise = 7;</code>
+       */
+      public Builder clearEmCcdNoise() {
+        
+        emCcdNoise_ = 0D;
         onChanged();
         return this;
       }
@@ -42733,100 +42997,102 @@ public final class GUIProtos {
       "del\030\010 \001(\005\022\017\n\007em_gain\030\t \001(\001\022\022\n\nem_samples",
       "\030\n \001(\005\022\020\n\010em_noise\030\013 \001(\001\022\021\n\tcmos_gain\030\014 " +
       "\001(\001\022\022\n\ncmos_noise\030\r \001(\001\022\033\n\023simpson_integ" +
-      "ration\030\016 \001(\010\022\022\n\nround_down\030\017 \001(\010\"q\n,Came" +
-      "raModelFisherInformationAnalysisSettings" +
-      "\022\024\n\014min_exponent\030\001 \001(\005\022\024\n\014max_exponent\030\002" +
-      " \001(\005\022\025\n\rsub_divisions\030\003 \001(\005\"\227\001\n\032CubicSpl" +
-      "ineManagerSettings\022\016\n\006option\030\001 \001(\005\022\020\n\010se" +
-      "lected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(\005\022\r\n\005s" +
-      "cale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shift\030\006" +
-      " \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030FailCountManag",
-      "erSettings\022\016\n\006option\030\001 \001(\005\022\022\n\nmax_frames" +
-      "\030\002 \001(\005\022\030\n\020fail_count_limit\030\003 \001(\005\022\032\n\022save" +
-      "_after_fitting\030\004 \001(\010\022\034\n\024target_pass_frac" +
-      "tion\030\005 \001(\001\022\020\n\010filename\030\006 \001(\t\022\021\n\tplot_ite" +
-      "m\030\007 \001(\005\022\033\n\023plot_rolling_window\030\010 \001(\005\022\030\n\020" +
-      "plot_pass_weight\030\t \001(\005\022\030\n\020plot_fail_weig" +
-      "ht\030\n \001(\005\022\033\n\023plot_reset_fraction\030\013 \001(\001\022\031\n" +
-      "\021plot_fixed_x_axis\030\014 \001(\010\022\023\n\013table_top_n\030" +
-      "\r \001(\005\022,\n$rolling_counter_min_allowed_fai" +
-      "lures\030\016 \001(\005\022,\n$rolling_counter_max_allow",
-      "ed_failures\030\017 \001(\005\022\"\n\032rolling_counter_min" +
-      "_window\030\020 \001(\005\022\"\n\032rolling_counter_max_win" +
-      "dow\030\021 \001(\005\022-\n%weighted_counter_min_allowe" +
-      "d_failures\030\022 \001(\005\022-\n%weighted_counter_max" +
-      "_allowed_failures\030\023 \001(\005\022+\n#weighted_coun" +
-      "ter_min_pass_decrement\030\024 \001(\005\022+\n#weighted" +
-      "_counter_max_pass_decrement\030\025 \001(\005\022.\n&res" +
-      "etting_counter_min_allowed_failures\030\026 \001(" +
-      "\005\022.\n&resetting_counter_max_allowed_failu" +
-      "res\030\027 \001(\005\022,\n$resetting_counter_min_reset",
-      "_fraction\030\030 \001(\001\022,\n$resetting_counter_max" +
-      "_reset_fraction\030\031 \001(\001\022,\n$resetting_count" +
-      "er_inc_reset_fraction\030\032 \001(\001\022,\n$pass_rate" +
-      "_counter_min_allowed_counts\030\033 \001(\005\022,\n$pas" +
-      "s_rate_counter_max_allowed_counts\030\034 \001(\005\022" +
-      "\'\n\037pass_rate_counter_min_pass_rate\030\035 \001(\001" +
-      "\022\'\n\037pass_rate_counter_max_pass_rate\030\036 \001(" +
-      "\001\022\'\n\037pass_rate_counter_inc_pass_rate\030\037 \001" +
-      "(\001\"\266\005\n\037AstigmatismModelManagerSettings\022\016" +
-      "\n\006option\030\001 \001(\005\022\024\n\014nm_per_slice\030\002 \001(\001\022E\n\023",
-      "fit_engine_settings\030\003 \001(\0132(.gdsc.smlm.da" +
-      "ta.config.FitEngineSettings\022\'\n\003psf\030\004 \001(\013" +
-      "2\032.gdsc.smlm.data.config.PSF\0227\n\013calibrat" +
-      "ion\030\005 \001(\0132\".gdsc.smlm.data.config.Calibr" +
-      "ation\022\016\n\006radius\030\006 \001(\001\022\030\n\020log_fit_progres" +
-      "s\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001\022\024\n\014weighted_f" +
-      "it\030\t \001(\010\022\034\n\024show_estimated_curve\030\n \001(\010\022\r" +
-      "\n\005image\030\013 \001(\t\022\022\n\nmodel_name\030\014 \001(\t\022\022\n\nsav" +
-      "e_model\030\016 \001(\010\022\026\n\016save_fit_width\030\017 \001(\010\022\020\n" +
-      "\010selected\030\r \001(\t\022\033\n\023show_depth_of_focus\030\020",
-      " \001(\010\022\033\n\023show_combined_width\030\026 \001(\010\022\020\n\010sho" +
-      "w_psf\030\022 \001(\010\022<\n\017z_distance_unit\030\023 \001(\0162#.g" +
-      "dsc.smlm.data.config.DistanceUnit\022<\n\017s_d" +
-      "istance_unit\030\024 \001(\0162#.gdsc.smlm.data.conf" +
-      "ig.DistanceUnit\022\030\n\020calibrated_image\030\025 \001(" +
-      "\010\022\020\n\010filename\030\021 \001(\t\"\305\002\n\023CropResultsSetti" +
-      "ngs\022\024\n\014input_option\030\001 \001(\t\022\016\n\006border\030\002 \001(" +
-      "\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005 \001(\001\022\016" +
-      "\n\006height\030\006 \001(\001\022\025\n\rselect_region\030\007 \001(\010\022\017\n" +
-      "\007use_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022\024\n\014res",
-      "et_origin\030\n \001(\010\022\023\n\013output_name\030\013 \001(\t\022\023\n\013" +
-      "name_option\030\014 \001(\005\022\023\n\013name_suffix\030\r \001(\t\022\024" +
-      "\n\014name_counter\030\016 \001(\005\022\017\n\007limit_z\030\017 \001(\010\022\r\n" +
-      "\005min_z\030\020 \001(\001\022\r\n\005max_z\030\021 \001(\001\"\346\001\n\030Summaris" +
-      "eResultsSettings\022\027\n\017plot_background\030\001 \001(" +
-      "\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016" +
-      "\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplot_n" +
-      "oise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_pre" +
-      "cision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027\n\017r" +
-      "emove_outliers\030\n \001(\005\"\214\006\n\035ImageJ3DResults",
-      "ViewerSettings\022\024\n\014input_option\030\001 \001(\t\022\014\n\004" +
-      "size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003lut\030" +
-      "\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded\030\006 \001(\010" +
-      "\022\021\n\tnewWindow\030\007 \001(\010\022\021\n\tsize_mode\030\010 \001(\005\022\022" +
-      "\n\npixel_size\030\t \001(\001\022K\n\026results_table_sett" +
-      "ings\030\n \001(\0132+.gdsc.smlm.data.config.Resul" +
-      "tsTableSettings\022\022\n\ndepth_mode\030\013 \001(\005\022\023\n\013d" +
-      "epth_range\030\014 \001(\001\022\023\n\013dither_seed\030\r \001(\005\022\031\n" +
-      "\021transparency_mode\030\016 \001(\005\022\030\n\020min_transpar" +
-      "ency\030\017 \001(\001\022\030\n\020max_transparency\030\020 \001(\001\022\021\n\t",
-      "sort_mode\030\021 \001(\005\022\030\n\020sort_direction_x\030\022 \001(" +
-      "\001\022\030\n\020sort_direction_y\030\023 \001(\001\022\030\n\020sort_dire" +
-      "ction_z\030\024 \001(\001\022\022\n\nsort_eye_x\030\025 \001(\001\022\022\n\nsor" +
-      "t_eye_y\030\026 \001(\001\022\022\n\nsort_eye_z\030\027 \001(\001\022\026\n\016sav" +
-      "e_eye_point\030\030 \001(\010\022\030\n\020highlight_colour\030\031 " +
-      "\001(\t\022\023\n\013output_name\030\032 \001(\t\022\023\n\013name_option\030" +
-      "\033 \001(\005\022\023\n\013name_suffix\030\034 \001(\t\022\024\n\014name_count" +
-      "er\030\035 \001(\005\022$\n\034support_dynamic_transparency" +
-      "\030\036 \001(\010\022#\n\033enable_dynamic_transparency\030\037 " +
-      "\001(\010\"\220\001\n\030TranslateResultsSettings\022\024\n\014inpu",
-      "t_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n" +
-      "\n\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gdsc" +
-      ".smlm.data.config.DistanceUnit*O\n\014Templa" +
-      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
-      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPr" +
-      "otosb\006proto3"
+      "ration\030\016 \001(\010\022\022\n\nround_down\030\017 \001(\010\"\301\001\n,Cam" +
+      "eraModelFisherInformationAnalysisSetting" +
+      "s\022\024\n\014min_exponent\030\001 \001(\005\022\024\n\014max_exponent\030" +
+      "\002 \001(\005\022\025\n\rsub_divisions\030\003 \001(\005\022\020\n\010ccd_gain" +
+      "\030\004 \001(\001\022\021\n\tccd_noise\030\005 \001(\001\022\023\n\013em_ccd_gain" +
+      "\030\006 \001(\001\022\024\n\014em_ccd_noise\030\007 \001(\001\"\227\001\n\032CubicSp" +
+      "lineManagerSettings\022\016\n\006option\030\001 \001(\005\022\020\n\010s" +
+      "elected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(\005\022\r\n\005",
+      "scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shift\030" +
+      "\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030FailCountMana" +
+      "gerSettings\022\016\n\006option\030\001 \001(\005\022\022\n\nmax_frame" +
+      "s\030\002 \001(\005\022\030\n\020fail_count_limit\030\003 \001(\005\022\032\n\022sav" +
+      "e_after_fitting\030\004 \001(\010\022\034\n\024target_pass_fra" +
+      "ction\030\005 \001(\001\022\020\n\010filename\030\006 \001(\t\022\021\n\tplot_it" +
+      "em\030\007 \001(\005\022\033\n\023plot_rolling_window\030\010 \001(\005\022\030\n" +
+      "\020plot_pass_weight\030\t \001(\005\022\030\n\020plot_fail_wei" +
+      "ght\030\n \001(\005\022\033\n\023plot_reset_fraction\030\013 \001(\001\022\031" +
+      "\n\021plot_fixed_x_axis\030\014 \001(\010\022\023\n\013table_top_n",
+      "\030\r \001(\005\022,\n$rolling_counter_min_allowed_fa" +
+      "ilures\030\016 \001(\005\022,\n$rolling_counter_max_allo" +
+      "wed_failures\030\017 \001(\005\022\"\n\032rolling_counter_mi" +
+      "n_window\030\020 \001(\005\022\"\n\032rolling_counter_max_wi" +
+      "ndow\030\021 \001(\005\022-\n%weighted_counter_min_allow" +
+      "ed_failures\030\022 \001(\005\022-\n%weighted_counter_ma" +
+      "x_allowed_failures\030\023 \001(\005\022+\n#weighted_cou" +
+      "nter_min_pass_decrement\030\024 \001(\005\022+\n#weighte" +
+      "d_counter_max_pass_decrement\030\025 \001(\005\022.\n&re" +
+      "setting_counter_min_allowed_failures\030\026 \001",
+      "(\005\022.\n&resetting_counter_max_allowed_fail" +
+      "ures\030\027 \001(\005\022,\n$resetting_counter_min_rese" +
+      "t_fraction\030\030 \001(\001\022,\n$resetting_counter_ma" +
+      "x_reset_fraction\030\031 \001(\001\022,\n$resetting_coun" +
+      "ter_inc_reset_fraction\030\032 \001(\001\022,\n$pass_rat" +
+      "e_counter_min_allowed_counts\030\033 \001(\005\022,\n$pa" +
+      "ss_rate_counter_max_allowed_counts\030\034 \001(\005" +
+      "\022\'\n\037pass_rate_counter_min_pass_rate\030\035 \001(" +
+      "\001\022\'\n\037pass_rate_counter_max_pass_rate\030\036 \001" +
+      "(\001\022\'\n\037pass_rate_counter_inc_pass_rate\030\037 ",
+      "\001(\001\"\266\005\n\037AstigmatismModelManagerSettings\022" +
+      "\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_slice\030\002 \001(\001\022E\n" +
+      "\023fit_engine_settings\030\003 \001(\0132(.gdsc.smlm.d" +
+      "ata.config.FitEngineSettings\022\'\n\003psf\030\004 \001(" +
+      "\0132\032.gdsc.smlm.data.config.PSF\0227\n\013calibra" +
+      "tion\030\005 \001(\0132\".gdsc.smlm.data.config.Calib" +
+      "ration\022\016\n\006radius\030\006 \001(\001\022\030\n\020log_fit_progre" +
+      "ss\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001\022\024\n\014weighted_" +
+      "fit\030\t \001(\010\022\034\n\024show_estimated_curve\030\n \001(\010\022" +
+      "\r\n\005image\030\013 \001(\t\022\022\n\nmodel_name\030\014 \001(\t\022\022\n\nsa",
+      "ve_model\030\016 \001(\010\022\026\n\016save_fit_width\030\017 \001(\010\022\020" +
+      "\n\010selected\030\r \001(\t\022\033\n\023show_depth_of_focus\030" +
+      "\020 \001(\010\022\033\n\023show_combined_width\030\026 \001(\010\022\020\n\010sh" +
+      "ow_psf\030\022 \001(\010\022<\n\017z_distance_unit\030\023 \001(\0162#." +
+      "gdsc.smlm.data.config.DistanceUnit\022<\n\017s_" +
+      "distance_unit\030\024 \001(\0162#.gdsc.smlm.data.con" +
+      "fig.DistanceUnit\022\030\n\020calibrated_image\030\025 \001" +
+      "(\010\022\020\n\010filename\030\021 \001(\t\"\305\002\n\023CropResultsSett" +
+      "ings\022\024\n\014input_option\030\001 \001(\t\022\016\n\006border\030\002 \001" +
+      "(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005 \001(\001\022",
+      "\016\n\006height\030\006 \001(\001\022\025\n\rselect_region\030\007 \001(\010\022\017" +
+      "\n\007use_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022\024\n\014re" +
+      "set_origin\030\n \001(\010\022\023\n\013output_name\030\013 \001(\t\022\023\n" +
+      "\013name_option\030\014 \001(\005\022\023\n\013name_suffix\030\r \001(\t\022" +
+      "\024\n\014name_counter\030\016 \001(\005\022\017\n\007limit_z\030\017 \001(\010\022\r" +
+      "\n\005min_z\030\020 \001(\001\022\r\n\005max_z\030\021 \001(\001\"\346\001\n\030Summari" +
+      "seResultsSettings\022\027\n\017plot_background\030\001 \001" +
+      "(\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003 \001(\010\022" +
+      "\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplot_" +
+      "noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_pr",
+      "ecision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027\n\017" +
+      "remove_outliers\030\n \001(\005\"\214\006\n\035ImageJ3DResult" +
+      "sViewerSettings\022\024\n\014input_option\030\001 \001(\t\022\014\n" +
+      "\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003lut" +
+      "\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded\030\006 \001(" +
+      "\010\022\021\n\tnewWindow\030\007 \001(\010\022\021\n\tsize_mode\030\010 \001(\005\022" +
+      "\022\n\npixel_size\030\t \001(\001\022K\n\026results_table_set" +
+      "tings\030\n \001(\0132+.gdsc.smlm.data.config.Resu" +
+      "ltsTableSettings\022\022\n\ndepth_mode\030\013 \001(\005\022\023\n\013" +
+      "depth_range\030\014 \001(\001\022\023\n\013dither_seed\030\r \001(\005\022\031",
+      "\n\021transparency_mode\030\016 \001(\005\022\030\n\020min_transpa" +
+      "rency\030\017 \001(\001\022\030\n\020max_transparency\030\020 \001(\001\022\021\n" +
+      "\tsort_mode\030\021 \001(\005\022\030\n\020sort_direction_x\030\022 \001" +
+      "(\001\022\030\n\020sort_direction_y\030\023 \001(\001\022\030\n\020sort_dir" +
+      "ection_z\030\024 \001(\001\022\022\n\nsort_eye_x\030\025 \001(\001\022\022\n\nso" +
+      "rt_eye_y\030\026 \001(\001\022\022\n\nsort_eye_z\030\027 \001(\001\022\026\n\016sa" +
+      "ve_eye_point\030\030 \001(\010\022\030\n\020highlight_colour\030\031" +
+      " \001(\t\022\023\n\013output_name\030\032 \001(\t\022\023\n\013name_option" +
+      "\030\033 \001(\005\022\023\n\013name_suffix\030\034 \001(\t\022\024\n\014name_coun" +
+      "ter\030\035 \001(\005\022$\n\034support_dynamic_transparenc",
+      "y\030\036 \001(\010\022#\n\033enable_dynamic_transparency\030\037" +
+      " \001(\010\"\220\001\n\030TranslateResultsSettings\022\024\n\014inp" +
+      "ut_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022" +
+      "\n\n\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gds" +
+      "c.smlm.data.config.DistanceUnit*O\n\014Templ" +
+      "ateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE" +
+      "_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIP" +
+      "rotosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -42940,7 +43206,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_descriptor,
-        new java.lang.String[] { "MinExponent", "MaxExponent", "SubDivisions", });
+        new java.lang.String[] { "MinExponent", "MaxExponent", "SubDivisions", "CcdGain", "CcdNoise", "EmCcdGain", "EmCcdNoise", });
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(16);
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable = new

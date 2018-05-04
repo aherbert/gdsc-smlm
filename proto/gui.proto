@@ -475,6 +475,10 @@ message CameraModelFisherInformationAnalysisSettings {
 	int32 min_exponent = 1;
 	int32 max_exponent = 2;
 	int32 sub_divisions = 3;
+	double ccd_gain = 4;
+	double ccd_noise = 5;
+	double em_ccd_gain = 6;
+	double em_ccd_noise = 7;
 }
 
 // Contains settings for the Cubic Spline Manager plugin
