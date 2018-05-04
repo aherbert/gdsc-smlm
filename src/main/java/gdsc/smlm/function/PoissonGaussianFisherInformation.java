@@ -192,6 +192,8 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 			throw new IllegalArgumentException("Gaussian range must not be NaN");
 		range = Maths.clip(1, 38, range);
 
+		this.s = s;
+
 		// Check if the Gaussian standard deviation is above the threshold for computation.
 		// Also check if the gaussian filter will touch more than one Poisson value.
 		// Otherwise convolution is not possible.
@@ -199,7 +201,6 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// greater than this. It is unlikely anyway.
 		if (s >= 0.02 && s * range >= 1)
 		{
-			this.s = s;
 			this.range = range;
 
 			// Determine how much to up-sample so that the convolution with the Gaussian
@@ -212,7 +213,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		}
 		else
 		{
-			this.s = this.range = 0;
+			this.range = 0;
 			defaultScale = 0;
 			kernel = null;
 		}
@@ -244,18 +245,14 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 			//throw new IllegalArgumentException("Poisson mean must be positive");
 
 			// No Poisson. Return the Fisher information for a Gaussian
-			return 1.0 / (s * s);
+			return getGaussianI();
 		}
 
-		// Approximate the Poisson as a Gaussian with u=t and var=t.
-		// Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2)
 		if (t > meanThreshold)
-			// Fisher information of Gaussian mean is 1/variance
-			return 1.0 / (t + s * s);
+			return getPoissonGaussianI(t);
 
 		// Get the Fisher information for a Poisson. 
-		// This is used as the limit in case of poor computation. 
-		final double pI = 1.0 / t;
+		final double pI = getPoissonI(t);
 
 		if (kernel == null)
 			// No Gaussian convolution
@@ -305,8 +302,8 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 
 		// P(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-j)/s)^2
 		// A(z) = 1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2
-		// A(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-j+1)/s)^2
-		// A(z) = P(z+1)
+		// A(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-(j+1))/s)^2
+		// A(z) = P(z-1)
 
 		// We need the convolution of the Poisson with the Gaussian 
 
@@ -316,12 +313,14 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 
 		// Sample the values of the full range and compute a sum using Simpson integration.
 
-		// Build the Poisson distribution. Only use part of the cumulative distribution.
-		// Always start at zero. This is because when the Poisson mean is high then it is 
-		// expected that the Gaussian-Gaussian approximation is used. This code will be 
-		// for low mean values where the contribution at zero is significant.
+		// Build the Poisson distribution.
 		pd.setMeanUnsafe(t);
 
+		// Only use part of the cumulative distribution.
+		// Start at zero for a 1-tailed truncation of the cumulative distribution.
+		// This code will be for low mean values where the contribution at zero is 
+		// significant.
+		int minx = 0;
 		// Find the limit. These can be cached (or may be the defaults).
 		// TODO - Determine if the Poisson can be truncated. We may have to use more of 
 		// the values (for example those returned by computeLimit(...).
@@ -346,12 +345,16 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 			}
 			else
 			{
-				maxx = computeLimit(pd, x, cumulativeProbability);
+				// For large mean the distribution will be far from zero.
+				// In this case use a 2-tailed limit.
+				double lower = (1 - cumulativeProbability) / 2;
+				minx = computeLimit(pd, x, lower);
+				maxx = computeLimit(pd, x, 1 - lower);
 			}
 		}
 
 		list.resetQuick();
-		for (int x = 0; x < maxx; x++)
+		for (int x = minx; x < maxx; x++)
 		{
 			double pp = pd.probability(x);
 			list.add(pp);
@@ -369,7 +372,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 			// Assume a Gaussian distribution. Return the Fisher information
 			// for the Gaussian with mean 0. This will happen when the cumulative 
 			// probability has been altered from the default.
-			return 1.0 / (s * s);
+			return getGaussianI();
 		}
 
 		// Unscaled Poisson
@@ -382,15 +385,15 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// mean <4 => scale = 2
 		// mean <1 => scale >= 4
 		// This may have to be changed.
-		int scale = Math.max(defaultScale, getScale(Math.sqrt(t)));
+		int scale = Math.max(defaultScale, getScale(t / 2));
 
-		// XXX: Testing - The scale breaks things
-		//scale = 128;
+		//scale = 1;
+		//scale = defaultScale;
 
 		// Get the Gaussian kernel
-		int index = Maths.log2(scale);
+		int index = log2(scale);
 		if (kernel[index] == null)
-			kernel[index] = Convolution.makeGaussianKernel(s * scale, range);
+			kernel[index] = Convolution.makeGaussianKernel(s * scale, range, true);
 		double[] g = kernel[index];
 
 		// Up-sample the Poisson
@@ -410,23 +413,26 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// Convolve with the Gaussian kernel
 		double[] pg = Convolution.convolveFast(p, g);
 
-		// In order for A(z) = P(z+1) to work sum A(z) must be 1
+		// In order for A(z) = P(z-1) to work sum A(z) must be 1
 		double sum = 0;
 		for (int i = 0; i < pg.length; i++)
 			sum += pg[i];
+		//System.out.printf("Normalisation = %s\n", sum);
 		for (int i = 0; i < pg.length; i++)
 			pg[i] /= sum;
 
 		// Integrate function:
 		// E = integral [A^2/P] - 1
 		// P(z) = Poisson-Gaussian convolution
-		// A(z) = P(z+1)
+		// A(z) = P(z-1)
 
-		// The offset for P(z+1) is the scale. 
-		// When P(z+1) does not exist assume it is zero. Therefore only
-		// integrate over the range 0:P.length-scale
-		int length = pg.length - scale;
-
+		// The offset for P(z-1) is the scale. 
+		// When P(z-1) does not exist assume it is zero. Therefore only
+		// integrate over the range scale:P.length
+		int mini = scale;
+		int maxi = pg.length;
+		int offseti = -scale;
+		
 		// Compute the sum using Simpson's integration. 
 		// h = interval = (b-a)/n
 		// The integral range is:
@@ -440,13 +446,12 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 
 		// We assume that the function values at the end are zero and so do not 
 		// include them in the sum. Just alternate totals.
-		boolean use38 = false;
-		if (use38)
+		int integrationMode = 1;
+		if (integrationMode == 0)
 		{
-			// This computes the sum as:
-			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-			double sum3 = 0, sum2 = 0;
-			for (int i = 0; i < length; i++)
+			// Trapezoid sum. This will under-estimate the sum.
+			sum = 0;
+			for (int i = mini; i < maxi; i++)
 			{
 				if (pg[i] == 0)
 				{
@@ -455,7 +460,25 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 					// the valid range of z.
 					continue;
 				}
-				final double f = Maths.pow2(pg[i + scale]) / pg[i];
+				final double f = Maths.pow2(pg[i + offseti]) / pg[i];
+				sum += f;
+			}
+		}
+		else if (integrationMode == 1)
+		{
+			// This computes the sum as:
+			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
+			double sum3 = 0, sum2 = 0;
+			for (int i = mini; i < maxi; i++)
+			{
+				if (pg[i] == 0)
+				{
+					// No probability so the function is zero.
+					// This is the equivalent of only computing the Fisher information over 
+					// the valid range of z.
+					continue;
+				}
+				final double f = Maths.pow2(pg[i + offseti]) / pg[i];
 				if (i % 3 == 2)
 					sum2 += f;
 				else
@@ -469,7 +492,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 			// This computes the sum as:
 			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
 			double sum4 = 0, sum2 = 0;
-			for (int i = 0; i < length; i++)
+			for (int i = mini; i < maxi; i++)
 			{
 				if (pg[i] == 0)
 				{
@@ -478,7 +501,7 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 					// the valid range of z.
 					continue;
 				}
-				final double f = Maths.pow2(pg[i + scale]) / pg[i];
+				final double f = Maths.pow2(pg[i + offseti]) / pg[i];
 				if (i % 2 == 0)
 					sum4 += f;
 				else
@@ -491,12 +514,64 @@ public class PoissonGaussianFisherInformation implements FisherInformation
 		// Subtract the final 1 
 		sum -= 1;
 
-		System.out.printf("t=%g  scale=%d   sum=%s  pI = %g   pgI = %g\n", t, scale, sum, pI, 1 / (t + s * s));
+		System.out.printf("t=%g x=%d-%d scale=%d   sum=%s  pI = %g   pgI = %g\n", t, minx, maxx, scale, sum, pI,
+				1 / (t + s * s));
 
-		// Check limits. It should be worse than the Poisson Fisher information.
+		// Check limits.
+
+		// It should be worse than the Poisson Fisher information (upper limit) but 
+		// better than the Poisson-Gaussian Fisher information (lower limit).
 		// Note a low Fisher information is worse as this is the amount of information
-		// carried about the parameter. 
-		return (sum < pI) ? sum : pI;
+		// carried about the parameter.
+
+		return Maths.clip(pI, getPoissonGaussianI(t), sum);
+		//return Maths.max(getPoissonGaussianI(t), sum);
+	}
+
+	/**
+	 * Gets the poisson Fisher information.
+	 *
+	 * @param t
+	 *            the poisson mean
+	 * @return the poisson Fisher information
+	 */
+	private double getPoissonI(double t)
+	{
+		return 1.0 / t;
+	}
+
+	/**
+	 * Gets the poisson-gaussian Fisher information.
+	 * Approximate the Poisson as a Gaussian with u=t and var=t.
+	 * Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2).
+	 * Fisher information of Gaussian mean is 1/variance.
+	 *
+	 * @param t
+	 *            the poisson mean
+	 * @return the poisson gaussian Fisher information
+	 */
+	private double getPoissonGaussianI(double t)
+	{
+		return 1.0 / (t + s * s);
+	}
+
+	/**
+	 * Gets the gaussian Fisher information for mean 0.
+	 * Fisher information of Gaussian mean is 1/variance.
+	 *
+	 * @return the gaussian Fisher information
+	 */
+	private double getGaussianI()
+	{
+		return 1.0 / (s * s);
+	}
+
+	private int log2(int scale)
+	{
+		int bits = 30;
+		while ((scale & (1 << bits)) == 0)
+			bits--;
+		return bits;
 	}
 
 	/**

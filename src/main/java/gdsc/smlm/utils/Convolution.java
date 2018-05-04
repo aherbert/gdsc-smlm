@@ -246,8 +246,8 @@ public class Convolution
 				else
 					break;
 			}
-			System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r,
-					sqrtSlope);
+			//System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r,
+			//		sqrtSlope);
 			for (int r1 = r + 2; r1 < kRadius; r1++)
 				kernel[r1] = ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
 		}
