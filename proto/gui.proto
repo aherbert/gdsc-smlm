@@ -637,3 +637,10 @@ message TranslateResultsSettings {
 	double dz = 4;
 	DistanceUnit distance_unit = 5;
 }
+
+// Contains settings for the Spot Fit plugin
+message SpotFitSettings {
+	int32 channel = 1;
+	int32 search_radius = 2;
+	int32 fit_radius = 3;
+}

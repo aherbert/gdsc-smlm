@@ -52,6 +52,7 @@ import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
+import gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings;
 import gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
@@ -1122,6 +1123,19 @@ public class SettingsManager
 	{
 		return new ConfigurationReader<ImageJ3DResultsViewerSettings>(
 				GUIProtosHelper.defaultImageJ3DResultsViewerSettings).read(flags);
+	}
+
+	/**
+	 * Read the SpotFitSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the SpotFitSettings
+	 */
+	public static SpotFitSettings readSpotFitSettings(int flags)
+	{
+		return new ConfigurationReader<SpotFitSettings>(
+				GUIProtosHelper.defaultSpotFitSettings).read(flags);
 	}
 
 	/**

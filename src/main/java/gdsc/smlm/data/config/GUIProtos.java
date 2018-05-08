@@ -42691,6 +42691,580 @@ public final class GUIProtos {
 
   }
 
+  public interface SpotFitSettingsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.SpotFitSettings)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int32 channel = 1;</code>
+     */
+    int getChannel();
+
+    /**
+     * <code>int32 search_radius = 2;</code>
+     */
+    int getSearchRadius();
+
+    /**
+     * <code>int32 fit_radius = 3;</code>
+     */
+    int getFitRadius();
+  }
+  /**
+   * <pre>
+   * Contains settings for the Spot Fit plugin
+   * </pre>
+   *
+   * Protobuf type {@code gdsc.smlm.data.config.SpotFitSettings}
+   */
+  public  static final class SpotFitSettings extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.SpotFitSettings)
+      SpotFitSettingsOrBuilder {
+    // Use SpotFitSettings.newBuilder() to construct.
+    private SpotFitSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SpotFitSettings() {
+      channel_ = 0;
+      searchRadius_ = 0;
+      fitRadius_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+    }
+    private SpotFitSettings(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!input.skipField(tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+
+              channel_ = input.readInt32();
+              break;
+            }
+            case 16: {
+
+              searchRadius_ = input.readInt32();
+              break;
+            }
+            case 24: {
+
+              fitRadius_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              gdsc.smlm.data.config.GUIProtos.SpotFitSettings.class, gdsc.smlm.data.config.GUIProtos.SpotFitSettings.Builder.class);
+    }
+
+    public static final int CHANNEL_FIELD_NUMBER = 1;
+    private int channel_;
+    /**
+     * <code>int32 channel = 1;</code>
+     */
+    public int getChannel() {
+      return channel_;
+    }
+
+    public static final int SEARCH_RADIUS_FIELD_NUMBER = 2;
+    private int searchRadius_;
+    /**
+     * <code>int32 search_radius = 2;</code>
+     */
+    public int getSearchRadius() {
+      return searchRadius_;
+    }
+
+    public static final int FIT_RADIUS_FIELD_NUMBER = 3;
+    private int fitRadius_;
+    /**
+     * <code>int32 fit_radius = 3;</code>
+     */
+    public int getFitRadius() {
+      return fitRadius_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (channel_ != 0) {
+        output.writeInt32(1, channel_);
+      }
+      if (searchRadius_ != 0) {
+        output.writeInt32(2, searchRadius_);
+      }
+      if (fitRadius_ != 0) {
+        output.writeInt32(3, fitRadius_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (channel_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, channel_);
+      }
+      if (searchRadius_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, searchRadius_);
+      }
+      if (fitRadius_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, fitRadius_);
+      }
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings)) {
+        return super.equals(obj);
+      }
+      gdsc.smlm.data.config.GUIProtos.SpotFitSettings other = (gdsc.smlm.data.config.GUIProtos.SpotFitSettings) obj;
+
+      boolean result = true;
+      result = result && (getChannel()
+          == other.getChannel());
+      result = result && (getSearchRadius()
+          == other.getSearchRadius());
+      result = result && (getFitRadius()
+          == other.getFitRadius());
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CHANNEL_FIELD_NUMBER;
+      hash = (53 * hash) + getChannel();
+      hash = (37 * hash) + SEARCH_RADIUS_FIELD_NUMBER;
+      hash = (53 * hash) + getSearchRadius();
+      hash = (37 * hash) + FIT_RADIUS_FIELD_NUMBER;
+      hash = (53 * hash) + getFitRadius();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(gdsc.smlm.data.config.GUIProtos.SpotFitSettings prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Contains settings for the Spot Fit plugin
+     * </pre>
+     *
+     * Protobuf type {@code gdsc.smlm.data.config.SpotFitSettings}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.SpotFitSettings)
+        gdsc.smlm.data.config.GUIProtos.SpotFitSettingsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                gdsc.smlm.data.config.GUIProtos.SpotFitSettings.class, gdsc.smlm.data.config.GUIProtos.SpotFitSettings.Builder.class);
+      }
+
+      // Construct using gdsc.smlm.data.config.GUIProtos.SpotFitSettings.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        channel_ = 0;
+
+        searchRadius_ = 0;
+
+        fitRadius_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return gdsc.smlm.data.config.GUIProtos.internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstanceForType() {
+        return gdsc.smlm.data.config.GUIProtos.SpotFitSettings.getDefaultInstance();
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.SpotFitSettings build() {
+        gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public gdsc.smlm.data.config.GUIProtos.SpotFitSettings buildPartial() {
+        gdsc.smlm.data.config.GUIProtos.SpotFitSettings result = new gdsc.smlm.data.config.GUIProtos.SpotFitSettings(this);
+        result.channel_ = channel_;
+        result.searchRadius_ = searchRadius_;
+        result.fitRadius_ = fitRadius_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof gdsc.smlm.data.config.GUIProtos.SpotFitSettings) {
+          return mergeFrom((gdsc.smlm.data.config.GUIProtos.SpotFitSettings)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(gdsc.smlm.data.config.GUIProtos.SpotFitSettings other) {
+        if (other == gdsc.smlm.data.config.GUIProtos.SpotFitSettings.getDefaultInstance()) return this;
+        if (other.getChannel() != 0) {
+          setChannel(other.getChannel());
+        }
+        if (other.getSearchRadius() != 0) {
+          setSearchRadius(other.getSearchRadius());
+        }
+        if (other.getFitRadius() != 0) {
+          setFitRadius(other.getFitRadius());
+        }
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        gdsc.smlm.data.config.GUIProtos.SpotFitSettings parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (gdsc.smlm.data.config.GUIProtos.SpotFitSettings) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int channel_ ;
+      /**
+       * <code>int32 channel = 1;</code>
+       */
+      public int getChannel() {
+        return channel_;
+      }
+      /**
+       * <code>int32 channel = 1;</code>
+       */
+      public Builder setChannel(int value) {
+        
+        channel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 channel = 1;</code>
+       */
+      public Builder clearChannel() {
+        
+        channel_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int searchRadius_ ;
+      /**
+       * <code>int32 search_radius = 2;</code>
+       */
+      public int getSearchRadius() {
+        return searchRadius_;
+      }
+      /**
+       * <code>int32 search_radius = 2;</code>
+       */
+      public Builder setSearchRadius(int value) {
+        
+        searchRadius_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 search_radius = 2;</code>
+       */
+      public Builder clearSearchRadius() {
+        
+        searchRadius_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int fitRadius_ ;
+      /**
+       * <code>int32 fit_radius = 3;</code>
+       */
+      public int getFitRadius() {
+        return fitRadius_;
+      }
+      /**
+       * <code>int32 fit_radius = 3;</code>
+       */
+      public Builder setFitRadius(int value) {
+        
+        fitRadius_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 fit_radius = 3;</code>
+       */
+      public Builder clearFitRadius() {
+        
+        fitRadius_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return this;
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.SpotFitSettings)
+    }
+
+    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.SpotFitSettings)
+    private static final gdsc.smlm.data.config.GUIProtos.SpotFitSettings DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new gdsc.smlm.data.config.GUIProtos.SpotFitSettings();
+    }
+
+    public static gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SpotFitSettings>
+        PARSER = new com.google.protobuf.AbstractParser<SpotFitSettings>() {
+      public SpotFitSettings parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new SpotFitSettings(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SpotFitSettings> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SpotFitSettings> getParserForType() {
+      return PARSER;
+    }
+
+    public gdsc.smlm.data.config.GUIProtos.SpotFitSettings getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_GUIFilterSettings_descriptor;
   private static final 
@@ -42806,6 +43380,11 @@ public final class GUIProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -43089,10 +43668,12 @@ public final class GUIProtos {
       " \001(\010\"\220\001\n\030TranslateResultsSettings\022\024\n\014inp" +
       "ut_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022" +
       "\n\n\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gds" +
-      "c.smlm.data.config.DistanceUnit*O\n\014Templ" +
-      "ateType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE" +
-      "_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIP" +
-      "rotosb\006proto3"
+      "c.smlm.data.config.DistanceUnit\"M\n\017SpotF" +
+      "itSettings\022\017\n\007channel\030\001 \001(\005\022\025\n\rsearch_ra" +
+      "dius\030\002 \001(\005\022\022\n\nfit_radius\030\003 \001(\005*O\n\014Templa" +
+      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
+      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPr" +
+      "otosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -43249,6 +43830,12 @@ public final class GUIProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor,
         new java.lang.String[] { "InputOption", "Dx", "Dy", "Dz", "DistanceUnit", });
+    internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor =
+      getDescriptor().getMessageTypes().get(23);
+    internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor,
+        new java.lang.String[] { "Channel", "SearchRadius", "FitRadius", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

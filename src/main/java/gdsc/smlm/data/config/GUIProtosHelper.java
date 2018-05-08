@@ -26,6 +26,7 @@ import gdsc.smlm.data.config.GUIProtos.OpticsSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
+import gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -432,5 +433,16 @@ public class GUIProtosHelper
 		resultsTableSettings.setDistanceUnit(DistanceUnit.NM);
 		resultsTableSettings.setShowTable(true);
 		defaultImageJ3DResultsViewerSettings = builder.build();
+	}
+
+	/** The default SpotFitSettings */
+	public static final SpotFitSettings defaultSpotFitSettings;
+	static
+	{
+		SpotFitSettings.Builder builder = SpotFitSettings.newBuilder();
+		builder.setChannel(1);
+		builder.setSearchRadius(3);
+		builder.setFitRadius(10);
+		defaultSpotFitSettings = builder.build();
 	}
 }
