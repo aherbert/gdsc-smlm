@@ -13,9 +13,13 @@ import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.filters.BlockMeanFilter;
 
@@ -492,7 +496,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		}
 
 		results = new IJTablePeakResults(showDeviations, imp.getTitle() + " [" + imp.getCurrentSlice() + "]");
+		CalibrationWriter cw = new CalibrationWriter();
+		cw.setIntensityUnit(IntensityUnit.COUNT);
+		cw.setDistanceUnit(DistanceUnit.PIXEL);
+		cw.setAngleUnit(AngleUnit.RADIAN);
+		results.setCalibration(cw.getCalibration());
+		results.setPSF(PSFProtosHelper.getDefaultPSF(getPSFType()));
 		results.setShowFittingData(true);
+		results.setAngleUnit(AngleUnit.DEGREE);
 		results.begin();
 
 		// Perform the Gaussian fit
@@ -555,8 +566,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 							data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
-					double xf = peakParams[3];
-					double yf = peakParams[4];
+					double xf = peakParams[Gaussian2DFunction.X_POSITION];
+					double yf = peakParams[Gaussian2DFunction.Y_POSITION];
 					xpoints[nMaxima] = (int) (xf + 0.5);
 					ypoints[nMaxima] = (int) (yf + 0.5);
 					nMaxima++;
@@ -635,8 +646,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					addResult(bounds, regionBounds, data, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
 
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
-					double xf = peakParams[3];
-					double yf = peakParams[4];
+					double xf = peakParams[Gaussian2DFunction.X_POSITION];
+					double yf = peakParams[Gaussian2DFunction.Y_POSITION];
 					xpoints[nMaxima] = (int) (xf + 0.5);
 					ypoints[nMaxima] = (int) (yf + 0.5);
 					nMaxima++;
@@ -685,8 +696,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	{
 		x += bounds.x;
 		y += bounds.y;
-		params[3] += bounds.x + regionBounds.x;
-		params[4] += bounds.y + regionBounds.y;
+		params[Gaussian2DFunction.X_POSITION] += bounds.x + regionBounds.x;
+		params[Gaussian2DFunction.Y_POSITION] += bounds.y + regionBounds.y;
 		results.add(n + 1, x, y, value, chiSquared, 0f, SimpleArrayUtils.toFloat(params),
 				SimpleArrayUtils.toFloat(paramsDev));
 	}
@@ -931,8 +942,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		double[] result = fit(data, ip.getWidth(), ip.getHeight());
 		if (result != null)
 		{
-			result[2] += 0.5;
-			result[3] += 0.5;
+			result[Gaussian2DFunction.X_POSITION] += 0.5;
+			result[Gaussian2DFunction.Y_POSITION] += 0.5;
 		}
 		return result;
 	}
