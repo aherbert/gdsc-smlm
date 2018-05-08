@@ -2,7 +2,6 @@ package gdsc.smlm.fitting;
 
 import java.util.Arrays;
 
-import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.FisherInformation;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
@@ -35,7 +34,7 @@ import gdsc.smlm.function.Gradient1Procedure;
  * 335-338, SI Eq S3.
  * 
  * <pre>
- * Iij = sum(k) (d v(θ,k) / dθi) . (d v(θ,k) / dθj) . E [ (d ln(p(z|v(θ,k)) / d v(θ,k) )^2  dz]
+ * Iij = sum(k) (d v(θ,k) / dθi) . (d v(θ,k) / dθj) . E [ (d ln(p(z|v(θ,k)) / d v(θ,k) )^2 ]
  * k = the number of points over which the function is evaluated
  * v(θ,k) = the function value at point k given parameters θ
  * p(z|v(θ,k) = the likelihood function for data z given value v
@@ -71,12 +70,16 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 		this.fi = fi;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws IllegalArgumentException
+	 *             If the Fisher information cannot be computed for a function value
 	 * 
 	 * @see gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
+	 * @see #setIgnoreBadFunctionValues(boolean)
 	 */
-	public FisherInformationMatrix compute(double[] parameters)
+	public FisherInformationMatrix compute(double[] parameters) throws IllegalArgumentException
 	{
 		final int n = gf.getNumberOfGradients();
 		final double[] data = new double[n * (n + 1) / 2];
@@ -113,7 +116,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 					Arrays.fill(data, Double.POSITIVE_INFINITY);
 					infinity = true;
 				}
-				
+
 				// Compute the actual matrix data 
 				for (int i = 0, c = 0; i < n; i++)
 				{
@@ -134,9 +137,10 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 	}
 
 	/**
-	 * Checks if ignoring bad function values that do not compute a Fisher information.
+	 * Checks if ignoring bad function values that do not compute a Fisher information. Set to false will cause
+	 * bad values to throw IllegalArgumentException within {@link #compute(double[])}.
 	 *
-	 * @return true, if is ignore bad function values
+	 * @return true, if ignoring bad function values
 	 */
 	public boolean isIgnoreBadFunctionValues()
 	{
@@ -144,7 +148,8 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 	}
 
 	/**
-	 * Sets to true to ignore any bad function values that do not compute a Fisher information.
+	 * Sets to true to ignore any bad function values that do not compute a Fisher information. Set to false will cause
+	 * bad values to throw IllegalArgumentException within {@link #compute(double[])}.
 	 *
 	 * @param ignoreBadFunctionValues
 	 *            the new ignore bad function values flag
