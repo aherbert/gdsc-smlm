@@ -1456,7 +1456,7 @@ public class FRC
 		// set reconstructions, will have twice the SNR value of each of the half 
 		// data sets"
 		// Eq. (15) = log2(SNR+1) = n-bits
-		final double snr = (Math.pow(2, bits) - 1) / 2;
+		final double snr = (FastMath.pow(2, bits) - 1) / 2;
 		final double snr1 = snr + 1;
 		final double twoRootSnr = 2 * Math.sqrt(snr);
 		final double twoRootSnr1 = twoRootSnr + 1;

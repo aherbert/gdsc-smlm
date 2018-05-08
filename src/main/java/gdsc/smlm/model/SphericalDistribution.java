@@ -15,6 +15,7 @@ package gdsc.smlm.model;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Samples uniformly from the specified spherical volume
@@ -88,7 +89,7 @@ public class SphericalDistribution implements SpatialDistribution
 				}
 
 				// Calculate the distance: RsU^1/3 / length			
-				final double d = (radius * Math.pow(randomGenerator.nextDouble(), 0.3333333333)) /
+				final double d = (radius * FastMath.cbrt(randomGenerator.nextDouble())) /
 						Math.sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
 				for (int i = 0; i < 3; i++)
 					xyz[i] *= d;

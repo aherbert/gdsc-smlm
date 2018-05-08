@@ -649,7 +649,7 @@ public class BinomialFitter
 		// Set the delta using the desired fractional accuracy.
 		// See Numerical Recipes, The Art of Scientific Computing (2nd edition) Chapter 5.7
 		// on numerical derivatives
-		final double delta = Math.pow(1e-6, 1.0 / 3);
+		final double delta = FastMath.cbrt(1e-6);
 
 		double[][] jacobian(double[] variables)
 		{
