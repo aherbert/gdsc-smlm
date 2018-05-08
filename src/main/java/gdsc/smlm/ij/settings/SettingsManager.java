@@ -35,6 +35,7 @@ import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
+import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
 import gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
@@ -1018,7 +1019,21 @@ public class SettingsManager
 		return new ConfigurationReader<CameraModelAnalysisSettings>(GUIProtosHelper.defaultCameraModelAnalysisSettings)
 				.read(flags);
 	}
-	
+
+	/**
+	 * Read the CameraModelFisherInformationAnalysisSettings from the settings file in the settings directory.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @return the CameraModelFisherInformationAnalysisSettings
+	 */
+	public static CameraModelFisherInformationAnalysisSettings readCameraModelFisherInformationAnalysisSettings(
+			int flags)
+	{
+		return new ConfigurationReader<CameraModelFisherInformationAnalysisSettings>(
+				GUIProtosHelper.defaultCameraModelFisherInformationAnalysisSettings).read(flags);
+	}
+
 	/**
 	 * Read the CubicSplineManagerSettings from the settings file in the settings directory.
 	 *
