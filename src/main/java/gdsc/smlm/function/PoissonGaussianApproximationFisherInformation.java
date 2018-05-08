@@ -14,19 +14,8 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Calculate the Fisher information for a Poisson-Gaussian distribution.
- * <p>
- * Uses the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq S7.
- * <p>
- * Performs a convolution with a finite Gaussian kernel. The Gaussian is constructed using a range of the standard
- * deviation (s) and sampled at least every s/2.
- * <p>
- * An optimisation is used to avoid computation on tiny Gaussian kernels (i.e. too small to be computed)
- * This will occur when the Gaussian standard deviation is less than 0.02. The result is no convolution and the result
- * computes Poisson Fisher information.
- * <p>
- * An optimisation is used when the mean of the Poisson is above a threshold. In this case the Poisson can be
- * approximated as a Gaussian and the Fisher information is returned for the Gaussian-Gaussian convolution.
+ * Calculate the Fisher information for a Poisson-Gaussian distribution using an approximation of the Poisson (mean=t)
+ * as a Gaussian (u=t, var=t).
  */
 public class PoissonGaussianApproximationFisherInformation implements FisherInformation
 {
