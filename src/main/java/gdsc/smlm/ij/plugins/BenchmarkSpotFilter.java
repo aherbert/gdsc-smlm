@@ -1837,7 +1837,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (weights == null)
 			{
 				bounds = cameraModel.getBounds();
-				weights = cameraModel.getWeights(bounds);
+				weights = cameraModel.getNormalisedWeights(bounds);
 			}
 		}
 

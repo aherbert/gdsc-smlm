@@ -490,8 +490,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		CameraModel cameraModel = fitConfig.getCameraModel();
 		if (!(cameraModel instanceof FakePerPixelCameraModel))
 		{
-			float[] w = cameraModel.getWeights(bounds);
+			// This should be done on the normalised data
+			float[] w = cameraModel.getNormalisedWeights(bounds);
 			filter.setWeights(w, width, height);
+			data = data.clone();
+			cameraModel.removeBiasAndGain(data);
 		}
 
 		Spot[] spots = filter.rank(data, width, height);

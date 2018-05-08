@@ -110,6 +110,15 @@ public interface CameraModel
 	 * @return the weights
 	 */
 	public float[] getWeights(Rectangle bounds);
+	
+	/**
+	 * Gets the per-pixel normalised weights, for example 1/[normalised variance].
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @return the weights
+	 */
+	public float[] getNormalisedWeights(Rectangle bounds);
 
 	/**
 	 * Remove the per-pixel camera bias (offset) from the crop of the camera data. The bounds are expected to fit

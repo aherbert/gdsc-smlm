@@ -188,6 +188,16 @@ public class FixedPixelCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
+	 */
+	public float[] getNormalisedWeights(Rectangle bounds)
+	{
+		return newArray(bounds, 1f);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(java.awt.Rectangle, float[])
 	 */
 	public void removeBias(Rectangle bounds, float[] data)

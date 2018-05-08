@@ -796,7 +796,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Only get this if the bounds have changed to enable efficient caching.
 			if (newBounds)
 			{
-				float[] w = cameraModel.getWeights(cc.dataBounds);
+				// The weights should be for the raw data or the normalised data (gain subtracted)
+				float[] w;
+				if (isFitCameraCounts)
+					w = cameraModel.getWeights(cc.dataBounds);
+				else
+					w = cameraModel.getNormalisedWeights(cc.dataBounds);
 				spotFilter.setWeights(w, cc.dataBounds.width, cc.dataBounds.height);
 			}
 		}
@@ -3952,7 +3957,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					Rectangle bounds = new Rectangle(regionBounds);
 					bounds.x += cc.dataBounds.x;
 					bounds.y += cc.dataBounds.y;
-					float[] v = cameraModel.getNormalisedVariance(bounds);
+					float[] v = (isFitCameraCounts) ? cameraModel.getVariance(bounds)
+							: cameraModel.getNormalisedVariance(bounds);
 					// Convert to double
 					if (var_g2 == null || var_g2.length != v.length)
 					{

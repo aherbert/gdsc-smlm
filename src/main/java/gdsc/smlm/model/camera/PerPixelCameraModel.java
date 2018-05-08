@@ -433,6 +433,16 @@ public class PerPixelCameraModel extends BaseCameraModel
 	}
 
 	/**
+	 * Return the weights as 1/[normalised variance].
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
+	 */
+	public float[] getNormalisedWeights(Rectangle bounds)
+	{
+		return toWeights(getNormalisedVariance(bounds));
+	}
+
+	/**
 	 * Gets the data from the values using the intersection of the bounds.
 	 *
 	 * @param bounds
