@@ -391,13 +391,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (maxIndices.length > 0)
 		{
 			int nMaxima = maxIndices.length;
-			int[] xpoints = new int[nMaxima];
-			int[] ypoints = new int[nMaxima];
+			float[] xpoints = new float[nMaxima];
+			float[] ypoints = new float[nMaxima];
 			int n = 0;
 			for (int index : maxIndices)
 			{
-				xpoints[n] = bounds.x + index % width;
-				ypoints[n] = bounds.y + index / width;
+				xpoints[n] = 0.5f + bounds.x + index % width;
+				ypoints[n] = 0.5f + bounds.y + index / width;
 				n++;
 			}
 
@@ -419,7 +419,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * @param xpoints
 	 * @param ypoints
 	 */
-	private void setOverlay(int nMaxima, int[] xpoints, int[] ypoints)
+	private void setOverlay(int nMaxima, float[] xpoints, float[] ypoints)
 	{
 		PointRoi roi = new PointRoi(xpoints, ypoints, nMaxima);
 
@@ -538,8 +538,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				double[] paramsDev = convertParameters(fitResult.getParameterDeviations());
 				Rectangle regionBounds = new Rectangle();
 
-				int[] xpoints = new int[maxIndices.length];
-				int[] ypoints = new int[maxIndices.length];
+				float[] xpoints = new float[maxIndices.length];
+				float[] ypoints = new float[maxIndices.length];
 				int nMaxima = 0;
 
 				for (int i = 1, n = 0; i < params.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK, n++)
@@ -568,8 +568,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
 					double xf = peakParams[Gaussian2DFunction.X_POSITION];
 					double yf = peakParams[Gaussian2DFunction.Y_POSITION];
-					xpoints[nMaxima] = (int) (xf + 0.5);
-					ypoints[nMaxima] = (int) (yf + 0.5);
+					xpoints[nMaxima] = (float) xf;
+					ypoints[nMaxima] = (float) yf;
 					nMaxima++;
 				}
 
@@ -606,8 +606,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 				IJ.log("Individual fit");
 
 			int nMaxima = 0;
-			int[] xpoints = new int[maxIndices.length];
-			int[] ypoints = new int[maxIndices.length];
+			float[] xpoints = new float[maxIndices.length];
+			float[] ypoints = new float[maxIndices.length];
 
 			// Extract each peak and fit individually
 			ImageExtractor ie = new ImageExtractor(data, width, height);
@@ -648,8 +648,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					// Add fit result to the overlay - Coords are updated with the region offsets in addResult
 					double xf = peakParams[Gaussian2DFunction.X_POSITION];
 					double yf = peakParams[Gaussian2DFunction.Y_POSITION];
-					xpoints[nMaxima] = (int) (xf + 0.5);
-					ypoints[nMaxima] = (int) (yf + 0.5);
+					xpoints[nMaxima] = (float) xf;
+					ypoints[nMaxima] = (float) yf;
 					nMaxima++;
 				}
 				else
@@ -687,8 +687,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		if (params == null)
 			return null;
 
-		return new double[] { params[0], params[i], params[i + 1], params[i + 2], params[i + 3], params[i + 4],
-				params[i + 5] };
+		// 0 is the background. Then the peaks are packed.
+		double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		p[0] = params[0];
+		System.arraycopy(params, i, p, 1, Gaussian2DFunction.PARAMETERS_PER_PEAK);
+		return p;
 	}
 
 	private void addResult(Rectangle bounds, Rectangle regionBounds, float[] data, double[] params, double[] paramsDev,
