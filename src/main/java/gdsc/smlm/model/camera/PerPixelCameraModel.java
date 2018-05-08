@@ -411,11 +411,14 @@ public class PerPixelCameraModel extends BaseCameraModel
 
 	private synchronized void createNormalisedVariance()
 	{
-		int size = variance.length;
-		var_g2 = new float[size];
-		for (int i = 0; i < size; i++)
+		if (var_g2 == null)
 		{
-			var_g2[i] = variance[i] / (gain[i] * gain[i]);
+			int size = variance.length;
+			var_g2 = new float[size];
+			for (int i = 0; i < size; i++)
+			{
+				var_g2[i] = variance[i] / (gain[i] * gain[i]);
+			}
 		}
 	}
 
@@ -721,7 +724,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 		for (int i = 0; i < data.length; i++)
 			data[i] = data[i] * gain[i] + bias[i];
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
