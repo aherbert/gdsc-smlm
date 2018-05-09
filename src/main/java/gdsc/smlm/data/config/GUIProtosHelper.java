@@ -443,6 +443,7 @@ public class GUIProtosHelper
 		builder.setChannel(1);
 		builder.setSearchRadius(3);
 		builder.setFitRadius(10);
+		builder.setShowOverlay(true);
 		defaultSpotFitSettings = builder.build();
 	}
 }

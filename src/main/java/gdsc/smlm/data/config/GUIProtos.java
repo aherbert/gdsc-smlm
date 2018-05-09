@@ -42709,6 +42709,26 @@ public final class GUIProtos {
      * <code>int32 fit_radius = 3;</code>
      */
     int getFitRadius();
+
+    /**
+     * <code>bool show_overlay = 4;</code>
+     */
+    boolean getShowOverlay();
+
+    /**
+     * <code>bool attach_to_slice = 5;</code>
+     */
+    boolean getAttachToSlice();
+
+    /**
+     * <code>bool log_progress = 6;</code>
+     */
+    boolean getLogProgress();
+
+    /**
+     * <code>bool show_fit_roi = 7;</code>
+     */
+    boolean getShowFitRoi();
   }
   /**
    * <pre>
@@ -42729,6 +42749,10 @@ public final class GUIProtos {
       channel_ = 0;
       searchRadius_ = 0;
       fitRadius_ = 0;
+      showOverlay_ = false;
+      attachToSlice_ = false;
+      logProgress_ = false;
+      showFitRoi_ = false;
     }
 
     @java.lang.Override
@@ -42769,6 +42793,26 @@ public final class GUIProtos {
             case 24: {
 
               fitRadius_ = input.readInt32();
+              break;
+            }
+            case 32: {
+
+              showOverlay_ = input.readBool();
+              break;
+            }
+            case 40: {
+
+              attachToSlice_ = input.readBool();
+              break;
+            }
+            case 48: {
+
+              logProgress_ = input.readBool();
+              break;
+            }
+            case 56: {
+
+              showFitRoi_ = input.readBool();
               break;
             }
           }
@@ -42821,6 +42865,42 @@ public final class GUIProtos {
       return fitRadius_;
     }
 
+    public static final int SHOW_OVERLAY_FIELD_NUMBER = 4;
+    private boolean showOverlay_;
+    /**
+     * <code>bool show_overlay = 4;</code>
+     */
+    public boolean getShowOverlay() {
+      return showOverlay_;
+    }
+
+    public static final int ATTACH_TO_SLICE_FIELD_NUMBER = 5;
+    private boolean attachToSlice_;
+    /**
+     * <code>bool attach_to_slice = 5;</code>
+     */
+    public boolean getAttachToSlice() {
+      return attachToSlice_;
+    }
+
+    public static final int LOG_PROGRESS_FIELD_NUMBER = 6;
+    private boolean logProgress_;
+    /**
+     * <code>bool log_progress = 6;</code>
+     */
+    public boolean getLogProgress() {
+      return logProgress_;
+    }
+
+    public static final int SHOW_FIT_ROI_FIELD_NUMBER = 7;
+    private boolean showFitRoi_;
+    /**
+     * <code>bool show_fit_roi = 7;</code>
+     */
+    public boolean getShowFitRoi() {
+      return showFitRoi_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -42842,6 +42922,18 @@ public final class GUIProtos {
       if (fitRadius_ != 0) {
         output.writeInt32(3, fitRadius_);
       }
+      if (showOverlay_ != false) {
+        output.writeBool(4, showOverlay_);
+      }
+      if (attachToSlice_ != false) {
+        output.writeBool(5, attachToSlice_);
+      }
+      if (logProgress_ != false) {
+        output.writeBool(6, logProgress_);
+      }
+      if (showFitRoi_ != false) {
+        output.writeBool(7, showFitRoi_);
+      }
     }
 
     public int getSerializedSize() {
@@ -42860,6 +42952,22 @@ public final class GUIProtos {
       if (fitRadius_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, fitRadius_);
+      }
+      if (showOverlay_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, showOverlay_);
+      }
+      if (attachToSlice_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, attachToSlice_);
+      }
+      if (logProgress_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, logProgress_);
+      }
+      if (showFitRoi_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, showFitRoi_);
       }
       memoizedSize = size;
       return size;
@@ -42883,6 +42991,14 @@ public final class GUIProtos {
           == other.getSearchRadius());
       result = result && (getFitRadius()
           == other.getFitRadius());
+      result = result && (getShowOverlay()
+          == other.getShowOverlay());
+      result = result && (getAttachToSlice()
+          == other.getAttachToSlice());
+      result = result && (getLogProgress()
+          == other.getLogProgress());
+      result = result && (getShowFitRoi()
+          == other.getShowFitRoi());
       return result;
     }
 
@@ -42899,6 +43015,18 @@ public final class GUIProtos {
       hash = (53 * hash) + getSearchRadius();
       hash = (37 * hash) + FIT_RADIUS_FIELD_NUMBER;
       hash = (53 * hash) + getFitRadius();
+      hash = (37 * hash) + SHOW_OVERLAY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowOverlay());
+      hash = (37 * hash) + ATTACH_TO_SLICE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAttachToSlice());
+      hash = (37 * hash) + LOG_PROGRESS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getLogProgress());
+      hash = (37 * hash) + SHOW_FIT_ROI_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowFitRoi());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -43038,6 +43166,14 @@ public final class GUIProtos {
 
         fitRadius_ = 0;
 
+        showOverlay_ = false;
+
+        attachToSlice_ = false;
+
+        logProgress_ = false;
+
+        showFitRoi_ = false;
+
         return this;
       }
 
@@ -43063,6 +43199,10 @@ public final class GUIProtos {
         result.channel_ = channel_;
         result.searchRadius_ = searchRadius_;
         result.fitRadius_ = fitRadius_;
+        result.showOverlay_ = showOverlay_;
+        result.attachToSlice_ = attachToSlice_;
+        result.logProgress_ = logProgress_;
+        result.showFitRoi_ = showFitRoi_;
         onBuilt();
         return result;
       }
@@ -43112,6 +43252,18 @@ public final class GUIProtos {
         }
         if (other.getFitRadius() != 0) {
           setFitRadius(other.getFitRadius());
+        }
+        if (other.getShowOverlay() != false) {
+          setShowOverlay(other.getShowOverlay());
+        }
+        if (other.getAttachToSlice() != false) {
+          setAttachToSlice(other.getAttachToSlice());
+        }
+        if (other.getLogProgress() != false) {
+          setLogProgress(other.getLogProgress());
+        }
+        if (other.getShowFitRoi() != false) {
+          setShowFitRoi(other.getShowFitRoi());
         }
         onChanged();
         return this;
@@ -43213,6 +43365,110 @@ public final class GUIProtos {
       public Builder clearFitRadius() {
         
         fitRadius_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean showOverlay_ ;
+      /**
+       * <code>bool show_overlay = 4;</code>
+       */
+      public boolean getShowOverlay() {
+        return showOverlay_;
+      }
+      /**
+       * <code>bool show_overlay = 4;</code>
+       */
+      public Builder setShowOverlay(boolean value) {
+        
+        showOverlay_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_overlay = 4;</code>
+       */
+      public Builder clearShowOverlay() {
+        
+        showOverlay_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean attachToSlice_ ;
+      /**
+       * <code>bool attach_to_slice = 5;</code>
+       */
+      public boolean getAttachToSlice() {
+        return attachToSlice_;
+      }
+      /**
+       * <code>bool attach_to_slice = 5;</code>
+       */
+      public Builder setAttachToSlice(boolean value) {
+        
+        attachToSlice_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool attach_to_slice = 5;</code>
+       */
+      public Builder clearAttachToSlice() {
+        
+        attachToSlice_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean logProgress_ ;
+      /**
+       * <code>bool log_progress = 6;</code>
+       */
+      public boolean getLogProgress() {
+        return logProgress_;
+      }
+      /**
+       * <code>bool log_progress = 6;</code>
+       */
+      public Builder setLogProgress(boolean value) {
+        
+        logProgress_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool log_progress = 6;</code>
+       */
+      public Builder clearLogProgress() {
+        
+        logProgress_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean showFitRoi_ ;
+      /**
+       * <code>bool show_fit_roi = 7;</code>
+       */
+      public boolean getShowFitRoi() {
+        return showFitRoi_;
+      }
+      /**
+       * <code>bool show_fit_roi = 7;</code>
+       */
+      public Builder setShowFitRoi(boolean value) {
+        
+        showFitRoi_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool show_fit_roi = 7;</code>
+       */
+      public Builder clearShowFitRoi() {
+        
+        showFitRoi_ = false;
         onChanged();
         return this;
       }
@@ -43668,12 +43924,14 @@ public final class GUIProtos {
       " \001(\010\"\220\001\n\030TranslateResultsSettings\022\024\n\014inp" +
       "ut_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022" +
       "\n\n\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.gds" +
-      "c.smlm.data.config.DistanceUnit\"M\n\017SpotF" +
-      "itSettings\022\017\n\007channel\030\001 \001(\005\022\025\n\rsearch_ra" +
-      "dius\030\002 \001(\005\022\022\n\nfit_radius\030\003 \001(\005*O\n\014Templa" +
-      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
-      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPr" +
-      "otosb\006proto3"
+      "c.smlm.data.config.DistanceUnit\"\250\001\n\017Spot" +
+      "FitSettings\022\017\n\007channel\030\001 \001(\005\022\025\n\rsearch_r" +
+      "adius\030\002 \001(\005\022\022\n\nfit_radius\030\003 \001(\005\022\024\n\014show_" +
+      "overlay\030\004 \001(\010\022\027\n\017attach_to_slice\030\005 \001(\010\022\024" +
+      "\n\014log_progress\030\006 \001(\010\022\024\n\014show_fit_roi\030\007 \001" +
+      "(\010*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020\000\022",
+      "\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLAT" +
+      "E\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -43835,7 +44093,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor,
-        new java.lang.String[] { "Channel", "SearchRadius", "FitRadius", });
+        new java.lang.String[] { "Channel", "SearchRadius", "FitRadius", "ShowOverlay", "AttachToSlice", "LogProgress", "ShowFitRoi", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

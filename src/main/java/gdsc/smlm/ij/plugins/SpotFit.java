@@ -35,7 +35,8 @@ import gdsc.smlm.utils.ImageConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.GenericDialog;
+import ij.gui.ExtendedGenericDialog;
+import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
@@ -62,16 +63,29 @@ public class SpotFit implements PlugIn
 
 		private SpotFitSettings.Builder settings;
 		private boolean active = true;
+		private boolean logging = false;
 
 		private BlockMeanFilter f = new BlockMeanFilter();
 		private FitConfiguration config;
 		private Gaussian2DFitter gf;
+
+		private double[] lower, upper;
 
 		private SpotFitPluginTool()
 		{
 			settings = SettingsManager.readSpotFitSettings(0).toBuilder();
 			config = createFitConfiguration();
 			gf = new Gaussian2DFitter(config);
+
+			// Support bounded fit on the coordinates
+			int n = Gaussian2DFunction.PARAMETERS_PER_PEAK + 1;
+			lower = new double[n];
+			upper = new double[n];
+			for (int i = 0; i < n; i++)
+			{
+				lower[i] = Double.NEGATIVE_INFINITY;
+				upper[i] = Double.POSITIVE_INFINITY;
+			}
 		}
 
 		@Override
@@ -90,7 +104,7 @@ public class SpotFit implements PlugIn
 		@Override
 		public void showOptionsDialog()
 		{
-			GenericDialog gd = new GenericDialog(TITLE + " Tool Options");
+			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Tool Options");
 			gd.addMessage(
 				//@formatter:off
 				TextUtils.wrap(
@@ -100,6 +114,33 @@ public class SpotFit implements PlugIn
 			gd.addNumericField("Channel", settings.getChannel(), 0);
 			gd.addSlider("Search_range", 1, 10, settings.getSearchRadius());
 			gd.addSlider("Fit_radius", 3, 10, settings.getFitRadius());
+			gd.addCheckbox("Show_fit_ROI", settings.getShowFitRoi());
+			gd.addCheckbox("Show_overlay", settings.getShowOverlay(), new OptionListener<Boolean>()
+			{
+				public boolean collectOptions(Boolean value)
+				{
+					settings.setShowOverlay(value);
+					return collectOptions(false);
+				}
+
+				public boolean collectOptions()
+				{
+					return collectOptions(true);
+				}
+
+				private boolean collectOptions(boolean silent)
+				{
+					ExtendedGenericDialog egd = new ExtendedGenericDialog("Overlay options");
+					egd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
+					egd.showDialog(true, gd);
+					if (egd.wasCanceled())
+						return false;
+					settings.setAttachToSlice(egd.getNextBoolean());
+					return true;
+				}
+			});
+			gd.addCheckbox("Log_progress", settings.getLogProgress());
+
 			gd.showDialog();
 			if (gd.wasCanceled())
 				return;
@@ -108,6 +149,9 @@ public class SpotFit implements PlugIn
 				settings.setChannel((int) gd.getNextNumber());
 				settings.setSearchRadius((int) gd.getNextNumber());
 				settings.setFitRadius((int) gd.getNextNumber());
+				settings.setShowFitRoi(gd.getNextBoolean());
+				settings.setShowOverlay(gd.getNextBoolean());
+				settings.setLogProgress(gd.getNextBoolean());
 				// Only active if the settings are valid
 				active = (settings.getFitRadius() > 1);
 				if (!active)
@@ -121,18 +165,22 @@ public class SpotFit implements PlugIn
 		@Override
 		public void mouseClicked(ImagePlus imp, MouseEvent e)
 		{
-			int c = imp.getNChannels();
-			if (!active || c < settings.getChannel())
+			if (!active)
 				return;
+			int c = imp.getNChannels();
+			if (c < settings.getChannel())
+			{
+				// Always warn if the channel is incorrect for the image 
+				//if (logging)
+				Utils.log(TITLE + ": Image %s does not contain channel %d", imp.getTitle(), settings.getChannel());
+				return;
+			}
 
 			// Mark this event as handled
 			e.consume();
 
-			// TODO
-			// Add control for logging the fit progress
-			// More control over the overlay output.
-			// More control over fitting.
-			
+			// TODO - More control over fitting.
+
 			// Ensure rapid mouse click / new options does not break things
 			synchronized (this)
 			{
@@ -153,21 +201,27 @@ public class SpotFit implements PlugIn
 				ImageExtractor ie = new ImageExtractor(null, ip.getWidth(), ip.getHeight());
 
 				// Search for the maxima using the search radius
-				Utils.log("Clicked %d,%d", x, y);
+				if (logging)
+					Utils.log("Clicked %d,%d", x, y);
 				int index = findMaxima(ip, ie, x, y);
 
 				// Fit the maxima
 				x = index % ip.getWidth();
 				y = index / ip.getWidth();
-				Utils.log("Fitting %d,%d", x, y);
+				if (logging)
+					Utils.log("Fitting %d,%d", x, y);
 				Rectangle bounds = ie.getBoxRegionBounds(x, y, settings.getFitRadius());
+				if (settings.getShowFitRoi())
+					imp.setRoi(bounds);
 				FitResult fitResult = fitMaxima(ip, bounds, x, y);
 
-				Utils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
-				Utils.log("Fit status = %s", fitResult.getStatus());
+				if (logging)
+					Utils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
+				if (logging)
+					Utils.log("Fit status = %s", fitResult.getStatus());
 				if (fitResult.getStatus() != FitStatus.OK)
 				{
-					// Do something?
+					// Q. Do something?
 					return;
 				}
 
@@ -175,19 +229,8 @@ public class SpotFit implements PlugIn
 				createResultsWindow();
 				addResult(imp, channel, slice, frame, bounds, fitResult);
 
-				// Add overlay
-				double[] params = fitResult.getParameters();
-				Overlay o = imp.getOverlay();
-				if (o==null)
-					o = new Overlay();
-				PointRoi roi = new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]);
-				roi.setPointType(3);
-				if (imp.isDisplayedHyperStack())
-					roi.setPosition(channel, slice, frame);
-				else
-					roi.setPosition(imp.getCurrentSlice());
-				o.add(roi);
-				imp.setOverlay(o);
+				if (settings.getShowOverlay())
+					addOverlay(imp, channel, slice, frame, fitResult);
 			}
 		}
 
@@ -216,7 +259,7 @@ public class SpotFit implements PlugIn
 		private FitResult fitMaxima(ImageProcessor ip, Rectangle bounds, int x, int y)
 		{
 			config.setInitialPeakStdDev(0);
-			
+
 			setupPeakFiltering(config, bounds);
 
 			// Get a region
@@ -224,11 +267,19 @@ public class SpotFit implements PlugIn
 					null);
 
 			//Utils.display(TITLE + " fit data", data, bounds.width, bounds.height, 0);
-			
+
 			// Find the index of the maxima
 			int ox = x - bounds.x;
 			int oy = y - bounds.y;
 			int index = oy * bounds.width + ox;
+
+			// Limit the range for the XY position
+			int range = settings.getFitRadius() / 2;
+			lower[Gaussian2DFunction.X_POSITION] = ox - range;
+			lower[Gaussian2DFunction.Y_POSITION] = oy - range;
+			upper[Gaussian2DFunction.X_POSITION] = ox + range;
+			upper[Gaussian2DFunction.Y_POSITION] = oy + range;
+			gf.setBounds(lower, upper);
 
 			// Leave to the fitter to estimate background, width and height
 			FitResult fitResult = gf.fit(data, bounds.width, bounds.height, new int[] { index });
@@ -321,6 +372,22 @@ public class SpotFit implements PlugIn
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.Y_POSITION]));
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.X_SD]));
 			resultsWindow.append(sb.toString());
+		}
+
+		private void addOverlay(ImagePlus imp, int channel, int slice, int frame, FitResult fitResult)
+		{
+			double[] params = fitResult.getParameters();
+			Overlay o = imp.getOverlay();
+			if (o == null)
+				o = new Overlay();
+			PointRoi roi = new PointRoi(params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]);
+			roi.setPointType(3);
+			if (imp.isDisplayedHyperStack())
+				roi.setPosition(channel, (settings.getAttachToSlice()) ? slice : 0, frame);
+			else if (settings.getAttachToSlice())
+				roi.setPosition(imp.getCurrentSlice());
+			o.add(roi);
+			imp.setOverlay(o);
 		}
 	}
 

@@ -643,4 +643,8 @@ message SpotFitSettings {
 	int32 channel = 1;
 	int32 search_radius = 2;
 	int32 fit_radius = 3;
+	bool show_overlay = 4;
+	bool attach_to_slice = 5;
+	bool log_progress = 6;
+	bool show_fit_roi = 7;
 }
