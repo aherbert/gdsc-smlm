@@ -103,7 +103,57 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			Assert.assertEquals(var, crlb[3], var * 1e-2);
 		}
 	}
-	
-	// TODO - Do the Poisson test using a per pixel fisher information
-	
+
+	@Test
+	public void canComputePerPixelPoissonGaussianApproximationFisherInformation()
+	{
+		RandomGenerator r = new Well19937c(30051977);
+		for (int n = 1; n < 10; n++)
+		{
+			canComputePerPixelPoissonGaussianApproximationFisherInformation(r);
+		}
+	}
+
+	private void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomGenerator r)
+	{
+		RandomDataGenerator rdg = new RandomDataGenerator(r);
+
+		// Create function
+		Gaussian2DFunction func = GaussianFunctionFactory.create2D(1, 10, 10, GaussianFunctionFactory.FIT_ERF_CIRCLE,
+				null);
+		double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+		params[Gaussian2DFunction.BACKGROUND] = rdg.nextUniform(0.1, 0.3);
+		params[Gaussian2DFunction.SIGNAL] = rdg.nextUniform(100, 300);
+		params[Gaussian2DFunction.X_POSITION] = rdg.nextUniform(4, 6);
+		params[Gaussian2DFunction.Y_POSITION] = rdg.nextUniform(4, 6);
+		params[Gaussian2DFunction.X_SD] = rdg.nextUniform(1, 1.3);
+
+		Gradient1Function f1 = func;
+		FisherInformation[] fi;
+
+		// Get a per-pixel variance
+		double[] var = new double[func.size()];
+		
+		fi = new FisherInformation[var.length]; 
+		for (int i = var.length; i-- > 0;)
+		{
+			var[i] = 0.9 + 0.2 * r.nextDouble();
+			fi[i] = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var[i]));
+		}
+
+		f1 = (Gradient1Function) PrecomputedFunctionFactory.wrapFunction(func, var);
+
+		// This introduces a dependency on a different package, and relies on that 
+		// computing the correct answer. However that code predates this and so the
+		// test ensures that the FisherInformationCalculator functions correctly.
+		PoissonGradientProcedure p1 = PoissonGradientProcedureFactory.create(f1);
+		p1.computeFisherInformation(params);
+		double[] e = p1.getLinear();
+
+		FisherInformationCalculator calc = new UnivariateLikelihoodFisherInformationCalculator(func, fi);
+		FisherInformationMatrix I = calc.compute(params);
+		double[] o = I.getMatrix().data;
+
+		Assert.assertArrayEquals(e, o, 1e-6);
+	}
 }

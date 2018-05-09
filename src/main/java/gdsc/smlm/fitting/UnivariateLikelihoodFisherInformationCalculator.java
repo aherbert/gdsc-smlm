@@ -51,7 +51,7 @@ import gdsc.smlm.function.Gradient1Procedure;
 public class UnivariateLikelihoodFisherInformationCalculator implements FisherInformationCalculator
 {
 	protected final Gradient1Function gf;
-	protected final FisherInformation fi;
+	protected final FisherInformation[] fi;
 	private boolean ignoreBadFunctionValues = true;
 
 	/**
@@ -66,6 +66,25 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 	{
 		if (gf == null || fi == null)
 			throw new NullPointerException();
+		this.gf = gf;
+		this.fi = new FisherInformation[gf.size()];
+		Arrays.fill(this.fi, fi);
+	}
+
+	/**
+	 * Instantiates a new univariate likelihood fisher information calculator.
+	 *
+	 * @param gf
+	 *            the gradient function
+	 * @param fi
+	 *            the fisher information of the output of each value of the function
+	 */
+	public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf, FisherInformation[] fi)
+	{
+		if (gf == null || fi == null)
+			throw new NullPointerException();
+		if (fi.length != gf.size())
+			throw new IllegalArgumentException("Fisher information must be provided for each function value");
 		this.gf = gf;
 		this.fi = fi;
 	}
@@ -87,6 +106,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 		gf.forEach(new Gradient1Procedure()
 		{
 			boolean infinity = false;
+			int k = 0;
 
 			public void execute(double v, double[] dv_dt)
 			{
@@ -97,7 +117,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 				final double f;
 				try
 				{
-					f = fi.getFisherInformation(v);
+					f = fi[k++].getFisherInformation(v);
 				}
 				catch (IllegalArgumentException e)
 				{
