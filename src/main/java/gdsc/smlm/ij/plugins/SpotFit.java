@@ -35,8 +35,6 @@ import gdsc.smlm.utils.ImageConverter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.ExtendedGenericDialog;
-import ij.gui.ExtendedGenericDialog.OptionListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
@@ -105,46 +103,23 @@ public class SpotFit implements PlugIn
 		@Override
 		public void showOptionsDialog()
 		{
-			// Using the extended dialog in this class causes Fiji to load the 
-			// plugin at start-up.
+			// Using the ExtendedGenericDialog in this class causes Fiji to load the 
+			// plugin at start-up, probably as it is within the ij.gui package.
 			
-			//			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Tool Options");
 			final GenericDialog gd = new GenericDialog(TITLE + " Tool Options");
 			gd.addMessage(
 				//@formatter:off
 				TextUtils.wrap(
-				"Click on a multi-channel image and fit a spot in a selected " +
-				"channel. ", 80));
+				"Click on an image and fit a spot in a selected channel. " +
+				"The maxima within a search range is used to centre the " +
+				"fit window for Gaussian 2D fitting.", 80));
 				//@formatter:on
 			gd.addNumericField("Channel", settings.getChannel(), 0);
 			gd.addSlider("Search_range", 1, 10, settings.getSearchRadius());
 			gd.addSlider("Fit_radius", 3, 10, settings.getFitRadius());
 			gd.addCheckbox("Show_fit_ROI", settings.getShowFitRoi());
+			gd.addCheckbox("Show_overlay", settings.getShowOverlay());
 			gd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
-			//			gd.addCheckbox("Show_overlay", settings.getShowOverlay(), new OptionListener<Boolean>()
-			//			{
-			//				public boolean collectOptions(Boolean value)
-			//				{
-			//					settings.setShowOverlay(value);
-			//					return collectOptions(false);
-			//				}
-			//
-			//				public boolean collectOptions()
-			//				{
-			//					return collectOptions(true);
-			//				}
-			//
-			//				private boolean collectOptions(boolean silent)
-			//				{
-			//					ExtendedGenericDialog egd = new ExtendedGenericDialog("Overlay options");
-			//					egd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
-			//					egd.showDialog(true, gd);
-			//					if (egd.wasCanceled())
-			//						return false;
-			//					settings.setAttachToSlice(egd.getNextBoolean());
-			//					return true;
-			//				}
-			//			});
 			gd.addCheckbox("Log_progress", settings.getLogProgress());
 
 			gd.showDialog();
