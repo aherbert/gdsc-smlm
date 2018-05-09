@@ -37,6 +37,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.ExtendedGenericDialog.OptionListener;
+import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
@@ -104,7 +105,11 @@ public class SpotFit implements PlugIn
 		@Override
 		public void showOptionsDialog()
 		{
-			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Tool Options");
+			// Using the extended dialog in this class causes Fiji to load the 
+			// plugin at start-up.
+			
+			//			final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE + " Tool Options");
+			final GenericDialog gd = new GenericDialog(TITLE + " Tool Options");
 			gd.addMessage(
 				//@formatter:off
 				TextUtils.wrap(
@@ -115,30 +120,31 @@ public class SpotFit implements PlugIn
 			gd.addSlider("Search_range", 1, 10, settings.getSearchRadius());
 			gd.addSlider("Fit_radius", 3, 10, settings.getFitRadius());
 			gd.addCheckbox("Show_fit_ROI", settings.getShowFitRoi());
-			gd.addCheckbox("Show_overlay", settings.getShowOverlay(), new OptionListener<Boolean>()
-			{
-				public boolean collectOptions(Boolean value)
-				{
-					settings.setShowOverlay(value);
-					return collectOptions(false);
-				}
-
-				public boolean collectOptions()
-				{
-					return collectOptions(true);
-				}
-
-				private boolean collectOptions(boolean silent)
-				{
-					ExtendedGenericDialog egd = new ExtendedGenericDialog("Overlay options");
-					egd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
-					egd.showDialog(true, gd);
-					if (egd.wasCanceled())
-						return false;
-					settings.setAttachToSlice(egd.getNextBoolean());
-					return true;
-				}
-			});
+			gd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
+			//			gd.addCheckbox("Show_overlay", settings.getShowOverlay(), new OptionListener<Boolean>()
+			//			{
+			//				public boolean collectOptions(Boolean value)
+			//				{
+			//					settings.setShowOverlay(value);
+			//					return collectOptions(false);
+			//				}
+			//
+			//				public boolean collectOptions()
+			//				{
+			//					return collectOptions(true);
+			//				}
+			//
+			//				private boolean collectOptions(boolean silent)
+			//				{
+			//					ExtendedGenericDialog egd = new ExtendedGenericDialog("Overlay options");
+			//					egd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
+			//					egd.showDialog(true, gd);
+			//					if (egd.wasCanceled())
+			//						return false;
+			//					settings.setAttachToSlice(egd.getNextBoolean());
+			//					return true;
+			//				}
+			//			});
 			gd.addCheckbox("Log_progress", settings.getLogProgress());
 
 			gd.showDialog();
@@ -151,6 +157,7 @@ public class SpotFit implements PlugIn
 				settings.setFitRadius((int) gd.getNextNumber());
 				settings.setShowFitRoi(gd.getNextBoolean());
 				settings.setShowOverlay(gd.getNextBoolean());
+				settings.setAttachToSlice(gd.getNextBoolean());
 				settings.setLogProgress(gd.getNextBoolean());
 				// Only active if the settings are valid
 				active = (settings.getFitRadius() > 1);
