@@ -55,7 +55,7 @@ public class PoissonGaussianFisherInformationTest
 		double I = f.getPoissonGaussianI(u);
 		//System.out.printf("s=%g u=%g I=%s\n", f.s, u, I);
 		double lower = f.getPoissonGaussianApproximationI(u);
-		double upper = f.getPoissonI(u);
+		double upper = PoissonFisherInformation.getPoissonI(u);
 		// Allow a tolerance on the approximation at high mean.
 		// The function does not compute the sum to infinity and so can underestimate
 		// the value.
