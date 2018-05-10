@@ -123,7 +123,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				//System.out.printf("t1=%g, t2=%g error=%g\n", transform, transform2,
 				//		gdsc.core.utils.DoubleEquality.relativeError(transform, transform2));
 
-				return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
+				//return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
+				return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
 			}
 			else
 			{
@@ -194,7 +195,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double _c_m_p = -c_m - p;
 			if (x > 709 || _c_m_p < -709)
 			{
-				return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
+				//return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x));
+				return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x));
 			}
 			else
 			{
@@ -259,14 +261,14 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			// The current implementation of Bessel.II(x) is Infinity at x==710
 			// due to the use of Math.exp(x). Switch to an approximation.
 			final double x = 2 * Math.sqrt(cp_m);
-			if (x > 709)
+			final double _c_m_p = -c_m - p;
+			if (x > 709 || _c_m_p < -709)
 			{
 				// Approximate Bessel function i0(x)/i1(x) when using large x:
 				// In(x) ~ exp(x)/sqrt(2*pi*x)
-
-				final double transform = -c_m - p + x - 0.5 * Math.log(twoPi * x);
-				double G = FastMath.exp(0.5 * Math.log(p / (c * m)) + transform);
-				dG_dp[0] = FastMath.exp(transform) / m - G;
+				double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x)); 
+				double G = (x / (2 * c)) * exp_transform;
+				dG_dp[0] = exp_transform / m - G;
 				return G;
 			}
 			else
@@ -282,7 +284,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				// dG(c)/dp = e^-p . e^-c/m . 1/m . I0(2*sqrt(cp/m)) - G(c)
 				// dG(c)/dp = e^(-c/m -p) . I0(2*sqrt(cp/m))/m - G(c)
 
-				double exp_c_m_p = FastMath.exp(-c_m - p);
+				double exp_c_m_p = FastMath.exp(_c_m_p);
 				//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
 				double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
 				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
@@ -331,16 +333,17 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			final double c_m = c / m;
 			final double cp_m = p * c_m;
 			final double x = 2 * Math.sqrt(cp_m);
-			if (x > 709)
+			final double _c_m_p = -c_m - p;
+			if (x > 709 || _c_m_p < -709)
 			{
-				final double transform = -c_m - p + x - 0.5 * Math.log(twoPi * x);
-				double G = FastMath.exp(0.5 * Math.log(p / (c * m)) + transform);
-				dG_dp[0] = FastMath.exp(transform) / m;
+				double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(twoPi * x)); 
+				double G = (x / (2 * c)) * exp_transform;
+				dG_dp[0] = exp_transform / m;
 				return G;
 			}
 			else
 			{
-				double exp_c_m_p = FastMath.exp(-c_m - p);
+				double exp_c_m_p = FastMath.exp(_c_m_p);
 				//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
 				double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
 				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m;
