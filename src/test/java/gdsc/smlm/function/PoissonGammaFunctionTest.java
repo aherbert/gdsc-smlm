@@ -201,6 +201,7 @@ public class PoissonGammaFunctionTest
 		int min = Math.max(0, range[0]);
 		int max = range[1];
 		double[] dp_dt = new double[1];
+		double[] dp_dt2 = new double[1];
 		double step = (nonInteger) ? 0.5 : 1;
 
 		// When using the approximation the gradients are not as accurate
@@ -213,7 +214,12 @@ public class PoissonGammaFunctionTest
 
 			double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
 			double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
-			Assert.assertEquals(p1, p2, p1 * 1e-8);
+			Assert.assertEquals(p1, p2, 0);
+			
+			// Check partial gradient matches
+			double p3 = PoissonGammaFunction.poissonGammaPartial(x, o, gain, dp_dt2);
+			Assert.assertEquals(p1, p3, 0);
+			Assert.assertEquals(dp_dt[0] + p1, dp_dt2[0], Math.abs(dp_dt[0] + p1) * 1e-8);
 
 			double up = PoissonGammaFunction.poissonGamma(x, uo, gain);
 			double lp = PoissonGammaFunction.poissonGamma(x, lo, gain);
