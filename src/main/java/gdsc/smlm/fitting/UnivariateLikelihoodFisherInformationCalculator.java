@@ -2,6 +2,7 @@ package gdsc.smlm.fitting;
 
 import java.util.Arrays;
 
+import gdsc.core.data.DataException;
 import gdsc.smlm.function.FisherInformation;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
@@ -92,27 +93,25 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws IllegalArgumentException
+	 * @throws DataException
 	 *             If the Fisher information cannot be computed for a function value
+	 * @throws DataException
+	 *             If the Fisher information is infinite for a function value
 	 * 
 	 * @see gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
 	 * @see #setIgnoreBadFunctionValues(boolean)
 	 */
-	public FisherInformationMatrix compute(double[] parameters) throws IllegalArgumentException
+	public FisherInformationMatrix compute(double[] parameters) throws DataException
 	{
 		final int n = gf.getNumberOfGradients();
 		final double[] data = new double[n * (n + 1) / 2];
 		gf.initialise1(parameters);
 		gf.forEach(new Gradient1Procedure()
 		{
-			boolean infinity = false;
 			int k = 0;
 
 			public void execute(double v, double[] dv_dt)
 			{
-				// Check if an infinite Fisher information has been computed.
-				if (infinity)
-					return;
 				// Get the Fisher information of the value
 				final double f;
 				try
@@ -123,7 +122,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 				{
 					if (ignoreBadFunctionValues)
 						return;
-					throw e;
+					throw new DataException(e);
 				}
 				if (f == 0)
 				{
@@ -132,9 +131,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 				}
 				if (f == Double.POSITIVE_INFINITY)
 				{
-					// Infinite summation 
-					Arrays.fill(data, Double.POSITIVE_INFINITY);
-					infinity = true;
+					throw new DataException("Fisher information is infinite at f(" + k + ")");
 				}
 
 				// Compute the actual matrix data 
@@ -158,7 +155,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 
 	/**
 	 * Checks if ignoring bad function values that do not compute a Fisher information. Set to false will cause
-	 * bad values to throw IllegalArgumentException within {@link #compute(double[])}.
+	 * bad values to throw DataException within {@link #compute(double[])}.
 	 *
 	 * @return true, if ignoring bad function values
 	 */
@@ -169,7 +166,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 
 	/**
 	 * Sets to true to ignore any bad function values that do not compute a Fisher information. Set to false will cause
-	 * bad values to throw IllegalArgumentException within {@link #compute(double[])}.
+	 * bad values to throw DataException within {@link #compute(double[])}.
 	 *
 	 * @param ignoreBadFunctionValues
 	 *            the new ignore bad function values flag
