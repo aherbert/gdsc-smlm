@@ -127,7 +127,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			}
 			else
 			{
-				return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+				//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+				return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 			}
 		}
 		else if (c == 0.0)
@@ -197,7 +198,8 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			}
 			else
 			{
-				return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+				//return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
+				return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.I1(x);
 			}
 		}
 		else if (c == 0.0)
@@ -263,32 +265,94 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 				// In(x) ~ exp(x)/sqrt(2*pi*x)
 
 				final double transform = -c_m - p + x - 0.5 * Math.log(twoPi * x);
-				double ans = FastMath.exp(0.5 * Math.log(p / (c * m)) + transform);
-				dG_dp[0] = FastMath.exp(transform) / m - ans;
-				return ans;
+				double G = FastMath.exp(0.5 * Math.log(p / (c * m)) + transform);
+				dG_dp[0] = FastMath.exp(transform) / m - G;
+				return G;
 			}
 			else
 			{
-				// TODO: Working for the gradient ...
+				// G(c) = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n }
+				// dG(c)/dp = e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . n * p^(n-1) c^(n-1) / m^n } - e^-p . e^-c/m . sum n=1 to inf { 1/(n!(n-1)!) . p^n c^(n-1) / m^n } 
+				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=1 to inf { 1/((n-1)!(n-1)!) . p^(n-1) c^(n-1) / m^(n-1) } - G(c) 
+				// dG(c)/dp = e^-p . e^-c/m . 1/m . sum n=0 to inf { 1/(n!^2) . (pc/m)^n } - G(c)
 
-				// The gradient is:
-				// FastMath.exp(-c_m - p) * (Bessel.I0(x)/m - Math.sqrt(p / (c * m)) * Bessel.I1(x))
-				// It is rearranged so that the return value exactly matches the equivalent function 
-				// value computed without a gradient:
-				// FastMath.exp(-c_m - p) * Bessel.I0(x) / m - FastMath.exp(-c_m - p) * Math.sqrt(p / (c * m)) * Bessel.I1(x)
+				// Bessel I0 = sum n=0 to inf { 1/(n!^2) . ((x/2)^2)^n }
+				// x = 2 * sqrt(cp/m)
+
+				// dG(c)/dp = e^-p . e^-c/m . 1/m . I0(2*sqrt(cp/m)) - G(c)
+				// dG(c)/dp = e^(-c/m -p) . I0(2*sqrt(cp/m))/m - G(c)
 
 				double exp_c_m_p = FastMath.exp(-c_m - p);
-				double ans = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
-				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - ans;
-				return ans;
+				//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
+				double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
+				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m - G;
+				return G;
 			}
 		}
 		else if (c == 0.0)
 		{
-			double scale = (1 + p / m);
+			// f(p) = exp(-p) * (1 + p / m)
+			// df/dp = (-exp(-p) * (1 + p / m)) + (exp(-p) / m)   
 			double exp_p = FastMath.exp(-p);
-			dG_dp[0] = -exp_p * scale + exp_p / m;
-			return exp_p * scale;
+			double G = exp_p * (1 + p / m);
+			dG_dp[0] = exp_p / m - G;
+			return G;
+		}
+		else
+		{
+			dG_dp[0] = 0;
+			return 0;
+		}
+	}
+
+	/**
+	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
+	 * <p>
+	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * <p>
+	 * This is a special version which computes only part of the gradient.
+	 * The partial gradient is equal to the actual gradient plus the value of the function.
+	 *
+	 * @param c
+	 *            The count to evaluate
+	 * @param p
+	 *            The average number of photons per pixel input to the EM-camera (must be positive)
+	 * @param m
+	 *            The multiplication factor (gain)
+	 * @param dG_dp
+	 *            the partial gradient of the function G(c) with respect to parameter p
+	 * @return The probability
+	 */
+	static double poissonGammaPartial(double c, double p, double m, double[] dG_dp)
+	{
+		// As above but do not subtract the Gwer from the gradient. 
+		if (c > 0.0)
+		{
+			final double c_m = c / m;
+			final double cp_m = p * c_m;
+			final double x = 2 * Math.sqrt(cp_m);
+			if (x > 709)
+			{
+				final double transform = -c_m - p + x - 0.5 * Math.log(twoPi * x);
+				double G = FastMath.exp(0.5 * Math.log(p / (c * m)) + transform);
+				dG_dp[0] = FastMath.exp(transform) / m;
+				return G;
+			}
+			else
+			{
+				double exp_c_m_p = FastMath.exp(-c_m - p);
+				//double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.I1(x);
+				double G = (x / (2 * c)) * exp_c_m_p * Bessel.I1(x);
+				dG_dp[0] = exp_c_m_p * Bessel.I0(x) / m;
+				return G;
+			}
+		}
+		else if (c == 0.0)
+		{
+			double exp_p = FastMath.exp(-p);
+			double G = exp_p * (1 + p / m);
+			dG_dp[0] = exp_p / m;
+			return G;
 		}
 		else
 		{
