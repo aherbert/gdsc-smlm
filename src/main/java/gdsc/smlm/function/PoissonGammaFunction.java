@@ -32,7 +32,7 @@ import org.apache.commons.math3.util.FastMath;
  * Poisson process of emitted light, converted to electrons on the camera chip, amplified by a gain and then read with
  * Gaussian noise.
  */
-public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFunction
+public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFunction, GradientLikelihoodFunction
 {
 	/**
 	 * The on-chip gain multiplication factor
@@ -356,5 +356,15 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	public double logLikelihood(double o, double e)
 	{
 		return logPoissonGamma(o, e, m);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
+	 */
+	public double likelihood(double o, double t, double[] dp_dt)
+	{
+		return poissonGamma(o, t, m, dp_dt);
 	}
 }
