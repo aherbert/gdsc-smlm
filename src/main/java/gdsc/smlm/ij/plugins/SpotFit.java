@@ -3,6 +3,7 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 /*----------------------------------------------------------------------------- 
  * GDSC Plugins for ImageJ
@@ -39,10 +40,13 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
+import ij.gui.Roi;
 import ij.gui.Toolbar;
 import ij.plugin.PlugIn;
 import ij.plugin.tool.PlugInTool;
+import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 
 /**
@@ -69,6 +73,8 @@ public class SpotFit implements PlugIn
 		private Gaussian2DFitter gf;
 
 		private double[] lower, upper;
+
+		final static Pattern pattern = Pattern.compile("\t");
 
 		private SpotFitPluginTool()
 		{
@@ -105,7 +111,7 @@ public class SpotFit implements PlugIn
 		{
 			// Using the ExtendedGenericDialog in this class causes Fiji to load the 
 			// plugin at start-up, probably as it is within the ij.gui package.
-			
+
 			final GenericDialog gd = new GenericDialog(TITLE + " Tool Options");
 			gd.addMessage(
 				//@formatter:off
@@ -170,6 +176,9 @@ public class SpotFit implements PlugIn
 				int x = ic.offScreenX(e.getX());
 				int y = ic.offScreenY(e.getY());
 
+				if (logging)
+					Utils.log("Clicked %d,%d", x, y);
+
 				// Get the data
 				int channel = settings.getChannel();
 				int slice = imp.getZ();
@@ -177,14 +186,18 @@ public class SpotFit implements PlugIn
 
 				int stackIndex = imp.getStackIndex(channel, slice, frame);
 
+				ImageExtractor ie = new ImageExtractor(null, imp.getWidth(), imp.getHeight());
+
+				if (isRemoveEvent(e))
+				{
+					removeSpots(imp, channel, slice, frame, x, y, ie);
+					return;
+				}
+
 				ImageStack stack = imp.getImageStack();
 				ImageProcessor ip = stack.getProcessor(stackIndex);
 
-				ImageExtractor ie = new ImageExtractor(null, ip.getWidth(), ip.getHeight());
-
 				// Search for the maxima using the search radius
-				if (logging)
-					Utils.log("Clicked %d,%d", x, y);
 				int index = findMaxima(ip, ie, x, y);
 
 				// Fit the maxima
@@ -214,6 +227,11 @@ public class SpotFit implements PlugIn
 				if (settings.getShowOverlay())
 					addOverlay(imp, channel, slice, frame, fitResult);
 			}
+		}
+
+		private boolean isRemoveEvent(MouseEvent e)
+		{
+			return e.isAltDown() || e.isShiftDown() || e.isControlDown();
 		}
 
 		private int findMaxima(ImageProcessor ip, ImageExtractor ie, int x, int y)
@@ -370,6 +388,98 @@ public class SpotFit implements PlugIn
 				roi.setPosition(imp.getCurrentSlice());
 			o.add(roi);
 			imp.setOverlay(o);
+		}
+
+		private void removeSpots(ImagePlus imp, int channel, int slice, int frame, int x, int y, ImageExtractor ie)
+		{
+			// Get a region to search for spots
+			Rectangle bounds = ie.getBoxRegionBounds(x, y, Math.max(0, settings.getSearchRadius()));
+			if (bounds.width == 0 || bounds.height == 0)
+				return;
+
+			boolean isDisplayedHyperStack = imp.isDisplayedHyperStack();
+
+			// Remove all the overlay components
+			Overlay o = imp.getOverlay();
+			if (o != null)
+			{
+				Roi[] rois = o.toArray();
+				int size = o.size();
+				o = new Overlay();
+				for (int i = 0; i < rois.length; i++)
+				{
+					if (rois[i] instanceof PointRoi)
+					{
+						PointRoi roi = (PointRoi) rois[i];
+						boolean boundsCheck = true;
+						if (isDisplayedHyperStack)
+						{
+							// Must be on the same channel/slice/frame
+							boundsCheck = roi.getCPosition() == channel && roi.getTPosition() == frame &&
+									(roi.getZPosition() == 0 || roi.getZPosition() == slice);
+						}
+						if (boundsCheck)
+						{
+							FloatPolygon poly = roi.getFloatPolygon();
+							if (bounds.contains(poly.xpoints[0], poly.ypoints[0]))
+								continue;
+						}
+					}
+					o.add(rois[i]);
+				}
+				if (o.size() != size)
+				{
+					if (o.size() == 0)
+						imp.setOverlay(null);
+					else
+						imp.setOverlay(o);
+				}
+			}
+
+			if (resultsWindow != null && resultsWindow.isShowing())
+			{
+				TextPanel tp = resultsWindow.getTextPanel();
+				String title = imp.getTitle();
+				for (int i = 0; i < tp.getLineCount(); i++)
+				{
+					String line = tp.getLine(i);
+					// Check the image name
+					int startIndex = line.indexOf('\t');
+					if (startIndex == -1)
+						continue;
+					if (!title.equals(line.substring(0, startIndex)))
+						continue;
+
+					String[] fields = pattern.split(line, 0);
+
+					try
+					{
+						if (isDisplayedHyperStack)
+						{
+							int c = Integer.parseInt(fields[1]);
+							// Ignore z as the user may be on the wrong slice but can still see
+							// the overlay if it is not tied to the slice position
+							//int z = Integer.parseInt(fields[2]);
+							int t = Integer.parseInt(fields[3]);
+							if (c != channel || t != frame)
+								continue;
+						}
+						float xp = Float.parseFloat(fields[7]);
+						float yp = Float.parseFloat(fields[8]);
+						if (bounds.contains(xp, yp))
+						{
+							tp.setSelection(i, i);
+							tp.clearSelection();
+							// Since i will be incremented for the next line,
+							// decrement to check the current line again.
+							i--;
+						}
+					}
+					catch (NumberFormatException ex)
+					{
+					}
+				}
+			}
 		}
 	}
 
