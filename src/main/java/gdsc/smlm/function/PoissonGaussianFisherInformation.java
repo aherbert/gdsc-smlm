@@ -207,8 +207,8 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 		// better than the Poisson-Gaussian Fisher information (lower limit).
 		// Note a low Fisher information is worse as this is the amount of information
 		// carried about the parameter.
-		final double lower = getPoissonGaussianApproximationI(t);
-		final double upper = getPoissonI(t);
+		final double lower = 1.0 / (t + s * s); // getPoissonGaussianApproximationI(t);
+		final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);;
 		return Maths.clip(lower, upper, I);
 	}
 
@@ -245,7 +245,7 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 		if (t > meanThreshold)
 		{
 			// Use an approximation when the Poisson mean is large
-			return getPoissonGaussianApproximationI(t);
+			return 1.0 / (t + s * s); //getPoissonGaussianApproximationI(t);
 		}
 
 		final int scale = getKernelScale(t);
@@ -253,7 +253,7 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 		{
 			// No Gaussian convolution
 			// Get the Fisher information for a Poisson. 
-			return getPoissonI(t);
+			return 1.0 / t; // PoissonFisherInformation.getPoissonI(t);
 		}
 
 		// This computes the convolution of a Poisson PMF and a Gaussian PDF.
@@ -505,18 +505,6 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 	protected abstract double[] getGaussianKernel(int scale);
 
 	/**
-	 * Gets the Poisson Fisher information.
-	 *
-	 * @param t
-	 *            the poisson mean
-	 * @return the poisson Fisher information
-	 */
-	public double getPoissonI(double t)
-	{
-		return 1.0 / t;
-	}
-
-	/**
 	 * Gets the approximate Poisson-Gaussian Fisher information.
 	 * Approximate the Poisson as a Gaussian with u=t and var=t.
 	 * Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2).
@@ -528,6 +516,27 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 	 */
 	public double getPoissonGaussianApproximationI(double t)
 	{
+		if (t <= 0)
+			throw new IllegalArgumentException("Poisson mean must be positive");
+		return 1.0 / (t + s * s);
+	}
+
+	/**
+	 * Gets the approximate Poisson-Gaussian Fisher information.
+	 * Approximate the Poisson as a Gaussian with u=t and var=t.
+	 * Gaussian-Gaussian convolution: sa * sb => sc = sqrt(sa^2+sb^2).
+	 * Fisher information of Gaussian mean is 1/variance.
+	 *
+	 * @param t
+	 *            the poisson mean
+	 * @param s
+	 *            the Gaussian standard deviation (no check made for negatives as this is squared)
+	 * @return the Poisson Gaussian Fisher information
+	 */
+	public static double getPoissonGaussianApproximationI(double t, double s)
+	{
+		if (t <= 0)
+			throw new IllegalArgumentException("Poisson mean must be positive");
 		return 1.0 / (t + s * s);
 	}
 
@@ -538,6 +547,19 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 	 * @return the Gaussian Fisher information
 	 */
 	public double getGaussianI()
+	{
+		return 1.0 / (s * s);
+	}
+
+	/**
+	 * Gets the Gaussian Fisher information for mean 0.
+	 * Fisher information of Gaussian mean is 1/variance.
+	 *
+	 * @param s
+	 *            the Gaussian standard deviation (no check made for negatives as this is squared)
+	 * @return the Gaussian Fisher information
+	 */
+	public static double getGaussianI(double s)
 	{
 		return 1.0 / (s * s);
 	}

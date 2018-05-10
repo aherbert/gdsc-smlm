@@ -33,4 +33,18 @@ public class PoissonFisherInformation implements FisherInformation
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		return 1.0 / t;
 	}
+
+	/**
+	 * Gets the Poisson Fisher information.
+	 *
+	 * @param t
+	 *            the poisson mean
+	 * @return the poisson Fisher information
+	 */
+	public static double getPoissonI(double t)
+	{
+		if (t <= 0)
+			throw new IllegalArgumentException("Poisson mean must be positive");
+		return 1.0 / t;
+	}
 }
