@@ -380,9 +380,12 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		// This is how the Camera Model Analysis works. Perhaps there is
 		// floating point error when the dirac is large.
 		
-		// TODO - this can be combined into a dual function
-		double[] P = Convolution.convolveFast(p, g);
-		double[] A = Convolution.convolveFast(a, g);
+		double[] P, A;
+		//P = Convolution.convolveFast(p, g);
+		//A = Convolution.convolveFast(a, g);
+		double[][] result = Convolution.convolveFast(g, p, a);
+		P = result[0];
+		A = result[1];
 
 		int maxi = (singleRange)
 				// Do the entire range
@@ -491,9 +494,11 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 
 		System.out.printf("t=%g  sum p2=%g  single=%b\n", t, Maths.sum(p) * h, singleRange);
 
-		// TODO - this can be combined into a dual function
-		P = Convolution.convolveFast(p, g);
-		A = Convolution.convolveFast(a, g);
+		//P = Convolution.convolveFast(p, g);
+		//A = Convolution.convolveFast(a, g);
+		result = Convolution.convolveFast(g, p, a);
+		P = result[0];
+		A = result[1];
 
 		// Add the kernel size to get the point when new values occur.
 		mini += g.length / 2;

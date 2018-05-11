@@ -41,6 +41,6 @@ public class PoissonGammaGaussianFisherInformationTest
 		// the value.
 		if (u >= 100)
 			upper *= 1.001;
-		//Assert.assertTrue("Not less than Poisson information", I <= upper);
+		Assert.assertTrue("Not less than Poisson information", I <= upper);
 	}
 }

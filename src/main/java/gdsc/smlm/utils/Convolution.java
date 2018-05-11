@@ -94,13 +94,14 @@ public class Convolution
 	{
 		checkInput(x, h);
 
-		if (x.length < h.length)
-		{
-			// Swap so that the longest array is the signal
-			final double[] tmp = x;
-			x = h;
-			h = tmp;
-		}
+		// This is not needed
+		//if (x.length < h.length)
+		//{
+		//	// Swap so that the longest array is the signal
+		//	final double[] tmp = x;
+		//	x = h;
+		//	h = tmp;
+		//}
 
 		final int xLen = x.length;
 		final int hLen = h.length;
@@ -112,7 +113,6 @@ public class Convolution
 		// Double the new length for complex values in DoubleFFT_1D
 		x = Arrays.copyOf(x, 2 * newL);
 		h = Arrays.copyOf(h, x.length);
-		//double[] tmp = new double[x.length];
 
 		DoubleFFT_1D fft = new DoubleFFT_1D(newL);
 
@@ -126,18 +126,20 @@ public class Convolution
 			int j = i + 1;
 			double xi = x[i];
 			double xj = x[j];
-			x[i] = xi * h[i] - xj * h[j];
-			x[j] = xi * h[j] + xj * h[i];
+			double hi = h[i];
+			double hj = h[j];
+			h[i] = hi * xi - hj * xj;
+			h[j] = hi * xj + hj * xi;
 		}
 
 		// Inverse FFT
-		fft.complexInverse(x, true);
+		fft.complexInverse(h, true);
 
 		// Fill result with real part
 		final double[] y = new double[totalLength];
 		for (int i = 0; i < totalLength; i++)
 		{
-			y[i] = x[2 * i];
+			y[i] = h[2 * i];
 		}
 		return y;
 	}
@@ -194,6 +196,189 @@ public class Convolution
 		if (x.length == 0 || h.length == 0)
 		{
 			throw new IllegalArgumentException("Input x or h have no length");
+		}
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between one sequence and two other sequences.
+	 * <p>
+	 * The solution is obtained via straightforward computation of the convolution sum (and not via FFT). Whenever the
+	 * computation needs an element that would be located at an index outside the input arrays, the value is assumed to
+	 * be zero.
+	 * <p>
+	 * This has been adapted from Apache Commons Math v3.3: org.apache.commons.math3.util.MathArrays
+	 *
+	 * @param x
+	 *            First sequence.
+	 * @param h1
+	 *            Second sequence 1.
+	 * @param h2
+	 *            Second sequence 2.
+	 * @return the convolution of {@code x} and {@code h1} and {@code x} and {@code h2}.
+	 *         This array's length will be [2][{@code x.length + h1.length - 1}].
+	 * @throws IllegalArgumentException
+	 *             If any input is null or empty. If h1 and h2 are different lengths.
+	 */
+	public static double[][] convolve(double[] x, double[] h1, double[] h2) throws IllegalArgumentException
+	{
+		checkInput(x, h1, h2);
+
+		final int xLen = x.length;
+		final int hLen = h1.length;
+
+		// initialize the output array
+		final int totalLength = xLen + hLen - 1;
+		final double[][] y = new double[2][totalLength];
+
+		// straightforward implementation of the convolution sum
+		for (int n = 0; n < totalLength; n++)
+		{
+			double yn1 = 0, yn2 = 0;
+			int k = FastMath.max(0, n + 1 - xLen);
+			int j = n - k;
+			while (k < hLen && j >= 0)
+			{
+				yn1 += x[j] * h1[k];
+				yn2 += x[j] * h2[k];
+				j--;
+				k++;
+			}
+			y[0][n] = yn1;
+			y[1][n] = yn2;
+		}
+
+		return y;
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between one sequence and two other sequences.
+	 * <p>
+	 * The solution is obtained via multiplication in the frequency domain.
+	 *
+	 * @param x
+	 *            First sequence.
+	 * @param h1
+	 *            Second sequence 1.
+	 * @param h2
+	 *            Second sequence 2.
+	 * @return the convolution of {@code x} and {@code h1} and {@code x} and {@code h2}.
+	 *         This array's length will be [2][{@code x.length + h1.length - 1}].
+	 * @throws IllegalArgumentException
+	 *             If any input is null or empty. If h1 and h2 are different lengths.
+	 */
+	public static double[][] convolveFFT(double[] x, double[] h1, double[] h2) throws IllegalArgumentException
+	{
+		checkInput(x, h1, h2);
+
+		final int xLen = x.length;
+		final int hLen = h1.length;
+		final int totalLength = xLen + hLen - 1;
+
+		// Get length to a power of 2
+		int newL = CommonUtils.nextPow2(totalLength);
+
+		// Double the new length for complex values in DoubleFFT_1D
+		x = Arrays.copyOf(x, 2 * newL);
+		h1 = Arrays.copyOf(h1, x.length);
+		h2 = Arrays.copyOf(h2, x.length);
+
+		DoubleFFT_1D fft = new DoubleFFT_1D(newL);
+
+		// FFT
+		fft.realForwardFull(x);
+		fft.realForwardFull(h1);
+		fft.realForwardFull(h2);
+
+		// Complex multiply. Reuse data array
+		for (int i = 0; i < x.length; i += 2)
+		{
+			int j = i + 1;
+			double xi = x[i];
+			double xj = x[j];
+			double hi = h1[i];
+			double hj = h1[j];
+			h1[i] = hi * xi - hj * xj;
+			h1[j] = hi * xj + hj * xi;
+			hi = h2[i];
+			hj = h2[j];
+			h2[i] = hi * xi - hj * xj;
+			h2[j] = hi * xj + hj * xi;
+		}
+
+		// Inverse FFT
+		fft.complexInverse(h1, true);
+		fft.complexInverse(h2, true);
+
+		// Fill result with real part
+		final double[][] y = new double[2][totalLength];
+		for (int i = 0; i < totalLength; i++)
+		{
+			y[0][i] = h1[2 * i];
+			y[1][i] = h2[2 * i];
+		}
+		return y;
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between one sequence and two other sequences.
+	 * <p>
+	 * The solution is obtained using either the spatial or frequency domain depending on the size. The switch is made
+	 * when the min array length is above 127 and the product of the lengths is above 40000. Speed tests have
+	 * been performed for single threaded FFT computation. The FFT library begins multi-threaded computation when the
+	 * size of the array is above length 8192.
+	 *
+	 * @param x
+	 *            First sequence.
+	 * @param h1
+	 *            Second sequence 1.
+	 * @param h2
+	 *            Second sequence 2.
+	 * @return the convolution of {@code x} and {@code h1} and {@code x} and {@code h2}.
+	 *         This array's length will be [2][{@code x.length + h1.length - 1}].
+	 * @throws IllegalArgumentException
+	 *             If any input is null or empty. If h1 and h2 are different lengths.
+	 */
+	public static double[][] convolveFast(double[] x, double[] h1, double[] h2) throws IllegalArgumentException
+	{
+		checkInput(x, h1, h2);
+		// See Junit class ConvolveTest to determine when to switch to the FFT method.
+		// This is not perfect for all length combinations but the switch will happen 
+		// when the two methods are roughly the same speed.
+		int min, max;
+		if (x.length < h1.length)
+		{
+			min = x.length;
+			max = h1.length;
+		}
+		else
+		{
+			min = h1.length;
+			max = x.length;
+		}
+		if (min >= 128 && (long) min * (long) max > 40000L)
+			return convolveFFT(x, h1, h2);
+		return convolve(x, h1, h2);
+	}
+
+	private static void checkInput(double[] x, double[] h1, double[] h2)
+	{
+		if (x == null)
+			throw new IllegalArgumentException("Input x is null");
+		if (h1 == null)
+			throw new IllegalArgumentException("Input h1 is null");
+		if (h2 == null)
+			throw new IllegalArgumentException("Input h2 is null");
+
+		if (x.length == 0 || h1.length == 0)
+		{
+			throw new IllegalArgumentException("Input x or h1 have no length");
+		}
+		if (h1.length != h2.length)
+		{
+			throw new IllegalArgumentException("Input h1 and h2 have different length");
 		}
 	}
 
