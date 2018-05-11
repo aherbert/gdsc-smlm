@@ -10,8 +10,13 @@ public class PoissonGammaGaussianFisherInformationTest
 	{
 		//org.junit.Assume.assumeTrue(false);
 
+		canComputeRealFisherInformation(250, 13);
+
+		if (true)
+			return;
+
 		double[] M = { 20 };
-		double[] S = { 3 };
+		double[] S = { 3, 13 };
 
 		for (double m : M)
 			for (double s : S)

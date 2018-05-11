@@ -277,7 +277,7 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		// Configure so that there is a maximum number of steps up to the mean (and similar after).
 		// This limits the convolution size.
 		// TODO - make this number of steps configurable
-		double step = mean / 20;
+		double step = mean / 50;
 		// The step must coincide with the end of range 1, 
 		// which is an integer factor of the standard deviation.
 		int scale2;
@@ -317,7 +317,9 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		// be an even number of subdivisions.
 		double sum = G - dirac;
 		double max = sum;
-		int limit = extent * scale;
+		// The limit is set so that we have the full Poisson-Gamma function computed
+		// when the Gaussian kernel no longer touches zero.
+		int limit = extent * scale * 2;
 		G = PoissonGammaFunction.poissonGamma(h, t, m, dG_dp);
 		if (max < G)
 			max = G;
@@ -340,7 +342,7 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 			sum += 4 * G;
 		}
 		// Final value
-		final double endRange1 = h * limit; // == s * extent
+		final double endRange1 = h * limit; // == s * extent * 2
 		G = PoissonGammaFunction.poissonGamma(endRange1, t, m, dG_dp);
 		if (max < G)
 			max = G;
@@ -373,13 +375,12 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		double[] p = list1.toArray();
 		double[] a = list2.toArray();
 
-		System.out.printf("t=%g  sum p=%g  single=%b\n", t, 
-				(Maths.sum(p)-dirac) * h + dirac, singleRange);
+		System.out.printf("t=%g  sum p=%g  single=%b\n", t, (Maths.sum(p) - dirac) * h + dirac, singleRange);
 
 		// Should this convolve without the Dirac then add that afterwards.
 		// This is how the Camera Model Analysis works. Perhaps there is
 		// floating point error when the dirac is large.
-		
+
 		double[] P, A;
 		//P = Convolution.convolveFast(p, g);
 		//A = Convolution.convolveFast(a, g);
@@ -390,8 +391,12 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		int maxi = (singleRange)
 				// Do the entire range
 				? P.length
-				// For a dual range compute sum only up to the limit. Add the kernel size
-				: p.length + g.length / 2;
+				// For a dual range compute sum only up to where 
+				// the Gaussian kernel no longer touches zero.
+				// If the Gaussian is at p.length / 2 then it does not touch 0.
+				// Add the kernel range too to compute the 
+				// sum from -[Gaussian range] to +[Gaussian range] around zero.		
+				: p.length / 2 + g.length / 2; // Separate additions at both are odd
 
 		final double endRange1F;
 
@@ -459,6 +464,9 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		if (singleRange)
 			return range1sum;
 
+		// XXX - For testing that the two convolutions join seemlessly
+		//scale2 = scale;
+
 		// The samples are taken at a factor of the standard deviation
 		h = s / scale2;
 		g = getUnitGaussianKernel(scale2);
@@ -474,10 +482,12 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		}
 
 		// For a dual range compute sum only from the range 1 limit
-		int mini = list1.size();
+		// (this was p.length / 2 since the length was double for full convolution
+		// with the Gaussian).
+		//int mini = (p.length / 2) / interval;		
+		int mini = list1.size() / 2;
 
-		// The end of range 1 was the extent of the Gaussian.
-		// Continue until all the probability has been achieved.
+		// Continue from the end of range 1 until all the probability has been achieved.
 		for (int i = 1;; i++)
 		{
 			G = PoissonGammaFunction.poissonGamma(endRange1 + h * i, t, m, dG_dp);
@@ -503,8 +513,12 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		// Add the kernel size to get the point when new values occur.
 		mini += g.length / 2;
 
-		// Check that the endRange1F is the same as the start point
-		double range2sum = getF(P[mini - 1], A[mini - 1]);
+		// Check that the endRange1F is the same as the start point.
+		// When debugging set scale2 == scale. However this may still
+		// be different if convolution used the FFT due to the different
+		// size data. When scale2 != scale then it will be different
+		// due to less accurate sampling of the convolution.
+		double range2sum = getF(P[mini], A[mini]);
 		System.out.printf("%s == %s (%g)\n", endRange1F, range2sum,
 				gdsc.core.utils.DoubleEquality.relativeError(endRange1F, range2sum));
 
@@ -517,7 +531,7 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
 			// The final step before maxi must sum 2. 
 			double sum3 = 0, sum2 = 0;
-			for (int i = mini; i < P.length; i++)
+			for (int i = mini + 1; i < P.length; i++)
 			{
 				if (P[i] == 0)
 				{
@@ -544,7 +558,7 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 			// The number of steps must be modulo 2. Assume all values before this are zero.
 			// The final step before maxi must sum 2. 
 			double sum4 = 0, sum2 = 0;
-			for (int i = mini; i < P.length; i++)
+			for (int i = mini + 1; i < P.length; i++)
 			{
 				if (P[i] == 0)
 				{
