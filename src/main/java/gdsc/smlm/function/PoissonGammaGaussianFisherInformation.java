@@ -307,6 +307,9 @@ public abstract class PoissonGammaGaussianFisherInformation implements FisherInf
 		// Ensure the first scale is greater then the second
 		if (scale < scale2)
 			scale = scale2;
+		
+		//scale = scale2 = 128;
+		//use38 = false;
 
 		double h = s / scale;
 		double G;
