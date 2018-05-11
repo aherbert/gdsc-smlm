@@ -26,6 +26,13 @@ import gnu.trove.list.array.TDoubleArrayList;
  */
 public abstract class PoissonGammaGaussianFisherInformation implements FisherInformation
 {
+	// TODO - change this to a cumulative probability so that the entire distribution is sampled.
+	
+	// TODO - Fix the computation when the mean is between 0.1 and 10. 
+	// There is a strange dip. 
+	// Perhaps the kernel sampling is incorrect.
+	// Maybe the Poisson-Gamma changes shape in this range.
+	
 	public static final double DEFAULT_RELATIVE_PROBABILITY_THRESHOLD = 1e-5;
 
 	/** The gain multiplication factor. */
