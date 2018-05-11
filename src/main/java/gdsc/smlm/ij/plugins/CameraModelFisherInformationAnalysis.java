@@ -6,9 +6,12 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
+import gdsc.smlm.function.DiscretePoissonGaussianFisherInformation;
 import gdsc.smlm.function.FisherInformation;
+import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
+import gdsc.smlm.function.RealPoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.RealPoissonGaussianFisherInformation;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -125,6 +128,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return;
 		PoissonGaussianApproximationFisherInformation pga = createPoissonGaussianApproximationFisherInformation();
 
+		PoissonGammaGaussianFisherInformation pgg = createPoissonGammaGaussianFisherInformation();
+		if (pgg == null)
+			return;
+		
 		double[] exp = createExponents();
 		if (exp == null)
 			return;
@@ -135,14 +142,16 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		double[] pgFI = getFisherInformation(photons, pg);
 		double[] pgaFI = getFisherInformation(photons, pga);
+		double[] pggFI = getFisherInformation(photons, pgg);
 
 		// Compute relative to the Poisson Fisher information
 		double[] rpgFI = getAlpha(pgFI, photons);
 		double[] rpgaFI = getAlpha(pgaFI, photons);
+		double[] rpggFI = getAlpha(pggFI, photons);
 
 		Color color1 = Color.BLUE;
 		Color color2 = Color.GREEN;
-		//Color color3 = Color.RED;
+		Color color3 = Color.RED;
 
 		WindowOrganiser wo = new WindowOrganiser();
 
@@ -154,14 +163,17 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		plot.addPoints(photons, rpgFI, Plot.LINE);
 		plot.setColor(color2);
 		plot.addPoints(photons, rpgaFI, Plot.LINE);
+		plot.setColor(color3);
+		plot.addPoints(photons, rpggFI, Plot.LINE);
 		plot.setColor(Color.BLACK);
-		plot.addLegend("CCD\nCCD approx");
+		plot.addLegend("CCD\nCCD approx\nEM CCD");
 		Utils.display(title, plot, 0, wo);
 
 		title = "Fisher Information";
 		plot = new Plot(title, "photons", "Fisher Information");
 		double[] limits = Maths.limits(pgFI);
 		limits = Maths.limits(limits, pgaFI);
+		limits = Maths.limits(limits, pggFI);
 		plot.setLimits(photons[0], photons[photons.length - 1], limits[0], limits[1]);
 		plot.setLogScaleX();
 		plot.setLogScaleY();
@@ -169,8 +181,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		plot.addPoints(photons, pgFI, Plot.LINE);
 		plot.setColor(color2);
 		plot.addPoints(photons, pgaFI, Plot.LINE);
+		plot.setColor(color3);
+		plot.addPoints(photons, pggFI, Plot.LINE);
 		plot.setColor(Color.BLACK);
-		plot.addLegend("CCD\nCCD approx");
+		plot.addLegend("CCD\nCCD approx\nEM CCD");
 		Utils.display(title, plot, 0, wo);
 
 		wo.tile();
@@ -184,6 +198,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "CCD noise must be positive");
 			return null;
 		}
+		if (discrete)
+			return new DiscretePoissonGaussianFisherInformation(s);
 		return new RealPoissonGaussianFisherInformation(s);
 	}
 
@@ -196,6 +212,23 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return null;
 		}
 		return new PoissonGaussianApproximationFisherInformation(s);
+	}
+	
+	private PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation()
+	{
+		double s = settings.getEmCcdNoise();
+		double m = settings.getEmCcdGain();
+		if (s <= 0)
+		{
+			IJ.error(TITLE, "EM CCD noise must be positive");
+			return null;
+		}
+		if (m <= 0)
+		{
+			IJ.error(TITLE, "EM CCD gain must be positive");
+			return null;
+		}
+		return new RealPoissonGammaGaussianFisherInformation(m, s);
 	}
 
 	private double[] createExponents()
