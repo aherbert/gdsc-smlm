@@ -467,4 +467,60 @@ public class Convolution
 	{
 		return (int) Math.ceil(sigma * range);
 	}
+
+	/**
+	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation sigma.
+	 * The kernel is constructed using the Error function (Erf) to compute the sum of
+	 * the Gaussian from x-0.5 to x+0.5 for each x sample point.
+	 *
+	 * @param sigma
+	 *            Standard deviation
+	 * @param range
+	 *            the range
+	 * @return The Erf kernel
+	 */
+	public static double[] makeErfGaussianKernel(double sigma, double range)
+	{
+		// Limit range for the Gaussian
+		if (range < 1)
+			range = 1;
+		else if (range > 38)
+			range = 38;
+
+		// Build half the kernel into the full kernel array. This is duplicated later.
+		int kRadius = getGaussianHalfWidth(sigma, range) + 1;
+		double[] kernel = new double[2 * kRadius - 1];
+
+		if (kRadius == 1)
+		{
+			kernel[0] = 1;
+			return kernel;
+		}
+
+		// Use the error function to get the integral of the Gaussian.
+		final double sqrt_var_by_2 = Math.sqrt(sigma * sigma * 2);
+
+		double upper = org.apache.commons.math3.special.Erf.erf(-0.5 / sqrt_var_by_2);
+		for (int i = 0; i < kRadius; i++)
+		{
+			double lower = upper;
+			upper = org.apache.commons.math3.special.Erf.erf((i + 0.5) / sqrt_var_by_2);
+			kernel[i] = (upper - lower) * 0.5;
+		}
+
+		// Normalise
+		double sum = kernel[0];
+		for (int i = 1; i < kRadius; i++)
+			sum += 2 * kernel[i];
+		for (int i = 0; i < kRadius; i++)
+			kernel[i] /= sum;
+
+		// Create symmetrical
+		System.arraycopy(kernel, 0, kernel, kRadius - 1, kRadius);
+		for (int i = kRadius, j = i - 2; i < kernel.length; i++, j--)
+		{
+			kernel[j] = kernel[i];
+		}
+		return kernel;
+	}
 }
