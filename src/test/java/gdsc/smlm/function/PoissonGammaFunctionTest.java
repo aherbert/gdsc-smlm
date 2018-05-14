@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gnu.trove.list.array.TDoubleArrayList;
 
 public class PoissonGammaFunctionTest
 {
@@ -42,7 +43,7 @@ public class PoissonGammaFunctionTest
 	{
 		double p2 = cumulativeProbability(gain, mu, pdf);
 		String msg = String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf);
-		
+
 		if (pdf)
 		{
 			Assert.assertEquals(msg, 1, p2, 0.02);
@@ -133,12 +134,12 @@ public class PoissonGammaFunctionTest
 					return PoissonGammaFunction.poissonGammaN(x, mu, gain);
 				}
 			}, min, max);
-			
+
 			p2 += PoissonGammaFunction.dirac(mu);
 		}
 
 		//if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
+		System.out.printf("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
 
 		return p2;
 	}
@@ -194,7 +195,7 @@ public class PoissonGammaFunctionTest
 
 		// The numerical gradient is poor around the switch between the use of the 
 		// Bessel function and the approximation. So just count the errors.
-		int fail = 0, total = 0;
+		int fail = 0;
 		double sum = 0;
 
 		int[] range = PoissonGaussianFunctionTest.getRange(gain, mu, 0);
@@ -208,18 +209,39 @@ public class PoissonGammaFunctionTest
 		boolean approx = (2 * Math.sqrt(max * o / gain) > 709);
 		double tol = approx ? 0.05 : 1e-3;
 
+		TDoubleArrayList list = new TDoubleArrayList();
+		if (min != 0)
+			list.add(0);
 		for (double x = min; x <= max; x += step)
-		{
-			total++;
+			list.add(x);
 
+		for (double x : list.toArray())
+		{
 			double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
 			double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
 			Assert.assertEquals(p1, p2, 0);
-			
+
 			// Check partial gradient matches
 			double p3 = PoissonGammaFunction.poissonGammaPartial(x, o, gain, dp_dt2);
 			Assert.assertEquals(p1, p3, 0);
 			Assert.assertEquals(dp_dt[0] + p1, dp_dt2[0], Math.abs(dp_dt[0] + p1) * 1e-8);
+
+			// Check no dirac gradient matches
+			p3 = PoissonGammaFunction.poissonGammaN(x, o, gain, dp_dt2);
+			if (x == 0)
+			{
+				double dirac = PoissonGammaFunction.dirac(o);
+				// Add the dirac contribution
+				p3 += dirac;
+				dp_dt2[0] -= dirac;
+				Assert.assertEquals(p1, p3, p1 * 1e-8);
+				Assert.assertEquals(dp_dt[0], dp_dt2[0], Math.abs(dp_dt[0]) * 1e-8);
+			}
+			else
+			{
+				Assert.assertEquals(p1, p3, 0);
+				Assert.assertEquals(dp_dt[0], dp_dt2[0], Math.abs(dp_dt[0]) * 1e-8);
+			}
 
 			double up = PoissonGammaFunction.poissonGamma(x, uo, gain);
 			double lp = PoissonGammaFunction.poissonGamma(x, lo, gain);
@@ -238,7 +260,7 @@ public class PoissonGammaFunctionTest
 			}
 		}
 
-		double f = (double) fail / total;
+		double f = (double) fail / list.size();
 		System.out.printf("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
 		if (approx)
 		{
