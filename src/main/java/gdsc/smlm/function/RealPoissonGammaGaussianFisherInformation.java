@@ -30,6 +30,11 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	private final double[][] kernel;
 
 	/**
+	 * The Erf Gaussian convolution kernels for different scaling. The scale is 2^index, e.g. 1, 2, 4, 8, 16, 32, 64, 128.
+	 */
+	private final double[][] erfKernel;
+	
+	/**
 	 * Instantiates a new real poisson gaussian fisher information.
 	 *
 	 * @param m
@@ -41,7 +46,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	 */
 	public RealPoissonGammaGaussianFisherInformation(double m, double s) throws IllegalArgumentException
 	{
-		this(m, s, 5);
+		this(m, s, 6);
 	}
 
 	/**
@@ -64,6 +69,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 		// Store the Gaussian kernels for convolution:
 		// 1, 2, 4, 8, 16, 32, 64, 128
 		kernel = new double[8][];
+		erfKernel = new double[kernel.length][];
 	}
 
 	/*
@@ -77,10 +83,23 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 		// Get the Gaussian kernel
 		int index = log2(scale);
 		if (kernel[index] == null)
-			kernel[index] = Convolution.makeGaussianKernel(scale, range, true);
+			kernel[index] = Convolution.makeGaussianKernel(scale, range, false);
 		return kernel[index];
 	}
 
+	/* (non-Javadoc)
+	 * @see gdsc.smlm.function.PoissonGammaGaussianFisherInformation#getUnitErfGaussianKernel(int)
+	 */
+	@Override
+	protected double[] getUnitErfGaussianKernel(int scale)
+	{
+		// Get the Gaussian kernel
+		int index = log2(scale);
+		if (erfKernel[index] == null)
+			erfKernel[index] = Convolution.makeErfGaussianKernel(scale, range);
+		return erfKernel[index];
+	}
+	
 	private int log2(int scale)
 	{
 		int bits = 8;

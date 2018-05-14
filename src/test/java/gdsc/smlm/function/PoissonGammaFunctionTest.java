@@ -1,5 +1,7 @@
 package gdsc.smlm.function;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
@@ -269,6 +271,44 @@ public class PoissonGammaFunctionTest
 		else
 		{
 			Assert.assertTrue(f < 0.01);
+		}
+	}
+
+	@Test
+	public void canComputeC0delta()
+	{
+		TDoubleArrayList list = new TDoubleArrayList();
+		for (int exp = -12; exp < 6; exp++)
+		{
+			list.add(Math.pow(10, exp * 0.5));
+		}
+		for (int x = 2; x < 10; x++)
+		{
+			list.add(x / 10.0);
+		}
+		for (double x = 11; x <= 20; x++)
+		{
+			list.add(x / 10.0);
+		}
+		double[] p = list.toArray();
+		Arrays.sort(p);
+		
+		double m = 5;
+		
+		for (double x : p)
+		{
+			double dirac = PoissonGammaFunction.dirac(x);
+			double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
+			double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
+			
+			System.out.printf("p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, 
+					dirac, p0, 
+					dirac / p0, 
+					//gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
+					p01,
+					p0/p01
+					//gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
+					);
 		}
 	}
 }

@@ -263,7 +263,21 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		// TODO - multithread for speed.
 		double[] f = new double[photons.length];
 		for (int i = 0; i < f.length; i++)
+		{
 			f[i] = fi.getFisherInformation(photons[i]);
+			
+			// Debugging
+			if (
+					//photons[i] > 0.5 && photons[i] < 5 && 
+					fi instanceof PoissonGammaGaussianFisherInformation)
+			{
+				PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation)fi;
+				double[][] data = pgg.getFisherInformationFunction();
+				String title = TITLE + " " + photons[i];
+				Plot plot = new Plot(title, "Count", "FI function", data[0], data[1]);
+				Utils.display(title, plot);				
+			}
+		}
 		return f;
 	}
 
