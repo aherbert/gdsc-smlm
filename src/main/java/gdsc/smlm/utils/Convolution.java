@@ -185,6 +185,33 @@ public class Convolution
 			return convolveFFT(x, h);
 		return convolve(x, h);
 	}
+	
+	/**
+	 * Checks if convolution will use the FFT method.
+	 *
+	 * @param length1
+	 *            the length 1
+	 * @param length2
+	 *            the length 2
+	 * @return true, if using the FFT method
+	 */
+	public static boolean isFFT(int length1, int length2)
+	{
+		int min, max;
+		if (length1 < length2)
+		{
+			min = length1;
+			max = length2;
+		}
+		else
+		{
+			min = length2;
+			max = length1;
+		}
+		if (min >= 128 && (long) min * (long) max > 40000L)
+			return true;
+		return false;
+	}
 
 	private static void checkInput(double[] x, double[] h)
 	{
