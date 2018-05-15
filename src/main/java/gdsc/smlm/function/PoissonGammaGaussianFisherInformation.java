@@ -222,7 +222,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// (Poisson Binomial Gaussian convolution)
 		
 
-		// Gradient is:
+		// Gradient of the Poisson Binomial is:
 
 		
 		// This component can be seen in Chao et al, Eq S8:
@@ -231,7 +231,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// Substitute the Poisson Binomial Gaussian with Poisson Gamma Gaussian:
 
 		
-		// Gradient is:
+		// Gradient of the Poisson Gamma is:
 		
 
 		// Fisher information is:
