@@ -8,7 +8,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canComputeRealFisherInformation()
 	{
-		//org.junit.Assume.assumeTrue(false);
+		org.junit.Assume.assumeTrue(false);
 
 		//canComputeRealFisherInformation(250, 13);
 		//double m1 = 500;
