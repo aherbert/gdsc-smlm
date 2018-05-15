@@ -205,13 +205,6 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// = integral [ (1/p(z) .  d p(z) dv)^2 p(z) dz ]
 		// = integral [  1/p(z) . (d p(z) dv)^2 dz ]
 
-		// -=-=-=-
-		// Q. Can this be sped up using the method of Chao et al to 
-		// compute part of the gradient and then subtract 1 at the end. This is true
-		// if the sum of the partial gradient is 1.
-		// Chao et al method ...
-		// -=-=-=-		
-
 		// Gaussian standard deviation = s
 
 		// Note: (fg)' => fg' + f'g
@@ -221,91 +214,72 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// p(z|v)  = e^-v * g(v)
 		// p'(z|v) = e^-v * g'(v) - p(z|v)
 
+		// -=-=-=-
+		
+		// This Fisher information is based on Chao, et al (2013) Nature Methods, 10, 335-338, SI.
+		
 		// Chao et al, Eq 4:
 		// (Poisson Binomial Gaussian convolution)
+		
 
 		// Gradient is:
 
+		
 		// This component can be seen in Chao et al, Eq S8:
 
+		
 		// Substitute the Poisson Binomial Gaussian with Poisson Gamma Gaussian:
 
+		
 		// Gradient is:
+		
 
 		// Fisher information is:
-
-		// p(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j! . e^-1/2((z-j)/s)^2
-
-		// This is the sum over j of the probability of Poisson(j) * probability of Gaussian(z-j) 
-
-		// Note: (fg)' => f'g + fg'
-		// e^-v => -e^-v
-		// v^j => j.v^(j-1)
-		// e^-v v^j / j! => e^-v v^(j-1) / (j-1)! - e^-v v^j / j!
-
-		// d p(z) dv = 1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2 - 
-		//                          sum_j=0:Inf  e^-v . v^j / j! . e^-1/2((z-j)/s)^2
-		// Note: j=0 differentiates to -e^v since v^j / j! = 1. This removes j=0 from the first sum
-		// but not the second.
-		// Over the sum the second term adds up to become p(z) so:
-		// d p(z) dv = (1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2 ) - p(z) 
-
-		// Set the first term to A, the second to P:
-		// d p(z) dv = A - P
-
-		// E = integral [ (1/p(z) . d p(z) dv)^2 p(z) dz ]
-		//   = integral [ (1/P    . (A - P))^2 * P ]
-		//   = integral [ (1/P^2  . (A^2 - 2AP + p^2) * P ]
-		//   = integral [ (A^2/P^2 - 2A/P + 1) * P ]
-		//   = integral [  A^2/P   - 2A   + P ]
-		//   = integral [A^2/P] - integral [2A] + integral [P]
-
-		// Note that the integral of P==1.
-		// Since the integral of A is just P offset by j-1, integral of A==1
-
-		// E = integral [A^2/P] - 1
-
-		// P(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-j)/s)^2
-		// A(z) = 1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2
-		// A(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-(j+1))/s)^2
-		// A(z) = P(z-1)
+		
+		
 
 		// -=-=-=-
 
 		// We need the convolution of:
-		// - the Poisson-Gamma with the Gaussian
-		// - the Poisson-Gamma gradient component with the Gaussian
+		// - the Poisson-Gamma with the Gaussian (P)
+		// - the Poisson-Gamma partial gradient component with the Gaussian (A)
+		// This is combined to a function A^2/P which is integrated.
+		// Note that A & P should sum to 1 over the full range used for integration.
+		// In practice a relative height threshold of the function can be used
+		// to determine the range where it is significant.
 
 		// Note that when the Poisson mean is low then the contribution from the 
 		// Dirac delta function at 0 will be large. As the mean increases 
-		// the Dirac will have little significance, the Poisson-Gamma is very smooth
+		// the Dirac will have little significance, the function is very smooth
 		// and may have a large range. Thus convolution with a small Gaussian kernel 
-		// may not be necessary.
-		// The target is to computes
-		// = integral [  1/p(z) . (d p(z) dv)^2 dz ]
+		// may not be necessary over the full range.
 		// So the integral can be computed as [integral range1] + [integral range2]
 
 		// Range 1:
 		// The range around the Dirac delta function is computed using a full convolution
 		// with Gaussian over-sampling.
 		// The Dirac delta function = exp(-p)
-		// The Poisson-Gamma at zero = exp(-p) * p / m
-		// Total = exp(-p) * (1 + p/m)
-		// Ratio = 1 : p/m
-		// The ratio between them determines the significance of the Dirac contribution.
-		// Use more upsampling when the Dirac is large. This should compute a scale of 2 
-		// when the ratio is 1:1. The scale increases as the ratio increase. 
+		// Use more upsampling when the Dirac is large.
+		// p   Dirac     scale
+		// 1   0.368     128
+		// 2   0.135     128
+		// 4   0.0183    128
+		// 5   0.00673   64
+		// 6   0.00248   32
+		// 7   0.000912  16
+		// 8   0.000335  8
+		// 9             4
+		// 10            2
+		// 11            1
+
 		final double dirac = PoissonGammaFunction.dirac(t);
 
-		// Q. Should the scale be computed using the dirac as well. When the Dirac is small
-		// then this part of the Poisson-Gamma curve is insignificant.
-
-		// Q. Should the scale just be the maximum as it is a small convolution compared
-		// to the rest of the function when the mean is high. When the mean is low this is
-		// the most important part.
-
-		int scale = getPow2Scale(2 * m / t); // = 2 / (t/m)
-		//scale = 128;
+		// As the mean reduces the Dirac gets bigger. So over-sample more for smaller mean
+		int scale;
+		scale = 1;
+		for (double tt = t; tt < 11; tt++)
+			scale *= 2;
+		scale = Maths.min(128, scale);
 
 		// Range 2: 
 		// The remaining range of the Poisson-Gamma sampled in step intervals up to 
@@ -322,8 +296,10 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 		// Configure so that there is a maximum number of steps up to the mean (and similar after).
 		// This limits the convolution size.
-		// TODO - make this number of steps configurable
-		double step = mean / 200;
+		// TODO - make this number of steps configurable? This value works for reasonable
+		// input parameters. Too small a step size results in poor integration when t is low
+		// (and the gain is low) since the mean is over-estimated.
+		double step = mean / 128;
 		// The step must coincide with the end of range 1, 
 		// which is an integer factor of the standard deviation.
 		int scale2;
@@ -343,10 +319,12 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			scale2 = 1;
 		}
 
+		//System.out.printf("t=%g m=%g scale=%d scale2=%d\n", t, m, scale, scale2);
+		
 		// Ensure the first scale is greater then the second
 		if (scale < scale2)
 			scale = scale2;
-
+		
 		//scale = scale2 = 128;
 		//use38 = false;
 
@@ -396,13 +374,12 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		double endRange1 = limit * h;
 
 		// If the range is past the range expected then do a single range.
-		// There is a zero in the Fisher Information at the mean (t*m) so ensure we compute
-		// at least 2 * mean before checking the relative size.
 		// TODO - make the threshold configurable
 		boolean singleRange = scale == scale2 || endRange1 > 5 * mean;
 		if (singleRange)
 		{
 			// Continue until all the Fisher information has been achieved.
+			// Compute at least 2 * mean before checking the relative size.
 			final int checkI = (int) Math.ceil((2 * mean - endRange1) / h);
 			final double target = cumulativeProbability / (h / 3);
 			for (int i = limit + 1;; i++)
@@ -530,8 +507,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		int mini = list1.size() / 2;
 
 		// Continue from the end of range 1 until all the Fisher information has been achieved.
-		// There is a zero in the Fisher Information at the mean (t*m) so ensure we compute
-		// at least 2 * mean before checking the relative size.
+		// Compute at least 2 * mean before checking the relative size.
 		int checkI = (int) Math.ceil((2 * mean - endRange1) / h);
 		final double target = cumulativeProbability / (h / 3);
 		for (int i = 1;; i++)
