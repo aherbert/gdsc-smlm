@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 
+import gdsc.core.math.NumberUtils;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.utils.Convolution;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -31,7 +32,7 @@ import gnu.trove.list.array.TDoubleArrayList;
  * An optimisation is used when the mean of the Poisson is above a threshold. In this case the Poisson can be
  * approximated as a Gaussian and the Fisher information is returned for the Gaussian-Gaussian convolution.
  */
-public abstract class PoissonGaussianFisherInformation implements FisherInformation
+public abstract class PoissonGaussianFisherInformation extends BasePoissonFisherInformation
 {
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-10;
 
@@ -325,7 +326,7 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 		int maxx;
 		if (t < 1)
 		{
-			int exp = -FastLog.getSignedExponent(t);
+			int exp = -NumberUtils.getSignedExponent(t);
 			if (exp >= tinyLimits.length)
 				exp = tinyLimits.length - 1;
 			if (tinyLimits[exp] == 0)
@@ -643,5 +644,12 @@ public abstract class PoissonGaussianFisherInformation implements FisherInformat
 	public void setUse38(boolean use38)
 	{
 		this.use38 = use38;
+	}
+
+	@Override
+	protected void postClone()
+	{
+		pd = new CustomPoissonDistribution(null, 1);
+		list = new TDoubleArrayList();
 	}
 }

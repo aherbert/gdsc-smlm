@@ -18,7 +18,7 @@ package gdsc.smlm.function;
  * <p>
  * <a href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
-public class PoissonFisherInformation implements FisherInformation
+public class PoissonFisherInformation extends BasePoissonFisherInformation
 {
 	/*
 	 * {@inheritDoc}
@@ -46,5 +46,11 @@ public class PoissonFisherInformation implements FisherInformation
 		if (t <= 0)
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		return 1.0 / t;
+	}
+	
+	@Override
+	protected void postClone()
+	{
+		// Nothing to do.
 	}
 }

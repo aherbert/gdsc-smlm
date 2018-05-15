@@ -1,13 +1,17 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
+import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
+import gdsc.smlm.function.BasePoissonFisherInformation;
 import gdsc.smlm.function.DiscretePoissonGaussianFisherInformation;
-import gdsc.smlm.function.FisherInformation;
 import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
@@ -16,6 +20,7 @@ import gdsc.smlm.function.RealPoissonGaussianFisherInformation;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
+import ij.Prefs;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.NonBlockingExtendedGenericDialog;
 import ij.gui.Plot;
@@ -41,16 +46,13 @@ import ij.plugin.WindowOrganiser;
 public class CameraModelFisherInformationAnalysis implements PlugIn
 {
 	// TODO 
-	// Let the function store the last computed convolution.
-	// Create a plugin to compute the alpha parameter across a range of means.
-	// Draw the P-G convolution and the computed function.
-	// Is it smooth enough for a Simpson sum?
-	// Maybe the simpson sum is not working at low mean as the convolution/function
-	// is not smooth.
-
+	// Options to show the computed convolution across a range of means.
+	
 	private static final String TITLE = "Camera Model Fisher Information Analysis";
 
 	private CameraModelFisherInformationAnalysisSettings.Builder settings;
+
+	private ExecutorService es = null;
 
 	//private boolean extraOptions;
 
@@ -131,7 +133,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		PoissonGammaGaussianFisherInformation pgg = createPoissonGammaGaussianFisherInformation();
 		if (pgg == null)
 			return;
-		
+
 		double[] exp = createExponents();
 		if (exp == null)
 			return;
@@ -140,9 +142,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		for (int i = 0; i < photons.length; i++)
 			photons[i] = Math.pow(10, exp[i]);
 
-		double[] pgFI = getFisherInformation(photons, pg);
-		double[] pgaFI = getFisherInformation(photons, pga);
-		double[] pggFI = getFisherInformation(photons, pgg);
+		double[] pgFI = getFisherInformation(photons, pg, true);
+		double[] pgaFI = getFisherInformation(photons, pga, false);
+		double[] pggFI = getFisherInformation(photons, pgg, true);
 
 		// Compute relative to the Poisson Fisher information
 		double[] rpgFI = getAlpha(pgFI, photons);
@@ -213,7 +215,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 		return new PoissonGaussianApproximationFisherInformation(s);
 	}
-	
+
 	private PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation()
 	{
 		double s = settings.getEmCcdNoise();
@@ -257,25 +259,62 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return list.toArray();
 	}
 
-	private double[] getFisherInformation(double[] photons, FisherInformation fi)
+	private double[] getFisherInformation(final double[] photons, final BasePoissonFisherInformation fi,
+			boolean multithread)
 	{
-		// Simple single threaded method.
-		// TODO - multithread for speed.
-		double[] f = new double[photons.length];
-		for (int i = 0; i < f.length; i++)
+		final double[] f = new double[photons.length];
+		if (multithread)
 		{
-			f[i] = fi.getFisherInformation(photons[i]);
-			
-			// Debugging
-			if (
-					//photons[i] > 0.5 && photons[i] < 5 && 
-					fi instanceof PoissonGammaGaussianFisherInformation)
+			int nThreads = Prefs.getThreads();
+			if (es == null)
+				es = Executors.newFixedThreadPool(nThreads);
+			int nPerThread = (int) Math.ceil((double) f.length / nThreads);
+			TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
+			for (int i = 0; i < f.length; i += nPerThread)
 			{
-				PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation)fi;
-				double[][] data = pgg.getFisherInformationFunction();
-				String title = TITLE + " " + photons[i];
-				Plot plot = new Plot(title, "Count", "FI function", data[0], data[1]);
-				Utils.display(title, plot);				
+				final int start = i;
+				final int end = Math.min(f.length, i + nPerThread);
+				futures.add(es.submit(new Runnable()
+				{
+					public void run()
+					{
+						BasePoissonFisherInformation fi2 = fi.clone();
+						for (int ii = start; ii < end; ii++)
+							f[ii] = fi2.getFisherInformation(photons[ii]);
+					}
+				}));
+			}
+			Utils.waitForCompletion(futures);
+		}
+		else
+		{
+			// Simple single threaded method.
+			for (int i = 0; i < f.length; i++)
+			{
+				f[i] = fi.getFisherInformation(photons[i]);
+
+				//if (fi instanceof PoissonGammaGaussianFisherInformation)
+				//{
+				//	PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) fi;
+				//	double[][] data = pgg.getFisherInformationFunction(false);
+				//
+				//	double[] fif = data[1];
+				//	int max = 0;
+				//	for (int j = 1; j < fif.length; j++)
+				//		if (fif[max] < fif[j])
+				//			max = j;
+				//	System.out.printf("PGG(p=%g) max=%g\n", photons[i], data[0][max]);
+				//
+				//	// Debugging
+				//	if (photons[i] > 500.999 && photons[i] < 100.001)
+				//	{
+				//		//PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation)fi;
+				//		//double[][] data = pgg.getFisherInformationFunction(false);
+				//		String title = TITLE + " " + photons[i];
+				//		Plot plot = new Plot(title, "Count", "FI function", data[0], data[1]);
+				//		Utils.display(title, plot);
+				//	}
+				//}
 			}
 		}
 		return f;

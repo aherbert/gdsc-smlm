@@ -1,0 +1,48 @@
+package gdsc.smlm.function;
+
+/*----------------------------------------------------------------------------- 
+ * GDSC SMLM Software
+ * 
+ * Copyright (C) 2018 Alex Herbert
+ * Genome Damage and Stability Centre
+ * University of Sussex, UK
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Base class for any probability distribution that can calculate the Fisher information for a Poisson distributed mean.
+ * <p>
+ * <a href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
+ */
+public abstract class BasePoissonFisherInformation implements FisherInformation, Cloneable
+{
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public BasePoissonFisherInformation clone()
+	{
+		try
+		{
+			BasePoissonFisherInformation fi = (BasePoissonFisherInformation) super.clone();
+			fi.postClone();
+			return fi;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// Should not happen
+			return null;
+		}
+	}
+
+	/**
+	 * Run any actions after clone, for example creating new instance fields if they cannot be shared.
+	 */
+	protected abstract void postClone();
+}
