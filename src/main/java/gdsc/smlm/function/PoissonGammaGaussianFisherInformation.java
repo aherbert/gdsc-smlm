@@ -408,7 +408,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// This is how the Camera Model Analysis works. Perhaps there is
 		// floating point error when the dirac is large.
 
-		double[] g = getUnitErfGaussianKernel(scale);
+		double[] g = getUnitGaussianKernel(scale);
 		p[0] += dirac;
 		convolve(p, a, g, true);
 
@@ -531,7 +531,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		//System.out.printf("t=%g  sum p2=%g  endRange1=%g sumA=%s\n", t,
 		//		(Maths.sum(p) + (1 - c0factor) * p0) * h + dirac, endRange1, sum * h / 3);
 
-		g = getUnitErfGaussianKernel(scale2);
+		g = getUnitGaussianKernel(scale2);
 		p[0] += dirac;
 		convolve(p, a, g, false);
 
@@ -651,27 +651,16 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 * Gets the gaussian kernel for convolution using a standard deviation of 1.
 	 * The kernel will be sampled every (1 / scale).
 	 * This will only be called with scales of power 2.
+	 * <p>
+	 * This kernel could be integrated over the range -1/scale to 1/scale for each
+	 * sample point using the error function (Erf). If not available then a single 
+	 * Gaussian sample can be returned.
 	 *
 	 * @param scale
 	 *            the scale
 	 * @return the gaussian kernel
 	 */
 	protected abstract double[] getUnitGaussianKernel(int scale);
-
-	/**
-	 * Gets the gaussian kernel for convolution using a standard deviation of 1.
-	 * The kernel will be sampled every (1 / scale).
-	 * This will only be called with scales of power 2.
-	 * <p>
-	 * This kernel should be integrated over the range -1/scale to 1/scale for each
-	 * sample point using the error function (Erf). If not available then {@link #getUnitGaussianKernel(int)} can be
-	 * returned.
-	 *
-	 * @param scale
-	 *            the scale
-	 * @return the gaussian kernel
-	 */
-	protected abstract double[] getUnitErfGaussianKernel(int scale);
 
 	private static double getF(double P, double A)
 	{
