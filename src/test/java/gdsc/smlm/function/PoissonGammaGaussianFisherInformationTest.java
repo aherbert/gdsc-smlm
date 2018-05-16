@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +44,6 @@ public class PoissonGammaGaussianFisherInformationTest
 		// half the Poisson Fisher information should be used instead. 
 		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
 		for (int exp = -12; exp <= 4; exp++)
-		//for (int exp = -590, i=0; i<2; exp++, i++)
 		{
 			canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
 		}
@@ -63,38 +61,50 @@ public class PoissonGammaGaussianFisherInformationTest
 	}
 
 	@Test
-	public void canComputeLowerLimit()
+	public void canComputeAlpha()
 	{
-		// The relative Fisher information plateaus at low photons. Output where this is.
-		for (double p : new double[] { 1e-9, 1e-10, 1e-11 })
-		{
-			double exp_p = FastMath.exp(-p);
-			double upper = PoissonFisherInformation.getPoissonI(p);
-			double lastAlpha = 1;
-			double lastChange = 1;
-			double[] M = { 20, 100, 500 };
-			double[] S = { 3, 13 };
+		org.junit.Assume.assumeTrue(false);
 
-			for (double m : M)
-				for (double s : S)
-				{
-					PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, s);
-					f.setCumulativeProbability(1 - 1e-12);
-					double I = f.getPoissonGammaGaussianI(p);
-					double alpha = I / upper;
-					double change = lastAlpha / alpha;
-					System.out.printf("p=%g  exp(-p)=%s   s=%g   I=%s  alpha=%s  (%s)  %s\n", p, exp_p, s, I, alpha,
-							change, lastChange / change);
-					lastAlpha = alpha;
-					lastChange = change;
-				}
-		}
+		// Compute the alpha using a range of gain and standard deviation
+
+		int minm = 100;
+		int maxm = 200;
+
+		// When Poisson mean is low s does not matter as the Dirac is insignificant
+		// and the convolution is mute. This may not be true when m is low but at higher
+		// m the function is smooth and convolution has little effect.
+		int mins = 5;
+		int maxs = 5;
+
+		// The relative Fisher information plateaus at low photons. 
+		// Output where this is.
+		double p = 1e-100;
+		double p2 = 1e-200; //Double.MIN_NORMAL; //Double.longBitsToDouble(0x4000000000001L);
+
+		double upper = PoissonFisherInformation.getPoissonI(p);
+		double upper2 = PoissonFisherInformation.getPoissonI(p2);
+		double lastAlpha = 1;
+
+		for (int s = mins; s <= maxs; s++)
+			for (int m = minm; m <= maxm; m++)
+			{
+				PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, s);
+				f.setCumulativeProbability(1 - 1e-12);
+				double I = f.getPoissonGammaGaussianI(p);
+				double I2 = f.getPoissonGammaGaussianI(p2);
+				double alpha = I / upper;
+				double alpha2 = I2 / upper2;
+				double change = lastAlpha / alpha;
+				System.out.printf("p=%g  p2=%s   m=%s  s=%s   I=%s (%s)  alpha=%s (%s)  (delta=%s)\n", p, p2, m, s, I,
+						I2, alpha, alpha2, change);
+				lastAlpha = alpha;
+			}
 	}
 
 	@Test(expected = AssertionError.class)
 	public void cannotComputeRealFisherInformationWithLowestPossibleMean()
 	{
-		//org.junit.Assume.assumeTrue(false);
+		org.junit.Assume.assumeTrue(false);
 
 		// Lowest value where the reciprocal is not infinity.
 		double u = Double.longBitsToDouble(0x4000000000001L);
@@ -132,6 +142,19 @@ public class PoissonGammaGaussianFisherInformationTest
 		Assert.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
 		Assert.assertTrue(1.0 / Math.nextAfter(u, -1) == Double.POSITIVE_INFINITY);
 
+		computeRealFisherInformationWithMean(u);
+	}
+
+	@Test
+	public void canComputeRealFisherInformationWithLowMean()
+	{
+		org.junit.Assume.assumeTrue(false);
+		double u = 1e-300;
+		computeRealFisherInformationWithMean(u);
+	}
+
+	private void computeRealFisherInformationWithMean(double u)
+	{
 		double[] M = { 20, 100, 500 };
 		double[] S = { 3, 13 };
 
@@ -141,9 +164,10 @@ public class PoissonGammaGaussianFisherInformationTest
 				PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, s);
 				double I = f.getPoissonGammaGaussianI(u);
 				double upper = PoissonFisherInformation.getPoissonI(u);
-				System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, I / upper);
-				//Assert.assertTrue(I < upper);
-				//Assert.assertTrue(alpha > 0);
+				double alpha = I / upper;
+				System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
+				Assert.assertTrue(I < upper);
+				Assert.assertTrue(alpha > 0);
 			}
 	}
 }

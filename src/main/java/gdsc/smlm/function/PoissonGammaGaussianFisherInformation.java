@@ -154,14 +154,10 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// Note a low Fisher information is worse as this is the amount of information
 		// carried about the parameter.
 		final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);
-		if (t > 1)
-		{
-			// When the mean is high then the lower bound should be half the 
-			// Poisson Fisher information. 
-			final double lower = 0.5 * upper;
-			return Maths.clip(lower, upper, I);
-		}
-		return Math.min(upper, I);
+		// When the mean is high then the lower bound should be half the 
+		// Poisson Fisher information. Otherwise check against 0.
+		final double lower = (t > 1) ? 0.5 * upper : 0;
+		return Maths.clip(lower, upper, I);
 	}
 
 	/**
@@ -196,16 +192,16 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// Use an approximation as half the Poisson Fisher information when the mean is large
 			return 1.0 / (2 * t);
 		}
-		
+
 		// XXX set a threshold
 		if (t < 0)
 		{
 			// The Fisher information plateaus relative to the poisson at low mean.
 			// alpha = t * FI
 			// FI = alpha / t == alpha * 1/t      (where 1/t is Poisson FI)
-			
+
 			// Q. Can the alpha plateau be deduced?
-			
+
 		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
@@ -226,28 +222,21 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// p'(z|v) = e^-v * g'(v) - p(z|v)
 
 		// -=-=-=-
-		
+
 		// This Fisher information is based on Chao, et al (2013) Nature Methods, 10, 335-338, SI.
-		
+
 		// Chao et al, Eq 4:
 		// (Poisson Binomial Gaussian convolution)
-		
 
 		// Gradient of the Poisson Binomial is:
 
-		
 		// This component can be seen in Chao et al, Eq S8:
 
-		
 		// Substitute the Poisson Binomial Gaussian with Poisson Gamma Gaussian:
 
-		
 		// Gradient of the Poisson Gamma is:
-		
 
 		// Fisher information is:
-		
-		
 
 		// -=-=-=-
 
@@ -331,11 +320,11 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		}
 
 		//System.out.printf("t=%g m=%g scale=%d scale2=%d\n", t, m, scale, scale2);
-		
+
 		// Ensure the first scale is greater then the second
 		if (scale < scale2)
 			scale = scale2;
-		
+
 		//scale = scale2 = 128;
 		//use38 = false;
 
@@ -664,7 +653,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 * This will only be called with scales of power 2.
 	 * <p>
 	 * This kernel could be integrated over the range -1/scale to 1/scale for each
-	 * sample point using the error function (Erf). If not available then a single 
+	 * sample point using the error function (Erf). If not available then a single
 	 * Gaussian sample can be returned.
 	 *
 	 * @param scale
