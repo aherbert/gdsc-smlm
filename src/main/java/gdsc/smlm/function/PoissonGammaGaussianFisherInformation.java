@@ -32,6 +32,11 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	/** The default threshold for the cumulative probability. */
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-6;
 
+	/**
+	 * The lowest value for the mean that can be computed. This is the lowest value where the reciprocal is not infinity
+	 */
+	public static final double MIN_MEAN = Double.longBitsToDouble(0x4000000000001L);
+
 	/** The gain multiplication factor. */
 	public final double m;
 
@@ -57,6 +62,15 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 	/** The mean threshold for the switch to half the Poisson Fisher information. */
 	private double meanThreshold = 100;
+
+	/**
+	 * The lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
+	 * constant. The Fisher information is then the alpha coefficient * Poisson Fisher information.
+	 */
+	private double lowerMeanThreshold = 1e-20;
+
+	/** The alpha coefficient. */
+	private double alpha = -1;
 
 	/** The cumulative probability of the partial gradient of the Poisson-Gamma distribution that is used. */
 	private double cumulativeProbability = DEFAULT_CUMULATIVE_PROBABILITY;
@@ -180,7 +194,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	public double getPoissonGammaGaussianI(double t) throws IllegalArgumentException
 	{
-		if (t <= 0)
+		if (t < MIN_MEAN)
 		{
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		}
@@ -193,15 +207,14 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			return 1.0 / (2 * t);
 		}
 
-		// XXX set a threshold
-		if (t < 0)
+		if (t < lowerMeanThreshold)
 		{
-			// The Fisher information plateaus relative to the poisson at low mean.
-			// alpha = t * FI
-			// FI = alpha / t == alpha * 1/t      (where 1/t is Poisson FI)
-
-			// Q. Can the alpha plateau be deduced?
-
+			// The Fisher information plateaus relative to the poisson Fisher information
+			// at low mean.
+			// Compute the Poisson Fisher information. This will not be infinity since
+			// t is >= MIN_MEAN.
+			double fi = 1.0 / t;
+			return getAlpha() * fi;
 		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
@@ -757,6 +770,55 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	public void setMeanThreshold(double meanThreshold)
 	{
 		this.meanThreshold = meanThreshold;
+	}
+
+	/**
+	 * Gets the lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
+	 * constant. The Fisher information is then the alpha coefficient * Poisson Fisher information.
+	 * 
+	 * @return the lower mean threshold
+	 */
+	public double getLowerMeanThreshold()
+	{
+		return lowerMeanThreshold;
+	}
+
+	/**
+	 * Sets the lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
+	 * constant. The Fisher information is then the alpha coefficient * Poisson Fisher information.
+	 * <p>
+	 * This value should be less than 0.01, in practice it can be as low as {@link #MIN_MEAN}.
+	 *
+	 * @param lowerMeanThreshold
+	 *            the new lower mean threshold
+	 * @throws IllegalArgumentException
+	 *             If the value is above 0.01
+	 */
+	public void setLowerMeanThreshold(double lowerMeanThreshold) throws IllegalArgumentException
+	{
+		if (lowerMeanThreshold > 0.01)
+			throw new IllegalArgumentException("Lower mean threshold is above 0.01: " + lowerMeanThreshold);
+		if (lowerMeanThreshold < MIN_MEAN)
+			lowerMeanThreshold = MIN_MEAN;
+		if (this.lowerMeanThreshold != lowerMeanThreshold)
+		{
+			this.lowerMeanThreshold = lowerMeanThreshold;
+			alpha = -1;
+		}
+	}
+
+	private double getAlpha()
+	{
+		if (alpha == -1)
+			alpha = computeAlpha();
+		return alpha;
+	}
+
+	private double computeAlpha()
+	{
+		double upper = 1.0 / lowerMeanThreshold;
+		double fi = getPoissonGammaGaussianI(lowerMeanThreshold);
+		return fi / upper;
 	}
 
 	/**

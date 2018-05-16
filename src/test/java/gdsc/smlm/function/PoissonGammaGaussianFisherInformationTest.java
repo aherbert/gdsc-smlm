@@ -170,4 +170,42 @@ public class PoissonGammaGaussianFisherInformationTest
 				Assert.assertTrue(alpha > 0);
 			}
 	}
+
+	@Test
+	public void canApproximateRealFisherInformationWithLowMean()
+	{
+		double[] M = { 20, 100, 500 };
+		double[] S = { 3, 13 };
+
+		for (double m : M)
+			for (double s : S)
+				canApproximateRealFisherInformationWithLowMean(m, s);
+	}
+
+	private void canApproximateRealFisherInformationWithLowMean(double m, double s)
+	{
+		canApproximateRealFisherInformationWithLowMean(new RealPoissonGammaGaussianFisherInformation(m, s));
+	}
+
+	private void canApproximateRealFisherInformationWithLowMean(PoissonGammaGaussianFisherInformation f)
+	{
+		PoissonGammaGaussianFisherInformation fe = (PoissonGammaGaussianFisherInformation) f.clone();
+
+		f.setLowerMeanThreshold(1e-20);
+		fe.setLowerMeanThreshold(0);
+
+		canApproximateRealFisherInformationWithLowMean(fe, f, 1e-21);
+		canApproximateRealFisherInformationWithLowMean(fe, f, 1e-100);
+		canApproximateRealFisherInformationWithLowMean(fe, f, 1e-200);
+	}
+
+	private void canApproximateRealFisherInformationWithLowMean(PoissonGammaGaussianFisherInformation fe,
+			PoissonGammaGaussianFisherInformation fo, double u)
+	{
+		double e = fe.getPoissonGammaGaussianI(u);
+		double o = fo.getPoissonGammaGaussianI(u);
+
+		//System.out.printf("m=%g s=%g u=%g e=%s o=%s\n", fe.m, fe.s, u, e, o);
+		Assert.assertEquals(e, o, e * 1e-2);
+	}
 }

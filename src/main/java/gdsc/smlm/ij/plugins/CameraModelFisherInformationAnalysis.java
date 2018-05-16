@@ -5,8 +5,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
-import gdsc.core.utils.Maths;
+import gdsc.core.logging.Ticker;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
@@ -91,7 +94,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 				"Configure the range of photons using a log10 scale.", 80));
 		//@formatter:on
 
-		gd.addSlider("Min_exponent", -10, 4, settings.getMinExponent());
+		gd.addSlider("Min_exponent", -50, 4, settings.getMinExponent());
 		gd.addSlider("Max_exponent", -10, 4, settings.getMaxExponent());
 		gd.addSlider("Sub_divisions", 0, 10, settings.getSubDivisions());
 		gd.addNumericField("CCD_gain", settings.getCcdGain(), 2);
@@ -140,7 +143,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		double[] photons = new double[exp.length];
 		for (int i = 0; i < photons.length; i++)
-			photons[i] = Math.pow(10, exp[i]);
+			photons[i] = FastMath.pow(10, exp[i]);
 
 		double[] pgFI = getFisherInformation(photons, pg, true);
 		double[] pgaFI = getFisherInformation(photons, pga, false);
@@ -157,39 +160,87 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		WindowOrganiser wo = new WindowOrganiser();
 
+		// Test if we can use ImageJ support for a X log scale
+		boolean logScaleX = ((float) photons[0] != 0);
+		double[] x = (logScaleX) ? photons : exp;
+		String xTitle = (logScaleX) ? "photons" : "log10(photons)";
+
 		String title = "Relative Fisher Information";
-		Plot plot = new Plot(title, "photons", "Noise coefficient (alpha)");
-		plot.setLimits(photons[0], photons[photons.length - 1], 0, 1);
-		plot.setLogScaleX();
+		Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
+		plot.setLimits(x[0], x[x.length - 1], 0, 1);
+		if (logScaleX)
+			plot.setLogScaleX();
 		plot.setColor(color1);
-		plot.addPoints(photons, rpgFI, Plot.LINE);
+		plot.addPoints(x, rpgFI, Plot.LINE);
 		plot.setColor(color2);
-		plot.addPoints(photons, rpgaFI, Plot.LINE);
+		plot.addPoints(x, rpgaFI, Plot.LINE);
 		plot.setColor(color3);
-		plot.addPoints(photons, rpggFI, Plot.LINE);
+		plot.addPoints(x, rpggFI, Plot.LINE);
 		plot.setColor(Color.BLACK);
 		plot.addLegend("CCD\nCCD approx\nEM CCD");
 		Utils.display(title, plot, 0, wo);
 
+		// The approximation should not produce an infinite computation
+		double[] limits = new double[] { pgaFI[pgaFI.length - 1], pgaFI[pgaFI.length - 1] };
+		limits = limits(limits, pgFI);
+		limits = limits(limits, pgaFI);
+		limits = limits(limits, pggFI);
+
+		// Check if we can use ImageJ support for a Y log scale
+		boolean logScaleY = ((float) limits[1] <= Float.MAX_VALUE);
+		if (!logScaleY)
+		{
+			for (int i = 0; i < pgFI.length; i++)
+			{
+				pgFI[i] = Math.log10(pgFI[i]);
+				pgaFI[i] = Math.log10(pgaFI[i]);
+				pggFI[i] = Math.log10(pggFI[i]);
+			}
+			limits[0] = Math.log10(limits[0]);
+			limits[1] = Math.log10(limits[1]);
+		}
+
+		String yTitle = (logScaleY) ? "Fisher Information" : "log10(Fisher Information)";
+
 		title = "Fisher Information";
-		plot = new Plot(title, "photons", "Fisher Information");
-		double[] limits = Maths.limits(pgFI);
-		limits = Maths.limits(limits, pgaFI);
-		limits = Maths.limits(limits, pggFI);
-		plot.setLimits(photons[0], photons[photons.length - 1], limits[0], limits[1]);
-		plot.setLogScaleX();
-		plot.setLogScaleY();
+		plot = new Plot(title, xTitle, yTitle);
+
+		plot.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
+		if (logScaleX)
+			plot.setLogScaleX();
+		if (logScaleY)
+			plot.setLogScaleY();
 		plot.setColor(color1);
-		plot.addPoints(photons, pgFI, Plot.LINE);
+		plot.addPoints(x, pgFI, Plot.LINE);
 		plot.setColor(color2);
-		plot.addPoints(photons, pgaFI, Plot.LINE);
+		plot.addPoints(x, pgaFI, Plot.LINE);
 		plot.setColor(color3);
-		plot.addPoints(photons, pggFI, Plot.LINE);
+		plot.addPoints(x, pggFI, Plot.LINE);
 		plot.setColor(Color.BLACK);
 		plot.addLegend("CCD\nCCD approx\nEM CCD");
 		Utils.display(title, plot, 0, wo);
 
 		wo.tile();
+	}
+
+	private double[] limits(double[] limits, double[] f)
+	{
+		double min = limits[0];
+		double max = limits[1];
+		for (int i = 0; i < f.length; i++)
+		{
+			double d = f[i];
+			// Find limits of numbers that can be logged
+			if (d <= 0 || d == Double.POSITIVE_INFINITY)
+				continue;
+			if (min > d)
+				min = d;
+			else if (max < d)
+				max = d;
+		}
+		limits[0] = min;
+		limits[1] = max;
+		return limits;
 	}
 
 	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(boolean discrete)
@@ -232,7 +283,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "EM CCD gain must be positive");
 			return null;
 		}
-		return new RealPoissonGammaGaussianFisherInformation(m, s);
+		PoissonGammaGaussianFisherInformation fi = new RealPoissonGammaGaussianFisherInformation(m, s);
+		//fi.setCumulativeProbability(1 - 1e-5);
+		fi.setLowerMeanThreshold(1e-300);
+		return fi;
 	}
 
 	private double[] createExponents()
@@ -267,9 +321,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		final double[] f = new double[photons.length];
 		if (multithread)
 		{
+			Utils.showStatus("Computing " + fi.getClass().getSimpleName());
 			int nThreads = Prefs.getThreads();
 			if (es == null)
 				es = Executors.newFixedThreadPool(nThreads);
+			final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), f.length, nThreads != 1);
 			int nPerThread = (int) Math.ceil((double) f.length / nThreads);
 			TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
 			for (int i = 0; i < f.length; i += nPerThread)
@@ -282,11 +338,16 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 					{
 						BasePoissonFisherInformation fi2 = fi.clone();
 						for (int ii = start; ii < end; ii++)
+						{
 							f[ii] = fi2.getFisherInformation(photons[ii]);
+							ticker.tick();
+						}
 					}
 				}));
 			}
 			Utils.waitForCompletion(futures);
+			ticker.stop();
+			Utils.showStatus("");
 		}
 		else
 		{

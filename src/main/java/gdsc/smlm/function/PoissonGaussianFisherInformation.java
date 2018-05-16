@@ -588,7 +588,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	{
 		this.meanThreshold = meanThreshold;
 	}
-
+	
 	/**
 	 * Gets the cumulative probability of the Poisson distribution that is used.
 	 *
