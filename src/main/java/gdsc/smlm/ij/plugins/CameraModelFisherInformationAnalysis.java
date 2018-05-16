@@ -47,7 +47,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 {
 	// TODO 
 	// Options to show the computed convolution across a range of means.
-	
+
 	private static final String TITLE = "Camera Model Fisher Information Analysis";
 
 	private CameraModelFisherInformationAnalysisSettings.Builder settings;
@@ -200,9 +200,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "CCD noise must be positive");
 			return null;
 		}
-		if (discrete)
-			return new DiscretePoissonGaussianFisherInformation(s);
-		return new RealPoissonGaussianFisherInformation(s);
+		double range = PoissonGaussianFisherInformation.DEFAULT_RANGE;
+		PoissonGaussianFisherInformation fi = (discrete) ? new DiscretePoissonGaussianFisherInformation(s, range)
+				: new RealPoissonGaussianFisherInformation(s, range);
+		//fi.setCumulativeProbability(1 - 1e-12);
+		return fi;
 	}
 
 	private PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation()

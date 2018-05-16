@@ -196,6 +196,17 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// Use an approximation as half the Poisson Fisher information when the mean is large
 			return 1.0 / (2 * t);
 		}
+		
+		// XXX set a threshold
+		if (t < 0)
+		{
+			// The Fisher information plateaus relative to the poisson at low mean.
+			// alpha = t * FI
+			// FI = alpha / t == alpha * 1/t      (where 1/t is Poisson FI)
+			
+			// Q. Can the alpha plateau be deduced?
+			
+		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
 		// The value of this is p(z).

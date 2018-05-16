@@ -34,6 +34,9 @@ import gnu.trove.list.array.TDoubleArrayList;
  */
 public abstract class PoissonGaussianFisherInformation extends BasePoissonFisherInformation
 {
+	/** The default range for the Gaussian kernel (in units of SD). */
+	public static final double DEFAULT_RANGE = 7;
+
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-10;
 
 	/** Store the limit of the Poisson distribution for small mean for the default cumulative probability. */
@@ -373,10 +376,10 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			// probability has been altered from the default.
 			return getGaussianI();
 		}
-
+		
 		// Unscaled Poisson
 		double[] p = list.toArray();
-
+		
 		// Up-sample the Poisson
 		if (scale != 1)
 		{
@@ -398,11 +401,11 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 
 		// In order for A(z) = P(z-1) to work sum A(z) must be 1
 		double sum = 0;
-		for (int i = 0; i < pg.length; i++)
-			sum += pg[i];
-		//System.out.printf("Normalisation = %s\n", sum);
-		for (int i = 0; i < pg.length; i++)
-			pg[i] /= sum;
+		//for (int i = 0; i < pg.length; i++)
+		//	sum += pg[i];
+		////System.out.printf("Normalisation = %s\n", sum);
+		//for (int i = 0; i < pg.length; i++)
+		//	pg[i] /= sum;
 
 		// Integrate function:
 		// E = integral [A^2/P] - 1
@@ -437,7 +440,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			double sum3 = 0, sum2 = 0;
 			for (int i = mini; i < maxi; i++)
 			{
-				if (pg[i] == 0)
+				if (pg[i] <= 0)
 				{
 					// No probability so the function is zero.
 					// This is the equivalent of only computing the Fisher information over 
@@ -461,7 +464,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			double sum4 = 0, sum2 = 0;
 			for (int i = mini; i < maxi; i++)
 			{
-				if (pg[i] == 0)
+				if (pg[i] <= 0)
 				{
 					// No probability so the function is zero.
 					// This is the equivalent of only computing the Fisher information over 

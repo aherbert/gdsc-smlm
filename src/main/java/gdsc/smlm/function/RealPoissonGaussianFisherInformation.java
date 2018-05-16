@@ -51,7 +51,7 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 	 */
 	public RealPoissonGaussianFisherInformation(double s) throws IllegalArgumentException
 	{
-		this(s, 5);
+		this(s, 7);
 	}
 
 	/**
@@ -107,6 +107,8 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 	@Override
 	protected int getKernelScale(double t)
 	{
+		if (defaultScale == 0)
+			return 0;
 		// Choose the kernel. A small mean requires more Gaussian samples.
 		// Note the default scale is the minimum required to sample at 0.5 SD units.
 		// Find the same for the Poisson using its variance.
@@ -128,7 +130,16 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 		// Get the Gaussian kernel
 		int index = log2(scale);
 		if (kernel[index] == null)
-			kernel[index] = Convolution.makeGaussianKernel(s * scale, range, true);
+		{
+			//kernel[index] = Convolution.makeGaussianKernel(s * scale, range, true);
+			kernel[index] = Convolution.makeGaussianKernel(s * scale, range, false);
+			// This does not work. The Poisson is discrete and so must be convolved
+			// with a continuous Gaussian. Using the Error function is equivalent
+			// to integrating the continuous Gaussian with the same value of the 
+			// Poisson over the range x-0.5 to x+0.5. However the Poisson is zero
+			// in all that range except for x.
+			//kernel[index] = Convolution.makeErfGaussianKernel(s * scale, range);
+		}
 		return kernel[index];
 	}
 

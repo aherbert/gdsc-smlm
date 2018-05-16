@@ -41,7 +41,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	 */
 	public RealPoissonGammaGaussianFisherInformation(double m, double s) throws IllegalArgumentException
 	{
-		this(m, s, 6);
+		this(m, s, PoissonGaussianFisherInformation.DEFAULT_RANGE);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 		if (kernel[index] == null)
 		{
 			kernel[index] = Convolution.makeErfGaussianKernel(scale, range);
-			//kernel[index] = Convolution.makeGaussianKernel(scale, range, false);
+			//kernel[index] = Convolution.makeGaussianKernel(scale, range, true);
 		}
 		return kernel[index];
 	}

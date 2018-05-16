@@ -1,5 +1,7 @@
 package gdsc.smlm.function;
 
+import gdsc.smlm.utils.Convolution;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -44,7 +46,7 @@ public class DiscretePoissonGaussianFisherInformation extends PoissonGaussianFis
 	public DiscretePoissonGaussianFisherInformation(double s) throws IllegalArgumentException
 	{
 		// With no upscaling the convolution can handle a large range.
-		this(s, 7);
+		this(s, 8);
 	}
 
 	/**
@@ -67,31 +69,13 @@ public class DiscretePoissonGaussianFisherInformation extends PoissonGaussianFis
 	private static double[] createKernel(double s, double range)
 	{
 		// Get the range of the kernel
-		range *= s;
-		if (range < 0.5)
+		if (range * s < 0.5)
 		{
 			// Convolution will not cover more than 1 sample of the Poisson PMF
 			return null;
 		}
 
-		// Use the error function to get the integral of the Gaussian.
-		final double sqrt_var_by_2 = Math.sqrt(s * s * 2);
-
-		// Find the highest x value touched by the range. 
-		// Note the range of x is -0.5 to 0.5. 
-		int maxx = (int) Math.round(range + 0.5);
-
-		double[] kernel = new double[2 * maxx + 1];
-
-		double upper = org.apache.commons.math3.special.Erf.erf(-0.5 / sqrt_var_by_2);
-		for (int x = 0, i = maxx, j = maxx; x <= maxx; x++, i++, j--)
-		{
-			double lower = upper;
-			upper = org.apache.commons.math3.special.Erf.erf((x + 0.5) / sqrt_var_by_2);
-			kernel[i] = kernel[j] = (upper - lower) * 0.5;
-		}
-
-		return kernel;
+		return Convolution.makeErfGaussianKernel(s, range);
 	}
 
 	/*
