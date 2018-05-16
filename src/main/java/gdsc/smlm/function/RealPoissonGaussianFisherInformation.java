@@ -72,9 +72,9 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 		// Check if the Gaussian standard deviation is above the threshold for computation.
 		// Also check if the gaussian filter will touch more than one Poisson value.
 		// Otherwise convolution is not possible.
-		// The limit s ==0.02 is based on the scale being 2/s = 100. Do not support scaling 
+		// The limit s==0.04 is based on the scale being 4/s = 100. Do not support scaling 
 		// greater than this. It is unlikely anyway.
-		if (s >= 0.02 && s * range >= 1)
+		if (s >= 0.04 && s * range >= 1)
 		{
 			// Determine how much to up-sample so that the convolution with the Gaussian
 			// uses multiple values of the Gaussian.
@@ -93,7 +93,7 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 
 	private static int getScale(double s)
 	{
-		double scale = Math.ceil(2 / s);
+		double scale = Math.ceil(4 / s);
 		if (scale > 128)
 			return 128;
 		return Maths.nextPow2((int) scale);
