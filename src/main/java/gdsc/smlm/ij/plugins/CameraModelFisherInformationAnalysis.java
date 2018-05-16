@@ -252,6 +252,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return null;
 		}
 		double range = PoissonGaussianFisherInformation.DEFAULT_RANGE;
+		//range = 15;
 		PoissonGaussianFisherInformation fi = (discrete) ? new DiscretePoissonGaussianFisherInformation(s, range)
 				: new RealPoissonGaussianFisherInformation(s, range);
 		//fi.setCumulativeProbability(1 - 1e-12);
