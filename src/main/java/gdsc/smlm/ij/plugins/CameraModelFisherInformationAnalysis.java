@@ -286,6 +286,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		PoissonGammaGaussianFisherInformation fi = new RealPoissonGammaGaussianFisherInformation(m, s);
 		//fi.setCumulativeProbability(1 - 1e-5);
 		fi.setLowerMeanThreshold(1e-300);
+		fi.setMeanThreshold(200);
 		return fi;
 	}
 

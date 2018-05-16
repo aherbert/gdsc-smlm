@@ -61,7 +61,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	private double relativeProbabilityThreshold = DEFAULT_RELATIVE_PROBABILITY_THRESHOLD;
 
 	/** The mean threshold for the switch to half the Poisson Fisher information. */
-	private double meanThreshold = 100;
+	private double meanThreshold = 200;
 
 	/**
 	 * The lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
