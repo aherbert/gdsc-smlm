@@ -24,10 +24,8 @@ import gdsc.smlm.utils.Convolution;
  */
 public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGaussianFisherInformation
 {
-	// TODO - fix this to use sampling and a range for the kernel
-	
 	/**
-	 * The Gaussian convolution kernels for different scaling. The scale is 2^index, e.g. 1, 2, 4, 8, 16, 32, 64, 128.
+	 * The Gaussian convolution kernels for different ranges.
 	 */
 	private final double[][] kernel;
 
@@ -40,10 +38,14 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	 *            the standard deviation of the Gaussian
 	 * @throws IllegalArgumentException
 	 *             If the standard deviation is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the sampling is below 1
+	 * @throws IllegalArgumentException
+	 *             If the maximum kernel size after scaling is too large
 	 */
 	public RealPoissonGammaGaussianFisherInformation(double m, double s) throws IllegalArgumentException
 	{
-		this(m, s, 6);
+		this(m, s, PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING);
 	}
 
 	/**
@@ -53,19 +55,20 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	 *            the gain multiplication factor
 	 * @param s
 	 *            the standard deviation of the Gaussian
-	 * @param range
-	 *            the range of the Gaussian kernel (in SD units). This is clipped to the range
-	 *            1-38 to provide a meaningful convolution.
+	 * @param sampling
+	 *            The number of Gaussian samples to take per standard deviation
 	 * @throws IllegalArgumentException
 	 *             If the standard deviation is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the sampling is below 1
+	 * @throws IllegalArgumentException
+	 *             If the maximum kernel size after scaling is too large
 	 */
-	public RealPoissonGammaGaussianFisherInformation(double m, double s, double range) throws IllegalArgumentException
+	public RealPoissonGammaGaussianFisherInformation(double m, double s, double sampling)
+			throws IllegalArgumentException
 	{
-		super(m, s, range);
-
-		// Store the Gaussian kernels for convolution:
-		// 1, 2, 4, 8, 16, 32, 64, 128
-		kernel = new double[8][];
+		super(m, s, sampling);
+		kernel = new double[39][];
 	}
 
 	/*
@@ -74,23 +77,17 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	 * @see gdsc.smlm.function.PoissonGammaGaussianFisherInformation#getUnitGaussianKernel(int)
 	 */
 	@Override
-	protected double[] getUnitGaussianKernel(int scale)
+	protected double[] getUnitGaussianKernel(int scale, int range)
 	{
-		// Get the Gaussian kernel
-		int index = log2(scale);
-		if (kernel[index] == null)
+		if (kernel[scale] == null)
 		{
-			kernel[index] = Convolution.makeErfGaussianKernel(scale, range);
-			//kernel[index] = Convolution.makeGaussianKernel(scale, range, true);
-		}
-		return kernel[index];
-	}
+			kernel[scale] = Convolution.makeGaussianKernel(scale, range, true);
 
-	private int log2(int scale)
-	{
-		int bits = 8;
-		while ((scale & (1 << bits)) == 0)
-			bits--;
-		return bits;
+			// This does not work as the lack of granularity in the 
+			// kernel makes the A^2/P function incorrect.
+
+			//kernel[scale] = Convolution.makeErfGaussianKernel(scale, range);
+		}
+		return kernel[scale];
 	}
 }

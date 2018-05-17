@@ -304,17 +304,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			return null;
 		}
 
-		//		discrete = false;
-		//		double range = PoissonGaussianFisherInformation.DEFAULT_RANGE;
-		//		range = 35;
-		//		PoissonGaussianFisherInformation fi = (discrete) ? new DiscretePoissonGaussianFisherInformation(s, range)
-		//				: new RealPoissonGaussianFisherInformation(s, range);
-
 		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
-		//sampling = 8;
+		sampling = 64;
 		PoissonGaussianFisherInformation fi = new RealPoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
-		//fi.setMaxRange(38);
+		fi.setMinRange(10);
 		return fi;
 	}
 
@@ -343,9 +337,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "EM CCD gain must be positive");
 			return null;
 		}
-		PoissonGammaGaussianFisherInformation fi = new RealPoissonGammaGaussianFisherInformation(m, s);
-		//fi.setCumulativeProbability(1 - 1e-5);
-		fi.setLowerMeanThreshold(1e-300);
+		
+		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
+		sampling = 128;
+		PoissonGammaGaussianFisherInformation fi = new RealPoissonGammaGaussianFisherInformation(m, s, sampling);
+		fi.setCumulativeProbability(1 - 1e-8);
+		fi.setMinRange(14);
 		fi.setMeanThreshold(200);
 		return fi;
 	}

@@ -88,12 +88,8 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 			kernel[range] = Convolution.makeGaussianKernel(s * scale, range, true);
 			//kernel[range] = Convolution.makeGaussianKernel(s * scale, range, false);
 			
-			// This does not work. The Poisson is discrete and so must be convolved
-			// with a continuous Gaussian. Using the Error function is equivalent
-			// to integrating the continuous Gaussian with the same value of the 
-			// Poisson over the range x-0.5 to x+0.5.
-			
-			// Lack of granularity in the kernel makes the A^2/P function incorrect. 
+			// This does not work as the lack of granularity in the 
+			// kernel makes the A^2/P function incorrect.
 			
 			//kernel[range] = Convolution.makeErfGaussianKernel(s * scale, range);
 		}

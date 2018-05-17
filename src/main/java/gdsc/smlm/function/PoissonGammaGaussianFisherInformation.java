@@ -1,5 +1,6 @@
 package gdsc.smlm.function;
 
+import gdsc.core.math.NumberUtils;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.utils.Convolution;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -26,14 +27,26 @@ import gnu.trove.list.array.TDoubleArrayList;
  */
 public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation
 {
-	// TODO - fix this to use samplijng and a range for the kernel
+	/** The default minimum range for the Gaussian kernel (in units of SD). */
+	public static final int DEFAULT_MIN_RANGE = 6;
 
-	
+	/** The default maximum range for the Gaussian kernel (in units of SD). */
+	public static final int DEFAULT_MAX_RANGE = 38;
+
+	/** The maximum range for the Gaussian kernel (in units of SD). */
+	public static final int MAX_RANGE = 38;
+
 	/** The default threshold for the relative probability. */
 	public static final double DEFAULT_RELATIVE_PROBABILITY_THRESHOLD = 1e-5;
 
 	/** The default threshold for the cumulative probability. */
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-6;
+
+	/**
+	 * The default sampling of the Gaussian kernel. The kernel will be sampled at s/sampling,
+	 * i.e. this is the number of samples to take per standard deviation unit.
+	 */
+	public static final int DEFAULT_SAMPLING = 4;
 
 	/**
 	 * The lowest value for the mean that can be computed. This is the lowest value where the reciprocal is not infinity
@@ -46,11 +59,14 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	/** The standard deviation of the Gaussian. */
 	public final double s;
 
-	/** The range of the Gaussian kernel (in SD units). */
-	public final double range;
+	/** The minimum range of the Gaussian kernel (in SD units). */
+	private int minRange = DEFAULT_MIN_RANGE;
 
-	/** The extent of the Gaussian kernel. This is the next SD unit interval when the kernel is zero. */
-	private final int extent;
+	/** The maximum range of the Gaussian kernel (in SD units). */
+	private int maxRange = DEFAULT_MAX_RANGE;
+
+	/** The scale of the kernel. */
+	private final int scale;
 
 	/** Working space to store the probabilities. */
 	private TDoubleArrayList list1 = new TDoubleArrayList();
@@ -65,15 +81,6 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 	/** The upper mean threshold for the switch to half the Poisson Fisher information. */
 	private double upperMeanThreshold = 200;
-
-	/**
-	 * The lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
-	 * constant. The Fisher information is then the alpha coefficient * Poisson Fisher information.
-	 */
-	private double lowerMeanThreshold = 1e-20;
-
-	/** The alpha coefficient. */
-	private double alpha = -1;
 
 	/** The cumulative probability of the partial gradient of the Poisson-Gamma distribution that is used. */
 	private double cumulativeProbability = DEFAULT_CUMULATIVE_PROBABILITY;
@@ -108,7 +115,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	public PoissonGammaGaussianFisherInformation(double m, double s) throws IllegalArgumentException
 	{
-		this(m, s, 6);
+		this(m, s, DEFAULT_SAMPLING);
 	}
 
 	/**
@@ -118,36 +125,36 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 *            the gain multiplication factor
 	 * @param s
 	 *            the standard deviation of the Gaussian
-	 * @param range
-	 *            the range of the Gaussian kernel (in SD units). This is clipped to the range
-	 *            1-38 to provide a meaningful convolution.
+	 * @param sampling
+	 *            The number of Gaussian samples to take per standard deviation
 	 * @throws IllegalArgumentException
-	 *             If the standard deviation is not strictly positive
+	 *             If the gain or standard deviation are not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the sampling is below 1
+	 * @throws IllegalArgumentException
+	 *             If the maximum kernel size after scaling is too large
 	 */
-	public PoissonGammaGaussianFisherInformation(double m, double s, double range) throws IllegalArgumentException
+	public PoissonGammaGaussianFisherInformation(double m, double s, double sampling) throws IllegalArgumentException
 	{
 		if (!(m > 0 && m <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gain multiplication factor must be strictly positive");
 		if (!(s > 0 && s <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+		if (!(sampling >= 1 && sampling <= Double.MAX_VALUE))
+			throw new IllegalArgumentException("Gaussian sampling must at least 1");
+		if (s * MAX_RANGE < 0.5)
+			throw new IllegalArgumentException("Gaussian range does not extend to convolve with the Poisson");
 
-		// Gaussian = Math.exp(-0.5 * x^2)
-		// FastMath.exp(-746) == 0
-		// => range for the Gaussian is sqrt(2*746) = 38.6
-
-		if (Double.isNaN(range))
-			throw new IllegalArgumentException("Gaussian range must not be NaN");
-		range = Maths.clip(1, 38, range);
+		double scale = Math.ceil(sampling / s);
+		if (scale * s * MAX_RANGE > 1000000)
+		{
+			// Don't support excess scaling caused by small kernels
+			throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * s * MAX_RANGE);
+		}
 
 		this.m = m;
 		this.s = s;
-		this.range = range;
-
-		// Compute the extent of the kernel. This is the first SD interval where the kernel is zero.
-		int irange = (int) Math.ceil(range);
-		if (irange == range)
-			irange++;
-		extent = irange;
+		this.scale = (int) scale;
 	}
 
 	/**
@@ -189,16 +196,9 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			return 0.5;
 		}
 
-		if (t < lowerMeanThreshold)
-		{
-			// The Fisher information plateaus relative to the poisson Fisher information
-			// at low mean.
-			return getLowerMeanThresholdAlpha();
-		}
-		
 		return t * getFisherInformation(t);
 	}
-	
+
 	/**
 	 * Gets the Poisson-Gamma-Gaussian Fisher information.
 	 * <p>
@@ -232,14 +232,14 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			return 1.0 / (2 * t);
 		}
 
-		if (t < lowerMeanThreshold)
+		final double dirac = PoissonGammaFunction.dirac(t);
+
+		// Special case where the start of the range will have no probability.
+		// This occurs when mean > limit of exp(-p) => 746.
+		if (dirac == 0)
 		{
-			// The Fisher information plateaus relative to the poisson Fisher information
-			// at low mean.
-			// Compute the Poisson Fisher information. This will not be infinity since
-			// t is >= MIN_MEAN.
-			double fi = 1.0 / t;
-			return getLowerMeanThresholdAlpha() * fi;
+			// Use half the Poisson fisher information
+			return 1.0 / (2 * t);
 		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
@@ -289,35 +289,22 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// Note that when the Poisson mean is low then the contribution from the 
 		// Dirac delta function at 0 will be large. As the mean increases 
 		// the Dirac will have little significance, the function is very smooth
-		// and may have a large range. Thus convolution with a small Gaussian kernel 
+		// and may have a large range. Thus convolution with an extended Gaussian kernel 
 		// may not be necessary over the full range.
 		// So the integral can be computed as [integral range1] + [integral range2]
 
 		// Range 1:
 		// The range around the Dirac delta function is computed using a full convolution
-		// with Gaussian over-sampling.
-		// The Dirac delta function = exp(-p)
-		// Use more upsampling when the Dirac is large.
-		// p   Dirac     scale
-		// 1   0.368     128
-		// 2   0.135     128
-		// 4   0.0183    128
-		// 5   0.00673   64
-		// 6   0.00248   32
-		// 7   0.000912  16
-		// 8   0.000335  8
-		// 9             4
-		// 10            2
-		// 11            1
+		// with the Gaussian.
 
-		final double dirac = PoissonGammaFunction.dirac(t);
-
-		// As the mean reduces the Dirac gets bigger. So over-sample more for smaller mean
-		int scale;
-		scale = 1;
-		for (double tt = t; tt < 11; tt++)
-			scale *= 2;
-		scale = Maths.min(128, scale);
+		// The exponent provides a rough idea of the size of the mean
+		int exp = NumberUtils.getSignedExponent(t);
+		// As the mean reduces the Poisson distribution is more skewed 
+		// and the extent of the kernel must change. Just increase the range
+		// for the kernel for each power of 2 the number is below 1.
+		int range1 = minRange;
+		for (int e = exp; range1 < maxRange && e <= 0; e++, range1++)
+			;
 
 		// Range 2: 
 		// The remaining range of the Poisson-Gamma sampled in step intervals up to 
@@ -337,31 +324,36 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// TODO - make this number of steps configurable? This value works for reasonable
 		// input parameters. Too small a step size results in poor integration when t is low
 		// (and the gain is low) since the mean is over-estimated.
-		double step = mean / 128;
-		// The step must coincide with the end of range 1, 
-		// which is an integer factor of the standard deviation.
-		int scale2;
-		if (step < s)
-		{
-			// This will occur when the Gaussian is wide compared to the width of the Poisson-Gamma.
-			// Upsample the Gaussian.
-			scale2 = getPow2Scale(s / step);
-		}
-		else
-		{
-			// This is when the Gaussian is narrow compared to the width of the Poisson-Gamma.
-			// Just sample every unit of standard deviation.
-			// TODO: There will be a point when convolution with a narrow Gaussian is expensive.
-			// For now assume that the width will be reasonable (e.g. >1) and a second
-			// convolution is always done.
-			scale2 = 1;
-		}
-
-		//System.out.printf("t=%g m=%g scale=%d scale2=%d\n", t, m, scale, scale2);
-
-		// Ensure the first scale is greater then the second
-		if (scale < scale2)
-			scale = scale2;
+		
+		
+		// TODO - fix the dual range convolution.
+		
+//		double step = mean / 128;
+//		// The step must coincide with the end of range 1, 
+//		// which is an integer factor of the standard deviation.
+		int scale2 = 1;
+		
+//		if (step < s)
+//		{
+//			// This will occur when the Gaussian is wide compared to the width of the Poisson-Gamma.
+//			// Upsample the Gaussian.
+//			scale2 = getPow2Scale(s / step);
+//		}
+//		else
+//		{
+//			// This is when the Gaussian is narrow compared to the width of the Poisson-Gamma.
+//			// Just sample every unit of standard deviation.
+//			// TODO: There will be a point when convolution with a narrow Gaussian is expensive.
+//			// For now assume that the width will be reasonable (e.g. >1) and a second
+//			// convolution is always done.
+//			scale2 = 1;
+//		}
+//
+//		//System.out.printf("t=%g m=%g scale=%d scale2=%d\n", t, m, scale, scale2);
+//
+//		// Ensure the first scale is greater then the second
+//		if (scale < scale2)
+//			scale = scale2;
 
 		//scale = scale2 = 128;
 		//use38 = false;
@@ -379,14 +371,6 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// Compute the max fisher information for the unconvolved function.
 		double max = 0;
 
-		// Special case where the start of the range will have no probability.
-		// This occurs when mean > limit of exp(-p) => 746.
-		if (dirac == 0)
-		{
-			// Use half the Poisson fisher information
-			return 1.0 / (2 * t);
-		}
-
 		G = PoissonGammaFunction.poissonGammaPartial(0, t, m, dG_dp);
 		final double p0 = (G - dirac) * c0factor;
 		list1.add(p0);
@@ -397,7 +381,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 		// The limit is set so that we have the full Poisson-Gamma function computed
 		// when the Gaussian kernel no longer touches zero.
-		int limit = extent * scale * 2;
+		int limit = (range1 + 1) * scale * 2;
 		for (int i = 1; i <= limit; i++)
 		{
 			G = PoissonGammaFunction.poissonGammaPartial(h * i, t, m, dG_dp);
@@ -413,7 +397,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 		// If the range is past the range expected then do a single range.
 		// TODO - make the threshold configurable
-		boolean singleRange = scale == scale2 || endRange1 > 5 * mean;
+		boolean singleRange = true; //scale == scale2 || endRange1 > 5 * mean;
 		if (singleRange)
 		{
 			// Continue until all the Fisher information has been achieved.
@@ -446,7 +430,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// This is how the Camera Model Analysis works. Perhaps there is
 		// floating point error when the dirac is large.
 
-		double[] g = getUnitGaussianKernel(scale);
+		double[] g = getUnitGaussianKernel(scale, range1);
 		p[0] += dirac;
 		convolve(p, a, g, true);
 
@@ -569,7 +553,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		//System.out.printf("t=%g  sum p2=%g  endRange1=%g sumA=%s\n", t,
 		//		(Maths.sum(p) + (1 - c0factor) * p0) * h + dirac, endRange1, sum * h / 3);
 
-		g = getUnitGaussianKernel(scale2);
+		g = getUnitGaussianKernel(scale2, minRange);
 		p[0] += dirac;
 		convolve(p, a, g, false);
 
@@ -688,17 +672,16 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	/**
 	 * Gets the gaussian kernel for convolution using a standard deviation of 1.
 	 * The kernel will be sampled every (1 / scale).
-	 * This will only be called with scales of power 2.
 	 * <p>
-	 * This kernel could be integrated over the range -1/scale to 1/scale for each
-	 * sample point using the error function (Erf). If not available then a single
-	 * Gaussian sample can be returned.
+	 * This will only be called with a range of 1 to 38.
 	 *
-	 * @param scale
+	 * @param sampling
 	 *            the scale
+	 * @param range
+	 *            the range (in SD units)
 	 * @return the gaussian kernel
 	 */
-	protected abstract double[] getUnitGaussianKernel(int scale);
+	protected abstract double[] getUnitGaussianKernel(int scale, int range);
 
 	private static double getF(double P, double A)
 	{
@@ -758,14 +741,57 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	}
 
 	/**
-	 * Gets the Gaussian Fisher information for mean 0.
-	 * Fisher information of Gaussian mean is 1/variance.
+	 * Gets the min range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
 	 *
-	 * @return the Gaussian Fisher information
+	 * @return the min range
 	 */
-	public double getGaussianI()
+	public int getMinRange()
 	{
-		return 1.0 / (s * s);
+		return minRange;
+	}
+
+	/**
+	 * Sets the min range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @param minRange
+	 *            the new min range
+	 */
+	public void setMinRange(int minRange)
+	{
+		this.minRange = checkRange(minRange);
+	}
+
+	private int checkRange(int range)
+	{
+		// Gaussian = Math.exp(-0.5 * x^2)
+		// FastMath.exp(-746) == 0
+		// => range for the Gaussian is sqrt(2*746) = 38.6
+		return Maths.clip(1, MAX_RANGE, range);
+	}
+
+	/**
+	 * Gets the max range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @return the max range
+	 */
+	public int getMaxRange()
+	{
+		return maxRange;
+	}
+
+	/**
+	 * Sets the max range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @param maxRange
+	 *            the new max range
+	 */
+	public void setMaxRange(int maxRange)
+	{
+		this.maxRange = checkRange(maxRange);
 	}
 
 	/**
@@ -795,55 +821,6 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	public void setMeanThreshold(double meanThreshold)
 	{
 		this.upperMeanThreshold = meanThreshold;
-	}
-
-	/**
-	 * Gets the lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
-	 * constant. The Fisher information is then the alpha coefficient * Poisson Fisher information.
-	 * 
-	 * @return the lower mean threshold
-	 */
-	public double getLowerMeanThreshold()
-	{
-		return lowerMeanThreshold;
-	}
-
-	/**
-	 * Sets the lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
-	 * constant. The Fisher information is then the alpha coefficient * Poisson Fisher information.
-	 * <p>
-	 * This value should be less than 0.01, in practice it can be as low as {@link #MIN_MEAN}.
-	 *
-	 * @param lowerMeanThreshold
-	 *            the new lower mean threshold
-	 * @throws IllegalArgumentException
-	 *             If the value is above 0.01
-	 */
-	public void setLowerMeanThreshold(double lowerMeanThreshold) throws IllegalArgumentException
-	{
-		if (lowerMeanThreshold > 0.01)
-			throw new IllegalArgumentException("Lower mean threshold is above 0.01: " + lowerMeanThreshold);
-		if (lowerMeanThreshold < MIN_MEAN)
-			lowerMeanThreshold = MIN_MEAN;
-		if (this.lowerMeanThreshold != lowerMeanThreshold)
-		{
-			this.lowerMeanThreshold = lowerMeanThreshold;
-			alpha = -1;
-		}
-	}
-
-	private double getLowerMeanThresholdAlpha()
-	{
-		if (alpha == -1)
-			alpha = computeLowerMeanThresholdAlpha();
-		return alpha;
-	}
-
-	private double computeLowerMeanThresholdAlpha()
-	{
-		double upper = 1.0 / lowerMeanThreshold;
-		double fi = getPoissonGammaGaussianI(lowerMeanThreshold);
-		return fi / upper;
 	}
 
 	/**

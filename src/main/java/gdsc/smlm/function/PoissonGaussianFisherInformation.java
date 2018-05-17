@@ -211,10 +211,10 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		// e.g. s [0.5:20], sampling from [1:8].
 
 		double scale = Math.ceil(sampling / s);
-		if (scale * MAX_RANGE > 1000000)
+		if (scale * s * MAX_RANGE > 1000000)
 		{
 			// Don't support excess scaling caused by small kernels
-			throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * MAX_RANGE);
+			throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * s * MAX_RANGE);
 		}
 
 		this.s = s;
