@@ -175,9 +175,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double scale = Math.log(10);
 		for (int i = 0; i < logU.length; i++)
 			logU[i] *= scale;
-		BasePoissonFisherInformation ipg = new InterpolatedPoissonFisherInformation(logU, rpgFI, pga);
+		BasePoissonFisherInformation ipg = new InterpolatedPoissonFisherInformation(logU, rpgFI, true, pga);
 		BasePoissonFisherInformation ipga = pga; // No need for interpolation
-		BasePoissonFisherInformation ipgg = new InterpolatedPoissonFisherInformation(logU, rpggFI,
+		// TODO - change this if the PGG FI is not fixed alpha at low mean.
+		BasePoissonFisherInformation ipgg = new InterpolatedPoissonFisherInformation(logU, rpggFI, false,
 				new HalfPoissonFisherInformation());
 
 		// Interpolate with 300 points for smooth curve
@@ -302,7 +303,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "CCD noise must be positive");
 			return null;
 		}
-		
+
 		//		discrete = false;
 		//		double range = PoissonGaussianFisherInformation.DEFAULT_RANGE;
 		//		range = 35;
