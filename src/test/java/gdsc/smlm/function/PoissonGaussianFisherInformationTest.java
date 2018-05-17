@@ -13,8 +13,8 @@ public class PoissonGaussianFisherInformationTest
 		//double u;
 		////u = Math.pow(10, -300);
 		////u = 1.0 / Math.nextAfter(Double.MAX_VALUE, -1); // Smallest p with a non-infinite Fisher information
-		//u = Double.MIN_NORMAL;
-		//PoissonGaussianFisherInformation f = new RealPoissonGaussianFisherInformation(0.25);
+		//u = 1e-100;
+		//PoissonGaussianFisherInformation f = new RealPoissonGaussianFisherInformation(0.20);
 		//f.setMeanThreshold(Double.MAX_VALUE);
 		//double I = f.getPoissonGaussianI(u);
 		//double lower = f.getPoissonGaussianApproximationI(u);
@@ -33,27 +33,6 @@ public class PoissonGaussianFisherInformationTest
 	private void canComputeRealFisherInformation(double s)
 	{
 		canComputeFisherInformation(new RealPoissonGaussianFisherInformation(s));
-	}
-
-	@Test(expected = AssertionError.class)
-	public void cannotComputeDiscreteFisherInformation()
-	{
-		// TODO - The discrete version currently fails this test.
-		// Do the full differentiation of the PMF that is being used 
-		// to determine if it is computing a correct Fisher information. 
-
-		//org.junit.Assume.assumeTrue(false);
-
-		for (int i = 0; i < 4; i++)
-		{
-			double s = (1 << i) * 0.25;
-			canComputeDiscreteFisherInformation(s);
-		}
-	}
-
-	private void canComputeDiscreteFisherInformation(double s)
-	{
-		canComputeFisherInformation(new DiscretePoissonGaussianFisherInformation(s));
 	}
 
 	private void canComputeFisherInformation(PoissonGaussianFisherInformation f)
@@ -130,12 +109,17 @@ public class PoissonGaussianFisherInformationTest
 			double s = (1 << i) * 0.25;
 			PoissonGaussianFisherInformation f = new RealPoissonGaussianFisherInformation(s);
 			double I = f.getPoissonGaussianI(u);
+			double I2 = f.getPoissonGaussianI(1e-100);
 			double lower = f.getPoissonGaussianApproximationI(u);
 			double upper = PoissonFisherInformation.getPoissonI(u);
-			//double alpha = I / upper;
-			//System.out.printf("s=%g u=%g I=%s  (%s - %s) alpha=%s\n", f.s, u, I, lower, upper, alpha);
+			double alpha = I / upper;
+			System.out.printf("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, 
+					I2, lower, upper, alpha);
 			Assert.assertTrue(I > lower);
 			Assert.assertTrue(I < upper);
+			
+			// Test convergence
+			Assert.assertEquals(I, I2, 1e-50);
 		}
 	}
 }

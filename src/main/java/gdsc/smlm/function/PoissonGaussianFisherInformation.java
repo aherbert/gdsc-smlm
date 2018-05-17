@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package gdsc.smlm.function;
 
 import java.util.Arrays;
@@ -34,10 +37,23 @@ import gnu.trove.list.array.TDoubleArrayList;
  */
 public abstract class PoissonGaussianFisherInformation extends BasePoissonFisherInformation
 {
-	/** The default range for the Gaussian kernel (in units of SD). */
-	public static final double DEFAULT_RANGE = 7;
+	/** The default minimum range for the Gaussian kernel (in units of SD). */
+	public static final int DEFAULT_MIN_RANGE = 6;
 
+	/** The default maximum range for the Gaussian kernel (in units of SD). */
+	public static final int DEFAULT_MAX_RANGE = 38;
+
+	/** The maximum range for the Gaussian kernel (in units of SD). */
+	public static final int MAX_RANGE = 38;
+
+	/** The default cumulative probability for the Poisson distribution. */
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-10;
+
+	/**
+	 * The default sampling of the Gaussian kernel. The kernel will be sampled at s/sampling,
+	 * i.e. this is the number of samples to take per standard deviation unit.
+	 */
+	public static final int DEFAULT_SAMPLING = 4;
 
 	/** Store the limit of the Poisson distribution for small mean for the default cumulative probability. */
 	private static final int[] defaultLimits;
@@ -107,8 +123,8 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	 *
 	 * @param pd
 	 *            the pd
-	 * @param mean
-	 *            the mean
+	 * @param exp
+	 *            the exponent of the mean (in base 2)
 	 * @param cumulativeProbability
 	 *            the cumulative probability
 	 * @return the limit
@@ -116,7 +132,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	private static int computeTinyLimit(CustomPoissonDistribution pd, int exp, double cumulativeProbability)
 	{
 		// Fill all bits of the mantissa
-		long bits = 0xfffffffffffffL;
+		long bits = 0xffffffffffffffL;
 		double mean = Double.longBitsToDouble(bits | (long) (exp + 1023) << 52);
 		pd.setMeanUnsafe(mean);
 		return pd.inverseCumulativeProbability(cumulativeProbability);
@@ -125,8 +141,14 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	/** The standard deviation of the Gaussian. */
 	public final double s;
 
-	/** The range of the Gaussian kernel (in SD units). */
-	public final double range;
+	/** The minimum range of the Gaussian kernel (in SD units). */
+	private int minRange = DEFAULT_MIN_RANGE;
+
+	/** The maximum range of the Gaussian kernel (in SD units). */
+	private int maxRange = DEFAULT_MAX_RANGE;
+
+	/** The scale of the kernel. */
+	private final int scale;
 
 	/** The poisson distribution used to generate the Poisson probabilities. */
 	private CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
@@ -159,7 +181,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	 */
 	public PoissonGaussianFisherInformation(double s) throws IllegalArgumentException
 	{
-		this(s, 5);
+		this(s, DEFAULT_SAMPLING);
 	}
 
 	/**
@@ -167,27 +189,36 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	 *
 	 * @param s
 	 *            the standard deviation of the Gaussian
-	 * @param range
-	 *            the range of the Gaussian kernel (in SD units). This is clipped to the range
-	 *            1-38 to provide a meaningful convolution.
+	 * @param sampling
+	 *            The number of Gaussian samples to take per standard deviation
 	 * @throws IllegalArgumentException
 	 *             If the standard deviation is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the sampling is below 1
+	 * @throws IllegalArgumentException
+	 *             If the maximum kernel size after scaling is too large
 	 */
-	public PoissonGaussianFisherInformation(double s, double range) throws IllegalArgumentException
+	public PoissonGaussianFisherInformation(double s, double sampling) throws IllegalArgumentException
 	{
 		if (!(s > 0 && s <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+		if (!(sampling >= 1 && sampling <= Double.MAX_VALUE))
+			throw new IllegalArgumentException("Gaussian sampling must at least 1");
+		if (s * MAX_RANGE < 0.5)
+			throw new IllegalArgumentException("Gaussian range does not extend to convolve with the Poisson");
 
-		// Gaussian = Math.exp(-0.5 * x^2)
-		// FastMath.exp(-746) == 0
-		// => range for the Gaussian is sqrt(2*746) = 38.6
+		// This is set to work for reasonable values of the Gaussian kernel and sampling
+		// e.g. s [0.5:20], sampling from [1:8].
 
-		if (Double.isNaN(range))
-			throw new IllegalArgumentException("Gaussian range must not be NaN");
-		range = Maths.clip(1, 38, range);
+		double scale = Math.ceil(sampling / s);
+		if (scale * MAX_RANGE > 1000000)
+		{
+			// Don't support excess scaling caused by small kernels
+			throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * MAX_RANGE);
+		}
 
 		this.s = s;
-		this.range = range;
+		this.scale = (int) scale;
 	}
 
 	/**
@@ -215,7 +246,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);;
 		return Maths.clip(lower, upper, I);
 	}
-	
+
 	@Override
 	public double getAlpha(double t)
 	{
@@ -259,13 +290,13 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			return 1.0 / (t + s * s); //getPoissonGaussianApproximationI(t);
 		}
 
-		final int scale = getKernelScale(t);
-		if (scale == 0)
-		{
-			// No Gaussian convolution
-			// Get the Fisher information for a Poisson. 
-			return 1.0 / t; // PoissonFisherInformation.getPoissonI(t);
-		}
+		//		final int scale = getKernelScale(t);
+		//		if (scale == 0)
+		//		{
+		//			// No Gaussian convolution
+		//			// Get the Fisher information for a Poisson. 
+		//			return 1.0 / t; // PoissonFisherInformation.getPoissonI(t);
+		//		}
 
 		// This computes the convolution of a Poisson PMF and a Gaussian PDF.
 		// The value of this is p(z).
@@ -322,9 +353,6 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 
 		// Sample the values of the full range and compute a sum using Simpson integration.
 
-		// Build the Poisson distribution.
-		pd.setMeanUnsafe(t);
-
 		// Only use part of the cumulative distribution.
 		// Start at zero for a 1-tailed truncation of the cumulative distribution.
 		// This code will be for low mean values where the contribution at zero is 
@@ -334,14 +362,16 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		// TODO - Determine if the Poisson can be truncated. We may have to use more of 
 		// the values (for example those returned by computeLimit(...).
 		int maxx;
+		// The exponent provides a rough idea of the size of the mean
+		int exp = NumberUtils.getSignedExponent(t);
 		if (t < 1)
 		{
-			int exp = -NumberUtils.getSignedExponent(t);
-			if (exp >= tinyLimits.length)
-				exp = tinyLimits.length - 1;
-			if (tinyLimits[exp] == 0)
-				tinyLimits[exp] = computeTinyLimit(pd, -exp, cumulativeProbability);
-			maxx = tinyLimits[exp];
+			int e = -exp;
+			if (e >= tinyLimits.length)
+				e = tinyLimits.length - 1;
+			if (tinyLimits[e] == 0)
+				tinyLimits[e] = computeTinyLimit(pd, -e, cumulativeProbability);
+			maxx = tinyLimits[e];
 		}
 		else
 		{
@@ -362,17 +392,21 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			}
 		}
 
+		// Build the Poisson distribution.
+		pd.setMeanUnsafe(t);
 		list.resetQuick();
-		for (int x = minx; x < maxx; x++)
+
+		// XXX - check this is needed
+		// For small t the tail of the distribution is important
+		if (maxx < 10)
+			maxx = 10;
+
+		for (int x = minx; x <= maxx; x++)
 		{
 			double pp = pd.probability(x);
+			if (pp == 0)
+				break;
 			list.add(pp);
-		}
-		// Final value may be zero
-		{
-			double pp = pd.probability(maxx);
-			if (pp != 0)
-				list.add(pp);
 		}
 
 		if (list.size() < 2)
@@ -383,10 +417,10 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			// probability has been altered from the default.
 			return getGaussianI();
 		}
-		
+
 		// Unscaled Poisson
 		double[] p = list.toArray();
-		
+
 		// Up-sample the Poisson
 		if (scale != 1)
 		{
@@ -401,8 +435,21 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			p = list.toArray();
 		}
 
-		// Convolve with the Gaussian kernel
-		double[] g = getGaussianKernel(scale);
+		// Convolve with the Gaussian kernel.
+		// As the mean reduces the Poisson distribution is more skewed 
+		// and the extent of the kernel must change. Just increase the range
+		// for the kernel for each power of 2 the number is below 1.
+		int range = minRange;
+		for (int e = exp; range < maxRange && e <= 0; e++, range++)
+			;
+		double[] g = getGaussianKernel(scale, range);
+
+		// In order for A(z) = P(z-1) to work sum A(z) must be 1
+		double sum;
+		//sum = list.sum();
+		//System.out.printf("Normalisation (t=%g) = %s\n", t, sum);
+		//for (int i = 0; i < p.length; i++)
+		//	p[i] /= sum;
 
 		// Avoid the FFT convolution when the Poisson distribution is 
 		// skewed to c=0. This is due to edge wrap artifacts that are 
@@ -411,8 +458,6 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		// is approximately normal.
 		double[] pg = (t < 10) ? Convolution.convolve(p, g) : Convolution.convolveFast(p, g);
 
-		// In order for A(z) = P(z-1) to work sum A(z) must be 1
-		double sum = 0;
 		//for (int i = 0; i < pg.length; i++)
 		//	sum += pg[i];
 		////System.out.printf("Normalisation = %s\n", sum);
@@ -503,22 +548,18 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	}
 
 	/**
-	 * Gets the scale for convolution. Return 0 if no convolution is possible.
-	 *
-	 * @param t
-	 *            the mean of the Poisson distribution
-	 * @return the scale
-	 */
-	protected abstract int getKernelScale(double t);
-
-	/**
-	 * Gets the gaussian kernel for convolution.
+	 * Gets the gaussian kernel for convolution at a spacing of 1. The kernel may be scaled up so that
+	 * more samples are taken.
+	 * <p>
+	 * This will only be called with a range of 1 to 38.
 	 *
 	 * @param scale
-	 *            the scale
+	 *            the scale (to multiply the standard deviation)
+	 * @param range
+	 *            the range (in SD units)
 	 * @return the gaussian kernel
 	 */
-	protected abstract double[] getGaussianKernel(int scale);
+	protected abstract double[] getGaussianKernel(int scale, int range);
 
 	/**
 	 * Gets the approximate Poisson-Gaussian Fisher information.
@@ -581,6 +622,60 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	}
 
 	/**
+	 * Gets the min range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @return the min range
+	 */
+	public int getMinRange()
+	{
+		return minRange;
+	}
+
+	/**
+	 * Sets the min range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @param minRange
+	 *            the new min range
+	 */
+	public void setMinRange(int minRange)
+	{
+		this.minRange = checkRange(minRange);
+	}
+
+	private int checkRange(int range)
+	{
+		// Gaussian = Math.exp(-0.5 * x^2)
+		// FastMath.exp(-746) == 0
+		// => range for the Gaussian is sqrt(2*746) = 38.6
+		return Maths.clip(1, MAX_RANGE, range);
+	}
+
+	/**
+	 * Gets the max range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @return the max range
+	 */
+	public int getMaxRange()
+	{
+		return maxRange;
+	}
+
+	/**
+	 * Sets the max range of the Gaussian kernel in SD units.
+	 * The Gaussian kernel is scaled dynamically depending on the shape of the Poisson distribution.
+	 *
+	 * @param maxRange
+	 *            the new max range
+	 */
+	public void setMaxRange(int maxRange)
+	{
+		this.maxRange = checkRange(maxRange);
+	}
+
+	/**
 	 * Gets the mean threshold for the switch to a Gaussian-Gaussian convolution.
 	 *
 	 * @return the mean threshold
@@ -600,7 +695,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	{
 		this.meanThreshold = meanThreshold;
 	}
-	
+
 	/**
 	 * Gets the cumulative probability of the Poisson distribution that is used.
 	 *
@@ -627,7 +722,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			if (limits == defaultLimits)
 			{
 				limits = new int[defaultLimits.length];
-				tinyLimits = new int[tinyLimits.length];
+				tinyLimits = new int[defaultTinyLimits.length];
 			}
 			else
 			{

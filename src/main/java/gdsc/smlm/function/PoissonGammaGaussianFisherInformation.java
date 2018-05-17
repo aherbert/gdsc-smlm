@@ -26,6 +26,9 @@ import gnu.trove.list.array.TDoubleArrayList;
  */
 public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation
 {
+	// TODO - fix this to use samplijng and a range for the kernel
+
+	
 	/** The default threshold for the relative probability. */
 	public static final double DEFAULT_RELATIVE_PROBABILITY_THRESHOLD = 1e-5;
 

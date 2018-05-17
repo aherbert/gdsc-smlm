@@ -24,6 +24,8 @@ import gdsc.smlm.utils.Convolution;
  */
 public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGaussianFisherInformation
 {
+	// TODO - fix this to use sampling and a range for the kernel
+	
 	/**
 	 * The Gaussian convolution kernels for different scaling. The scale is 2^index, e.g. 1, 2, 4, 8, 16, 32, 64, 128.
 	 */
@@ -41,7 +43,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	 */
 	public RealPoissonGammaGaussianFisherInformation(double m, double s) throws IllegalArgumentException
 	{
-		this(m, s, PoissonGaussianFisherInformation.DEFAULT_RANGE);
+		this(m, s, 6);
 	}
 
 	/**

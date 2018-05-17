@@ -14,7 +14,6 @@ import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
 import gdsc.smlm.function.BasePoissonFisherInformation;
-import gdsc.smlm.function.DiscretePoissonGaussianFisherInformation;
 import gdsc.smlm.function.HalfPoissonFisherInformation;
 import gdsc.smlm.function.InterpolatedPoissonFisherInformation;
 import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
@@ -303,11 +302,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "CCD noise must be positive");
 			return null;
 		}
-		double range = PoissonGaussianFisherInformation.DEFAULT_RANGE;
-		//range = 15;
-		PoissonGaussianFisherInformation fi = (discrete) ? new DiscretePoissonGaussianFisherInformation(s, range)
-				: new RealPoissonGaussianFisherInformation(s, range);
+		
+		//		discrete = false;
+		//		double range = PoissonGaussianFisherInformation.DEFAULT_RANGE;
+		//		range = 35;
+		//		PoissonGaussianFisherInformation fi = (discrete) ? new DiscretePoissonGaussianFisherInformation(s, range)
+		//				: new RealPoissonGaussianFisherInformation(s, range);
+
+		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
+		//sampling = 8;
+		PoissonGaussianFisherInformation fi = new RealPoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
+		//fi.setMaxRange(38);
 		return fi;
 	}
 

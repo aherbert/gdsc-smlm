@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-import gdsc.core.utils.Maths;
 import gdsc.smlm.utils.Convolution;
 
 /*----------------------------------------------------------------------------- 
@@ -33,11 +32,8 @@ import gdsc.smlm.utils.Convolution;
  */
 public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherInformation
 {
-	/** The default scale for the kernel. */
-	private final int defaultScale;
-
 	/**
-	 * The Gaussian convolution kernels for different scaling. The scale is 2^index, e.g. 1, 2, 4, 8, 16, 32, 64, 128.
+	 * The Gaussian convolution kernels for different ranges.
 	 */
 	private final double[][] kernel;
 
@@ -48,10 +44,14 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 	 *            the standard deviation of the Gaussian
 	 * @throws IllegalArgumentException
 	 *             If the standard deviation is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the sampling is below 1
+	 * @throws IllegalArgumentException
+	 *             If the maximum kernel size after scaling is too large
 	 */
 	public RealPoissonGaussianFisherInformation(double s) throws IllegalArgumentException
 	{
-		this(s, 7);
+		this(s, PoissonGaussianFisherInformation.DEFAULT_SAMPLING);
 	}
 
 	/**
@@ -59,64 +59,19 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 	 *
 	 * @param s
 	 *            the standard deviation of the Gaussian
-	 * @param range
-	 *            the range of the Gaussian kernel (in SD units). This is clipped to the range
-	 *            1-38 to provide a meaningful convolution.
+	 * @param sampling
+	 *            The number of Gaussian samples to take per standard deviation
 	 * @throws IllegalArgumentException
 	 *             If the standard deviation is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the sampling is below 1
+	 * @throws IllegalArgumentException
+	 *             If the maximum kernel size after scaling is too large
 	 */
-	public RealPoissonGaussianFisherInformation(double s, double range) throws IllegalArgumentException
+	public RealPoissonGaussianFisherInformation(double s, double sampling) throws IllegalArgumentException
 	{
-		super(s, range);
-
-		// Check if the Gaussian standard deviation is above the threshold for computation.
-		// Also check if the gaussian filter will touch more than one Poisson value.
-		// Otherwise convolution is not possible.
-		// The limit s==0.04 is based on the scale being 4/s = 100. Do not support scaling 
-		// greater than this. It is unlikely anyway.
-		if (s >= 0.04 && s * range >= 1)
-		{
-			// Determine how much to up-sample so that the convolution with the Gaussian
-			// uses multiple values of the Gaussian.
-			defaultScale = getScale(s);
-
-			// Store the Gaussian kernels for convolution:
-			// 1, 2, 4, 8, 16, 32, 64, 128
-			kernel = new double[8][];
-		}
-		else
-		{
-			defaultScale = 0;
-			kernel = null;
-		}
-	}
-
-	private static int getScale(double s)
-	{
-		double scale = Math.ceil(4 / s);
-		if (scale > 128)
-			return 128;
-		return Maths.nextPow2((int) scale);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.PoissonGaussianFisherInformation#getGaussianKernel(double)
-	 */
-	@Override
-	protected int getKernelScale(double t)
-	{
-		if (defaultScale == 0)
-			return 0;
-		// Choose the kernel. A small mean requires more Gaussian samples.
-		// Note the default scale is the minimum required to sample at 0.5 SD units.
-		// Find the same for the Poisson using its variance.
-		// mean 4 => scale = 1
-		// mean <4 => scale = 2
-		// mean <1 => scale >= 4
-		// This may have to be changed.
-		return Math.max(defaultScale, getScale(t / 2));
+		super(s, sampling);
+		kernel = new double[39][];
 	}
 
 	/*
@@ -125,29 +80,23 @@ public class RealPoissonGaussianFisherInformation extends PoissonGaussianFisherI
 	 * @see gdsc.smlm.function.PoissonGaussianFisherInformation#getGaussianKernel(int)
 	 */
 	@Override
-	protected double[] getGaussianKernel(int scale)
+	protected double[] getGaussianKernel(int scale, int range)
 	{
 		// Get the Gaussian kernel
-		int index = log2(scale);
-		if (kernel[index] == null)
+		if (kernel[range] == null)
 		{
-			//kernel[index] = Convolution.makeGaussianKernel(s * scale, range, true);
-			kernel[index] = Convolution.makeGaussianKernel(s * scale, range, false);
+			kernel[range] = Convolution.makeGaussianKernel(s * scale, range, true);
+			//kernel[range] = Convolution.makeGaussianKernel(s * scale, range, false);
+			
 			// This does not work. The Poisson is discrete and so must be convolved
 			// with a continuous Gaussian. Using the Error function is equivalent
 			// to integrating the continuous Gaussian with the same value of the 
-			// Poisson over the range x-0.5 to x+0.5. However the Poisson is zero
-			// in all that range except for x.
-			//kernel[index] = Convolution.makeErfGaussianKernel(s * scale, range);
+			// Poisson over the range x-0.5 to x+0.5.
+			
+			// Lack of granularity in the kernel makes the A^2/P function incorrect. 
+			
+			//kernel[range] = Convolution.makeErfGaussianKernel(s * scale, range);
 		}
-		return kernel[index];
-	}
-
-	private int log2(int scale)
-	{
-		int bits = 30;
-		while ((scale & (1 << bits)) == 0)
-			bits--;
-		return bits;
+		return kernel[range];
 	}
 }
