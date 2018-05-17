@@ -25,7 +25,6 @@ package gdsc.smlm.function;
  */
 public interface FisherInformation
 {
-
 	/**
 	 * Gets the fisher information: the amount of information that
 	 * an observable random variable X carries about an unknown parameter θ of a distribution that models X.

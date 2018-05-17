@@ -56,6 +56,14 @@ public class PoissonGaussianApproximationFisherInformation extends BasePoissonFi
 	}
 	
 	@Override
+	public double getAlpha(double t)
+	{
+		if (t <= 0)
+			throw new IllegalArgumentException("Poisson mean must be positive");
+		return t / (t + variance);
+	}
+	
+	@Override
 	protected void postClone()
 	{
 		// Nothing to do

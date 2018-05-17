@@ -215,6 +215,13 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);;
 		return Maths.clip(lower, upper, I);
 	}
+	
+	@Override
+	public double getAlpha(double t)
+	{
+		// Simple implementation
+		return t * getFisherInformation(t);
+	}
 
 	/**
 	 * Gets the Poisson-Gaussian Fisher information.

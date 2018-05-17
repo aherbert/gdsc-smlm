@@ -20,6 +20,21 @@ package gdsc.smlm.function;
  */
 public abstract class BasePoissonFisherInformation implements FisherInformation, Cloneable
 {
+	/**
+	 * Gets the alpha scale of the Poisson Fisher information. 
+	 * This is the Fisher information relative to the Fisher information of a pure Poisson distribution:
+	 * <pre>
+	 * alpha = FI / (Poisson FI) = FI * t
+	 * </pre>
+	 *
+	 * @param t
+	 *            parameter θ of a distribution that models X
+	 * @return the alpha scale
+	 * @throws IllegalArgumentException
+	 *             if the parameter is not in the valid range
+	 */
+	public abstract double getAlpha(double t);
+
 	/*
 	 * (non-Javadoc)
 	 * 

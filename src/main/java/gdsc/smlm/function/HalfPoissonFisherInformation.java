@@ -14,16 +14,17 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Calculate the Fisher information for a Poisson distribution.
+ * Calculate half the Fisher information for a Poisson distribution. 
+ * This is suitable for modelling an EM-CCD camera (Poisson-Gamma-Gaussian distribution) when the mean is high.
  * <p>
  * <a href="https://en.wikipedia.org/wiki/Poisson_distribution">https://en.wikipedia.org/wiki/Poisson_distribution</a>
  */
-public class PoissonFisherInformation extends BasePoissonFisherInformation
+public class HalfPoissonFisherInformation extends BasePoissonFisherInformation
 {
 	/*
 	 * {@inheritDoc}
 	 * <p>
-	 * The input parameter refers to the mean of the Poisson distribution. The Fisher information is 1/mean.
+	 * The input parameter refers to the mean of the Poisson distribution. The Fisher information is 1/(2*mean).
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
@@ -31,27 +32,13 @@ public class PoissonFisherInformation extends BasePoissonFisherInformation
 	{
 		if (t <= 0)
 			throw new IllegalArgumentException("Poisson mean must be positive");
-		return 1.0 / t;
-	}
-
-	/**
-	 * Gets the Poisson Fisher information.
-	 *
-	 * @param t
-	 *            the poisson mean
-	 * @return the poisson Fisher information
-	 */
-	public static double getPoissonI(double t)
-	{
-		if (t <= 0)
-			throw new IllegalArgumentException("Poisson mean must be positive");
-		return 1.0 / t;
+		return 0.5 / t;
 	}
 	
 	@Override
 	public double getAlpha(double t)
 	{
-		return 1;
+		return 0.5;
 	}
 	
 	@Override

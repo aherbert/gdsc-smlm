@@ -60,8 +60,8 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	private double relativeProbabilityThreshold = DEFAULT_RELATIVE_PROBABILITY_THRESHOLD;
 
-	/** The mean threshold for the switch to half the Poisson Fisher information. */
-	private double meanThreshold = 200;
+	/** The upper mean threshold for the switch to half the Poisson Fisher information. */
+	private double upperMeanThreshold = 200;
 
 	/**
 	 * The lower mean threshold where the Fisher information is computed assuming that the alpha coefficient is
@@ -174,6 +174,28 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		return Maths.clip(lower, upper, I);
 	}
 
+	@Override
+	public double getAlpha(double t)
+	{
+		// Don't check against MIN_MEAN as this is done later if it is necessary
+		// to compute the Fisher information.
+
+		if (t > upperMeanThreshold)
+		{
+			// Use an approximation as half the Poisson Fisher information
+			return 0.5;
+		}
+
+		if (t < lowerMeanThreshold)
+		{
+			// The Fisher information plateaus relative to the poisson Fisher information
+			// at low mean.
+			return getLowerMeanThresholdAlpha();
+		}
+		
+		return t * getFisherInformation(t);
+	}
+	
 	/**
 	 * Gets the Poisson-Gamma-Gaussian Fisher information.
 	 * <p>
@@ -201,7 +223,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 		lastT = t;
 
-		if (t > meanThreshold)
+		if (t > upperMeanThreshold)
 		{
 			// Use an approximation as half the Poisson Fisher information when the mean is large
 			return 1.0 / (2 * t);
@@ -214,7 +236,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// Compute the Poisson Fisher information. This will not be infinity since
 			// t is >= MIN_MEAN.
 			double fi = 1.0 / t;
-			return getAlpha() * fi;
+			return getLowerMeanThresholdAlpha() * fi;
 		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
@@ -754,7 +776,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	public double getMeanThreshold()
 	{
-		return meanThreshold;
+		return upperMeanThreshold;
 	}
 
 	/**
@@ -769,7 +791,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	public void setMeanThreshold(double meanThreshold)
 	{
-		this.meanThreshold = meanThreshold;
+		this.upperMeanThreshold = meanThreshold;
 	}
 
 	/**
@@ -807,14 +829,14 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		}
 	}
 
-	private double getAlpha()
+	private double getLowerMeanThresholdAlpha()
 	{
 		if (alpha == -1)
-			alpha = computeAlpha();
+			alpha = computeLowerMeanThresholdAlpha();
 		return alpha;
 	}
 
-	private double computeAlpha()
+	private double computeLowerMeanThresholdAlpha()
 	{
 		double upper = 1.0 / lowerMeanThreshold;
 		double fi = getPoissonGammaGaussianI(lowerMeanThreshold);

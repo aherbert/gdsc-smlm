@@ -1,5 +1,11 @@
 package gdsc.smlm.function;
 
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.NonMonotonicSequenceException;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -21,25 +27,101 @@ package gdsc.smlm.function;
  */
 public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInformation
 {
-	// TODO - store a polynomial spline function to interpolate the alpha parameter.
-	// This must use a log x scale (log(Poisson mean)).
+	/** The minimum of the interpolation range. */
+	private final double min;
 
-	// At the minimum the alpha is fixed to the min.
+	/** The maximum of the interpolation range. */
+	private final double max;
 
-	// At the maximum the Fisher information can use a fixed alpha or a approximation
-	// function.
+	/** The minimum of the interpolation range. */
+	private final double minReal;
 
-	// Within the range the poisson mean is converted to a log scale and alpha is
-	// interpolated.
+	/** The maximum of the interpolation range. */
+	private final double maxReal;
 
-	// The Fisher information is returned using the alpha multiplied by the 
-	// Poisson Fisher information.
+	/** The alpha at the minimum of the interpolation range. */
+	private final double alphaMin;
+
+	/** The alpha at the maximum of the interpolation range. */
+	private final double alphaMax;
+
+	/** The function to compute the Fisher information above the maximum of the interpolation range. */
+	private BasePoissonFisherInformation upperFI;
+
+	/** The function to interpolate alpha in the range min-max. */
+	private final PolynomialSplineFunction alphaF;
+
+	/** The fast log function. */
+	private FastLog fastLog;
 
 	/**
-	 * Instantiates a new poisson gaussian fisher information.
+	 * Instantiates a new interpolated poisson fisher information.
+	 * The input series of means must have at least 3 points and be in increasing order.
+	 *
+	 * @param logU
+	 *            the log of the mean
+	 * @param alpha
+	 *            the alpha for each Poisson mean
+	 * @throws DimensionMismatchException
+	 *             if {@code x} and {@code y}
+	 *             have different sizes.
+	 * @throws NumberIsTooSmallException
+	 *             if the size of {@code x} is smaller
+	 *             than 3.
+	 * @throws NonMonotonicSequenceException
+	 *             if {@code x} is not sorted in
+	 *             strict increasing order.
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
 	 */
-	public InterpolatedPoissonFisherInformation() throws IllegalArgumentException
+	public InterpolatedPoissonFisherInformation(double[] logU, double[] alpha)
+			throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
 	{
+		this(logU, alpha, null);
+	}
+
+	/**
+	 * Instantiates a new interpolated poisson fisher information.
+	 * The input series of means must have at least 3 points and be in increasing order.
+	 *
+	 * @param logU
+	 *            the log of the mean
+	 * @param alpha
+	 *            the alpha for each Poisson mean
+	 * @param upperFI
+	 *            the upper FI
+	 * @throws DimensionMismatchException
+	 *             if {@code x} and {@code y}
+	 *             have different sizes.
+	 * @throws NumberIsTooSmallException
+	 *             if the size of {@code x} is smaller
+	 *             than 3.
+	 * @throws NonMonotonicSequenceException
+	 *             if {@code x} is not sorted in
+	 *             strict increasing order.
+	 * @throws IllegalArgumentException
+	 *             the illegal argument exception
+	 */
+	public InterpolatedPoissonFisherInformation(double[] logU, double[] alpha, BasePoissonFisherInformation upperFI)
+			throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException
+	{
+		SplineInterpolator si = new SplineInterpolator();
+		alphaF = si.interpolate(logU, alpha);
+
+		this.upperFI = upperFI;
+
+		min = logU[0];
+		alphaMin = alpha[0];
+
+		int n_1 = logU.length - 1;
+		max = logU[n_1];
+		alphaMax = alpha[n_1];
+
+		// Store the ends in non-log format
+		minReal = Math.exp(min);
+		maxReal = Math.exp(max);
+
+		fastLog = FastLogFactory.getFastLog();
 	}
 
 	/**
@@ -59,20 +141,64 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		// Poisson fisher information
 		double I = 1.0 / t;
+		// The Fisher information is returned using the alpha multiplied by the 
+		// Poisson Fisher information.
 		if (I != Double.POSITIVE_INFINITY)
 			I *= getAlpha(t);
 		return I;
 	}
 
-	private double getAlpha(double t)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.BasePoissonFisherInformation#getAlpha(double)
+	 */
+	public double getAlpha(double t)
 	{
-		// TODO
-		return 1;
+		if (t <= 0)
+			throw new IllegalArgumentException("Poisson mean must be positive");
+
+		// At the minimum the Fisher information uses a fixed alpha.
+		if (t <= minReal)
+			return alphaMin;
+
+		// At the maximum the Fisher information can use a fixed alpha or a approximation
+		// function.
+		if (t >= maxReal)
+			return getAlphaMax(t);
+
+		// Within the range the poisson mean is converted to a log scale and alpha is
+		// interpolated. Use a fast log for this as the precision is not critical due 
+		// to the assumed error in the interpolation. 
+		// At this point t is known to be in the bound >0, but it may be NaN or infinity
+		// so allow the checks (i.e. don't use fastLogD(double)).
+		final double x = fastLog.logD(t);
+
+		// Check again as fast log may not be precise. 
+		// This avoids an out-of-range exception in the interpolating function. 
+		if (x <= min)
+			return alphaMin;
+		if (x >= max)
+			return getAlphaMax(t);
+
+		return alphaF.value(x);
 	}
 
+	private double getAlphaMax(double t)
+	{
+		return (upperFI != null) ? upperFI.getAlpha(t) : alphaMax;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.BasePoissonFisherInformation#postClone()
+	 */
 	@Override
 	protected void postClone()
 	{
-		// Nothing to do
+		// Ensure the function instance is cloned
+		if (upperFI != null)
+			upperFI = upperFI.clone();
 	}
 }
