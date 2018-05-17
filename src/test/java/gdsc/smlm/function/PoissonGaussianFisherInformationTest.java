@@ -72,7 +72,7 @@ public class PoissonGaussianFisherInformationTest
 		double I = f.getPoissonGaussianI(u);
 		double lower = f.getPoissonGaussianApproximationI(u);
 		double upper = PoissonFisherInformation.getPoissonI(u);
-		System.out.printf("s=%g u=%g I=%s  (%s - %s) alpha=%s\n", f.s, u, I, lower, upper, I / upper);
+		//System.out.printf("s=%g u=%g I=%s  (%s - %s) alpha=%s\n", f.s, u, I, lower, upper, I / upper);
 		// Allow a tolerance on the approximation at high mean.
 		// The function does not compute the sum to infinity and so can underestimate
 		// the value.
@@ -132,8 +132,8 @@ public class PoissonGaussianFisherInformationTest
 			double I = f.getPoissonGaussianI(u);
 			double lower = f.getPoissonGaussianApproximationI(u);
 			double upper = PoissonFisherInformation.getPoissonI(u);
-			double alpha = I / upper;
-			System.out.printf("s=%g u=%g I=%s  (%s - %s) alpha=%s\n", f.s, u, I, lower, upper, alpha);
+			//double alpha = I / upper;
+			//System.out.printf("s=%g u=%g I=%s  (%s - %s) alpha=%s\n", f.s, u, I, lower, upper, alpha);
 			Assert.assertTrue(I > lower);
 			Assert.assertTrue(I < upper);
 		}

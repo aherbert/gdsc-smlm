@@ -404,7 +404,12 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		// Convolve with the Gaussian kernel
 		double[] g = getGaussianKernel(scale);
 
-		double[] pg = Convolution.convolveFast(p, g);
+		// Avoid the FFT convolution when the Poisson distribution is 
+		// skewed to c=0. This is due to edge wrap artifacts that are 
+		// usually avoided using an edge window function. 
+		// Skew only occurs at low mean, at higher mean the distribution
+		// is approximately normal.
+		double[] pg = (t < 10) ? Convolution.convolve(p, g) : Convolution.convolveFast(p, g);
 
 		// In order for A(z) = P(z-1) to work sum A(z) must be 1
 		double sum = 0;
