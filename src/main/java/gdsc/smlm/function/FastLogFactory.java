@@ -31,4 +31,14 @@ public class FastLogFactory
 			fastLog = new TurboLog();
 		return fastLog;
 	}
+	
+	/**
+	 * Gets an instance of FastLog that uses Math.log, i.e. this is not fast.
+	 *
+	 * @return the log instance
+	 */
+	public static FastLog getLog()
+	{
+		return NonFastLog.INSTANCE;
+	}
 }
