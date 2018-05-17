@@ -15,6 +15,8 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
 import gdsc.smlm.function.BasePoissonFisherInformation;
 import gdsc.smlm.function.DiscretePoissonGaussianFisherInformation;
+import gdsc.smlm.function.HalfPoissonFisherInformation;
+import gdsc.smlm.function.InterpolatedPoissonFisherInformation;
 import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
@@ -52,6 +54,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	// Options to show the computed convolution across a range of means.
 
 	private static final String TITLE = "Camera Model Fisher Information Analysis";
+
+	private static final String[] POINT_OPTION = { "None", "X", "Circle", "Box", "Cross" };
 
 	private CameraModelFisherInformationAnalysisSettings.Builder settings;
 
@@ -101,6 +105,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		gd.addNumericField("CCD_noise", settings.getCcdNoise(), 2);
 		gd.addNumericField("EM-CCD_gain", settings.getEmCcdGain(), 2);
 		gd.addNumericField("EM-CCD_noise", settings.getEmCcdNoise(), 2);
+		gd.addChoice("Plot_point", POINT_OPTION, settings.getPointOption());
 
 		gd.showDialog();
 
@@ -114,6 +119,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		settings.setCcdNoise(gd.getNextNumber());
 		settings.setEmCcdGain(gd.getNextNumber());
 		settings.setEmCcdNoise(gd.getNextNumber());
+		settings.setPointOption(gd.getNextChoiceIndex());
 
 		SettingsManager.writeSettings(settings);
 
@@ -151,7 +157,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		// Compute relative to the Poisson Fisher information
 		double[] rpgFI = getAlpha(pgFI, photons);
-		double[] rpgaFI = getAlpha(pgaFI, photons);
+		//double[] rpgaFI = getAlpha(pgaFI, photons);
 		double[] rpggFI = getAlpha(pggFI, photons);
 
 		Color color1 = Color.BLUE;
@@ -165,19 +171,55 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double[] x = (logScaleX) ? photons : exp;
 		String xTitle = (logScaleX) ? "photons" : "log10(photons)";
 
+		// Get interpolation for alpha
+		double[] logU = exp.clone();
+		double scale = Math.log(10);
+		for (int i = 0; i < logU.length; i++)
+			logU[i] *= scale;
+		BasePoissonFisherInformation ipg = new InterpolatedPoissonFisherInformation(logU, rpgFI, pga);
+		BasePoissonFisherInformation ipga = pga; // No need for interpolation
+		BasePoissonFisherInformation ipgg = new InterpolatedPoissonFisherInformation(logU, rpggFI,
+				new HalfPoissonFisherInformation());
+
+		// Interpolate with 300 points for smooth curve
+		int n = 300;
+		double[] iexp = new double[n + 1];
+		double[] iphotons = new double[iexp.length];
+		double h = (exp[exp.length - 1] - exp[0]) / n;
+		for (int i = 0; i <= n; i++)
+		{
+			iexp[i] = exp[0] + i * h;
+			iphotons[i] = FastMath.pow(10, iexp[i]);
+		}
+		double[] ix = (logScaleX) ? iphotons : iexp;
+		double[] irpgFI = getAlpha(ipg, iphotons);
+		double[] irpgaFI = getAlpha(ipga, iphotons);
+		double[] irpggFI = getAlpha(ipgg, iphotons);
+
+		int pointShape = getPointShape();
+
 		String title = "Relative Fisher Information";
 		Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
 		plot.setLimits(x[0], x[x.length - 1], 0, 1);
 		if (logScaleX)
 			plot.setLogScaleX();
 		plot.setColor(color1);
-		plot.addPoints(x, rpgFI, Plot.LINE);
+		plot.addPoints(ix, irpgFI, Plot.LINE);
 		plot.setColor(color2);
-		plot.addPoints(x, rpgaFI, Plot.LINE);
+		plot.addPoints(ix, irpgaFI, Plot.LINE);
 		plot.setColor(color3);
-		plot.addPoints(x, rpggFI, Plot.LINE);
+		plot.addPoints(ix, irpggFI, Plot.LINE);
 		plot.setColor(Color.BLACK);
 		plot.addLegend("CCD\nCCD approx\nEM CCD");
+		// Option to show nodes
+		if (pointShape != -1)
+		{
+			plot.setColor(color1);
+			plot.addPoints(x, rpgFI, pointShape);
+			plot.setColor(color3);
+			plot.addPoints(x, rpggFI, pointShape);
+			plot.setColor(Color.BLACK);
+		}
 		Utils.display(title, plot, 0, wo);
 
 		// The approximation should not produce an infinite computation
@@ -218,6 +260,16 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		plot.addPoints(x, pggFI, Plot.LINE);
 		plot.setColor(Color.BLACK);
 		plot.addLegend("CCD\nCCD approx\nEM CCD");
+		//// Option to show nodes
+		// This gets messy as the lines are straight
+		//if (pointShape != -1)
+		//{
+		//	plot.setColor(color1);
+		//	plot.addPoints(x, pgFI, pointShape);
+		//	plot.setColor(color3);
+		//	plot.addPoints(x, pggFI, pointShape);
+		//	plot.setColor(Color.BLACK);
+		//}
 		Utils.display(title, plot, 0, wo);
 
 		wo.tile();
@@ -393,5 +445,32 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			rI[i] = I[i] * photons[i];
 		}
 		return rI;
+	}
+
+	private double[] getAlpha(BasePoissonFisherInformation fi, double[] photons)
+	{
+		// Do not multi-thread as this is an interpolated/fast function
+		double[] rI = new double[photons.length];
+		for (int i = 0; i < photons.length; i++)
+		{
+			rI[i] = fi.getAlpha(photons[i]);
+		}
+		return rI;
+	}
+
+	private int getPointShape()
+	{
+		switch (settings.getPointOption())
+		{
+			case 1:
+				return Plot.X;
+			case 2:
+				return Plot.CIRCLE;
+			case 3:
+				return Plot.BOX;
+			case 4:
+				return Plot.CROSS;
+		}
+		return -1;
 	}
 }

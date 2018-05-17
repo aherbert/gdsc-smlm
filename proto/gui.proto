@@ -479,6 +479,7 @@ message CameraModelFisherInformationAnalysisSettings {
 	double ccd_noise = 5;
 	double em_ccd_gain = 6;
 	double em_ccd_noise = 7;
+	int32 point_option = 8;
 }
 
 // Contains settings for the Cubic Spline Manager plugin
