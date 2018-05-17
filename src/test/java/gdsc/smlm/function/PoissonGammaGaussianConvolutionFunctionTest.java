@@ -6,8 +6,6 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.Maths;
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 
 public class PoissonGammaGaussianConvolutionFunctionTest
