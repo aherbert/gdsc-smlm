@@ -43,7 +43,7 @@ public class TurboLog extends FastLog
 
 	/**
 	 * The bounds below 1 where the function switches to use Math.log. This results in a maximum relative error of
-	 * 7.95e-4 for x below x.
+	 * 7.95e-4 for x below 1.
 	 */
 	public static final double LOWER_ONE_BOUND = 0.92;
 	/**
