@@ -53,7 +53,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	 * The default sampling of the Gaussian kernel. The kernel will be sampled at s/sampling,
 	 * i.e. this is the number of samples to take per standard deviation unit.
 	 */
-	public static final int DEFAULT_SAMPLING = 4;
+	public static final int DEFAULT_SAMPLING = 16;
 
 	/** Store the limit of the Poisson distribution for small mean for the default cumulative probability. */
 	private static final int[] defaultLimits;
@@ -442,6 +442,11 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		int range = minRange;
 		for (int e = exp; range < maxRange && e <= 0; e++, range++)
 			;
+		// Ensure the kernel range covers multiple values of the Poisson distribution. 
+		// Only applicable to small kernels
+		while (range < maxRange && range * s < 1)
+			range++;
+
 		double[] g = getGaussianKernel(scale, range);
 
 		// In order for A(z) = P(z-1) to work sum A(z) must be 1
