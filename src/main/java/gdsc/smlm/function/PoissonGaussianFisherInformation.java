@@ -171,6 +171,9 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	/** Store the limit of the Poisson distribution for tiny mean for the cumulative probability. */
 	private int[] tinyLimits = defaultTinyLimits;
 
+	/** Flag to indicate no possible convolution with the gaussian. */
+	private final boolean noGaussian;
+
 	/**
 	 * Instantiates a new poisson gaussian fisher information.
 	 *
@@ -204,21 +207,28 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
 		if (!(sampling >= 1 && sampling <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gaussian sampling must at least 1");
-		if (s * MAX_RANGE < 0.5)
-			throw new IllegalArgumentException("Gaussian range does not extend to convolve with the Poisson");
-
-		// This is set to work for reasonable values of the Gaussian kernel and sampling
-		// e.g. s [0.5:20], sampling from [1:8].
-
-		double scale = Math.ceil(sampling / s);
-		if (scale * s * MAX_RANGE > 1000000)
-		{
-			// Don't support excess scaling caused by small kernels
-			throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * s * MAX_RANGE);
-		}
-
 		this.s = s;
-		this.scale = (int) scale;
+		noGaussian = (s * MAX_RANGE < 1);
+		if (noGaussian)
+		{
+			//throw new IllegalArgumentException("Gaussian range does not extend to convolve with the Poisson");
+			// This is OK. Just return the information for a Poisson.
+			this.scale = 0;
+		}
+		else
+		{
+
+			// This is set to work for reasonable values of the Gaussian kernel and sampling
+			// e.g. s [0.5:20], sampling from [1:8].
+
+			double scale = Math.ceil(sampling / s);
+			if (scale * s * MAX_RANGE > 1000000)
+			{
+				// Don't support excess scaling caused by small kernels
+				throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * s * MAX_RANGE);
+			}
+			this.scale = (int) scale;
+		}
 	}
 
 	/**
@@ -251,7 +261,7 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	public double getAlpha(double t)
 	{
 		// Simple implementation
-		return t * getFisherInformation(t);
+		return (noGaussian) ? 1 : t * getFisherInformation(t);
 	}
 
 	/**
@@ -284,19 +294,18 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 			//return getGaussianI();
 		}
 
+		if (noGaussian)
+		{
+			// No Gaussian convolution
+			// Get the Fisher information for a Poisson. 
+			return 1.0 / t;
+		}
+
 		if (t > meanThreshold)
 		{
 			// Use an approximation when the Poisson mean is large
 			return 1.0 / (t + s * s); //getPoissonGaussianApproximationI(t);
 		}
-
-		//		final int scale = getKernelScale(t);
-		//		if (scale == 0)
-		//		{
-		//			// No Gaussian convolution
-		//			// Get the Fisher information for a Poisson. 
-		//			return 1.0 / t; // PoissonFisherInformation.getPoissonI(t);
-		//		}
 
 		// This computes the convolution of a Poisson PMF and a Gaussian PDF.
 		// The value of this is p(z).
