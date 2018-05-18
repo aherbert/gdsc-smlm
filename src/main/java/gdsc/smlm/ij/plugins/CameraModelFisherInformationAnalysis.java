@@ -158,7 +158,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		// ==============
 		{
 			// Debug PGG
-			double t = 10;
+			double t = 1;
 			pgg.getFisherInformation(t);
 			double[][] data1 = pgg.getFisherInformationFunction(false);
 			double[][] data2 = pgg.getFisherInformationFunction(true);

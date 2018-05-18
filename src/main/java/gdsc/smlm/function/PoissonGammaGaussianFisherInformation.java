@@ -470,7 +470,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// This computes the sum as:
 			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
 			// The number of steps must be modulo 2. Assume all values before this are zero.
-			// The final step before maxi must sum 2. 
+			// The final step before maxi must sum 4. 
 			final int end = (maxi - 1) % 2;
 			double sum4 = 0, sum2 = 0;
 			for (int i = 0; i < maxi; i++)
@@ -558,7 +558,7 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// size data. When scale2 != scale then it will be different
 		// due to less accurate sampling of the convolution.
 		double startRange2F = getF(P[mini], A[mini]);
-		System.out.printf("%s == %s (%g)\n", endRange1F, startRange2F,
+		System.out.printf("t=%g  endRange1=%g  %s == %s (%g)\n", t, endRange1, endRange1F, startRange2F,
 				gdsc.core.utils.DoubleEquality.relativeError(endRange1F, startRange2F));
 
 		// We assume that the function values at the end are zero and so do not 
@@ -569,12 +569,13 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
 			// This computes the sum as:
 			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-			// The final step before maxi must sum 2. 
+			// The first step must be sum 3. 
+			final int end = (mini + 1 + 2) % 3;
 			double sum3 = 0, sum2 = 0;
 			for (int i = mini + 1; i < P.length; i++)
 			{
 				final double f = getF(P[i], A[i]);
-				if (i % 3 == 2)
+				if (i % 3 == end)
 					sum2 += f;
 				else
 					sum3 += f;
@@ -589,12 +590,13 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// This computes the sum as:
 			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
 			// The number of steps must be modulo 2. Assume all values before this are zero.
-			// The final step before maxi must sum 2. 
+			// The first step must be sum 4. 
+			final int end = (mini + 1) % 2;
 			double sum4 = 0, sum2 = 0;
 			for (int i = mini + 1; i < P.length; i++)
 			{
 				final double f = getF(P[i], A[i]);
-				if (i % 2 == 0)
+				if (i % 2 == end)
 					sum4 += f;
 				else
 					sum2 += f;
