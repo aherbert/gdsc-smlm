@@ -27,7 +27,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	/**
 	 * The Gaussian convolution kernels for different ranges.
 	 */
-	private final double[][] kernel;
+	private final double[][][] kernel;
 
 	/**
 	 * Instantiates a new real poisson gaussian fisher information.
@@ -68,7 +68,7 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 			throws IllegalArgumentException
 	{
 		super(m, s, sampling);
-		kernel = new double[39][];
+		kernel = new double[LOG_2_MAX_SCALE + 1][39][];
 	}
 
 	/*
@@ -79,15 +79,16 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 	@Override
 	protected double[] getUnitGaussianKernel(int scale, int range)
 	{
-		if (kernel[scale] == null)
+		int index = getIndex(scale);
+		if (kernel[index][range] == null)
 		{
-			kernel[scale] = Convolution.makeGaussianKernel(scale, range, true);
+			kernel[index][range] = Convolution.makeGaussianKernel(scale, range, true);
 
 			// This does not work as the lack of granularity in the 
 			// kernel makes the A^2/P function incorrect.
 
-			//kernel[scale] = Convolution.makeErfGaussianKernel(scale, range);
+			//kernel[range] = Convolution.makeErfGaussianKernel(scale, range);
 		}
-		return kernel[scale];
+		return kernel[index][range];
 	}
 }

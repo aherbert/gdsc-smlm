@@ -10,6 +10,7 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
@@ -153,6 +154,35 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double[] pgFI = getFisherInformation(photons, pg, true);
 		double[] pgaFI = getFisherInformation(photons, pga, false);
 		double[] pggFI = getFisherInformation(photons, pgg, true);
+
+		// ==============
+		{
+			// Debug PGG
+			double t = 10;
+			pgg.getFisherInformation(t);
+			double[][] data1 = pgg.getFisherInformationFunction(false);
+			double[][] data2 = pgg.getFisherInformationFunction(true);
+
+			double[] fif = data1[1];
+			int max = 0;
+			for (int j = 1; j < fif.length; j++)
+				if (fif[max] < fif[j])
+					max = j;
+			System.out.printf("PGG(p=%g) max=%g\n", t, data1[0][max]);
+
+			String title = TITLE + " " + t;
+			Plot plot = new Plot(title, "Count", "FI function");
+			double yMax = Maths.max(data1[1]);
+			yMax = Maths.maxDefault(yMax, data2[1]);
+			plot.setLimits(data2[0][0], data2[0][data2[0].length-1], 0, yMax);
+			plot.setColor(Color.red);
+			plot.addPoints(data1[0], data1[1], Plot.LINE);
+			plot.setColor(Color.blue);
+			plot.addPoints(data2[0], data2[1], Plot.LINE);
+			Utils.display(title, plot);
+		}
+
+		// ==============
 
 		// Compute relative to the Poisson Fisher information
 		double[] rpgFI = getAlpha(pgFI, photons);
@@ -305,10 +335,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 
 		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
-		sampling = 64;
+		//sampling <<= 2;
 		PoissonGaussianFisherInformation fi = new RealPoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
-		fi.setMinRange(10);
+		fi.setMinRange(5);
 		return fi;
 	}
 
@@ -337,12 +367,13 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			IJ.error(TITLE, "EM CCD gain must be positive");
 			return null;
 		}
-		
-		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
-		sampling = 128;
+
+		int sampling = PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING;
+		sampling <<= 2;
 		PoissonGammaGaussianFisherInformation fi = new RealPoissonGammaGaussianFisherInformation(m, s, sampling);
-		fi.setCumulativeProbability(1 - 1e-8);
-		fi.setMinRange(14);
+		//fi.setCumulativeProbability(1 - 1e-8);
+		fi.setMinRange(10);
+		//fi.setMaxRange(10);
 		fi.setMeanThreshold(200);
 		return fi;
 	}
@@ -413,29 +444,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			for (int i = 0; i < f.length; i++)
 			{
 				f[i] = fi.getFisherInformation(photons[i]);
-
-				//if (fi instanceof PoissonGammaGaussianFisherInformation)
-				//{
-				//	PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) fi;
-				//	double[][] data = pgg.getFisherInformationFunction(false);
-				//
-				//	double[] fif = data[1];
-				//	int max = 0;
-				//	for (int j = 1; j < fif.length; j++)
-				//		if (fif[max] < fif[j])
-				//			max = j;
-				//	System.out.printf("PGG(p=%g) max=%g\n", photons[i], data[0][max]);
-				//
-				//	// Debugging
-				//	if (photons[i] > 500.999 && photons[i] < 100.001)
-				//	{
-				//		//PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation)fi;
-				//		//double[][] data = pgg.getFisherInformationFunction(false);
-				//		String title = TITLE + " " + photons[i];
-				//		Plot plot = new Plot(title, "Count", "FI function", data[0], data[1]);
-				//		Utils.display(title, plot);
-				//	}
-				//}
 			}
 		}
 		return f;

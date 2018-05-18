@@ -6,6 +6,41 @@ import org.junit.Test;
 public class PoissonGammaGaussianFisherInformationTest
 {
 	@Test
+	public void canFindMaximumAndUpperLimit()
+	{
+		double[] M = { 20, 100, 500 };
+
+		for (double m : M)
+			canFindMaximumAndUpperLimit(m);
+	}
+
+	private void canFindMaximumAndUpperLimit(double m)
+	{
+		PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, 1);
+		f.setMeanThreshold(Double.POSITIVE_INFINITY);
+
+		// Due to a limited convolution (for an infinite range) 
+		// the class works up to mean of about 300. Above that the approximation using
+		// half the Poisson Fisher information should be used instead. 
+		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
+		for (int exp = -12; exp <= 4; exp++)
+		{
+			canFindMaximumAndUpperLimit(f, Math.pow(10, exp * 0.5));
+		}
+		for (int i = 0; i <= 10; i++)
+			canFindMaximumAndUpperLimit(f, 0.001 + i * 0.1);
+	}
+
+	private void canFindMaximumAndUpperLimit(PoissonGammaGaussianFisherInformation f, double u)
+	{
+		double[] max = f.findMaximum(u, 1e-6);
+		double[] upper = f.findUpperLimit(u, max, 1e-6);
+		System.out.printf("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)\n", f.m, u, max[0], max[1], max[2], 
+				upper[0],
+				upper[1], upper[2]);
+	}
+
+	@Test
 	public void canComputeRealFisherInformation()
 	{
 		//org.junit.Assume.assumeTrue(false);
