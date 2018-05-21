@@ -449,7 +449,7 @@ public class Convolution
 		final double HLen = (double) (h.length - 1) * scale + 1;
 		final double totalLength = xLen + HLen - 1;
 		if (totalLength > MAX)
-			throw new IllegalArgumentException("Scale creates unspported array size: " + totalLength);
+			throw new IllegalArgumentException("Scale creates unsupported array size: " + totalLength);
 
 		final int iTotalLength = (int) totalLength;
 		final double[] y = new double[iTotalLength];
@@ -525,7 +525,6 @@ public class Convolution
 	 * @param v
 	 *            Output procedure for the convolution of {@code x} and {@code h}.
 	 *            This total number of times this is called will be {@code x.length + H.length - 1}.
-	 * @return
 	 * @throws IllegalArgumentException
 	 *             if either {@code x} or {@code h} is {@code null} or either {@code x} or {@code h} is empty.
 	 * @throws IllegalArgumentException
@@ -535,7 +534,7 @@ public class Convolution
 			throws IllegalArgumentException
 	{
 		// As above but dynamically output the result
-		
+
 		checkInput(x, h);
 
 		if (scale < 1)
@@ -551,7 +550,7 @@ public class Convolution
 		final double HLen = (double) (h.length - 1) * scale + 1;
 		final double totalLength = xLen + HLen - 1;
 		if (totalLength > MAX)
-			throw new IllegalArgumentException("Scale creates unspported size: " + totalLength);
+			throw new IllegalArgumentException("Scale creates unsupported size: " + totalLength);
 
 		final int iTotalLength = (int) totalLength;
 
