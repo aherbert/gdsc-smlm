@@ -21,7 +21,6 @@ import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
 import gdsc.smlm.function.RealPoissonGammaGaussianFisherInformation;
-import gdsc.smlm.function.RealPoissonGaussianFisherInformation;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
@@ -134,7 +133,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private void analyse()
 	{
-		PoissonGaussianFisherInformation pg = createPoissonGaussianFisherInformation(false);
+		PoissonGaussianFisherInformation pg = createPoissonGaussianFisherInformation();
 		if (pg == null)
 			return;
 		PoissonGaussianApproximationFisherInformation pga = createPoissonGaussianApproximationFisherInformation();
@@ -325,7 +324,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return limits;
 	}
 
-	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(boolean discrete)
+	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation()
 	{
 		double s = settings.getCcdNoise() / settings.getCcdGain();
 		if (s <= 0)
@@ -336,7 +335,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		int sampling = PoissonGaussianFisherInformation.DEFAULT_SAMPLING;
 		//sampling <<= 2;
-		PoissonGaussianFisherInformation fi = new RealPoissonGaussianFisherInformation(s, sampling);
+		PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
 		fi.setMinRange(5);
 		return fi;
