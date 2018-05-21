@@ -6,10 +6,13 @@ package gdsc.smlm.function;
 import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
+import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.math.NumberUtils;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.utils.Convolution;
+import gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
+import gdsc.smlm.utils.GaussianKernel;
 import gnu.trove.list.array.TDoubleArrayList;
 
 /*----------------------------------------------------------------------------- 
@@ -35,7 +38,7 @@ import gnu.trove.list.array.TDoubleArrayList;
  * An optimisation is used when the mean of the Poisson is above a threshold. In this case the Poisson can be
  * approximated as a Gaussian and the Fisher information is returned for the Gaussian-Gaussian convolution.
  */
-public abstract class PoissonGaussianFisherInformation extends BasePoissonFisherInformation
+public class PoissonGaussianFisherInformation extends BasePoissonFisherInformation
 {
 	/** The default minimum range for the Gaussian kernel (in units of SD). */
 	public static final int DEFAULT_MIN_RANGE = 6;
@@ -53,7 +56,16 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	 * The default sampling of the Gaussian kernel. The kernel will be sampled at s/sampling,
 	 * i.e. this is the number of samples to take per standard deviation unit.
 	 */
-	public static final int DEFAULT_SAMPLING = 16;
+	public static final int DEFAULT_SAMPLING = 4;
+
+	/** The default relative accuracy for convergence. */
+	public static final double DEFAULT_RELATIVE_ACCURACY = 1e-6;
+
+	/**
+	 * The default number of maximum iterations.
+	 * The Gaussian sampling will be doubled during each iteration.
+	 */
+	public static final int DEFAULT_MAX_ITERATIONS = 4;
 
 	/** Store the limit of the Poisson distribution for small mean for the default cumulative probability. */
 	private static final int[] defaultLimits;
@@ -174,6 +186,15 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 	/** Flag to indicate no possible convolution with the gaussian. */
 	private final boolean noGaussian;
 
+	/** The gaussian kernel. */
+	private GaussianKernel gaussianKernel;
+
+	/** The relative accuracy for convergence. */
+	private double relativeAccuracy = DEFAULT_RELATIVE_ACCURACY;
+
+	/** The max iterations. */
+	private int maxIterations = DEFAULT_MAX_ITERATIONS;
+
 	/**
 	 * Instantiates a new poisson gaussian fisher information.
 	 *
@@ -217,17 +238,11 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		}
 		else
 		{
-
 			// This is set to work for reasonable values of the Gaussian kernel and sampling
 			// e.g. s [0.5:20], sampling from [1:8].
 
-			double scale = Math.ceil(sampling / s);
-			if (scale * s * MAX_RANGE > 1000000)
-			{
-				// Don't support excess scaling caused by small kernels
-				throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + scale * s * MAX_RANGE);
-			}
-			this.scale = (int) scale;
+			this.scale = Maths.nextPow2((int) Math.ceil(sampling / s));
+			gaussianKernel = new GaussianKernel(s);
 		}
 	}
 
@@ -430,20 +445,6 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		// Unscaled Poisson
 		double[] p = list.toArray();
 
-		// Up-sample the Poisson
-		if (scale != 1)
-		{
-			list.resetQuick();
-			double[] pad = new double[scale - 1];
-			list.add(p[0]);
-			for (int i = 1; i < p.length; i++)
-			{
-				list.add(pad);
-				list.add(p[i]);
-			}
-			p = list.toArray();
-		}
-
 		// Convolve with the Gaussian kernel.
 		// As the mean reduces the Poisson distribution is more skewed 
 		// and the extent of the kernel must change. Just increase the range
@@ -456,8 +457,6 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		while (range < maxRange && range * s < 1)
 			range++;
 
-		double[] g = getGaussianKernel(scale, range);
-
 		// In order for A(z) = P(z-1) to work sum A(z) must be 1
 		double sum;
 		//sum = list.sum();
@@ -465,115 +464,159 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		//for (int i = 0; i < p.length; i++)
 		//	p[i] /= sum;
 
-		// Avoid the FFT convolution when the Poisson distribution is 
-		// skewed to c=0. This is due to edge wrap artifacts that are 
-		// usually avoided using an edge window function. 
-		// Skew only occurs at low mean, at higher mean the distribution
-		// is approximately normal.
-		double[] pg = (t < 10) ? Convolution.convolve(p, g) : Convolution.convolveFast(p, g);
+		// Initial sum
+		int scale = this.scale;
+		sum = compute(scale, range, p);
 
-		//for (int i = 0; i < pg.length; i++)
-		//	sum += pg[i];
-		////System.out.printf("Normalisation = %s\n", sum);
-		//for (int i = 0; i < pg.length; i++)
-		//	pg[i] /= sum;
-
-		// Integrate function:
-		// E = integral [A^2/P] - 1
-		// P(z) = Poisson-Gaussian convolution
-		// A(z) = P(z-1)
-
-		// The offset for P(z-1) is the scale. 
-		// When P(z-1) does not exist assume it is zero. Therefore only
-		// integrate over the range scale:P.length
-		int mini = scale;
-		int maxi = pg.length;
-		int offseti = -scale;
-
-		// Compute the sum using Simpson's integration. 
-		// h = interval = (b-a)/n
-		// The integral range is:
-		// f(x0) = 0 where x0 = -1;
-		// f(xn) = 0 where xn = length;
-		// n = length-1 + 2 = length+1
-		// a = -1
-		// b = length
-		// h = (length - -1) / (length+1) = 1
-		double h = 1;
-
-		// We assume that the function values at the end are zero and so do not 
-		// include them in the sum. Just alternate totals.
-		if (use38)
+		// Iterate
+		for (int iteration = 1; iteration <= maxIterations; iteration++)
 		{
-			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
-			// This computes the sum as:
-			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-			double sum3 = 0, sum2 = 0;
-			for (int i = mini; i < maxi; i++)
+			scale *= 2;
+			double oldSum = sum;
+			try
 			{
-				if (pg[i] <= 0)
-				{
-					// No probability so the function is zero.
-					// This is the equivalent of only computing the Fisher information over 
-					// the valid range of z.
-					continue;
-				}
-				final double f = Maths.pow2(pg[i + offseti]) / pg[i];
-				if (i % 3 == 2)
-					sum2 += f;
-				else
-					sum3 += f;
+				sum = compute(scale, range, p);
 			}
-
-			sum = (3 * h / 8) * (sum3 * 3 + sum2 * 2);
-		}
-		else
-		{
-			// Simpson's rule.
-			// This computes the sum as:
-			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-			double sum4 = 0, sum2 = 0;
-			for (int i = mini; i < maxi; i++)
+			catch (IllegalArgumentException e)
 			{
-				if (pg[i] <= 0)
-				{
-					// No probability so the function is zero.
-					// This is the equivalent of only computing the Fisher information over 
-					// the valid range of z.
-					continue;
-				}
-				final double f = Maths.pow2(pg[i + offseti]) / pg[i];
-				if (i % 2 == 0)
-					sum4 += f;
-				else
-					sum2 += f;
+				// Occurs when the convolution has grown too big
+				return sum;
 			}
-
-			sum = (h / 3) * (sum4 * 4 + sum2 * 2);
+			final double delta = FastMath.abs(sum - oldSum);
+			//System.out.printf("s=%g t=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, t, iteration, sum, oldSum,
+			//		delta / (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5);
+			final double rLimit = getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5;
+			if (delta <= rLimit)
+			{
+				break;
+			}
 		}
-
-		// Subtract the final 1 
-		sum -= 1;
-
-		//System.out.printf("s=%g t=%g x=%d-%d scale=%d   sum=%s  pI = %g   pgI = %g\n", s, t, minx, maxx, scale, sum,
-		//		getPoissonI(t), 1 / (t + s * s));
 
 		return sum;
 	}
 
+	private static abstract class IntegrationProcedure implements ConvolutionValueProcedure
+	{
+		final int scale;
+		final double[] pz_1;
+		int i = 0;
+
+		IntegrationProcedure(int scale)
+		{
+			this.scale = scale;
+
+			// E = integral [A^2/P] - 1
+			// P(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-j)/s)^2
+			// A(z) = 1/sqrt(2pi)s sum_j=1:Inf  e^-v . v^(j-1) / (j-1)! . e^-1/2((z-j)/s)^2
+			// A(z) = 1/sqrt(2pi)s sum_j=0:Inf  e^-v . v^j / j!         . e^-1/2((z-(j+1))/s)^2
+			// A(z) = P(z-1)
+
+			// Store p(z-1). This is initialised to 0.
+			pz_1 = new double[scale];
+		}
+
+		public boolean execute(double pz)
+		{
+			int index = i % scale;
+			i++;
+			final double gz = pz_1[index];
+			pz_1[index] = pz;
+			if (pz > 0)
+			{
+				final double f = Maths.pow2(gz) / pz;
+				sum(f);
+			}
+			return true;
+		}
+
+		protected abstract void sum(double f);
+
+		public abstract double getSum();
+	}
+
+	private static class SimpsonIntegrationProcedure extends IntegrationProcedure
+	{
+		double sum2 = 0, sum4 = 0;
+
+		SimpsonIntegrationProcedure(int scale)
+		{
+			super(scale);
+		}
+
+		@Override
+		protected void sum(double f)
+		{
+			// Simpson's rule.
+			// This computes the sum as:
+			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
+			if (i % 2 == 0)
+				sum2 += f;
+			else
+				sum4 += f;
+		}
+
+		@Override
+		public double getSum()
+		{
+			// Assume the end function values are zero
+			return (sum4 * 4 + sum2 * 2) / 3;
+		}
+	}
+
+	private static class Simpson38IntegrationProcedure extends IntegrationProcedure
+	{
+		double sum2 = 0, sum3 = 0;
+
+		Simpson38IntegrationProcedure(int scale)
+		{
+			super(scale);
+		}
+
+		@Override
+		protected void sum(double f)
+		{
+			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
+			// This computes the sum as:
+			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
+			if (i % 3 == 0)
+				sum2 += f;
+			else
+				sum3 += f;
+		}
+
+		@Override
+		public double getSum()
+		{
+			// Assume the end function values are zero
+			return (3.0 / 8) * (sum3 * 3 + sum2 * 2);
+		}
+	}
+
 	/**
-	 * Gets the gaussian kernel for convolution at a spacing of 1. The kernel may be scaled up so that
-	 * more samples are taken.
-	 * <p>
-	 * This will only be called with a range of 1 to 38.
+	 * Compute the integral.
 	 *
 	 * @param scale
-	 *            the scale (to multiply the standard deviation)
+	 *            the scale of the Gaussian kernel
 	 * @param range
-	 *            the range (in SD units)
-	 * @return the gaussian kernel
+	 *            the range of the Gaussian kernel
+	 * @param p
+	 *            the poisson distribution
+	 * @return the integral
+	 * @throws IllegalArgumentException
+	 *             If the convolution will be too large
 	 */
-	protected abstract double[] getGaussianKernel(int scale, int range);
+	private double compute(int scale, int range, double[] p) throws IllegalArgumentException
+	{
+		double[] g = gaussianKernel.getGaussianKernel(scale, range, false);
+
+		IntegrationProcedure ip = (use38) ? new Simpson38IntegrationProcedure(scale)
+				: new SimpsonIntegrationProcedure(scale);
+
+		Convolution.convolve(g, p, scale, ip);
+
+		// Subtract the final 1 
+		return ip.getSum() - 1;
+	}
 
 	/**
 	 * Gets the approximate Poisson-Gaussian Fisher information.
@@ -770,10 +813,55 @@ public abstract class PoissonGaussianFisherInformation extends BasePoissonFisher
 		this.use38 = use38;
 	}
 
+	/**
+	 * Gets the relative accuracy for convergence during iteration.
+	 *
+	 * @return the relative accuracy
+	 */
+	public double getRelativeAccuracy()
+	{
+		return relativeAccuracy;
+	}
+
+	/**
+	 * Sets the relative accuracy for convergence during iteration.
+	 * <p>
+	 * Set to below zero to prevent convergence check. This results in a fixed number of iterations.
+	 *
+	 * @param relativeAccuracy
+	 *            the new relative accuracy
+	 */
+	public void setRelativeAccuracy(double relativeAccuracy)
+	{
+		this.relativeAccuracy = relativeAccuracy;
+	}
+
+	/**
+	 * Gets the max iterations for iteration.
+	 *
+	 * @return the max iterations
+	 */
+	public int getMaxIterations()
+	{
+		return maxIterations;
+	}
+
+	/**
+	 * Sets the max iterations for iteration. Set to zero to prevent iteration.
+	 *
+	 * @param maxIterations
+	 *            the new max iterations
+	 */
+	public void setMaxIterations(int maxIterations)
+	{
+		this.maxIterations = maxIterations;
+	}
+
 	@Override
 	protected void postClone()
 	{
 		pd = new CustomPoissonDistribution(null, 1);
 		list = new TDoubleArrayList();
+		gaussianKernel = gaussianKernel.clone();
 	}
 }

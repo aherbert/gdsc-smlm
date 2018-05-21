@@ -6,7 +6,7 @@ import org.junit.Test;
 public class PoissonGaussianFisherInformationTest
 {
 	@Test
-	public void canComputeRealFisherInformation()
+	public void canComputeFisherInformation()
 	{
 		//org.junit.Assume.assumeTrue(false);
 
@@ -14,7 +14,7 @@ public class PoissonGaussianFisherInformationTest
 		////u = Math.pow(10, -300);
 		////u = 1.0 / Math.nextAfter(Double.MAX_VALUE, -1); // Smallest p with a non-infinite Fisher information
 		//u = 1e-100;
-		//PoissonGaussianFisherInformation f = new RealPoissonGaussianFisherInformation(0.20);
+		//PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(0.20);
 		//f.setMeanThreshold(Double.MAX_VALUE);
 		//double I = f.getPoissonGaussianI(u);
 		//double lower = f.getPoissonGaussianApproximationI(u);
@@ -26,13 +26,13 @@ public class PoissonGaussianFisherInformationTest
 		for (int i = 0; i < 4; i++)
 		{
 			double s = (1 << i) * 0.25;
-			canComputeRealFisherInformation(s);
+			canComputeFisherInformation(s);
 		}
 	}
 
-	private void canComputeRealFisherInformation(double s)
+	private void canComputeFisherInformation(double s)
 	{
-		canComputeFisherInformation(new RealPoissonGaussianFisherInformation(s));
+		canComputeFisherInformation(new PoissonGaussianFisherInformation(s));
 	}
 
 	private void canComputeFisherInformation(PoissonGaussianFisherInformation f)
@@ -64,7 +64,7 @@ public class PoissonGaussianFisherInformationTest
 	}
 
 	@Test
-	public void canComputeRealFisherInformationWithLowestPossibleMean()
+	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
 		//org.junit.Assume.assumeTrue(false);
 
@@ -107,7 +107,7 @@ public class PoissonGaussianFisherInformationTest
 		for (int i = 0; i < 4; i++)
 		{
 			double s = (1 << i) * 0.25;
-			PoissonGaussianFisherInformation f = new RealPoissonGaussianFisherInformation(s);
+			PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(s);
 			double I = f.getPoissonGaussianI(u);
 			double I2 = f.getPoissonGaussianI(1e-100);
 			double lower = f.getPoissonGaussianApproximationI(u);
