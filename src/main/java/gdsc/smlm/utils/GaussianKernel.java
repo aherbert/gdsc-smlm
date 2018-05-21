@@ -23,7 +23,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 /**
  * Store a Gaussian kernel for use in convolution
  */
-public class GaussianKernel
+public class GaussianKernel implements Cloneable
 {
 	/** The maximum size of half the Gaussian kernel. */
 	public static final int HALF_WIDTH_LIMIT = 1 << 28;
@@ -333,5 +333,20 @@ public class GaussianKernel
 		}
 
 		return buildKernel(kernel, kRadius, false);
+	}
+
+	@Override
+	public GaussianKernel clone()
+	{
+		try
+		{
+			GaussianKernel k = (GaussianKernel) super.clone();
+			k.halfKernel = new TDoubleArrayList(this.halfKernel);
+			return k;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return new GaussianKernel(s);
+		}
 	}
 }
