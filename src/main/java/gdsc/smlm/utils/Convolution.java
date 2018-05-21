@@ -185,7 +185,7 @@ public class Convolution
 			return convolveFFT(x, h);
 		return convolve(x, h);
 	}
-	
+
 	/**
 	 * Checks if convolution will use the FFT method.
 	 *
@@ -409,145 +409,171 @@ public class Convolution
 		}
 	}
 
+	private static final int MAX = 1 << 30;
+
 	/**
-	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation sigma.
-	 * To avoid a step due to the cutoff at a finite value, the near-edge values are
-	 * replaced by a 2nd-order polynomial with its minimum=0 at the first out-of-kernel
-	 * pixel. Thus, the kernel function has a smooth 1st derivative in spite of finite
-	 * length.
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between two sequences.
+	 * <p>
+	 * The scale is used to increase the size of h dynamically to H with zero fill.
+	 * The length of H is thus ((h.length-1) * scale + 1);
 	 *
-	 * @param sigma
-	 *            Standard deviation
-	 * @param range
-	 *            the range
-	 * @param edgeCorrection
-	 *            Set to true to perform the edge correction
-	 * @return The kernel, decaying towards zero, which would be reached at the first out of kernel index
+	 * @param x
+	 *            First sequence.
+	 * @param h
+	 *            Second sequence.
+	 * @param scale
+	 *            the scale
+	 * @return the convolution of {@code x} and {@code h}.
+	 *         This array's length will be {@code x.length + H.length - 1}.
+	 * @throws IllegalArgumentException
+	 *             if either {@code x} or {@code h} is {@code null} or either {@code x} or {@code h} is empty.
+	 * @throws IllegalArgumentException
+	 *             if the scale is not strictly positive
 	 */
-	public static double[] makeGaussianKernel(final double sigma, double range, boolean edgeCorrection)
+	public static double[] convolve(double[] x, double[] h, int scale) throws IllegalArgumentException
 	{
-		// Limit range for the Gaussian
-		if (range < 1)
-			range = 1;
-		else if (range > 38)
-			range = 38;
+		checkInput(x, h);
 
-		// Build half the kernel into the full kernel array. This is duplicated later.
-		int kRadius = getGaussianHalfWidth(sigma, range) + 1;
-		double[] kernel = new double[2 * kRadius - 1];
+		if (scale < 1)
+			throw new IllegalArgumentException("Scale must be strictly positive");
 
-		kernel[0] = 1;
-		final double s2 = sigma * sigma;
-		for (int i = 1; i < kRadius; i++)
+		if (h.length == 1 || scale == 1)
+			// No scaling
+			return convolve(x, h);
+
+		final int xLen = x.length;
+		final int hLen = h.length;
+
+		// initialize the output array
+		final double HLen = (double) (h.length - 1) * scale + 1;
+		final double totalLength = xLen + HLen - 1;
+		if (totalLength > MAX)
+			throw new IllegalArgumentException("Scale creates unspported array size: " + totalLength);
+
+		final int iTotalLength = (int) totalLength;
+		final double[] y = new double[iTotalLength];
+
+		// Convolution sum. x is reversed verses h. 
+		// h is scaled up with zeros. 
+		// This is equivalent to using x every interval of scale.
+		for (int n = 0; n < iTotalLength; n++)
 		{
-			// Gaussian function
-			kernel[i] = FastMath.exp(-0.5 * i * i / s2);
-		}
+			double yn = 0;
+			// k is the index in the scaled up distribution H
+			int k = FastMath.max(0, n + 1 - xLen);
+			// j is the index in the input distribution x
+			int j = n - k;
 
-		// Edge correction
-		if (edgeCorrection && kRadius > 3)
-		{
-			double sqrtSlope = Double.MAX_VALUE;
-			int r = kRadius;
-			while (r > kRadius / 2)
+			// k has to be scaled.
+			// The modulus indicates how many values are zero
+			// before the first non-zero value in H (in the descending direction).
+			int mod = k % scale;
+			// kk is the index in input distribution h (in the descending direction). 
+			int kk = k / scale;
+			// If there are non-zero value shift the indices
+			if (mod != 0)
 			{
-				r--;
-				double a = Math.sqrt(kernel[r]) / (kRadius - r);
-				if (a < sqrtSlope)
-					sqrtSlope = a;
-				else
-					break;
+				// Shift kk by one for the next non-zero value (in the ascending direction)
+				kk++;
+				// Shift j by the number of zero values (in the descending direction)
+				j -= (scale - mod);
 			}
-			//System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r,
-			//		sqrtSlope);
-			for (int r1 = r + 2; r1 < kRadius; r1++)
-				kernel[r1] = ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
+
+			//int j = n - kk * scale;
+			while (kk < hLen && j >= 0)
+			{
+				yn += x[j] * h[kk++];
+				j -= scale;
+			}
+			y[n] = yn;
 		}
 
-		// Normalise
-		double sum = kernel[0];
-		for (int i = 1; i < kRadius; i++)
-			sum += 2 * kernel[i];
-		for (int i = 0; i < kRadius; i++)
-			kernel[i] /= sum;
-
-		// Create symmetrical
-		System.arraycopy(kernel, 0, kernel, kRadius - 1, kRadius);
-		for (int i = kRadius, j = i - 2; i < kernel.length; i++, j--)
-		{
-			kernel[j] = kernel[i];
-		}
-		return kernel;
+		return y;
 	}
 
 	/**
-	 * Get half the width of the region smoothed by a Gaussian filter for the specified standard deviation. The full
-	 * region size is 2N + 1
-	 *
-	 * @param sigma
-	 *            the sigma
-	 * @param range
-	 *            the range
-	 * @return The half width
+	 * Interface to handle a convolution value
 	 */
-	public static int getGaussianHalfWidth(double sigma, double range)
+	public interface ConvolutionValueProcedure
 	{
-		return (int) Math.ceil(sigma * range);
+		/**
+		 * Executes this procedure.
+		 *
+		 * @param value
+		 *            the value of the convolution
+		 * @return true, if further values should be computed
+		 */
+		boolean execute(double value);
 	}
 
 	/**
-	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation sigma.
-	 * The kernel is constructed using the Error function (Erf) to compute the sum of
-	 * the Gaussian from x-0.5 to x+0.5 for each x sample point.
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between two sequences.
+	 * <p>
+	 * The scale is used to increase the size of h dynamically to H with zero fill.
+	 * The length of H is thus ((h.length-1) * scale + 1);
+	 * <p>
+	 * The convolution is computed dynamically and can be stopped.
 	 *
-	 * @param sigma
-	 *            Standard deviation
-	 * @param range
-	 *            the range
-	 * @return The Erf kernel
+	 * @param x
+	 *            First sequence.
+	 * @param h
+	 *            Second sequence.
+	 * @param scale
+	 *            the scale
+	 * @param v
+	 *            Output procedure for the convolution of {@code x} and {@code h}.
+	 *            This total number of times this is called will be {@code x.length + H.length - 1}.
+	 * @return
+	 * @throws IllegalArgumentException
+	 *             if either {@code x} or {@code h} is {@code null} or either {@code x} or {@code h} is empty.
+	 * @throws IllegalArgumentException
+	 *             if the scale is not strictly positive
 	 */
-	public static double[] makeErfGaussianKernel(double sigma, double range)
+	public static void convolve(double[] x, double[] h, int scale, ConvolutionValueProcedure v)
+			throws IllegalArgumentException
 	{
-		// Limit range for the Gaussian
-		if (range < 1)
-			range = 1;
-		else if (range > 38)
-			range = 38;
+		// As above but dynamically output the result
+		
+		checkInput(x, h);
 
-		// Build half the kernel into the full kernel array. This is duplicated later.
-		int kRadius = getGaussianHalfWidth(sigma, range) + 1;
-		double[] kernel = new double[2 * kRadius - 1];
+		if (scale < 1)
+			throw new IllegalArgumentException("Scale must be strictly positive");
+		if (v == null)
+			throw new IllegalArgumentException("No value procedure");
 
-		if (kRadius == 1)
+		final int xLen = x.length;
+		final int hLen = h.length;
+
+		// For consistency just support up to the max for integers.
+		// This could be changed to use long for the index.
+		final double HLen = (double) (h.length - 1) * scale + 1;
+		final double totalLength = xLen + HLen - 1;
+		if (totalLength > MAX)
+			throw new IllegalArgumentException("Scale creates unspported size: " + totalLength);
+
+		final int iTotalLength = (int) totalLength;
+
+		for (int n = 0; n < iTotalLength; n++)
 		{
-			kernel[0] = 1;
-			return kernel;
+			double yn = 0;
+			int k = FastMath.max(0, n + 1 - xLen);
+			int j = n - k;
+			int mod = k % scale;
+			int kk = k / scale;
+			if (mod != 0)
+			{
+				kk++;
+				j -= (scale - mod);
+			}
+			while (kk < hLen && j >= 0)
+			{
+				yn += x[j] * h[kk++];
+				j -= scale;
+			}
+			if (!v.execute(yn))
+				break;
 		}
-
-		// Use the error function to get the integral of the Gaussian.
-		final double sqrt_var_by_2 = Math.sqrt(sigma * sigma * 2);
-
-		double upper = org.apache.commons.math3.special.Erf.erf(-0.5 / sqrt_var_by_2);
-		for (int i = 0; i < kRadius; i++)
-		{
-			double lower = upper;
-			upper = org.apache.commons.math3.special.Erf.erf((i + 0.5) / sqrt_var_by_2);
-			kernel[i] = (upper - lower) * 0.5;
-		}
-
-		// Normalise
-		double sum = kernel[0];
-		for (int i = 1; i < kRadius; i++)
-			sum += 2 * kernel[i];
-		for (int i = 0; i < kRadius; i++)
-			kernel[i] /= sum;
-
-		// Create symmetrical
-		System.arraycopy(kernel, 0, kernel, kRadius - 1, kRadius);
-		for (int i = kRadius, j = i - 2; i < kernel.length; i++, j--)
-		{
-			kernel[j] = kernel[i];
-		}
-		return kernel;
 	}
 }
