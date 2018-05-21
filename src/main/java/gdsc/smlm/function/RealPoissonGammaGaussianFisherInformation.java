@@ -1,6 +1,7 @@
 package gdsc.smlm.function;
 
 import gdsc.smlm.utils.Convolution;
+import gdsc.smlm.utils.GaussianKernel;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -82,12 +83,12 @@ public class RealPoissonGammaGaussianFisherInformation extends PoissonGammaGauss
 		int index = getIndex(scale);
 		if (kernel[index][range] == null)
 		{
-			kernel[index][range] = Convolution.makeGaussianKernel(scale, range, true);
+			kernel[index][range] = GaussianKernel.makeGaussianKernel(scale, range, true);
 
 			// This does not work as the lack of granularity in the 
 			// kernel makes the A^2/P function incorrect.
 
-			//kernel[range] = Convolution.makeErfGaussianKernel(scale, range);
+			//kernel[range] = GaussianKernel.makeErfGaussianKernel(scale, range);
 		}
 		return kernel[index][range];
 	}
