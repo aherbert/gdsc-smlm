@@ -34,6 +34,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.utils.ImageConverter;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
@@ -109,9 +110,6 @@ public class SpotFit implements PlugIn
 		@Override
 		public void showOptionsDialog()
 		{
-			// Using the ExtendedGenericDialog in this class causes Fiji to load the 
-			// plugin at start-up, probably as it is within the ij.gui package.
-
 			final GenericDialog gd = new GenericDialog(TITLE + " Tool Options");
 			gd.addMessage(
 				//@formatter:off
@@ -505,6 +503,12 @@ public class SpotFit implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		addPluginTool();
+
+		// Fiji restores the toolbar from the last session. 
+		// Do not show the options if this is happening.
+		ImageJ ij = IJ.getInstance();
+		if (ij == null || !ij.isVisible())
+			return;
 
 		toolInstance.showOptionsDialog();
 	}
