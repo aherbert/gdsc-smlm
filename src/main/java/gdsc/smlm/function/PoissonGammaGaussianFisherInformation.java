@@ -1,14 +1,10 @@
 package gdsc.smlm.function;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.optim.AbstractConvergenceChecker;
-import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
-import org.apache.commons.math3.optim.univariate.BracketFinder;
 import org.apache.commons.math3.optim.univariate.BrentOptimizer;
 import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
@@ -17,9 +13,10 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.math.NumberUtils;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.utils.Convolution;
+import gdsc.smlm.utils.GaussianKernel;
 import gnu.trove.list.array.TDoubleArrayList;
-import jogamp.newt.DefaultEDTUtil;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -41,7 +38,7 @@ import jogamp.newt.DefaultEDTUtil;
  * <p>
  * Performs a convolution with a finite Gaussian kernel.
  */
-public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation
+public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation
 {
 	/** The default minimum range for the Gaussian kernel (in units of SD). */
 	public static final int DEFAULT_MIN_RANGE = 6;
@@ -70,6 +67,15 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	public static final int DEFAULT_SAMPLING = 4;
 
+	/** The default relative accuracy for convergence. */
+	public static final double DEFAULT_RELATIVE_ACCURACY = 1e-6;
+
+	/**
+	 * The default number of maximum iterations.
+	 * The Gaussian sampling will be doubled during each iteration.
+	 */
+	public static final int DEFAULT_MAX_ITERATIONS = 4;
+
 	/**
 	 * The lowest value for the mean that can be computed. This is the lowest value where the reciprocal is not infinity
 	 */
@@ -91,9 +97,9 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	private final int defaultScale;
 
 	/** Working space to store the probabilities. */
-	private TDoubleArrayList list1 = new TDoubleArrayList();
+	private TDoubleArrayList listP = new TDoubleArrayList();
 	/** Working space to store the gradient. */
-	private TDoubleArrayList list2 = new TDoubleArrayList();
+	private TDoubleArrayList listA = new TDoubleArrayList();
 
 	/**
 	 * The relative probability threshold of the Poisson-Gamma distribution that is used. Any probability less than this
@@ -109,6 +115,18 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 
 	/** Set to true to use Simpson's 3/8 rule for cubic interpolation of the integral. */
 	private boolean use38 = true;
+
+	/** Flag to indicate no possible convolution with the gaussian. */
+	private final boolean noGaussian;
+
+	/** The gaussian kernel. */
+	private GaussianKernel gaussianKernel;
+
+	/** The relative accuracy for convergence. */
+	private double relativeAccuracy = DEFAULT_RELATIVE_ACCURACY;
+
+	/** The max iterations. */
+	private int maxIterations = DEFAULT_MAX_ITERATIONS;
 
 	/** The step size (h) between values of the last integrated function. */
 	private double h;
@@ -150,7 +168,9 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 * @param sampling
 	 *            The number of Gaussian samples to take per standard deviation
 	 * @throws IllegalArgumentException
-	 *             If the gain or standard deviation are not strictly positive
+	 *             If the gain is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If the standard deviation is below 1
 	 * @throws IllegalArgumentException
 	 *             If the sampling is below 1
 	 * @throws IllegalArgumentException
@@ -160,21 +180,50 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	{
 		if (!(m > 0 && m <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gain multiplication factor must be strictly positive");
-		if (!(s > 0 && s <= Double.MAX_VALUE))
-			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+		if (!(s >= 0 && s <= Double.MAX_VALUE))
+			throw new IllegalArgumentException("Gaussian standard deviation must be positive");
 		if (!(sampling >= 1 && sampling <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gaussian sampling must at least 1");
 
-		this.defaultScale = getPow2Scale(sampling / s);
-		// XXX - check this threshold
-		if (sampling * MAX_RANGE > 1000000000)
-		{
-			// Don't support excess scaling caused by small kernels
-			throw new IllegalArgumentException("Maximum Gaussian kernel size too large: " + sampling * MAX_RANGE);
-		}
-
 		this.m = m;
 		this.s = s;
+		noGaussian = (s * MAX_RANGE < 1);
+		if (noGaussian)
+		{
+			// This is OK. Just return the information for the Poisson-Gamma.
+			defaultScale = 0;
+		}
+		else
+		{
+			// This is set to work for reasonable values of the Gaussian kernel and sampling
+			// e.g. s [0.5:20], sampling from [1:8].
+
+			defaultScale = getPow2Scale(sampling / s);
+
+			// Don't support excess scaling caused by small kernels
+			if (defaultScale * s * MAX_RANGE > 1000000000)
+			{
+				throw new IllegalArgumentException(
+						"Maximum Gaussian kernel size too large: " + defaultScale * s * MAX_RANGE);
+			}
+
+			gaussianKernel = new GaussianKernel(s);
+		}
+	}
+
+	/**
+	 * Gets a value using the next integer power of 2. This is limited to a size of 2^16.
+	 *
+	 * @param s
+	 *            the value
+	 * @return the next power of 2
+	 */
+	protected static int getPow2Scale(double s)
+	{
+		double scale = Math.ceil(s);
+		if (scale > MAX_SCALE)
+			return MAX_SCALE;
+		return Maths.nextPow2((int) scale);
 	}
 
 	/**
@@ -313,156 +362,129 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// may not be necessary over the full range.
 		// So the integral can be computed as [integral range1] + [integral range2]
 
-		// The exponent provides a rough idea of the size of the mean
+		// The function we are integrating is:  
+		// E = integral [ (1/p(z) . d p(z) dv)^2 p(z) dz ]
+		// Integration is done using all values of this function within a reasonable
+		// relative size to the maximum.
+
+		// Determine the extent of the function: A^2/P
+		double[] maximum = findMaximum(t, 1e-4);
+		double[] upper = findUpperLimit(t, maximum, relativeProbabilityThreshold);
+		double upperLimit = upper[0];
+
+		// Note: This method works by using the Poisson-Gamma PDF as a substitute
+		// for a Poisson-Binomial PMF. For simplicity the PDF is integrated over 
+		// integer intervals to create a discrete PMF. This is a fair approximation
+		// of how an EM-CCD camera would work as input electrons should produce
+		// discrete output electrons.
+
+		if (noGaussian)
+		{
+			// Special case. Compute E [ A^2/P ] using only the Poisson-Gamma PMF. 
+			computePMF(dirac, t, (int) Math.ceil(upperLimit));
+
+			// No interpolated integration necessary as this is discrete
+			double sum = 0;
+			double[] p = listP.toArray();
+			double[] a = listA.toArray();
+			for (int i = 0; i < p.length; i++)
+			{
+				sum += getF(p[i], a[i]);
+			}
+			return sum;
+		}
+
+		// The exponent provides a rough idea of the size of the mean (i.e. log2(mean))
 		int exp = NumberUtils.getSignedExponent(t);
 		// As the mean reduces the Poisson distribution is more skewed 
 		// and the extent of the kernel must change. Just increase the range
 		// for the kernel for each power of 2 the number is below 1.
 		int range1 = minRange;
 		/// XXX - check this is needed if iteration is working.
-		//for (int e = exp; range1 < maxRange && e <= 0; e++, range1++)
-		//	;
+		for (int e = exp; range1 < maxRange && e <= 0; e++, range1++)
+			;
 
-		// The function we are integrating is:  
-		// E = integral [ (1/p(z) . d p(z) dv)^2 p(z) dz ]
-		// Integration is done using all values of this function within a reasonable
-		// relative size to the maximum.
-		
-		// Determine the extent of the function: A^2/P
-		double[] maximum = findMaximum(t, 1e-4);
-		double[] upper = findUpperLimit(t, maximum, relativeProbabilityThreshold);
-		double upperLimit = upper[0];
+		// Extend the upper limit using the configured kernel range
+		upperLimit += s * range1;
 
 		// TODO:
 		// Set range1 using the range of the Gaussian. 
 		// This is the range around c=0 where the Dirac has a large effect.
 		// Set range2 using the rest of the range.
 		// Iteratively integrate range 1 up to a maximum kernel size.
-		// Integrate range 2.
+		// Iteratively Integrate range 2.
+		// Combine the sums.
 
 		// Range 1:
 		// The range around the Dirac delta function is computed using a full convolution
 		// with the Gaussian. This is iterated until convergence using more Gaussian samples.
 
 		// Range 2: 
-		// The remaining range of the Poisson-Gamma sampled using the default sampling up to
-		// the upper limit.
+		// The remaining range of the Poisson-Gamma is integrated using an integrator until the
+		// the Gaussian kernel is non-trivial.
 
+		// For integration to work efficiently the Gaussian scaling should be in powers of 2. 
+		// Adjust the ranges appropriately so that the ranges start and end on powers of 1.
+		int iEndRange1 = Maths.nextPow2((int) Math.ceil(s * range1));
+		int iEndRange2 = iEndRange1;
+		if (upperLimit > iEndRange1)
+			iEndRange2 += Maths.nextPow2((int) Math.ceil(upperLimit - iEndRange1));
 
-		double G;
-		double[] dG_dp = new double[1];
+		// Compute the Poisson-Gamma over the range. This is a PDF but for 
+		// simplicity it is integrated to a discrete PMF.
+		computePMF(dirac, t, iEndRange2);
 
-		// XXX Test different scales here
-		
-		int scale = this.defaultScale;
-		list1.resetQuick();
-		list2.resetQuick();
+		int scale = defaultScale;
 
-		// TODO - ITERATION
-		// Increase the scale and compare the integral value to the first integral.
-		// Iterate until convergence.
-
-		h = s / scale;
-
-		// Since convolution with the Gaussian should only be done for c>=0 use
-		// only half the first value
-		double c0factor = 0.5;
-		//c0factor = 1;
-
-		G = PoissonGammaFunction.poissonGammaPartial(0, t, m, dG_dp);
-		final double p0 = (G - dirac) * c0factor;
-		list1.add(p0);
-		list2.add(dG_dp[0] * c0factor);
-
-		// The limit is set so that we have the full Poisson-Gamma function computed
-		// when the Gaussian kernel no longer touches zero.
-		int limit = (range1 + 1) * scale * 2;
-		for (int i = 1; i <= limit; i++)
-		{
-			G = PoissonGammaFunction.poissonGammaPartial(h * i, t, m, dG_dp);
-			list1.add(G);
-			list2.add(dG_dp[0]);
-		}
-
-		double endRange1 = limit * h;
-		
-		// If the range is past the range expected then do a single range.
-		// TODO - make the threshold configurable
-		boolean singleRange = 
-				//true || 
-				endRange1 > 0.5 * upperLimit;
-
-		// Extend the upper limit using the kernel range
-		upperLimit += s * range1;
-
-		if (singleRange)
-		{
-			// Continue until all the Fisher information has been achieved.
-			for (int i = limit + 1;; i++)
-			{
-				double c = h * i;
-				G = PoissonGammaFunction.poissonGammaPartial(c, t, m, dG_dp);
-				if (G == 0)
-					break;
-				list1.add(G);
-				list2.add(dG_dp[0]);
-				if (c > upperLimit)
-					break;
-			}
-		}
+		// Testing - do a single convolution
 
 		// Convolve with the Gaussian kernel
-		double[] p = list1.toArray();
-		double[] a = list2.toArray();
+		double[] p = listP.toArray();
+		double[] a = listA.toArray();
+		double[] g = gaussianKernel.getGaussianKernel(scale, range1, false);
+		h = 1.0 / scale;
 
-		//System.out.printf("t=%g  sum p=%s  single=%b  h=%g  sumA=%s\n", t, (Maths.sum(p)) * h + dirac, singleRange, h, sum * h / 3);
+		convolve(p, a, g, true, scale);
 
-		// Should this convolve without the Dirac then add that afterwards.
-		// This is how the Camera Model Analysis works. Perhaps there is
-		// floating point error when the dirac is large.
+		System.out.printf("t=%g 0=%d scale=%d kernel=%d After convolution SumP=%s SumA=%s\n", t, 
+				iEndRange2, scale, g.length,
+				Maths.sum(P), Maths.sum(A));
 
-		double[] g = getUnitGaussianKernel(scale, range1);
-		p[0] += dirac;
-		convolve(p, a, g, true);
+		int maxi = P.length;
 
-		int maxi = (singleRange)
-				// Do the entire range
-				? P.length
-				// For a dual range compute sum only up to where 
-				// the Gaussian kernel no longer touches zero.
-				// If the Gaussian is at p.length / 2 then it does not touch 0.
-				// Add the kernel range too to compute the 
-				// sum from -[Gaussian range] to +[Gaussian range] around zero.		
-				: p.length / 2 + g.length / 2; // Separate additions as both are odd
-
-		final double endRange1F;
-
-		//use38 = false;
+		// Note: The step size for Simpson integration should be 1/scale.
+		// Because the kernel is normalised each doubling in scale above 1
+		// results in the Gaussian kernel at each point halving. 
+		// The result is that the P and A values halve. A^2/P will then halve. 
+		// So it should be increased by scale. 
+		// This makes h effectively 1.
 		
 		// We assume that the function values at the end are zero and so do not 
 		// include them in the sum. Just alternate totals.
 		double range1sum;
+		double sum = 0;
 		if (use38)
 		{
 			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
 			// This computes the sum as:
 			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-			// The final step before maxi must sum 2. 
+			// The final step before maxi must be sum 2. 
 			final int end = (maxi - 1) % 3;
 			double sum3 = 0, sum2 = 0;
 			for (int i = 0; i < maxi; i++)
 			{
 				final double f = getF(P[i], A[i]);
+				sum += f;
 				if (i % 3 == end)
 					sum2 += f;
 				else
 					sum3 += f;
 			}
 
-			endRange1F = (singleRange) ? 0 : getF(P[maxi], A[maxi]);
-
 			// Assume all values before the function are zero.
-			range1sum = (h * 3.0 / 8) * (sum3 * 3 + sum2 * 2 + endRange1F);
+			range1sum = (
+			//h * 
+			3.0 / 8) * (sum3 * 3 + sum2 * 2);
 		}
 		else
 		{
@@ -470,151 +492,98 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 			// This computes the sum as:
 			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
 			// The number of steps must be modulo 2. Assume all values before this are zero.
-			// The final step before maxi must sum 4. 
+			// The final step before maxi must be sum 4. 
 			final int end = (maxi - 1) % 2;
 			double sum4 = 0, sum2 = 0;
 			for (int i = 0; i < maxi; i++)
 			{
 				final double f = getF(P[i], A[i]);
+				sum += f;
 				if (i % 2 == end)
 					sum4 += f;
 				else
 					sum2 += f;
 			}
-
-			endRange1F = (singleRange) ? 0 : getF(P[maxi], A[maxi]);
 
 			// Assume all values before the function are zero.
-			range1sum = (h * 1.0 / 3) * (sum4 * 4 + sum2 * 2 + endRange1F);
+			range1sum = (
+			//h * 
+			1.0 / 3) * (sum4 * 4 + sum2 * 2);
 		}
 
-		//System.out.printf("sum A = %g\n", Maths.sum(A) * h);
-
-		if (singleRange)
-		{
-			return range1sum - 1;
-		}
-
-		// END ITERATION
-
-		// The remaining convolution range does not overlap the Dirac at c=0.
-		// Use the default scale.
-		int scale2 = defaultScale;
-
-		// XXX - For testing that the two convolutions join seemlessly
-		//scale2 = scale;
-
-		// The samples are taken at a factor of the standard deviation
-		h = s / scale2;
-
-		// The second scale is less than the first so reuse the values
-		int interval = scale / scale2;
-		list1.resetQuick();
-		list2.resetQuick();
-		list1.add(p0);
-		list2.add(a[0]);
-		for (int i = interval; i < p.length; i += interval)
-		{
-			list1.add(p[i]);
-			list2.add(a[i]);
-		}
-
-		// For a dual range compute sum only from the range 1 limit
-		// (this was p.length / 2 since the length was double for full convolution
-		// with the Gaussian).
-		//int mini = (p.length / 2) / interval;		
-		int mini = list1.size() / 2;
-
-		// Continue until all the Fisher information has been achieved.
-		for (int i = 1;; i++)
-		{
-			double c = endRange1 + h * i;
-			G = PoissonGammaFunction.poissonGammaPartial(c, t, m, dG_dp);
-			if (G == 0)
-				break;
-			list1.add(G);
-			list2.add(dG_dp[0]);
-			if (c > upperLimit)
-				break;
-		}
-
-		p = list1.toArray();
-		a = list2.toArray();
-
-		//System.out.printf("t=%g  sum p2=%g  endRange1=%g sumA=%s\n", t,
-		//		(Maths.sum(p) + (1 - c0factor) * p0) * h + dirac, endRange1, sum * h / 3);
-
-		g = getUnitGaussianKernel(scale2, range1);
-		p[0] += dirac;
-		// XXX - check this
-		convolve(p, a, g, true);
-
-		// Add the kernel size to get the point when new values occur.
-		mini += g.length / 2;
-
-		// Check that the endRange1F is the same as the start point.
-		// When debugging set scale2 == scale. However this may still
-		// be different if convolution used the FFT due to the different
-		// size data. When scale2 != scale then it will be different
-		// due to less accurate sampling of the convolution.
-		double startRange2F = getF(P[mini], A[mini]);
-		System.out.printf("t=%g  endRange1=%g  %s == %s (%g)\n", t, endRange1, endRange1F, startRange2F,
-				gdsc.core.utils.DoubleEquality.relativeError(endRange1F, startRange2F));
-
-		// We assume that the function values at the end are zero and so do not 
-		// include them in the sum. Just alternate totals.
-		double range2sum;
-		if (use38)
-		{
-			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
-			// This computes the sum as:
-			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-			// The first step must be sum 3. 
-			final int end = (mini + 1 + 2) % 3;
-			double sum3 = 0, sum2 = 0;
-			for (int i = mini + 1; i < P.length; i++)
-			{
-				final double f = getF(P[i], A[i]);
-				if (i % 3 == end)
-					sum2 += f;
-				else
-					sum3 += f;
-			}
-
-			// Assume all values after the function are zero.
-			range2sum = (h * 3.0 / 8) * (endRange1F + sum3 * 3 + sum2 * 2);
-		}
-		else
-		{
-			// Simpson's rule.
-			// This computes the sum as:
-			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-			// The number of steps must be modulo 2. Assume all values before this are zero.
-			// The first step must be sum 4. 
-			final int end = (mini + 1) % 2;
-			double sum4 = 0, sum2 = 0;
-			for (int i = mini + 1; i < P.length; i++)
-			{
-				final double f = getF(P[i], A[i]);
-				if (i % 2 == end)
-					sum4 += f;
-				else
-					sum2 += f;
-			}
-
-			// Assume all values after the function are zero.
-			range2sum = (h * 1.0 / 3) * (endRange1F + sum4 * 4 + sum2 * 2);
-		}
-
-		//System.out.printf("s=%g t=%g x=%d-%d scale=%d   sum=%s  pI = %g   pgI = %g\n", s, t, minx, maxx, scale, sum,
-		//		getPoissonI(t), 1 / (t + s * s));
-
-		//System.out.printf("sum A = %g\n", Maths.sum(A) * h);
-
-		return range1sum + range2sum - 1;
+		return range1sum - 1;
 	}
 
-	private void convolve(double[] p, double[] a, double[] g, boolean requireEdge)
+	private void computePMF(double dirac, double t, int endX)
+	{
+		double G;
+		double[] dG_dp = new double[1];
+
+		listP.resetQuick();
+		listA.resetQuick();
+
+		// Initialise at x=0
+		G = PoissonGammaFunction.poissonGammaPartial(0, t, m, dG_dp);
+
+		// At x=0 integrate from 0 to 0.5 without the Dirac 
+		// (this is a smooth function)
+		G -= dirac;
+		G = add(t, G, dG_dp, 0, 0.25, 0.5);
+		listP.setQuick(0, listP.getQuick(0) + dirac);
+
+		// For the rest of the range integrate from x-0.5 to x+0.5
+		for (int x = 1; x <= endX; x++)
+		{
+			G = add(t, G, dG_dp, x - 0.5, x, x + 0.5);
+			if (G == 0)
+			{
+				listP.removeAt(x);
+				listA.removeAt(x);
+				break;
+			}
+		}
+		if (listP.size() != endX)
+		{
+			// Zero fill for the convolution?
+		}
+		System.out.printf("t=%g 0=%d Dirac=%s SumP=%s SumA=%s\n", t, endX, dirac, listP.sum(), listA.sum());
+	}
+
+	/**
+	 * Adds the integral of the Poisson-Gamma PDF to the working lists for P and A. It is assumed that the input is the
+	 * value and gradient of the lower bound.
+	 * When finished return the value and gradient of the upper bound.
+	 *
+	 * @param G
+	 *            the previous computed point value
+	 * @param dG_dp
+	 *            the previous computed point gradient
+	 * @param lower
+	 *            the lower bound
+	 * @param mid
+	 *            the mid point
+	 * @param upper
+	 *            the upper bound
+	 * @return the double
+	 */
+	private double add(double t, double G, double[] dG_dp, double lower, double mid, double upper)
+	{
+		// TODO - does this need refinement?
+
+		// Do a single Simpson sum (f0 + 4 * fxi + fn).
+		double sG = G;
+		double sA = dG_dp[0];
+		G = PoissonGammaFunction.poissonGammaPartial(mid, t, m, dG_dp);
+		sG += 4 * G;
+		sA += 4 * dG_dp[0];
+		G = PoissonGammaFunction.poissonGammaPartial(upper, t, m, dG_dp);
+		double h_3 = (upper - lower) / 6;
+		listP.add((sG + G) * h_3);
+		listA.add((sA + dG_dp[0]) * h_3);
+		return G;
+	}
+
+	private void convolve(double[] p, double[] a, double[] g, boolean requireEdge, int scale)
 	{
 		// Convolution in the frequency domain may create negatives
 		// due to edge wrap artifacts. This is classically reduced by using a 
@@ -626,72 +595,32 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		// When only part of the range is required (since the range start has been 
 		// computed, and the range end will asymptote to zero) use the FFT
 
-		double[][] result = (requireEdge) ? Convolution.convolve(g, p, a) : Convolution.convolveFast(g, p, a);
-		P = result[0];
-		A = result[1];
+//		double[][] result = (requireEdge) ? Convolution.convolve(g, p, a) : Convolution.convolveFast(g, p, a);
+//		P = result[0];
+//		A = result[1];
+		
+		// XXX - fix for a twin scaled convolution
+		P = Convolution.convolve(g, p, scale);
+		A = Convolution.convolve(g, a, scale);
 		offset = g.length / 2 * -h;
 
-		if (!requireEdge && Convolution.isFFT(g.length, p.length))
-		{
-			// Just remove values below the minimum expected.
-			// If the Gaussian kernel is sufficiently large then 
-			// edge artifacts should be limited to the region where
-			// the actual values are very small.
-			double minP = Maths.min(p) * g[0];
-			double minA = Maths.min(a) * g[0];
-			for (int i = 0; i < P.length; i++)
-			{
-				if (P[i] < minP)
-					P[i] = 0;
-				if (A[i] < minA)
-					A[i] = 0;
-			}
-		}
+//		if (!requireEdge && Convolution.isFFT(g.length, p.length))
+//		{
+//			// Just remove values below the minimum expected.
+//			// If the Gaussian kernel is sufficiently large then 
+//			// edge artifacts should be limited to the region where
+//			// the actual values are very small.
+//			double minP = Maths.min(p) * g[0];
+//			double minA = Maths.min(a) * g[0];
+//			for (int i = 0; i < P.length; i++)
+//			{
+//				if (P[i] < minP)
+//					P[i] = 0;
+//				if (A[i] < minA)
+//					A[i] = 0;
+//			}
+//		}
 	}
-
-	/**
-	 * Gets a value using the next integer power of 2. This is limited to a size of 2^16.
-	 *
-	 * @param s
-	 *            the value
-	 * @return the next power of 2
-	 */
-	protected static int getPow2Scale(double s)
-	{
-		double scale = Math.ceil(s);
-		if (scale > MAX_SCALE)
-			return MAX_SCALE;
-		return Maths.nextPow2((int) scale);
-	}
-
-	/**
-	 * Gets the index for the power of 2 scale, i.e. log2(scale).
-	 *
-	 * @param scale
-	 *            the scale
-	 * @return the index
-	 */
-	protected static int getIndex(int scale)
-	{
-		int bit = LOG_2_MAX_SCALE;
-		while ((scale & (1 << bit)) == 0)
-			bit--;
-		return bit;
-	}
-
-	/**
-	 * Gets the gaussian kernel for convolution using a standard deviation of 1.
-	 * The kernel will be sampled every (1 / scale).
-	 * <p>
-	 * This will only be called with a scale in power 2 intervals up to 2^16 and a range of 1 to 38.
-	 *
-	 * @param scale
-	 *            the scale
-	 * @param range
-	 *            the range (in SD units)
-	 * @return the gaussian kernel
-	 */
-	protected abstract double[] getUnitGaussianKernel(int scale, int range);
 
 	private static double getF(double P, double A)
 	{
@@ -719,12 +648,12 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 	 */
 	public double[][] getFisherInformationFunction(boolean withGaussian)
 	{
-		if (A == null)
+		if (listP.isEmpty())
 			return null;
 
 		double[] A, P;
 		double offset;
-		if (withGaussian)
+		if (withGaussian && !noGaussian)
 		{
 			P = this.P;
 			A = this.A;
@@ -732,13 +661,9 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		}
 		else
 		{
-			P = list1.toArray();
-			A = list2.toArray();
+			P = listP.toArray();
+			A = listA.toArray();
 			offset = 0;
-			// Account for manipulation at c=0 for the convolution. Just recompute.
-			double[] dG_dp = new double[1];
-			P[0] = PoissonGammaFunction.poissonGammaPartial(0, lastT, m, dG_dp);
-			A[0] = dG_dp[0];
 		}
 		double[] f = new double[A.length];
 		double[] x = new double[A.length];
@@ -910,11 +835,57 @@ public abstract class PoissonGammaGaussianFisherInformation extends BasePoissonF
 		this.use38 = use38;
 	}
 
+	/**
+	 * Gets the relative accuracy for convergence during iteration.
+	 *
+	 * @return the relative accuracy
+	 */
+	public double getRelativeAccuracy()
+	{
+		return relativeAccuracy;
+	}
+
+	/**
+	 * Sets the relative accuracy for convergence during iteration.
+	 * <p>
+	 * Set to below zero to prevent convergence check. This results in a fixed number of iterations.
+	 *
+	 * @param relativeAccuracy
+	 *            the new relative accuracy
+	 */
+	public void setRelativeAccuracy(double relativeAccuracy)
+	{
+		this.relativeAccuracy = relativeAccuracy;
+	}
+
+	/**
+	 * Gets the max iterations for iteration.
+	 *
+	 * @return the max iterations
+	 */
+	public int getMaxIterations()
+	{
+		return maxIterations;
+	}
+
+	/**
+	 * Sets the max iterations for iteration. Set to zero to prevent iteration.
+	 *
+	 * @param maxIterations
+	 *            the new max iterations
+	 */
+	public void setMaxIterations(int maxIterations)
+	{
+		this.maxIterations = maxIterations;
+	}
+
 	@Override
 	protected void postClone()
 	{
-		list1 = new TDoubleArrayList();
-		list2 = new TDoubleArrayList();
+		listP = new TDoubleArrayList();
+		listA = new TDoubleArrayList();
+		if (gaussianKernel != null)
+			gaussianKernel = gaussianKernel.clone();
 	}
 
 	private static class QuickConvergenceChecker extends AbstractConvergenceChecker<UnivariatePointValuePair>
