@@ -20,7 +20,6 @@ import gdsc.smlm.function.InterpolatedPoissonFisherInformation;
 import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
-import gdsc.smlm.function.RealPoissonGammaGaussianFisherInformation;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
@@ -327,7 +326,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation()
 	{
 		double s = settings.getCcdNoise() / settings.getCcdGain();
-		if (s <= 0)
+		if (s < 0)
 		{
 			IJ.error(TITLE, "CCD noise must be positive");
 			return null;
@@ -356,7 +355,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	{
 		double s = settings.getEmCcdNoise();
 		double m = settings.getEmCcdGain();
-		if (s <= 0)
+		if (s < 0)
 		{
 			IJ.error(TITLE, "EM CCD noise must be positive");
 			return null;
@@ -369,7 +368,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		int sampling = PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING;
 		sampling <<= 2;
-		PoissonGammaGaussianFisherInformation fi = new RealPoissonGammaGaussianFisherInformation(m, s, sampling);
+		PoissonGammaGaussianFisherInformation fi = new PoissonGammaGaussianFisherInformation(m, s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-8);
 		fi.setMinRange(10);
 		//fi.setMaxRange(10);

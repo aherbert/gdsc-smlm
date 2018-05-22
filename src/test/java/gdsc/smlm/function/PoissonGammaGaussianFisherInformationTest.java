@@ -16,7 +16,7 @@ public class PoissonGammaGaussianFisherInformationTest
 
 	private void canFindMaximumAndUpperLimit(double m)
 	{
-		PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, 1);
+		PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, 1);
 		f.setMeanThreshold(Double.POSITIVE_INFINITY);
 
 		// Due to a limited convolution (for an infinite range) 
@@ -49,7 +49,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		//double m1 = 500;
 		//double u = 350;
 		//double s1 = 13;
-		//PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m1, s1);
+		//PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m1, s1);
 		//f.setMeanThreshold(Double.POSITIVE_INFINITY);
 		//double I = f.getPoissonGammaGaussianI(u);
 		//double upper = PoissonFisherInformation.getPoissonI(u);
@@ -67,7 +67,7 @@ public class PoissonGammaGaussianFisherInformationTest
 
 	private void canComputeRealFisherInformation(double m, double s)
 	{
-		canComputeFisherInformation(new RealPoissonGammaGaussianFisherInformation(m, s));
+		canComputeFisherInformation(new PoissonGammaGaussianFisherInformation(m, s));
 	}
 
 	private void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f)
@@ -123,7 +123,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		for (int s = mins; s <= maxs; s++)
 			for (int m = minm; m <= maxm; m++)
 			{
-				PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, s);
+				PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
 				f.setCumulativeProbability(1 - 1e-12);
 				double I = f.getPoissonGammaGaussianI(p);
 				double I2 = f.getPoissonGammaGaussianI(p2);
@@ -196,7 +196,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		for (double m : M)
 			for (double s : S)
 			{
-				PoissonGammaGaussianFisherInformation f = new RealPoissonGammaGaussianFisherInformation(m, s);
+				PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
 				double I = f.getPoissonGammaGaussianI(u);
 				double upper = PoissonFisherInformation.getPoissonI(u);
 				double alpha = I / upper;
@@ -219,7 +219,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	//
 	//	private void canApproximateRealFisherInformationWithLowMean(double m, double s)
 	//	{
-	//		canApproximateRealFisherInformationWithLowMean(new RealPoissonGammaGaussianFisherInformation(m, s));
+	//		canApproximateRealFisherInformationWithLowMean(new PoissonGammaGaussianFisherInformation(m, s));
 	//	}
 	//
 	//	private void canApproximateRealFisherInformationWithLowMean(PoissonGammaGaussianFisherInformation f)
