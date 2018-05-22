@@ -58,7 +58,7 @@ public class GaussianKernel implements Cloneable
 	}
 
 	/**
-	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation scale*s.
+	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation s*scale.
 	 * To avoid a step due to the cutoff at a finite value, the near-edge values are
 	 * replaced by a 2nd-order polynomial with its minimum=0 at the first out-of-kernel
 	 * pixel. Thus, the kernel function has a smooth 1st derivative in spite of finite
@@ -71,8 +71,10 @@ public class GaussianKernel implements Cloneable
 	 * @param edgeCorrection
 	 *            Set to true to perform the edge correction
 	 * @return The kernel, decaying towards zero, which would be reached at the first out of kernel index
+	 * @throws IllegalArgumentException
+	 *             If the input scale is not a power of 2
 	 */
-	public double[] getGaussianKernel(int scale, double range, boolean edgeCorrection)
+	public double[] getGaussianKernel(int scale, double range, boolean edgeCorrection) throws IllegalArgumentException
 	{
 		if (!Maths.isPow2(scale))
 			throw new IllegalArgumentException("Scale must be a power of 2: " + scale);
@@ -101,11 +103,11 @@ public class GaussianKernel implements Cloneable
 		}
 		else
 		{
-			final int upsample = currentScale / scale;
 			final double step = 1.0 / scale;
-			for (int i = 1, j = upsample; i < kRadius; i++, j += upsample)
+			final int sample = currentScale / scale;
+			for (int i = 1, j = sample; i < kRadius; i++, j += sample)
 			{
-				// Just in case down-scaling requires a different end point in the kernel
+				// In case sampling requires a different end point in the kernel
 				// check the size
 				if (j < halfKernel.size())
 				{
@@ -118,6 +120,86 @@ public class GaussianKernel implements Cloneable
 					if (kernel[i] == 0)
 						break;
 				}
+			}
+		}
+
+		return buildKernel(kernel, kRadius, edgeCorrection);
+	}
+
+	/**
+	 * Create a 1-dimensional normalized Gaussian kernel with standard deviation s/scale.
+	 * To avoid a step due to the cutoff at a finite value, the near-edge values are
+	 * replaced by a 2nd-order polynomial with its minimum=0 at the first out-of-kernel
+	 * pixel. Thus, the kernel function has a smooth 1st derivative in spite of finite
+	 * length.
+	 * <p>
+	 * Note: This can lead to inefficiency if the kernel has been upscaled
+	 * (i.e. the current scale is above 1) and the cached range is below the input range since
+	 * the current kernel must be expanded. It is recommended to only call this method with
+	 * the same range that has been used for {@link #getGaussianKernel(int, double, boolean)}. The result is just a
+	 * sparsely sampled kernel.
+	 * <p>
+	 * This method is not recommended when the scale is above the standard deviation as the kernel will be too sparsely
+	 * sampled.
+	 *
+	 * @param scale
+	 *            the scale
+	 * @param range
+	 *            the range (in units of standard deviation)
+	 * @param edgeCorrection
+	 *            Set to true to perform the edge correction
+	 * @return The kernel, decaying towards zero, which would be reached at the first out of kernel index
+	 * @throws IllegalArgumentException
+	 *             If the input scale is above zero
+	 */
+	public double[] getDownscaleGaussianKernel(int scale, double range, boolean edgeCorrection)
+			throws IllegalArgumentException
+	{
+		if (scale < 1)
+			throw new IllegalArgumentException("Scale must be strictly positive: " + scale);
+
+		// Limit range for the Gaussian
+		if (range < 1)
+			range = 1;
+		else if (range > 38)
+			range = 38;
+
+		// Check if the current half-kernel would be too large if expanded to the range
+		if ((double) currentScale * scale * range > HALF_WIDTH_LIMIT)
+		{
+			return makeErfGaussianKernel(s / scale, range);
+		}
+
+		final int sample = currentScale * scale;
+
+		// Expand the kernel to cover the range at the current scale.
+		// Note: This can lead to inefficiency if the kernel has been upscaled
+		// (i.e. the current scale is above 1).
+		int kRadius = getGaussianHalfWidth(sample, range) + 1;
+		increaseKernel(kRadius);
+
+		// Now get the radius of the downscaled kernel
+		kRadius = getGaussianHalfWidth(s / scale, range) + 1;
+
+		// Create kernel
+		// Note: The stored values in the halfKernel are always non-zero.
+		double[] kernel = new double[2 * kRadius - 1];
+		kernel[0] = 1;
+		final double step = scale;
+		for (int i = 1, j = sample; i < kRadius; i++, j += sample)
+		{
+			// In case sampling requires a different end point in the kernel
+			// check the size
+			if (j < halfKernel.size())
+			{
+				kernel[i] = halfKernel.getQuick(j);
+			}
+			else
+			{
+				kernel[i] = FastMath.exp(Maths.pow2(i * step) / var2);
+				// Check if zero
+				if (kernel[i] == 0)
+					break;
 			}
 		}
 
