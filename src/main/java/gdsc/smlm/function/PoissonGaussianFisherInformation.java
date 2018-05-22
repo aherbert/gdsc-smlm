@@ -49,6 +49,12 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	/** The maximum range for the Gaussian kernel (in units of SD). */
 	public static final int MAX_RANGE = 38;
 
+	/** The log2 of the maximum scale for the Gaussian kernel (in units of SD). */
+	public static final int LOG_2_MAX_SCALE = 16;
+
+	/** The maximum scale for the Gaussian kernel (in units of SD). */
+	public static final int MAX_SCALE = 1 << LOG_2_MAX_SCALE;
+
 	/** The default cumulative probability for the Poisson distribution. */
 	public static final double DEFAULT_CUMULATIVE_PROBABILITY = 1 - 1e-10;
 
@@ -160,7 +166,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	private int maxRange = DEFAULT_MAX_RANGE;
 
 	/** The scale of the kernel. */
-	private final int scale;
+	private final int defaultScale;
 
 	/** The poisson distribution used to generate the Poisson probabilities. */
 	private CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
@@ -224,26 +230,49 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 */
 	public PoissonGaussianFisherInformation(double s, double sampling) throws IllegalArgumentException
 	{
-		if (!(s > 0 && s <= Double.MAX_VALUE))
-			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
+		if (!(s >= 0 && s <= Double.MAX_VALUE))
+			throw new IllegalArgumentException("Gaussian standard deviation must be positive");
 		if (!(sampling >= 1 && sampling <= Double.MAX_VALUE))
 			throw new IllegalArgumentException("Gaussian sampling must at least 1");
+
 		this.s = s;
 		noGaussian = (s * MAX_RANGE < 1);
 		if (noGaussian)
 		{
-			//throw new IllegalArgumentException("Gaussian range does not extend to convolve with the Poisson");
 			// This is OK. Just return the information for a Poisson.
-			this.scale = 0;
+			this.defaultScale = 0;
 		}
 		else
 		{
 			// This is set to work for reasonable values of the Gaussian kernel and sampling
 			// e.g. s [0.5:20], sampling from [1:8].
 
-			this.scale = Maths.nextPow2((int) Math.ceil(sampling / s));
+			this.defaultScale = getPow2Scale(sampling / s);
+
+			// Don't support excess scaling caused by small kernels
+			if (defaultScale * s * MAX_RANGE > 1000000000)
+			{
+				throw new IllegalArgumentException(
+						"Maximum Gaussian kernel size too large: " + defaultScale * s * MAX_RANGE);
+			}
+
 			gaussianKernel = new GaussianKernel(s);
 		}
+	}
+
+	/**
+	 * Gets a value using the next integer power of 2. This is limited to a size of 2^16.
+	 *
+	 * @param s
+	 *            the value
+	 * @return the next power of 2
+	 */
+	protected static int getPow2Scale(double s)
+	{
+		double scale = Math.ceil(s);
+		if (scale > MAX_SCALE)
+			return MAX_SCALE;
+		return Maths.nextPow2((int) scale);
 	}
 
 	/**
@@ -304,8 +333,8 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		{
 			throw new IllegalArgumentException("Poisson mean must be positive");
 
-			// This is not valid as the information tends towards infinity...
-			// No Poisson. Return the Fisher information for a Gaussian
+			// This is not valid as this is a lower limit on the information.
+			// No Poisson. Return the Fisher information for a Gaussian.
 			//return getGaussianI();
 		}
 
@@ -465,11 +494,11 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		//	p[i] /= sum;
 
 		// Initial sum
-		int scale = this.scale;
+		int scale = defaultScale;
 		sum = compute(scale, range, p);
 
 		// Iterate
-		for (int iteration = 1; iteration <= maxIterations; iteration++)
+		for (int iteration = 1; iteration <= maxIterations && scale < MAX_SCALE; iteration++)
 		{
 			scale *= 2;
 			double oldSum = sum;
@@ -862,6 +891,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	{
 		pd = new CustomPoissonDistribution(null, 1);
 		list = new TDoubleArrayList();
-		gaussianKernel = gaussianKernel.clone();
+		if (gaussianKernel != null)
+			gaussianKernel = gaussianKernel.clone();
 	}
 }
