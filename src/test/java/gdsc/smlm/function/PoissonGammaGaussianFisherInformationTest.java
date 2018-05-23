@@ -41,11 +41,11 @@ public class PoissonGammaGaussianFisherInformationTest
 	}
 
 	@Test
-	public void canComputeRealFisherInformation()
+	public void canComputeFisherInformation()
 	{
 		//org.junit.Assume.assumeTrue(false);
 
-		//canComputeRealFisherInformation(250, 13);
+		//canComputeFisherInformation(250, 13);
 		//double m1 = 500;
 		//double u = 350;
 		//double s1 = 13;
@@ -62,10 +62,10 @@ public class PoissonGammaGaussianFisherInformationTest
 
 		for (double m : M)
 			for (double s : S)
-				canComputeRealFisherInformation(m, s);
+				canComputeFisherInformation(m, s);
 	}
 
-	private void canComputeRealFisherInformation(double m, double s)
+	private void canComputeFisherInformation(double m, double s)
 	{
 		canComputeFisherInformation(new PoissonGammaGaussianFisherInformation(m, s));
 	}
@@ -91,7 +91,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, I / upper);
 		Assert.assertTrue("Not less than Poisson information", I <= upper);
 		// This is true at higher mean
-		if (u > 1)
+		if (u > 10)
 			Assert.assertTrue("Not above half the Poisson information", I >= 0.4999 * upper);
 	}
 
@@ -124,7 +124,6 @@ public class PoissonGammaGaussianFisherInformationTest
 			for (int m = minm; m <= maxm; m++)
 			{
 				PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
-				f.setCumulativeProbability(1 - 1e-12);
 				double I = f.getPoissonGammaGaussianI(p);
 				double I2 = f.getPoissonGammaGaussianI(p2);
 				double alpha = I / upper;
@@ -137,7 +136,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	}
 
 	@Test(expected = AssertionError.class)
-	public void cannotComputeRealFisherInformationWithLowestPossibleMean()
+	public void cannotComputeFisherInformationWithLowestPossibleMean()
 	{
 		org.junit.Assume.assumeTrue(false);
 
@@ -177,18 +176,18 @@ public class PoissonGammaGaussianFisherInformationTest
 		Assert.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
 		Assert.assertTrue(1.0 / Math.nextAfter(u, -1) == Double.POSITIVE_INFINITY);
 
-		computeRealFisherInformationWithMean(u);
+		computeFisherInformationWithMean(u);
 	}
 
 	@Test
-	public void canComputeRealFisherInformationWithLowMean()
+	public void canComputeFisherInformationWithLowMean()
 	{
 		org.junit.Assume.assumeTrue(false);
 		double u = 1e-300;
-		computeRealFisherInformationWithMean(u);
+		computeFisherInformationWithMean(u);
 	}
 
-	private void computeRealFisherInformationWithMean(double u)
+	private void computeFisherInformationWithMean(double u)
 	{
 		double[] M = { 20, 100, 500 };
 		double[] S = { 3, 13 };
@@ -205,39 +204,4 @@ public class PoissonGammaGaussianFisherInformationTest
 				Assert.assertTrue(alpha > 0);
 			}
 	}
-
-	//	@Test
-	//	public void canApproximateRealFisherInformationWithLowMean()
-	//	{
-	//		double[] M = { 20, 100, 500 };
-	//		double[] S = { 3, 13 };
-	//
-	//		for (double m : M)
-	//			for (double s : S)
-	//				canApproximateRealFisherInformationWithLowMean(m, s);
-	//	}
-	//
-	//	private void canApproximateRealFisherInformationWithLowMean(double m, double s)
-	//	{
-	//		canApproximateRealFisherInformationWithLowMean(new PoissonGammaGaussianFisherInformation(m, s));
-	//	}
-	//
-	//	private void canApproximateRealFisherInformationWithLowMean(PoissonGammaGaussianFisherInformation f)
-	//	{
-	//		PoissonGammaGaussianFisherInformation fe = (PoissonGammaGaussianFisherInformation) f.clone();
-	//
-	//		canApproximateRealFisherInformationWithLowMean(fe, f, 1e-21);
-	//		canApproximateRealFisherInformationWithLowMean(fe, f, 1e-100);
-	//		canApproximateRealFisherInformationWithLowMean(fe, f, 1e-200);
-	//	}
-	//
-	//	private void canApproximateRealFisherInformationWithLowMean(PoissonGammaGaussianFisherInformation fe,
-	//			PoissonGammaGaussianFisherInformation fo, double u)
-	//	{
-	//		double e = fe.getPoissonGammaGaussianI(u);
-	//		double o = fo.getPoissonGammaGaussianI(u);
-	//
-	//		//System.out.printf("m=%g s=%g u=%g e=%s o=%s\n", fe.m, fe.s, u, e, o);
-	//		Assert.assertEquals(e, o, e * 1e-2);
-	//	}
 }

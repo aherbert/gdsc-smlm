@@ -153,11 +153,26 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double[] pgaFI = getFisherInformation(photons, pga, false);
 		double[] pggFI = getFisherInformation(photons, pgg, true);
 
+		// Compute relative to the Poisson Fisher information
+		double[] rpgFI = getAlpha(pgFI, photons);
+		//double[] rpgaFI = getAlpha(pgaFI, photons);
+		double[] rpggFI = getAlpha(pggFI, photons);
+
 		// ==============
+		// Debug PGG
+		boolean debug = false;
+		// ==============
+		if (debug)
 		{
-			// Debug PGG
-			double t = 1;
-			pgg.getFisherInformation(t);
+			double t = 200;
+			//for (int i=0; i<rpggFI.length; i++)
+			//{
+			//	if (photons[i] > 100 && rpggFI[i] < 0.3)
+			//		t = photons[i];
+			//}
+
+			double fi = pgg.getFisherInformation(t);
+			double alpha = fi * t;
 			double[][] data1 = pgg.getFisherInformationFunction(false);
 			double[][] data2 = pgg.getFisherInformationFunction(true);
 
@@ -168,24 +183,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 					max = j;
 			System.out.printf("PGG(p=%g) max=%g\n", t, data1[0][max]);
 
-			String title = TITLE + " " + t;
+			String title = TITLE + " " + t + " " + Utils.rounded(alpha);
 			Plot plot = new Plot(title, "Count", "FI function");
 			double yMax = Maths.max(data1[1]);
 			yMax = Maths.maxDefault(yMax, data2[1]);
-			plot.setLimits(data2[0][0], data2[0][data2[0].length-1], 0, yMax);
+			plot.setLimits(data2[0][0], data2[0][data2[0].length - 1], 0, yMax);
 			plot.setColor(Color.red);
 			plot.addPoints(data1[0], data1[1], Plot.LINE);
 			plot.setColor(Color.blue);
 			plot.addPoints(data2[0], data2[1], Plot.LINE);
 			Utils.display(title, plot);
 		}
-
 		// ==============
-
-		// Compute relative to the Poisson Fisher information
-		double[] rpgFI = getAlpha(pgFI, photons);
-		//double[] rpgaFI = getAlpha(pgaFI, photons);
-		double[] rpggFI = getAlpha(pggFI, photons);
 
 		Color color1 = Color.BLUE;
 		Color color2 = Color.GREEN;
@@ -367,12 +376,14 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 
 		int sampling = PoissonGammaGaussianFisherInformation.DEFAULT_SAMPLING;
-		sampling <<= 2;
+		//sampling = 2;
 		PoissonGammaGaussianFisherInformation fi = new PoissonGammaGaussianFisherInformation(m, s, sampling);
-		//fi.setCumulativeProbability(1 - 1e-8);
-		fi.setMinRange(10);
+		//fi.setRelativeProbabilityThreshold(1e-6);
+		//fi.setMinRange(10);
+		//fi.setMaxIterations(3);
 		//fi.setMaxRange(10);
-		fi.setMeanThreshold(200);
+		//fi.setUse38(false);
+		fi.setMeanThreshold(Double.MAX_VALUE);
 		return fi;
 	}
 

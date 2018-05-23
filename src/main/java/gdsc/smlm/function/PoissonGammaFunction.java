@@ -410,7 +410,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 */
 	static double poissonGammaPartial(double c, double p, double m, double[] dG_dp)
 	{
-		// As above but do not subtract the Gwer from the gradient. 
+		// As above but do not subtract the G from the gradient. 
 		if (c > 0.0)
 		{
 			final double c_m = c / m;
