@@ -183,7 +183,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 					max = j;
 			System.out.printf("PGG(p=%g) max=%g\n", t, data1[0][max]);
 
-			String title = TITLE + " " + t + " " + Utils.rounded(alpha);
+			String title = TITLE + " photons=" + Utils.rounded(t) + " alpha=" + Utils.rounded(alpha);
 			Plot plot = new Plot(title, "Count", "FI function");
 			double yMax = Maths.max(data1[1]);
 			yMax = Maths.maxDefault(yMax, data2[1]);

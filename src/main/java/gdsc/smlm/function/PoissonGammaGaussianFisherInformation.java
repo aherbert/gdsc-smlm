@@ -866,7 +866,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		}
 
 		// Correct the unscaled function to the scaled function
-		double dirac = FastMath.exp(lastT);
+		double dirac = FastMath.exp(-lastT);
 		scaleFactor *= dirac;
 
 		double[] f = new double[A.length];
