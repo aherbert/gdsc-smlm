@@ -11,6 +11,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.FisherInformation;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.HalfPoissonFisherInformation;
 import gdsc.smlm.function.PoissonFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PrecomputedFunctionFactory;
@@ -20,13 +21,28 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 public class UnivariateLikelihoodFisherInformationCalculatorTest
 {
+	enum Model
+	{
+		POISSON, HALF_POISSON, POISSON_GAUSSIAN
+	}
+
 	@Test
 	public void canComputePoissonFisherInformation()
 	{
 		RandomGenerator r = new Well19937c(30051977);
 		for (int n = 1; n < 10; n++)
 		{
-			canComputePoissonFisherInformation(r, false);
+			canComputePoissonFisherInformation(r, Model.POISSON);
+		}
+	}
+
+	@Test
+	public void canComputeHalfPoissonFisherInformation()
+	{
+		RandomGenerator r = new Well19937c(30051977);
+		for (int n = 1; n < 10; n++)
+		{
+			canComputePoissonFisherInformation(r, Model.HALF_POISSON);
 		}
 	}
 
@@ -36,11 +52,11 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		RandomGenerator r = new Well19937c(30051977);
 		for (int n = 1; n < 10; n++)
 		{
-			canComputePoissonFisherInformation(r, true);
+			canComputePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
 		}
 	}
 
-	private void canComputePoissonFisherInformation(RandomGenerator r, boolean modelGaussian)
+	private void canComputePoissonFisherInformation(RandomGenerator r, Model model)
 	{
 		RandomDataGenerator rdg = new RandomDataGenerator(r);
 
@@ -57,17 +73,23 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		Gradient1Function f1 = func;
 		FisherInformation fi;
 
-		if (modelGaussian)
+		switch (model)
 		{
 			// Get a variance
-			double var = 0.9 + 0.2 * r.nextDouble();
-			fi = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var));
-			f1 = (Gradient1Function) PrecomputedFunctionFactory.wrapFunction(func,
-					SimpleArrayUtils.newDoubleArray(func.size(), var));
-		}
-		else
-		{
-			fi = new PoissonFisherInformation();
+			case POISSON_GAUSSIAN:
+				double var = 0.9 + 0.2 * r.nextDouble();
+				fi = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var));
+				f1 = (Gradient1Function) PrecomputedFunctionFactory.wrapFunction(func,
+						SimpleArrayUtils.newDoubleArray(func.size(), var));
+				break;
+			case POISSON:
+				fi = new PoissonFisherInformation();
+				break;
+			case HALF_POISSON:
+				fi = new HalfPoissonFisherInformation();
+				break;
+			default:
+				throw new IllegalStateException();
 		}
 
 		// This introduces a dependency on a different package, and relies on that 
@@ -81,9 +103,17 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		FisherInformationMatrix I = calc.compute(params);
 		double[] o = I.getMatrix().data;
 
+		boolean emCCD = model == Model.HALF_POISSON;
+
+		if (emCCD)
+		{
+			// Assumes half the poisson fisher information 
+			SimpleArrayUtils.multiply(e, 0.5);
+		}
+		
 		Assert.assertArrayEquals(e, o, 1e-6);
 
-		if (!modelGaussian)
+		if (model == Model.POISSON || model == Model.HALF_POISSON)
 		{
 			// Get the Mortensen approximation for fitting Poisson data with a Gaussian. 
 			// Set a to 100 for the square pixel adjustment.
@@ -91,7 +121,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			double s = params[Gaussian2DFunction.X_SD] * a;
 			double N = params[Gaussian2DFunction.SIGNAL];
 			double b2 = params[Gaussian2DFunction.BACKGROUND];
-			double var = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, false);
+			double var = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, emCCD);
 
 			// Convert expected variance to pixels
 			var /= (a * a);
@@ -133,8 +163,8 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 
 		// Get a per-pixel variance
 		double[] var = new double[func.size()];
-		
-		fi = new FisherInformation[var.length]; 
+
+		fi = new FisherInformation[var.length];
 		for (int i = var.length; i-- > 0;)
 		{
 			var[i] = 0.9 + 0.2 * r.nextDouble();
