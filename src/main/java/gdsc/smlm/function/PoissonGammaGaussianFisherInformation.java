@@ -488,6 +488,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			{
 				sum += getF(p[i], a[i]);
 			}
+			if (sum == Double.POSITIVE_INFINITY)
+				return extremeLimit(t);
 			// Remember to rescale to the correct range
 			return dirac * sum - 1;
 		}
@@ -536,7 +538,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		sum = compute(scale, range1, p, a);
 
 		if (sum == Double.POSITIVE_INFINITY)
-			return sum;
+			extremeLimit(t);
 
 		// Iterate
 		for (int iteration = 1; iteration <= maxIterations && scale < MAX_SCALE; iteration++)
@@ -588,6 +590,20 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	private static double largeApproximation(double t)
 	{
 		return 1.0 / (2 * t);
+	}
+
+	/**
+	 * Return the extreme limit for the given mean. 
+	 * <p>
+	 * This can be called when an infinite sum has occurred on the unscaled A^2/P integral.
+	 *
+	 * @param t the t
+	 * @return the double
+	 */
+	private double extremeLimit(double t)
+	{
+		// Infinite sum occurs when at the upper limit or lower limit
+		return (t > 1) ? largeApproximation(t) : Double.POSITIVE_INFINITY;
 	}
 
 	private boolean computePMF(double dirac, double t, double[] max, int endX)
