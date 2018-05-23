@@ -593,11 +593,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	}
 
 	/**
-	 * Return the extreme limit for the given mean. 
+	 * Return the extreme limit for the given mean.
 	 * <p>
 	 * This can be called when an infinite sum has occurred on the unscaled A^2/P integral.
 	 *
-	 * @param t the t
+	 * @param t
+	 *            the t
 	 * @return the double
 	 */
 	private double extremeLimit(double t)
@@ -770,7 +771,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		public double getSum()
 		{
 			// Assume the end function values are zero
-			return (sum4 * 4 + sum2 * 2) / 3;
+			//return (sum4 * 4 + sum2 * 2) / 3;
+			// Stabilise for high sums by dividing first
+			sum4 /= 3;
+			sum2 /= 3;
+			return sum4 * 4 + sum2 * 2;
 		}
 	}
 
@@ -794,7 +799,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		public double getSum()
 		{
 			// Assume the end function values are zero
-			return (3.0 / 8) * (sum3 * 3 + sum2 * 2);
+			//return (3.0 / 8) * (sum3 * 3 + sum2 * 2);
+			// Stabilise for high sums by dividing first
+			sum3 /= 8;
+			sum2 /= 8;
+			return sum3 * 9 + sum2 * 6;
 		}
 	}
 

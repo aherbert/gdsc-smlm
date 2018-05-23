@@ -8,6 +8,8 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canFindMaximumAndUpperLimit()
 	{
+		org.junit.Assume.assumeTrue(false);
+
 		double[] M = { 20, 100, 500 };
 
 		for (double m : M)
@@ -88,7 +90,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	{
 		double I = f.getPoissonGammaGaussianI(u);
 		double upper = PoissonFisherInformation.getPoissonI(u);
-		System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, I / upper);
+		//System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, I / upper);
 		Assert.assertTrue("Not less than Poisson information", I <= upper);
 		// This is true at higher mean
 		if (u > 10)
@@ -135,10 +137,10 @@ public class PoissonGammaGaussianFisherInformationTest
 			}
 	}
 
-	@Test(expected = AssertionError.class)
-	public void cannotComputeFisherInformationWithLowestPossibleMean()
+	@Test
+	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
-		org.junit.Assume.assumeTrue(false);
+		//org.junit.Assume.assumeTrue(false);
 
 		// Lowest value where the reciprocal is not infinity.
 		double u = Double.longBitsToDouble(0x4000000000001L);

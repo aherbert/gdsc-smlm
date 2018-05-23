@@ -588,7 +588,11 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		public double getSum()
 		{
 			// Assume the end function values are zero
-			return (sum4 * 4 + sum2 * 2) / 3;
+			//return (sum4 * 4 + sum2 * 2) / 3;
+			// Stabilise for high sums by dividing first
+			sum4 /= 3;
+			sum2 /= 3;
+			return sum4 * 4 + sum2 * 2;
 		}
 	}
 
@@ -617,7 +621,11 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		public double getSum()
 		{
 			// Assume the end function values are zero
-			return (3.0 / 8) * (sum3 * 3 + sum2 * 2);
+			//return (3.0 / 8) * (sum3 * 3 + sum2 * 2);
+			// Stabilise for high sums by dividing first
+			sum3 /= 8;
+			sum2 /= 8;
+			return sum3 * 9 + sum2 * 6;
 		}
 	}
 
