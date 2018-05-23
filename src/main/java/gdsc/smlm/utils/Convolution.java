@@ -25,6 +25,41 @@ import org.jtransforms.utils.CommonUtils;
  */
 public class Convolution
 {
+	/** The maximum size supported for scaled convolution. */
+	public static final int MAX = 1 << 30;
+
+	/**
+	 * Interface to handle a convolution value
+	 */
+	public interface ConvolutionValueProcedure
+	{
+		/**
+		 * Executes this procedure.
+		 *
+		 * @param value
+		 *            the value of the convolution
+		 * @return true, if further values should be computed
+		 */
+		boolean execute(double value);
+	}
+
+	/**
+	 * Interface to handle two convolution valuess
+	 */
+	public interface DoubleConvolutionValueProcedure
+	{
+		/**
+		 * Executes this procedure.
+		 *
+		 * @param value1
+		 *            the value of the convolution of the first input
+		 * @param value2
+		 *            the value of the convolution of the second input
+		 * @return true, if further values should be computed
+		 */
+		boolean execute(double value1, double value2);
+	}
+
 	/**
 	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
 	 * convolution</a> between two sequences.
@@ -57,7 +92,7 @@ public class Convolution
 		final int totalLength = xLen + hLen - 1;
 		final double[] y = new double[totalLength];
 
-		// straightforward implementation of the convolution sum
+		// Straightforward implementation of the convolution sum
 		for (int n = 0; n < totalLength; n++)
 		{
 			double yn = 0;
@@ -77,7 +112,60 @@ public class Convolution
 	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
 	 * convolution</a> between two sequences.
 	 * <p>
-	 * The solution is obtained via multiplication in the frequency domain.
+	 * The solution is obtained via straightforward computation of the convolution sum (and not via FFT). Whenever the
+	 * computation needs an element that would be located at an index outside the input arrays, the value is assumed to
+	 * be zero.
+	 * <p>
+	 * The convolution is computed dynamically and can be stopped.
+	 *
+	 * @param x
+	 *            First sequence.
+	 *            Typically, this sequence will represent an input signal to a system.
+	 * @param h
+	 *            Second sequence.
+	 *            Typically, this sequence will represent the impulse response of the system.
+	 * @param v
+	 *            Output procedure for the convolution of {@code x} and {@code h}.
+	 *            This total number of times this is called will be {@code x.length + h.length - 1}.
+	 * @throws IllegalArgumentException
+	 *             if either {@code x} or {@code h} is {@code null} or either {@code x} or {@code h} is empty.
+	 */
+	public static void convolve(double[] x, double[] h, ConvolutionValueProcedure v) throws IllegalArgumentException
+	{
+		checkInput(x, h);
+
+		if (v == null)
+			throw new IllegalArgumentException("No value procedure");
+
+		final int xLen = x.length;
+		final int hLen = h.length;
+
+		// initialize the output array
+		final int totalLength = xLen + hLen - 1;
+		if (totalLength <= 0)
+			throw new IllegalArgumentException("Unsupported size: " + ((long) xLen + hLen - 1));
+
+		// Straightforward implementation of the convolution sum
+		for (int n = 0; n < totalLength; n++)
+		{
+			double yn = 0;
+			int k = FastMath.max(0, n + 1 - xLen);
+			int j = n - k;
+			while (k < hLen && j >= 0)
+			{
+				yn += x[j--] * h[k++];
+			}
+			if (!v.execute(yn))
+				break;
+		}
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between two sequences.
+	 * <p>
+	 * The solution is obtained via multiplication in the frequency domain. To reduce edge wrap artifacts the input
+	 * signals should be windowed to zero at the ends.
 	 *
 	 * @param x
 	 *            First sequence.
@@ -258,7 +346,7 @@ public class Convolution
 		final int totalLength = xLen + hLen - 1;
 		final double[][] y = new double[2][totalLength];
 
-		// straightforward implementation of the convolution sum
+		// Straightforward implementation of the convolution sum
 		for (int n = 0; n < totalLength; n++)
 		{
 			double yn1 = 0, yn2 = 0;
@@ -282,7 +370,64 @@ public class Convolution
 	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
 	 * convolution</a> between one sequence and two other sequences.
 	 * <p>
-	 * The solution is obtained via multiplication in the frequency domain.
+	 * The solution is obtained via straightforward computation of the convolution sum (and not via FFT). Whenever the
+	 * computation needs an element that would be located at an index outside the input arrays, the value is assumed to
+	 * be zero.
+	 * <p>
+	 * This has been adapted from Apache Commons Math v3.3: org.apache.commons.math3.util.MathArrays
+	 *
+	 * @param x
+	 *            First sequence.
+	 * @param h1
+	 *            Second sequence 1.
+	 * @param h2
+	 *            Second sequence 2.
+	 * @param v
+	 *            Output procedure for the convolution of {@code x} and {@code h1} or {@code h2}.
+	 *            This total number of times this is called will be {@code x.length + h1.length - 1}.
+	 * @throws IllegalArgumentException
+	 *             If any input is null or empty. If h1 and h2 are different lengths.
+	 */
+	public static void convolve(double[] x, double[] h1, double[] h2, DoubleConvolutionValueProcedure v)
+			throws IllegalArgumentException
+	{
+		checkInput(x, h1, h2);
+
+		if (v == null)
+			throw new IllegalArgumentException("No value procedure");
+
+		final int xLen = x.length;
+		final int hLen = h1.length;
+
+		// initialize the output array
+		final int totalLength = xLen + hLen - 1;
+		if (totalLength <= 0)
+			throw new IllegalArgumentException("Unsupported size: " + ((long) xLen + hLen - 1));
+
+		// Straightforward implementation of the convolution sum
+		for (int n = 0; n < totalLength; n++)
+		{
+			double yn1 = 0, yn2 = 0;
+			int k = FastMath.max(0, n + 1 - xLen);
+			int j = n - k;
+			while (k < hLen && j >= 0)
+			{
+				yn1 += x[j] * h1[k];
+				yn2 += x[j] * h2[k];
+				j--;
+				k++;
+			}
+			if (!v.execute(yn1, yn2))
+				break;
+		}
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between one sequence and two other sequences.
+	 * <p>
+	 * The solution is obtained via multiplication in the frequency domain. To reduce edge wrap artifacts the input
+	 * signals should be windowed to zero at the ends.
 	 *
 	 * @param x
 	 *            First sequence.
@@ -409,8 +554,6 @@ public class Convolution
 		}
 	}
 
-	private static final int MAX = 1 << 30;
-
 	/**
 	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
 	 * convolution</a> between two sequences.
@@ -493,21 +636,6 @@ public class Convolution
 	}
 
 	/**
-	 * Interface to handle a convolution value
-	 */
-	public interface ConvolutionValueProcedure
-	{
-		/**
-		 * Executes this procedure.
-		 *
-		 * @param value
-		 *            the value of the convolution
-		 * @return true, if further values should be computed
-		 */
-		boolean execute(double value);
-	}
-
-	/**
 	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
 	 * convolution</a> between two sequences.
 	 * <p>
@@ -572,6 +700,163 @@ public class Convolution
 				j -= scale;
 			}
 			if (!v.execute(yn))
+				break;
+		}
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between two sequences.
+	 * <p>
+	 * The scale is used to increase the size of h dynamically to H with zero fill.
+	 * The length of H is thus ((h.length-1) * scale + 1);
+	 *
+	 * @param x
+	 *            First sequence.
+	 * @param h1
+	 *            Second sequence 1.
+	 * @param h2
+	 *            Second sequence 2.
+	 * @param scale
+	 *            the scale
+	 * @return the convolution of {@code x} and {@code h1} and {@code x} and {@code h2}.
+	 *         This array's length will be [2][{@code x.length + h1.length - 1}].
+	 * @throws IllegalArgumentException
+	 *             If any input is null or empty. If h1 and h2 are different lengths.
+	 * @throws IllegalArgumentException
+	 *             if the scale is not strictly positive
+	 */
+	public static double[][] convolve(double[] x, double[] h1, double[] h2, int scale) throws IllegalArgumentException
+	{
+		checkInput(x, h1, h2);
+
+		if (scale < 1)
+			throw new IllegalArgumentException("Scale must be strictly positive");
+
+		if (h1.length == 1 || scale == 1)
+			// No scaling
+			return convolve(x, h1, h2);
+
+		final int xLen = x.length;
+		final int hLen = h1.length;
+
+		// initialize the output array
+		final double HLen = (double) (h1.length - 1) * scale + 1;
+		final double totalLength = xLen + HLen - 1;
+		if (totalLength > MAX)
+			throw new IllegalArgumentException("Scale creates unsupported array size: " + totalLength);
+
+		final int iTotalLength = (int) totalLength;
+		final double[][] y = new double[2][iTotalLength];
+
+		// Convolution sum. x is reversed verses h. 
+		// h is scaled up with zeros. 
+		// This is equivalent to using x every interval of scale.
+		for (int n = 0; n < iTotalLength; n++)
+		{
+			double yn1 = 0, yn2 = 0;
+			// k is the index in the scaled up distribution H
+			int k = FastMath.max(0, n + 1 - xLen);
+			// j is the index in the input distribution x
+			int j = n - k;
+
+			// k has to be scaled.
+			// The modulus indicates how many values are zero
+			// before the first non-zero value in H (in the descending direction).
+			int mod = k % scale;
+			// kk is the index in input distribution h (in the descending direction). 
+			int kk = k / scale;
+			// If there are non-zero value shift the indices
+			if (mod != 0)
+			{
+				// Shift kk by one for the next non-zero value (in the ascending direction)
+				kk++;
+				// Shift j by the number of zero values (in the descending direction)
+				j -= (scale - mod);
+			}
+
+			//int j = n - kk * scale;
+			while (kk < hLen && j >= 0)
+			{
+				yn1 += x[j] * h1[kk];
+				yn2 += x[j] * h2[kk];
+				kk++;
+				j -= scale;
+			}
+			y[0][n] = yn1;
+			y[1][n] = yn2;
+		}
+
+		return y;
+	}
+
+	/**
+	 * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
+	 * convolution</a> between two sequences.
+	 * <p>
+	 * The scale is used to increase the size of h dynamically to H with zero fill.
+	 * The length of H is thus ((h1.length-1) * scale + 1);
+	 * <p>
+	 * The convolution is computed dynamically and can be stopped.
+	 *
+	 * @param x
+	 *            First sequence.
+	 * @param h1
+	 *            Second sequence.
+	 * @param scale
+	 *            the scale
+	 * @param v
+	 *            Output procedure for the convolution of {@code x} and {@code h1} or {@code h2}.
+	 *            This total number of times this is called will be {@code x.length + h1.length - 1}.
+	 * @throws IllegalArgumentException
+	 *             If any input is null or empty. If h1 and h2 are different lengths.
+	 * @throws IllegalArgumentException
+	 *             if the scale is not strictly positive
+	 * @throws IllegalArgumentException
+	 *             if the output size is above the max size supported
+	 */
+	public static void convolve(double[] x, double[] h1, double[] h2, int scale, DoubleConvolutionValueProcedure v)
+			throws IllegalArgumentException
+	{
+		checkInput(x, h1, h2);
+
+		if (scale < 1)
+			throw new IllegalArgumentException("Scale must be strictly positive");
+		if (v == null)
+			throw new IllegalArgumentException("No value procedure");
+
+		final int xLen = x.length;
+		final int hLen = h1.length;
+
+		// For consistency just support up to the max for integers.
+		// This could be changed to use long for the index.
+		final double HLen = (double) (h1.length - 1) * scale + 1;
+		final double totalLength = xLen + HLen - 1;
+		if (totalLength > MAX)
+			throw new IllegalArgumentException("Scale creates unsupported size: " + totalLength);
+
+		final int iTotalLength = (int) totalLength;
+
+		for (int n = 0; n < iTotalLength; n++)
+		{
+			double yn1 = 0, yn2 = 0;
+			int k = FastMath.max(0, n + 1 - xLen);
+			int j = n - k;
+			int mod = k % scale;
+			int kk = k / scale;
+			if (mod != 0)
+			{
+				kk++;
+				j -= (scale - mod);
+			}
+			while (kk < hLen && j >= 0)
+			{
+				yn1 += x[j] * h1[kk];
+				yn2 += x[j] * h2[kk];
+				kk++;
+				j -= scale;
+			}
+			if (!v.execute(yn1, yn2))
 				break;
 		}
 	}
