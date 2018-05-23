@@ -154,7 +154,7 @@ public class PoissonGammaGaussianFisherInformationTest
 			long lower = 1;
 			while (lower + 1 < upper)
 			{
-				// 1/Upper is not infinty
+				// 1/Upper is not infinity
 				// Test mid-point
 				long mid = (upper + lower) / 2;
 				u = Double.longBitsToDouble(mid);

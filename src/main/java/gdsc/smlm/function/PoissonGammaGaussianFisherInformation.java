@@ -152,6 +152,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	/** The scale of the last Gaussian kernel */
 	private int lastScale;
 
+	/** The mean of the last Fisher information */
+	private double lastT;
+
 	/**
 	 * Instantiates a new poisson gamma gaussian fisher information.
 	 *
@@ -303,6 +306,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		listP.resetQuick();
 		listA.resetQuick();
 		g = null;
+		lastT = t;
 
 		if (t < MIN_MEAN)
 		{
@@ -311,18 +315,16 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		if (t > upperMeanThreshold)
 		{
-			// Use an approximation as half the Poisson Fisher information when the mean is large
-			return 1.0 / (2 * t);
+			return largeApproximation(t);
 		}
 
 		final double dirac = PoissonGammaFunction.dirac(t);
 
 		// Special case where the start of the range will have no probability.
 		// This occurs when mean > limit of exp(-p) => 746.
-		if (dirac == 0)
+		if (1 / dirac == Double.POSITIVE_INFINITY)
 		{
-			// Use half the Poisson fisher information
-			return 1.0 / (2 * t);
+			return largeApproximation(t);
 		}
 
 		// This computes the convolution of a Poisson-Gamma PDF and a Gaussian PDF.
@@ -348,26 +350,99 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// Chao et al, Eq 4:
 		// (Poisson Binomial Gaussian convolution)
+		// P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 + 
+		//                                 sum_l=1_inf [ e^-0.5*((z-l)/s)^2 *
+		//                                 sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^(j+1) / ( j!*(l-1-j)!*(j+1)! ) ] ]
+		//                               ] 
+		// Note: dividing by (g/v)^(j+1) has been changed to multiplying by (v/g)^(j+1)
 
-		// Gradient of the Poisson Binomial is:
+		// Gradient of the Poisson Binomial Gaussian is:
+		// P'(z|v) = e^-v / (sqrt(2pi)*s) * [  
+		//                                    sum_l=1_inf [ e^-0.5*((z-l)/s)^2 *
+		//                                    sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^j / ( j!*(l-1-j)!*j!*g ) ] ]
+		//                                  ]  
+		//           - P(z)
+		// This is because d((v/g)^(j+1)) dv = (j+1)*(v/g)^j*(1/g) 
 
 		// This component can be seen in Chao et al, Eq S8:
+		// FI = E    e^-2v / P(z) * [  
+		//                            sum_l=1_inf [ e^-0.5*((z-l)/s)^2 / (sqrt(2pi)*s*g) *
+		//                            sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^j / ( j!*(l-1-j)!*j! ) ] ]
+		//                          ]^2
+		//           - 1
 
-		// Substitute the Poisson Binomial Gaussian with Poisson Gamma Gaussian:
+		// This equation is:
+		// integral [  1/p(z) . a(z|v)^2 dz ] - 1
+		// Where a(z|v) is the partial gradient of the Poisson-Binomial-Gaussian with respect to v 
+		// without the subtraction of P(z).
 
-		// Gradient of the Poisson Gamma is:
+		// Note that the partial gradient of the Poisson-Binomial-Gaussian is just the 
+		// partial gradient of the Poisson-Binomial convolved with a Gaussian (since the Gaussian does not
+		// have a component v).
+
+		// The Poisson-Binomial is computationally intense. Thus this can be substituted using
+		// the Poisson-Gamma convolution which can be computed efficiently using Bessel functions.
+
+		// Poisson-Gamma-Gaussian:
+		// P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 + 
+		//                                 sum_l=0_inf [ e^-0.5*((z-l)/s)^2 * e^-l/m *
+		//                                 sum_n=1_inf [ (1 / n!(n-1)!) * v^n * l^(n-1) / m^n ) ] ]
+		//                               ] 
+
+		// P'(z) = e^-v / (sqrt(2pi)*s) * [  
+		//                                  sum_l=0_inf [ e^-0.5*((z-l)/s)^2 * e^-l/m *
+		//                                  1/m * sum_n=0_inf [ (1 / (n!)^2) * v^n * l^n / m^n ) ] ]
+		//                                ] 
+		//           - P(z)
+
+		// Note:
+		// sum_n=0_inf [ (1 / (n!)^2) * v^n * l^n / m^n ) ] = sum_n=0_inf [ (1 / (n!)^2) * (v*l/m)^n) ]
+		//   Bessel I0 = sum_n=0_inf [ (1 / (n!)^2) * (x^2 / 4)^n
+		//   set x = 2 * sqrt(v*l/m)		
+		//                                                  = I0(x)
+
+		// P'(z) = e^-v / (sqrt(2pi)*s) * [  
+		//                                  sum_l=0_inf [ e^-0.5*((z-l)/s)^2 * e^-l/m * 1/m * I0(x) ]
+		//                                ] 
+		//           - P(z)
 
 		// Fisher information is:
+		// FI = E  e^-2v / (P(z)) * [ sum_l=0_inf [ e^-0.5*((z-l)/s)^2 / (sqrt(2pi)*s) * 
+		//								e^-l/m * 1/m * I0(x) ] ]^2 
+		//           - 1
+		// (where the Gaussian normalisation has been moved inside the power 2 bracket)
 
-		// -=-=-=-
+		// Note the Poisson-Gamma can be computed using the approximation defined in 
+		// Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.  
+		// PG(l|v) = sqrt(v/(l*m)) * e^(-l/m -v) * I1(x)
+		//      x = 2*sqrt(v*l/m)
+		// The partial gradient as defined above is:
+		// PG'(l|v) =  e^(-l/m -v) * I0(x) / m - PG(l|v)
 
 		// We need the convolution of:
-		// - the Poisson-Gamma with the Gaussian (P)
-		// - the Poisson-Gamma partial gradient component with the Gaussian (A)
+		// - the Poisson-Gamma with the Gaussian (P):
+		// - the Poisson-Gamma partial gradient component with the Gaussian (A):
 		// This is combined to a function A^2/P which is integrated.
+
 		// Note that A & P should sum to 1 over the full range used for integration.
 		// In practice a relative height threshold of the function can be used
 		// to determine the range where it is significant and the sums normalised to 1.
+
+		// Fisher information is:
+		// FI = E [ 1 / (P(z)) * [ A(z) ]^2 ] - 1
+
+		// -=-=-=-
+
+		// Note: e^-v is a scaling factor used in P and A.
+		// Compute P and A without the scaling factor as Pu and Au.
+		// This stabilises the computation at high mean (v).
+
+		// Fisher information is:
+		// FI = [e^-v * E [ 1 / (Pu(z)) * [ Au(z) ]^2 ] ] - 1
+
+		// Pu and Au will sum to 1/e^v.
+
+		// -=-=-=-
 
 		// Note that when the Poisson mean is low then the contribution from the 
 		// Dirac delta function at 0 will be large. As the mean increases 
@@ -402,7 +477,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		if (noGaussian || s * range1 < 1)
 		{
 			// Special case. Compute E [ A^2/P ] using only the Poisson-Gamma PMF. 
-			computePMF(dirac, t, maximum, (int) Math.ceil(upperLimit));
+			if (!computePMF(dirac, t, maximum, (int) Math.ceil(upperLimit)))
+				return largeApproximation(t);
 
 			// No interpolated integration necessary as this is discrete
 			double sum = 0;
@@ -412,7 +488,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			{
 				sum += getF(p[i], a[i]);
 			}
-			return sum - 1;
+			// Remember to rescale to the correct range
+			return dirac * sum - 1;
 		}
 
 		// Extend the upper limit using the configured kernel range
@@ -446,7 +523,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Compute the Poisson-Gamma over the range. This is a PDF but for 
 		// simplicity it is integrated to a discrete PMF.
 		int iEndRange = (int) Math.ceil(upperLimit);
-		computePMF(dirac, t, maximum, iEndRange);
+		if (!computePMF(dirac, t, maximum, iEndRange))
+			return largeApproximation(t);
 
 		double[] p = listP.toArray();
 		double[] a = listA.toArray();
@@ -456,6 +534,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Initial sum
 		int scale = defaultScale;
 		sum = compute(scale, range1, p, a);
+
+		if (sum == Double.POSITIVE_INFINITY)
+			return sum;
 
 		// Iterate
 		for (int iteration = 1; iteration <= maxIterations && scale < MAX_SCALE; iteration++)
@@ -469,38 +550,61 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			try
 			{
 				sum = compute(scale, range1, p, a);
+				if (sum == Double.POSITIVE_INFINITY)
+				{
+					sum = oldSum;
+					break;
+				}
 			}
 			catch (IllegalArgumentException e)
 			{
 				// Occurs when the convolution has grown too big
-				return sum;
+				break;
 			}
 			final double delta = FastMath.abs(sum - oldSum);
 			//System.out.printf("s=%g t=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, t, iteration, sum, oldSum,
 			//		delta / (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5);
-			final double rLimit = getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5;
+			//final double rLimit = getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5;
+			// Avoid problems with very large sums by scaling each individually
+			final double rLimit = (getRelativeAccuracy() * FastMath.abs(oldSum) +
+					getRelativeAccuracy() * FastMath.abs(sum)) * 0.5;
 			if (delta <= rLimit)
 			{
 				break;
 			}
 		}
 
-		return sum;
+		// Remember to rescale to the correct range
+		return dirac * sum - 1;
 	}
 
-	private void computePMF(double dirac, double t, double[] max, int endX)
+	/**
+	 * Use an approximation as half the Poisson Fisher information when the mean is large
+	 * 
+	 * @param t
+	 *            the mean
+	 * @return The approximate Fisher information
+	 */
+	private static double largeApproximation(double t)
+	{
+		return 1.0 / (2 * t);
+	}
+
+	private boolean computePMF(double dirac, double t, double[] max, int endX)
 	{
 		double G;
 		double[] dG_dp = new double[1];
 
 		// Initialise at x=0
-		G = PoissonGammaFunction.poissonGammaPartial(0, t, m, dG_dp);
+		G = PoissonGammaFunction.unscaledPoissonGammaPartial(0, t, m, dG_dp);
 
-		// At x=0 integrate from 0 to 0.5 without the Dirac 
-		// (this is a smooth function)
-		G -= dirac;
+		// At x=0 integrate from 0 to 0.5 without the Dirac contribution 
+		// (i.e. make it a a smooth function for integration).
+		// Note the Dirac contribution for the unscaled function is 1. 
+		double diracContirbution = 1;
+		G -= diracContirbution;
 		G = add(t, G, dG_dp, 0, 0.25, 0.5);
-		listP.setQuick(0, listP.getQuick(0) + dirac);
+		listP.setQuick(0, listP.getQuick(0) + diracContirbution);
 
 		// The next x value after the max
 		int maxx = (int) Math.ceil(max[0]);
@@ -533,7 +637,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			// For rest of the range just sample at point x
 			for (x = listP.size(); x <= endX; x++)
 			{
-				G = PoissonGammaFunction.poissonGammaPartial(x, t, m, dG_dp);
+				G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
 				if (G == 0)
 					break;
 				listP.add(G);
@@ -547,16 +651,31 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// for the integration to work.
 		// This will be a factor when the mean is large. If the sums are nearly 1
 		// then this will have little effect so do it anyway.
+
+		// The sum of the unscaled P and A should be 1/Dirac
+		double expected = 1 / dirac;
+
 		//if (t > 10)
 		{
+			// At large mean the summation of the unscaled function underestimates.
+			// This may be due to not using enough of the range. It may be due
+			// to the Bessel approximation failing.
+
 			double sumP = listP.sum();
+			if (sumP == Double.POSITIVE_INFINITY || sumP / expected < 0.75)
+				return false;
 			double sumA = listA.sum();
-			//System.out.printf("t=%g 0=%d Dirac=%s SumP=%s SumA=%s\n", t, endX, dirac, sumP, sumA);
+			if (sumA == Double.POSITIVE_INFINITY || sumA / expected < 0.75)
+				return false;
+			//System.out.printf("t=%g 0=%d Expected=%s SumP=%s (%s) SumA=%s (%s)\n", t, endX, expected, sumP,
+			//		sumP / expected, sumA, sumA / expected);
 			//if (gdsc.core.utils.DoubleEquality.relativeError(sumP, 1) > 1e-6)
-			listP.transformValues(new ScalingFunction(1.0 / sumP));
+			listP.transformValues(new ScalingFunction(expected / sumP));
 			//if (gdsc.core.utils.DoubleEquality.relativeError(sumA, 1) > 1e-6)
-			listA.transformValues(new ScalingFunction(1.0 / sumA));
+			listA.transformValues(new ScalingFunction(expected / sumA));
 		}
+
+		return true;
 	}
 
 	/**
@@ -583,10 +702,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Do a single Simpson sum (f0 + 4 * fxi + fn).
 		double sG = G;
 		double sA = dG_dp[0];
-		G = PoissonGammaFunction.poissonGammaPartial(mid, t, m, dG_dp);
+		G = PoissonGammaFunction.unscaledPoissonGammaPartial(mid, t, m, dG_dp);
 		sG += 4 * G;
 		sA += 4 * dG_dp[0];
-		G = PoissonGammaFunction.poissonGammaPartial(upper, t, m, dG_dp);
+		G = PoissonGammaFunction.unscaledPoissonGammaPartial(upper, t, m, dG_dp);
 		double h_3 = (upper - lower) / 6;
 		listP.add((sG + G) * h_3);
 		listA.add((sA + dG_dp[0]) * h_3);
@@ -689,8 +808,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		//if (ip.sumP > 1.0001)
 		//	System.out.printf("t=%g m=%g s=%g Bad convolution? = %s\n", lastT, m, s, ip.sumP);
 
-		// Subtract the final 1 
-		return ip.getSum() - 1;
+		return ip.getSum();
 	}
 
 	private static double getF(double P, double A)
@@ -736,7 +854,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			A = result[1];
 			h = 1.0 / lastScale;
 			offset = g.length / 2 * -h;
-			scaleFactor = 1; //gaussianKernel.getConversionFactor(g);
+			scaleFactor = gaussianKernel.getConversionFactor(g);
 		}
 		else
 		{
@@ -746,9 +864,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			offset = 0;
 			scaleFactor = 1;
 		}
+
+		// Correct the unscaled function to the scaled function
+		double dirac = FastMath.exp(lastT);
+		scaleFactor *= dirac;
+
 		double[] f = new double[A.length];
 		double[] x = new double[A.length];
-		System.out.printf("sumP=%s, sumA=%s\n", Maths.sum(P), Maths.sum(A));
+		//System.out.printf("sumP=%s, sumA=%s\n", Maths.sum(P)*dirac, Maths.sum(A)*dirac);
 		for (int i = 0; i < A.length; i++)
 		{
 			x[i] = i * h + offset;
@@ -1014,11 +1137,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 					G = dG_dp[0] * t;
 
 					//System.out.printf("m=%g s=%g u=%g max=%s %s\n", m, s, t, 0, getF(G, dG_dp[0]));
-					//G = PoissonGammaFunction.poissonGammaPartial(x, t, m, dG_dp);
+					//G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
 					//g-=dirac;
 				}
 				else
-					G = PoissonGammaFunction.poissonGammaPartial(x, t, m, dG_dp);
+					G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
 				return getF(G, dG_dp[0]);
 			}
 		};
@@ -1087,7 +1210,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 			public double value(double x)
 			{
-				double G = PoissonGammaFunction.poissonGammaPartial(x, t, m, dG_dp);
+				double G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);
 				return getF(G, dG_dp[0]);
 			}
 		};
