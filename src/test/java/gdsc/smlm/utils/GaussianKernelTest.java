@@ -1,5 +1,6 @@
 package gdsc.smlm.utils;
 
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -7,6 +8,27 @@ import gdsc.core.utils.Maths;
 
 public class GaussianKernelTest
 {
+	@Test
+	public void canGetConversionFactor()
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			double s = 0.33 * (1 << i);
+
+			double norm = 1.0 / (Math.sqrt(2 * Math.PI) * s);
+			double var2 = 2 * s * s;
+
+			GaussianKernel k = new GaussianKernel(s);
+			double[] o = k.getGaussianKernel(1, 5, false);
+			double f = k.getConversionFactor(o);
+			for (int u = o.length / 2, x = u; x >= 0; x--)
+			{
+				double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
+				Assert.assertEquals(e, f * o[x], e * 1e-10);
+			}
+		}
+	}
+
 	@Test
 	public void canComputeGaussianKernelIncScaleIncRange()
 	{
@@ -210,7 +232,7 @@ public class GaussianKernelTest
 	private void assertArrayEquals(double[] e, double[] o, double delta)
 	{
 		// This is used because the downscaling can use non-power of 2 scales
-		
+
 		if (e == o)
 			return;
 		if (e == null)

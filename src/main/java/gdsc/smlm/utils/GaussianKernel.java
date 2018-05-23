@@ -28,6 +28,8 @@ public class GaussianKernel implements Cloneable
 	/** The maximum size of half the Gaussian kernel. */
 	public static final int HALF_WIDTH_LIMIT = 1 << 28;
 
+	private static final double ONE_OVER_ROOT_2_PI = 1.0 / Math.sqrt(2 * Math.PI);
+
 	/** The standard deviation. */
 	final public double s;
 
@@ -55,6 +57,48 @@ public class GaussianKernel implements Cloneable
 		halfKernel.add(1);
 		// Precompute exponential scaling factor
 		var2 = -(s * s * 2);
+	}
+
+	/**
+	 * Gets the normalisation for the Gaussian:
+	 * 
+	 * <pre>
+	 * 1/sqrt(2* pi*s^2)
+	 * </pre>
+	 * <p>
+	 * This is the normalisation component that should be
+	 * applied to the Gaussian exponential component:
+	 * 
+	 * <pre>
+	 *  exp^(-x^2 / 2s^2).
+	 * </pre>
+	 * <p>
+	 * Note that the kernel computed is normalised to 1 irrespective of the number of samples. This is so that
+	 * convolution using the kernel does not alter the total signal in the input function. However the raw Gaussian can
+	 * be deduced using the difference in the magnitude at the centre of the kernel and this normalisation factor.
+	 *
+	 * @return the normalisation
+	 */
+	public double getNormalisation()
+	{
+		return ONE_OVER_ROOT_2_PI / s;
+	}
+
+	/**
+	 * Gets the conversion factor. Thus is the factor that should be applied to the kernel values to convert them to the
+	 * true Gaussian value:
+	 * 
+	 * <pre>
+	 * 1/sqrt(2*pi*s^2) * exp^(-x^2 / 2s^2)
+	 * </pre>
+	 *
+	 * @param kernel
+	 *            the kernel
+	 * @return the conversion factor
+	 */
+	public double getConversionFactor(double[] kernel)
+	{
+		return  getNormalisation() / kernel[kernel.length / 2];
 	}
 
 	/**
