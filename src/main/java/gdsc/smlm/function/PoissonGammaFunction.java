@@ -327,7 +327,6 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 		}
 	}
 
-
 	/**
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain for observed Poisson
 	 * counts. This avoids the computation of the Dirac delta function at c=0.
@@ -389,7 +388,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			return 0;
 		}
 	}
-	
+
 	/**
 	 * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
 	 * <p>
@@ -438,6 +437,62 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 			double exp_p = FastMath.exp(-p);
 			double G = exp_p * (1 + p / m);
 			dG_dp[0] = exp_p / m;
+			return G;
+		}
+		else
+		{
+			dG_dp[0] = 0;
+			return 0;
+		}
+	}
+
+	/**
+	 * Calculate the an unscaled probability density function for a Poisson-Gamma distribution model of EM-gain.
+	 * <p>
+	 * See Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
+	 * <p>
+	 * This is unscaled as the factor exp^p has been removed. This stabilises computation for large p.
+	 * <p>
+	 * This is a special version which computes only part of the gradient.
+	 * The partial gradient is equal to the actual gradient plus the value of the function.
+	 *
+	 * @param c
+	 *            The count to evaluate
+	 * @param p
+	 *            The average number of photons per pixel input to the EM-camera (must be positive)
+	 * @param m
+	 *            The multiplication factor (gain)
+	 * @param dG_dp
+	 *            the partial gradient of the function G(c) with respect to parameter p
+	 * @return The unscaled probability
+	 */
+	static double unscaledPoissonGammaPartial(double c, double p, double m, double[] dG_dp)
+	{
+		// As above but do not subtract the G from the gradient. 
+		if (c > 0.0)
+		{
+			final double c_m = c / m;
+			final double cp_m = p * c_m;
+			final double x = 2 * Math.sqrt(cp_m);
+			if (x > 709 || -c_m < -709)
+			{
+				double exp_transform = FastMath.exp(-c_m + x - 0.5 * Math.log(twoPi * x));
+				double G = (x / (2 * c)) * exp_transform;
+				dG_dp[0] = exp_transform / m;
+				return G;
+			}
+			else
+			{
+				double exp_c_m = FastMath.exp(-c_m);
+				double G = (x / (2 * c)) * exp_c_m * Bessel.I1(x);
+				dG_dp[0] = exp_c_m * Bessel.I0(x) / m;
+				return G;
+			}
+		}
+		else if (c == 0.0)
+		{
+			double G = 1 + p / m;
+			dG_dp[0] = 1 / m;
 			return G;
 		}
 		else
