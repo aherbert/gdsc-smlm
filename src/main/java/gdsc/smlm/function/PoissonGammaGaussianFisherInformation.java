@@ -531,11 +531,25 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		double[] p = listP.toArray();
 		double[] a = listA.toArray();
 
-		double sum;
+		// Find the minimum value to determine if A^2/P can be unchecked 
+		// for divide by zero error.
+		// The min is always at the end.
+		double minP = FastMath.min(FastMath.min(p[0], p[1]), p[p.length - 1]);
+
+		//int iMinP = SimpleArrayUtils.findMinIndex(p);
+		//int iMinA = SimpleArrayUtils.findMinIndex(a);
+		//int iMaxP = SimpleArrayUtils.findMaxIndex(p);
+		//int iMaxA = SimpleArrayUtils.findMaxIndex(a);
+		//minP = p[iMinP];
+		//double minA = a[iMinA];
+		//double maxP = p[iMaxP];
+		//double maxA = a[iMaxA];
+		//System.out.printf("m=%g s=%s p=%g n=%d MinP=%s @ %d, MaxP=%s @ %d, MinA=%s @ %d, MaxA=%s @ %d\n", m, s,
+		//		t, p.length, minP, iMinP, maxP, iMaxP, minA, iMinA, maxA, iMaxA);
 
 		// Initial sum
 		int scale = defaultScale;
-		sum = compute(scale, range1, p, a);
+		double sum = compute(scale, range1, p, a, minP);
 
 		if (sum == Double.POSITIVE_INFINITY)
 			extremeLimit(t);
@@ -551,7 +565,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			double oldSum = sum;
 			try
 			{
-				sum = compute(scale, range1, p, a);
+				sum = compute(scale, range1, p, a, minP);
 				if (sum == Double.POSITIVE_INFINITY)
 				{
 					sum = oldSum;
@@ -731,22 +745,21 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 	private static abstract class IntegrationProcedure implements DoubleConvolutionValueProcedure
 	{
-		//double sumP = 0;
 		int i = 0;
 
-		public boolean execute(double pz, double gz)
+		protected double getF(double pz, double az)
 		{
-			i++;
-			if (pz > 0)
-			{
-				//sumP += pz;
-				final double f = Maths.pow2(gz) / pz;
-				sum(f);
-			}
-			return true;
-		}
+			//return az * az / pz;
 
-		protected abstract void sum(double f);
+			// Compute with respect to the ultimate limit
+			// if az > 1 : az^2 -> Infinity
+			//   if pz > 1 :  az / pz will be real
+			//   if pz < 1 then az / pz -> Infinity and this will not help
+			// if az < 1 : az^2 -> 0
+			//   if pz < 1 then dividing first will reduce the chance of computing zero.
+			//   if pz > 1, the result will tend towards zero anyway.
+			return (az / pz) * az;
+		}
 
 		public abstract double getSum();
 	}
@@ -755,16 +768,20 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	{
 		double sum2 = 0, sum4 = 0;
 
-		@Override
-		protected void sum(double f)
+		public boolean execute(double pz, double az)
 		{
-			// Simpson's rule.
-			// This computes the sum as:
-			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-			if (i % 2 == 0)
-				sum2 += f;
-			else
-				sum4 += f;
+			++i;
+			if (pz > 0)
+			{
+				// Simpson's rule.
+				// This computes the sum as:
+				// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
+				if (i % 2 == 0)
+					sum2 += getF(pz, az);
+				else
+					sum4 += getF(pz, az);
+			}
+			return true;
 		}
 
 		@Override
@@ -783,16 +800,20 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	{
 		double sum2 = 0, sum3 = 0;
 
-		@Override
-		protected void sum(double f)
+		public boolean execute(double pz, double az)
 		{
-			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
-			// This computes the sum as:
-			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
-			if (i % 3 == 0)
-				sum2 += f;
-			else
-				sum3 += f;
+			++i;
+			if (pz > 0)
+			{
+				// Simpson's 3/8 rule based on cubic interpolation has a lower error.
+				// This computes the sum as:
+				// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
+				if (i % 3 == 0)
+					sum2 += getF(pz, az);
+				else
+					sum3 += getF(pz, az);
+			}
+			return true;
 		}
 
 		@Override
@@ -804,6 +825,36 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			sum3 /= 8;
 			sum2 /= 8;
 			return sum3 * 9 + sum2 * 6;
+		}
+	}
+
+	private static class UncheckedSimpsonIntegrationProcedure extends SimpsonIntegrationProcedure
+	{
+		public boolean execute(double pz, double az)
+		{
+			// Simpson's rule.
+			// This computes the sum as:
+			// h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
+			if (++i % 2 == 0)
+				sum2 += getF(pz, az);
+			else
+				sum4 += getF(pz, az);
+			return true;
+		}
+	}
+
+	private static class UncheckedSimpson38IntegrationProcedure extends Simpson38IntegrationProcedure
+	{
+		public boolean execute(double pz, double az)
+		{
+			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
+			// This computes the sum as:
+			// 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
+			if (++i % 3 == 0)
+				sum2 += getF(pz, az);
+			else
+				sum3 += getF(pz, az);
+			return true;
 		}
 	}
 
@@ -820,12 +871,27 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 * @throws IllegalArgumentException
 	 *             If the convolution will be too large
 	 */
-	private double compute(int scale, int range, double[] p, double[] a) throws IllegalArgumentException
+	private double compute(int scale, int range, double[] p, double[] a, double minP) throws IllegalArgumentException
 	{
 		g = gaussianKernel.getGaussianKernel(scale, range, false);
 		this.lastScale = scale;
 
-		IntegrationProcedure ip = (use38) ? new Simpson38IntegrationProcedure() : new SimpsonIntegrationProcedure();
+		// If the product of the minimum kernel value and the min value is non-zero
+		// then the convolution will never be zero.
+		boolean unchecked = g[0] * minP > 0;
+		//System.out.printf("t=%g  unchecked=%b\n", lastT, unchecked);
+
+		// If zeros can occur then the convolution could be reduced but the ends of 
+		// the distribution p that can be removed are unknown without convolution.
+		// So the resulting convolution output is checked for zero.
+
+		//@formatter:off
+		IntegrationProcedure ip = (use38) 
+				? (unchecked) ? new UncheckedSimpson38IntegrationProcedure() 
+						      : new Simpson38IntegrationProcedure() 
+				: (unchecked) ? new UncheckedSimpsonIntegrationProcedure()   
+						      : new SimpsonIntegrationProcedure();
+		//@formatter:on
 
 		Convolution.convolve(g, p, a, scale, ip);
 

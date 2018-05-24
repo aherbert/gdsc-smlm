@@ -548,12 +548,17 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 		{
 			int index = i % scale;
 			i++;
-			final double gz = pz_1[index];
+			final double az = pz_1[index];
 			pz_1[index] = pz;
 			if (pz > 0)
 			{
-				final double f = Maths.pow2(gz) / pz;
-				sum(f);
+				//sum(az * az / pz);
+				
+				// Compute with respect to the ultimate limit.
+				// Both az and pz should be < 1
+				// if az < 1 : az^2 -> 0
+				//   if pz < 1 then dividing first will reduce the chance of computing zero.
+				sum((az / pz) * az);
 			}
 			return true;
 		}
