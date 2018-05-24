@@ -649,7 +649,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 */
 	private double compute(int scale, int range, double[] p) throws IllegalArgumentException
 	{
-		double[] g = gaussianKernel.getGaussianKernel(scale, range, false);
+		double[] g = gaussianKernel.getGaussianKernel(scale, range, true);
 
 		IntegrationProcedure ip = (use38) ? new Simpson38IntegrationProcedure(scale)
 				: new SimpsonIntegrationProcedure(scale);

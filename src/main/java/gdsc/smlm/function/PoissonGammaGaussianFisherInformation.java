@@ -873,7 +873,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 */
 	private double compute(int scale, int range, double[] p, double[] a, double minP) throws IllegalArgumentException
 	{
-		g = gaussianKernel.getGaussianKernel(scale, range, false);
+		g = gaussianKernel.getGaussianKernel(scale, range, true);
 		this.lastScale = scale;
 
 		// If the product of the minimum kernel value and the min value is non-zero
