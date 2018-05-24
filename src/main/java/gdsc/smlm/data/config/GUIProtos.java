@@ -29480,29 +29480,39 @@ public final class GUIProtos {
     int getSubDivisions();
 
     /**
-     * <code>double ccd_gain = 4;</code>
+     * <code>double camera_1_gain = 4;</code>
      */
-    double getCcdGain();
+    double getCamera1Gain();
 
     /**
-     * <code>double ccd_noise = 5;</code>
+     * <code>double camera_1_noise = 5;</code>
      */
-    double getCcdNoise();
+    double getCamera1Noise();
 
     /**
-     * <code>double em_ccd_gain = 6;</code>
+     * <code>double camera_2_gain = 6;</code>
      */
-    double getEmCcdGain();
+    double getCamera2Gain();
 
     /**
-     * <code>double em_ccd_noise = 7;</code>
+     * <code>double camera_2_noise = 7;</code>
      */
-    double getEmCcdNoise();
+    double getCamera2Noise();
 
     /**
      * <code>int32 point_option = 8;</code>
      */
     int getPointOption();
+
+    /**
+     * <code>int32 camera_1_type = 9;</code>
+     */
+    int getCamera1Type();
+
+    /**
+     * <code>int32 camera_2_type = 10;</code>
+     */
+    int getCamera2Type();
   }
   /**
    * <pre>
@@ -29523,11 +29533,13 @@ public final class GUIProtos {
       minExponent_ = 0;
       maxExponent_ = 0;
       subDivisions_ = 0;
-      ccdGain_ = 0D;
-      ccdNoise_ = 0D;
-      emCcdGain_ = 0D;
-      emCcdNoise_ = 0D;
+      camera1Gain_ = 0D;
+      camera1Noise_ = 0D;
+      camera2Gain_ = 0D;
+      camera2Noise_ = 0D;
       pointOption_ = 0;
+      camera1Type_ = 0;
+      camera2Type_ = 0;
     }
 
     @java.lang.Override
@@ -29572,27 +29584,37 @@ public final class GUIProtos {
             }
             case 33: {
 
-              ccdGain_ = input.readDouble();
+              camera1Gain_ = input.readDouble();
               break;
             }
             case 41: {
 
-              ccdNoise_ = input.readDouble();
+              camera1Noise_ = input.readDouble();
               break;
             }
             case 49: {
 
-              emCcdGain_ = input.readDouble();
+              camera2Gain_ = input.readDouble();
               break;
             }
             case 57: {
 
-              emCcdNoise_ = input.readDouble();
+              camera2Noise_ = input.readDouble();
               break;
             }
             case 64: {
 
               pointOption_ = input.readInt32();
+              break;
+            }
+            case 72: {
+
+              camera1Type_ = input.readInt32();
+              break;
+            }
+            case 80: {
+
+              camera2Type_ = input.readInt32();
               break;
             }
           }
@@ -29645,40 +29667,40 @@ public final class GUIProtos {
       return subDivisions_;
     }
 
-    public static final int CCD_GAIN_FIELD_NUMBER = 4;
-    private double ccdGain_;
+    public static final int CAMERA_1_GAIN_FIELD_NUMBER = 4;
+    private double camera1Gain_;
     /**
-     * <code>double ccd_gain = 4;</code>
+     * <code>double camera_1_gain = 4;</code>
      */
-    public double getCcdGain() {
-      return ccdGain_;
+    public double getCamera1Gain() {
+      return camera1Gain_;
     }
 
-    public static final int CCD_NOISE_FIELD_NUMBER = 5;
-    private double ccdNoise_;
+    public static final int CAMERA_1_NOISE_FIELD_NUMBER = 5;
+    private double camera1Noise_;
     /**
-     * <code>double ccd_noise = 5;</code>
+     * <code>double camera_1_noise = 5;</code>
      */
-    public double getCcdNoise() {
-      return ccdNoise_;
+    public double getCamera1Noise() {
+      return camera1Noise_;
     }
 
-    public static final int EM_CCD_GAIN_FIELD_NUMBER = 6;
-    private double emCcdGain_;
+    public static final int CAMERA_2_GAIN_FIELD_NUMBER = 6;
+    private double camera2Gain_;
     /**
-     * <code>double em_ccd_gain = 6;</code>
+     * <code>double camera_2_gain = 6;</code>
      */
-    public double getEmCcdGain() {
-      return emCcdGain_;
+    public double getCamera2Gain() {
+      return camera2Gain_;
     }
 
-    public static final int EM_CCD_NOISE_FIELD_NUMBER = 7;
-    private double emCcdNoise_;
+    public static final int CAMERA_2_NOISE_FIELD_NUMBER = 7;
+    private double camera2Noise_;
     /**
-     * <code>double em_ccd_noise = 7;</code>
+     * <code>double camera_2_noise = 7;</code>
      */
-    public double getEmCcdNoise() {
-      return emCcdNoise_;
+    public double getCamera2Noise() {
+      return camera2Noise_;
     }
 
     public static final int POINT_OPTION_FIELD_NUMBER = 8;
@@ -29688,6 +29710,24 @@ public final class GUIProtos {
      */
     public int getPointOption() {
       return pointOption_;
+    }
+
+    public static final int CAMERA_1_TYPE_FIELD_NUMBER = 9;
+    private int camera1Type_;
+    /**
+     * <code>int32 camera_1_type = 9;</code>
+     */
+    public int getCamera1Type() {
+      return camera1Type_;
+    }
+
+    public static final int CAMERA_2_TYPE_FIELD_NUMBER = 10;
+    private int camera2Type_;
+    /**
+     * <code>int32 camera_2_type = 10;</code>
+     */
+    public int getCamera2Type() {
+      return camera2Type_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -29711,20 +29751,26 @@ public final class GUIProtos {
       if (subDivisions_ != 0) {
         output.writeInt32(3, subDivisions_);
       }
-      if (ccdGain_ != 0D) {
-        output.writeDouble(4, ccdGain_);
+      if (camera1Gain_ != 0D) {
+        output.writeDouble(4, camera1Gain_);
       }
-      if (ccdNoise_ != 0D) {
-        output.writeDouble(5, ccdNoise_);
+      if (camera1Noise_ != 0D) {
+        output.writeDouble(5, camera1Noise_);
       }
-      if (emCcdGain_ != 0D) {
-        output.writeDouble(6, emCcdGain_);
+      if (camera2Gain_ != 0D) {
+        output.writeDouble(6, camera2Gain_);
       }
-      if (emCcdNoise_ != 0D) {
-        output.writeDouble(7, emCcdNoise_);
+      if (camera2Noise_ != 0D) {
+        output.writeDouble(7, camera2Noise_);
       }
       if (pointOption_ != 0) {
         output.writeInt32(8, pointOption_);
+      }
+      if (camera1Type_ != 0) {
+        output.writeInt32(9, camera1Type_);
+      }
+      if (camera2Type_ != 0) {
+        output.writeInt32(10, camera2Type_);
       }
     }
 
@@ -29745,25 +29791,33 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, subDivisions_);
       }
-      if (ccdGain_ != 0D) {
+      if (camera1Gain_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, ccdGain_);
+          .computeDoubleSize(4, camera1Gain_);
       }
-      if (ccdNoise_ != 0D) {
+      if (camera1Noise_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(5, ccdNoise_);
+          .computeDoubleSize(5, camera1Noise_);
       }
-      if (emCcdGain_ != 0D) {
+      if (camera2Gain_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(6, emCcdGain_);
+          .computeDoubleSize(6, camera2Gain_);
       }
-      if (emCcdNoise_ != 0D) {
+      if (camera2Noise_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(7, emCcdNoise_);
+          .computeDoubleSize(7, camera2Noise_);
       }
       if (pointOption_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, pointOption_);
+      }
+      if (camera1Type_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, camera1Type_);
+      }
+      if (camera2Type_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(10, camera2Type_);
       }
       memoizedSize = size;
       return size;
@@ -29788,23 +29842,27 @@ public final class GUIProtos {
       result = result && (getSubDivisions()
           == other.getSubDivisions());
       result = result && (
-          java.lang.Double.doubleToLongBits(getCcdGain())
+          java.lang.Double.doubleToLongBits(getCamera1Gain())
           == java.lang.Double.doubleToLongBits(
-              other.getCcdGain()));
+              other.getCamera1Gain()));
       result = result && (
-          java.lang.Double.doubleToLongBits(getCcdNoise())
+          java.lang.Double.doubleToLongBits(getCamera1Noise())
           == java.lang.Double.doubleToLongBits(
-              other.getCcdNoise()));
+              other.getCamera1Noise()));
       result = result && (
-          java.lang.Double.doubleToLongBits(getEmCcdGain())
+          java.lang.Double.doubleToLongBits(getCamera2Gain())
           == java.lang.Double.doubleToLongBits(
-              other.getEmCcdGain()));
+              other.getCamera2Gain()));
       result = result && (
-          java.lang.Double.doubleToLongBits(getEmCcdNoise())
+          java.lang.Double.doubleToLongBits(getCamera2Noise())
           == java.lang.Double.doubleToLongBits(
-              other.getEmCcdNoise()));
+              other.getCamera2Noise()));
       result = result && (getPointOption()
           == other.getPointOption());
+      result = result && (getCamera1Type()
+          == other.getCamera1Type());
+      result = result && (getCamera2Type()
+          == other.getCamera2Type());
       return result;
     }
 
@@ -29821,20 +29879,24 @@ public final class GUIProtos {
       hash = (53 * hash) + getMaxExponent();
       hash = (37 * hash) + SUB_DIVISIONS_FIELD_NUMBER;
       hash = (53 * hash) + getSubDivisions();
-      hash = (37 * hash) + CCD_GAIN_FIELD_NUMBER;
+      hash = (37 * hash) + CAMERA_1_GAIN_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getCcdGain()));
-      hash = (37 * hash) + CCD_NOISE_FIELD_NUMBER;
+          java.lang.Double.doubleToLongBits(getCamera1Gain()));
+      hash = (37 * hash) + CAMERA_1_NOISE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getCcdNoise()));
-      hash = (37 * hash) + EM_CCD_GAIN_FIELD_NUMBER;
+          java.lang.Double.doubleToLongBits(getCamera1Noise()));
+      hash = (37 * hash) + CAMERA_2_GAIN_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getEmCcdGain()));
-      hash = (37 * hash) + EM_CCD_NOISE_FIELD_NUMBER;
+          java.lang.Double.doubleToLongBits(getCamera2Gain()));
+      hash = (37 * hash) + CAMERA_2_NOISE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getEmCcdNoise()));
+          java.lang.Double.doubleToLongBits(getCamera2Noise()));
       hash = (37 * hash) + POINT_OPTION_FIELD_NUMBER;
       hash = (53 * hash) + getPointOption();
+      hash = (37 * hash) + CAMERA_1_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getCamera1Type();
+      hash = (37 * hash) + CAMERA_2_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getCamera2Type();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -29974,15 +30036,19 @@ public final class GUIProtos {
 
         subDivisions_ = 0;
 
-        ccdGain_ = 0D;
+        camera1Gain_ = 0D;
 
-        ccdNoise_ = 0D;
+        camera1Noise_ = 0D;
 
-        emCcdGain_ = 0D;
+        camera2Gain_ = 0D;
 
-        emCcdNoise_ = 0D;
+        camera2Noise_ = 0D;
 
         pointOption_ = 0;
+
+        camera1Type_ = 0;
+
+        camera2Type_ = 0;
 
         return this;
       }
@@ -30009,11 +30075,13 @@ public final class GUIProtos {
         result.minExponent_ = minExponent_;
         result.maxExponent_ = maxExponent_;
         result.subDivisions_ = subDivisions_;
-        result.ccdGain_ = ccdGain_;
-        result.ccdNoise_ = ccdNoise_;
-        result.emCcdGain_ = emCcdGain_;
-        result.emCcdNoise_ = emCcdNoise_;
+        result.camera1Gain_ = camera1Gain_;
+        result.camera1Noise_ = camera1Noise_;
+        result.camera2Gain_ = camera2Gain_;
+        result.camera2Noise_ = camera2Noise_;
         result.pointOption_ = pointOption_;
+        result.camera1Type_ = camera1Type_;
+        result.camera2Type_ = camera2Type_;
         onBuilt();
         return result;
       }
@@ -30064,20 +30132,26 @@ public final class GUIProtos {
         if (other.getSubDivisions() != 0) {
           setSubDivisions(other.getSubDivisions());
         }
-        if (other.getCcdGain() != 0D) {
-          setCcdGain(other.getCcdGain());
+        if (other.getCamera1Gain() != 0D) {
+          setCamera1Gain(other.getCamera1Gain());
         }
-        if (other.getCcdNoise() != 0D) {
-          setCcdNoise(other.getCcdNoise());
+        if (other.getCamera1Noise() != 0D) {
+          setCamera1Noise(other.getCamera1Noise());
         }
-        if (other.getEmCcdGain() != 0D) {
-          setEmCcdGain(other.getEmCcdGain());
+        if (other.getCamera2Gain() != 0D) {
+          setCamera2Gain(other.getCamera2Gain());
         }
-        if (other.getEmCcdNoise() != 0D) {
-          setEmCcdNoise(other.getEmCcdNoise());
+        if (other.getCamera2Noise() != 0D) {
+          setCamera2Noise(other.getCamera2Noise());
         }
         if (other.getPointOption() != 0) {
           setPointOption(other.getPointOption());
+        }
+        if (other.getCamera1Type() != 0) {
+          setCamera1Type(other.getCamera1Type());
+        }
+        if (other.getCamera2Type() != 0) {
+          setCamera2Type(other.getCamera2Type());
         }
         onChanged();
         return this;
@@ -30183,106 +30257,106 @@ public final class GUIProtos {
         return this;
       }
 
-      private double ccdGain_ ;
+      private double camera1Gain_ ;
       /**
-       * <code>double ccd_gain = 4;</code>
+       * <code>double camera_1_gain = 4;</code>
        */
-      public double getCcdGain() {
-        return ccdGain_;
+      public double getCamera1Gain() {
+        return camera1Gain_;
       }
       /**
-       * <code>double ccd_gain = 4;</code>
+       * <code>double camera_1_gain = 4;</code>
        */
-      public Builder setCcdGain(double value) {
+      public Builder setCamera1Gain(double value) {
         
-        ccdGain_ = value;
+        camera1Gain_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>double ccd_gain = 4;</code>
+       * <code>double camera_1_gain = 4;</code>
        */
-      public Builder clearCcdGain() {
+      public Builder clearCamera1Gain() {
         
-        ccdGain_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double ccdNoise_ ;
-      /**
-       * <code>double ccd_noise = 5;</code>
-       */
-      public double getCcdNoise() {
-        return ccdNoise_;
-      }
-      /**
-       * <code>double ccd_noise = 5;</code>
-       */
-      public Builder setCcdNoise(double value) {
-        
-        ccdNoise_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double ccd_noise = 5;</code>
-       */
-      public Builder clearCcdNoise() {
-        
-        ccdNoise_ = 0D;
+        camera1Gain_ = 0D;
         onChanged();
         return this;
       }
 
-      private double emCcdGain_ ;
+      private double camera1Noise_ ;
       /**
-       * <code>double em_ccd_gain = 6;</code>
+       * <code>double camera_1_noise = 5;</code>
        */
-      public double getEmCcdGain() {
-        return emCcdGain_;
+      public double getCamera1Noise() {
+        return camera1Noise_;
       }
       /**
-       * <code>double em_ccd_gain = 6;</code>
+       * <code>double camera_1_noise = 5;</code>
        */
-      public Builder setEmCcdGain(double value) {
+      public Builder setCamera1Noise(double value) {
         
-        emCcdGain_ = value;
+        camera1Noise_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>double em_ccd_gain = 6;</code>
+       * <code>double camera_1_noise = 5;</code>
        */
-      public Builder clearEmCcdGain() {
+      public Builder clearCamera1Noise() {
         
-        emCcdGain_ = 0D;
+        camera1Noise_ = 0D;
         onChanged();
         return this;
       }
 
-      private double emCcdNoise_ ;
+      private double camera2Gain_ ;
       /**
-       * <code>double em_ccd_noise = 7;</code>
+       * <code>double camera_2_gain = 6;</code>
        */
-      public double getEmCcdNoise() {
-        return emCcdNoise_;
+      public double getCamera2Gain() {
+        return camera2Gain_;
       }
       /**
-       * <code>double em_ccd_noise = 7;</code>
+       * <code>double camera_2_gain = 6;</code>
        */
-      public Builder setEmCcdNoise(double value) {
+      public Builder setCamera2Gain(double value) {
         
-        emCcdNoise_ = value;
+        camera2Gain_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>double em_ccd_noise = 7;</code>
+       * <code>double camera_2_gain = 6;</code>
        */
-      public Builder clearEmCcdNoise() {
+      public Builder clearCamera2Gain() {
         
-        emCcdNoise_ = 0D;
+        camera2Gain_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double camera2Noise_ ;
+      /**
+       * <code>double camera_2_noise = 7;</code>
+       */
+      public double getCamera2Noise() {
+        return camera2Noise_;
+      }
+      /**
+       * <code>double camera_2_noise = 7;</code>
+       */
+      public Builder setCamera2Noise(double value) {
+        
+        camera2Noise_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double camera_2_noise = 7;</code>
+       */
+      public Builder clearCamera2Noise() {
+        
+        camera2Noise_ = 0D;
         onChanged();
         return this;
       }
@@ -30309,6 +30383,58 @@ public final class GUIProtos {
       public Builder clearPointOption() {
         
         pointOption_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int camera1Type_ ;
+      /**
+       * <code>int32 camera_1_type = 9;</code>
+       */
+      public int getCamera1Type() {
+        return camera1Type_;
+      }
+      /**
+       * <code>int32 camera_1_type = 9;</code>
+       */
+      public Builder setCamera1Type(int value) {
+        
+        camera1Type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 camera_1_type = 9;</code>
+       */
+      public Builder clearCamera1Type() {
+        
+        camera1Type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int camera2Type_ ;
+      /**
+       * <code>int32 camera_2_type = 10;</code>
+       */
+      public int getCamera2Type() {
+        return camera2Type_;
+      }
+      /**
+       * <code>int32 camera_2_type = 10;</code>
+       */
+      public Builder setCamera2Type(int value) {
+        
+        camera2Type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 camera_2_type = 10;</code>
+       */
+      public Builder clearCamera2Type() {
+        
+        camera2Type_ = 0;
         onChanged();
         return this;
       }
@@ -43895,107 +44021,108 @@ public final class GUIProtos {
       "del\030\010 \001(\005\022\017\n\007em_gain\030\t \001(\001\022\022\n\nem_samples",
       "\030\n \001(\005\022\020\n\010em_noise\030\013 \001(\001\022\021\n\tcmos_gain\030\014 " +
       "\001(\001\022\022\n\ncmos_noise\030\r \001(\001\022\033\n\023simpson_integ" +
-      "ration\030\016 \001(\010\022\022\n\nround_down\030\017 \001(\010\"\327\001\n,Cam" +
+      "ration\030\016 \001(\010\022\022\n\nround_down\030\017 \001(\010\"\223\002\n,Cam" +
       "eraModelFisherInformationAnalysisSetting" +
       "s\022\024\n\014min_exponent\030\001 \001(\005\022\024\n\014max_exponent\030" +
-      "\002 \001(\005\022\025\n\rsub_divisions\030\003 \001(\005\022\020\n\010ccd_gain" +
-      "\030\004 \001(\001\022\021\n\tccd_noise\030\005 \001(\001\022\023\n\013em_ccd_gain" +
-      "\030\006 \001(\001\022\024\n\014em_ccd_noise\030\007 \001(\001\022\024\n\014point_op" +
-      "tion\030\010 \001(\005\"\227\001\n\032CubicSplineManagerSetting" +
-      "s\022\016\n\006option\030\001 \001(\005\022\020\n\010selected\030\002 \001(\t\022\025\n\rm",
-      "agnification\030\003 \001(\005\022\r\n\005scale\030\004 \001(\005\022\017\n\007x_s" +
-      "hift\030\005 \001(\001\022\017\n\007y_shift\030\006 \001(\001\022\017\n\007z_shift\030\007" +
-      " \001(\001\"\362\010\n\030FailCountManagerSettings\022\016\n\006opt" +
-      "ion\030\001 \001(\005\022\022\n\nmax_frames\030\002 \001(\005\022\030\n\020fail_co" +
-      "unt_limit\030\003 \001(\005\022\032\n\022save_after_fitting\030\004 " +
-      "\001(\010\022\034\n\024target_pass_fraction\030\005 \001(\001\022\020\n\010fil" +
-      "ename\030\006 \001(\t\022\021\n\tplot_item\030\007 \001(\005\022\033\n\023plot_r" +
-      "olling_window\030\010 \001(\005\022\030\n\020plot_pass_weight\030" +
-      "\t \001(\005\022\030\n\020plot_fail_weight\030\n \001(\005\022\033\n\023plot_" +
-      "reset_fraction\030\013 \001(\001\022\031\n\021plot_fixed_x_axi",
-      "s\030\014 \001(\010\022\023\n\013table_top_n\030\r \001(\005\022,\n$rolling_" +
-      "counter_min_allowed_failures\030\016 \001(\005\022,\n$ro" +
-      "lling_counter_max_allowed_failures\030\017 \001(\005" +
-      "\022\"\n\032rolling_counter_min_window\030\020 \001(\005\022\"\n\032" +
-      "rolling_counter_max_window\030\021 \001(\005\022-\n%weig" +
-      "hted_counter_min_allowed_failures\030\022 \001(\005\022" +
-      "-\n%weighted_counter_max_allowed_failures" +
-      "\030\023 \001(\005\022+\n#weighted_counter_min_pass_decr" +
-      "ement\030\024 \001(\005\022+\n#weighted_counter_max_pass" +
-      "_decrement\030\025 \001(\005\022.\n&resetting_counter_mi",
-      "n_allowed_failures\030\026 \001(\005\022.\n&resetting_co" +
-      "unter_max_allowed_failures\030\027 \001(\005\022,\n$rese" +
-      "tting_counter_min_reset_fraction\030\030 \001(\001\022," +
-      "\n$resetting_counter_max_reset_fraction\030\031" +
-      " \001(\001\022,\n$resetting_counter_inc_reset_frac" +
-      "tion\030\032 \001(\001\022,\n$pass_rate_counter_min_allo" +
-      "wed_counts\030\033 \001(\005\022,\n$pass_rate_counter_ma" +
-      "x_allowed_counts\030\034 \001(\005\022\'\n\037pass_rate_coun" +
-      "ter_min_pass_rate\030\035 \001(\001\022\'\n\037pass_rate_cou" +
-      "nter_max_pass_rate\030\036 \001(\001\022\'\n\037pass_rate_co",
-      "unter_inc_pass_rate\030\037 \001(\001\"\266\005\n\037Astigmatis" +
-      "mModelManagerSettings\022\016\n\006option\030\001 \001(\005\022\024\n" +
-      "\014nm_per_slice\030\002 \001(\001\022E\n\023fit_engine_settin" +
-      "gs\030\003 \001(\0132(.gdsc.smlm.data.config.FitEngi" +
-      "neSettings\022\'\n\003psf\030\004 \001(\0132\032.gdsc.smlm.data" +
-      ".config.PSF\0227\n\013calibration\030\005 \001(\0132\".gdsc." +
-      "smlm.data.config.Calibration\022\016\n\006radius\030\006" +
-      " \001(\001\022\030\n\020log_fit_progress\030\007 \001(\010\022\021\n\tsmooth" +
-      "ing\030\010 \001(\001\022\024\n\014weighted_fit\030\t \001(\010\022\034\n\024show_" +
-      "estimated_curve\030\n \001(\010\022\r\n\005image\030\013 \001(\t\022\022\n\n",
-      "model_name\030\014 \001(\t\022\022\n\nsave_model\030\016 \001(\010\022\026\n\016" +
-      "save_fit_width\030\017 \001(\010\022\020\n\010selected\030\r \001(\t\022\033" +
-      "\n\023show_depth_of_focus\030\020 \001(\010\022\033\n\023show_comb" +
-      "ined_width\030\026 \001(\010\022\020\n\010show_psf\030\022 \001(\010\022<\n\017z_" +
-      "distance_unit\030\023 \001(\0162#.gdsc.smlm.data.con" +
-      "fig.DistanceUnit\022<\n\017s_distance_unit\030\024 \001(" +
-      "\0162#.gdsc.smlm.data.config.DistanceUnit\022\030" +
-      "\n\020calibrated_image\030\025 \001(\010\022\020\n\010filename\030\021 \001" +
-      "(\t\"\305\002\n\023CropResultsSettings\022\024\n\014input_opti" +
-      "on\030\001 \001(\t\022\016\n\006border\030\002 \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y",
-      "\030\004 \001(\001\022\r\n\005width\030\005 \001(\001\022\016\n\006height\030\006 \001(\001\022\025\n" +
-      "\rselect_region\030\007 \001(\010\022\017\n\007use_roi\030\010 \001(\010\022\021\n" +
-      "\troi_image\030\t \001(\t\022\024\n\014reset_origin\030\n \001(\010\022\023" +
-      "\n\013output_name\030\013 \001(\t\022\023\n\013name_option\030\014 \001(\005" +
-      "\022\023\n\013name_suffix\030\r \001(\t\022\024\n\014name_counter\030\016 " +
-      "\001(\005\022\017\n\007limit_z\030\017 \001(\010\022\r\n\005min_z\030\020 \001(\001\022\r\n\005m" +
-      "ax_z\030\021 \001(\001\"\346\001\n\030SummariseResultsSettings\022" +
-      "\027\n\017plot_background\030\001 \001(\010\022\023\n\013plot_signal\030" +
-      "\002 \001(\010\022\016\n\006plot_x\030\003 \001(\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n" +
-      "\006plot_z\030\005 \001(\010\022\022\n\nplot_noise\030\006 \001(\010\022\020\n\010plo",
-      "t_snr\030\007 \001(\010\022\026\n\016plot_precision\030\010 \001(\010\022\025\n\rh" +
-      "istgram_bins\030\t \001(\005\022\027\n\017remove_outliers\030\n " +
-      "\001(\005\"\214\006\n\035ImageJ3DResultsViewerSettings\022\024\n" +
-      "\014input_option\030\001 \001(\t\022\014\n\004size\030\002 \001(\001\022\024\n\014tra" +
-      "nsparency\030\003 \001(\001\022\013\n\003lut\030\004 \001(\005\022\021\n\trenderin" +
-      "g\030\005 \001(\005\022\016\n\006shaded\030\006 \001(\010\022\021\n\tnewWindow\030\007 \001" +
-      "(\010\022\021\n\tsize_mode\030\010 \001(\005\022\022\n\npixel_size\030\t \001(" +
-      "\001\022K\n\026results_table_settings\030\n \001(\0132+.gdsc" +
-      ".smlm.data.config.ResultsTableSettings\022\022" +
-      "\n\ndepth_mode\030\013 \001(\005\022\023\n\013depth_range\030\014 \001(\001\022",
-      "\023\n\013dither_seed\030\r \001(\005\022\031\n\021transparency_mod" +
-      "e\030\016 \001(\005\022\030\n\020min_transparency\030\017 \001(\001\022\030\n\020max" +
-      "_transparency\030\020 \001(\001\022\021\n\tsort_mode\030\021 \001(\005\022\030" +
-      "\n\020sort_direction_x\030\022 \001(\001\022\030\n\020sort_directi" +
-      "on_y\030\023 \001(\001\022\030\n\020sort_direction_z\030\024 \001(\001\022\022\n\n" +
-      "sort_eye_x\030\025 \001(\001\022\022\n\nsort_eye_y\030\026 \001(\001\022\022\n\n" +
-      "sort_eye_z\030\027 \001(\001\022\026\n\016save_eye_point\030\030 \001(\010" +
-      "\022\030\n\020highlight_colour\030\031 \001(\t\022\023\n\013output_nam" +
-      "e\030\032 \001(\t\022\023\n\013name_option\030\033 \001(\005\022\023\n\013name_suf" +
-      "fix\030\034 \001(\t\022\024\n\014name_counter\030\035 \001(\005\022$\n\034suppo",
-      "rt_dynamic_transparency\030\036 \001(\010\022#\n\033enable_" +
-      "dynamic_transparency\030\037 \001(\010\"\220\001\n\030Translate" +
-      "ResultsSettings\022\024\n\014input_option\030\001 \001(\t\022\n\n" +
-      "\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdis" +
-      "tance_unit\030\005 \001(\0162#.gdsc.smlm.data.config" +
-      ".DistanceUnit\"\250\001\n\017SpotFitSettings\022\017\n\007cha" +
-      "nnel\030\001 \001(\005\022\025\n\rsearch_radius\030\002 \001(\005\022\022\n\nfit" +
-      "_radius\030\003 \001(\005\022\024\n\014show_overlay\030\004 \001(\010\022\027\n\017a" +
-      "ttach_to_slice\030\005 \001(\010\022\024\n\014log_progress\030\006 \001" +
-      "(\010\022\024\n\014show_fit_roi\030\007 \001(\010*O\n\014TemplateType",
-      "\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLA" +
-      "TE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIProtosb\006" +
-      "proto3"
+      "\002 \001(\005\022\025\n\rsub_divisions\030\003 \001(\005\022\025\n\rcamera_1" +
+      "_gain\030\004 \001(\001\022\026\n\016camera_1_noise\030\005 \001(\001\022\025\n\rc" +
+      "amera_2_gain\030\006 \001(\001\022\026\n\016camera_2_noise\030\007 \001" +
+      "(\001\022\024\n\014point_option\030\010 \001(\005\022\025\n\rcamera_1_typ" +
+      "e\030\t \001(\005\022\025\n\rcamera_2_type\030\n \001(\005\"\227\001\n\032Cubic",
+      "SplineManagerSettings\022\016\n\006option\030\001 \001(\005\022\020\n" +
+      "\010selected\030\002 \001(\t\022\025\n\rmagnification\030\003 \001(\005\022\r" +
+      "\n\005scale\030\004 \001(\005\022\017\n\007x_shift\030\005 \001(\001\022\017\n\007y_shif" +
+      "t\030\006 \001(\001\022\017\n\007z_shift\030\007 \001(\001\"\362\010\n\030FailCountMa" +
+      "nagerSettings\022\016\n\006option\030\001 \001(\005\022\022\n\nmax_fra" +
+      "mes\030\002 \001(\005\022\030\n\020fail_count_limit\030\003 \001(\005\022\032\n\022s" +
+      "ave_after_fitting\030\004 \001(\010\022\034\n\024target_pass_f" +
+      "raction\030\005 \001(\001\022\020\n\010filename\030\006 \001(\t\022\021\n\tplot_" +
+      "item\030\007 \001(\005\022\033\n\023plot_rolling_window\030\010 \001(\005\022" +
+      "\030\n\020plot_pass_weight\030\t \001(\005\022\030\n\020plot_fail_w",
+      "eight\030\n \001(\005\022\033\n\023plot_reset_fraction\030\013 \001(\001" +
+      "\022\031\n\021plot_fixed_x_axis\030\014 \001(\010\022\023\n\013table_top" +
+      "_n\030\r \001(\005\022,\n$rolling_counter_min_allowed_" +
+      "failures\030\016 \001(\005\022,\n$rolling_counter_max_al" +
+      "lowed_failures\030\017 \001(\005\022\"\n\032rolling_counter_" +
+      "min_window\030\020 \001(\005\022\"\n\032rolling_counter_max_" +
+      "window\030\021 \001(\005\022-\n%weighted_counter_min_all" +
+      "owed_failures\030\022 \001(\005\022-\n%weighted_counter_" +
+      "max_allowed_failures\030\023 \001(\005\022+\n#weighted_c" +
+      "ounter_min_pass_decrement\030\024 \001(\005\022+\n#weigh",
+      "ted_counter_max_pass_decrement\030\025 \001(\005\022.\n&" +
+      "resetting_counter_min_allowed_failures\030\026" +
+      " \001(\005\022.\n&resetting_counter_max_allowed_fa" +
+      "ilures\030\027 \001(\005\022,\n$resetting_counter_min_re" +
+      "set_fraction\030\030 \001(\001\022,\n$resetting_counter_" +
+      "max_reset_fraction\030\031 \001(\001\022,\n$resetting_co" +
+      "unter_inc_reset_fraction\030\032 \001(\001\022,\n$pass_r" +
+      "ate_counter_min_allowed_counts\030\033 \001(\005\022,\n$" +
+      "pass_rate_counter_max_allowed_counts\030\034 \001" +
+      "(\005\022\'\n\037pass_rate_counter_min_pass_rate\030\035 ",
+      "\001(\001\022\'\n\037pass_rate_counter_max_pass_rate\030\036" +
+      " \001(\001\022\'\n\037pass_rate_counter_inc_pass_rate\030" +
+      "\037 \001(\001\"\266\005\n\037AstigmatismModelManagerSetting" +
+      "s\022\016\n\006option\030\001 \001(\005\022\024\n\014nm_per_slice\030\002 \001(\001\022" +
+      "E\n\023fit_engine_settings\030\003 \001(\0132(.gdsc.smlm" +
+      ".data.config.FitEngineSettings\022\'\n\003psf\030\004 " +
+      "\001(\0132\032.gdsc.smlm.data.config.PSF\0227\n\013calib" +
+      "ration\030\005 \001(\0132\".gdsc.smlm.data.config.Cal" +
+      "ibration\022\016\n\006radius\030\006 \001(\001\022\030\n\020log_fit_prog" +
+      "ress\030\007 \001(\010\022\021\n\tsmoothing\030\010 \001(\001\022\024\n\014weighte",
+      "d_fit\030\t \001(\010\022\034\n\024show_estimated_curve\030\n \001(" +
+      "\010\022\r\n\005image\030\013 \001(\t\022\022\n\nmodel_name\030\014 \001(\t\022\022\n\n" +
+      "save_model\030\016 \001(\010\022\026\n\016save_fit_width\030\017 \001(\010" +
+      "\022\020\n\010selected\030\r \001(\t\022\033\n\023show_depth_of_focu" +
+      "s\030\020 \001(\010\022\033\n\023show_combined_width\030\026 \001(\010\022\020\n\010" +
+      "show_psf\030\022 \001(\010\022<\n\017z_distance_unit\030\023 \001(\0162" +
+      "#.gdsc.smlm.data.config.DistanceUnit\022<\n\017" +
+      "s_distance_unit\030\024 \001(\0162#.gdsc.smlm.data.c" +
+      "onfig.DistanceUnit\022\030\n\020calibrated_image\030\025" +
+      " \001(\010\022\020\n\010filename\030\021 \001(\t\"\305\002\n\023CropResultsSe",
+      "ttings\022\024\n\014input_option\030\001 \001(\t\022\016\n\006border\030\002" +
+      " \001(\001\022\t\n\001x\030\003 \001(\001\022\t\n\001y\030\004 \001(\001\022\r\n\005width\030\005 \001(" +
+      "\001\022\016\n\006height\030\006 \001(\001\022\025\n\rselect_region\030\007 \001(\010" +
+      "\022\017\n\007use_roi\030\010 \001(\010\022\021\n\troi_image\030\t \001(\t\022\024\n\014" +
+      "reset_origin\030\n \001(\010\022\023\n\013output_name\030\013 \001(\t\022" +
+      "\023\n\013name_option\030\014 \001(\005\022\023\n\013name_suffix\030\r \001(" +
+      "\t\022\024\n\014name_counter\030\016 \001(\005\022\017\n\007limit_z\030\017 \001(\010" +
+      "\022\r\n\005min_z\030\020 \001(\001\022\r\n\005max_z\030\021 \001(\001\"\346\001\n\030Summa" +
+      "riseResultsSettings\022\027\n\017plot_background\030\001" +
+      " \001(\010\022\023\n\013plot_signal\030\002 \001(\010\022\016\n\006plot_x\030\003 \001(",
+      "\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplo" +
+      "t_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_" +
+      "precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027" +
+      "\n\017remove_outliers\030\n \001(\005\"\214\006\n\035ImageJ3DResu" +
+      "ltsViewerSettings\022\024\n\014input_option\030\001 \001(\t\022" +
+      "\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003l" +
+      "ut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded\030\006 " +
+      "\001(\010\022\021\n\tnewWindow\030\007 \001(\010\022\021\n\tsize_mode\030\010 \001(" +
+      "\005\022\022\n\npixel_size\030\t \001(\001\022K\n\026results_table_s" +
+      "ettings\030\n \001(\0132+.gdsc.smlm.data.config.Re",
+      "sultsTableSettings\022\022\n\ndepth_mode\030\013 \001(\005\022\023" +
+      "\n\013depth_range\030\014 \001(\001\022\023\n\013dither_seed\030\r \001(\005" +
+      "\022\031\n\021transparency_mode\030\016 \001(\005\022\030\n\020min_trans" +
+      "parency\030\017 \001(\001\022\030\n\020max_transparency\030\020 \001(\001\022" +
+      "\021\n\tsort_mode\030\021 \001(\005\022\030\n\020sort_direction_x\030\022" +
+      " \001(\001\022\030\n\020sort_direction_y\030\023 \001(\001\022\030\n\020sort_d" +
+      "irection_z\030\024 \001(\001\022\022\n\nsort_eye_x\030\025 \001(\001\022\022\n\n" +
+      "sort_eye_y\030\026 \001(\001\022\022\n\nsort_eye_z\030\027 \001(\001\022\026\n\016" +
+      "save_eye_point\030\030 \001(\010\022\030\n\020highlight_colour" +
+      "\030\031 \001(\t\022\023\n\013output_name\030\032 \001(\t\022\023\n\013name_opti",
+      "on\030\033 \001(\005\022\023\n\013name_suffix\030\034 \001(\t\022\024\n\014name_co" +
+      "unter\030\035 \001(\005\022$\n\034support_dynamic_transpare" +
+      "ncy\030\036 \001(\010\022#\n\033enable_dynamic_transparency" +
+      "\030\037 \001(\010\"\220\001\n\030TranslateResultsSettings\022\024\n\014i" +
+      "nput_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(" +
+      "\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.g" +
+      "dsc.smlm.data.config.DistanceUnit\"\250\001\n\017Sp" +
+      "otFitSettings\022\017\n\007channel\030\001 \001(\005\022\025\n\rsearch" +
+      "_radius\030\002 \001(\005\022\022\n\nfit_radius\030\003 \001(\005\022\024\n\014sho" +
+      "w_overlay\030\004 \001(\010\022\027\n\017attach_to_slice\030\005 \001(\010",
+      "\022\024\n\014log_progress\030\006 \001(\010\022\024\n\014show_fit_roi\030\007" +
+      " \001(\010*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020" +
+      "\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPL" +
+      "ATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -44109,7 +44236,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_CameraModelFisherInformationAnalysisSettings_descriptor,
-        new java.lang.String[] { "MinExponent", "MaxExponent", "SubDivisions", "CcdGain", "CcdNoise", "EmCcdGain", "EmCcdNoise", "PointOption", });
+        new java.lang.String[] { "MinExponent", "MaxExponent", "SubDivisions", "Camera1Gain", "Camera1Noise", "Camera2Gain", "Camera2Noise", "PointOption", "Camera1Type", "Camera2Type", });
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_descriptor =
       getDescriptor().getMessageTypes().get(16);
     internal_static_gdsc_smlm_data_config_CubicSplineManagerSettings_fieldAccessorTable = new

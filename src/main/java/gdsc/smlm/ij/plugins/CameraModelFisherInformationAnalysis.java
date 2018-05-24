@@ -13,10 +13,12 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
+import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
 import gdsc.smlm.function.BasePoissonFisherInformation;
 import gdsc.smlm.function.HalfPoissonFisherInformation;
 import gdsc.smlm.function.InterpolatedPoissonFisherInformation;
+import gdsc.smlm.function.PoissonFisherInformation;
 import gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
@@ -54,6 +56,51 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	private static final String TITLE = "Camera Model Fisher Information Analysis";
 
 	private static final String[] POINT_OPTION = { "None", "X", "Circle", "Box", "Cross" };
+
+	//@formatter:off
+	private enum CameraType implements NamedObject
+	{
+		POISSON { public String getName() { return "Poisson"; } },
+		CCD { public String getName() { return "CCD"; } 
+			  public boolean isFast() { return false; }
+			  public boolean isLowerFixedI() { return true; } },
+		CCD_APPROXIMATION { public String getName() { return "CCD Approximation"; }
+							public String getShortName() { return "CCD Approx"; }},
+		EM_CCD { public String getName() { return "EM-CCD"; } 
+		         public boolean isFast() { return false; } };
+
+		public abstract String getName();
+		
+		/**
+		 * Checks if is fast to compute.
+		 *
+		 * @return true, if is fast
+		 */
+		public boolean isFast() { return false; }
+		
+		/**
+		 * Checks if is fixed Fisher information at the lower bound.
+		 *
+		 * @return true, if is lower fixed I
+		 */
+		public boolean isLowerFixedI() { return false; }
+
+		public String getShortName()
+		{
+			return getName();
+		}
+		
+		public static CameraType forNumber(int number)
+		{
+			CameraType[] values = CameraType.values();
+			if (number >= 0 && number < values.length)
+				return values[number];
+			return values[0];
+		}
+	}
+	//@formatter:on
+
+	private static String[] CAMERA_TYPES = SettingsManager.getNames((Object[]) CameraType.values());
 
 	private CameraModelFisherInformationAnalysisSettings.Builder settings;
 
@@ -99,10 +146,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		gd.addSlider("Min_exponent", -50, 4, settings.getMinExponent());
 		gd.addSlider("Max_exponent", -10, 4, settings.getMaxExponent());
 		gd.addSlider("Sub_divisions", 0, 10, settings.getSubDivisions());
-		gd.addNumericField("CCD_gain", settings.getCcdGain(), 2);
-		gd.addNumericField("CCD_noise", settings.getCcdNoise(), 2);
-		gd.addNumericField("EM-CCD_gain", settings.getEmCcdGain(), 2);
-		gd.addNumericField("EM-CCD_noise", settings.getEmCcdNoise(), 2);
+		gd.addChoice("Camera_1_type", CAMERA_TYPES, settings.getCamera1Type());
+		gd.addNumericField("Camera_1_gain", settings.getCamera1Gain(), 2);
+		gd.addNumericField("Camera_1_noise", settings.getCamera1Noise(), 2);
+		gd.addChoice("Camera_2_type", CAMERA_TYPES, settings.getCamera2Type());
+		gd.addNumericField("Camera_2_gain", settings.getCamera2Gain(), 2);
+		gd.addNumericField("Camera_2_noise", settings.getCamera2Noise(), 2);
 		gd.addChoice("Plot_point", POINT_OPTION, settings.getPointOption());
 
 		gd.showDialog();
@@ -113,10 +162,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		settings.setMinExponent((int) gd.getNextNumber());
 		settings.setMaxExponent((int) gd.getNextNumber());
 		settings.setSubDivisions((int) gd.getNextNumber());
-		settings.setCcdGain(gd.getNextNumber());
-		settings.setCcdNoise(gd.getNextNumber());
-		settings.setEmCcdGain(gd.getNextNumber());
-		settings.setEmCcdNoise(gd.getNextNumber());
+		settings.setCamera1Type(gd.getNextChoiceIndex());
+		settings.setCamera1Gain(gd.getNextNumber());
+		settings.setCamera1Noise(gd.getNextNumber());
+		settings.setCamera2Type(gd.getNextChoiceIndex());
+		settings.setCamera2Gain(gd.getNextNumber());
+		settings.setCamera2Noise(gd.getNextNumber());
 		settings.setPointOption(gd.getNextChoiceIndex());
 
 		SettingsManager.writeSettings(settings);
@@ -132,13 +183,16 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 	private void analyse()
 	{
-		PoissonGaussianFisherInformation pg = createPoissonGaussianFisherInformation();
-		if (pg == null)
-			return;
-		PoissonGaussianApproximationFisherInformation pga = createPoissonGaussianApproximationFisherInformation();
+		CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
+		CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
 
-		PoissonGammaGaussianFisherInformation pgg = createPoissonGammaGaussianFisherInformation();
-		if (pgg == null)
+		BasePoissonFisherInformation f1 = createPoissonFisherInformation(type1, settings.getCamera1Gain(),
+				settings.getCamera1Noise());
+		if (f1 == null)
+			return;
+		BasePoissonFisherInformation f2 = createPoissonFisherInformation(type2, settings.getCamera2Gain(),
+				settings.getCamera2Noise());
+		if (f2 == null)
 			return;
 
 		double[] exp = createExponents();
@@ -149,21 +203,20 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		for (int i = 0; i < photons.length; i++)
 			photons[i] = FastMath.pow(10, exp[i]);
 
-		double[] pgFI = getFisherInformation(photons, pg, true);
-		double[] pgaFI = getFisherInformation(photons, pga, false);
-		double[] pggFI = getFisherInformation(photons, pgg, true);
+		double[] fi1 = getFisherInformation(photons, f1, !type1.isFast());
+		double[] fi2 = getFisherInformation(photons, f2, !type1.isFast());
 
 		// Compute relative to the Poisson Fisher information
-		double[] rpgFI = getAlpha(pgFI, photons);
-		//double[] rpgaFI = getAlpha(pgaFI, photons);
-		double[] rpggFI = getAlpha(pggFI, photons);
+		double[] alpha1 = getAlpha(fi1, photons);
+		double[] alpha2 = getAlpha(fi2, photons);
 
 		// ==============
 		// Debug PGG
 		boolean debug = false;
 		// ==============
-		if (debug)
+		if (debug && f2 instanceof PoissonGammaGaussianFisherInformation)
 		{
+			PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) f2;
 			double t = 200;
 			//for (int i=0; i<rpggFI.length; i++)
 			//{
@@ -197,8 +250,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		// ==============
 
 		Color color1 = Color.BLUE;
-		Color color2 = Color.GREEN;
-		Color color3 = Color.RED;
+		Color color2 = Color.RED;
 
 		WindowOrganiser wo = new WindowOrganiser();
 
@@ -212,11 +264,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double scale = Math.log(10);
 		for (int i = 0; i < logU.length; i++)
 			logU[i] *= scale;
-		BasePoissonFisherInformation ipg = new InterpolatedPoissonFisherInformation(logU, rpgFI, true, pga);
-		BasePoissonFisherInformation ipga = pga; // No need for interpolation
-		// TODO - change this if the PGG FI is not fixed alpha at low mean.
-		BasePoissonFisherInformation ipgg = new InterpolatedPoissonFisherInformation(logU, rpggFI, false,
-				new HalfPoissonFisherInformation());
+		BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(type1, logU, alpha1, f1);
+		BasePoissonFisherInformation if2 = getInterpolatedPoissonFisherInformation(type2, logU, alpha2, f2);
 
 		// Interpolate with 300 points for smooth curve
 		int n = 300;
@@ -229,51 +278,50 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			iphotons[i] = FastMath.pow(10, iexp[i]);
 		}
 		double[] ix = (logScaleX) ? iphotons : iexp;
-		double[] irpgFI = getAlpha(ipg, iphotons);
-		double[] irpgaFI = getAlpha(ipga, iphotons);
-		double[] irpggFI = getAlpha(ipgg, iphotons);
+		double[] ialpha1 = getAlpha(if1, iphotons);
+		double[] ialpha2 = getAlpha(if2, iphotons);
 
 		int pointShape = getPointShape();
 
+		String name1 = getName(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
+		String name2 = getName(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
+		String legend = name1 + "\n" + name2;
+
 		String title = "Relative Fisher Information";
 		Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
-		plot.setLimits(x[0], x[x.length - 1], 0, 1);
+		plot.setLimits(x[0], x[x.length - 1], -0.05, 1.05);
 		if (logScaleX)
 			plot.setLogScaleX();
 		plot.setColor(color1);
-		plot.addPoints(ix, irpgFI, Plot.LINE);
+		plot.addPoints(ix, ialpha1, Plot.LINE);
 		plot.setColor(color2);
-		plot.addPoints(ix, irpgaFI, Plot.LINE);
-		plot.setColor(color3);
-		plot.addPoints(ix, irpggFI, Plot.LINE);
+		plot.addPoints(ix, ialpha2, Plot.LINE);
 		plot.setColor(Color.BLACK);
-		plot.addLegend("CCD\nCCD approx\nEM CCD");
+		plot.addLegend(legend);
 		// Option to show nodes
 		if (pointShape != -1)
 		{
 			plot.setColor(color1);
-			plot.addPoints(x, rpgFI, pointShape);
-			plot.setColor(color3);
-			plot.addPoints(x, rpggFI, pointShape);
+			plot.addPoints(x, alpha1, pointShape);
+			plot.setColor(color2);
+			plot.addPoints(x, alpha2, pointShape);
 			plot.setColor(Color.BLACK);
 		}
 		Utils.display(title, plot, 0, wo);
 
 		// The approximation should not produce an infinite computation
-		double[] limits = new double[] { pgaFI[pgaFI.length - 1], pgaFI[pgaFI.length - 1] };
-		limits = limits(limits, pgFI);
-		limits = limits(limits, pgaFI);
-		limits = limits(limits, pggFI);
+		double[] limits = new double[] { fi2[fi2.length - 1], fi2[fi2.length - 1] };
+		limits = limits(limits, fi1);
+		limits = limits(limits, fi2);
 
 		// Check if we can use ImageJ support for a Y log scale
 		boolean logScaleY = ((float) limits[1] <= Float.MAX_VALUE);
 		if (!logScaleY)
 		{
-			for (int i = 0; i < pgFI.length; i++)
+			for (int i = 0; i < fi1.length; i++)
 			{
-				pgFI[i] = Math.log10(pgFI[i]);
-				pgaFI[i] = Math.log10(pgaFI[i]);
-				pggFI[i] = Math.log10(pggFI[i]);
+				fi1[i] = Math.log10(fi1[i]);
+				fi2[i] = Math.log10(fi2[i]);
 			}
 			limits[0] = Math.log10(limits[0]);
 			limits[1] = Math.log10(limits[1]);
@@ -290,13 +338,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		if (logScaleY)
 			plot.setLogScaleY();
 		plot.setColor(color1);
-		plot.addPoints(x, pgFI, Plot.LINE);
+		plot.addPoints(x, fi1, Plot.LINE);
 		plot.setColor(color2);
-		plot.addPoints(x, pgaFI, Plot.LINE);
-		plot.setColor(color3);
-		plot.addPoints(x, pggFI, Plot.LINE);
+		plot.addPoints(x, fi2, Plot.LINE);
 		plot.setColor(Color.BLACK);
-		plot.addLegend("CCD\nCCD approx\nEM CCD");
+		plot.addLegend(legend);
 		//// Option to show nodes
 		// This gets messy as the lines are straight
 		//if (pointShape != -1)
@@ -312,29 +358,40 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		wo.tile();
 	}
 
-	private double[] limits(double[] limits, double[] f)
+	private BasePoissonFisherInformation createPoissonFisherInformation(CameraType type, double gain, double noise)
 	{
-		double min = limits[0];
-		double max = limits[1];
-		for (int i = 0; i < f.length; i++)
+		switch (type)
 		{
-			double d = f[i];
-			// Find limits of numbers that can be logged
-			if (d <= 0 || d == Double.POSITIVE_INFINITY)
-				continue;
-			if (min > d)
-				min = d;
-			else if (max < d)
-				max = d;
+			case CCD:
+				return createPoissonGaussianFisherInformation(noise / gain);
+			case CCD_APPROXIMATION:
+				return createPoissonGaussianApproximationFisherInformation(noise / gain);
+			case EM_CCD:
+				return createPoissonGammaGaussianFisherInformation(gain, noise);
+			case POISSON:
+				return new PoissonFisherInformation();
+			default:
+				throw new IllegalStateException("Unknown camera type: " + type);
 		}
-		limits[0] = min;
-		limits[1] = max;
-		return limits;
 	}
 
-	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation()
+	private String getName(CameraType type, double gain, double noise)
 	{
-		double s = settings.getCcdNoise() / settings.getCcdGain();
+		String name = type.getShortName();
+		switch (type)
+		{
+			case CCD:
+			case CCD_APPROXIMATION:
+			case EM_CCD:
+				name += String.format(" g=%.1f,n=%.1f", gain, noise);
+			default:
+				break;
+		}
+		return name;
+	}
+
+	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(double s)
+	{
 		if (s < 0)
 		{
 			IJ.error(TITLE, "CCD noise must be positive");
@@ -346,12 +403,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
 		fi.setMinRange(5);
+		fi.setMeanThreshold(1000);
 		return fi;
 	}
 
-	private PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation()
+	private PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation(double s)
 	{
-		double s = settings.getCcdNoise() / settings.getCcdGain();
 		if (s <= 0)
 		{
 			IJ.error(TITLE, "CCD noise must be positive");
@@ -360,10 +417,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return new PoissonGaussianApproximationFisherInformation(s);
 	}
 
-	private PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation()
+	private PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation(double m, double s)
 	{
-		double s = settings.getEmCcdNoise();
-		double m = settings.getEmCcdGain();
 		if (s < 0)
 		{
 			IJ.error(TITLE, "EM CCD noise must be positive");
@@ -479,6 +534,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return rI;
 	}
 
+	private BasePoissonFisherInformation getInterpolatedPoissonFisherInformation(CameraType type, double[] logU,
+			double[] alpha1, BasePoissonFisherInformation f)
+	{
+		if (type.isFast())
+			return f;
+		// This should not matter as the interpolation is only used between the ends of the range
+		BasePoissonFisherInformation upperf = f;
+		if (type == CameraType.EM_CCD)
+			upperf = new HalfPoissonFisherInformation();
+		return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperf);
+	}
+
 	private int getPointShape()
 	{
 		switch (settings.getPointOption())
@@ -493,5 +560,25 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 				return Plot.CROSS;
 		}
 		return -1;
+	}
+
+	private double[] limits(double[] limits, double[] f)
+	{
+		double min = limits[0];
+		double max = limits[1];
+		for (int i = 0; i < f.length; i++)
+		{
+			double d = f[i];
+			// Find limits of numbers that can be logged
+			if (d <= 0 || d == Double.POSITIVE_INFINITY)
+				continue;
+			if (min > d)
+				min = d;
+			else if (max < d)
+				max = d;
+		}
+		limits[0] = min;
+		limits[1] = max;
+		return limits;
 	}
 }

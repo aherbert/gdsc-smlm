@@ -323,10 +323,12 @@ public class GUIProtosHelper
 		builder.setMinExponent(-6);
 		builder.setMaxExponent(2);
 		builder.setSubDivisions(1);
-		builder.setCcdGain(1);
-		builder.setCcdNoise(4);
-		builder.setEmCcdGain(20);
-		builder.setEmCcdNoise(8);
+		builder.setCamera2Type(1);
+		builder.setCamera1Gain(1);
+		builder.setCamera1Noise(4);
+		builder.setCamera2Type(3);
+		builder.setCamera2Gain(20);
+		builder.setCamera2Noise(8);
 		defaultCameraModelFisherInformationAnalysisSettings = builder.build();
 	}
 
