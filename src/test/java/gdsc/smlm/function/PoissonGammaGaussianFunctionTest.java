@@ -1,5 +1,9 @@
 package gdsc.smlm.function;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
@@ -28,37 +32,60 @@ public class PoissonGammaGaussianFunctionTest
 	static double[] pgSum = new double[11];
 	static
 	{
-		//// Compute
-		//MathContext mc = new MathContext(4, RoundingMode.UP);
-		//for (int g = 1; g <= 10; g++)
-		//{
-		//	double sum = 0;
-		//	for (int c = 0;; c++)
-		//	{
-		//		double p = PoissonGammaFunction.poissonGamma(c, 1, g);
-		//		sum += p;
-		//		if (p / sum < 1e-6)
-		//			break;
-		//	}
-		//	pgSum[g] = sum;
-		//	BigDecimal bd = new BigDecimal(sum);
-		//	System.out.printf("pgSum[%d] = %.3f;\n", g, bd.round(mc).doubleValue());
-		//}
-
-		// Compute the sum at expected photons=1. This produces 
+		// Compute the sum at expected photons around 1. This produces 
 		// the highest sum as the contribution from the Poisson-Gamma to c=0
 		// will be the greatest.
 		// These are rounded up to 3 d.p. provide a safer upper bound.
-		pgSum[1] = 1.200;
-		pgSum[2] = 1.096;
-		pgSum[3] = 1.064;
-		pgSum[4] = 1.047;
-		pgSum[5] = 1.038;
-		pgSum[6] = 1.032;
-		pgSum[7] = 1.027;
-		pgSum[8] = 1.024;
-		pgSum[9] = 1.021;
-		pgSum[10] = 1.019;
+		boolean compute = false;
+		if (compute)
+		{
+			MathContext mc = new MathContext(4, RoundingMode.UP);
+
+			for (int g = 1; g <= 10; g++)
+			{
+				double max = 0;
+				int steps = 10;
+				for (int i = 0; i <= steps; i++)
+				{
+					double e = 0.5 * i / steps;
+					// Compute half for the first interval 
+					double sum = PoissonGammaFunction.poissonGammaN(0, e, g) * 0.5 + PoissonGammaFunction.dirac(e);
+					for (int c = 1;; c++)
+					{
+						double p = PoissonGammaFunction.poissonGamma(c, e, g);
+						sum += p;
+						if (p / sum < 1e-6)
+							break;
+					}
+					max = Math.max(max, sum);
+				}
+				pgSum[g] = max;
+				BigDecimal bd = new BigDecimal(max);
+				System.out.printf("pgSum[%d] = %.3f;\n", g, bd.round(mc).doubleValue());
+			}
+		}
+
+		//		pgSum[1] = 1.200;
+		//		pgSum[2] = 1.096;
+		//		pgSum[3] = 1.064;
+		//		pgSum[4] = 1.047;
+		//		pgSum[5] = 1.038;
+		//		pgSum[6] = 1.032;
+		//		pgSum[7] = 1.027;
+		//		pgSum[8] = 1.024;
+		//		pgSum[9] = 1.021;
+		//		pgSum[10] = 1.019;
+
+		pgSum[1] = 1.019;
+		pgSum[2] = 1.005;
+		pgSum[3] = 1.003;
+		pgSum[4] = 1.002;
+		pgSum[5] = 1.001;
+		pgSum[6] = 1.001;
+		pgSum[7] = 1.001;
+		pgSum[8] = 1.001;
+		pgSum[9] = 1.001;
+		pgSum[10] = 1.001;
 	}
 
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
@@ -168,7 +195,7 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	// The approximation is not meant to be used as a PMF
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMF()
 	{
 		for (double p : photons)
@@ -180,7 +207,7 @@ public class PoissonGammaGaussianFunctionTest
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION, true);
 				}
 	}
-	
+
 	@Test
 	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDF()
 	{
@@ -296,7 +323,7 @@ public class PoissonGammaGaussianFunctionTest
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION, true);
 				}
 	}
-	
+
 	@Test
 	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDFAtHighPhotons()
 	{
@@ -340,7 +367,7 @@ public class PoissonGammaGaussianFunctionTest
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF, true);
 				}
 	}
-			
+
 	@Test
 	public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPMFAtLowPhotons()
 	{
@@ -403,7 +430,7 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	// The approximation is not meant to be used as a PMF
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMFAtLowPhotons()
 	{
 		for (double p : lowPhotons)
@@ -415,7 +442,7 @@ public class PoissonGammaGaussianFunctionTest
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION, true);
 				}
 	}
-	
+
 	@Test
 	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDFAtLowPhotons()
 	{
@@ -488,28 +515,31 @@ public class PoissonGammaGaussianFunctionTest
 		System.out.printf("Simpson integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
+	// Speed order is roughly: Approx, Simpson, Discrete PDF, Legendre, Discrete PMF
+	// The most accurate over most settings p<<1e-5, p=1, p>>10 is the Simpson.
+	
 	@Test
-	public void approximationFasterThanDiscretePDFIntegration()
+	public void approximationFasterThanSimpsonIntegration()
 	{
-		fasterThan(ConvolutionMode.DISCRETE_PDF, ConvolutionMode.APPROXIMATION);
+		fasterThan(ConvolutionMode.SIMPSON_PDF, ConvolutionMode.APPROXIMATION);
 	}
 
 	@Test
-	public void discretePMFIntegrationFasterThanDiscretePDFIntegration()
+	public void simpsonIntegrationFasterThanDiscretePDFIntegration()
 	{
-		fasterThan(ConvolutionMode.DISCRETE_PDF, ConvolutionMode.DISCRETE_PMF);
+		fasterThan(ConvolutionMode.DISCRETE_PDF, ConvolutionMode.SIMPSON_PDF);
 	}
-
-	@Test
-	public void simpsonIntegrationFasterThanDiscretePMFIntegration()
-	{
-		fasterThan(ConvolutionMode.DISCRETE_PMF, ConvolutionMode.SIMPSON_PDF);
-	}
-
+	
 	@Test
 	public void simpsonIntegrationFasterThanLegendreGaussIntegration()
 	{
 		fasterThan(ConvolutionMode.LEGENDRE_GAUSS_PDF, ConvolutionMode.SIMPSON_PDF);
+	}
+
+	@Test
+	public void discretePDFIntegrationFasterThanDiscretePMFIntegration()
+	{
+		fasterThan(ConvolutionMode.DISCRETE_PMF, ConvolutionMode.DISCRETE_PDF);
 	}
 
 	private void cumulativeProbabilityIsOne(final double mu, final double s, final double g,

@@ -40,6 +40,7 @@ import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.function.PoissonPoissonFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.utils.Convolution;
+import gdsc.smlm.utils.GaussianKernel;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
@@ -637,10 +638,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				// Should it be rounded to make it a discrete PMF?
 				// Or should the model actually be integrated.
 				// Basically the value of the Poisson-Gamma from 0-0.5 should be
-				// added to the delta function at c=0 from the count at c=0.
-				// This would fix the function. Note that the function is undefined
-				// at c=0 so it needs to be integrated with a Legendre-Guass
-				// integrator.
+				// added to the delta function at c=0 for the count at c=0.
+				// This would fix the function. 
 
 				// Should we use the Tubb's model which uses:
 				//final double shape = count;
@@ -649,15 +648,16 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				//final double output = count + electrons; 
 
 				// The Tubb's model is for additional electrons. So a count of 1
-				// can never generate an output of 0. This better fits the
-				// Ulbrich+Isacoff model when c=0 is undefined, i.e. you cannot
+				// can never generate an output of 0. This does not fit the
+				// Ulbrich+Isacoff model where c=0 is actually defined, i.e. you can
 				// model zero output for EM-gain.
 
 				// Over-sample the Gamma
 				for (int k = emSamples; k-- > 0;)
 				{
-					final double d2 = gamma.sample();
-					//final double d2 = round.round(gamma.sample());
+					//final double d2 = gamma.sample();
+					// Do rounding to simulate a discrete PMF.
+					final double d2 = round.round(gamma.sample());
 					//final double d2 = (int)(gamma.sample());
 
 					// Over-sample the Gaussian
@@ -801,6 +801,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			boolean discrete = false; // noise != 0;
 			if (discrete)
 			{
+				// Note: This is obsolete as the Poisson-Gamma function is continuous. 
+				// Sampling it at integer intervals is not valid, especially for low gain.
+				// The Poisson-Gamma PDF should be integrated to form a discrete PMF. 
+
 				step = 1.0;
 
 				CustomGammaDistribution gamma = new CustomGammaDistribution(random, settings.getPhotons(), gain,
@@ -891,19 +895,33 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			}
 			else
 			{
-				// This computes a PDF using the approximation and up-samples together.
+				// This integrates the PDF using the approximation and up-samples together.
+				// Compute the sampling interval.
 				step = 1.0 / upsample;
-				upsample = 1;
-				list.add(PoissonGammaFunction.poissonGammaN(0, p, m));
+				upsample = 1; // Reset
+
+				// Compute the integral of [-step/2:step/2] for each point.
+				// Use trapezoid integration.
+				double step_2 = step / 2;
+				double prev = PoissonGammaFunction.poissonGammaN(0, p, m);
+				double next = PoissonGammaFunction.poissonGammaN(step_2, p, m);
+				list.add((prev + next) * 0.25);
 				double max = 0;
 				for (int i = 1;; i++)
 				{
-					// Scale the probability so it can be used directly to build the CDF
-					double pp = PoissonGammaFunction.poissonGammaN(i * step, p, m);
+					// Each remaining point is modelling a PMF for the range [-step/2:step/2]
+					prev = next;
+					next = PoissonGammaFunction.poissonGammaN(i * step + step_2, p, m);
+					double pp = (prev + next) * 0.5;
 					if (max < pp)
 						max = pp;
 					if (pp / max < 1e-5)
+					{
+						// Use this if non-zero since it has been calculated
+						if (pp != 0)
+							list.add(pp);
 						break;
+					}
 					list.add(pp);
 				}
 			}
@@ -959,40 +977,30 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// Sample Gaussian
 		if (noise > 0)
 		{
-			if (upsample != 1)
-			{
-				// The PMF is discrete and (if Poisson with gain) may be on a non-integer scale.
-				// Upsample the PMF to allow appropriate convolution and rounding to the integer 
-				// scale.
-				list.resetQuick();
-				double[] pad = new double[upsample - 1];
-
-				list.add(g[0]);
-				for (int i = 1; i < g.length; i++)
-				{
-					list.add(pad);
-					list.add(g[i]);
-				}
-				step /= upsample;
-			}
-
+			step /= upsample;
 			g = list.toArray();
 
-			// Convolve with Gaussian kernel up to 4 times the standard deviation
-			final int radius = (int) Math.ceil(Math.abs(noise) * 4 / step) + 1;
-			double[] kernel = new double[2 * radius + 1];
-			final double norm = -0.5 / (noise * noise);
-			for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--)
-				kernel[j] = kernel[jj] = FastMath.exp(norm * Maths.pow2(i * step));
-			// Normalise
-			double sum = 0;
-			for (int j = 0; j < kernel.length; j++)
-				sum += kernel[j];
-			for (int j = 0; j < kernel.length; j++)
-				kernel[j] /= sum;
+			// Convolve with Gaussian kernel
+			double[] kernel = GaussianKernel.makeGaussianKernel(Math.abs(noise) / step, 6, true);
 
-			g = Convolution.convolveFast(g, kernel);
+			if (upsample != 1)
+			{
+				// Use scaled convolution. This is faster that zero filling distribution g.
+				g = Convolution.convolve(kernel, g, upsample);
+			}
+			else
+			{
+				// The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT. 
+				// This is a problem if most of the probability is in the Dirac. 
+				// Otherwise it can be ignored.
+				if (dirac > 0.01)
+					g = Convolution.convolve(kernel, g);
+				else
+					g = Convolution.convolveFast(kernel, g);
+			}
+			
 			// The convolution will have created a larger array so we must adjust the offset for this
+			int radius = kernel.length / 2;
 			zero -= radius * step;
 
 			// Add convolution of the dirac delta function.
@@ -1124,8 +1132,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 
 		double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
 
-		// Q. If the EM-CCD the distribution may have a dirac delta at c=0 which 
-		// should could break interpolation using a spline?
+		// Q. If the EM-CCD the distribution may have a Dirac delta at c=0 which 
+		// could break interpolation using a spline?
 		UnivariateInterpolator in =
 				//(settings.getMode() == MODE_EM_CCD) ? new LinearInterpolator() : 
 				new SplineInterpolator();
@@ -1400,7 +1408,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 					// below and add the delta back. Only functions that support noise==0
 					// will be allowed so this solution works.
 					dirac = PoissonGammaFunction.dirac(p);
-					y[c0] -= dirac;
+					if (c0 != -1)
+						y[c0] -= dirac;
 				}
 				else
 				{
