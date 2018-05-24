@@ -203,8 +203,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		for (int i = 0; i < photons.length; i++)
 			photons[i] = FastMath.pow(10, exp[i]);
 
-		double[] fi1 = getFisherInformation(photons, f1, !type1.isFast());
-		double[] fi2 = getFisherInformation(photons, f2, !type1.isFast());
+		double[] fi1 = getFisherInformation(photons, f1, type1);
+		double[] fi2 = getFisherInformation(photons, f2, type2);
 
 		// Compute relative to the Poisson Fisher information
 		double[] alpha1 = getAlpha(fi1, photons);
@@ -402,7 +402,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		//sampling <<= 2;
 		PoissonGaussianFisherInformation fi = new PoissonGaussianFisherInformation(s, sampling);
 		//fi.setCumulativeProbability(1 - 1e-12);
-		fi.setMinRange(5);
+		//fi.setMinRange(5);
 		fi.setMeanThreshold(1000);
 		return fi;
 	}
@@ -469,12 +469,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	}
 
 	private double[] getFisherInformation(final double[] photons, final BasePoissonFisherInformation fi,
-			boolean multithread)
+			CameraType type)
 	{
 		final double[] f = new double[photons.length];
-		if (multithread)
+		if (!type.isFast())
 		{
-			Utils.showStatus("Computing " + fi.getClass().getSimpleName());
+			IJ.showStatus("Computing " + type.getName());
 			int nThreads = Prefs.getThreads();
 			if (es == null)
 				es = Executors.newFixedThreadPool(nThreads);
@@ -500,7 +500,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			}
 			Utils.waitForCompletion(futures);
 			ticker.stop();
-			Utils.showStatus("");
+			IJ.showStatus("");
 		}
 		else
 		{
