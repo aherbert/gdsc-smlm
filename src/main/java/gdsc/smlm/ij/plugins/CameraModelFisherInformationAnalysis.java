@@ -172,7 +172,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		{
 			return cameraTypeValues[type];
 		}
-		
+
 		@Override
 		public String toString()
 		{
@@ -266,7 +266,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			b.clearAlphaSample();
 			b.addAllAlphaSample(list);
 			data = b.build();
-			
+
 			//System.out.println(data);
 		}
 		else
@@ -554,8 +554,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(type1, logU, alpha1, f1);
 		BasePoissonFisherInformation if2 = getInterpolatedPoissonFisherInformation(type2, logU, alpha2, f2);
 
-		// Interpolate with 300 points for smooth curve
-		int n = 300;
+		// Interpolate with 5 points per sample for smooth curve
+		int n = 5 * exp.length;
 		double[] iexp = new double[n + 1];
 		double[] iphotons = new double[iexp.length];
 		double h = (exp[exp.length - 1] - exp[0]) / n;
@@ -948,7 +948,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 		// Just in case
 		//Sort.sortArrays(alpha, exp, true);
-		
+
 		// Test if we can use ImageJ support for a X log scale
 		boolean logScaleX = ((float) FastMath.pow(10, exp[0]) != 0);
 		double[] x = exp;
@@ -969,18 +969,26 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			logU[i] *= scale;
 		BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(key.getType(), logU, alpha, null);
 
-		// Interpolate with 300 points for smooth curve
-		int n = 300;
-		double[] iexp = new double[n + 1];
-		double[] iphotons = new double[iexp.length];
-		double h = (exp[exp.length - 1] - exp[0]) / n;
-		for (int i = 0; i <= n; i++)
+		// Interpolate with 5 points per sample for smooth curve
+		int n = 5;
+		TDoubleArrayList iexp = new TDoubleArrayList();
+		TDoubleArrayList iphotons = new TDoubleArrayList();
+		for (int i = 1; i < exp.length; i++)
 		{
-			iexp[i] = exp[0] + i * h;
-			iphotons[i] = FastMath.pow(10, iexp[i]);
+			int i_1 = i - 1;
+			double h = (exp[i] - exp[i_1]) / n;
+			for (int j = 0; j < n; j++)
+			{
+				double e = exp[i_1] + j * h;
+				iexp.add(e);
+				iphotons.add(FastMath.pow(10, e));
+			}
 		}
-		double[] ix = (logScaleX) ? iphotons : iexp;
-		double[] ialpha1 = getAlpha(if1, iphotons);
+		iexp.add(exp[exp.length-1]);
+		iphotons.add(FastMath.pow(10, exp[exp.length-1]));
+		double[] photons = iphotons.toArray();
+		double[] ix = (logScaleX) ? photons : iexp.toArray();
+		double[] ialpha1 = getAlpha(if1, photons);
 
 		int pointShape = getPointShape(pointOption);
 
