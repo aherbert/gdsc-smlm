@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -16,6 +17,7 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
@@ -171,6 +173,23 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		{
 			return cameraTypeValues[type];
 		}
+		
+		@Override
+		public String toString()
+		{
+			CameraType type = getType();
+			String name = type.getShortName();
+			switch (type)
+			{
+				case CCD:
+				case CCD_APPROXIMATION:
+				case EM_CCD:
+					name += String.format(" g=%s,n=%s", gain, noise);
+				default:
+					break;
+			}
+			return name;
+		}
 	}
 
 	private static HashMap<FIKey, PoissonFisherInformationData> cache = new HashMap<FIKey, PoissonFisherInformationData>();
@@ -248,6 +267,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			b.clearAlphaSample();
 			b.addAllAlphaSample(list);
 			data = b.build();
+			
+			//System.out.println(data);
 		}
 		else
 		{
@@ -376,6 +397,12 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+
+		if (Utils.isExtraOptions() && !cache.isEmpty())
+		{
+			plotFromCache();
+			return;
+		}
 
 		if (!showDialog())
 			return;
@@ -520,7 +547,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double[] x = (logScaleX) ? photons : exp;
 		String xTitle = (logScaleX) ? "photons" : "log10(photons)";
 
-		// Get interpolation for alpha
+		// Get interpolation for alpha. Convert to base e.
 		double[] logU = exp.clone();
 		double scale = Math.log(10);
 		for (int i = 0; i < logU.length; i++)
@@ -542,7 +569,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		double[] ialpha1 = getAlpha(if1, iphotons);
 		double[] ialpha2 = getAlpha(if2, iphotons);
 
-		int pointShape = getPointShape();
+		int pointShape = getPointShape(settings.getPointOption());
 
 		String name1 = getName(key1);
 		String name2 = getName(key2);
@@ -846,9 +873,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return new InterpolatedPoissonFisherInformation(logU, alpha1, type.isLowerFixedI(), upperf);
 	}
 
-	private int getPointShape()
+	private int getPointShape(int pointOption)
 	{
-		switch (settings.getPointOption())
+		switch (pointOption)
 		{
 			case 1:
 				return Plot.X;
@@ -880,5 +907,98 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		limits[0] = min;
 		limits[1] = max;
 		return limits;
+	}
+
+	private static String cachePlot = "";
+	private static int pointOption = 0;
+
+	private void plotFromCache()
+	{
+		// Build a list of curve stored in the cache
+		String[] names = new String[cache.size()];
+		PoissonFisherInformationData[] datas = new PoissonFisherInformationData[cache.size()];
+		int c = 0;
+		for (Entry<FIKey, PoissonFisherInformationData> e : cache.entrySet())
+		{
+			names[c] = e.getKey().toString();
+			datas[c] = e.getValue();
+			c++;
+		}
+
+		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+		gd.addChoice("Fisher_information", names, cachePlot);
+		gd.addChoice("Plot_point", POINT_OPTION, pointOption);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return;
+		int index = gd.getNextChoiceIndex();
+		pointOption = gd.getNextChoiceIndex();
+		cachePlot = names[index];
+
+		PoissonFisherInformationData data = datas[index];
+		FIKey key = new FIKey(data);
+
+		c = 0;
+		double[] exp = new double[data.getAlphaSampleCount()];
+		double[] alpha = new double[data.getAlphaSampleCount()];
+		for (AlphaSample s : data.getAlphaSampleList())
+		{
+			exp[c] = s.getLog10Mean();
+			alpha[c] = s.getAlpha();
+			c++;
+		}
+		// Just in case
+		Sort.sortArrays(alpha, exp, true);
+		
+		// Test if we can use ImageJ support for a X log scale
+		boolean logScaleX = ((float) FastMath.pow(10, exp[0]) != 0);
+		double[] x = exp;
+		String xTitle = "log10(photons)";
+		if (logScaleX)
+		{
+			double[] photons = new double[exp.length];
+			for (int i = 0; i < photons.length; i++)
+				photons[i] = FastMath.pow(10, exp[i]);
+			x = photons;
+			xTitle = "photons";
+		}
+
+		// Get interpolation for alpha. Convert to base e.
+		double[] logU = exp.clone();
+		double scale = Math.log(10);
+		for (int i = 0; i < logU.length; i++)
+			logU[i] *= scale;
+		BasePoissonFisherInformation if1 = getInterpolatedPoissonFisherInformation(key.getType(), logU, alpha, null);
+
+		// Interpolate with 300 points for smooth curve
+		int n = 300;
+		double[] iexp = new double[n + 1];
+		double[] iphotons = new double[iexp.length];
+		double h = (exp[exp.length - 1] - exp[0]) / n;
+		for (int i = 0; i <= n; i++)
+		{
+			iexp[i] = exp[0] + i * h;
+			iphotons[i] = FastMath.pow(10, iexp[i]);
+		}
+		double[] ix = (logScaleX) ? iphotons : iexp;
+		double[] ialpha1 = getAlpha(if1, iphotons);
+
+		int pointShape = getPointShape(pointOption);
+
+		String title = "Cached Relative Fisher Information";
+		Plot plot = new Plot(title, xTitle, "Noise coefficient (alpha)");
+		plot.setLimits(x[0], x[x.length - 1], -0.05, 1.05);
+		if (logScaleX)
+			plot.setLogScaleX();
+		plot.setColor(Color.blue);
+		plot.addPoints(ix, ialpha1, Plot.LINE);
+		// Option to show nodes
+		if (pointShape != -1)
+		{
+			plot.addPoints(x, alpha, pointShape);
+		}
+		plot.setColor(Color.BLACK);
+		plot.addLabel(0, 0, cachePlot);
+		Utils.display(title, plot);
 	}
 }
