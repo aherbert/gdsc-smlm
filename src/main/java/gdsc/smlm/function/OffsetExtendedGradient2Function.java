@@ -14,9 +14,9 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Wraps a value function to add pre-computed values to the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Function
+public class OffsetExtendedGradient2Function extends OffsetGradient2Function
 		implements ExtendedGradient2Function, ExtendedGradient2Procedure
 {
 	protected final ExtendedGradient2Function ef2;
@@ -32,13 +32,13 @@ public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Fu
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	protected PrecomputedExtendedGradient2Function(ExtendedGradient2Function f, double[] values)
+	protected OffsetExtendedGradient2Function(ExtendedGradient2Function f, double[] values)
 	{
 		super(f, values);
 		ef2 = f;
 	}
 
-	protected PrecomputedExtendedGradient2Function(PrecomputedExtendedGradient2Function pre, double[] values2)
+	protected OffsetExtendedGradient2Function(OffsetExtendedGradient2Function pre, double[] values2)
 	{
 		super(pre, values2);
 		ef2 = (ExtendedGradient2Function) f;
@@ -63,7 +63,7 @@ public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Fu
 
 	public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 	{
-		procedure.executeExtended(value + values[i++], dy_da, d2y_dadb);
+		procedure.executeExtended(value + offset[i++], dy_da, d2y_dadb);
 	}
 
 	/**
@@ -81,11 +81,11 @@ public class PrecomputedExtendedGradient2Function extends PrecomputedGradient2Fu
 		if (b != null && b.length == func.size())
 		{
 			// Avoid multiple wrapping
-			if (func instanceof PrecomputedExtendedGradient2Function)
+			if (func instanceof OffsetExtendedGradient2Function)
 			{
-				return new PrecomputedExtendedGradient2Function((PrecomputedExtendedGradient2Function) func, b);
+				return new OffsetExtendedGradient2Function((OffsetExtendedGradient2Function) func, b);
 			}
-			return new PrecomputedExtendedGradient2Function(func, b);
+			return new OffsetExtendedGradient2Function(func, b);
 		}
 		return func;
 	}

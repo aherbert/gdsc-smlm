@@ -14,9 +14,9 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Wraps a value function to add pre-computed values to the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class PrecomputedGradient1Function extends PrecomputedValueFunction
+public class OffsetGradient1Function extends OffsetValueFunction
 		implements Gradient1Function, Gradient1Procedure, NonLinearFunction
 {
 	protected final Gradient1Function f1;
@@ -82,13 +82,13 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	protected PrecomputedGradient1Function(Gradient1Function f, double[] values)
+	protected OffsetGradient1Function(Gradient1Function f, double[] values)
 	{
 		super(f, values);
 		f1 = f;
 	}
 
-	protected PrecomputedGradient1Function(PrecomputedGradient1Function pre, double[] values2)
+	protected OffsetGradient1Function(OffsetGradient1Function pre, double[] values2)
 	{
 		super(pre, values2);
 		f1 = (Gradient1Function) f;
@@ -130,7 +130,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 
 	public void execute(double value, double[] dy_da)
 	{
-		procedure.execute(value + values[i++], dy_da);
+		procedure.execute(value + offset[i++], dy_da);
 	}
 
 	/**
@@ -147,11 +147,11 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
 		if (b != null && b.length == func.size())
 		{
 			// Avoid multiple wrapping
-			if (func instanceof PrecomputedGradient1Function)
+			if (func instanceof OffsetGradient1Function)
 			{
-				return new PrecomputedGradient1Function((PrecomputedGradient1Function) func, b);
+				return new OffsetGradient1Function((OffsetGradient1Function) func, b);
 			}
-			return new PrecomputedGradient1Function(func, b);
+			return new OffsetGradient1Function(func, b);
 		}
 		return func;
 	}

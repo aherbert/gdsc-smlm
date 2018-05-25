@@ -21,7 +21,7 @@ import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.PrecomputedGradient1Function;
+import gdsc.smlm.function.OffsetGradient1Function;
 import gdsc.smlm.function.TurboLog2;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -420,7 +420,7 @@ public class LVMGradientProcedureTest
 		if (precomputed)
 		{
 			double[] b = SimpleArrayUtils.newArray(func.size(), 0.1, 1.3);
-			func = PrecomputedGradient1Function.wrapGradient1Function(func, b);
+			func = OffsetGradient1Function.wrapGradient1Function(func, b);
 		}
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
@@ -537,7 +537,7 @@ public class LVMGradientProcedureTest
 		if (precomputed)
 		{
 			final double[] b = SimpleArrayUtils.newArray(fgf.size(), 0.1, 1.3);
-			func = PrecomputedGradient1Function.wrapGradient1Function(fgf, b);
+			func = OffsetGradient1Function.wrapGradient1Function(fgf, b);
 		}
 		else
 		{
@@ -716,7 +716,7 @@ public class LVMGradientProcedureTest
 				{
 					b[j] = y[j] * 0.5;
 				}
-				p = LVMGradientProcedureFactory.create(y, PrecomputedGradient1Function.wrapGradient1Function(func, b),
+				p = LVMGradientProcedureFactory.create(y, OffsetGradient1Function.wrapGradient1Function(func, b),
 						type, fastLog);
 			}
 			else
@@ -863,7 +863,7 @@ public class LVMGradientProcedureTest
 			// These should be the same
 			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type, fastLog);
 			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y,
-					PrecomputedGradient1Function.wrapGradient1Function(f12, b), type, fastLog);
+					OffsetGradient1Function.wrapGradient1Function(f12, b), type, fastLog);
 			// This may be different
 			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
 

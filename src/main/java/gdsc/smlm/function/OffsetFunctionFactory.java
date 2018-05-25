@@ -14,9 +14,9 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Wraps a value function to add pre-computed values to the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class PrecomputedFunctionFactory
+public class OffsetFunctionFactory
 {
 	/**
 	 * Wrap a function with pre-computed values.
@@ -34,18 +34,18 @@ public class PrecomputedFunctionFactory
 			// Wrap appropriately
 			if (func instanceof ExtendedGradient2Function)
 			{
-				return PrecomputedExtendedGradient2Function
+				return OffsetExtendedGradient2Function
 						.wrapExtendedGradient2Function((ExtendedGradient2Function) func, b);
 			}
 			if (func instanceof Gradient2Function)
 			{
-				return PrecomputedGradient2Function.wrapGradient2Function((Gradient2Function) func, b);
+				return OffsetGradient2Function.wrapGradient2Function((Gradient2Function) func, b);
 			}
 			if (func instanceof Gradient1Function)
 			{
-				return PrecomputedGradient1Function.wrapGradient1Function((Gradient1Function) func, b);
+				return OffsetGradient1Function.wrapGradient1Function((Gradient1Function) func, b);
 			}
-			return PrecomputedValueFunction.wrapValueFunction(func, b);
+			return OffsetValueFunction.wrapValueFunction(func, b);
 		}
 		return func;
 	}

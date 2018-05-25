@@ -14,8 +14,8 @@ import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2FunctionValueStore;
 import gdsc.smlm.function.PoissonCalculator;
-import gdsc.smlm.function.PrecomputedGradient1Function;
-import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.OffsetGradient1Function;
+import gdsc.smlm.function.OffsetGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -182,7 +182,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		f1 = (Gradient1Function) f;
 		if (w != null)
 		{
-			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
+			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
 		}
 		if (isFastLog())
 			return MLELVMGradientProcedureFactory.create(y, f1, fastLog);
@@ -246,7 +246,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// Add the weights if necessary
 		if (w != null)
 		{
-			f1 = PrecomputedGradient2Function.wrapGradient1Function(f1, w);
+			f1 = OffsetGradient2Function.wrapGradient1Function(f1, w);
 		}
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(lastA);
@@ -266,7 +266,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		Gradient1Function f1 = (Gradient1Function) f;
 		if (w != null)
 		{
-			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
+			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
 		}
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(a);

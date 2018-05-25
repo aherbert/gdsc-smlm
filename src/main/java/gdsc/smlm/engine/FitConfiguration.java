@@ -48,7 +48,7 @@ import gdsc.smlm.fitting.nonlinear.ToleranceChecker;
 import gdsc.smlm.fitting.nonlinear.WLSELVMSteppingFunctionSolver;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.GradientFunction;
-import gdsc.smlm.function.PrecomputedFunctionFactory;
+import gdsc.smlm.function.OffsetFunctionFactory;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -3150,7 +3150,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				precomputedFunctionValues = f;
 			}
 
-			functionSolver.setGradientFunction((GradientFunction) PrecomputedFunctionFactory
+			functionSolver.setGradientFunction((GradientFunction) OffsetFunctionFactory
 					.wrapFunction(gaussianFunction, precomputedFunctionValues));
 			precomputedFunctionValues = null;
 		}

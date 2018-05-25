@@ -14,12 +14,12 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Wraps a value function to add pre-computed values to the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class PrecomputedValueFunction implements ValueFunction, ValueProcedure, NamedFunction
+public class OffsetValueFunction implements ValueFunction, ValueProcedure, NamedFunction
 {
 	protected final ValueFunction f;
-	protected final double[] values;
+	protected final double[] offset;
 	protected int i;
 	protected ValueProcedure procedure;
 
@@ -33,12 +33,12 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure, 
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	protected PrecomputedValueFunction(ValueFunction f, double[] values)
+	protected OffsetValueFunction(ValueFunction f, double[] values)
 	{
 		if (f.size() != values.length)
 			throw new IllegalArgumentException("Length of precomputed values must match function size");
 		this.f = f;
-		this.values = values;
+		this.offset = values;
 	}
 
 	/**
@@ -50,14 +50,14 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure, 
 	 * @param values2
 	 *            the second set of precomputed values
 	 */
-	protected PrecomputedValueFunction(PrecomputedValueFunction pre, double[] values2)
+	protected OffsetValueFunction(OffsetValueFunction pre, double[] values2)
 	{
 		this.f = pre.f;
 		final int n = f.size();
-		final double[] values1 = pre.values;
-		values = new double[n];
+		final double[] values1 = pre.offset;
+		offset = new double[n];
 		for (int i = 0; i < n; i++)
-			values[i] = values1[i] + values2[i];
+			offset[i] = values1[i] + values2[i];
 	}
 
 	public ValueFunction getValueFunction()
@@ -84,7 +84,7 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure, 
 
 	public void execute(double value)
 	{
-		procedure.execute(value + values[i++]);
+		procedure.execute(value + offset[i++]);
 	}
 
 	/**
@@ -101,11 +101,11 @@ public class PrecomputedValueFunction implements ValueFunction, ValueProcedure, 
 		if (b != null && b.length == func.size())
 		{
 			// Avoid multiple wrapping
-			if (func instanceof PrecomputedValueFunction)
+			if (func instanceof OffsetValueFunction)
 			{
-				return new PrecomputedValueFunction((PrecomputedValueFunction) func, b);
+				return new OffsetValueFunction((OffsetValueFunction) func, b);
 			}
-			return new PrecomputedValueFunction(func, b);
+			return new OffsetValueFunction(func, b);
 		}
 		return func;
 	}

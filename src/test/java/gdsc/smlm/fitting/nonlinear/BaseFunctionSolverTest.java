@@ -22,7 +22,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedureFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.OffsetGradient2Function;
 import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -699,7 +699,7 @@ public abstract class BaseFunctionSolverTest
 			// compare to 2 peak deviation computation.
 			ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
 					null);
-			Gradient2Function pf1 = PrecomputedGradient2Function.wrapGradient2Function(f1, p2v);
+			Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
 			solver1.setGradientFunction(pf1);
 			a = p1.clone();
 			e = new double[a.length];
@@ -807,7 +807,7 @@ public abstract class BaseFunctionSolverTest
 			// compare to 2 peak computation.
 			ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags,
 					null);
-			Gradient2Function pf1 = PrecomputedGradient2Function.wrapGradient2Function(f1, p2v);
+			Gradient2Function pf1 = OffsetGradient2Function.wrapGradient2Function(f1, p2v);
 			solver1.setGradientFunction(pf1);
 			solver2.setGradientFunction(pf1);
 

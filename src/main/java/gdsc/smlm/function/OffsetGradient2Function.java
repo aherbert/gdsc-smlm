@@ -14,9 +14,9 @@ package gdsc.smlm.function;
  *---------------------------------------------------------------------------*/
 
 /**
- * Wraps a value function to add pre-computed values to the forEach procedure
+ * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class PrecomputedGradient2Function extends PrecomputedGradient1Function
+public class OffsetGradient2Function extends OffsetGradient1Function
 		implements Gradient2Function, Gradient2Procedure
 {
 	protected final Gradient2Function f2;
@@ -32,13 +32,13 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 	 * @throws IllegalArgumentException
 	 *             if the values length does not match the function size
 	 */
-	protected PrecomputedGradient2Function(Gradient2Function f, double[] values)
+	protected OffsetGradient2Function(Gradient2Function f, double[] values)
 	{
 		super(f, values);
 		f2 = f;
 	}
 	
-	protected PrecomputedGradient2Function(PrecomputedGradient2Function pre, double[] values2)
+	protected OffsetGradient2Function(OffsetGradient2Function pre, double[] values2)
 	{
 		super(pre, values2);
 		f2 = (Gradient2Function) f;
@@ -63,7 +63,7 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 
 	public void execute(double value, double[] dy_da, double[] d2y_da2)
 	{
-		procedure.execute(value + values[i++], dy_da, d2y_da2);
+		procedure.execute(value + offset[i++], dy_da, d2y_da2);
 	}
 
 	/**
@@ -80,11 +80,11 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
 		if (b != null && b.length == func.size())
 		{
 			// Avoid multiple wrapping
-			if (func instanceof PrecomputedGradient2Function)
+			if (func instanceof OffsetGradient2Function)
 			{
-				return new PrecomputedGradient2Function((PrecomputedGradient2Function)func, b);
+				return new OffsetGradient2Function((OffsetGradient2Function)func, b);
 			}
-			return new PrecomputedGradient2Function(func, b);
+			return new OffsetGradient2Function(func, b);
 		}
 		return func;
 	}

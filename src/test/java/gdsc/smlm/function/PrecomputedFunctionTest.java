@@ -19,8 +19,8 @@ public class PrecomputedFunctionTest
 		int size = f0.size();
 		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
 		double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
-		ValueFunction f1 = PrecomputedValueFunction.wrapValueFunction(f0, b1);
-		ValueFunction f2 = PrecomputedValueFunction.wrapValueFunction(f1, b2);
+		ValueFunction f1 = OffsetValueFunction.wrapValueFunction(f0, b1);
+		ValueFunction f2 = OffsetValueFunction.wrapValueFunction(f1, b2);
 		double[] p = new double[n];
 		for (int i = 0; i < n; i++)
 			p[i] = r.nextDouble();
@@ -62,8 +62,8 @@ public class PrecomputedFunctionTest
 		int size = f0.size();
 		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
 		double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
-		Gradient1Function f1 = PrecomputedGradient1Function.wrapGradient1Function(f0, b1);
-		Gradient1Function f2 = PrecomputedGradient1Function.wrapGradient1Function(f1, b2);
+		Gradient1Function f1 = OffsetGradient1Function.wrapGradient1Function(f0, b1);
+		Gradient1Function f2 = OffsetGradient1Function.wrapGradient1Function(f1, b2);
 		double[] p = new double[n];
 		for (int i = 0; i < n; i++)
 			p[i] = r.nextDouble();
@@ -112,8 +112,8 @@ public class PrecomputedFunctionTest
 		int size = f0.size();
 		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
 		double[] b2 = new PseudoRandomGenerator(size, r).getSequence();
-		Gradient2Function f1 = PrecomputedGradient2Function.wrapGradient2Function(f0, b1);
-		Gradient2Function f2 = PrecomputedGradient2Function.wrapGradient2Function(f1, b2);
+		Gradient2Function f1 = OffsetGradient2Function.wrapGradient2Function(f0, b1);
+		Gradient2Function f2 = OffsetGradient2Function.wrapGradient2Function(f1, b2);
 		double[] p = new double[n];
 		for (int i = 0; i < n; i++)
 			p[i] = r.nextDouble();
@@ -173,12 +173,12 @@ public class PrecomputedFunctionTest
 		ValueFunction vf = f;
 		for (int n = 0; n < 3; n++)
 		{
-			vf = PrecomputedValueFunction.wrapValueFunction(vf, b);
+			vf = OffsetValueFunction.wrapValueFunction(vf, b);
 			double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((PrecomputedValueFunction) vf).getValueFunction() == f);
+			Assert.assertTrue(((OffsetValueFunction) vf).getValueFunction() == f);
 		}
 	}
 
@@ -193,12 +193,12 @@ public class PrecomputedFunctionTest
 		Gradient1Function vf = f;
 		for (int n = 0; n < 3; n++)
 		{
-			vf = PrecomputedGradient1Function.wrapGradient1Function(vf, b);
+			vf = OffsetGradient1Function.wrapGradient1Function(vf, b);
 			double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((PrecomputedGradient1Function) vf).getGradient1Function() == f);
+			Assert.assertTrue(((OffsetGradient1Function) vf).getGradient1Function() == f);
 		}
 	}
 
@@ -213,12 +213,12 @@ public class PrecomputedFunctionTest
 		Gradient2Function vf = f;
 		for (int n = 0; n < 3; n++)
 		{
-			vf = PrecomputedGradient2Function.wrapGradient2Function(vf, b);
+			vf = OffsetGradient2Function.wrapGradient2Function(vf, b);
 			double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((PrecomputedGradient2Function) vf).getGradient2Function() == f);
+			Assert.assertTrue(((OffsetGradient2Function) vf).getGradient2Function() == f);
 		}
 	}
 
@@ -233,12 +233,12 @@ public class PrecomputedFunctionTest
 		ExtendedGradient2Function vf = f;
 		for (int n = 0; n < 3; n++)
 		{
-			vf = PrecomputedExtendedGradient2Function.wrapExtendedGradient2Function(vf, b);
+			vf = OffsetExtendedGradient2Function.wrapExtendedGradient2Function(vf, b);
 			double[] o = sp.getValues(vf, a);
 			for (int i = 0; i < e.length; i++)
 				e[i] += b[i];
 			Assert.assertArrayEquals(e, o, 0);
-			Assert.assertTrue(((PrecomputedExtendedGradient2Function) vf).getExtendedGradient2Function() == f);
+			Assert.assertTrue(((OffsetExtendedGradient2Function) vf).getExtendedGradient2Function() == f);
 		}
 	}
 }

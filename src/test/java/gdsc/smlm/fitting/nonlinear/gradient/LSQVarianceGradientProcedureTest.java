@@ -14,7 +14,7 @@ import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.PrecomputedGradient1Function;
+import gdsc.smlm.function.OffsetGradient1Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
@@ -229,7 +229,7 @@ public class LSQVarianceGradientProcedureTest
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
-			func = PrecomputedGradient1Function.wrapGradient1Function(func,
+			func = OffsetGradient1Function.wrapGradient1Function(func,
 					SimpleArrayUtils.newArray(func.size(), 0.1, 1.3));
 
 		String name = String.format("[%d]", nparams);
@@ -276,7 +276,7 @@ public class LSQVarianceGradientProcedureTest
 		// Remove the timing of the function call by creating a dummy function
 		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
-				? PrecomputedGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
+				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
 				: f;
 
 		for (int i = 0; i < paramsList.size(); i++)
@@ -362,7 +362,7 @@ public class LSQVarianceGradientProcedureTest
 			p1.variance(a);
 
 			LSQVarianceGradientProcedure p2 = LSQVarianceGradientProcedureFactory
-					.create(PrecomputedGradient1Function.wrapGradient1Function(func, b));
+					.create(OffsetGradient1Function.wrapGradient1Function(func, b));
 			p2.variance(a);
 
 			double[] crlb1 = p1.variance;

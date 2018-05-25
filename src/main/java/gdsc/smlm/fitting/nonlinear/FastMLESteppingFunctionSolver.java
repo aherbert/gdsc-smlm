@@ -15,8 +15,8 @@ import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.Gradient2FunctionValueStore;
-import gdsc.smlm.function.PrecomputedGradient1Function;
-import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.OffsetGradient1Function;
+import gdsc.smlm.function.OffsetGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -218,7 +218,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		f2 = (Gradient2Function) f;
 		if (w != null)
 		{
-			f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+			f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
 		}
 		return FastMLEGradient2ProcedureFactory.create(y, f2);
 	}
@@ -473,7 +473,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		// Add the weights if necessary
 		if (w != null)
 		{
-			f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+			f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
 		}
 		// The fisher information is that for a Poisson process
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f2);
@@ -510,7 +510,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 		Gradient1Function f1 = (Gradient1Function) f;
 		if (w != null)
 		{
-			f1 = PrecomputedGradient1Function.wrapGradient1Function(f1, w);
+			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
 		}
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(a);

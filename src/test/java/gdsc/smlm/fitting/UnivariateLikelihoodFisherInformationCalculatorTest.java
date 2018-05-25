@@ -14,7 +14,7 @@ import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.HalfPoissonFisherInformation;
 import gdsc.smlm.function.PoissonFisherInformation;
 import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
-import gdsc.smlm.function.PrecomputedFunctionFactory;
+import gdsc.smlm.function.OffsetFunctionFactory;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -79,7 +79,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			case POISSON_GAUSSIAN:
 				double var = 0.9 + 0.2 * r.nextDouble();
 				fi = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var));
-				f1 = (Gradient1Function) PrecomputedFunctionFactory.wrapFunction(func,
+				f1 = (Gradient1Function) OffsetFunctionFactory.wrapFunction(func,
 						SimpleArrayUtils.newDoubleArray(func.size(), var));
 				break;
 			case POISSON:
@@ -171,7 +171,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			fi[i] = new PoissonGaussianApproximationFisherInformation(Math.sqrt(var[i]));
 		}
 
-		f1 = (Gradient1Function) PrecomputedFunctionFactory.wrapFunction(func, var);
+		f1 = (Gradient1Function) OffsetFunctionFactory.wrapFunction(func, var);
 
 		// This introduces a dependency on a different package, and relies on that 
 		// computing the correct answer. However that code predates this and so the

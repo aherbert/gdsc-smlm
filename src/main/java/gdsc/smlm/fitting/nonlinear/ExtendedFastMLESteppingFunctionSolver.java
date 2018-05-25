@@ -11,8 +11,8 @@ import gdsc.smlm.fitting.nonlinear.gradient.FastMLEGradient2ProcedureFactory;
 import gdsc.smlm.fitting.nonlinear.gradient.FastMLEJacobianGradient2Procedure;
 import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.PrecomputedExtendedGradient2Function;
-import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.OffsetExtendedGradient2Function;
+import gdsc.smlm.function.OffsetGradient2Function;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -145,7 +145,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 		{
 			if (w != null)
 			{
-				f2 = PrecomputedExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) f,
+				f2 = OffsetExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) f,
 						w);
 			}
 			jacobian = new double[f2.size()];
@@ -155,7 +155,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 		{
 			if (w != null)
 			{
-				f2 = PrecomputedGradient2Function.wrapGradient2Function(f2, w);
+				f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
 			}
 			return FastMLEGradient2ProcedureFactory.create(y, f2);
 		}

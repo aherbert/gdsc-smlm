@@ -15,7 +15,7 @@ import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.PrecomputedGradient2Function;
+import gdsc.smlm.function.OffsetGradient2Function;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
@@ -177,7 +177,7 @@ public class FastMLEGradient2ProcedureTest
 
 			// Compute peak 1+(precomputed 2)
 			FastMLEGradient2Procedure p1b2 = FastMLEGradient2ProcedureFactory.create(x,
-					PrecomputedGradient2Function.wrapGradient2Function(f1, b));
+					OffsetGradient2Function.wrapGradient2Function(f1, b));
 			p1b2.computeSecondDerivative(a1);
 			double[] d12 = p1b2.d1;
 			double[] d22 = p1b2.d2;
