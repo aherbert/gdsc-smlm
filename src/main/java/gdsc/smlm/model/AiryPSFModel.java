@@ -231,10 +231,7 @@ public class AiryPSFModel extends PSFModel
 		if (sum == 0)
 			return 0;
 		// Parameter check
-		if (width < 1)
-			throw new IllegalArgumentException("Width cannot be less than 1");
-		if (height < 1)
-			throw new IllegalArgumentException("Height cannot be less than 1");
+		checkSize(width, height);
 		if (data == null)
 			data = new float[width * height];
 		else if (data.length < width * height)
@@ -293,10 +290,7 @@ public class AiryPSFModel extends PSFModel
 		if (sum == 0)
 			return 0;
 		// Parameter check
-		if (width < 1)
-			throw new IllegalArgumentException("Width cannot be less than 1");
-		if (height < 1)
-			throw new IllegalArgumentException("Height cannot be less than 1");
+		checkSize(width, height);
 		if (data == null)
 			data = new double[width * height];
 		else if (data.length < width * height)

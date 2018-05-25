@@ -15,6 +15,7 @@ package gdsc.smlm.model;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -202,7 +203,8 @@ public abstract class PSFModel
 	 * @param psf
 	 *            The PSF data
 	 * @param poissonNoise
-	 * @return
+	 *            Set to true to add Poisson noise to the PSF
+	 * @return The sum of the PSF inserted
 	 */
 	protected double insert(float[] data, int x0min, int x1min, int x0max, int x1max, int width, double[] psf,
 			boolean poissonNoise)
@@ -228,9 +230,13 @@ public abstract class PSFModel
 
 		if (poissonNoise)
 		{
+			CustomPoissonDistribution pd = new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
 			for (int i = 0; i < psf.length; i++)
 				if (psf[i] > 0)
-					psf[i] = rand.nextPoisson(psf[i]);
+				{
+					pd.setMeanUnsafe(psf[i]);
+					psf[i] = pd.sample();
+				}
 		}
 
 		// Insert the function into the input data
@@ -269,7 +275,8 @@ public abstract class PSFModel
 	 * @param psf
 	 *            The PSF data
 	 * @param poissonNoise
-	 * @return
+	 *            Set to true to add Poisson noise to the PSF
+	 * @return The sum of the PSF inserted
 	 */
 	protected double insert(double[] data, int x0min, int x1min, int x0max, int x1max, int width, double[] psf,
 			boolean poissonNoise)
@@ -295,9 +302,13 @@ public abstract class PSFModel
 
 		if (poissonNoise)
 		{
+			CustomPoissonDistribution pd = new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
 			for (int i = 0; i < psf.length; i++)
 				if (psf[i] > 0)
-					psf[i] = rand.nextPoisson(psf[i]);
+				{
+					pd.setMeanUnsafe(psf[i]);
+					psf[i] = pd.sample();
+				}
 		}
 
 		// Insert the function into the input data
@@ -713,5 +724,150 @@ public abstract class PSFModel
 		if (randomDataGenerator == null)
 			throw new IllegalArgumentException("Random generator was null");
 		rand = randomDataGenerator;
+	}
+
+	/**
+	 * Get the value of the PSF function.
+	 *
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param value
+	 *            the value
+	 * @throws IllegalArgumentException
+	 *             If width or height are not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If value or gradient are not length [width*height]
+	 */
+	public void getValue(final int width, final int height, double x0, double x1, double x2, double[] value)
+			throws IllegalArgumentException
+	{
+		checkSize(width, height);
+		int size = width * height;
+		if (value.length != size)
+			throw new IllegalArgumentException("Value is not the correct size");
+		computeValue(width, height, x0, x1, x2, value);
+	}
+
+	/**
+	 * Check size.
+	 *
+	 * @param width
+	 *            the width
+	 * @param height
+	 *            the height
+	 * @throws IllegalArgumentException
+	 *             If width or height are not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If width * height is too large for an array
+	 */
+	protected void checkSize(int width, int height)
+	{
+		if (width < 1)
+			throw new IllegalArgumentException("Width cannot be less than 1");
+		if (height < 1)
+			throw new IllegalArgumentException("Height cannot be less than 1");
+		if ((double) width * height > Integer.MAX_VALUE)
+			throw new IllegalArgumentException("width*height is too large");
+	}
+
+	/**
+	 * Compute the value of the PSF function.
+	 * <p>
+	 * This can be over-ridden if the result is different from
+	 * {@link #create3D(double[], int, int, double, double, double, double, boolean)} using a sum of 1 and no Poisson
+	 * noise.
+	 *
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param value
+	 *            the value
+	 */
+	protected void computeValue(final int width, final int height, double x0, double x1, double x2, double[] value)
+	{
+		// Default implementation. Allow this to be overridden.
+		create3D(value, width, height, 1, x0, x1, x2, false);
+	}
+
+	/**
+	 * Get the value and partial gradient of the PSF function.
+	 * <p>
+	 * If gradient[i].length is not 3 then the correct array size will be created. Allows the function to be called
+	 * using <code>double[][] gradient = new double[width*height][]</code>.
+	 *
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param value
+	 *            the value
+	 * @param gradient
+	 *            the partial gradient at each point for each dimension
+	 * @return the value and gradient
+	 * @throws IllegalArgumentException
+	 *             If width or height are not strictly positive
+	 * @throws IllegalArgumentException
+	 *             If value or gradient are not length [width*height]
+	 */
+	public void getValueAndGradient(final int width, final int height, double x0, double x1, double x2, double[] value,
+			double[][] gradient) throws IllegalArgumentException
+	{
+		checkSize(width, height);
+		int size = width * height;
+		if (value.length != size)
+			throw new IllegalArgumentException("Value is not the correct size");
+		if (gradient.length != size)
+			throw new IllegalArgumentException("Gradient is not the correct size");
+		for (int i = 0; i < gradient.length; i++)
+			if (gradient[i] == null || gradient[i].length != 3)
+				gradient[i] = new double[3];
+		computeValueAndGradient(width, height, x0, x1, x2, value, gradient);
+	}
+
+	/**
+	 * Compute the value and partial gradient of the PSF function.
+	 *
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param value
+	 *            the value
+	 * @param jacobian
+	 *            the jacobian (partial gradient at each point for each dimension)
+	 */
+	protected
+	//abstract 
+	void computeValueAndGradient(final int width, final int height, double x0, double x1, double x2, double[] value,
+			double[][] jacobian)
+	{
+		// TODO - make this abstract and implement it for all the models.
 	}
 }
