@@ -17,7 +17,6 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
@@ -948,7 +947,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			c++;
 		}
 		// Just in case
-		Sort.sortArrays(alpha, exp, true);
+		//Sort.sortArrays(alpha, exp, true);
 		
 		// Test if we can use ImageJ support for a X log scale
 		boolean logScaleX = ((float) FastMath.pow(10, exp[0]) != 0);
