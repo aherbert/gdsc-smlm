@@ -19,12 +19,12 @@ package gdsc.smlm.function;
 public class OffsetFunctionFactory
 {
 	/**
-	 * Wrap a function with pre-computed values.
+	 * Wrap a function with a pre-computed offset.
 	 *
 	 * @param func
 	 *            the function
 	 * @param b
-	 *            Baseline pre-computed y-values
+	 *            Baseline pre-computed offset for the values
 	 * @return the wrapped function (or the original if pre-computed values are null or wrong length)
 	 */
 	public static ValueFunction wrapFunction(final ValueFunction func, final double[] b)

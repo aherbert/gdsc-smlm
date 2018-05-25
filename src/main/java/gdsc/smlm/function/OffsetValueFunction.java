@@ -24,7 +24,7 @@ public class OffsetValueFunction implements ValueFunction, ValueProcedure, Named
 	protected ValueProcedure procedure;
 
 	/**
-	 * Instantiates a new precomputed value function.
+	 * Instantiates a new offset value function.
 	 *
 	 * @param f
 	 *            the function
@@ -42,7 +42,7 @@ public class OffsetValueFunction implements ValueFunction, ValueProcedure, Named
 	}
 
 	/**
-	 * Instantiates a new precomputed value function by combining the current precomputed values with more precomputed
+	 * Instantiates a new offset value function by combining the current precomputed values with more precomputed
 	 * values. This is used internally and so no checks are made on the size of values arrays (which must match).
 	 *
 	 * @param pre

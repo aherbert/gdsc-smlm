@@ -23,7 +23,7 @@ public class OffsetGradient2Function extends OffsetGradient1Function
 	protected Gradient2Procedure procedure;
 
 	/**
-	 * Instantiates a new precomputed gradient2 function.
+	 * Instantiates a new offset gradient2 function.
 	 *
 	 * @param f
 	 *            the function

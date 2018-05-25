@@ -73,7 +73,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 	protected double[][] all_dyda;
 
 	/**
-	 * Instantiates a new precomputed gradient1 function.
+	 * Instantiates a new offset gradient1 function.
 	 *
 	 * @param f
 	 *            the function
