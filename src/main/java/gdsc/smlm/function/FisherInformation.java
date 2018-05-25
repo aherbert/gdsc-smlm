@@ -1,6 +1,5 @@
 package gdsc.smlm.function;
 
-// TODO: Auto-generated Javadoc
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -36,4 +35,16 @@ public interface FisherInformation
 	 *             if the parameter is not in the valid range
 	 */
 	public double getFisherInformation(double t) throws IllegalArgumentException;
+
+	/**
+	 * Checks if the parameter θ is in a valid range to compute a representable value.
+	 * <p>
+	 * If not true then it would be expected that
+	 * {@link #getFisherInformation(double)} will: throw an exception; compute zero; or compute infinity.
+	 *
+	 * @param t
+	 *            parameter θ of a distribution that models X
+	 * @return true, if a representable value can be computed
+	 */
+	public boolean isValid(double t);
 }

@@ -21,8 +21,24 @@ package gdsc.smlm.function;
 public abstract class BasePoissonFisherInformation implements FisherInformation, Cloneable
 {
 	/**
-	 * Gets the alpha scale of the Poisson Fisher information. 
+	 * The lowest value for the mean that can be computed. This is the lowest value where the reciprocal is not infinity
+	 */
+	public static final double MIN_MEAN = Double.longBitsToDouble(0x4000000000001L);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.FisherInformation#isValid(double)
+	 */
+	public boolean isValid(double t)
+	{
+		return t >= MIN_MEAN;
+	}
+
+	/**
+	 * Gets the alpha scale of the Poisson Fisher information.
 	 * This is the Fisher information relative to the Fisher information of a pure Poisson distribution:
+	 * 
 	 * <pre>
 	 * alpha = FI / (Poisson FI) = FI * t
 	 * </pre>

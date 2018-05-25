@@ -330,13 +330,9 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	public double getPoissonGaussianI(double t) throws IllegalArgumentException
 	{
 		if (t <= 0)
-		{
 			throw new IllegalArgumentException("Poisson mean must be positive");
-
-			// This is not valid as this is a lower limit on the information.
-			// No Poisson. Return the Fisher information for a Gaussian.
-			//return getGaussianI();
-		}
+		if (t < MIN_MEAN)
+			return Double.POSITIVE_INFINITY;
 
 		if (noGaussian)
 		{

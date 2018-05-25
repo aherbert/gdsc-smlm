@@ -53,7 +53,6 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 {
 	protected final Gradient1Function gf;
 	protected final FisherInformation[] fi;
-	private boolean ignoreBadFunctionValues = true;
 
 	/**
 	 * Instantiates a new univariate likelihood fisher information calculator.
@@ -108,22 +107,15 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 		gf.initialise1(parameters);
 		gf.forEach(new Gradient1Procedure()
 		{
-			int k = 0;
+			int k = -1;
 
 			public void execute(double v, double[] dv_dt)
 			{
+				k++;
+				if (!fi[k].isValid(v))
+					return;
 				// Get the Fisher information of the value
-				final double f;
-				try
-				{
-					f = fi[k++].getFisherInformation(v);
-				}
-				catch (IllegalArgumentException e)
-				{
-					if (ignoreBadFunctionValues)
-						return;
-					throw new DataException(e);
-				}
+				final double f = fi[k].getFisherInformation(v);
 				if (f == 0)
 				{
 					// No summation
@@ -151,28 +143,5 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 			for (int j = 0; j <= i; j++)
 				matrix[i * n + j] = matrix[j * n + i] = data[c++];
 		return new FisherInformationMatrix(matrix, n);
-	}
-
-	/**
-	 * Checks if ignoring bad function values that do not compute a Fisher information. Set to false will cause
-	 * bad values to throw DataException within {@link #compute(double[])}.
-	 *
-	 * @return true, if ignoring bad function values
-	 */
-	public boolean isIgnoreBadFunctionValues()
-	{
-		return ignoreBadFunctionValues;
-	}
-
-	/**
-	 * Sets to true to ignore any bad function values that do not compute a Fisher information. Set to false will cause
-	 * bad values to throw DataException within {@link #compute(double[])}.
-	 *
-	 * @param ignoreBadFunctionValues
-	 *            the new ignore bad function values flag
-	 */
-	public void setIgnoreBadFunctionValues(boolean ignoreBadFunctionValues)
-	{
-		this.ignoreBadFunctionValues = ignoreBadFunctionValues;
 	}
 }

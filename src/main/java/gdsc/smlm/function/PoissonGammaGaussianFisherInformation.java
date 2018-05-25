@@ -97,11 +97,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 */
 	public static final int DEFAULT_MAX_ITERATIONS = 6;
 
-	/**
-	 * The lowest value for the mean that can be computed. This is the lowest value where the reciprocal is not infinity
-	 */
-	public static final double MIN_MEAN = Double.longBitsToDouble(0x4000000000001L);
-
 	/** The gain multiplication factor. */
 	public final double m;
 
@@ -308,10 +303,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		g = null;
 		lastT = t;
 
-		if (t < MIN_MEAN)
-		{
+		if (t <= 0)
 			throw new IllegalArgumentException("Poisson mean must be positive");
-		}
+		if (t < MIN_MEAN)
+			return Double.POSITIVE_INFINITY;
 
 		if (t > upperMeanThreshold)
 		{
