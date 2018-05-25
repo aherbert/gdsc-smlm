@@ -1,6 +1,9 @@
 package gdsc.smlm.ij.plugins;
 
 import java.awt.Color;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -10,10 +13,15 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Ticker;
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
+import gdsc.smlm.data.config.FisherProtos.AlphaSample;
+import gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationCache;
+import gdsc.smlm.data.config.FisherProtos.PoissonFisherInformationData;
 import gdsc.smlm.data.config.GUIProtos.CameraModelFisherInformationAnalysisSettings;
 import gdsc.smlm.function.BasePoissonFisherInformation;
 import gdsc.smlm.function.HalfPoissonFisherInformation;
@@ -24,6 +32,7 @@ import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.ExtendedGenericDialog;
@@ -58,7 +67,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	private static final String[] POINT_OPTION = { "None", "X", "Circle", "Box", "Cross" };
 
 	//@formatter:off
-	private enum CameraType implements NamedObject
+	public enum CameraType implements NamedObject
 	{
 		POISSON { public String getName() { return "Poisson"; } },
 		CCD { public String getName() { return "CCD"; } 
@@ -76,7 +85,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		 *
 		 * @return true, if is fast
 		 */
-		public boolean isFast() { return false; }
+		public boolean isFast() { return true; }
 		
 		/**
 		 * Checks if is fixed Fisher information at the lower bound.
@@ -99,14 +108,265 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 	}
 	//@formatter:on
+	private static CameraType[] cameraTypeValues = CameraType.values();
 
-	private static String[] CAMERA_TYPES = SettingsManager.getNames((Object[]) CameraType.values());
+	private static String[] CAMERA_TYPES = SettingsManager.getNames((Object[]) cameraTypeValues);
+
+	/**
+	 * Class for hashing the Fisher information settings
+	 */
+	private static class FIKey
+	{
+		// This is not part of the hashcode. 
+		// It is used to ensure only the latest computations are saved to disk. 
+		final long age = System.currentTimeMillis();
+
+		final int type;
+		final double gain;
+		final double noise;
+
+		public FIKey(int type, double gain, double noise)
+		{
+			this.type = type;
+			this.gain = gain;
+			this.noise = noise;
+		}
+
+		public FIKey(PoissonFisherInformationData d)
+		{
+			this(d.getType(), d.getGain(), d.getNoise());
+		}
+
+		public FIKey(CameraType type, double gain, double noise)
+		{
+			this(type.ordinal(), gain, noise);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			int hash = type;
+			hash = 31 * hash + Double.hashCode(gain);
+			hash = 31 * hash + Double.hashCode(noise);
+			return hash;
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (this == o)
+				return true;
+			// null check
+			if (o == null)
+				return false;
+			// type check and cast
+			if (getClass() != o.getClass())
+				return false;
+			FIKey key = (FIKey) o;
+			// field comparison
+			return type == key.type && gain == key.gain && noise == key.noise;
+		}
+
+		public CameraType getType()
+		{
+			return cameraTypeValues[type];
+		}
+	}
+
+	private static HashMap<FIKey, PoissonFisherInformationData> cache = new HashMap<FIKey, PoissonFisherInformationData>();
+
+	static
+	{
+		PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<PoissonFisherInformationCache>(
+				PoissonFisherInformationCache.getDefaultInstance()).read();
+		if (cacheData != null)
+		{
+			for (PoissonFisherInformationData data : cacheData.getDataList())
+			{
+				cache.put(new FIKey(data), data);
+			}
+		}
+	}
+
+	/**
+	 * Save the data to the cache.
+	 *
+	 * @param key
+	 *            the key
+	 * @param log10photons
+	 *            the log 10 photons
+	 * @param alpha
+	 *            the alpha
+	 */
+	private void save(FIKey key, double[] log10photons, double[] alpha)
+	{
+		CameraType type = key.getType();
+		if (type.isFast())
+			return;
+		PoissonFisherInformationData data = cache.get(key);
+		if (data != null)
+		{
+			// This should only be called if new values have been computed.
+			// so assume we must merge the lists. 
+			// Note: The lists must be sorted.
+			AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
+			//AlphaSample[] list2 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
+			TurboList<AlphaSample> list = new TurboList<AlphaSample>(list1.length + log10photons.length);
+			int i = 0, j = 0;
+			AlphaSample.Builder a2 = AlphaSample.newBuilder();
+			while (i < list1.length && j < log10photons.length)
+			{
+				AlphaSample a1 = list1[i];
+				double mean = log10photons[j];
+				if (a1.getLog10Mean() == mean)
+				{
+					list.add(a1);
+					i++;
+					j++;
+				}
+				else if (a1.getLog10Mean() < mean)
+				{
+					list.add(a1);
+					i++;
+				}
+				else //if (a1.getLog10Mean() > mean)
+				{
+					a2.setLog10Mean(mean);
+					a2.setAlpha(alpha[j++]);
+					list.add(a2.build());
+				}
+			}
+			while (i < list1.length)
+				list.add(list1[i++]);
+			while (j < log10photons.length)
+			{
+				a2.setLog10Mean(log10photons[j]);
+				a2.setAlpha(alpha[j++]);
+				list.add(a2.build());
+			}
+			PoissonFisherInformationData.Builder b = data.toBuilder();
+			b.clearAlphaSample();
+			b.addAllAlphaSample(list);
+			data = b.build();
+		}
+		else
+		{
+			PoissonFisherInformationData.Builder b = PoissonFisherInformationData.newBuilder();
+			AlphaSample.Builder sample = AlphaSample.newBuilder();
+			b.setType(key.type);
+			b.setGain(key.gain);
+			b.setNoise(key.noise);
+			for (int i = 0; i < log10photons.length; i++)
+			{
+				sample.setLog10Mean(log10photons[i]);
+				sample.setAlpha(alpha[i]);
+				b.addAlphaSample(sample);
+			}
+			data = b.build();
+		}
+		cache.put(key, data);
+
+		// Also save EM-CCD data to file
+		if (type == CameraType.EM_CCD)
+		{
+			int t = type.ordinal();
+			// Get the EM-CCD keys
+			TurboList<FIKey> list = new TurboList<FIKey>(cache.size());
+			for (FIKey k : cache.keySet())
+			{
+				if (k.type == t)
+				{
+					list.add(k);
+				}
+			}
+			int MAX = 10;
+			if (list.size() > MAX)
+			{
+				// Sort by age
+				list.sort(new Comparator<FIKey>()
+				{
+					public int compare(FIKey o1, FIKey o2)
+					{
+						// Youngest first
+						return -Long.compare(o1.age, o2.age);
+					}
+				});
+			}
+			PoissonFisherInformationCache.Builder cacheData = PoissonFisherInformationCache.newBuilder();
+			for (int i = Math.min(list.size(), MAX); i-- > 0;)
+				cacheData.addData(cache.get(list.getf(i)));
+			SettingsManager.writeSettings(cacheData);
+		}
+	}
+
+	private static PoissonFisherInformationData load(FIKey key)
+	{
+		return cache.get(key);
+	}
+
+	/**
+	 * Load the PoissoFisher information for the camera type from the cache. The gain and noise must match within an
+	 * error of 1e-3.
+	 *
+	 * @param type
+	 *            the type
+	 * @param gain
+	 *            the gain
+	 * @param noise
+	 *            the noise
+	 * @return the poisson fisher information data (or null)
+	 */
+	public static PoissonFisherInformationData load(CameraType type, double gain, double noise)
+	{
+		return load(type, gain, noise, 1e-3);
+	}
+
+	/**
+	 * Load the PoissoFisher information for the camera type from the cache.
+	 *
+	 * @param type
+	 *            the type
+	 * @param gain
+	 *            the gain
+	 * @param noise
+	 *            the noise
+	 * @param relativeError
+	 *            the relative error (used to compare the gain and noise)
+	 * @return the poisson fisher information data (or null)
+	 */
+	public static PoissonFisherInformationData load(CameraType type, double gain, double noise, double relativeError)
+	{
+		FIKey key = new FIKey(type, gain, noise);
+		PoissonFisherInformationData data = load(key);
+		if (data == null && relativeError > 0 && relativeError < 0.1)
+		{
+			// Fuzzy matching
+			double error = 1;
+			for (PoissonFisherInformationData d : cache.values())
+			{
+				double e1 = DoubleEquality.relativeError(gain, d.getGain());
+				if (e1 < relativeError)
+				{
+					double e2 = DoubleEquality.relativeError(noise, d.getNoise());
+					if (e2 < relativeError)
+					{
+						// Combined error - Euclidean distance
+						double e = e1 * e1 + e2 * e2;
+						if (error > e)
+						{
+							error = e;
+							data = d;
+						}
+					}
+				}
+			}
+		}
+		return data;
+	}
 
 	private CameraModelFisherInformationAnalysisSettings.Builder settings;
 
 	private ExecutorService es = null;
-
-	//private boolean extraOptions;
 
 	/*
 	 * (non-Javadoc)
@@ -116,7 +376,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		//extraOptions = Utils.isExtraOptions();
 
 		if (!showDialog())
 			return;
@@ -186,12 +445,13 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
 		CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
 
-		BasePoissonFisherInformation f1 = createPoissonFisherInformation(type1, settings.getCamera1Gain(),
-				settings.getCamera1Noise());
+		FIKey key1 = new FIKey(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
+		FIKey key2 = new FIKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
+
+		BasePoissonFisherInformation f1 = createPoissonFisherInformation(key1);
 		if (f1 == null)
 			return;
-		BasePoissonFisherInformation f2 = createPoissonFisherInformation(type2, settings.getCamera2Gain(),
-				settings.getCamera2Noise());
+		BasePoissonFisherInformation f2 = createPoissonFisherInformation(key2);
 		if (f2 == null)
 			return;
 
@@ -203,12 +463,13 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		for (int i = 0; i < photons.length; i++)
 			photons[i] = FastMath.pow(10, exp[i]);
 
-		double[] fi1 = getFisherInformation(photons, f1, type1);
-		double[] fi2 = getFisherInformation(photons, f2, type2);
+		// Get the alpha. This may be from the cache
+		double[] alpha1 = getAlpha(photons, exp, f1, key1);
+		double[] alpha2 = getAlpha(photons, exp, f2, key2);
 
-		// Compute relative to the Poisson Fisher information
-		double[] alpha1 = getAlpha(fi1, photons);
-		double[] alpha2 = getAlpha(fi2, photons);
+		// Compute the Poisson Fisher information
+		double[] fi1 = getFisherInformation(alpha1, photons);
+		double[] fi2 = getFisherInformation(alpha2, photons);
 
 		// ==============
 		// Debug PGG
@@ -283,8 +544,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 
 		int pointShape = getPointShape();
 
-		String name1 = getName(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
-		String name2 = getName(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
+		String name1 = getName(key1);
+		String name2 = getName(key2);
 		String legend = name1 + "\n" + name2;
 
 		String title = "Relative Fisher Information";
@@ -358,32 +619,33 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		wo.tile();
 	}
 
-	private BasePoissonFisherInformation createPoissonFisherInformation(CameraType type, double gain, double noise)
+	private BasePoissonFisherInformation createPoissonFisherInformation(FIKey key)
 	{
-		switch (type)
+		switch (key.getType())
 		{
 			case CCD:
-				return createPoissonGaussianFisherInformation(noise / gain);
+				return createPoissonGaussianFisherInformation(key.noise / key.gain);
 			case CCD_APPROXIMATION:
-				return createPoissonGaussianApproximationFisherInformation(noise / gain);
+				return createPoissonGaussianApproximationFisherInformation(key.noise / key.gain);
 			case EM_CCD:
-				return createPoissonGammaGaussianFisherInformation(gain, noise);
+				return createPoissonGammaGaussianFisherInformation(key.gain, key.noise);
 			case POISSON:
 				return new PoissonFisherInformation();
 			default:
-				throw new IllegalStateException("Unknown camera type: " + type);
+				throw new IllegalStateException("Unknown camera type: " + key.getType());
 		}
 	}
 
-	private String getName(CameraType type, double gain, double noise)
+	private String getName(FIKey key)
 	{
+		CameraType type = key.getType();
 		String name = type.getShortName();
 		switch (type)
 		{
 			case CCD:
 			case CCD_APPROXIMATION:
 			case EM_CCD:
-				name += String.format(" g=%.1f,n=%.1f", gain, noise);
+				name += String.format(" g=%.1f,n=%.1f", key.gain, key.noise);
 			default:
 				break;
 		}
@@ -468,59 +730,97 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return list.toArray();
 	}
 
-	private double[] getFisherInformation(final double[] photons, final BasePoissonFisherInformation fi,
-			CameraType type)
+	private double[] getAlpha(final double[] photons, double[] exp, final BasePoissonFisherInformation fi, FIKey key)
 	{
-		final double[] f = new double[photons.length];
+		CameraType type = key.getType();
+		final double[] alpha = new double[photons.length];
 		if (!type.isFast())
 		{
-			IJ.showStatus("Computing " + type.getName());
-			int nThreads = Prefs.getThreads();
-			if (es == null)
-				es = Executors.newFixedThreadPool(nThreads);
-			final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), f.length, nThreads != 1);
-			int nPerThread = (int) Math.ceil((double) f.length / nThreads);
-			TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
-			for (int i = 0; i < f.length; i += nPerThread)
+			final int[] index;
+
+			// Try and load from the cache
+			PoissonFisherInformationData data = load(key);
+			if (data != null)
 			{
-				final int start = i;
-				final int end = Math.min(f.length, i + nPerThread);
-				futures.add(es.submit(new Runnable()
+				// Dump the log10 means
+				TDoubleArrayList means = new TDoubleArrayList(data.getAlphaSampleCount());
+				for (AlphaSample sample : data.getAlphaSampleList())
+					means.add(sample.getLog10Mean());
+				double[] exp2 = means.toArray();
+				// These must be sorted
+				Arrays.sort(exp2);
+
+				// Find any exponent not in the array
+				TIntArrayList list = new TIntArrayList(exp.length);
+				for (int i = 0; i < exp.length; i++)
 				{
-					public void run()
-					{
-						BasePoissonFisherInformation fi2 = fi.clone();
-						for (int ii = start; ii < end; ii++)
-						{
-							f[ii] = fi2.getFisherInformation(photons[ii]);
-							ticker.tick();
-						}
-					}
-				}));
+					int j = Arrays.binarySearch(exp2, exp[i]);
+					if (j < 0)
+						list.add(i); // Add to indices to compute
+					else
+						alpha[i] = data.getAlphaSample(j).getAlpha(); // Get alpha
+				}
+				index = list.toArray();
 			}
-			Utils.waitForCompletion(futures);
-			ticker.stop();
-			IJ.showStatus("");
+			else
+			{
+				// Compute all
+				index = SimpleArrayUtils.newArray(alpha.length, 0, 1);
+			}
+
+			if (index.length > 0)
+			{
+				IJ.showStatus("Computing " + getName(key));
+				int nThreads = Prefs.getThreads();
+				if (es == null)
+					es = Executors.newFixedThreadPool(nThreads);
+				final Ticker ticker = Ticker.createStarted(new IJTrackProgress(), index.length, nThreads != 1);
+				int nPerThread = (int) Math.ceil((double) index.length / nThreads);
+				TurboList<Future<?>> futures = new TurboList<Future<?>>(nThreads);
+				for (int i = 0; i < index.length; i += nPerThread)
+				{
+					final int start = i;
+					final int end = Math.min(index.length, i + nPerThread);
+					futures.add(es.submit(new Runnable()
+					{
+						public void run()
+						{
+							BasePoissonFisherInformation fi2 = fi.clone();
+							for (int ii = start; ii < end; ii++)
+							{
+								int j = index[ii];
+								alpha[j] = fi2.getAlpha(photons[j]);
+								ticker.tick();
+							}
+						}
+					}));
+				}
+				Utils.waitForCompletion(futures);
+				ticker.stop();
+				IJ.showStatus("");
+
+				save(key, exp, alpha);
+			}
 		}
 		else
 		{
 			// Simple single threaded method.
-			for (int i = 0; i < f.length; i++)
+			for (int i = 0; i < alpha.length; i++)
 			{
-				f[i] = fi.getFisherInformation(photons[i]);
+				alpha[i] = fi.getAlpha(photons[i]);
 			}
 		}
-		return f;
+		return alpha;
 	}
 
-	private double[] getAlpha(double[] I, double[] photons)
+	private double[] getFisherInformation(double[] alpha, double[] photons)
 	{
-		double[] rI = new double[photons.length];
+		double[] I = new double[photons.length];
 		for (int i = 0; i < photons.length; i++)
 		{
-			rI[i] = I[i] * photons[i];
+			I[i] = alpha[i] / photons[i];
 		}
-		return rI;
+		return I;
 	}
 
 	private double[] getAlpha(BasePoissonFisherInformation fi, double[] photons)
