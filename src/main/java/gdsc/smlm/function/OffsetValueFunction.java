@@ -16,10 +16,9 @@ package gdsc.smlm.function;
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class OffsetValueFunction implements ValueFunction, ValueProcedure, NamedFunction
+public class OffsetValueFunction extends PrecomputedValueFunction implements ValueFunction, ValueProcedure, NamedFunction
 {
 	protected final ValueFunction f;
-	protected final double[] offset;
 	protected int i;
 	protected ValueProcedure procedure;
 
@@ -35,10 +34,10 @@ public class OffsetValueFunction implements ValueFunction, ValueProcedure, Named
 	 */
 	protected OffsetValueFunction(ValueFunction f, double[] values)
 	{
+		super(values);
 		if (f.size() != values.length)
 			throw new IllegalArgumentException("Length of precomputed values must match function size");
 		this.f = f;
-		this.offset = values;
 	}
 
 	/**
@@ -52,22 +51,18 @@ public class OffsetValueFunction implements ValueFunction, ValueProcedure, Named
 	 */
 	protected OffsetValueFunction(OffsetValueFunction pre, double[] values2)
 	{
+		// Clone the values as they will be modified
+		super(values2.clone());
 		this.f = pre.f;
 		final int n = f.size();
-		final double[] values1 = pre.offset;
-		offset = new double[n];
+		final double[] values1 = pre.values;
 		for (int i = 0; i < n; i++)
-			offset[i] = values1[i] + values2[i];
+			values[i] += values1[i];
 	}
 
 	public ValueFunction getValueFunction()
 	{
 		return f;
-	}
-
-	public int size()
-	{
-		return f.size();
 	}
 
 	public void initialise0(double[] a)
@@ -84,7 +79,7 @@ public class OffsetValueFunction implements ValueFunction, ValueProcedure, Named
 
 	public void execute(double value)
 	{
-		procedure.execute(value + offset[i++]);
+		procedure.execute(value + values[i++]);
 	}
 
 	/**

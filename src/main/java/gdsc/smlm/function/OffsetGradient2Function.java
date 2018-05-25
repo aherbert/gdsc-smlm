@@ -63,7 +63,7 @@ public class OffsetGradient2Function extends OffsetGradient1Function
 
 	public void execute(double value, double[] dy_da, double[] d2y_da2)
 	{
-		procedure.execute(value + offset[i++], dy_da, d2y_da2);
+		procedure.execute(value + values[i++], dy_da, d2y_da2);
 	}
 
 	/**
