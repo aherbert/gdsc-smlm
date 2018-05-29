@@ -103,9 +103,9 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 					public Pair<RealVector, RealMatrix> value(RealVector point)
 					{
 						final double[] p = point.toArray();
-						final Pair<double[], double[][]> result = fun.computeValuesAndJacobian(p);
-						return new Pair<RealVector, RealMatrix>(new ArrayRealVector(result.getFirst(), false),
-								new Array2DRowRealMatrix(result.getSecond(), false));
+						final gdsc.smlm.utils.Pair<double[], double[][]> result = fun.computeValuesAndJacobian(p);
+						return new Pair<RealVector, RealMatrix>(new ArrayRealVector(result.a, false),
+								new Array2DRowRealMatrix(result.b, false));
 					}
 
 					public RealVector computeValue(double[] params)
