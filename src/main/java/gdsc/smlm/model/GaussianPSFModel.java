@@ -18,7 +18,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.special.Erf;
 
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.NullAstigmatismZModel;
+import gdsc.smlm.utils.Pair;
 
 /**
  * Contains methods for generating models of a Point Spread Function using a Gaussian approximation
@@ -447,7 +450,6 @@ public class GaussianPSFModel extends PSFModel
 		model.zModel = zModel;
 		return model;
 	}
-	
 
 	@Override
 	public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2)
@@ -500,5 +502,111 @@ public class GaussianPSFModel extends PSFModel
 			x[i] = sigma * random.nextGaussian() + mu;
 		}
 		return x;
+	}
+
+	@Override
+	protected boolean computeValue(int width, int height, double x0, double x1, double x2, double[] value)
+	{
+		double s0 = getS0(x2);
+		double s1 = getS1(x2);
+
+		// Evaluate the Gaussian error function on a pixel grid covering +/- 5 SD
+		final int x0min = clip((int) (x0 - 5 * s0), width);
+		final int x1min = clip((int) (x1 - 5 * s1), height);
+		final int x0max = clip((int) Math.ceil(x0 + 5 * s0), width);
+		final int x1max = clip((int) Math.ceil(x1 + 5 * s1), height);
+
+		final int x0range = x0max - x0min;
+		final int x1range = x1max - x1min;
+
+		// min should always be less than max
+		if (x0range < 1)
+			throw new IllegalArgumentException("Gaussian dimension 0 range not within data bounds");
+		if (x1range < 1)
+			throw new IllegalArgumentException("Gaussian dimension 1 range not within data bounds");
+
+		// Evaluate using a function.
+		// This allows testing the function verses the default gaussian2D() method
+		// as they should be nearly identical (the Erf function may be different).
+		// Thus the gradient can be evaluated using the same function.
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x0range, x1range,
+				GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
+		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
+		p[Gaussian2DFunction.SIGNAL] = 1;
+		// The function computes the centre of the pixel as 0,0
+		p[Gaussian2DFunction.X_POSITION] = x0 - x0min - 0.5;
+		p[Gaussian2DFunction.Y_POSITION] = x1 - x1min - 0.5;
+		p[Gaussian2DFunction.X_POSITION] = x2;
+		double[] v = f.computeValues(p);
+		for (int y = 0; y < x1range; y++)
+		{
+			// Locate the insert location
+			int indexTo = (y + x1min) * width + x0min;
+			int indexFrom = y * x0range;
+			for (int x = 0; x < x0range; x++)
+			{
+				value[indexTo++] += v[indexFrom++];
+			}
+		}
+		return true;
+	}
+
+	@Override
+	protected boolean computeValueAndGradient(int width, int height, double x0, double x1, double x2, double[] value,
+			double[][] jacobian)
+	{
+		double s0 = getS0(x2);
+		double s1 = getS1(x2);
+
+		// Evaluate the Gaussian error function on a pixel grid covering +/- 5 SD
+		final int x0min = clip((int) (x0 - 5 * s0), width);
+		final int x1min = clip((int) (x1 - 5 * s1), height);
+		final int x0max = clip((int) Math.ceil(x0 + 5 * s0), width);
+		final int x1max = clip((int) Math.ceil(x1 + 5 * s1), height);
+
+		final int x0range = x0max - x0min;
+		final int x1range = x1max - x1min;
+
+		// min should always be less than max
+		if (x0range < 1)
+			throw new IllegalArgumentException("Gaussian dimension 0 range not within data bounds");
+		if (x1range < 1)
+			throw new IllegalArgumentException("Gaussian dimension 1 range not within data bounds");
+
+		// Evaluate using a function.
+		// This allows testing the function verses the default gaussian2D() method
+		// as they should be nearly identical (the Erf function may be different).
+		// Thus the gradient can be evaluated using the same function.
+		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x0range, x1range,
+				GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
+		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
+		p[Gaussian2DFunction.SIGNAL] = 1;
+		// The function computes the centre of the pixel as 0,0. 
+		// The PSF sets the centre as 0.5,0.5.
+		p[Gaussian2DFunction.X_POSITION] = x0 - x0min - 0.5;
+		p[Gaussian2DFunction.Y_POSITION] = x1 - x1min - 0.5;
+		p[Gaussian2DFunction.X_POSITION] = x2;
+		int i0 = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
+		int i1 = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
+		int i2 = f.findGradientIndex(Gaussian2DFunction.Z_POSITION);
+		Pair<double[], double[][]> pair = f.computeValuesAndJacobian(p);
+		double[] v = pair.a;
+		double[][] j = pair.b;
+		for (int y = 0; y < x1range; y++)
+		{
+			// Locate the insert location
+			int indexTo = (y + x1min) * width + x0min;
+			int indexFrom = y * x0range;
+			for (int x = 0; x < x0range; x++)
+			{
+				value[indexTo] += v[indexFrom];
+				jacobian[indexTo][0] = j[indexFrom][i0];
+				jacobian[indexTo][1] = j[indexFrom][i1];
+				jacobian[indexTo][2] = j[indexFrom][i2];
+				indexTo++;
+				indexFrom++;
+			}
+		}
+		return true;
 	}
 }

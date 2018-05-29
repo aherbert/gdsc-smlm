@@ -1178,4 +1178,16 @@ public class ImagePSFModel extends PSFModel
 			hwhm1[slice] = unitsPerPixel * ((upperV - lowerV) / 2.0 - fraction);
 		}
 	}
+
+	@Override
+	protected boolean computeValueAndGradient(int width, int height, double x0, double x1, double x2, double[] value,
+			double[][] jacobian)
+	{
+		final int slice = getSlice(x2);
+		if (slice < 0 || slice >= sumImage.length)
+			return false;	
+		double delta = 1e-2;
+		double[] dx = new double[] { delta, delta, unitsPerSlice };
+		return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);
+	}
 }

@@ -745,15 +745,16 @@ public abstract class PSFModel
 	 *             If width or height are not strictly positive
 	 * @throws IllegalArgumentException
 	 *             If value or gradient are not length [width*height]
+	 * @return true, if successful; false, if no value was computed
 	 */
-	public void getValue(final int width, final int height, double x0, double x1, double x2, double[] value)
+	public boolean getValue(final int width, final int height, double x0, double x1, double x2, double[] value)
 			throws IllegalArgumentException
 	{
 		checkSize(width, height);
 		int size = width * height;
 		if (value.length != size)
 			throw new IllegalArgumentException("Value is not the correct size");
-		computeValue(width, height, x0, x1, x2, value);
+		return computeValue(width, height, x0, x1, x2, value);
 	}
 
 	/**
@@ -797,11 +798,12 @@ public abstract class PSFModel
 	 *            The centre in dimension 2
 	 * @param value
 	 *            the value
+	 * @return true, if successful; false, if no value was computed
 	 */
-	protected void computeValue(final int width, final int height, double x0, double x1, double x2, double[] value)
+	protected boolean computeValue(final int width, final int height, double x0, double x1, double x2, double[] value)
 	{
 		// Default implementation. Allow this to be overridden.
-		create3D(value, width, height, 1, x0, x1, x2, false);
+		return create3D(value, width, height, 1, x0, x1, x2, false) != 0;
 	}
 
 	/**
@@ -829,9 +831,10 @@ public abstract class PSFModel
 	 *             If width or height are not strictly positive
 	 * @throws IllegalArgumentException
 	 *             If value or gradient are not length [width*height]
+	 * @return true, if successful; false, if no value was computed
 	 */
-	public void getValueAndGradient(final int width, final int height, double x0, double x1, double x2, double[] value,
-			double[][] gradient) throws IllegalArgumentException
+	public boolean getValueAndGradient(final int width, final int height, double x0, double x1, double x2,
+			double[] value, double[][] gradient) throws IllegalArgumentException
 	{
 		checkSize(width, height);
 		int size = width * height;
@@ -842,7 +845,7 @@ public abstract class PSFModel
 		for (int i = 0; i < gradient.length; i++)
 			if (gradient[i] == null || gradient[i].length != 3)
 				gradient[i] = new double[3];
-		computeValueAndGradient(width, height, x0, x1, x2, value, gradient);
+		return computeValueAndGradient(width, height, x0, x1, x2, value, gradient);
 	}
 
 	/**
@@ -862,12 +865,63 @@ public abstract class PSFModel
 	 *            the value
 	 * @param jacobian
 	 *            the jacobian (partial gradient at each point for each dimension)
+	 * @return true, if successful; false, if no value was computed
 	 */
-	protected
-	//abstract 
-	void computeValueAndGradient(final int width, final int height, double x0, double x1, double x2, double[] value,
-			double[][] jacobian)
+	protected abstract boolean computeValueAndGradient(final int width, final int height, double x0, double x1,
+			double x2, double[] value, double[][] jacobian);
+
+	/**
+	 * Compute the value and partial gradient of the PSF function using numerical gradients.
+	 * <p>
+	 * This is a helper function for sub-classes and arguments are unchecked.
+	 *
+	 * @param width
+	 *            The data width
+	 * @param height
+	 *            The data height
+	 * @param x0
+	 *            The centre in dimension 0
+	 * @param x1
+	 *            The centre in dimension 1
+	 * @param x2
+	 *            The centre in dimension 2
+	 * @param value
+	 *            the value
+	 * @param jacobian
+	 *            the jacobian (partial gradient at each point for each dimension)
+	 * @param dx
+	 *            the delta for each dimension for numerical gradient
+	 * @return true, if successful; false, if no value was computed
+	 */
+	protected boolean computeValueAndGradient(final int width, final int height, double x0, double x1, double x2,
+			double[] value, double[][] jacobian, double[] dx)
 	{
-		// TODO - make this abstract and implement it for all the models.
+		int size = width * height;
+		double[] v1 = new double[size];
+		double[] v2 = new double[size];
+		// Compute the value
+		if (!computeValue(width, height, x0, x1, x2, value))
+			return false;
+		double[] x = { x0, x1, x2 };
+		for (int i = 0; i < 3; i++)
+		{
+			// Numerical gradient
+			double delta = dx[i];
+			double p = x[i];
+			x[i] = p + delta;
+			boolean upper = computeValue(width, height, x[0], x[1], x[2], v1);
+			x[i] = p - delta;
+			boolean lower = computeValue(width, height, x[0], x[1], x[2], v2);
+			x[i] = p;
+			double[] u = (upper) ? v1 : value;
+			double[] l = (lower) ? v2 : value;
+			if (u == l)
+				return false;
+			if (upper && lower)
+				delta *= 2;
+			for (int j = 0; j < size; j++)
+				jacobian[j][i] = (u[j] - l[j]) / delta;
+		}
+		return true;
 	}
 }
