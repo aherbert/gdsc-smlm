@@ -3,12 +3,13 @@ package gdsc.smlm.model;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.NamedFunction;
 import gdsc.smlm.function.ValueProcedure;
 
 /**
  * A wrapper around a PSF Model for the Gradient1Function interface
  */
-public class PSFModelGradient1Function implements Gradient1Function
+public class PSFModelGradient1Function implements Gradient1Function, NamedFunction
 {
 	private static final int[] gradientIndices = SimpleArrayUtils.newArray(5, 0, 1);
 	private final PSFModel psf;
@@ -117,6 +118,25 @@ public class PSFModelGradient1Function implements Gradient1Function
 			df_da[3] = m * g[i][1];
 			df_da[4] = m * g[i][2];
 			procedure.execute(c + m * v[i], df_da);
+		}
+	}
+
+	public String getParameterName(int i)
+	{
+		switch (i)
+		{
+			case 0:
+				return "Background";
+			case 1:
+				return "Intensity";
+			case 2:
+				return "X";
+			case 3:
+				return "Y";
+			case 4:
+				return "Z";
+			default:
+				return "N/A";
 		}
 	}
 }
