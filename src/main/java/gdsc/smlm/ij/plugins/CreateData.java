@@ -94,7 +94,6 @@ import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.function.LikelihoodFunction;
 import gdsc.smlm.function.PoissonGammaGaussianFunction;
-import gdsc.smlm.function.PoissonGaussianFunction;
 import gdsc.smlm.function.PoissonGaussianFunction2;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
