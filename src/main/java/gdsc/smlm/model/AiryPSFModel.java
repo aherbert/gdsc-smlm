@@ -847,7 +847,7 @@ public class AiryPSFModel extends PSFModel
 	protected boolean computeValueAndGradient(int width, int height, double x0, double x1, double x2, double[] value,
 			double[][] jacobian)
 	{
-		double[] dx = new double[] { 1e-6, 1e-6, 1e-6 };
+		double[] dx = new double[] { 1e-4, 1e-4, 1e-4 };
 		return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);
 	}
 }

@@ -18,6 +18,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.util.Precision;
 
 /**
  * Contains methods for generating models of a Point Spread Function
@@ -754,6 +755,7 @@ public abstract class PSFModel
 		int size = width * height;
 		if (value.length != size)
 			throw new IllegalArgumentException("Value is not the correct size");
+		Arrays.fill(value, 0);
 		return computeValue(width, height, x0, x1, x2, value);
 	}
 
@@ -843,8 +845,17 @@ public abstract class PSFModel
 		if (gradient.length != size)
 			throw new IllegalArgumentException("Gradient is not the correct size");
 		for (int i = 0; i < gradient.length; i++)
+		{
 			if (gradient[i] == null || gradient[i].length != 3)
 				gradient[i] = new double[3];
+			else
+			{
+				gradient[i][0] = 0;
+				gradient[i][1] = 0;
+				gradient[i][2] = 0;
+			}
+		}
+		Arrays.fill(value, 0);
 		return computeValueAndGradient(width, height, x0, x1, x2, value, gradient);
 	}
 
@@ -900,17 +911,20 @@ public abstract class PSFModel
 		double[] v1 = new double[size];
 		double[] v2 = new double[size];
 		// Compute the value
+		Arrays.fill(value, 0);
 		if (!computeValue(width, height, x0, x1, x2, value))
 			return false;
 		double[] x = { x0, x1, x2 };
 		for (int i = 0; i < 3; i++)
 		{
 			// Numerical gradient
-			double delta = dx[i];
 			double p = x[i];
+			double delta = Precision.representableDelta(p, dx[i]);
 			x[i] = p + delta;
+			Arrays.fill(v1, 0);
 			boolean upper = computeValue(width, height, x[0], x[1], x[2], v1);
 			x[i] = p - delta;
+			Arrays.fill(v2, 0);
 			boolean lower = computeValue(width, height, x[0], x[1], x[2], v2);
 			x[i] = p;
 			double[] u = (upper) ? v1 : value;

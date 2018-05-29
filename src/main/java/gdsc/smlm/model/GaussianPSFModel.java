@@ -19,8 +19,8 @@ import org.apache.commons.math3.special.Erf;
 
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.NullAstigmatismZModel;
+import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.utils.Pair;
 
 /**
@@ -529,14 +529,14 @@ public class GaussianPSFModel extends PSFModel
 		// This allows testing the function verses the default gaussian2D() method
 		// as they should be nearly identical (the Erf function may be different).
 		// Thus the gradient can be evaluated using the same function.
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x0range, x1range,
-				GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
+		Gaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(x0range, x1range, zModel);
+		//GaussianFunctionFactory.create2D(1, x0range, x1range, GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
 		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 		p[Gaussian2DFunction.SIGNAL] = 1;
 		// The function computes the centre of the pixel as 0,0
 		p[Gaussian2DFunction.X_POSITION] = x0 - x0min - 0.5;
 		p[Gaussian2DFunction.Y_POSITION] = x1 - x1min - 0.5;
-		p[Gaussian2DFunction.X_POSITION] = x2;
+		p[Gaussian2DFunction.Z_POSITION] = x2;
 		double[] v = f.computeValues(p);
 		for (int y = 0; y < x1range; y++)
 		{
@@ -545,7 +545,7 @@ public class GaussianPSFModel extends PSFModel
 			int indexFrom = y * x0range;
 			for (int x = 0; x < x0range; x++)
 			{
-				value[indexTo++] += v[indexFrom++];
+				value[indexTo++] = v[indexFrom++];
 			}
 		}
 		return true;
@@ -577,15 +577,15 @@ public class GaussianPSFModel extends PSFModel
 		// This allows testing the function verses the default gaussian2D() method
 		// as they should be nearly identical (the Erf function may be different).
 		// Thus the gradient can be evaluated using the same function.
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, x0range, x1range,
-				GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
+		Gaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(x0range, x1range, zModel);
+		//GaussianFunctionFactory.create2D(1, x0range, x1range, GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
 		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 		p[Gaussian2DFunction.SIGNAL] = 1;
 		// The function computes the centre of the pixel as 0,0. 
 		// The PSF sets the centre as 0.5,0.5.
 		p[Gaussian2DFunction.X_POSITION] = x0 - x0min - 0.5;
 		p[Gaussian2DFunction.Y_POSITION] = x1 - x1min - 0.5;
-		p[Gaussian2DFunction.X_POSITION] = x2;
+		p[Gaussian2DFunction.Z_POSITION] = x2;
 		int i0 = f.findGradientIndex(Gaussian2DFunction.X_POSITION);
 		int i1 = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
 		int i2 = f.findGradientIndex(Gaussian2DFunction.Z_POSITION);
@@ -599,7 +599,7 @@ public class GaussianPSFModel extends PSFModel
 			int indexFrom = y * x0range;
 			for (int x = 0; x < x0range; x++)
 			{
-				value[indexTo] += v[indexFrom];
+				value[indexTo] = v[indexFrom];
 				jacobian[indexTo][0] = j[indexFrom][i0];
 				jacobian[indexTo][1] = j[indexFrom][i1];
 				jacobian[indexTo][2] = j[indexFrom][i2];
