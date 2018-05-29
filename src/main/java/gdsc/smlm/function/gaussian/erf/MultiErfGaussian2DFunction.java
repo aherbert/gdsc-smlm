@@ -224,4 +224,62 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 			}
 		}
 	}
+
+	@Override
+	public double[] computeValues(double[] variables)
+	{
+		initialise0(variables);
+		final double[] values = new double[size()];
+		// Unroll for the number of peaks
+		if (nPeaks == 2)
+		{
+			if (tB == 0)
+			{
+				for (int y = 0, i = 0; y < maxy; y++)
+				{
+					// Pre-compute
+					final double tI_deltaEy0 = tI[0] * deltaEy[y];
+					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
+
+					for (int x = 0; x < maxx; x++)
+					{
+						values[i++] = (tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+					}
+				}
+			}
+			else
+			{
+				for (int y = 0, i = 0; y < maxy; y++)
+				{
+					// Pre-compute
+					final double tI_deltaEy0 = tI[0] * deltaEy[y];
+					final double tI_deltaEy1 = tI[1] * deltaEy[y + maxy];
+
+					for (int x = 0; x < maxx; x++)
+					{
+						values[i++] = (tB + tI_deltaEy0 * deltaEx[x] + tI_deltaEy1 * deltaEx[x + maxx]);
+					}
+				}
+			}
+		}
+		else
+		{
+			final double[] tI_deltaEy = new double[nPeaks];
+			for (int y = 0, i = 0; y < maxy; y++)
+			{
+				// Pre-compute
+				for (int n = 0, yy = y; n < nPeaks; n++, yy += maxy)
+					tI_deltaEy[n] = tI[n] * deltaEy[yy];
+
+				for (int x = 0; x < maxx; x++)
+				{
+					double I = tB;
+					for (int n = 0, xx = x; n < nPeaks; n++, xx += maxx)
+						I += tI_deltaEy[n] * deltaEx[xx];
+					values[i++] = I;
+				}
+			}
+		}
+		return values;
+	}
 }

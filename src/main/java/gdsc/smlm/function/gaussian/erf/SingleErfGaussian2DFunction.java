@@ -123,6 +123,40 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
+	 */
+	public double[] computeValues(double[] variables)
+	{
+		initialise0(variables);
+		final double[] values = new double[size()];
+		if (tB == 0)
+		{
+			for (int y = 0, i = 0; y < maxy; y++)
+			{
+				final double tI_deltaEy = tI * deltaEy[y];
+				for (int x = 0; x < maxx; x++)
+				{
+					values[i++] = tI_deltaEy * deltaEx[x];
+				}
+			}
+		}
+		else
+		{
+			for (int y = 0, i = 0; y < maxy; y++)
+			{
+				final double tI_deltaEy = tI * deltaEy[y];
+				for (int x = 0; x < maxx; x++)
+				{
+					values[i++] = tB + tI_deltaEy * deltaEx[x];
+				}
+			}
+		}
+		return values;
+	}
+
 	// Force implementation
 	@Override
 	public abstract int getNumberOfGradients();
