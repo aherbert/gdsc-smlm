@@ -2,7 +2,6 @@ package gdsc.smlm.function.gaussian;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.util.Pair;
 
 import gdsc.smlm.function.ExtendedNonLinearFunction;
 import gdsc.smlm.function.Gradient1Procedure;
@@ -10,6 +9,7 @@ import gdsc.smlm.function.NamedFunction;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.ValueProcedure;
+import gdsc.smlm.utils.Pair;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -427,7 +427,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 */
 	public double[][] computeJacobian(double[] variables)
 	{
-		return computeValuesAndJacobian(variables).getSecond();
+		return computeValuesAndJacobian(variables).b;
 	}
 
 	/*
