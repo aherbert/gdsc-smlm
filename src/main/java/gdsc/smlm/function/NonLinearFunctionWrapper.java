@@ -1,6 +1,6 @@
 package gdsc.smlm.function;
 
-import org.apache.commons.math3.util.Pair;
+import gdsc.smlm.utils.Pair;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
