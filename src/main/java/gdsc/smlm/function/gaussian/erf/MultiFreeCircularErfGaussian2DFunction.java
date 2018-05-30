@@ -4,7 +4,6 @@ package gdsc.smlm.function.gaussian.erf;
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
-import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
@@ -170,16 +169,16 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param u
 	 *            the mean of the Gaussian for dimension 0
 	 */
-	protected static void createDeltaETable(int n, int max, double one_sSqrt2, double[] deltaE, double u)
+	protected void createDeltaETable(int n, int max, double one_sSqrt2, double[] deltaE, double u)
 	{
 		// For documentation see SingleFreeCircularErfGaussian2DFunction.createSecondOrderTables(...)
 
 		double x_u_p12 = -u;
-		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
 			x_u_p12 += 1.0;
-			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
 			erf_x_minus = erf_x_plus;
 		}
@@ -205,8 +204,8 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param s
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	protected static void createFirstOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx,
-			double[] du_ds, double u, double s)
+	protected void createFirstOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx, double[] du_ds,
+			double u, double s)
 	{
 		createFirstOrderTables(n, max, ONE_OVER_ROOT2 / s, 0.5 / (s * s), tI * ONE_OVER_ROOT2PI / s,
 				tI * ONE_OVER_ROOT2PI / (s * s), deltaE, du_dx, du_ds, u);
@@ -236,19 +235,19 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param u
 	 *            the mean of the Gaussian for dimension 0
 	 */
-	protected static void createFirstOrderTables(int n, int max, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
+	protected void createFirstOrderTables(int n, int max, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
 			double I_ssSqrt2pi, double[] deltaE, double[] du_dx, double[] du_ds, double u)
 	{
 		// For documentation see SingleFreeCircularErfGaussian2DFunction.createSecondOrderTables(...)
 
 		double x_u_p12 = -u;
-		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
 			double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
-			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
 			erf_x_minus = erf_x_plus;
 
@@ -285,8 +284,8 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param s
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	protected static void createSecondOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx,
-			double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double u, double s)
+	protected void createSecondOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx, double[] du_ds,
+			double[] d2u_dx2, double[] d2u_ds2, double u, double s)
 	{
 		final double ss = s * s;
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
@@ -335,7 +334,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param u
 	 *            the mean of the Gaussian for dimension 0
 	 */
-	protected static void createSecondOrderTables(int n, int max, double tI, double one_sSqrt2, double one_2ss,
+	protected void createSecondOrderTables(int n, int max, double tI, double one_sSqrt2, double one_2ss,
 			double I_sSqrt2pi, double I_ssSqrt2pi, double I_sssSqrt2pi, double ss, double one_sssSqrt2pi,
 			double one_sssssSqrt2pi, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
 			double[] d2u_ds2, double u)
@@ -355,13 +354,13 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		// Offset x by the position and get the pixel lower bound.
 		// (x - u - 0.5) with x=0 and u offset by +0.5
 		double x_u_p12 = -u;
-		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
 			double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
-			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
 			erf_x_minus = erf_x_plus;
 
@@ -412,8 +411,8 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param s
 	 *            the standard deviation of the Gaussian for dimension 0
 	 */
-	protected static void createExSecondOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx,
-			double[] du_ds, double[] d2u_dx2, double[] d2u_ds2, double[] d2deltaE_dsdx, double u, double s)
+	protected void createExSecondOrderTables(int n, int max, double tI, double[] deltaE, double[] du_dx, double[] du_ds,
+			double[] d2u_dx2, double[] d2u_ds2, double[] d2deltaE_dsdx, double u, double s)
 	{
 		final double ss = s * s;
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
@@ -465,7 +464,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 	 * @param u
 	 *            the mean of the Gaussian for dimension 0
 	 */
-	protected static void createExSecondOrderTables(int n, int max, double tI, double one_sSqrt2, double one_2ss,
+	protected void createExSecondOrderTables(int n, int max, double tI, double one_sSqrt2, double one_2ss,
 			double I_sSqrt2pi, double I_ssSqrt2pi, double I_sssSqrt2pi, double ss, double one_sssSqrt2pi,
 			double one_sssssSqrt2pi, double[] deltaE, double[] du_dx, double[] du_ds, double[] d2u_dx2,
 			double[] d2u_ds2, double[] d2deltaE_dsdx, double u)
@@ -485,13 +484,13 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		// Offset x by the position and get the pixel lower bound.
 		// (x - u - 0.5) with x=0 and u offset by +0.5
 		double x_u_p12 = -u;
-		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
 			double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
-			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
 			erf_x_minus = erf_x_plus;
 

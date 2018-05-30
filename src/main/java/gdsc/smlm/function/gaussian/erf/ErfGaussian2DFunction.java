@@ -47,6 +47,45 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	protected double[] d2deltaEx_dtsxdx, d2deltaEy_dtsydy;
 
 	/**
+	 * Define the error function used.
+	 */
+	public enum ErfFunction
+	{
+		/** Use a fast approximation for the Error function. */
+		FAST,
+
+		/** Use the Apache commons math library Error function. */
+		COMMONS_MATH;
+	}
+
+	private ErfFunction erfFunction = ErfFunction.FAST;
+
+	private static interface ErrorFunction
+	{
+		public double erf(double x);
+	}
+
+	private static class FastErrorFunction implements ErrorFunction
+	{
+		public double erf(double x)
+		{
+			return gdsc.smlm.function.Erf.erf(x);
+		}
+	}
+
+	private static class CommontsMathErrorFunction implements ErrorFunction
+	{
+		public double erf(double x)
+		{
+			return org.apache.commons.math3.special.Erf.erf(x);
+		}
+	}
+
+	private static final FastErrorFunction fastErrorFunction = new FastErrorFunction();
+	private static final CommontsMathErrorFunction commontsMathErrorFunction = new CommontsMathErrorFunction();
+	private ErrorFunction errorFunction = fastErrorFunction;
+
+	/**
 	 * Instantiates a new erf gaussian 2D function.
 	 *
 	 * @param nPeaks
@@ -186,5 +225,59 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		// Currently this is not performed as the ERF functions are used in the context 
 		// of bounded parameters so avoiding bad parameters, e.g. tI being zero.
 		return (numerator == 0) ? 0 : numerator / denominator;
+	}
+
+	/**
+	 * Gets the erf function.
+	 *
+	 * @return the erf function
+	 */
+	public ErfFunction getErfFunction()
+	{
+		return erfFunction;
+	}
+
+	/**
+	 * Sets the erf function.
+	 *
+	 * @param erfFunction
+	 *            the new erf function
+	 * @throws IllegalArgumentException
+	 *             If the error function is unknown
+	 */
+	public void setErfFunction(ErfFunction erfFunction) throws IllegalArgumentException
+	{
+		switch (erfFunction)
+		{
+			case COMMONS_MATH:
+				errorFunction = commontsMathErrorFunction;
+				break;
+			case FAST:
+				errorFunction = fastErrorFunction;
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown error function: " + erfFunction);
+		}
+		this.erfFunction = erfFunction;
+	}
+
+	  /**
+     * Returns the error function.
+     *
+     * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt </p>
+     *
+     * <p>Uses the configured implementation (see {@link #getErfFunction()}).</p>
+     *
+     * <p>The value returned is always between -1 and 1 (inclusive).
+     * If {@code abs(x) > 40}, then {@code erf(x)} is indistinguishable from
+     * either 1 or -1 as a double, so the appropriate extreme value is returned.
+     * </p>
+     *
+     * @param x the value.
+     * @return the error function erf(x)
+     */
+    public double erf(double x)
+	{
+		return errorFunction.erf(x);
 	}
 }

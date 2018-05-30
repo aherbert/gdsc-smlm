@@ -2,7 +2,6 @@ package gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
@@ -183,18 +182,18 @@ public class MultiFixedErfGaussian2DFunction extends MultiFreeCircularErfGaussia
 	 * @param u
 	 *            the mean of the Gaussian for dimension 0
 	 */
-	protected static void createFirstOrderTables(int n, int max, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
+	protected void createFirstOrderTables(int n, int max, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
 			double[] deltaE, double[] du_dx, double u)
 	{
 		// For documentation see SingleFreeCircularErfGaussian2DFunction.createSecondOrderTables(...)
 
 		double x_u_p12 = -u;
-		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
 			x_u_p12 += 1.0;
-			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
 			erf_x_minus = erf_x_plus;
 
@@ -229,19 +228,19 @@ public class MultiFixedErfGaussian2DFunction extends MultiFreeCircularErfGaussia
 	 * @param u
 	 *            the mean of the Gaussian for dimension 0
 	 */
-	protected static void createSecondOrderTables(int n, int max, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
+	protected void createSecondOrderTables(int n, int max, double one_sSqrt2, double one_2ss, double I_sSqrt2pi,
 			double I_sssSqrt2pi, double[] deltaE, double[] du_dx, double[] d2u_dx2, double u)
 	{
 		// For documentation see SingleFreeCircularErfGaussian2DFunction.createSecondOrderTables(...)
 
 		double x_u_p12 = -u;
-		double erf_x_minus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+		double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 		double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
 		for (int i = 0, j = n * max; i < max; i++, j++)
 		{
 			double x_u_m12 = x_u_p12;
 			x_u_p12 += 1.0;
-			final double erf_x_plus = 0.5 * Erf.erf(x_u_p12 * one_sSqrt2);
+			final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
 			deltaE[j] = erf_x_plus - erf_x_minus;
 			erf_x_minus = erf_x_plus;
 
