@@ -20,6 +20,7 @@ import org.apache.commons.math3.special.Erf;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.NullAstigmatismZModel;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.utils.Pair;
 
@@ -529,8 +530,7 @@ public class GaussianPSFModel extends PSFModel
 		// This allows testing the function verses the default gaussian2D() method
 		// as they should be nearly identical (the Erf function may be different).
 		// Thus the gradient can be evaluated using the same function.
-		Gaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(x0range, x1range, zModel);
-		//GaussianFunctionFactory.create2D(1, x0range, x1range, GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
+		ErfGaussian2DFunction f = createGaussianFunction(x0range, x1range);
 		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 		p[Gaussian2DFunction.SIGNAL] = 1;
 		// The function computes the centre of the pixel as 0,0
@@ -549,6 +549,13 @@ public class GaussianPSFModel extends PSFModel
 			}
 		}
 		return true;
+	}
+
+	private ErfGaussian2DFunction createGaussianFunction(final int x0range, final int x1range)
+	{
+		ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(x0range, x1range, zModel);
+		f.setErfFunction(ErfGaussian2DFunction.ErfFunction.COMMONS_MATH);
+		return f;
 	}
 
 	@Override
@@ -577,8 +584,7 @@ public class GaussianPSFModel extends PSFModel
 		// This allows testing the function verses the default gaussian2D() method
 		// as they should be nearly identical (the Erf function may be different).
 		// Thus the gradient can be evaluated using the same function.
-		Gaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(x0range, x1range, zModel);
-		//GaussianFunctionFactory.create2D(1, x0range, x1range, GaussianFunctionFactory.FIT_ERF_ASTIGMATISM, zModel);
+		ErfGaussian2DFunction f = createGaussianFunction(x0range, x1range);
 		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 		p[Gaussian2DFunction.SIGNAL] = 1;
 		// The function computes the centre of the pixel as 0,0. 
