@@ -203,7 +203,7 @@ public class FisherInformationMatrix
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
 	 * inverted Fisher information matrix.
 	 * <p>
-	 * The information matrix is inverted and the square root of the central diagonal returned.
+	 * The information matrix is inverted and the central diagonal returned.
 	 * 
 	 * @return CRLB (or null if inversion failed)
 	 */
@@ -216,8 +216,8 @@ public class FisherInformationMatrix
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the central diagonal of the
 	 * inverted Fisher information matrix.
 	 * <p>
-	 * The information matrix is inverted and the square root of the central diagonal returned. If the inversion fails
-	 * then the routine optionally returns the square root of the reciprocal of the diagonal element to find a (possibly
+	 * The information matrix is inverted and the central diagonal returned. If the inversion fails
+	 * then the routine optionally returns the reciprocal of the diagonal element to find a (possibly
 	 * loose) lower bound.
 	 *
 	 * @param allowReciprocal
@@ -245,7 +245,7 @@ public class FisherInformationMatrix
 	 * Compute the Cramer-Rao Lower Bound (CRLB) variance for fitted variables using the reciprocal of the central
 	 * diagonal of the Fisher information matrix.
 	 * 
-	 * The information matrix is NOT inverted. The square root of the reciprocal of the central diagonal returned for a
+	 * The information matrix is NOT inverted. The reciprocal of the central diagonal returned for a
 	 * (possibly loose) lower bound.
 	 *
 	 * @return CRLB (or null if inversion failed)
@@ -262,7 +262,7 @@ public class FisherInformationMatrix
 	 * Compute the Cramer-Rao Lower Bound (CRLB) for fitted variables using the central diagonal of the inverted
 	 * Fisher information matrix.
 	 * <p>
-	 * The information matrix is inverted and the square root of the central diagonal returned.
+	 * The information matrix is inverted and the central diagonal returned.
 	 * 
 	 * @return CRLB (or null if inversion failed)
 	 */
