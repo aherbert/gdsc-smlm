@@ -56,14 +56,14 @@ public class GaussianPSFModelTest
 							// Same insertion into the blank data region
 							Assert.assertTrue(o[ii] == 0);
 						}
-						else if (e[ii] > 1e-4) // Only check where there is a reasonable amount of signal
+						else if (e[ii] > 1e-8) // Only check where there is a reasonable amount of signal
 						{
 							double error = DoubleEquality.relativeError(e[ii], o[ii]);
 							//System.out.printf("[%d,%d]   %g == %g    %g\n", ii/maxx, ii%maxx, e[ii], o[ii], error);
 							// We expect a small error since the ErfGaussian2DFunction uses a 
 							// fast approximation of the Erf(..) (the error function). The PSFModel
 							// uses the Apache commons implementation.
-							if (error > 5e-4)
+							if (error > 1e-8)
 								Assert.fail(String.format("[%d] %s != %s  error = %f\n", ii, Double.toString(e[ii]),
 										Double.toString(o[ii]), error));
 						}
