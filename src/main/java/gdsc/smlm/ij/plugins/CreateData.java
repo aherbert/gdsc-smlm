@@ -624,8 +624,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Draw the same point on the image repeatedly
 				n = 1;
 				dist = createFixedDistribution();
-
-				reportAndSaveFittingLimits(dist);
+				try
+				{
+					reportAndSaveFittingLimits(dist);
+				}
+				catch (Exception e)
+				{
+					// This will be from the computation of the CRLB
+					IJ.error(TITLE, e.getMessage());
+					return;
+				}
 			}
 			else if (spotMode)
 			{
