@@ -1029,12 +1029,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			FisherInformationMatrix m = c.compute(params);
 
 			// Report and store the limits
-			double[] crlb = m.crlb();
+			double[] crlb = m.crlbSqrt();
 			if (crlb != null)
 			{
-				Utils.log("Localisation precision (CRLB): %s,%s photons", Utils.rounded(crlb[0]),
+				Utils.log("Localisation precision (CRLB): B=%s,I=%s photons", Utils.rounded(crlb[0]),
 						Utils.rounded(crlb[1]));
-				Utils.log("Localisation precision (CRLB): %s,%s,%s nm : %s,%s,%s px", Utils.rounded(crlb[2] * a),
+				Utils.log("Localisation precision (CRLB): X=%s,Y=%s,Z=%s nm : %s,%s,%s px", Utils.rounded(crlb[2] * a),
 						Utils.rounded(crlb[3] * a), Utils.rounded(crlb[4] * a), Utils.rounded(crlb[2]),
 						Utils.rounded(crlb[3]), Utils.rounded(crlb[4]));
 			}
@@ -4703,8 +4703,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			else
 			{
-				// This is fast enough to compute dynamically
-				f = new PoissonGaussianFisherInformation(readNoise / helper.getTotalGain());
+				// This is fast enough to compute dynamically.
+				// Read noise is in electrons so use directly.
+				f = new PoissonGaussianFisherInformation(settings.getReadNoise());
 			}
 			Arrays.fill(fiFunction, f);
 		}
