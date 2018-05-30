@@ -28,16 +28,16 @@ import org.apache.commons.math3.exception.NumberIsTooSmallException;
 public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInformation
 {
 	/** The minimum of the interpolation range (log scale). */
-	private final double min;
+	public final double min;
 
 	/** The maximum of the interpolation range (log scale). */
-	private final double max;
+	public final double max;
 
 	/** The mean at the minimum of the interpolation range. */
-	private final double uMin;
+	public final double uMin;
 
 	/** The mean at the maximum of the interpolation range. */
-	private final double uMax;
+	public final double uMax;
 
 	/** The alpha at the minimum of the interpolation range. */
 	private final double alphaMin;
