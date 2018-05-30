@@ -92,9 +92,11 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitWorker;
 import gdsc.smlm.filters.GaussianFilter;
-import gdsc.smlm.function.LikelihoodFunction;
-import gdsc.smlm.function.PoissonGammaGaussianFunction;
-import gdsc.smlm.function.PoissonGaussianFunction2;
+import gdsc.smlm.fitting.FisherInformationMatrix;
+import gdsc.smlm.fitting.UnivariateLikelihoodFisherInformationCalculator;
+import gdsc.smlm.function.BasePoissonFisherInformation;
+import gdsc.smlm.function.InterpolatedPoissonFisherInformation;
+import gdsc.smlm.function.PoissonGaussianFisherInformation;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
@@ -119,6 +121,7 @@ import gdsc.smlm.model.MaskDistribution;
 import gdsc.smlm.model.MaskDistribution3D;
 import gdsc.smlm.model.MoleculeModel;
 import gdsc.smlm.model.PSFModel;
+import gdsc.smlm.model.PSFModelGradient1Function;
 import gdsc.smlm.model.RadialFalloffIllumination;
 import gdsc.smlm.model.RandomGeneratorFactory;
 import gdsc.smlm.model.SpatialDistribution;
@@ -296,10 +299,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private boolean poissonNoise = true;
 	private double minPhotons = 0, minSNRt1 = 0, minSNRtN = 0;
 
-	// Compute the CRLB for the PSF using a likelihood function
-	private LikelihoodFunction[] likelihoodFunction = null;
-	// Counter for the number of CRLB to compute
-	private AtomicInteger crlbCount = new AtomicInteger();
+	// Compute the CRLB for the PSF using the fisher information
+	private BasePoissonFisherInformation[] fiFunction = null;
 
 	// Store the parameters
 	public static class BaseParameters
@@ -471,6 +472,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * The actual number of simulated background photons in each frame of the benchmark image.
 		 */
 		final double[] background;
+
+		/**
+		 * The Cramer-Rao lower bounds computed from the PSF model and the Fisher information.
+		 * [Background,Intensity,X,Y,Z]
+		 */
+		final double[] crlb;
+
 		/**
 		 * The number of frames with a simulated photon count
 		 */
@@ -481,7 +489,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		public BenchmarkParameters(int frames, double s, double a, double signal, double x, double y, double z,
 				double bias, double gain, double qe, double readNoise, CameraType cameraType, String cameraModelName,
 				Rectangle cameraBounds, double b, double noise, double precisionN, double precisionX,
-				double precisionXML, PSF psf)
+				double precisionXML, PSF psf, double[] crlb)
 		{
 			super(s, a, signal, signal, signal, bias, gain, qe, readNoise, cameraType, cameraModelName, cameraBounds, b,
 					noise, psf);
@@ -495,6 +503,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			this.precisionXML = precisionXML;
 			p = new double[frames];
 			background = new double[frames];
+			this.crlb = crlb;
 		}
 
 		public void setPhotons(MemoryPeakResults results)
@@ -921,18 +930,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		Utils.log(TITLE + " Benchmark");
 
+		double a = settings.getPixelPitch();
 		double[] xyz = dist.next().clone();
 		double offset = settings.getSize() * 0.5;
 		for (int i = 0; i < 2; i++)
 			xyz[i] += offset;
-		double sd = getPsfSD() * settings.getPixelPitch();
+		double sd = getPsfSD() * a;
 
-		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * settings.getPixelPitch()), Utils.rounded(xyz[0], 6));
-		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * settings.getPixelPitch()), Utils.rounded(xyz[1], 6));
-		Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / settings.getPixelPitch()));
-		final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.getPixelPitch());
-		Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa),
-				Utils.rounded(sa / settings.getPixelPitch()));
+		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * a), Utils.rounded(xyz[0], 6));
+		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * a), Utils.rounded(xyz[1], 6));
+		Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / a));
+		final double sa = PSFCalculator.squarePixelAdjustment(sd, a);
+		Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa), Utils.rounded(sa / a));
 		Utils.log("Signal (N) = %s - %s photons", Utils.rounded(settings.getPhotonsPerSecond()),
 				Utils.rounded(settings.getPhotonsPerSecondMaximum()));
 
@@ -968,42 +977,65 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 		// is the same as MLE with the caveat of numerical instability.
 
-		double lowerP = Gaussian2DPeakResultHelper.getPrecision(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecondMaximum(), noise, emCCD);
-		double upperP = Gaussian2DPeakResultHelper.getPrecision(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecond(), noise, emCCD);
-		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecondMaximum(), noise, emCCD);
-		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(settings.getPixelPitch(), sd,
-				settings.getPhotonsPerSecond(), noise, emCCD);
-		double lowerN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecond(), Maths.pow2(noise),
+		double lowerP = Gaussian2DPeakResultHelper.getPrecision(a, sd, settings.getPhotonsPerSecondMaximum(), noise,
 				emCCD);
-		double upperN = getPrecisionN(settings.getPixelPitch(), sd, settings.getPhotonsPerSecondMaximum(),
-				Maths.pow2(noise), emCCD);
+		double upperP = Gaussian2DPeakResultHelper.getPrecision(a, sd, settings.getPhotonsPerSecond(), noise, emCCD);
+		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, settings.getPhotonsPerSecondMaximum(), noise,
+				emCCD);
+		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, settings.getPhotonsPerSecond(), noise,
+				emCCD);
+		double lowerN = getPrecisionN(a, sd, settings.getPhotonsPerSecond(), Maths.pow2(noise), emCCD);
+		double upperN = getPrecisionN(a, sd, settings.getPhotonsPerSecondMaximum(), Maths.pow2(noise), emCCD);
 
 		if (settings.getCameraType() == CameraType.SCMOS)
 			Utils.log("sCMOS camera background estimate uses an average read noise");
 		Utils.log("Effective background noise = %s photons [includes read variance converted to photons]",
 				Utils.rounded(noise));
 		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
-				Utils.rounded(lowerP / settings.getPixelPitch()), Utils.rounded(upperP / settings.getPixelPitch()));
+				Utils.rounded(lowerP / a), Utils.rounded(upperP / a));
 		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
-				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / settings.getPixelPitch()),
-				Utils.rounded(upperMLP / settings.getPixelPitch()));
+				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / a), Utils.rounded(upperMLP / a));
 		Utils.log("Signal precision: %s - %s photons", Utils.rounded(lowerN), Utils.rounded(upperN));
 
 		// Store the benchmark settings when not using variable photons
 		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
 		{
-			// Flag that CRLB should be computed
-			crlbCount.set(1);
+			// Compute the true CRLB using the fisher information
+			createLikelihoodFunction();
+
+			// This needs the PSF Model
+			PSFModel psf = createPSFModel(xyz);
+
+			// Wrap to a function
+			PSFModelGradient1Function f = new PSFModelGradient1Function(psf, settings.getSize(), settings.getSize());
+
+			// Compute Fisher information
+			UnivariateLikelihoodFisherInformationCalculator c = new UnivariateLikelihoodFisherInformationCalculator(f,
+					fiFunction);
+
+			// Get limits
+			double[] params = new double[5];
+			params[0] = settings.getBackground();
+			params[1] = settings.getPhotonsPerSecond();
+			System.arraycopy(xyz, 0, params, 2, 3);
+			FisherInformationMatrix m = c.compute(params);
+
+			// Report and store the limits
+			double[] crlb = m.crlb();
+			if (crlb != null)
+			{
+				Utils.log("Localisation precision (CRLB): %s,%s photons", Utils.rounded(crlb[0]),
+						Utils.rounded(crlb[1]));
+				Utils.log("Localisation precision (CRLB): %s,%s,%s nm : %s,%s,%s px", Utils.rounded(crlb[2] * a),
+						Utils.rounded(crlb[3] * a), Utils.rounded(crlb[4] * a), Utils.rounded(crlb[2]),
+						Utils.rounded(crlb[3]), Utils.rounded(crlb[4]));
+			}
 
 			final double qe = getQuantumEfficiency();
-			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, settings.getPixelPitch(),
+			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, a,
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
 					readNoise, settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
-					settings.getBackground(), noise, lowerN, lowerP, lowerMLP,
-					createPSF(sd / settings.getPixelPitch()));
+					settings.getBackground(), noise, lowerN, lowerP, lowerMLP, createPSF(sd / a), crlb);
 		}
 		else
 		{
@@ -2052,22 +2084,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Create the camera noise model
 		createPerPixelCameraModelData(cameraModel);
 
-		// Set-up computation of CRLB
 		int threadCount = Prefs.getThreads();
-		if (benchmarkMode)
-		{
-			crlbCount.set(threadCount);
-			createLikelihoodFunction();
-		}
 
 		IJ.showStatus("Drawing image ...");
 
 		// Multi-thread for speed
-		// Note that the default Executors.newCachedThreadPool() will continue to make threads if
-		// new tasks are added. We need to limit the tasks that can be added using a fixed size
-		// blocking queue.
-		// http://stackoverflow.com/questions/1800317/impossible-to-make-a-cached-thread-pool-with-a-size-limit
-		// ExecutorService threadPool = Executors.newCachedThreadPool();
 		PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
 		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 		List<Future<?>> futures = new LinkedList<Future<?>>();
@@ -2451,10 +2472,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 		}
 
+		double d = settings.getDepthOfFocus() / settings.getPixelPitch();
+
 		if (psfModelType == PSF_MODEL_GAUSSIAN)
 		{
 			double sd = getPsfSD();
-			double d = settings.getDepthOfFocus() / settings.getPixelPitch();
 			double gamma = 0;
 			HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
 			return new GaussianPSFModel(createRandomGenerator(), zModel);
@@ -2462,9 +2484,20 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Default to Airy pattern
 		double width = getPsfSD() / PSFCalculator.AIRY_TO_GAUSSIAN;
-		AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, 450.0 / settings.getPixelPitch());
+		AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, d);
 		m.setRing(2);
 		return m;
+	}
+
+	private PSFModel createPSFModel(double[] xyz)
+	{
+		// Create a set with a single model
+		List<LocalisationModelSet> localisationSets = new TurboList<LocalisationModelSet>(1);
+		LocalisationModelSet set = new LocalisationModelSet(0, 0);
+		LocalisationModel m = new LocalisationModel(0, 0, xyz, 1, 0);
+		set.add(m);
+		localisationSets.add(set);
+		return createPSFModel(localisationSets);
 	}
 
 	private PSFModel createPSFModel(PSFModel psfModel) throws IllegalArgumentException
@@ -3563,7 +3596,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
-					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
+					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
+					: stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -4642,26 +4676,40 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		CameraType cameraType = settings.getCameraType();
 		boolean isCCD = CalibrationProtosHelper.isCCDCameraType(cameraType);
-		likelihoodFunction = new LikelihoodFunction[settings.getSize() * settings.getSize()];
+		fiFunction = new BasePoissonFisherInformation[settings.getSize() * settings.getSize()];
 		if (isCCD)
 		{
-			LikelihoodFunction f;
+			BasePoissonFisherInformation f;
 			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 			double readNoise = helper.getReadNoiseInCounts();
 
 			if (cameraType == CameraType.EMCCD)
 			{
-				f = new PoissonGammaGaussianFunction(1.0 / helper.getTotalGain(), readNoise);
+				// This should be interpolated from a stored curve
+				InterpolatedPoissonFisherInformation i = CameraModelFisherInformationAnalysis.loadFunction(
+						CameraModelFisherInformationAnalysis.CameraType.EM_CCD, helper.getTotalGain(), readNoise);
+				if (i == null)
+					throw new IllegalStateException("No stored Fisher information for EM-CCD camera with gain " +
+							helper.getTotalGain() + " and noise " + readNoise);
+				f = i;
 			}
 			else
 			{
-				f = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / helper.getTotalGain(), readNoise);
+				// This is fast enough to compute dynamically
+				f = new PoissonGaussianFisherInformation(readNoise / helper.getTotalGain());
 			}
-			Arrays.fill(likelihoodFunction, f);
+			Arrays.fill(fiFunction, f);
 		}
 		else if (cameraType == CameraType.SCMOS)
 		{
-			// Build per-pixel likelihood function
+			// Build per-pixel likelihood function.
+			// Get the normalised variance per pixel.
+			float[] v = cameraModel.getNormalisedVariance(cameraModel.getBounds());
+			// Build the function
+			for (int i = 0; i < fiFunction.length; i++)
+			{
+				fiFunction[i] = new PoissonGaussianFisherInformation(Math.sqrt(v[i]));
+			}
 		}
 		else
 		{
