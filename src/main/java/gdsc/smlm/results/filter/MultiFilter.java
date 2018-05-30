@@ -355,6 +355,8 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	public int getValidationFlags()
 	{
+		if (components == null)
+			setup();
 		return components.getValidationFlags();
 	}
 
