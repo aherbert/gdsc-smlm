@@ -17,6 +17,7 @@ import gdsc.core.logging.Ticker;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
@@ -325,7 +326,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	}
 
 	/**
-	 * Load the PoissoFisher information for the camera type from the cache. The gain and noise must match within an
+	 * Load the Poisson Fisher information data for the camera type from the cache. The gain and noise must match within
+	 * an
 	 * error of 1e-3.
 	 *
 	 * @param type
@@ -336,13 +338,13 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	 *            the noise
 	 * @return the poisson fisher information data (or null)
 	 */
-	public static PoissonFisherInformationData load(CameraType type, double gain, double noise)
+	public static PoissonFisherInformationData loadData(CameraType type, double gain, double noise)
 	{
-		return load(type, gain, noise, 1e-3);
+		return loadData(type, gain, noise, 1e-3);
 	}
 
 	/**
-	 * Load the PoissoFisher information for the camera type from the cache.
+	 * Load the Poisson Fisher information data for the camera type from the cache.
 	 *
 	 * @param type
 	 *            the type
@@ -354,7 +356,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	 *            the relative error (used to compare the gain and noise)
 	 * @return the poisson fisher information data (or null)
 	 */
-	public static PoissonFisherInformationData load(CameraType type, double gain, double noise, double relativeError)
+	public static PoissonFisherInformationData loadData(CameraType type, double gain, double noise,
+			double relativeError)
 	{
 		FIKey key = new FIKey(type, gain, noise);
 		PoissonFisherInformationData data = load(key);
@@ -382,6 +385,85 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			}
 		}
 		return data;
+	}
+
+	/**
+	 * Load the Poisson Fisher information for the camera type from the cache. The gain and noise must match within an
+	 * error of 1e-3.
+	 *
+	 * @param type
+	 *            the type
+	 * @param gain
+	 *            the gain
+	 * @param noise
+	 *            the noise
+	 * @return the poisson fisher information (or null)
+	 */
+	public static InterpolatedPoissonFisherInformation loadFunction(CameraType type, double gain, double noise)
+	{
+		return loadFunction(type, gain, noise, 1e-3);
+	}
+
+	/**
+	 * Load the Poisson Fisher information for the camera type from the cache.
+	 *
+	 * @param type
+	 *            the type
+	 * @param gain
+	 *            the gain
+	 * @param noise
+	 *            the noise
+	 * @param relativeError
+	 *            the relative error (used to compare the gain and noise)
+	 * @return the poisson fisher information (or null)
+	 */
+	public static InterpolatedPoissonFisherInformation loadFunction(CameraType type, double gain, double noise,
+			double relativeError)
+	{
+		if (type == null || type.isFast())
+			return null;
+		FIKey key = new FIKey(type, gain, noise);
+		PoissonFisherInformationData data = load(key);
+		if (data == null && relativeError > 0 && relativeError < 0.1)
+		{
+			// Fuzzy matching
+			double error = 1;
+			for (PoissonFisherInformationData d : cache.values())
+			{
+				double e1 = DoubleEquality.relativeError(gain, d.getGain());
+				if (e1 < relativeError)
+				{
+					double e2 = DoubleEquality.relativeError(noise, d.getNoise());
+					if (e2 < relativeError)
+					{
+						// Combined error - Euclidean distance
+						double e = e1 * e1 + e2 * e2;
+						if (error > e)
+						{
+							error = e;
+							data = d;
+						}
+					}
+				}
+			}
+		}
+		if (data == null)
+			return null;
+		// Dump the samples. Convert to base e.
+		double scale = Math.log(10);
+		TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
+		TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
+		for (AlphaSample sample : data.getAlphaSampleList())
+		{
+			meanList.add(sample.getLog10Mean() * scale);
+			alphalist.add(sample.getAlpha());
+		}
+		double[] means = meanList.toArray();
+		double[] alphas = alphalist.toArray();
+		Sort.sortArrays(alphas, means, true);
+		BasePoissonFisherInformation upperf = (type == CameraType.EM_CCD) ? new HalfPoissonFisherInformation()
+				: createPoissonGaussianApproximationFisherInformation(noise / gain);
+		return new InterpolatedPoissonFisherInformation(means, alphas, type.isLowerFixedI(), upperf);
 	}
 
 	private CameraModelFisherInformationAnalysisSettings.Builder settings;
@@ -645,7 +727,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		wo.tile();
 	}
 
-	private BasePoissonFisherInformation createPoissonFisherInformation(FIKey key)
+	private static BasePoissonFisherInformation createPoissonFisherInformation(FIKey key)
 	{
 		switch (key.getType())
 		{
@@ -662,7 +744,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		}
 	}
 
-	private String getName(FIKey key)
+	private static String getName(FIKey key)
 	{
 		CameraType type = key.getType();
 		String name = type.getShortName();
@@ -678,7 +760,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return name;
 	}
 
-	private PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(double s)
+	private static PoissonGaussianFisherInformation createPoissonGaussianFisherInformation(double s)
 	{
 		if (s < 0)
 		{
@@ -695,7 +777,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return fi;
 	}
 
-	private PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation(double s)
+	private static PoissonGaussianApproximationFisherInformation createPoissonGaussianApproximationFisherInformation(
+			double s)
 	{
 		if (s <= 0)
 		{
@@ -705,7 +788,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		return new PoissonGaussianApproximationFisherInformation(s);
 	}
 
-	private PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation(double m, double s)
+	private static PoissonGammaGaussianFisherInformation createPoissonGammaGaussianFisherInformation(double m, double s)
 	{
 		if (s < 0)
 		{
@@ -768,23 +851,28 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 			PoissonFisherInformationData data = load(key);
 			if (data != null)
 			{
-				// Dump the log10 means
-				TDoubleArrayList means = new TDoubleArrayList(data.getAlphaSampleCount());
+				// Dump the samples
+				TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
+				TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
 				for (AlphaSample sample : data.getAlphaSampleList())
-					means.add(sample.getLog10Mean());
-				double[] exp2 = means.toArray();
-				// These must be sorted
-				Arrays.sort(exp2);
+				{
+					meanList.add(sample.getLog10Mean());
+					alphalist.add(sample.getAlpha());
+				}
+				double[] exp2 = meanList.toArray();
+				double[] alphas = alphalist.toArray();
+				Sort.sortArrays(alphas, exp2, true);
 
 				// Find any exponent not in the array
 				TIntArrayList list = new TIntArrayList(exp.length);
 				for (int i = 0; i < exp.length; i++)
 				{
+					// Assume exp2 is sorted
 					int j = Arrays.binarySearch(exp2, exp[i]);
 					if (j < 0)
 						list.add(i); // Add to indices to compute
 					else
-						alpha[i] = data.getAlphaSample(j).getAlpha(); // Get alpha
+						alpha[i] = alphas[j]; // Get alpha
 				}
 				index = list.toArray();
 			}
@@ -984,8 +1072,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 				iphotons.add(FastMath.pow(10, e));
 			}
 		}
-		iexp.add(exp[exp.length-1]);
-		iphotons.add(FastMath.pow(10, exp[exp.length-1]));
+		iexp.add(exp[exp.length - 1]);
+		iphotons.add(FastMath.pow(10, exp[exp.length - 1]));
 		double[] photons = iphotons.toArray();
 		double[] ix = (logScaleX) ? photons : iexp.toArray();
 		double[] ialpha1 = getAlpha(if1, photons);
