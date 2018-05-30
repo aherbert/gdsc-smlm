@@ -32,6 +32,7 @@ public class GaussianPSFModel extends PSFModel
 	private double s0;
 	private double s1;
 	private AstigmatismZModel zModel;
+	private double range = 5;
 
 	/**
 	 * @param s0
@@ -241,10 +242,10 @@ public class GaussianPSFModel extends PSFModel
 		s1 = Math.abs(s1);
 
 		// Evaluate the Gaussian error function on a pixel grid covering +/- 5 SD
-		final int x0min = clip((int) (x0 - 5 * s0), width);
-		final int x1min = clip((int) (x1 - 5 * s1), height);
-		final int x0max = clip((int) Math.ceil(x0 + 5 * s0), width);
-		final int x1max = clip((int) Math.ceil(x1 + 5 * s1), height);
+		final int x0min = clip((int) (x0 - range * s0), width);
+		final int x1min = clip((int) (x1 - range * s1), height);
+		final int x0max = clip((int) Math.ceil(x0 + range * s0), width);
+		final int x1max = clip((int) Math.ceil(x1 + range * s1), height);
 
 		final int x0range = x0max - x0min;
 		final int x1range = x1max - x1min;
@@ -305,10 +306,10 @@ public class GaussianPSFModel extends PSFModel
 		s1 = Math.abs(s1);
 
 		// Evaluate the Gaussian error function on a pixel grid covering +/- 5 SD
-		final int x0min = clip((int) (x0 - 5 * s0), width);
-		final int x1min = clip((int) (x1 - 5 * s1), height);
-		final int x0max = clip((int) Math.ceil(x0 + 5 * s0), width);
-		final int x1max = clip((int) Math.ceil(x1 + 5 * s1), height);
+		final int x0min = clip((int) (x0 - range * s0), width);
+		final int x1min = clip((int) (x1 - range * s1), height);
+		final int x0max = clip((int) Math.ceil(x0 + range * s0), width);
+		final int x1max = clip((int) Math.ceil(x1 + range * s1), height);
 
 		final int x0range = x0max - x0min;
 		final int x1range = x1max - x1min;
@@ -512,10 +513,10 @@ public class GaussianPSFModel extends PSFModel
 		double s1 = getS1(x2);
 
 		// Evaluate the Gaussian error function on a pixel grid covering +/- 5 SD
-		final int x0min = clip((int) (x0 - 5 * s0), width);
-		final int x1min = clip((int) (x1 - 5 * s1), height);
-		final int x0max = clip((int) Math.ceil(x0 + 5 * s0), width);
-		final int x1max = clip((int) Math.ceil(x1 + 5 * s1), height);
+		final int x0min = clip((int) (x0 - range * s0), width);
+		final int x1min = clip((int) (x1 - range * s1), height);
+		final int x0max = clip((int) Math.ceil(x0 + range * s0), width);
+		final int x1max = clip((int) Math.ceil(x1 + range * s1), height);
 
 		final int x0range = x0max - x0min;
 		final int x1range = x1max - x1min;
@@ -566,10 +567,10 @@ public class GaussianPSFModel extends PSFModel
 		double s1 = getS1(x2);
 
 		// Evaluate the Gaussian error function on a pixel grid covering +/- 5 SD
-		final int x0min = clip((int) (x0 - 5 * s0), width);
-		final int x1min = clip((int) (x1 - 5 * s1), height);
-		final int x0max = clip((int) Math.ceil(x0 + 5 * s0), width);
-		final int x1max = clip((int) Math.ceil(x1 + 5 * s1), height);
+		final int x0min = clip((int) (x0 - range * s0), width);
+		final int x1min = clip((int) (x1 - range * s1), height);
+		final int x0max = clip((int) Math.ceil(x0 + range * s0), width);
+		final int x1max = clip((int) Math.ceil(x1 + range * s1), height);
 
 		final int x0range = x0max - x0min;
 		final int x1range = x1max - x1min;
@@ -614,5 +615,30 @@ public class GaussianPSFModel extends PSFModel
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Gets the range over which the Gaussian is evaluated. This is in units of standard deviation.
+	 *
+	 * @return the range
+	 */
+	public double getRange()
+	{
+		return range;
+	}
+
+	/**
+	 * Sets the range over which the Gaussian is evaluated. This is in units of standard deviation.
+	 *
+	 * @param range
+	 *            the new range
+	 * @throws IllegalArgumentException
+	 *             If the range is not strictly positive
+	 */
+	public void setRange(double range) throws IllegalArgumentException
+	{
+		if (!(range > 0))
+			throw new IllegalArgumentException("Range must be strictly positive");
+		this.range = range;
 	}
 }

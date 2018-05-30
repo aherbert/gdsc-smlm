@@ -134,4 +134,62 @@ public class GaussianPSFModelTest
 			}
 		}
 	}
+
+	@Test
+	public void canComputeValueWithDifferentRange()
+	{
+		// Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
+		double sx = 1.08;
+		double sy = 1.01;
+		double gamma = 0.389;
+		double d = 0.531;
+		double Ax = -0.0708;
+		double Bx = -0.073;
+		double Ay = 0.164;
+		double By = 0.0417;
+		AstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
+
+		int maxx = 21, maxy = 21;
+		double[] o = new double[maxx * maxy];
+		double[] o2 = new double[maxx * maxy];
+
+		PSFModel psf = new GaussianPSFModel(zModel);
+		GaussianPSFModel psf2 = new GaussianPSFModel(zModel);
+		psf2.setRange(40);
+
+		double c = maxx * 0.5;
+		for (int i = -1; i <= 1; i++)
+		{
+			double x0 = c + i * 0.33;
+			for (int j = -1; j <= 1; j++)
+			{
+				double x1 = c + j * 0.33;
+				for (int k = -1; k <= 1; k++)
+				{
+					double x2 = k * 0.33;
+					psf.getValue(maxx, maxy, x0, x1, x2, o);
+					psf2.getValue(maxx, maxy, x0, x1, x2, o2);
+					int extra = 0, zero = 0;
+					for (int ii = 0; ii < o.length; ii++)
+					{
+						if (o[ii] == 0)
+						{
+							// PSF has a larger range
+							zero++;
+							if (o2[ii] != 0)
+								extra++;
+						}
+						else
+						{
+							Assert.assertEquals(o[ii], o2[ii], 0);
+						}
+					}
+					Assert.assertNotEquals(0, extra);
+					double f = (double) extra / zero;
+					//System.out.printf("Extra %d/%d (%g)\n", extra, zero, f);
+					Assert.assertTrue(f > 0.4);
+				}
+			}
+		}
+	}
 }
