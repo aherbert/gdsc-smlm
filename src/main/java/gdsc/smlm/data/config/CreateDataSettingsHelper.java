@@ -1,5 +1,6 @@
 package gdsc.smlm.data.config;
 
+import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettingsOrBuilder;
 import gdsc.smlm.model.DiffusionType;
 
@@ -23,6 +24,7 @@ public class CreateDataSettingsHelper
 {
 	CreateDataSettingsOrBuilder createDataSettings;
 
+	private boolean isEMCCD = false;
 	private double totalGain = 0;
 
 	/**
@@ -38,6 +40,7 @@ public class CreateDataSettingsHelper
 		if (!CalibrationProtosHelper.isCCDCameraType(createDataSettings.getCameraType()))
 			throw new IllegalArgumentException("Helper instance must be used for a CCD-type camera");
 		this.createDataSettings = createDataSettings;
+		isEMCCD = createDataSettings.getCameraTypeValue() == CameraType.EMCCD_VALUE;
 		updateTotalGain();
 	}
 
@@ -54,15 +57,21 @@ public class CreateDataSettingsHelper
 
 	/**
 	 * EM-gain cannot be below 1. If so it is set to zero and disabled.
+	 * <p>
+	 * This is also zero for a non EM-CCD camera.
 	 * 
 	 * @return the emGain
 	 */
 	public double getEmGain()
 	{
-		double emGain = createDataSettings.getEmGain();
-		if (emGain < 1)
-			emGain = 0;
-		return emGain;
+		if (isEMCCD)
+		{
+			double emGain = createDataSettings.getEmGain();
+			if (emGain < 1)
+				emGain = 0;
+			return emGain;
+		}
+		return 0;
 	}
 
 	/**
