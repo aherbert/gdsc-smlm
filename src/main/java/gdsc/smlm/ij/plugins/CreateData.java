@@ -986,13 +986,18 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		boolean emCCD;
 		double totalGain;
-		double noise = getNoiseEstimate();
+		final double qe = getQuantumEfficiency();
+		double noise = getNoiseEstimateInPhotoelectrons(qe);
 		double readNoise;
+
+		// TODO
+		// Apply QE directly to simulated photons to allow computation of bounds
+		// with the captured photons...
 
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
 			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
-			emCCD = (settings.getCameraType() == CameraType.EMCCD) ? settings.getEmGain() > 1 : false;
+			emCCD = helper.isEMCCD;
 			totalGain = helper.getTotalGainSafe();
 			// Store read noise in ADUs
 			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
@@ -1016,28 +1021,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 		// is the same as MLE with the caveat of numerical instability.
 
-		double lowerP = Gaussian2DPeakResultHelper.getPrecision(a, sd, settings.getPhotonsPerSecondMaximum(), noise,
-				emCCD);
-		double upperP = Gaussian2DPeakResultHelper.getPrecision(a, sd, settings.getPhotonsPerSecond(), noise, emCCD);
-		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, settings.getPhotonsPerSecondMaximum(), noise,
-				emCCD);
-		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, settings.getPhotonsPerSecond(), noise,
-				emCCD);
-		double lowerN = getPrecisionN(a, sd, settings.getPhotonsPerSecond(), Maths.pow2(noise), emCCD);
-		double upperN = getPrecisionN(a, sd, settings.getPhotonsPerSecondMaximum(), Maths.pow2(noise), emCCD);
+		double min = settings.getPhotonsPerSecond() * qe;
+		double max = settings.getPhotonsPerSecondMaximum() * qe;
+		double lowerP = Gaussian2DPeakResultHelper.getPrecision(a, sd, max, noise, emCCD);
+		double upperP = Gaussian2DPeakResultHelper.getPrecision(a, sd, min, noise, emCCD);
+		double lowerMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, max, noise, emCCD);
+		double upperMLP = Gaussian2DPeakResultHelper.getMLPrecision(a, sd, min, noise, emCCD);
+		double lowerN = getPrecisionN(a, sd, min, Maths.pow2(noise), emCCD);
+		double upperN = getPrecisionN(a, sd, max, Maths.pow2(noise), emCCD);
 
 		if (settings.getCameraType() == CameraType.SCMOS)
 			Utils.log("sCMOS camera background estimate uses an average read noise");
-		Utils.log("Effective background noise = %s photons [includes read variance converted to photons]",
+		Utils.log("Effective background noise = %s photo-electron [includes read variance converted to photons]",
 				Utils.rounded(noise));
 		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
 				Utils.rounded(lowerP / a), Utils.rounded(upperP / a));
 		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", Utils.rounded(lowerMLP),
 				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / a), Utils.rounded(upperMLP / a));
-		Utils.log("Signal precision: %s - %s photons", Utils.rounded(lowerN), Utils.rounded(upperN));
+		Utils.log("Signal precision: %s - %s photo-electrons", Utils.rounded(lowerN), Utils.rounded(upperN));
 
 		// Store the benchmark settings when not using variable photons
-		if (settings.getPhotonsPerSecond() == settings.getPhotonsPerSecondMaximum())
+		if (min == max)
 		{
 			// Compute the true CRLB using the fisher information
 			createLikelihoodFunction();
@@ -1051,8 +1055,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Get limits
 			double[] params = new double[5];
-			params[0] = settings.getBackground();
-			params[1] = settings.getPhotonsPerSecond();
+			params[0] = settings.getBackground() * qe;
+			params[1] = min;
 			System.arraycopy(xyz, 0, params, 2, 3);
 			FisherInformationMatrix m = c.compute(params);
 
@@ -1061,14 +1065,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			//System.out.println(m);
 			if (crlb != null)
 			{
-				Utils.log("Localisation precision (CRLB): B=%s,I=%s photons", Utils.rounded(crlb[0]),
+				Utils.log("Localisation precision (CRLB): B=%s, I=%s photons", Utils.rounded(crlb[0]),
 						Utils.rounded(crlb[1]));
-				Utils.log("Localisation precision (CRLB): X=%s,Y=%s,Z=%s nm : %s,%s,%s px", Utils.rounded(crlb[2] * a),
+				Utils.log("Localisation precision (CRLB): X=%s, Y=%s, Z=%s nm : %s,%s,%s px", Utils.rounded(crlb[2] * a),
 						Utils.rounded(crlb[3] * a), Utils.rounded(crlb[4] * a), Utils.rounded(crlb[2]),
 						Utils.rounded(crlb[3]), Utils.rounded(crlb[4]));
 			}
 
-			final double qe = getQuantumEfficiency();
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, a,
 					settings.getPhotonsPerSecond(), xyz[0], xyz[1], xyz[2], settings.getBias(), totalGain, qe,
 					readNoise, settings.getCameraType(), settings.getCameraModelName(), cameraModel.getBounds(),
@@ -1083,7 +1086,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 	}
 
-	private double getNoiseEstimate()
+	private double getNoiseEstimateInPhotoelectrons(double qe)
 	{
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
@@ -1091,7 +1094,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			double backgroundVariance = settings.getBackground();
 
 			// Read noise is in electrons. Convert to Photons
-			double readNoise = settings.getReadNoise() / getQuantumEfficiency();
+			double readNoise = settings.getReadNoise() / qe;
 
 			// In an EM-CCD camera the read noise (in Counts) is swamped by amplification of the signal. 
 			// We get the same result by dividing the read noise (in photons) by the EM-gain.
@@ -1105,7 +1108,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
 			// is equal to the total variance at the pixel.
-			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
+			double total = backgroundVariance + Maths.pow2(readNoise);
+			// Convert back to electrons and get the noise estimate
+			return Math.sqrt(total * qe);
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
@@ -1119,9 +1124,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			createPerPixelCameraModelData(cameraModel);
 
 			// Get the average read noise. Convert from electrons to photons
-			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / getQuantumEfficiency();
+			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / qe;
 
-			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
+			double total = backgroundVariance + Maths.pow2(readNoise);
+			// Convert back to electrons and get the noise estimate
+			return Math.sqrt(total * qe);
 		}
 		throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
 	}
@@ -1134,7 +1141,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	private void saveSimulationParameters(int particles, boolean fullSimulation, double signalPerFrame)
 	{
 		double totalGain;
-		double noise = getNoiseEstimate();
+		double noise = getNoiseEstimateInPhotoelectrons(getQuantumEfficiency());
 		double readNoise;
 
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
@@ -1142,7 +1149,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
 			totalGain = helper.getTotalGainSafe();
 			// Store read noise in ADUs
-			readNoise = settings.getReadNoise() * ((settings.getCameraGain() > 0) ? settings.getCameraGain() : 1);
+			readNoise = helper.getReadNoiseInCounts();
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
@@ -2469,7 +2476,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Allow reuse of the cached model
 		if (psfModelCache != null)
 			return psfModelCache;
-		
+
 		if (psfModelType == PSF_MODEL_IMAGE)
 		{
 			return createImagePSF(localisationSets);
@@ -4731,12 +4738,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			if (cameraType == CameraType.EMCCD)
 			{
+				// We only want the amplification (without QE applied)
+				double amp = helper.getAmplification();
 				// This should be interpolated from a stored curve
-				InterpolatedPoissonFisherInformation i = CameraModelFisherInformationAnalysis.loadFunction(
-						CameraModelFisherInformationAnalysis.CameraType.EM_CCD, helper.getTotalGain(), readNoise);
+				InterpolatedPoissonFisherInformation i = CameraModelFisherInformationAnalysis
+						.loadFunction(CameraModelFisherInformationAnalysis.CameraType.EM_CCD, amp, readNoise);
 				if (i == null)
-					throw new IllegalStateException("No stored Fisher information for EM-CCD camera with gain " +
-							helper.getTotalGain() + " and noise " + readNoise);
+					throw new IllegalStateException("No stored Fisher information for EM-CCD camera with gain " + amp +
+							" and noise " + readNoise);
 				f = i;
 			}
 			else
