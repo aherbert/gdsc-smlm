@@ -24,7 +24,7 @@ public class CreateDataSettingsHelper
 {
 	CreateDataSettingsOrBuilder createDataSettings;
 
-	private boolean isEMCCD = false;
+	final public boolean isEMCCD;
 	private double totalGain = 0;
 
 	/**
