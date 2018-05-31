@@ -940,13 +940,42 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		double a = settings.getPixelPitch();
 		double[] xyz = dist.next().clone();
-		double offset = settings.getSize() * 0.5;
+		int size = settings.getSize();
+		double offset = size * 0.5;
 		for (int i = 0; i < 2; i++)
 			xyz[i] += offset;
-		double sd = getPsfSD() * a;
+
+		// Get the width for the z-depth by using the PSF Model
+		PSFModel psf = createPSFModel(xyz);
+
+		double sd0, sd1;
+		if (psf instanceof GaussianPSFModel)
+		{
+			sd0 = ((GaussianPSFModel) psf).getS0(xyz[2]);
+			sd1 = ((GaussianPSFModel) psf).getS1(xyz[2]);
+		}
+		else if (psf instanceof AiryPSFModel)
+		{
+			psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
+			sd0 = ((AiryPSFModel) psf).getW0() * PSFCalculator.AIRY_TO_GAUSSIAN;
+			sd1 = ((AiryPSFModel) psf).getW1() * PSFCalculator.AIRY_TO_GAUSSIAN;
+		}
+		else if (psf instanceof ImagePSFModel)
+		{
+			psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
+			sd0 = ((ImagePSFModel) psf).getHWHM0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+			sd1 = ((ImagePSFModel) psf).getHWHM1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR;
+		}
+		else
+		{
+			throw new IllegalStateException("Unknown PSF: " + psf.getClass().getSimpleName());
+		}
+
+		double sd = Gaussian2DPeakResultHelper.getStandardDeviation(sd0, sd1) * a;
 
 		Utils.log("X = %s nm : %s px", Utils.rounded(xyz[0] * a), Utils.rounded(xyz[0], 6));
 		Utils.log("Y = %s nm : %s px", Utils.rounded(xyz[1] * a), Utils.rounded(xyz[1], 6));
+		Utils.log("Z = %s nm : %s px", Utils.rounded(xyz[2] * a), Utils.rounded(xyz[2], 6));
 		Utils.log("Width (s) = %s nm : %s px", Utils.rounded(sd), Utils.rounded(sd / a));
 		final double sa = PSFCalculator.squarePixelAdjustment(sd, a);
 		Utils.log("Adjusted Width (sa) = %s nm : %s px", Utils.rounded(sa), Utils.rounded(sa / a));
@@ -1011,11 +1040,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Compute the true CRLB using the fisher information
 			createLikelihoodFunction();
 
-			// This needs the PSF Model
-			PSFModel psf = createPSFModel(xyz);
-
 			// Wrap to a function
-			PSFModelGradient1Function f = new PSFModelGradient1Function(psf, settings.getSize(), settings.getSize());
+			PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
 
 			// Compute Fisher information
 			UnivariateLikelihoodFisherInformationCalculator c = new UnivariateLikelihoodFisherInformationCalculator(f,
@@ -1030,6 +1056,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Report and store the limits
 			double[] crlb = m.crlbSqrt();
+			System.out.println(m);
 			if (crlb != null)
 			{
 				Utils.log("Localisation precision (CRLB): B=%s,I=%s photons", Utils.rounded(crlb[0]),
@@ -2487,7 +2514,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			double sd = getPsfSD();
 			double gamma = 0;
 			HoltzerAstigmatismZModel zModel = HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
-			return new GaussianPSFModel(createRandomGenerator(), zModel);
+			GaussianPSFModel m = new GaussianPSFModel(createRandomGenerator(), zModel);
+			//m.setRange(10);
+			return m;
 		}
 
 		// Default to Airy pattern
