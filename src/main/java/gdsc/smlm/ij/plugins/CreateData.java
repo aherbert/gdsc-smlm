@@ -208,6 +208,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 */
 	private int psfModelType = -1;
 	private AstigmatismModel astigmatismModel = null;
+	private PSFModel psfModelCache;
 
 	private static TextWindow summaryTable = null;
 	private static int datasetNumber = 0;
@@ -947,6 +948,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Get the width for the z-depth by using the PSF Model
 		PSFModel psf = createPSFModel(xyz);
+		psfModelCache = psf;
 
 		double sd0, sd1;
 		if (psf instanceof GaussianPSFModel)
@@ -1056,7 +1058,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 			// Report and store the limits
 			double[] crlb = m.crlbSqrt();
-			System.out.println(m);
+			//System.out.println(m);
 			if (crlb != null)
 			{
 				Utils.log("Localisation precision (CRLB): B=%s,I=%s photons", Utils.rounded(crlb[0]),
@@ -2383,6 +2385,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// closer to the objective). Thus higher z-coordinate are for higher slice numbers.
 			int lower = (int) Math.round(minZ / unitsPerSlice) + zCentre;
 			int upper = (int) Math.round(maxZ / unitsPerSlice) + zCentre;
+			// Add extra to the range so that gradients can be computed.
+			lower--;
+			upper++;
 			upper = (upper < 0) ? 0 : (upper >= nSlices) ? nSlices - 1 : upper;
 			lower = (lower < 0) ? 0 : (lower >= nSlices) ? nSlices - 1 : lower;
 
@@ -2461,6 +2466,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 	private PSFModel createPSFModel(List<LocalisationModelSet> localisationSets) throws IllegalArgumentException
 	{
+		// Allow reuse of the cached model
+		if (psfModelCache != null)
+			return psfModelCache;
+		
 		if (psfModelType == PSF_MODEL_IMAGE)
 		{
 			return createImagePSF(localisationSets);
