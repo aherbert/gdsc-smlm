@@ -26,10 +26,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
+import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
@@ -959,8 +961,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		else if (psf instanceof AiryPSFModel)
 		{
 			psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
-			sd0 = ((AiryPSFModel) psf).getW0() * PSFCalculator.AIRY_TO_GAUSSIAN;
-			sd1 = ((AiryPSFModel) psf).getW1() * PSFCalculator.AIRY_TO_GAUSSIAN;
+			sd0 = ((AiryPSFModel) psf).getW0() * AiryPattern.FACTOR;
+			sd1 = ((AiryPSFModel) psf).getW1() * AiryPattern.FACTOR;
 		}
 		else if (psf instanceof ImagePSFModel)
 		{
@@ -990,10 +992,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double noise = getNoiseEstimateInPhotoelectrons(qe);
 		double readNoise;
 
-		// TODO
-		// Apply QE directly to simulated photons to allow computation of bounds
-		// with the captured photons...
-
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
 			CreateDataSettingsHelper helper = new CreateDataSettingsHelper(settings);
@@ -1021,6 +1019,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// not implemented (i.e. we used an offset of zero) and in this case the WLSE precision 
 		// is the same as MLE with the caveat of numerical instability.
 
+		// Apply QE directly to simulated photons to allow computation of bounds
+		// with the captured photons...
 		double min = settings.getPhotonsPerSecond() * qe;
 		double max = settings.getPhotonsPerSecondMaximum() * qe;
 		double lowerP = Gaussian2DPeakResultHelper.getPrecision(a, sd, max, noise, emCCD);
@@ -1032,7 +1032,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		if (settings.getCameraType() == CameraType.SCMOS)
 			Utils.log("sCMOS camera background estimate uses an average read noise");
-		Utils.log("Effective background noise = %s photo-electron [includes read variance converted to photons]",
+		Utils.log("Effective background noise = %s photo-electron [includes read noise and background photons]",
 				Utils.rounded(noise));
 		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", Utils.rounded(lowerP), Utils.rounded(upperP),
 				Utils.rounded(lowerP / a), Utils.rounded(upperP / a));
@@ -1067,9 +1067,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				Utils.log("Localisation precision (CRLB): B=%s, I=%s photons", Utils.rounded(crlb[0]),
 						Utils.rounded(crlb[1]));
-				Utils.log("Localisation precision (CRLB): X=%s, Y=%s, Z=%s nm : %s,%s,%s px", Utils.rounded(crlb[2] * a),
-						Utils.rounded(crlb[3] * a), Utils.rounded(crlb[4] * a), Utils.rounded(crlb[2]),
-						Utils.rounded(crlb[3]), Utils.rounded(crlb[4]));
+				Utils.log("Localisation precision (CRLB): X=%s, Y=%s, Z=%s nm : %s,%s,%s px",
+						Utils.rounded(crlb[2] * a), Utils.rounded(crlb[3] * a), Utils.rounded(crlb[4] * a),
+						Utils.rounded(crlb[2]), Utils.rounded(crlb[3]), Utils.rounded(crlb[4]));
 			}
 
 			benchmarkParameters = new BenchmarkParameters(settings.getParticles(), sd, a,
@@ -1090,45 +1090,43 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (CalibrationProtosHelper.isCCDCameraType(settings.getCameraType()))
 		{
-			// Background is in photons
-			double backgroundVariance = settings.getBackground();
+			// Background is in photons. Convert to electrons
+			double backgroundVariance = settings.getBackground() * qe;
 
-			// Read noise is in electrons. Convert to Photons
-			double readNoise = settings.getReadNoise() / qe;
+			// Read noise is in electrons.
+			double readNoise = settings.getReadNoise();
 
-			// In an EM-CCD camera the read noise (in Counts) is swamped by amplification of the signal. 
-			// We get the same result by dividing the read noise (in photons) by the EM-gain.
+			// In an EM-CCD camera the read noise (in electrons) is swamped by amplification of the signal. 
+			// We get the same result by dividing the read noise (in electrons) by the EM-gain.
 			if (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
 			{
-				// Add EM-CCD noise factor. The Mortensen formula also includes this factor 
-				// so this is "double-counting" the EM-CCD.  
+				// Add EM-CCD noise factor. The implementation of the Mortensen formula 
+				// using the standard deviation expects this factor.
+				// See gdsc.smlm.results.Gaussian2DPeakResultHelper.getPrecision(double, double, double, double, boolean)
 				backgroundVariance *= 2;
 				readNoise /= settings.getEmGain();
 			}
 
-			// Get the expected value at each pixel in photons. Assuming a Poisson distribution this 
+			// Get the expected value at each pixel in electrons. Assuming a Poisson distribution this 
 			// is equal to the total variance at the pixel.
-			double total = backgroundVariance + Maths.pow2(readNoise);
-			// Convert back to electrons and get the noise estimate
-			return Math.sqrt(total * qe);
+			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
 		}
 		else if (settings.getCameraType() == CameraType.SCMOS)
 		{
 			// Assume sCMOS amplification is like a CCD. We need an average read noise to get an 
 			// approximation of the background noise for the precision computation.
 
-			// We get the total background in photons  
-			double backgroundVariance = settings.getBackground();
+			// We get the total background in electrons
+			double backgroundVariance = settings.getBackground() * qe;
 
 			// Create the camera noise model
 			createPerPixelCameraModelData(cameraModel);
 
-			// Get the average read noise. Convert from electrons to photons
-			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length) / qe;
+			// Get the average read noise in electrons
+			double readNoise = (Maths.sum(this.readNoise) / this.readNoise.length);
 
-			double total = backgroundVariance + Maths.pow2(readNoise);
-			// Convert back to electrons and get the noise estimate
-			return Math.sqrt(total * qe);
+			// Combine as above
+			return Math.sqrt(backgroundVariance + Maths.pow2(readNoise));
 		}
 		throw new IllegalStateException("Unknown camera type: " + settings.getCameraType());
 	}
@@ -2127,6 +2125,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Create the camera noise model
 		createPerPixelCameraModelData(cameraModel);
+		createBackgroundPixels();
 
 		int threadCount = Prefs.getThreads();
 
@@ -2698,16 +2697,33 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Adjust XY dimensions since they are centred on zero
 			final double xoffset = settings.getSize() * 0.5;
 
-			float[] image = createBackground(random);
-			float[] imageCache = image.clone();
+			// The simulation applies the following:
+			// Poisson - Photons emitted
+			// Binomial - Photons to electrons (QE) on the camera chip
+			// Gamma* - Optional EM-gain amplification (electrons)
+			// Gaussian* - Camera gain amplification with noise (count)
+			// *The output is rounded to remain a discrete distribution
 
-			// Create read noise now so that we can calculate the true background noise
-			float[] imageReadNoise = new float[image.length];
+			// In order to analytically determine the noise around each localisation
+			// the background is simulated separately. This is added to the 
+			// simulation for the rendered photons.
+			// This is possible because the Gamma(shape,scale) distribution can be added:
+			// Gamma(a+b,scale) = Gamma(a,scale) + Gamma(b,scale)
+			// See: https://en.wikipedia.org/wiki/Gamma_distribution#Summation
+
+			float[] background = createBackground(random);
+			if (settings.getBackground() > 0)
+				amplify(background);
+
+			float[] image = new float[background.length];
+
+			// Create read noise now so that we can calculate the true background noise.
+			// Note: The read noise is in electrons.
 			if (readNoise != null)
 			{
 				RandomGenerator r = random.getRandomGenerator();
-				for (int i = 0; i < imageReadNoise.length; i++)
-					imageReadNoise[i] = (float) (readNoise[i] * r.nextGaussian());
+				for (int i = 0; i < background.length; i++)
+					background[i] += (float) (readNoise[i] * r.nextGaussian());
 			}
 
 			// Extract the localisations and draw if we have a PSF model
@@ -2803,8 +2819,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					int origY = (int) y;
 					// Background and noise should be calculated using the
 					// region covered by the PSF.
-					double[] localStats = getStatistics(imageCache, imageReadNoise, origX, origY);
-					float background = (float) (localStats[0]);
+					double[] localStats = getStatistics(backgroundPixels, background, origX, origY);
+					double backgroundInPhotons = localStats[0];
 
 					// Note: The width estimate does not account for diffusion
 					float sx, sy;
@@ -2841,46 +2857,22 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// fluorophore SIGNAL.
 					// *-*-*-*-*
 
-					// (EM-)CCD camera:
-					// 
-
-					// The variance of the background image is currently in photons^2 
-					double backgroundVariance = localStats[1];
-
-					// Convert to electrons^2
-					if (qe < 1)
-						backgroundVariance *= Maths.pow2(qe);
-
-					// Get the actual read noise applied to this part of the image. This is in electrons^2.
-					double readVariance = localStats[3];
-
-					// EM-gain noise factor: Adds sqrt(2) to the electrons input to the register.
-					// All data 'read' through the EM-register must have this additional noise factor added.
-					if (emGain != 0)
-					{
-						backgroundVariance *= 2; // Note we are using the variance (std.dev^2) so we use the factor 2
-
-						// For an EM-CCD camera the EM amplification massively scales the electrophotons
-						// and then read noise is added after. This is the same as descaling the read noise by 
-						// the EM-gain so that they can be combined.
-						// Note: Previously the noise computation was in ADUs:
-						// backgroundVariance(photons) * totalGain^2 + readVariance(electrons) * cameraGain^2
-						// backgroundVariance(electrons) * (emGain * cameraGain)^2 + readVariance(electrons) * cameraGain^2
-						// To convert to electrons we divide by total gain:
-						// (backgroundVariance * (emGain * cameraGain)^2 + readVariance * cameraGain^2) / (emGain * cameraGain)^2 
-						// backgroundVariance + readVariance * cameraGain^2 / (emGain * cameraGain)^2
-						// backgroundVariance + readVariance * cameraGain^2 / (emGain * cameraGain)^2
-						// backgroundVariance + readVariance / emGain^2
-
-						readVariance /= Maths.pow2(emGain);
-					}
-
-					// Overall noise can be calculated from the ‘root of sum of squares’ equation
-					double totalNoise = Math.sqrt(backgroundVariance + readVariance);
+					// The variance of the background image is currently in electrons^2 
+					double totalNoise = Math.sqrt(localStats[3]);
 
 					// Convert noise from electrons back to photons for convenience when computing SNR using the signal in photons.
-					if (qe < 1)
-						totalNoise /= qe;
+					double totalNoiseInPhotons = totalNoise / qe;
+					
+					// Account for EM-gain.
+					// This makes the total noise in photons the equivalent of:
+					// [noise in counts] / [total gain]
+					// [noise in counts] / [EM-gain * camera-gain * qe]
+					// [[noise in counts] / camera-gain] / [EM-gain * qe]
+					// [noise in electrons] / [EM-gain * qe]
+					if (emGain != 0)
+						totalNoiseInPhotons /= emGain;
+
+					//System.out.printf("Noise = %g e-\n", totalNoiseInPhotons);
 
 					// Ensure the new data is added before the intensity is updated. This avoids 
 					// syncronisation clashes in the getIntensity(...) function.
@@ -2890,11 +2882,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// [2] = Gaussian Sx
 					// [3] = Gaussian Sy
 					// [4] = total intensity (photons)
-					localisationSet.setData(new double[] { localStats[0], totalNoise, sx, sy, totalPhotonsRendered });
+					localisationSet.setData(
+							new double[] { backgroundInPhotons, totalNoiseInPhotons, sx, sy, totalPhotonsRendered });
 
 					if (checkSNR)
 					{
-						if (badLocalisation(localisationSet, totalPhotonsRendered, totalNoise))
+						if (badLocalisation(localisationSet, totalPhotonsRendered, totalNoiseInPhotons))
 						{
 							for (int i = 0; i < spotCount; i++)
 							{
@@ -2906,13 +2899,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					}
 
 					newLocalisations.add(localisationSet);
-					// Use extended result to store the ID.
-					// Store the z position in the error. 
-					// TODO - This is no longer necessary as we now store the z in the results so update plugins to 
-					// use the z-position from the results.
-					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams(background, intensity, x, y, z, sx,
-							sy);
-					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoise, params,
+					// The parameters should have the background and intensity in 
+					// photons before noise (as a perfect result).
+					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams((float) backgroundInPhotons,
+							intensity, x, y, z, sx, sy);
+					// Use extended result to store the ID
+					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoiseInPhotons, params,
 							null, localisationSet.getId()));
 				}
 
@@ -2920,14 +2912,42 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					image[i] += data[i];
 			}
 
+			amplify(image);
+
+			// Combine with background + read noise (in electrons)
+			for (int i = 0; i < image.length; i++)
+				image[i] += background[i];
+
+			// Apply camera gain. Note that the noise component of the camera gain IS the 
+			// read noise. Thus the read noise is expected to be different for each camera gain.
+			// Also add the bias.
+			cameraModel.applyGainAndBias(cameraModel.getBounds(), image);
+
+			// Send to output
+			stack.setPixels(image, t);
+		}
+
+		/**
+		 * Amplify the photons (assumed to be integer).
+		 * Apply QE using a Binomial to generate electrons.
+		 * Optionally apply EM-gain with a Gamma distribution (more electrons).
+		 *
+		 * @param image
+		 *            the image
+		 */
+		private void amplify(float[] image)
+		{
 			// Quantum efficiency: Model using binomial distribution
 			if (qe < 1)
 			{
 				for (int i = 0; i < image.length; i++)
-					image[i] = random.nextBinomial((int) image[i], qe);
+				{
+					if (image[i] != 0)
+						image[i] = random.nextBinomial((int) image[i], qe);
+				}
 			}
 
-			// Apply EM gain and add Gaussian read noise after all the photons have been simulated
+			// Apply EM gain 
 			if (emGain != 0)
 			{
 				final boolean tubbsModel = false;
@@ -2956,7 +2976,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						if (image[i] <= 0)
 							continue;
 						final double scale = emGain - 1 + 1 / image[i];
-						final double electrons = random.nextGamma(image[i], scale) - 1;
+						final double electrons = Math.round(random.nextGamma(image[i], scale) - 1);
 						image[i] += electrons;
 					}
 				}
@@ -2979,45 +2999,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							// What about modelling spontaneous electron events?
 							continue;
 						}
-						//image[i] = (float) random.nextGamma(image[i], settings.getEmGain());
 						dist.setShapeUnsafe(image[i]);
-						image[i] = (float) dist.sample();
+						image[i] = (float) Math.round(dist.sample());
 					}
 				}
 			}
-
-			// Apply read noise (in electrons)
-			if (readNoise != null)
-			{
-				for (int i = 0; i < image.length; i++)
-					image[i] += imageReadNoise[i];
-			}
-
-			// Apply camera gain. Note that the noise component of the camera gain IS the 
-			// read noise. Thus the read noise is expected to be different for each camera gain.
-			// Also add the bias.
-			cameraModel.applyGainAndBias(cameraModel.getBounds(), image);
-
-			{
-				// TODO Compute the Fisher information for each spot.
-				// This is valid for a Poisson process (see Smith et al, 2010):
-				// Iaa = sum(i) (dYi da) * (dYi da) / Yi
-				// Q. What about EM-CCD? We actually require the difference in the 
-				// log-likelihood function.
-				// 1. Draw each spot perfectly on a new image using psfModel.create3D
-				// 2. Apply perfect gain to get the correct scale 
-				// 3. For each spot
-				// - Combine the other spots + background photons to get the background function
-				// - Combine with the target spot and apply gain to get Yi	
-				// - Render the target spot using an offset +/- delta on X,Y,Signal (a) to get dYi da
-				// - Compute Iaa
-
-				// The simulated image is not used?
-
-			}
-
-			// Send to output
-			stack.setPixels(image, t);
 		}
 
 		private void erase(float[] data, Spot spot)
@@ -3151,7 +3137,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			if (random == null)
 				random = new RandomDataGenerator(createRandomGenerator());
-			createBackgroundPixels();
 			pixels2 = new float[backgroundPixels.length];
 
 			// Add Poisson noise.
@@ -3163,12 +3148,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// the mean for each pixel multiplied by the number of pixels.
 				// Note: The number of samples (N) must be Poisson distributed, i.e. 
 				// the total amount of photons per frame is Poisson noise.
-				final int samples = (int) random.nextPoisson(mean * backgroundPixels.length);
+				long samples = random.nextPoisson(mean * backgroundPixels.length);
 
 				final int upper = pixels2.length - 1;
-				for (int i = 0; i < samples; i++)
+				UniformIntegerDistribution d = new UniformIntegerDistribution(random.getRandomGenerator(), 0, upper);
+				while (samples-- > 0)
 				{
-					pixels2[random.nextInt(0, upper)] += 1;
+					pixels2[d.sample()] += 1;
 				}
 
 				//// Alternative is to sample each pixel from a Poisson distribution. This is slow
@@ -3181,21 +3167,27 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			else
 			{
+				CustomPoissonDistribution dist = new CustomPoissonDistribution(random.getRandomGenerator(), 1,
+						PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 				for (int i = 0; i < pixels2.length; i++)
 				{
-					pixels2[i] = random.nextPoisson(backgroundPixels[i]);
+					if (backgroundPixels[i] > 0)
+					{
+						dist.setMeanUnsafe(backgroundPixels[i]);
+						pixels2[i] = dist.sample();
+					}
 				}
 			}
 		}
 		else
 		{
-			pixels2 = new float[settings.getSize() * settings.getSize()];
+			pixels2 = backgroundPixels.clone();
 		}
 
 		return pixels2;
 	}
 
-	synchronized private void createBackgroundPixels()
+	private void createBackgroundPixels()
 	{
 		// Cache illumination background
 		if (backgroundPixels == null)
