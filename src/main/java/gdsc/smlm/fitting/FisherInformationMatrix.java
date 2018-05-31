@@ -1,5 +1,7 @@
 package gdsc.smlm.fitting;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
@@ -143,7 +145,7 @@ public class FisherInformationMatrix
 				out[ii] = in[index + indices[j]];
 			}
 		}
-		
+
 		return new FisherInformationMatrix(out, m);
 	}
 
@@ -438,5 +440,11 @@ public class FisherInformationMatrix
 	public DenseMatrix64F getMatrix()
 	{
 		return m;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "CRLB=" + Arrays.toString(crlb) + "\nM=" + m.toString();
 	}
 }
