@@ -1,6 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>22.2.0</version>
+		<relativePath />
+	</parent>
 
 	<groupId>gdsc</groupId>
 	<artifactId>gdsc_smlm</artifactId>
@@ -18,6 +26,25 @@
 		</license>
 	</licenses>
 
+	<inceptionYear>2013</inceptionYear>
+	<contributors>
+		<contributor>
+			<name>Alex Herbert</name>
+		</contributor>
+	</contributors>
+	<mailingLists>
+		<mailingList>
+			<name>ImageJ Forum</name>
+			<archive>http://forum.imagej.net/</archive>
+		</mailingList>
+	</mailingLists>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/aherbert/GDSC-SMLM/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
 	<scm>
 		<url>https://github.com/aherbert/GDSC-SMLM</url>
 	</scm>
@@ -28,30 +55,20 @@
 			<name>Alex Herbert</name>
 			<email>a.herbert@sussex.ac.uk</email>
 			<roles>
-				<role>architect</role>
 				<role>developer</role>
 			</roles>
 		</developer>
 	</developers>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
-		<build.date>${maven.build.timestamp}</build.date>
+		<license.licenseName>gpl_v3</license.licenseName>
+		<license.copyrightOwners>N/A</license.copyrightOwners>
+		<allowedDuplicateClasses></allowedDuplicateClasses>
 	</properties>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>2.1</version>
-					<configuration>
-						<source>1.5</source>
-						<target>1.5</target>
-					</configuration>
-				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
@@ -120,7 +137,15 @@
 			</build>
 		</profile>
 	</profiles>
-
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>xmlpull</groupId>
+				<artifactId>xmlpull</artifactId>
+				<version>1.1.3.4d_b4_min</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>gdsc</groupId>
@@ -131,6 +156,12 @@
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
 			<version>1.4.9</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3_min</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.efficient-java-matrix-library</groupId>
@@ -140,17 +171,14 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
-			<version>1.50a</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
-			<version>3.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.wendykierp</groupId>
@@ -172,19 +200,16 @@
 		<dependency>
 			<groupId>net.sf.trove4j</groupId>
 			<artifactId>trove4j</artifactId>
-			<version>3.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/sc.fiji/3D_Viewer -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
-			<version>4.0.2</version>
 		</dependency>
 	</dependencies>
 
