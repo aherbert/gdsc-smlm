@@ -45,7 +45,7 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
 	public SNRResultProcedure(MemoryPeakResults results) throws DataException
 	{
 		super(results);
-		if (results.hasNoise())
+		if (!results.hasNoise())
 			throw new DataException("Results do not have noise");
 	}
 
@@ -120,7 +120,7 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
 		this.mean = mean;
 		i = 0;
 		snr = allocate(snr);
-		results.forEach((StoredPrecisionProcedure) this);
+		results.forEach((PeakResultProcedure) this);
 		return snr;
 	}
 

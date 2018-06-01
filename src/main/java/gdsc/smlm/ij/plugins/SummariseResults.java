@@ -159,11 +159,11 @@ public class SummariseResults implements PlugIn, MouseListener
 			// Precision 
 			try
 			{
-				PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
+				PrecisionResultProcedure p = new PrecisionResultProcedure(result);
 				// Use stored precision if possible
 				stored = result.hasPrecision();
-				precisionMethod = pp.getPrecision(stored);
-				for (double v : pp.precision)
+				precisionMethod = p.getPrecision(stored);
+				for (double v : p.precision)
 					stats[0].addValue(v);
 			}
 			catch (DataException e)
@@ -174,9 +174,9 @@ public class SummariseResults implements PlugIn, MouseListener
 			// SNR 
 			try
 			{
-				SNRResultProcedure pp = new SNRResultProcedure(result);
-				pp.getSNR();
-				for (double v : pp.snr)
+				SNRResultProcedure p = new SNRResultProcedure(result);
+				p.getSNR();
+				for (double v : p.snr)
 					stats[1].addValue(v);
 			}
 			catch (DataException e)
@@ -357,8 +357,7 @@ public class SummariseResults implements PlugIn, MouseListener
 			{
 				try
 				{
-					SNRResultProcedure pp = new SNRResultProcedure(result);
-					plot(wo, "SNR", pp.getSNR());
+					plot(wo, "SNR", new SNRResultProcedure(result).getSNR());
 				}
 				catch (DataException e)
 				{
@@ -385,14 +384,14 @@ public class SummariseResults implements PlugIn, MouseListener
 			// Precision 
 			try
 			{
-				PrecisionResultProcedure pp = new PrecisionResultProcedure(result);
+				PrecisionResultProcedure p = new PrecisionResultProcedure(result);
 				// Use stored precision if possible
 				boolean stored = result.hasPrecision();
-				PrecisionMethod precisionMethod = pp.getPrecision(stored);
+				PrecisionMethod precisionMethod = p.getPrecision(stored);
 				String name = FitProtosHelper.getName(precisionMethod);
 				if (stored)
 					name += " (Stored)";
-				plot(wo, "Precision: " + name, new StoredDataStatistics(pp.precision));
+				plot(wo, "Precision: " + name, new StoredDataStatistics(p.precision));
 			}
 			catch (DataException e)
 			{
