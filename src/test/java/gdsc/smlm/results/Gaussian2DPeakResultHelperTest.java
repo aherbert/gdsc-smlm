@@ -4,6 +4,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
@@ -211,6 +212,30 @@ public class Gaussian2DPeakResultHelperTest
 					Gaussian2DPeakResultHelper.getSNR1(intensity, sx, sy, noise), 1e-3);
 			Assert.assertEquals(Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 2, noise),
 					Gaussian2DPeakResultHelper.getSNR2(intensity, sx, sy, noise), 1e-3);
+		}
+	}
+
+	@Test
+	public void canComputeSNRVersesTotalSNR()
+	{
+		Assume.assumeTrue(false);
+
+		double intensity = 100;
+		double noise = 3;
+
+		for (int i = 0; i <= 10; i++)
+		{
+			double sx = 1 + i / 10.0;
+			for (int j = 0; j <= 10; j++)
+			{
+				double sy = 1 + j / 10.0;
+				System.out.printf("%g,%g  %g  : %g  %g  %g  %g\n", sx, sy, intensity / noise,
+						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 1, noise),
+						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 1.5, noise),
+						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 2, noise),
+						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 3, noise));
+				;
+			}
 		}
 	}
 }
