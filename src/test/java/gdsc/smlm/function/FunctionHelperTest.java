@@ -1,7 +1,5 @@
 package gdsc.smlm.function;
 
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.util.Arrays;
 
 import org.junit.Assert;
@@ -12,10 +10,6 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.ShapeRoi;
-import ij.process.FloatProcessor;
 
 public class FunctionHelperTest
 {
@@ -104,27 +98,6 @@ public class FunctionHelperTest
 	@Test
 	public void canGetMeanValueForGaussian()
 	{
-		// XXX TODO tidfy this up
-		
-		// This does not work. 
-		// The number of samples to achieve the target intensity is much 
-		// greater than the area of the ellipse covered by the Gaussian.
-		// Plot tbe drawn gaussian.
-		// Overlay an ellipse for each range of SD.
-		// Create a mask using all pixels required to achieve the sum.
-		// Does it roughly fit the ellipse?
-
-		// This shows that the Gaussian2DPeakResultHelper.getMeanSignal is not working
-		// The 2D cumulative needs to be computed. I am using a 1D cumulative.
-		// map the 2D back into a smaller 1D range: range = 1 / sqrt(range^2 * 2)
-		for (int range = 1; range <= 3; range++)
-		{
-			double a = Gaussian2DPeakResultHelper.cumulative(range);
-			double b = Gaussian2DPeakResultHelper.cumulative2D(range);
-
-			System.out.printf("%d  %g  %g  %g\n", range, a, b, a / b);
-		}
-
 		float intensity = 100;
 		float sx = 20f;
 		float sy = 20f;
@@ -134,21 +107,19 @@ public class FunctionHelperTest
 		//| GaussianFunctionFactory.FIT_SIMPLE
 				, null);
 		double[] values = f.computeValues(SimpleArrayUtils.toDouble(a));
-		ImagePlus imp = new ImagePlus("gauss", new FloatProcessor(size, size, values));
-		double cx = size / 2.;
-		Shape shape = new Ellipse2D.Double(cx - sx, cx - sy, 2 * sx, 2 * sy);
-		imp.setRoi(new ShapeRoi(shape));
-		//imp.setRoi(new EllipseRoi(cx - sx, cx - sy, cx + sx, cx + sy, 1));
-		IJ.save(imp, "/Users/ah403/1.tif");
-		//imp.close();
+		//ImagePlus imp = new ImagePlus("gauss", new FloatProcessor(size, size, values));
+		//double cx = size / 2.;
+		//Shape shape = new Ellipse2D.Double(cx - sx, cx - sy, 2 * sx, 2 * sy);
+		//imp.setRoi(new ShapeRoi(shape));
+		//IJ.save(imp, "/Users/ah403/1.tif");
 		double scale = Maths.sum(values) / intensity;
 		for (int range = 1; range <= 3; range++)
 		{
 			double e = Gaussian2DPeakResultHelper.getMeanSignal(intensity, sx, sy, range);
 			double o = FunctionHelper.getMeanValue(values.clone(),
 					scale * Gaussian2DPeakResultHelper.cumulative2D(range));
-			System.out.printf("%d  %g %g  %g\n", range, e, o, e / o);
-			//Assert.assertEquals(e, o, e*1e-2);
+			//System.out.printf("%d  %g %g  %g\n", range, e, o, e / o);
+			Assert.assertEquals(e, o, e * 1e-2);
 		}
 	}
 }
