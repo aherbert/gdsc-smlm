@@ -1,5 +1,7 @@
 package gdsc.smlm.results;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.junit.Assert;
 import org.junit.Test;
@@ -177,5 +179,38 @@ public class Gaussian2DPeakResultHelperTest
 		//		r.getN());
 		// The simple amplitude over estimates the actual pixel amplitude
 		Assert.assertTrue(r.getSlope() > 1);
+	}
+
+	@Test
+	public void canComputeCumulative()
+	{
+		Assert.assertEquals(0.6827, Gaussian2DPeakResultHelper.cumulative(1), 1e-3);
+		Assert.assertEquals(0.9545, Gaussian2DPeakResultHelper.cumulative(2), 1e-3);
+		Assert.assertEquals(0.9974, Gaussian2DPeakResultHelper.cumulative(3), 1e-3);
+	}
+
+	@Test
+	public void canComputeSNR()
+	{
+		//@formatter:off
+		Assert.assertEquals(0.6827 / (Math.PI), Gaussian2DPeakResultHelper.getSNR(1, 1, 1, 1, 1), 1e-3);
+		Assert.assertEquals(15 * 0.6827 / (Math.PI * 2 * 1.5), Gaussian2DPeakResultHelper.getSNR(15, 2, 1.5, 1, 1), 1e-3);
+		Assert.assertEquals(15 * 0.6827 / (Math.PI * 2 * 1.5 * 1.2), Gaussian2DPeakResultHelper.getSNR(15, 2, 1.5, 1, 1.2), 1e-3);
+		Assert.assertEquals(15 * 0.9545 / (Math.PI * 2 * 2 * 1.5 * 2 * 1.2), Gaussian2DPeakResultHelper.getSNR(15, 2, 1.5, 2, 1.2), 1e-3);
+		//@formatter:on
+
+		// Test fixed versions verse dynamic
+		RandomGenerator r = new Well19937c();
+		for (int i = 0; i < 10; i++)
+		{
+			double intensity = r.nextDouble() * 100;
+			double sx = r.nextDouble() * 2;
+			double sy = r.nextDouble() * 2;
+			double noise = r.nextDouble() * 3;
+			Assert.assertEquals(Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 1, noise),
+					Gaussian2DPeakResultHelper.getSNR1(intensity, sx, sy, noise), 1e-3);
+			Assert.assertEquals(Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 2, noise),
+					Gaussian2DPeakResultHelper.getSNR2(intensity, sx, sy, noise), 1e-3);
+		}
 	}
 }

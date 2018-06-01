@@ -40,10 +40,14 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public class Gaussian2DPeakResultHelper
 {
+	private static final double ROOT2 = Math.sqrt(2);
+	private static final double F1 = cumulative(1);
+	private static final double F2 = cumulative(2) / 4;
+
 	private static class BaseGaussian2DPeakResultCalculator implements Gaussian2DPeakResultCalculator
 	{
 		final static double twoPi = 2 * Math.PI;
-		final static double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
+		final static double ONE_OVER_ROOT2 = 1.0 / ROOT2;
 
 		final CalibrationReader calibration;
 		final int isx, isy;
@@ -1215,5 +1219,121 @@ public class Gaussian2DPeakResultHelper
 			default:
 				throw new IllegalArgumentException("PSF type must be a Gaussian 2D PSF");
 		}
+	}
+
+	/**
+	 * Gets the Signal-to-Noise Ratio (SNR). This is ratio of the average signal value to the standard deviation of the
+	 * background. Ideally the standard deviation of the background is computed in the region around the Gaussian.
+	 * <p>
+	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
+	 * elliptial area of the same range. For example a range of 1 would expect the Gaussian to be 0.6827 of the total
+	 * intensity; the area would be pi * sx * sx; and the SNR = intensity * 0.6827 / (pi * sx * sy * noise).
+	 * <p>
+	 * As an alternative definition, the standard deviation of the background can be computed using the standard
+	 * deviation of the signal in the region around the Gaussian.
+	 * <p>
+	 * Note: Arguments are not checked
+	 *
+	 * @param intensity
+	 *            the total intensity of the Gaussian
+	 * @param sx
+	 *            the Gaussian standard deviation in the X dimension
+	 * @param sy
+	 *            the Gaussian standard deviation in the Y dimension
+	 * @param range
+	 *            the range over which to compute the average signal
+	 * @param noise
+	 *            the noise (standard deviation of the background)
+	 * @return the snr
+	 * @see <a href=
+	 *      "https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)">https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)</a>
+	 */
+	public static double getSNR(double intensity, double sx, double sy, double range, double noise)
+	{
+		// Get the expected total signal using the Error function assuming a standard deviation of 1
+		double exp = cumulative(range);
+		return intensity * exp / (Math.PI * sx * sy * range * range * noise);
+	}
+
+	/**
+	 * Compute the cumulative normal distribution within the range -x to x:
+	 * 
+	 * <pre>
+	 * return erf(x / sqrt(2));
+	 * </pre>
+	 * 
+	 * This uses a fast approximation to the Error function.
+	 *
+	 * @param x
+	 *            the x
+	 * @return the cumulative normal distribution within the range -x to x
+	 */
+	public static double cumulative(double x)
+	{
+		return Erf.erf(x / ROOT2);
+	}
+
+	/**
+	 * Gets the Signal-to-Noise Ratio (SNR). This is ratio of the average signal value to the standard deviation of the
+	 * background. Ideally the standard deviation of the background is computed in the region around the Gaussian.
+	 * <p>
+	 * The average signal value is taken using the expected sum of the Gaussian within a range of 1 SD divided by the
+	 * elliptial area of the same range. For example a range of 1 would expect the Gaussian to be 0.6827 of the total
+	 * intensity; the area would be pi * sx * sx; and the SNR = intensity * 0.6827 / (pi * sx * sy * noise).
+	 * <p>
+	 * As an alternative definition, the standard deviation of the background can be computed using the standard
+	 * deviation of the signal in the region around the Gaussian.
+	 * <p>
+	 * Note: Arguments are not checked
+	 *
+	 * @param intensity
+	 *            the total intensity of the Gaussian
+	 * @param sx
+	 *            the Gaussian standard deviation in the X dimension
+	 * @param sy
+	 *            the Gaussian standard deviation in the Y dimension
+	 * @param range
+	 *            the range over which to compute the average signal
+	 * @param noise
+	 *            the noise (standard deviation of the background)
+	 * @return the snr
+	 * @see <a href=
+	 *      "https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)">https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)</a>
+	 */
+	public static double getSNR1(double intensity, double sx, double sy, double noise)
+	{
+		return intensity * F1 / (Math.PI * sx * sy * noise);
+	}
+
+	/**
+	 * Gets the Signal-to-Noise Ratio (SNR). This is ratio of the average signal value to the standard deviation of the
+	 * background. Ideally the standard deviation of the background is computed in the region around the Gaussian.
+	 * <p>
+	 * The average signal value is taken using the expected sum of the Gaussian within a range of 2 SD divided by the
+	 * elliptial area of the same range. For example a range of 2 would expect the Gaussian to be 0.9545 of the total
+	 * intensity; the area would be pi * sx * 2 * sx * 2; and the SNR = intensity * 0.9545 / (pi * sx * sy * 4 * noise).
+	 * <p>
+	 * As an alternative definition, the standard deviation of the background can be computed using the standard
+	 * deviation of the signal in the region around the Gaussian.
+	 * <p>
+	 * Note: Arguments are not checked
+	 *
+	 * @param intensity
+	 *            the total intensity of the Gaussian
+	 * @param sx
+	 *            the Gaussian standard deviation in the X dimension
+	 * @param sy
+	 *            the Gaussian standard deviation in the Y dimension
+	 * @param range
+	 *            the range over which to compute the average signal
+	 * @param noise
+	 *            the noise (standard deviation of the background)
+	 * @return the snr
+	 * @see <a href=
+	 *      "https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)">https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)</a>
+	 */
+	public static double getSNR2(double intensity, double sx, double sy, double noise)
+	{
+		return intensity * F2 / (Math.PI * sx * sy * noise);
 	}
 }
