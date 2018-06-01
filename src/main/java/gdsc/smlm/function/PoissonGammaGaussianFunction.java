@@ -528,7 +528,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 */
 	double gaussianCDF(final double x, final double x2)
 	{
-		//return 0.5 * (1 + org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2));
+		//return 0.5 * (org.apache.commons.math3.special.Erf.erf(x / sqrt2sigma2, x2 / sqrt2sigma2));
 		// This may not be precise enough. 
 		// Absolute error is <3e-7. Not sure what relative error is.
 		// The standard Erf is much slower.
