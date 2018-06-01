@@ -104,6 +104,8 @@ public class FunctionHelperTest
 	@Test
 	public void canGetMeanValueForGaussian()
 	{
+		// XXX TODO tidfy this up
+		
 		// This does not work. 
 		// The number of samples to achieve the target intensity is much 
 		// greater than the area of the ellipse covered by the Gaussian.
@@ -118,7 +120,7 @@ public class FunctionHelperTest
 		for (int range = 1; range <= 3; range++)
 		{
 			double a = Gaussian2DPeakResultHelper.cumulative(range);
-			double b = Math.PI * Maths.pow2(Gaussian2DPeakResultHelper.cumulative(range) / 2);
+			double b = Gaussian2DPeakResultHelper.cumulative2D(range);
 
 			System.out.printf("%d  %g  %g  %g\n", range, a, b, a / b);
 		}
@@ -144,7 +146,7 @@ public class FunctionHelperTest
 		{
 			double e = Gaussian2DPeakResultHelper.getMeanSignal(intensity, sx, sy, range);
 			double o = FunctionHelper.getMeanValue(values.clone(),
-					scale * Gaussian2DPeakResultHelper.cumulative(range));
+					scale * Gaussian2DPeakResultHelper.cumulative2D(range));
 			System.out.printf("%d  %g %g  %g\n", range, e, o, e / o);
 			//Assert.assertEquals(e, o, e*1e-2);
 		}

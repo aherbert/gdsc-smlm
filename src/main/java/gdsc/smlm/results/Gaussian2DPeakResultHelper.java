@@ -6,6 +6,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.data.utils.ConversionException;
 import gdsc.core.data.utils.TypeConverter;
@@ -41,8 +42,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 public class Gaussian2DPeakResultHelper
 {
 	private static final double ROOT2 = Math.sqrt(2);
-	private static final double F1 = cumulative(1);
-	private static final double F2 = cumulative(2) / 4;
+	private static final double F1 = cumulative2D(1);
+	private static final double F2 = cumulative2D(2) / 4;
 
 	private static class BaseGaussian2DPeakResultCalculator implements Gaussian2DPeakResultCalculator
 	{
@@ -1226,8 +1227,8 @@ public class Gaussian2DPeakResultHelper
 	 * background. Ideally the standard deviation of the background is computed in the region around the Gaussian.
 	 * <p>
 	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
-	 * elliptical area of the same range. For example a range of 1 would expect the Gaussian to be 0.6827 of the total
-	 * intensity; the area would be pi * sx * sx; and the SNR = intensity * 0.6827 / (pi * sx * sy * noise).
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * the area would be pi * sx * sy.
 	 * <p>
 	 * As an alternative definition, the standard deviation of the background can be computed using the standard
 	 * deviation of the signal in the region around the Gaussian.
@@ -1250,9 +1251,7 @@ public class Gaussian2DPeakResultHelper
 	 */
 	public static double getSNR(double intensity, double sx, double sy, double range, double noise)
 	{
-		// Get the expected total signal using the Error function assuming a standard deviation of 1
-		double exp = cumulative(range);
-		return intensity * exp / (Math.PI * sx * sy * range * range * noise);
+		return intensity * cumulative2D(range) / (Math.PI * sx * sy * range * range * noise);
 	}
 
 	/**
@@ -1266,7 +1265,7 @@ public class Gaussian2DPeakResultHelper
 	 *
 	 * @param x
 	 *            the x
-	 * @return the cumulative normal distribution within the range -x to x
+	 * @return the cumulative normal distribution CDF(X<x)
 	 */
 	public static double cumulative(double x)
 	{
@@ -1274,12 +1273,34 @@ public class Gaussian2DPeakResultHelper
 	}
 
 	/**
+	 * Compute the cumulative 2D normal distribution as the probability that a sample lies inside the ellipsoid
+	 * determined by its Mahalanobis distance r from the Gaussian, a direct generalization of the standard deviation.
+	 * 
+	 * <pre>
+	 * return 1 - exp(-r * r / 2);
+	 * </pre>
+	 * 
+	 * This formula is provided in <a href=
+	 * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
+	 *
+	 * @param r
+	 *            the r
+	 * @return the cumulative 2D normal distribution F(r)
+	 */
+	public static double cumulative2D(double r)
+	{
+		// https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function
+		// https://upload.wikimedia.org/wikipedia/commons/a/a2/Cumulative_function_n_dimensional_Gaussians_12.2013.pdf
+		return 1 - FastMath.exp(-r * r / 2.0);
+	}
+
+	/**
 	 * Gets the Signal-to-Noise Ratio (SNR). This is ratio of the average signal value to the standard deviation of the
 	 * background. Ideally the standard deviation of the background is computed in the region around the Gaussian.
 	 * <p>
-	 * The average signal value is taken using the expected sum of the Gaussian within a range of 1 SD divided by the
-	 * elliptical area of the same range. For example a range of 1 would expect the Gaussian to be 0.6827 of the total
-	 * intensity; the area would be pi * sx * sx; and the SNR = intensity * 0.6827 / (pi * sx * sy * noise).
+	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * the area would be pi * sx * sy.
 	 * <p>
 	 * As an alternative definition, the standard deviation of the background can be computed using the standard
 	 * deviation of the signal in the region around the Gaussian.
@@ -1309,9 +1330,9 @@ public class Gaussian2DPeakResultHelper
 	 * Gets the Signal-to-Noise Ratio (SNR). This is ratio of the average signal value to the standard deviation of the
 	 * background. Ideally the standard deviation of the background is computed in the region around the Gaussian.
 	 * <p>
-	 * The average signal value is taken using the expected sum of the Gaussian within a range of 2 SD divided by the
-	 * elliptical area of the same range. For example a range of 2 would expect the Gaussian to be 0.9545 of the total
-	 * intensity; the area would be pi * sx * 2 * sx * 2; and the SNR = intensity * 0.9545 / (pi * sx * sy * 4 * noise).
+	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * the area would be pi * sx * sy.
 	 * <p>
 	 * As an alternative definition, the standard deviation of the background can be computed using the standard
 	 * deviation of the signal in the region around the Gaussian.
@@ -1340,9 +1361,9 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Gets the average signal value within 1 standard deviations of the centre.
 	 * <p>
-	 * The average signal value is taken using the expected sum of the Gaussian within a range of 1 SD divided by the
-	 * elliptical area of the same range. For example a range of 1 would expect the Gaussian to be 0.6827 of the total
-	 * intensity; the area would be pi * sx * sx; and the mean = intensity * 0.6827 / (pi * sx * sy).
+	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * the area would be pi * sx * sy.
 	 * <p>
 	 * Note: Arguments are not checked
 	 *
@@ -1358,16 +1379,15 @@ public class Gaussian2DPeakResultHelper
 	 */
 	public static double getMeanSignal(double intensity, double sx, double sy, double range)
 	{
-		double exp = cumulative(range);
-		return intensity * exp / (Math.PI * sx * sy * range * range);
+		return intensity * cumulative2D(range) / (Math.PI * sx * sy * range * range);
 	}
 
 	/**
 	 * Gets the average signal value within 1 standard deviations of the centre.
 	 * <p>
-	 * The average signal value is taken using the expected sum of the Gaussian within a range of 1 SD divided by the
-	 * elliptical area of the same range. For example a range of 1 would expect the Gaussian to be 0.6827 of the total
-	 * intensity; the area would be pi * sx * sx; and the mean = intensity * 0.6827 / (pi * sx * sy).
+	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * the area would be pi * sx * sy.
 	 * <p>
 	 * Note: Arguments are not checked
 	 *
@@ -1387,9 +1407,9 @@ public class Gaussian2DPeakResultHelper
 	/**
 	 * Gets the average signal value within 2 standard deviations of the centre.
 	 * <p>
-	 * The average signal value is taken using the expected sum of the Gaussian within a range of 2 SD divided by the
-	 * elliptical area of the same range. For example a range of 2 would expect the Gaussian to be 0.9545 of the total
-	 * intensity; the area would be pi * sx * 2 * sx * 2; and the mean = intensity * 0.9545 / (pi * sx * sy * 4).
+	 * The average signal value is taken using the expected sum of the Gaussian within the range divided by the
+	 * elliptical area of the same range. The expected sum is computed using {@link #cumulative2D(double); } and
+	 * the area would be pi * sx * sy.
 	 * <p>
 	 * As an alternative definition, the standard deviation of the background can be computed using the standard
 	 * deviation of the signal in the region around the Gaussian.
