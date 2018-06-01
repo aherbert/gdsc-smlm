@@ -2862,7 +2862,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 					// Convert noise from electrons back to photons for convenience when computing SNR using the signal in photons.
 					double totalNoiseInPhotons = totalNoise / qe;
-					
+
 					// Account for EM-gain.
 					// This makes the total noise in photons the equivalent of:
 					// [noise in counts] / [total gain]
@@ -2904,8 +2904,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams((float) backgroundInPhotons,
 							intensity, x, y, z, sx, sy);
 					// Use extended result to store the ID
-					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoiseInPhotons, params,
-							null, localisationSet.getId()));
+					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoiseInPhotons,
+							params, null, localisationSet.getId()));
 				}
 
 				for (int i = 0; i < image.length; i++)
@@ -3392,10 +3392,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			if (data == null)
 				throw new IllegalStateException("No localisation data. This should not happen!");
 			final double noise = data[1];
+			final double sx = data[2];
+			final double sy = data[3];
 			final double intensityInPhotons = data[4];
 			// Q. What if the noise is zero, i.e. no background photon / read noise?
-			// Just ignore it at current.
-			final double snr = intensityInPhotons / noise;
+			// Just ignore it at current. This is only an approximation to the SNR estimate
+			// if this is not a Gaussian spot.
+			final double snr = Gaussian2DPeakResultHelper.getSNR1(intensityInPhotons, sx, sy, noise);
 			stats[SIGNAL].add(intensityInPhotons);
 			stats[NOISE].add(noise);
 			if (noise != 0)
