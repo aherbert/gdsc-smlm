@@ -57,7 +57,8 @@ public interface PreprocessedPeakResult
 	float getSignal();
 
 	/**
-	 * Get the signal-to-noise ratio (SNR)
+	 * Get the signal-to-noise ratio (SNR). This is ratio of the average signal value to the standard deviation of the
+	 * background. Ideally the standard deviation of the background is computed in the region around the centre.
 	 * 
 	 * @return The SNR
 	 */

@@ -1,5 +1,7 @@
 package gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -15,16 +17,20 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import gdsc.smlm.results.PeakResultData;
+import gdsc.smlm.results.data.Gaussian2DPeakResultMeanSignalData;
 
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold
+ * <p>
+ * This filter assumes the input results are Gaussian2D peak results.
  */
 public class SNRFilter extends DirectFilter implements IMultiFilter
 {
 	public static final double DEFAULT_INCREMENT = 1;
 	public static final double DEFAULT_RANGE = 10;
+
+	static final PeakResultData<Float> converter = new Gaussian2DPeakResultMeanSignalData();
 
 	@XStreamAsAttribute
 	final float snr;
@@ -58,9 +64,19 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 		return 0;
 	}
 
+	/**
+	 * Gets the snr. This is ratio of the average signal value to the
+	 * standard deviation of the background.
+	 ** <p>
+	 * This assumes the input results are Gaussian2D peak results.
+	 * 
+	 * @param peak
+	 *            the peak
+	 * @return the snr
+	 */
 	static float getSNR(PeakResult peak)
 	{
-		return (peak.getNoise() > 0) ? peak.getSignal() / peak.getNoise() : Float.POSITIVE_INFINITY;
+		return (peak.getNoise() > 0) ? converter.getValue(peak) / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 
 	/*

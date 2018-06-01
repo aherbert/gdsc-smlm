@@ -1,6 +1,9 @@
 package gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -17,6 +20,8 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.PeakResultData;
+import gdsc.smlm.results.data.Gaussian2DPeakResultMeanSignalData;
 
 /**
  * Filter results using a signal-to-background ratio (SBR) threshold.
@@ -25,11 +30,16 @@ import gdsc.smlm.results.PeakResult;
  * bias then the filter resorts to a signal-to-noise filter. If there is a background level above the bias then this is
  * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background
  * level.
+ * <p>
+ * This filter assumes the input results are Gaussian2D peak results.
  */
 public class SBRFilter extends DirectFilter
 {
 	@XStreamAsAttribute
 	final float sbr;
+
+	@XStreamOmitField
+	final PeakResultData<Float> converter = new Gaussian2DPeakResultMeanSignalData();
 
 	public SBRFilter(float sbr)
 	{
@@ -46,22 +56,24 @@ public class SBRFilter extends DirectFilter
 	{
 		final double background = peak.getBackground();
 		if (background > 0)
-			return peak.getSignal() / Math.sqrt(background) >= this.sbr;
+			return converter.getValue(peak) / Math.sqrt(background) >= this.sbr;
 		return SNRFilter.getSNR(peak) >= this.sbr;
 	}
 
 	public int getValidationFlags()
 	{
-		return V_PHOTONS | V_BACKGROUND| V_SNR;
+		return V_PHOTONS | V_BACKGROUND | V_SNR;
 	}
-	
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		final double background = peak.getBackground();
 		if (background > 0)
 		{
-			if (peak.getSignal() / Math.sqrt(background) < this.sbr)
+			// Get the mean signal assuming the integral / area of 1 SD of the Gaussian
+			if (Gaussian2DPeakResultHelper.getMeanSignal1(peak.getSignal(), peak.getXSD(), peak.getYSD()) /
+					Math.sqrt(background) < this.sbr)
 				return V_PHOTONS | V_BACKGROUND;
 			return 0;
 		}

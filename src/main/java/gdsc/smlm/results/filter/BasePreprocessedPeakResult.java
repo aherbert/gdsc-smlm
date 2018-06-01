@@ -113,7 +113,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.id = id;
 		this.candidateId = candidateId;
 		this.signal = (float) (signal);
-		this.snr = (float) (signal / noise);
+		this.snr = (float) Gaussian2DPeakResultHelper.getSNR1(signal, xsd, ysd, noise);
 		this.noise = (float) (noise);
 		this.sd = (float) (Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd));
 		this.b = (float) (b);

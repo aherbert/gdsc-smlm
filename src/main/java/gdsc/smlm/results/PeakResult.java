@@ -32,13 +32,14 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	public static final int Z = 4;
 	/** Number of standard parameters */
 	public static final int STANDARD_PARAMETERS = 5;
-	
+
 	private static final String[] NAMES = { "Background", "Intensity", "X", "Y", "Z" };
-	
+
 	/**
 	 * Gets the parameter name.
 	 *
-	 * @param i the index
+	 * @param i
+	 *            the index
 	 * @return the parameter name
 	 */
 	public static String getParameterName(int i)
