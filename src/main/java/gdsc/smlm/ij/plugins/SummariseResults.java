@@ -34,6 +34,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.procedures.SNRResultProcedure;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
@@ -170,16 +171,17 @@ public class SummariseResults implements PlugIn, MouseListener
 				// Ignore
 			}
 
-			// SNR requires noise
-			if (result.hasNoise())
+			// SNR 
+			try
 			{
-				result.forEach(new PeakResultProcedure()
-				{
-					public void execute(PeakResult peakResult)
-					{
-						stats[1].addValue(peakResult.getSignal() / peakResult.getNoise());
-					}
-				});
+				SNRResultProcedure pp = new SNRResultProcedure(result);
+				pp.getSNR();
+				for (double v : pp.snr)
+					stats[1].addValue(v);
+			}
+			catch (DataException e)
+			{
+				// Ignore
 			}
 		}
 
@@ -351,22 +353,32 @@ public class SummariseResults implements PlugIn, MouseListener
 			plot(wo, "Z", result, PeakResult.Z);
 		if ((settings.getPlotNoise() || settings.getPlotSnr()) && result.hasNoise())
 		{
-			final Counter counter = new Counter();
-			final float[] snr = new float[result.size()];
-			final float[] noise = new float[snr.length];
-			result.forEach(new PeakResultProcedure()
-			{
-				public void execute(PeakResult peakResult)
-				{
-					int i = counter.getAndIncrement();
-					snr[i] = peakResult.getSignal() / peakResult.getNoise();
-					noise[i] = peakResult.getNoise();
-				}
-			});
-			if (settings.getPlotNoise())
-				plot(wo, "Noise", noise);
 			if (settings.getPlotSnr())
-				plot(wo, "SNR", snr);
+			{
+				try
+				{
+					SNRResultProcedure pp = new SNRResultProcedure(result);
+					plot(wo, "SNR", pp.getSNR());
+				}
+				catch (DataException e)
+				{
+					// Ignore
+				}
+			}
+			if (settings.getPlotNoise())
+			{
+				final Counter counter = new Counter();
+				final float[] noise = new float[result.size()];
+				result.forEach(new PeakResultProcedure()
+				{
+					public void execute(PeakResult peakResult)
+					{
+						int i = counter.getAndIncrement();
+						noise[i] = peakResult.getNoise();
+					}
+				});
+				plot(wo, "Noise", noise);
+			}
 		}
 		if (settings.getPlotPrecision())
 		{
