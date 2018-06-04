@@ -97,8 +97,10 @@ import gdsc.smlm.filters.GaussianFilter;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.fitting.UnivariateLikelihoodFisherInformationCalculator;
 import gdsc.smlm.function.BasePoissonFisherInformation;
+import gdsc.smlm.function.FunctionHelper;
 import gdsc.smlm.function.InterpolatedPoissonFisherInformation;
 import gdsc.smlm.function.PoissonGaussianFisherInformation;
+import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
@@ -1040,24 +1042,35 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				Utils.rounded(upperMLP), Utils.rounded(lowerMLP / a), Utils.rounded(upperMLP / a));
 		Utils.log("Signal precision: %s - %s photo-electrons", Utils.rounded(lowerN), Utils.rounded(upperN));
 
+		// Wrap to a function
+		PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
+
+		// Set parameters
+		double[] params = new double[5];
+		// No background when computing the SNR
+		//params[0] = settings.getBackground() * qe;
+		params[1] = min;
+		System.arraycopy(xyz, 0, params, 2, 3);
+
+		// Compute SNR using mean signal at 50%. Assume the region covers the entire PSF.
+		double[] v = new StandardValueProcedure().getValues(f, params);
+		double u = FunctionHelper.getMeanValue(v, 0.5);
+		double u0 = Maths.max(v);
+
 		// Store the benchmark settings when not using variable photons
 		if (min == max)
 		{
+			Utils.log("50%% PSF SNR : %s : Peak SNR : %s", Utils.rounded(u / noise), Utils.rounded(u0 / noise));
+
 			// Compute the true CRLB using the fisher information
 			createLikelihoodFunction();
-
-			// Wrap to a function
-			PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
 
 			// Compute Fisher information
 			UnivariateLikelihoodFisherInformationCalculator c = new UnivariateLikelihoodFisherInformationCalculator(f,
 					fiFunction);
 
-			// Get limits
-			double[] params = new double[5];
+			// Get limits: Include background in the params
 			params[0] = settings.getBackground() * qe;
-			params[1] = min;
-			System.arraycopy(xyz, 0, params, 2, 3);
 			FisherInformationMatrix m = c.compute(params);
 
 			// Report and store the limits
@@ -1079,6 +1092,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
+			// SNR will just scale
+			double scale = max / min;
+			Utils.log("50%% PSF SNR : %s - %s : Peak SNR : %s - %s", Utils.rounded(u / noise),
+					Utils.rounded(scale * u / noise), Utils.rounded(u0 / noise), Utils.rounded(scale * u0 / noise));
 			Utils.log(
 					"Warning: Benchmark settings are only stored in memory when the number of photons is fixed. Min %s != Max %s",
 					Utils.rounded(settings.getPhotonsPerSecond()),
