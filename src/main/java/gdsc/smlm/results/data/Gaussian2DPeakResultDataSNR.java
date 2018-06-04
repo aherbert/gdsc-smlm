@@ -24,7 +24,7 @@ import gdsc.smlm.results.PeakResult;
  * Assumes that the mean signal is half the total signal divided by the ellipsoid area of the Gaussian that contains
  * half the signal.
  */
-public class Gaussian2DPeakResultSNRData extends PeakResultDataFloat
+public class Gaussian2DPeakResultDataSNR extends PeakResultDataFloat
 {
 	final int i = PeakResult.STANDARD_PARAMETERS;
 	final int j = i + 1;
