@@ -81,10 +81,10 @@ have to install these to your local Maven repository before building:
 6. Build the code and package using Maven
 
         cd GDSC-SMLM
-        mvn -P dist package -DskipTests=true
+        mvn package -DskipTests=true
 
 	This will produce a gdsc_smlm-[VERSION].jar file in the target directory. 
-	All dependencies are copied into the target/dist/lib directory.
+	All dependencies are copied into the target/dependencies directory.
 
 7. Copy the gdsc_smlm* jar into the plugins directory of ImageJ. 
 
