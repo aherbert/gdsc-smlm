@@ -17,20 +17,14 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultData;
-import gdsc.smlm.results.data.Gaussian2DPeakResultDataMeanSignal;
 
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold
- * <p>
- * This filter assumes the input results are Gaussian2D peak results.
  */
 public class SNRFilter extends DirectFilter implements IMultiFilter
 {
 	public static final double DEFAULT_INCREMENT = 1;
 	public static final double DEFAULT_RANGE = 10;
-
-	static final PeakResultData<Float> converter = new Gaussian2DPeakResultDataMeanSignal();
 
 	@XStreamAsAttribute
 	final float snr;
@@ -48,7 +42,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return getSNR(peak) >= this.snr;
+		return peak.getSNR() >= this.snr;
 	}
 
 	public int getValidationFlags()
@@ -62,21 +56,6 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 		if (peak.getSNR() < this.snr)
 			return V_SNR;
 		return 0;
-	}
-
-	/**
-	 * Gets the snr. This is ratio of the average signal value to the
-	 * standard deviation of the background.
-	 ** <p>
-	 * This assumes the input results are Gaussian2D peak results.
-	 * 
-	 * @param peak
-	 *            the peak
-	 * @return the snr
-	 */
-	static float getSNR(PeakResult peak)
-	{
-		return (peak.getNoise() > 0) ? converter.getValue(peak) / peak.getNoise() : Float.POSITIVE_INFINITY;
 	}
 
 	/*

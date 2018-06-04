@@ -67,7 +67,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
-		final float snr = SNRFilter.getSNR(result);
+		final float snr = result.getSNR();
 		if (snr >= strictSnr)
 			return PeakStatus.OK;
 		else if (snr >= weakSnr)

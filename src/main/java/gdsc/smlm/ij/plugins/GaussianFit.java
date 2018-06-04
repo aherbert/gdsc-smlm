@@ -701,7 +701,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		y += bounds.y;
 		params[Gaussian2DFunction.X_POSITION] += bounds.x + regionBounds.x;
 		params[Gaussian2DFunction.Y_POSITION] += bounds.y + regionBounds.y;
-		results.add(n + 1, x, y, value, chiSquared, 0f, SimpleArrayUtils.toFloat(params),
+		results.add(n + 1, x, y, value, chiSquared, 0f, 0f, SimpleArrayUtils.toFloat(params),
 				SimpleArrayUtils.toFloat(paramsDev));
 	}
 

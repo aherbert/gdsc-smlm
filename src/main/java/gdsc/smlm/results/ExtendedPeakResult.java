@@ -23,8 +23,8 @@ public class ExtendedPeakResult extends IdPeakResult
 	/**
 	 * Instantiates a new peak result.
 	 *
-	 * @param frame
-	 *            the frame
+	 * @param startFrame
+	 *            the start frame
 	 * @param origX
 	 *            the original X position
 	 * @param origY
@@ -35,17 +35,24 @@ public class ExtendedPeakResult extends IdPeakResult
 	 *            the error
 	 * @param noise
 	 *            the noise
+	 * @param meanIntensity
+	 *            the mean intensity
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
 	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 * @param endFrame
+	 *            the end frame
+	 * @param id
+	 *            the id
 	 * @throws IllegalArgumentException
 	 *             the illegal argument exception if the parameters are invalid
 	 */
 	public ExtendedPeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsStdDev, int endFrame, int id) throws IllegalArgumentException
+			float meanIntensity, float[] params, float[] paramsStdDev, int endFrame, int id)
+			throws IllegalArgumentException
 	{
-		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev, id);
+		super(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev, id);
 		setEndFrame(endFrame);
 	}
 
@@ -84,7 +91,7 @@ public class ExtendedPeakResult extends IdPeakResult
 	{
 		super(x, y, intensity, id);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 

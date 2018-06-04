@@ -500,7 +500,7 @@ public class IJImagePeakResultsTest
 
 	private static void addPeakResult(IJImagePeakResults r, int t, float x, float y, float v)
 	{
-		r.add(new PeakResult(t, 0, 0, 0, 0, 0, createParams(x, y, v), null));
+		r.add(new PeakResult(t, 0, 0, 0, 0, 0, 0, createParams(x, y, v), null));
 	}
 
 	private static float[] createParams(float x, float y, float v)
@@ -520,7 +520,7 @@ public class IJImagePeakResultsTest
 	{
 		TurboList<PeakResult> results = new TurboList<PeakResult>(x.length);
 		for (int i = 0; i < x.length; i++)
-			results.add(new PeakResult(t[i], 0, 0, 0, 0, 0, createParams(x[i], y[i], v[i]), null));
+			results.add(new PeakResult(t[i], 0, 0, 0, 0, 0, 0, createParams(x[i], y[i], v[i]), null));
 		r.addAll(results);
 	}
 

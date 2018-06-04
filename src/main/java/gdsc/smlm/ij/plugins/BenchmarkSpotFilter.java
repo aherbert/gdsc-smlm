@@ -1938,7 +1938,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					{
 						final float[] params = new float[] { 0, spot.getIntensity(), 0, spot.spot.x, spot.spot.y, 0,
 								0 };
-						results.add(peak, spot.spot.x, spot.spot.y, spot.getIntensity(), 0d, 0f, params, null);
+						results.add(peak, spot.spot.x, spot.spot.y, spot.getIntensity(), 0d, 0f, 0f, params, null);
 					}
 				}
 				return true;

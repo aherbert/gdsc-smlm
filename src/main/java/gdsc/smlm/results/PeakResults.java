@@ -30,8 +30,8 @@ public interface PeakResults
 	public void begin();
 
 	/**
-	 * Add a fitted peak result
-	 * 
+	 * Add a fitted peak result.
+	 *
 	 * @param peak
 	 *            The peak number
 	 * @param origX
@@ -44,13 +44,15 @@ public interface PeakResults
 	 *            The error of the fit
 	 * @param noise
 	 *            Estimate of the noise in the signal
+	 * @param meanSignal
+	 *            Estimate of the mean signal
 	 * @param params
 	 *            The peak parameters
 	 * @param paramsStdDev
 	 *            The peak parameters standard deviations
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev);
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanSignal,
+			float[] params, float[] paramsStdDev);
 
 	/**
 	 * Add a fitted peak result

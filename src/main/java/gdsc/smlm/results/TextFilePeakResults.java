@@ -193,6 +193,10 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
 			noiseField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
 		names.add(noiseField);
+		String meanIntensityField = "Mean";
+		if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+			meanIntensityField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
+		names.add(meanIntensityField);
 
 		String[] fields = helper.getNames();
 
@@ -214,16 +218,16 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsStdDev)
 	{
 		if (fos == null)
 			return;
 
 		StringBuilder sb = new StringBuilder();
-		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise);
+		addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity);
 
 		// Add the parameters
 		if (isShowDeviations())
@@ -267,7 +271,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	}
 
 	private void addStandardData(StringBuilder sb, final int id, final int peak, final int endPeak, final int origX,
-			final int origY, final float origValue, final double error, final float noise)
+			final int origY, final float origValue, final double error, final float noise, float meanIntensity)
 	{
 		if (isShowId())
 		{
@@ -281,6 +285,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		add(sb, origValue);
 		add(sb, error);
 		add(sb, converters[PeakResult.INTENSITY].convert(noise));
+		add(sb, converters[PeakResult.INTENSITY].convert(meanIntensity));
 	}
 
 	private void add(StringBuilder sb, float value)
@@ -314,7 +319,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	private void add(StringBuilder sb, PeakResult result)
 	{
 		addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
-				result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise());
+				result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+				result.getMeanIntensity());
 
 		// Add the parameters		
 		final float[] params = result.getParameters();
@@ -427,8 +433,8 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 					else
 					{
 						results2.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
-								result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
-								result.getParameterDeviations(), result.getEndFrame(), id));
+								result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
+								result.getParameters(), result.getParameterDeviations(), result.getEndFrame(), id));
 					}
 				}
 			});

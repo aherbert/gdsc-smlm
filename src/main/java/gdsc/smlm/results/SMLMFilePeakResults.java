@@ -22,6 +22,18 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	public final static int FLAG_ID = 0x0002;
 	public final static int FLAG_PRECISION = 0x0004;
 
+	/**
+	 * The version
+	 * 
+	 * <ul>
+	 * <li>V1 = Version 1 had signal and amplitude in the results. It did not have the version string.
+	 * <li>V2 = Version 2 has only signal in the results
+	 * <li>V3 = Version 3 has an improved calibration header with dynamic fields
+	 * <li>V4 = Version 4 added mean intensity field to the standard data
+	 * </ul>
+	 */
+	public final static int VERSION = 4;
+
 	private final boolean showDeviations;
 	private final boolean showEndFrame;
 	private final boolean showId;
@@ -112,10 +124,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 		if (isShowPrecision())
 			extended += FLAG_PRECISION;
 		sb.append(extended);
-		// Version 1 had signal and amplitude in the results. It did not have the version string.
-		// .V2 = Version 2 has only signal in the results
-		// .V3 = Version 3 has an improved calibration header
-		sb.append(".V3");
+		sb.append(".V").append(VERSION);
 		return sb.toString();
 	}
 

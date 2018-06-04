@@ -169,10 +169,10 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsStdDev)
 	{
 		if (out == null)
 			return;
@@ -189,6 +189,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		builder.setError(error);
 		builder.setNoise(noise);
+		builder.setMeanIntensity(meanIntensity);
 		builder.setOriginalValue(origValue);
 		if (paramsStdDev != null)
 			addNewParamStdDevs(builder, paramsStdDev);
@@ -225,6 +226,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		builder.setError(result.getError());
 		builder.setNoise(result.getNoise());
+		builder.setMeanIntensity(result.getMeanIntensity());
 		if (result.hasEndFrame())
 			builder.setEndFrame(result.getEndFrame());
 		builder.setOriginalValue(result.getOrigValue());
@@ -251,7 +253,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		builder.setX(params[PeakResult.X]);
 		builder.setY(params[PeakResult.Y]);
 		builder.setZ(params[PeakResult.Z]);
-		
+
 		switch (fitMode)
 		{
 			case ONEAXIS:
@@ -324,6 +326,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 			builder.setError(result.getError());
 			builder.setNoise(result.getNoise());
+			builder.setMeanIntensity(result.getMeanIntensity());
 			if (result.hasEndFrame())
 				builder.setEndFrame(result.getEndFrame());
 			else
@@ -518,8 +521,8 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 				double qe = (cr.hasQuantumEfficiency()) ? cr.getQuantumEfficiency() : 1;
 				// e-/photon / count/photon => e-/count
-				double ecf = qe / cr.getCountPerPhoton();  
-						
+				double ecf = qe / cr.getCountPerPhoton();
+
 				builder.addEcf(ecf);
 				builder.addQe(qe);
 			}

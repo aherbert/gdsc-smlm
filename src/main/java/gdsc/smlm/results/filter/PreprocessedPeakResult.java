@@ -57,12 +57,26 @@ public interface PreprocessedPeakResult
 	float getSignal();
 
 	/**
+	 * Get the mean signal.
+	 * <p>
+	 * This requires a knowledge of the PSF used to create the result. It could be the peak signal in the PSF or the
+	 * average signal over a range of the PSF, e.g. the area covered from the maxima to half-maxima for spots.
+	 * 
+	 * @return The mean signal (in photons)
+	 */
+	float getMeanSignal();
+	
+	/**
 	 * Get the signal-to-noise ratio (SNR). This is ratio of the average signal value to the standard deviation of the
 	 * background. Ideally the standard deviation of the background is computed in the region around the centre.
+	 * <p>
+	 * The default implementation is {@link #getMeanSignal()} / {@link #getNoise()}.
 	 * 
 	 * @return The SNR
 	 */
-	float getSNR();
+	default float getSNR() {
+		return getMeanSignal() / getNoise();
+	}
 
 	/**
 	 * Get the background noise
@@ -70,7 +84,7 @@ public interface PreprocessedPeakResult
 	 * @return The noise (in photons)
 	 */
 	float getNoise();
-
+	
 	/**
 	 * The localisation variance using the noise estimate for the data to approximate the local noise
 	 * 

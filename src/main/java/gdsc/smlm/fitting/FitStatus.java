@@ -32,6 +32,7 @@ public enum FitStatus
 	COORDINATES_MOVED{ public String getName() { return "Coordinates moved"; }},
 	OUTSIDE_FIT_REGION{ public String getName() { return "Outside fit region"; }},
 	INSUFFICIENT_SIGNAL{ public String getName() { return "Insufficient signal"; }},
+	INSUFFICIENT_SNR{ public String getName() { return "Insufficient SNR"; }},
 	WIDTH_DIVERGED{ public String getName() { return "Width diverged"; }},
 	Z_MOVED{ public String getName() { return "Z-coordinate moved"; }},
 	INSUFFICIENT_PRECISION{ public String getName() { return "Insufficient precision"; }},

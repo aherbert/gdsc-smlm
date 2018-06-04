@@ -607,8 +607,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 					for (int i = n; i-- > 0;)
 					{
 						store.add(new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(),
-								r.nextFloat(), PeakResult.createParams(r.nextFloat(), r.nextFloat(), r.nextFloat(),
-										r.nextFloat(), r.nextFloat()),
+								r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(), r.nextFloat(),
+										r.nextFloat(), r.nextFloat(), r.nextFloat()),
 								null));
 					}
 

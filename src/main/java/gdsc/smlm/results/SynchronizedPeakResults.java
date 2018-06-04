@@ -88,10 +88,10 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults
 		synchronized (lock)	{ r.begin(); }
 	}
 
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity, float[] params,
 			float[] paramsStdDev)
 	{
-		synchronized (lock)	{ r.add(peak, origX, origY, origValue, error, noise, params, paramsStdDev); }
+		synchronized (lock)	{ r.add(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev); }
 	}
 
 	public void add(PeakResult result)

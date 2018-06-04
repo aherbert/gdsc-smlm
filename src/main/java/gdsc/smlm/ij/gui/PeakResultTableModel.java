@@ -285,6 +285,14 @@ public class PeakResultTableModel extends AbstractTableModel
 				}
 			});
 			addName("Noise", namesList, unitNames[PeakResult.INTENSITY]);
+			valuesList.add(new PeakResultDataFloat()
+			{
+				public Float getValue(PeakResult result)
+				{
+					return ic.convert(result.getMeanIntensity());
+				}
+			});
+			addName("Mean" + paramNames[PeakResult.INTENSITY], namesList, unitNames[PeakResult.INTENSITY]);
 			valuesList.add(new PeakResultDataSNR());
 			addName(valuesList, namesList);
 		}

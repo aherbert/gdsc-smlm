@@ -2920,9 +2920,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// photons before noise (as a perfect result).
 					float[] params = Gaussian2DPeakResultHelper.createTwoAxisParams((float) backgroundInPhotons,
 							intensity, x, y, z, sx, sy);
+					float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
 					// Use extended result to store the ID
 					results.add(new IdPeakResult(t, origX, origY, 0, localisation.getZ(), (float) totalNoiseInPhotons,
-							params, null, localisationSet.getId()));
+							u, params, null, localisationSet.getId()));
 				}
 
 				for (int i = 0; i < image.length; i++)
@@ -3661,8 +3662,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
-					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
-					: stats[i].getMean();
+					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -3953,7 +3953,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					params[isy] /= n;
 
 					ExtendedPeakResult p = new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
-							(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT,
+							(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), 0, params, null, lastT,
 							currentId);
 					// if (p.getPrecision(107, 1) > 2000)
 					// {
@@ -3990,7 +3990,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			params[isy] /= n;
 
 			traceResults.add(new ExtendedPeakResult(start.getTime(), (int) Math.round(start.getX()),
-					(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), params, null, lastT, currentId));
+					(int) Math.round(start.getY()), 0, 0, (float) (Math.sqrt(noise)), 0, params, null, lastT,
+					currentId));
 		}
 
 		traceResults.end();

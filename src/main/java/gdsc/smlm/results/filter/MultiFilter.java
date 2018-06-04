@@ -317,7 +317,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		// Current order of filter power obtained from BenchmarkFilterAnalysis:
 		// SNR, Max Width, Precision, Shift, Min width
 
-		if (SNRFilter.getSNR(peak) < this.snr)
+		if (peak.getSNR() < this.snr)
 			return false;
 
 		// Width

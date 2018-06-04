@@ -75,8 +75,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	private static int byteSize = 0;
 	private static int byteSizeWithDeviations = 0;
 
-	private static final int DEFAULT_SIZE = 96;
-	private static final int DEFAULT_SIZE_WITH_DEVIATIONS = 144;
+	private static final int DEFAULT_SIZE = 104;
+	private static final int DEFAULT_SIZE_WITH_DEVIATIONS = 152;
 
 	private boolean sortAfterEnd;
 
@@ -550,7 +550,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 			// Instantiate your data here and assign it to object
 
-			object = new PeakResult(0, 1, 2, 3.0f, 4.0, 5.0f, new float[7], (includeDeviations) ? new float[7] : null);
+			object = new PeakResult(0, 1, 2, 3.0f, 4.0, 5.0f, 6f, new float[7],
+					(includeDeviations) ? new float[7] : null);
 
 			if (i >= 0)
 				objects[i] = object;
@@ -673,12 +674,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * {@inheritDoc}
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise, float[] params,
-			float[] paramsStdDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise,
+			float meanIntensity, float[] params, float[] paramsStdDev)
 	{
-		add(new PeakResult(peak, origX, origY, origValue, chiSquared, noise, params, paramsStdDev));
+		add(new PeakResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev));
 	}
 
 	/*
@@ -917,7 +918,22 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (getf(i).getNoise() > 0)
+			if (getf(i).hasNoise())
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks for noise. At least one result must have a positive mean intensity.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasMeanIntensity()
+	{
+		for (int i = 0, size = size(); i < size; i++)
+		{
+			if (getf(i).hasMeanIntensity())
 				return true;
 		}
 		return false;

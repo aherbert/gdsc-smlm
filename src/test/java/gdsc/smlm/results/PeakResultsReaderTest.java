@@ -754,6 +754,7 @@ public class PeakResultsReaderTest
 			Assert.assertEquals("Orig value mismatch @ " + i, p1.getOrigValue(), p2.getOrigValue(), delta);
 			Assert.assertEquals("Error mismatch @ " + i, p1.getError(), p2.getError(), 1e-6);
 			Assert.assertEquals("Noise mismatch @ " + i, p1.getNoise(), p2.getNoise(), delta);
+			Assert.assertEquals("Mean intensity mismatch @ " + i, p1.getMeanIntensity(), p2.getMeanIntensity(), delta);
 			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
 			Assert.assertArrayEquals("Params mismatch @ " + i, p1.getParameters(), p2.getParameters(), delta);
 			if (showDeviations)
@@ -849,12 +850,13 @@ public class PeakResultsReaderTest
 			float origValue = rand.next();
 			double error = rand.next();
 			float noise = rand.next();
+			float meanIntensity = rand.next();
 			float[] params = createData();
 			float[] paramsStdDev = (showDeviations) ? createData() : null;
 			if (extended)
 			{
 				AttributePeakResult r = new AttributePeakResult(startFrame, origX, origY, origValue, error, noise,
-						params, paramsStdDev);
+						meanIntensity, params, paramsStdDev);
 				if (showEndFrame)
 					r.setEndFrame(startFrame + (int) (10 * rand.next()));
 				if (showId)
@@ -864,7 +866,7 @@ public class PeakResultsReaderTest
 				results.add(r);
 			}
 			else
-				results.add(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
+				results.add(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
 		}
 		results.setName(Float.toString(rand.next()) + Float.toString(rand.next()));
 		results.setConfiguration(Float.toString(rand.next()) + Float.toString(rand.next()));
@@ -949,7 +951,8 @@ public class PeakResultsReaderTest
 				public void execute(PeakResult peak)
 				{
 					out.add(peak.getFrame(), peak.getOrigX(), peak.getOrigY(), peak.getOrigValue(), peak.getError(),
-							peak.getNoise(), peak.getParameters(), peak.getParameterDeviations());
+							peak.getNoise(), peak.getMeanIntensity(), peak.getParameters(),
+							peak.getParameterDeviations());
 				}
 			});
 		}

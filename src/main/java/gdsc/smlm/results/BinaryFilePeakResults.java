@@ -107,7 +107,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			sb.append('i');
 		if (isShowId())
 			sb.append('i');
-		sb.append("iiifdf");
+		sb.append("iiifdff");
 		if (isShowDeviations())
 		{
 			for (int i = 0; i < nFields; i++)
@@ -183,10 +183,10 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.FilePeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsStdDev)
 	{
 		if (fos == null)
 			return;
@@ -197,7 +197,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 		try
 		{
-			addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, params, paramsStdDev, 0.0);
+			addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev,
+					0.0);
 			buffer.flush();
 		}
 		catch (IOException e)
@@ -210,8 +211,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	}
 
 	private void addResult(DataOutputStream buffer, final int id, final int peak, final int endPeak, final int origX,
-			final int origY, final float origValue, final double error, final float noise, final float[] params,
-			float[] paramsStdDev, double precision) throws IOException
+			final int origY, final float origValue, final double error, final float noise, float meanIntensity,
+			final float[] params, float[] paramsStdDev, double precision) throws IOException
 	{
 		if (isShowId())
 			buffer.writeInt(id);
@@ -223,6 +224,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		buffer.writeFloat(origValue);
 		buffer.writeDouble(error);
 		buffer.writeFloat(noise);
+		buffer.writeFloat(meanIntensity);
 
 		checkSize(nFields, params);
 		for (int i = 0; i < nFields; i++)
@@ -258,7 +260,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		{
 			addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
 					result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-					result.getParameters(), result.getParameterDeviations(), result.getPrecision());
+					result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
+					result.getPrecision());
 			buffer.flush();
 		}
 		catch (IOException e)
@@ -292,7 +295,8 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			{
 				addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
 						result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-						result.getParameters(), result.getParameterDeviations(), result.getPrecision());
+						result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
+						result.getPrecision());
 			}
 			catch (IOException e)
 			{
@@ -449,18 +453,18 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		return sb.toString();
 	}
 
-	public static int getDataSize(boolean deviations, int flags, int nFields)
+	static int getDataSize(boolean deviations, int flags, int nFields)
 	{
 		final int BYTES_INT = 4;
 		final int BYTES_FLOAT = 4;
 		final int BYTES_DOUBLE = 8;
 
-		// iiifdf + n*f
+		// iiifdff + n*f
 		//	or
-		// iiifdf + 2*n*f
+		// iiifdff + 2*n*f
 		// + Extra i added for the end frame after the first integer
 		// + Extra i added for the id in the first field
-		int size = 3 * BYTES_INT + BYTES_FLOAT + BYTES_DOUBLE + BYTES_FLOAT + nFields * BYTES_FLOAT;
+		int size = 3 * BYTES_INT + BYTES_FLOAT + BYTES_DOUBLE + BYTES_FLOAT + BYTES_FLOAT + nFields * BYTES_FLOAT;
 		if (deviations)
 			size += nFields * BYTES_FLOAT;
 		if (BitFlags.areSet(flags, FLAG_END_FRAME))

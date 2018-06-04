@@ -52,6 +52,9 @@ import ij.plugin.PlugIn;
  */
 public class LoadLocalisations implements PlugIn
 {
+	// TODO - Add support for noise and mean signal. 
+	// Q. Is this required?
+	
 	// Time units for the exposure time cannot be in frames as this makes no sense
 	private static EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
 	private static String[] tUnits;
@@ -156,7 +159,7 @@ public class LoadLocalisations implements PlugIn
 						default:
 							throw new NotImplementedException("Unsupported PSF type: " + psfType);
 					}
-					AttributePeakResult peakResult = new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, params,
+					AttributePeakResult peakResult = new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, 0, params,
 							null);
 					peakResult.setId(l.id);
 					if (l.precision > 0)

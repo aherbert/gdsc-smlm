@@ -34,6 +34,7 @@ class Candidate extends Spot
 	public float[] paramDevs;
 	public double error;
 	public float noise;
+	public float meanIntensity;
 	public double precision;
 
 	/**
@@ -73,12 +74,13 @@ class Candidate extends Spot
 	 *            the error
 	 * @param noise
 	 *            the noise
+	 * @param meanIntensity
+	 *            the mean intensity
 	 * @param valid
 	 *            the valid
 	 */
-	public Candidate(int x, int y, int index, float[] params, float[] paramDevs, 
-			double error, float noise,
-			boolean valid)
+	public Candidate(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
+			float meanIntensity, boolean valid)
 	{
 		super(x, y, 0, 0);
 		this.index = index;
@@ -86,6 +88,7 @@ class Candidate extends Spot
 		this.paramDevs = paramDevs;
 		this.error = error;
 		this.noise = noise;
+		this.meanIntensity = meanIntensity;
 		this.fit = valid;
 	}
 
@@ -120,18 +123,21 @@ class Candidate extends Spot
 	 *            the error
 	 * @param noise
 	 *            the noise
+	 * @param meanIntensity
+	 *            the mean intensity
 	 * @param valid
 	 *            the valid
 	 * @return the candidate
 	 */
 	public Candidate createFitted(int x, int y, int index, float[] params, float[] paramDevs, double error, float noise,
-			boolean valid)
+			float meanIntensity, boolean valid)
 	{
 		Candidate c = new Candidate(x, y, intensity, getScore(), index);
 		c.params = params;
 		c.paramDevs = paramDevs;
 		c.error = error;
 		c.noise = noise;
+		c.meanIntensity = meanIntensity;
 		c.fit = valid;
 		return c;
 	}

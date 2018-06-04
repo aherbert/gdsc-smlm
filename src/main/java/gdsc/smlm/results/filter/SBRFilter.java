@@ -1,7 +1,6 @@
 package gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
@@ -20,8 +19,6 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultData;
-import gdsc.smlm.results.data.Gaussian2DPeakResultDataMeanSignal;
 
 /**
  * Filter results using a signal-to-background ratio (SBR) threshold.
@@ -30,16 +27,11 @@ import gdsc.smlm.results.data.Gaussian2DPeakResultDataMeanSignal;
  * bias then the filter resorts to a signal-to-noise filter. If there is a background level above the bias then this is
  * assumed to be the variance of the photon shot noise and the noise is taken at the square root of the background
  * level.
- * <p>
- * This filter assumes the input results are Gaussian2D peak results.
  */
 public class SBRFilter extends DirectFilter
 {
 	@XStreamAsAttribute
 	final float sbr;
-
-	@XStreamOmitField
-	final PeakResultData<Float> converter = new Gaussian2DPeakResultDataMeanSignal();
 
 	public SBRFilter(float sbr)
 	{
@@ -56,8 +48,8 @@ public class SBRFilter extends DirectFilter
 	{
 		final double background = peak.getBackground();
 		if (background > 0)
-			return converter.getValue(peak) / Math.sqrt(background) >= this.sbr;
-		return SNRFilter.getSNR(peak) >= this.sbr;
+			return peak.getMeanIntensity() / Math.sqrt(background) >= this.sbr;
+		return peak.getSNR() >= this.sbr;
 	}
 
 	public int getValidationFlags()

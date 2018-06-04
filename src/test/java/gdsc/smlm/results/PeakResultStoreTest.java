@@ -238,6 +238,7 @@ public class PeakResultStoreTest
 	private PeakResult create(RandomGenerator r)
 	{
 		return new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(), r.nextFloat(),
+				r.nextFloat(),
 				PeakResult.createParams(r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat()),
 				null);
 	}

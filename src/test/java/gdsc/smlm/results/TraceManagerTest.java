@@ -19,7 +19,7 @@ public class TraceManagerTest
 		Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 		{
-			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
 		runTracing(0, 1, trace);
@@ -36,7 +36,7 @@ public class TraceManagerTest
 		for (int i = 0; i < 5; i++)
 		{
 			move(rand, params, distance);
-			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
 		runTracing(distance, 1, trace);
@@ -52,11 +52,11 @@ public class TraceManagerTest
 		Trace trace = new Trace();
 		for (int i = 0; i < 5; i++)
 		{
-			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
 		}
 		for (int i = 0; i < 5; i++)
 		{
-			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
 		runTracing(0, maxOffTime + 1, trace);
@@ -74,12 +74,12 @@ public class TraceManagerTest
 		for (int i = 0; i < 5; i++)
 		{
 			move(rand, params, distance);
-			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
 		}
 		for (int i = 0; i < 5; i++)
 		{
 			move(rand, params, distance);
-			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
 		runTracing(distance, maxOffTime + 1, trace);
@@ -139,7 +139,7 @@ public class TraceManagerTest
 				for (int i = 0; i < length; i++)
 				{
 					move(rand, params, distance);
-					trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, params, null));
+					trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 				}
 				t += rand.nextInt(1, maxOffTime);
 			}

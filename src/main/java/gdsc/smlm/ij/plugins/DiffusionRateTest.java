@@ -216,12 +216,14 @@ public class DiffusionRateTest implements PlugIn
 			stats2D[j] = new Statistics();
 			stats3D[j] = new Statistics();
 		}
-		SphericalDistribution dist = new SphericalDistribution(settings.getConfinementRadius() / settings.getPixelPitch());
+		SphericalDistribution dist = new SphericalDistribution(
+				settings.getConfinementRadius() / settings.getPixelPitch());
 		Statistics asymptote = new Statistics();
 
 		// Save results to memory
 		MemoryPeakResults results = new MemoryPeakResults(totalSteps);
-		results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1, 1000.0 / settings.getStepsPerSecond()));
+		results.setCalibration(
+				CalibrationHelper.create(settings.getPixelPitch(), 1, 1000.0 / settings.getStepsPerSecond()));
 		results.setName(TITLE);
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		int peak = 0;
@@ -462,7 +464,8 @@ public class DiffusionRateTest implements PlugIn
 
 		if (useConfinement)
 			Utils.log("3D asymptote distance = %s nm (expected %.2f)",
-					Utils.rounded(asymptote.getMean() * settings.getPixelPitch(), 4), 3 * settings.getConfinementRadius() / 4);
+					Utils.rounded(asymptote.getMean() * settings.getPixelPitch(), 4),
+					3 * settings.getConfinementRadius() / 4);
 	}
 
 	/**
@@ -657,7 +660,7 @@ public class DiffusionRateTest implements PlugIn
 		final float[] params = PeakResult.createParams(0, 10f, (float) xyz[0], (float) xyz[1], (float) xyz[2]);
 		final float noise = 0.1f;
 		results.add(new ExtendedPeakResult(peak, (int) params[PeakResult.X], (int) params[PeakResult.Y], 10, 0, noise,
-				params, null, peak, id));
+				0, params, null, peak, id));
 		return ++peak;
 	}
 
@@ -917,7 +920,8 @@ public class DiffusionRateTest implements PlugIn
 			return;
 
 		MemoryPeakResults results = new MemoryPeakResults(points.size() / myAggregateSteps);
-		results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1, myAggregateSteps * 1000.0 / settings.getStepsPerSecond()));
+		results.setCalibration(CalibrationHelper.create(settings.getPixelPitch(), 1,
+				myAggregateSteps * 1000.0 / settings.getStepsPerSecond()));
 		results.setName(TITLE + " Aggregated");
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		MemoryPeakResults.addResults(results);
@@ -943,7 +947,7 @@ public class DiffusionRateTest implements PlugIn
 					final float[] params = PeakResult.createParams(0, n, (float) xyz[0], (float) xyz[1], 0);
 					final float noise = 0.1f;
 					PeakResult r = new ExtendedPeakResult(peak, (int) params[PeakResult.X], (int) params[PeakResult.Y],
-							n, 0, noise, params, null, peak, id);
+							n, 0, noise, 0, params, null, peak, id);
 					results.add(r);
 					if (last != null)
 					{
@@ -976,7 +980,7 @@ public class DiffusionRateTest implements PlugIn
 			final float[] params = PeakResult.createParams(0, n, (float) xyz[0], (float) xyz[1], 0);
 			final float noise = 0.1f;
 			PeakResult r = new ExtendedPeakResult(peak, (int) params[PeakResult.X], (int) params[PeakResult.Y], n, 0,
-					noise, params, null, peak, id);
+					noise, 0, params, null, peak, id);
 			results.add(r);
 			if (last != null)
 			{
@@ -990,7 +994,8 @@ public class DiffusionRateTest implements PlugIn
 		// Convert to um^2/second
 		Utils.log("Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
 				Utils.rounded(settings.getDiffusionRate()), Utils.rounded(myPrecision), count,
-				Utils.rounded(results.getCalibrationReader().getExposureTime() / 1000), Utils.rounded(msd / conversionFactor),
+				Utils.rounded(results.getCalibrationReader().getExposureTime() / 1000),
+				Utils.rounded(msd / conversionFactor),
 				Utils.rounded((msd / conversionFactor) / (results.getCalibrationReader().getExposureTime() / 1000)));
 
 		msdAnalysis(points);

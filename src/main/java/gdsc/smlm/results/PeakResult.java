@@ -53,6 +53,7 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	private float origValue;
 	private double error;
 	private float noise;
+	private float meanIntensity;
 
 	/**
 	 * The parameters (for the standard parameters plus any PSF specific parameters).
@@ -80,6 +81,8 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	 *            the error
 	 * @param noise
 	 *            the noise
+	 * @param meanIntensity
+	 *            the mean intensity
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
@@ -87,8 +90,8 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	 * @throws IllegalArgumentException
 	 *             the illegal argument exception if the parameters are invalid
 	 */
-	public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev) throws IllegalArgumentException
+	public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsStdDev) throws IllegalArgumentException
 	{
 		if (params == null)
 			throw new IllegalArgumentException("Parameters must not be null");
@@ -102,6 +105,7 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 		this.origValue = origValue;
 		this.error = error;
 		this.noise = noise;
+		this.meanIntensity = meanIntensity;
 		this.params = params;
 		this.paramStdDevs = paramsStdDev;
 	}
@@ -219,6 +223,8 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 		if (r1.origValue != r2.origValue)
 			return false;
 		if (r1.noise != r2.noise)
+			return false;
+		if (r1.meanIntensity != r2.meanIntensity)
 			return false;
 
 		// Check optional properties
@@ -480,6 +486,66 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	public void setNoise(float noise)
 	{
 		this.noise = noise;
+	}
+
+	/**
+	 * Checks for noise.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasNoise()
+	{
+		return noise > 0;
+	}
+
+	/**
+	 * Gets the mean intensity.
+	 * <p>
+	 * This requires a knowledge of the PSF used to create the result. It could be the peak signal in the PSF or the
+	 * average signal over a range of the PSF, e.g. the area covered from the maxima to half-maxima for spots.
+	 *
+	 * @return the mean intensity
+	 */
+	public float getMeanIntensity()
+	{
+		return meanIntensity;
+	}
+
+	/**
+	 * Sets the mean intensity.
+	 * <p>
+	 * This requires a knowledge of the PSF used to create the result. It could be the peak signal in the PSF or the
+	 * average signal over a range of the PSF, e.g. the area covered from the maxima to half-maxima for spots.
+	 *
+	 * @param meanIntensity
+	 *            the new mean intensity
+	 */
+	public void setMeanIntensity(float meanIntensity)
+	{
+		this.meanIntensity = meanIntensity;
+	}
+
+	/**
+	 * Checks for mean intensity.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasMeanIntensity()
+	{
+		return meanIntensity > 0;
+	}
+
+	/**
+	 * Gets the Signal-to-Noise Ratio (SNR). This is the ratio of the average signal value to the background standard
+	 * deviation.
+	 *
+	 * @return the snr
+	 * @see #getMeanIntensity()
+	 * @see #getNoise()
+	 */
+	public float getSNR()
+	{
+		return meanIntensity / noise;
 	}
 
 	/**

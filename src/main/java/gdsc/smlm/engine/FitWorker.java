@@ -572,7 +572,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				peakParams[Gaussian2DFunction.X_SD] = sd0;
 				peakParams[Gaussian2DFunction.Y_SD] = sd1;
 				//peakParams[Gaussian2DFunction.ANGLE] = 0;
-				sliceResults.add(createResult(x, y, data[index], 0, noise, peakParams, null, n, 0));
+				float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, sd0, sd1);
+				sliceResults.add(createResult(x, y, data[index], 0, noise, u, peakParams, null, n, 0));
 			}
 		}
 		else
@@ -941,7 +942,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Add it to the grid of results (so we do not fit it again)
 		int x = (int) peakParams[Gaussian2DFunction.X_POSITION];
 		int y = (int) peakParams[Gaussian2DFunction.Y_POSITION];
-		Candidate fitted = c.createFitted(x, y, candidateId, peakParams, peakParamDevs, error, noise, inside);
+		float u = (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(peakParams[Gaussian2DFunction.SIGNAL],
+				peakParams[Gaussian2DFunction.X_SD], peakParams[Gaussian2DFunction.Y_SD]);
+		Candidate fitted = c.createFitted(x, y, candidateId, peakParams, peakParamDevs, error, noise, u, inside);
 		if (locationVariance > 0)
 			fitted.precision = Math.sqrt(locationVariance);
 		queueToGrid(fitted);
@@ -976,12 +979,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		params[Gaussian2DFunction.X_POSITION] += offsetx;
 		params[Gaussian2DFunction.Y_POSITION] += offsety;
 
-		return createResult(x, y, value, fitted.error, fitted.noise, params, fitted.paramDevs, candidateId,
-				fitted.precision);
+		return createResult(x, y, value, fitted.error, fitted.noise, fitted.meanIntensity, params, fitted.paramDevs,
+				candidateId, fitted.precision);
 	}
 
-	private PeakResult createResult(int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramDevs, int id, double precision)
+	private PeakResult createResult(int origX, int origY, float origValue, double error, float noise,
+			float meanIntensity, float[] params, float[] paramDevs, int id, double precision)
 	{
 		// Convert to a variable PSF parameter PeakResult
 		params = Gaussian2DPeakResultHelper.createParams(psfType, params);
@@ -995,8 +998,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		if (precision > 0)
 		{
-			AttributePeakResult r = new AttributePeakResult(slice, origX, origY, origValue, error, noise, params,
-					paramDevs);
+			AttributePeakResult r = new AttributePeakResult(slice, origX, origY, origValue, error, noise, meanIntensity,
+					params, paramDevs);
 			r.setId(id);
 			r.setPrecision(precision);
 			if (endT >= 0 && slice != endT)
@@ -1006,9 +1009,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		if (endT >= 0 && slice != endT)
 		{
-			return new ExtendedPeakResult(slice, origX, origY, origValue, error, noise, params, paramDevs, endT, id);
+			return new ExtendedPeakResult(slice, origX, origY, origValue, error, noise, meanIntensity, params,
+					paramDevs, endT, id);
 		}
-		return new IdPeakResult(slice, origX, origY, origValue, error, noise, params, paramDevs, id);
+		return new IdPeakResult(slice, origX, origY, origValue, error, noise, meanIntensity, params, paramDevs, id);
 	}
 
 	/**
@@ -2134,7 +2138,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				params[Gaussian2DFunction.Y_POSITION] -= cc.dataBounds.y;
 				int x = (int) params[Gaussian2DFunction.X_POSITION];
 				int y = (int) params[Gaussian2DFunction.Y_POSITION];
-				peakNeighbours2.add(new Candidate(x, y, otherId, params, null, 0, 0, true));
+				peakNeighbours2.add(new Candidate(x, y, otherId, params, null, 0, 0, 0, true));
 			}
 
 			// Create the precomputed function values. This is the function defined by the 
@@ -4385,7 +4389,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	public static IDirectFilter createMinimalFilter(PrecisionMethod precisionMethod)
 	{
 		double signal = 30;
-		float snr = 20;
+		// Note: SNR is the mean signal to noise. Rose criterion sets a minimum level at 5.
+		// https://en.wikipedia.org/wiki/Signal-to-noise_ratio#Alternative_definition
+		float snr = 5;
 		double minWidth = 0.5;
 		double maxWidth = 4;
 		double shift = 2;

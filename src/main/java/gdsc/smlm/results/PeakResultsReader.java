@@ -85,8 +85,8 @@ public class PeakResultsReader
 
 	/**
 	 * The columns to recognise in the ImageJ table results header for version 1/2.
-	 * Version 3 may also have this but we can distinguish because V1/2 had Amplitude/Signal
-	 * and V3 does not.
+	 * Version 3+ may also have this but we can distinguish because V1/2 had Amplitude/Signal
+	 * and V3+ does not.
 	 */
 	private static String IMAGEJ_TABLE_RESULTS_HEADER_V1_V2 = "origX\torigY\torigValue\tError\tNoise";
 
@@ -114,7 +114,7 @@ public class PeakResultsReader
 	private ResultOption[] options = null;
 
 	private boolean deviations, readEndFrame, readId, readPrecision, readSource;
-	private int smlmVersion = 3; // Assume the current
+	private int smlmVersion = 4; // Assume the current
 
 	public PeakResultsReader(String filename)
 	{
@@ -202,7 +202,11 @@ public class PeakResultsReader
 			else
 				return false;
 
-			if (version.contains(".V3"))
+			if (version.contains(".V4"))
+			{
+				smlmVersion = 4;
+			}
+			else if (version.contains(".V3"))
 			{
 				smlmVersion = 3;
 			}

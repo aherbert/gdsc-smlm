@@ -162,7 +162,7 @@ public class PeakResultDigestTest
 			float[] params = createParams(n, r);
 			float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
 			AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
-					r.nextDouble(), r.nextFloat(), params, paramsDev);
+					r.nextDouble(), r.nextFloat(), r.nextFloat(), params, paramsDev);
 			if (withId)
 				p.setId(r.nextInt());
 			if (withEndFrame)

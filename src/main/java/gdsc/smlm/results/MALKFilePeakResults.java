@@ -216,10 +216,10 @@ public class MALKFilePeakResults extends FilePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsStdDev)
 	{
 		if (fos == null)
 			return;

@@ -35,17 +35,21 @@ public class IdPeakResult extends PeakResult
 	 *            the error
 	 * @param noise
 	 *            the noise
+	 * @param meanIntensity
+	 *            the mean intensity
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
 	 *            the params standard deviations (if not null must match the length of the {@link #params} array)
+	 * @param id
+	 *            the id
 	 * @throws IllegalArgumentException
 	 *             the illegal argument exception if the parameters are invalid
 	 */
-	public IdPeakResult(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev, int id) throws IllegalArgumentException
+	public IdPeakResult(int frame, int origX, int origY, float origValue, double error, float noise,
+			float meanIntensity, float[] params, float[] paramsStdDev, int id) throws IllegalArgumentException
 	{
-		super(frame, origX, origY, origValue, error, noise, params, paramsStdDev);
+		super(frame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
 		this.id = id;
 	}
 

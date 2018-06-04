@@ -1011,7 +1011,7 @@ public class SpotAnalysis extends PlugInFrame
 			//signal += s.signal;
 			float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(0, (float) (spotSignal), cx, cy, 0,
 					psfWidth);
-			PeakResult result = new PeakResult(s.frame, (int) cx, (int) cy, 0, 0, 0, params, null);
+			PeakResult result = new PeakResult(s.frame, (int) cx, (int) cy, 0, 0, 0, 0, params, null);
 			if (trace == null)
 				trace = new Trace(result);
 			else

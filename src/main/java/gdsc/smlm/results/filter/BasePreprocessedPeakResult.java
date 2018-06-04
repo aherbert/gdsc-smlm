@@ -31,6 +31,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	private final int id;
 	private final int candidateId;
 	private final float signal;
+	private final float meanSignal;
 	private final float snr;
 	private final float noise;
 	private final float sd;
@@ -90,6 +91,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			int id,
 			int candidateId,
 			double signal,
+			double meanSignal,
 			double noise,
 			double b,
 			double angle,
@@ -113,7 +115,8 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		this.id = id;
 		this.candidateId = candidateId;
 		this.signal = (float) (signal);
-		this.snr = (float) (Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, ysd) / noise);
+		this.meanSignal = (float) (meanSignal);
+		this.snr = (float) (signal / noise);
 		this.noise = (float) (noise);
 		this.sd = (float) (Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd));
 		this.b = (float) (b);
@@ -165,6 +168,12 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		return signal;
 	}
 
+	public float getMeanSignal()
+	{
+		return meanSignal;
+	}
+	
+	@Override
 	public float getSNR()
 	{
 		return snr;

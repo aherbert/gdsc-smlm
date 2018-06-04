@@ -803,19 +803,20 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.utils.fitting.results.PeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
-			float[] params, float[] paramsStdDev)
+			float meanIntensity, float[] params, float[] paramsStdDev)
 	{
 		if (!sampleSizeReached())
 		{
 			if (!ignore[ANGLE])
-				sampleNew[ANGLE].addValue(params[2]);
+				// Assume fitting a 2D Gaussian
+				sampleNew[ANGLE].addValue(params[Gaussian2DFunction.ANGLE]);
 			//if (!ignore[X])
-			sampleNew[X].addValue(params[5]);
+			sampleNew[X].addValue(params[PeakResult.X]);
 			if (!ignore[Y])
-				sampleNew[Y].addValue(params[6]);
+				sampleNew[Y].addValue(params[PeakResult.Y]);
 		}
 	}
 
@@ -827,21 +828,23 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	public void add(PeakResult result)
 	{
 		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-				result.getNoise(), result.getParameters(), result.getParameterDeviations());
+				result.getNoise(), result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations());
 	}
 
 	public synchronized void addAll(PeakResult[] results)
 	{
 		for (PeakResult result : results)
 			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-					result.getNoise(), result.getParameters(), result.getParameterDeviations());
+					result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+					result.getParameterDeviations());
 	}
 
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)
 			add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-					result.getNoise(), result.getParameters(), result.getParameterDeviations());
+					result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+					result.getParameterDeviations());
 	}
 
 	public void addAll(PeakResultStore results)

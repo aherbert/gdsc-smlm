@@ -7889,6 +7889,29 @@ public final class TSFProtos {
      * <code>repeated float param_std_devs = 1505;</code>
      */
     float getParamStdDevs(int index);
+
+    /**
+     * <pre>
+     * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+     * size 7 for fitted parameters:
+     * [Background,Signal,Theta,X,Y,X-width,Y-width].
+     * Parameters that are not fit will have zero in the array.
+     * </pre>
+     *
+     * <code>optional float mean_intensity = 1506;</code>
+     */
+    boolean hasMeanIntensity();
+    /**
+     * <pre>
+     * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+     * size 7 for fitted parameters:
+     * [Background,Signal,Theta,X,Y,X-width,Y-width].
+     * Parameters that are not fit will have zero in the array.
+     * </pre>
+     *
+     * <code>optional float mean_intensity = 1506;</code>
+     */
+    float getMeanIntensity();
   }
   /**
    * Protobuf type {@code TSF.Spot}
@@ -7933,6 +7956,7 @@ public final class TSFProtos {
       endFrame_ = 0;
       originalValue_ = 0F;
       paramStdDevs_ = java.util.Collections.emptyList();
+      meanIntensity_ = 0F;
     }
 
     @java.lang.Override
@@ -8139,6 +8163,11 @@ public final class TSFProtos {
                 paramStdDevs_.add(input.readFloat());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 12053: {
+              bitField0_ |= 0x20000000;
+              meanIntensity_ = input.readFloat();
               break;
             }
           }
@@ -8896,6 +8925,35 @@ public final class TSFProtos {
       return paramStdDevs_.get(index);
     }
 
+    public static final int MEAN_INTENSITY_FIELD_NUMBER = 1506;
+    private float meanIntensity_;
+    /**
+     * <pre>
+     * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+     * size 7 for fitted parameters:
+     * [Background,Signal,Theta,X,Y,X-width,Y-width].
+     * Parameters that are not fit will have zero in the array.
+     * </pre>
+     *
+     * <code>optional float mean_intensity = 1506;</code>
+     */
+    public boolean hasMeanIntensity() {
+      return ((bitField0_ & 0x20000000) == 0x20000000);
+    }
+    /**
+     * <pre>
+     * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+     * size 7 for fitted parameters:
+     * [Background,Signal,Theta,X,Y,X-width,Y-width].
+     * Parameters that are not fit will have zero in the array.
+     * </pre>
+     *
+     * <code>optional float mean_intensity = 1506;</code>
+     */
+    public float getMeanIntensity() {
+      return meanIntensity_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -9029,6 +9087,9 @@ public final class TSFProtos {
       for (int i = 0; i < paramStdDevs_.size(); i++) {
         output.writeFloat(1505, paramStdDevs_.get(i));
       }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        output.writeFloat(1506, meanIntensity_);
+      }
       extensionWriter.writeUntil(2048, output);
       unknownFields.writeTo(output);
     }
@@ -9159,6 +9220,10 @@ public final class TSFProtos {
         dataSize = 4 * getParamStdDevsList().size();
         size += dataSize;
         size += 2 * getParamStdDevsList().size();
+      }
+      if (((bitField0_ & 0x20000000) == 0x20000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(1506, meanIntensity_);
       }
       size += extensionsSerializedSize();
       size += unknownFields.getSerializedSize();
@@ -9357,6 +9422,13 @@ public final class TSFProtos {
       }
       result = result && getParamStdDevsList()
           .equals(other.getParamStdDevsList());
+      result = result && (hasMeanIntensity() == other.hasMeanIntensity());
+      if (hasMeanIntensity()) {
+        result = result && (
+            java.lang.Float.floatToIntBits(getMeanIntensity())
+            == java.lang.Float.floatToIntBits(
+                other.getMeanIntensity()));
+      }
       result = result && unknownFields.equals(other.unknownFields);
       result = result &&
           getExtensionFields().equals(other.getExtensionFields());
@@ -9506,6 +9578,11 @@ public final class TSFProtos {
       if (getParamStdDevsCount() > 0) {
         hash = (37 * hash) + PARAM_STD_DEVS_FIELD_NUMBER;
         hash = (53 * hash) + getParamStdDevsList().hashCode();
+      }
+      if (hasMeanIntensity()) {
+        hash = (37 * hash) + MEAN_INTENSITY_FIELD_NUMBER;
+        hash = (53 * hash) + java.lang.Float.floatToIntBits(
+            getMeanIntensity());
       }
       hash = hashFields(hash, getExtensionFields());
       hash = (29 * hash) + unknownFields.hashCode();
@@ -9698,6 +9775,8 @@ public final class TSFProtos {
         bitField0_ = (bitField0_ & ~0x10000000);
         paramStdDevs_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x20000000);
+        meanIntensity_ = 0F;
+        bitField0_ = (bitField0_ & ~0x40000000);
         return this;
       }
 
@@ -9843,6 +9922,10 @@ public final class TSFProtos {
           bitField0_ = (bitField0_ & ~0x20000000);
         }
         result.paramStdDevs_ = paramStdDevs_;
+        if (((from_bitField0_ & 0x40000000) == 0x40000000)) {
+          to_bitField0_ |= 0x20000000;
+        }
+        result.meanIntensity_ = meanIntensity_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -10004,6 +10087,9 @@ public final class TSFProtos {
             paramStdDevs_.addAll(other.paramStdDevs_);
           }
           onChanged();
+        }
+        if (other.hasMeanIntensity()) {
+          setMeanIntensity(other.getMeanIntensity());
         }
         this.mergeExtensionFields(other);
         this.mergeUnknownFields(other.unknownFields);
@@ -11596,6 +11682,66 @@ public final class TSFProtos {
         onChanged();
         return this;
       }
+
+      private float meanIntensity_ ;
+      /**
+       * <pre>
+       * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+       * size 7 for fitted parameters:
+       * [Background,Signal,Theta,X,Y,X-width,Y-width].
+       * Parameters that are not fit will have zero in the array.
+       * </pre>
+       *
+       * <code>optional float mean_intensity = 1506;</code>
+       */
+      public boolean hasMeanIntensity() {
+        return ((bitField0_ & 0x40000000) == 0x40000000);
+      }
+      /**
+       * <pre>
+       * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+       * size 7 for fitted parameters:
+       * [Background,Signal,Theta,X,Y,X-width,Y-width].
+       * Parameters that are not fit will have zero in the array.
+       * </pre>
+       *
+       * <code>optional float mean_intensity = 1506;</code>
+       */
+      public float getMeanIntensity() {
+        return meanIntensity_;
+      }
+      /**
+       * <pre>
+       * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+       * size 7 for fitted parameters:
+       * [Background,Signal,Theta,X,Y,X-width,Y-width].
+       * Parameters that are not fit will have zero in the array.
+       * </pre>
+       *
+       * <code>optional float mean_intensity = 1506;</code>
+       */
+      public Builder setMeanIntensity(float value) {
+        bitField0_ |= 0x40000000;
+        meanIntensity_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+       * size 7 for fitted parameters:
+       * [Background,Signal,Theta,X,Y,X-width,Y-width].
+       * Parameters that are not fit will have zero in the array.
+       * </pre>
+       *
+       * <code>optional float mean_intensity = 1506;</code>
+       */
+      public Builder clearMeanIntensity() {
+        bitField0_ = (bitField0_ & ~0x40000000);
+        meanIntensity_ = 0F;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
@@ -11696,7 +11842,7 @@ public final class TSFProtos {
       "_time\030\340\013 \001(\001\022\023\n\nread_noise\030\341\013 \001(\001\022\r\n\004bia",
       "s\030\342\013 \001(\001\022%\n\013camera_type\030\345\013 \001(\0162\017.TSF.Cam" +
       "eraType\022\014\n\003PSF\030\346\013 \001(\t*\006\010\244\r\020\200\020J\006\010\343\013\020\344\013J\006\010" +
-      "\344\013\020\345\013R\006em_ccdR\ramplification\"\333\004\n\004Spot\022\020\n" +
+      "\344\013\020\345\013R\006em_ccdR\ramplification\"\364\004\n\004Spot\022\020\n" +
       "\010molecule\030\001 \002(\005\022\017\n\007channel\030\002 \002(\005\022\r\n\005fram" +
       "e\030\003 \002(\005\022\r\n\005slice\030\004 \001(\005\022\013\n\003pos\030\005 \001(\005\022\030\n\020f" +
       "luorophore_type\030\023 \001(\005\022\017\n\007cluster\030\024 \001(\005\022*" +
@@ -11711,14 +11857,14 @@ public final class TSFProtos {
       " \001(\002\022\022\n\nx_position\030k \001(\005\022\022\n\ny_position\030l" +
       " \001(\005\022\016\n\005error\030\334\013 \001(\001\022\016\n\005noise\030\335\013 \001(\002\022\022\n\t" +
       "end_frame\030\337\013 \001(\005\022\027\n\016original_value\030\340\013 \001(" +
-      "\002\022\027\n\016param_std_devs\030\341\013 \003(\002*\006\010\244\r\020\200\020*8\n\007Fi" +
-      "tMode\022\013\n\007ONEAXIS\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAX" +
-      "ISANDTHETA\020\002*&\n\nThetaUnits\022\013\n\007DEGREES\020\000\022",
-      "\013\n\007RADIANS\020\001*)\n\016IntensityUnits\022\n\n\006COUNTS" +
-      "\020\000\022\013\n\007PHOTONS\020\001*+\n\rLocationUnits\022\006\n\002NM\020\000" +
-      "\022\006\n\002UM\020\001\022\n\n\006PIXELS\020\002*+\n\nCameraType\022\007\n\003CC" +
-      "D\020\000\022\t\n\005EMCCD\020\001\022\t\n\005SCMOS\020\002B\032\n\rgdsc.smlm.t" +
-      "sfB\tTSFProtos"
+      "\002\022\027\n\016param_std_devs\030\341\013 \003(\002\022\027\n\016mean_inten" +
+      "sity\030\342\013 \001(\002*\006\010\244\r\020\200\020*8\n\007FitMode\022\013\n\007ONEAXI" +
+      "S\020\000\022\013\n\007TWOAXIS\020\001\022\023\n\017TWOAXISANDTHETA\020\002*&\n",
+      "\nThetaUnits\022\013\n\007DEGREES\020\000\022\013\n\007RADIANS\020\001*)\n" +
+      "\016IntensityUnits\022\n\n\006COUNTS\020\000\022\013\n\007PHOTONS\020\001" +
+      "*+\n\rLocationUnits\022\006\n\002NM\020\000\022\006\n\002UM\020\001\022\n\n\006PIX" +
+      "ELS\020\002*+\n\nCameraType\022\007\n\003CCD\020\000\022\t\n\005EMCCD\020\001\022" +
+      "\t\n\005SCMOS\020\002B\032\n\rgdsc.smlm.tsfB\tTSFProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -11755,7 +11901,7 @@ public final class TSFProtos {
     internal_static_TSF_Spot_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TSF_Spot_descriptor,
-        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "EndFrame", "OriginalValue", "ParamStdDevs", });
+        new java.lang.String[] { "Molecule", "Channel", "Frame", "Slice", "Pos", "FluorophoreType", "Cluster", "LocationUnits", "X", "Y", "Z", "IntensityUnits", "Intensity", "Background", "Width", "A", "Theta", "XOriginal", "YOriginal", "ZOriginal", "XPrecision", "YPrecision", "ZPrecision", "XPosition", "YPosition", "Error", "Noise", "EndFrame", "OriginalValue", "ParamStdDevs", "MeanIntensity", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

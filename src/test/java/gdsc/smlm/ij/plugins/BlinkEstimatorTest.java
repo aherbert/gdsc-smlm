@@ -142,7 +142,7 @@ public class BlinkEstimatorTest
 	{
 		// Skip this as it is slow
 		Assume.assumeTrue(false);
-		
+
 		int particles = 1000;
 		double fixedFraction = 1;
 
@@ -185,7 +185,7 @@ public class BlinkEstimatorTest
 			boolean timeAtLowerBound, boolean doAssert)
 	{
 		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
-		
+
 		SpatialIllumination activationIllumination = new UniformIllumination(100);
 		int totalSteps = 100;
 		double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
@@ -254,7 +254,7 @@ public class BlinkEstimatorTest
 			float x = (float) l.getX();
 			float y = (float) l.getY();
 			float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
-			results.add(frame, 0, 0, 0, 0, 0, params, null);
+			results.add(frame, 0, 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Add random localisations
@@ -266,7 +266,7 @@ public class BlinkEstimatorTest
 			float x = (float) (rand.nextDouble() * max[0]);
 			float y = (float) (rand.nextDouble() * max[1]);
 			float[] params = Gaussian2DPeakResultHelper.createParams(b, intensity, x, y, z, psfWidth);
-			results.add(frame, 0, 0, 0, 0, 0, params, null);
+			results.add(frame, 0, 0, 0, 0, 0, 0, params, null);
 		}
 
 		// Get actual simulated stats ...

@@ -104,7 +104,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	private double coordinateShift = 1;
 	private int fitRegionWidth = 0, fitRegionHeight = 0;
 	private double coordinateOffset = 0.5;
-	private double signalThreshold = 0;
+	private double minSignal = 0;
 	private double precisionThreshold = 0;
 	private boolean isTwoAxisGaussian2D;
 	private double nmPerPixel = 0;
@@ -394,7 +394,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			signalToPhotons = 1;
 		}
 
-		updateSignalThreshold();
+		updateMinSignal();
 		updatePrecisionThreshold();
 	}
 
@@ -603,7 +603,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private void updateFilterSettings()
 	{
-		updateSignalThreshold();
+		updateMinSignal();
 		updatePrecisionThreshold();
 		updateCoordinateShift();
 		updateWidthThreshold();
@@ -1310,11 +1310,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Set the signal strength used to determine the signal strength for a good fit (signalThreshold =
-	 * max(minSignal, noise x signalStrength).
-	 * <p>
-	 * Note that minSignal is created appropriately from minPhotons using the
-	 * type of fitter, see {@link #isFitCameraCounts()}.
+	 * Set the signal strength (Signal-to-Noise Ratio, SNR) for a good fit.
 	 * 
 	 * @param signalStrength
 	 *            The signal strength
@@ -1322,7 +1318,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setSignalStrength(double signalStrength)
 	{
 		filterSettings.setSignalStrength(signalStrength);
-		updateSignalThreshold();
 	}
 
 	/**
@@ -1354,7 +1349,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setMinPhotons(double minPhotons)
 	{
 		filterSettings.setMinPhotons(minPhotons);
-		updateSignalThreshold();
+		updateMinSignal();
+	}
+
+	private void updateMinSignal()
+	{
+		minSignal = (isFitCameraCounts()) ? getMinPhotons() * gain : getMinPhotons();
 	}
 
 	/**
@@ -1568,11 +1568,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
-	 * Set the image noise used to determine the signal strength for a good fit (signalThreshold =
-	 * max(minSignal, noise x signalStrength).
-	 * <p>
-	 * Note that minSignal is created appropriately from minPhotons using the
-	 * type of fitter, see {@link #isFitCameraCounts()}.
+	 * Set the image noise used to determine the Signal-to-Noise Ratio (SNR) for a good fit.
 	 * 
 	 * @param noise
 	 *            The image noise.
@@ -1580,7 +1576,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public void setNoise(double noise)
 	{
 		this.noise = noise;
-		updateSignalThreshold();
 	}
 
 	/**
@@ -1589,12 +1584,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	public double getNoise()
 	{
 		return noise;
-	}
-
-	private void updateSignalThreshold()
-	{
-		double minSignal = (isFitCameraCounts()) ? getMinPhotons() * gain : getMinPhotons();
-		signalThreshold = Math.max(noise * getSignalStrength(), minSignal);
 	}
 
 	/**
@@ -2293,14 +2282,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// The threshold should be set in the same units as those used during fitting. 
 		final double signal = params[Gaussian2DFunction.SIGNAL + offset];
 		// Compare the signal to the desired signal strength
-		if (signal < signalThreshold)
+		if (signal < minSignal)
 		{
 			if (log != null)
 			{
-				log.info("Bad peak %d: Insufficient signal %g (SNR=%g)\n", n, signal, signal / noise);
+				log.info("Bad peak %d: Insufficient signal %g\n", n, signal);
 			}
 			//if (params.length == 7) // Single peak
-			//	System.out.printf("Bad peak %d: Insufficient signal (%gx)\n", n, signal / noise);
+			//	System.out.printf("Bad peak %d: Insufficient signal (%g)\n", n, signal);
 			return setValidationResult(FitStatus.INSUFFICIENT_SIGNAL, signal);
 		}
 
@@ -2331,6 +2320,21 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			xsd = params[Gaussian2DFunction.X_SD + offset];
 			ysd = params[Gaussian2DFunction.Y_SD + offset];
+		}
+
+		// Check SNR threshold. Assume the noise has been set in the same units as the fit result.
+		final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, ysd) / noise;
+
+		// Compare the signal to the desired signal strength
+		if (snr < getSignalStrength())
+		{
+			if (log != null)
+			{
+				log.info("Bad peak %d: Insufficient SNR %g\n", n, snr);
+			}
+			//if (params.length == 7) // Single peak
+			//	System.out.printf("Bad peak %d: Insufficient SNR (%g)\n", n, snr);
+			return setValidationResult(FitStatus.INSUFFICIENT_SNR, snr);
 		}
 
 		// Check widths
@@ -2499,11 +2503,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * <p>
 	 * If not an EM-CCD then the method does nothing.
 	 * <p>
-	 * If an EM-CCD the method scales the variance for XY position parameters by a factor of 2. This
+	 * If an EM-CCD the method scales the variance for all parameters by a factor of 2. This
 	 * allows the computation of the localisation variance using the parameter deviations to match the estimation
 	 * formulas of Mortensen. See Mortensen, et al (2010) Nature Methods 7, 377-383, SI 4.3 for assumptions and proof
-	 * using MLE. Note that in the EM-CCD case the deviations for the other parameters will be incorrect as they are
-	 * computed assuming a Poisson process.
+	 * using MLE.
 	 *
 	 * @param paramsDev
 	 *            the params dev
@@ -2512,11 +2515,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (emCCD && paramsDev != null)
 		{
-			for (int i = Gaussian2DFunction.X_POSITION; i < paramsDev.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
-			{
+			//// Scale only XY
+			//for (int i = Gaussian2DFunction.X_POSITION; i < paramsDev.length; i += Gaussian2DFunction.PARAMETERS_PER_PEAK)
+			//{
+			//	paramsDev[i] *= 2;
+			//	paramsDev[i + Y_OFFSET] *= 2;
+			//}
+
+			// Note: Although Mortensen provide a proof for XY positions the Fisher information
+			// for an EM-CCD can be modelled as half the standard Poisson fisher information. So
+			// double the deviations for all parameters.
+
+			// Scale all 
+			for (int i = 0; i < paramsDev.length; i++)
 				paramsDev[i] *= 2;
-				paramsDev[i + Y_OFFSET] *= 2;
-			}
 		}
 	}
 
@@ -2628,9 +2640,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons);
 		}
 
-		public float getSNR()
+		@Override
+		public float getMeanSignal()
 		{
-			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / getNoise());
+			return (float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(params[Gaussian2DFunction.SIGNAL + offset],
+					xsd, ysd);
 		}
 
 		public float getNoise()
@@ -2991,9 +3005,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		//		? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
 
 		// This uses the local fitted background to estimate the noise
-		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, 1.0, this.emCCD) : this.noise;
-		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, noise, b, angle, x, y, z, x0, y0, xsd, ysd,
-				xsd0, ysd0, variance, variance2, varianceCRLB, resultType);
+		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, this.emCCD) : this.noise;
+		final double u = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, ysd);
+		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, u, noise, b, angle, x, y, z, x0, y0, xsd,
+				ysd, xsd0, ysd0, variance, variance2, varianceCRLB, resultType);
 	}
 
 	// The model now entirely defines the width so no unmapping is necessary
@@ -3148,8 +3163,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				precomputedFunctionValues = f;
 			}
 
-			functionSolver.setGradientFunction((GradientFunction) OffsetFunctionFactory
-					.wrapFunction(gaussianFunction, precomputedFunctionValues));
+			functionSolver.setGradientFunction(
+					(GradientFunction) OffsetFunctionFactory.wrapFunction(gaussianFunction, precomputedFunctionValues));
 			precomputedFunctionValues = null;
 		}
 		if (functionSolver.isWeighted())

@@ -311,6 +311,9 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 			sb.append("\tNoise");
 			if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
 				sb.append(" (").append(unitNames[PeakResult.INTENSITY]).append(')');
+			sb.append("\tMean");
+			if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY]))
+				sb.append(" (").append(unitNames[PeakResult.INTENSITY]).append(')');
 			sb.append("\tSNR");
 		}
 
@@ -362,22 +365,21 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.AbstractPeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int frame, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsDev)
+	public void add(int frame, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsDev)
 	{
-		addPeak(frame, frame, 0, origX, origY, origValue, error, noise, params, paramsDev, -1);
+		addPeak(frame, frame, 0, origX, origY, origValue, error, noise, meanIntensity, params, paramsDev, -1);
 	}
 
 	private void addPeak(int frame, int endFrame, int id, int origX, int origY, float origValue, double error,
-			float noise, float[] params, float[] paramsStdDev, double precision)
+			float noise, float meanIntensity, float[] params, float[] paramsStdDev, double precision)
 	{
 		if (!tableActive)
 			return;
 
-		final float snr = (noise > 0) ? params[PeakResult.INTENSITY] / noise : 0;
-		StringBuilder sb = addStandardData(frame, endFrame, id, origX, origY, origValue, error, noise, snr);
+		StringBuilder sb = addStandardData(frame, endFrame, id, origX, origY, origValue, error, noise, meanIntensity);
 		if (isShowDeviations())
 		{
 			if (paramsStdDev != null)
@@ -416,7 +418,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	}
 
 	private StringBuilder addStandardData(int frame, int endFrame, int id, int origX, int origY, float origValue,
-			double error, float noise, float snr)
+			double error, float noise, float meanIntensity)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (addCounter)
@@ -440,8 +442,10 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		}
 		if (showNoiseData)
 		{
-			add(sb, ic.convert(noise)); // This should be converted
-			add(sb, snr);
+			// These should be converted
+			add(sb, ic.convert(noise)); 
+			add(sb, ic.convert(meanIntensity));
+			add(sb, meanIntensity / noise);
 		}
 		return sb;
 	}
@@ -507,8 +511,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	public void add(PeakResult result)
 	{
 		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
-				result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
-				result.getParameterDeviations(), result.getPrecision());
+				result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
+				result.getParameters(), result.getParameterDeviations(), result.getPrecision());
 	}
 
 	/*
@@ -524,8 +528,8 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		for (PeakResult result : results)
 		{
 			addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
-					result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
-					result.getParameterDeviations(), result.getPrecision());
+					result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
+					result.getParameters(), result.getParameterDeviations(), result.getPrecision());
 			if (n++ > 31)
 			{
 				if (!tableActive)
@@ -1014,7 +1018,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	{
 		tp.removeMouseListener(listener);
 	}
-	
+
 	/**
 	 * Gets the text panel.
 	 *

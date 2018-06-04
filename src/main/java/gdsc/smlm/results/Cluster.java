@@ -353,8 +353,8 @@ public class Cluster implements Comparable<Cluster>
 				for (int peak = result.getFrame(); peak <= result.getEndFrame(); peak++)
 				{
 					newResults.add(new ExtendedPeakResult(peak, result.getOrigX(), result.getOrigY(),
-							result.getOrigValue(), result.getError(), result.getNoise(), result.getParameters(),
-							result.getParameterDeviations(), peak, result.getId()));
+							result.getOrigValue(), result.getError(), result.getNoise(), result.getMeanIntensity(),
+							result.getParameters(), result.getParameterDeviations(), peak, result.getId()));
 				}
 			}
 			else

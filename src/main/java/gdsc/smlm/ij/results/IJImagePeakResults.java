@@ -367,8 +367,8 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			// -Infinity is mapped to 0 in the LUT.
 			if ((displayFlags & DISPLAY_NEGATIVES) != 0)
 			{
-				InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight, (float[]) pixels,
-						null);
+				InfinityMappedFloatProcessor fp = new InfinityMappedFloatProcessor(imageWidth, imageHeight,
+						(float[]) pixels, null);
 				return fp;
 			}
 
@@ -549,10 +549,10 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.AbstractPeakResults#add(int, int, int, float, double, float, float[], float[])
+	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsDev)
 	{
 		if (!imageActive)
 			return;
@@ -1097,7 +1097,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	public void add(PeakResult result)
 	{
 		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-				result.getNoise(), result.getParameters(), null);
+				result.getNoise(), result.getMeanIntensity(), result.getParameters(), null);
 	}
 
 	/*

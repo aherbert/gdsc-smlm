@@ -1394,7 +1394,7 @@ public class PCPALMMolecules implements PlugIn
 				float xx = (float) (x / nmPerPixel);
 				float yy = (float) (y / nmPerPixel);
 				float[] params = PeakResult.createParams(0, 0, xx, yy, 0);
-				results.add(i + 1, (int) xx, (int) yy, 0, 0, 0, params, null);
+				results.add(i + 1, (int) xx, (int) yy, 0, 0, 0, 0, params, null);
 			}
 
 			if (molecules.size() > size)

@@ -260,7 +260,12 @@ message Spot {
       // each of the fitted parameters. The GDSC SMLM code uses a fixed array of
       // size 7 for fitted parameters:
       // [Background,Signal,Theta,X,Y,X-width,Y-width].
-      // Parameters that are not fit will have zero in the array.   
+      // Parameters that are not fit will have zero in the array.
+   optional float mean_intensity = 1506; // The mean intensity of the spot. This
+      // can be the peak spot intensity in the PSF which is simple to compute.
+      // It can be the integrated intensity over the main region of the spot
+      // divided by the area. E.g. This may be
+      // the intensity within the region with a value greater than half-maxima.
 
    // These ids can be used in your own .proto derived from this one
    extensions 1700 to 2047;

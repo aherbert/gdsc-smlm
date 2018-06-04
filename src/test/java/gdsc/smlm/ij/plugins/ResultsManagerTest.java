@@ -318,7 +318,7 @@ public class ResultsManagerTest
 						spot.getIntensity(), spot.getX(), spot.getY(), spot.getZ(),
 						(float) (spot.getWidth() / Gaussian2DFunction.SD_TO_FWHM_FACTOR));
 				float[] paramsStdDev = null;
-				IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, params,
+				IdPeakResult peak = new IdPeakResult(startFrame, origX, origY, origValue, error, noise, 0, params,
 						paramsStdDev, id);
 				results.add(peak);
 			}

@@ -180,8 +180,8 @@ public class AttributePeakResult extends PeakResult
 	/**
 	 * Instantiates a new attribute peak result.
 	 *
-	 * @param frame
-	 *            the frame
+	 * @param startFrame
+	 *            the start frame
 	 * @param origX
 	 *            the original X position
 	 * @param origY
@@ -192,6 +192,8 @@ public class AttributePeakResult extends PeakResult
 	 *            the error
 	 * @param noise
 	 *            the noise
+	 * @param meanIntensity
+	 *            the mean intensity
 	 * @param params
 	 *            the params (must not be null and must have at least {@value #STANDARD_PARAMETERS} parameters)
 	 * @param paramsStdDev
@@ -200,9 +202,9 @@ public class AttributePeakResult extends PeakResult
 	 *             the illegal argument exception if the parameters are invalid
 	 */
 	public AttributePeakResult(int startFrame, int origX, int origY, float origValue, double error, float noise,
-			float[] params, float[] paramsStdDev) throws IllegalArgumentException
+			float meanIntensity, float[] params, float[] paramsStdDev) throws IllegalArgumentException
 	{
-		super(startFrame, origX, origY, origValue, error, noise, params, paramsStdDev);
+		super(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
 	}
 
 	/**
@@ -246,8 +248,9 @@ public class AttributePeakResult extends PeakResult
 	 */
 	public AttributePeakResult(PeakResult peakResult)
 	{
-		super(peakResult.getFrame(), peakResult.getOrigX(), peakResult.getOrigY(), peakResult.getOrigValue(), peakResult.getError(),
-				peakResult.getNoise(), peakResult.getParameters().clone(),
+		super(peakResult.getFrame(), peakResult.getOrigX(), peakResult.getOrigY(), peakResult.getOrigValue(),
+				peakResult.getError(), peakResult.getNoise(), peakResult.getMeanIntensity(),
+				peakResult.getParameters().clone(),
 				(peakResult.getParameterDeviations() == null) ? null : peakResult.getParameterDeviations().clone());
 		if (peakResult.hasId())
 			setId(peakResult.getId());

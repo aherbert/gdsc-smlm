@@ -564,7 +564,7 @@ public class TraceManager
 				final float[] params = new float[] { background, signal, 0, centroid[0], centroid[1], sd, sd };
 				final int endFrame = traces[i].getTail().getEndFrame();
 				results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
-						result.getOrigValue(), 0, 0, params, null, endFrame, i + 1));
+						result.getOrigValue(), 0, 0, 0, params, null, endFrame, i + 1));
 			}
 		}
 		return results;
@@ -607,8 +607,8 @@ public class TraceManager
 				if (traces[i].size() == 1)
 				{
 					AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(), result.getOrigX(),
-							result.getOrigY(), result.getOrigValue(), 0, result.getNoise(), result.getParameters(),
-							null);
+							result.getOrigY(), result.getOrigValue(), 0, result.getNoise(), result.getMeanIntensity(),
+							result.getParameters(), null);
 					peakResult.setId(traces[i].getId());
 					peakResult.setEndFrame(result.getEndFrame());
 					if (converter != null)
@@ -697,7 +697,8 @@ public class TraceManager
 					public void execute(PeakResult result)
 					{
 						results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
-								result.getOrigValue(), 0, result.getNoise(), result.getParameters(), null, 0, traceId));
+								result.getOrigValue(), 0, result.getNoise(), result.getMeanIntensity(),
+								result.getParameters(), null, 0, traceId));
 
 					}
 				});

@@ -179,7 +179,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		// Check weak thresholds
 		if (result.getSignal() < weakSignalThreshold)
 			return PeakStatus.REJECT;
-		final float snr = SNRFilter.getSNR(result);
+		final float snr = result.getSNR();
 		if (snr < weakSnr)
 			return PeakStatus.REJECT;
 		final float sd = calculator.getStandardDeviation(result.getParameters());

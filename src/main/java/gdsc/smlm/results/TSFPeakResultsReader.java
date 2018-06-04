@@ -350,6 +350,7 @@ public class TSFPeakResultsReader
 				float origValue = 0;
 				double error = 0;
 				float noise = 0;
+				float meanIntensity = 0;
 				float[] paramsStdDev = null;
 				int id = 0;
 				int endFrame = frame;
@@ -358,6 +359,7 @@ public class TSFPeakResultsReader
 				{
 					error = spot.getError();
 					noise = spot.getNoise();
+					meanIntensity = spot.getMeanIntensity();
 					id = spot.getCluster();
 					origValue = spot.getOriginalValue();
 					endFrame = spot.getEndFrame();
@@ -376,7 +378,7 @@ public class TSFPeakResultsReader
 
 				// Allow storing any of the optional attributes
 				AttributePeakResult peakResult = new AttributePeakResult(frame, origX, origY, origValue, error, noise,
-						params, paramsStdDev);
+						meanIntensity, params, paramsStdDev);
 
 				peakResult.setEndFrame(endFrame);
 				peakResult.setId(id);
@@ -594,7 +596,7 @@ public class TSFPeakResultsReader
 		}
 		else
 			cal.setDistanceUnit(null);
-		
+
 		if (spotList.hasIntensityUnits())
 		{
 			cal.setIntensityUnit(intensityUnitsMap[spotList.getIntensityUnits().ordinal()]);
@@ -607,16 +609,16 @@ public class TSFPeakResultsReader
 		}
 		else
 			cal.setIntensityUnit(null);
-			
+
 		if (spotList.hasThetaUnits())
 		{
 			cal.setAngleUnit(thetaUnitsMap[spotList.getThetaUnits().ordinal()]);
 		}
 		else
 			cal.setAngleUnit(null);
-			
+
 		results.setCalibration(cal.getCalibration());
-		
+
 		return results;
 	}
 

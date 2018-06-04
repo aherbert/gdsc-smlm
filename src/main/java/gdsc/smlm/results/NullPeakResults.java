@@ -22,11 +22,11 @@ public class NullPeakResults extends AbstractPeakResults implements ThreadSafePe
 	{
 	}
 
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
-			float[] paramsStdDev)
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanSignal,
+			float[] params, float[] paramsStdDev)
 	{
 	}
-	
+
 	public void add(PeakResult result)
 	{
 	}

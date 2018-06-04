@@ -27,7 +27,7 @@ public class PeakResultDataSNR extends PeakResultDataFloat
 	 */
 	public Float getValue(PeakResult result)
 	{
-		return (result.getNoise() > 0f) ? result.getSignal() / result.getNoise() : 0f;
+		return result.getSNR();
 	}
 
 	/*
