@@ -4,10 +4,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
@@ -185,58 +185,76 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void canComputeCumulative()
 	{
+		Assert.assertEquals(0, Gaussian2DPeakResultHelper.cumulative(0), 0);
 		Assert.assertEquals(0.6827, Gaussian2DPeakResultHelper.cumulative(1), 1e-3);
 		Assert.assertEquals(0.9545, Gaussian2DPeakResultHelper.cumulative(2), 1e-3);
 		Assert.assertEquals(0.9974, Gaussian2DPeakResultHelper.cumulative(3), 1e-3);
+		Assert.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative(Double.POSITIVE_INFINITY));
 	}
 
 	@Test
-	public void canComputeSNR()
+	public void canComputeCumulative2DAndInverse()
 	{
-		// These are wrong
-//		//@formatter:off
-//		Assert.assertEquals(0.6827 / (Math.PI), Gaussian2DPeakResultHelper.getSNR(1, 1, 1, 1, 1), 1e-3);
-//		Assert.assertEquals(15 * 0.6827 / (Math.PI * 2 * 1.5), Gaussian2DPeakResultHelper.getSNR(15, 2, 1.5, 1, 1), 1e-3);
-//		Assert.assertEquals(15 * 0.6827 / (Math.PI * 2 * 1.5 * 1.2), Gaussian2DPeakResultHelper.getSNR(15, 2, 1.5, 1, 1.2), 1e-3);
-//		Assert.assertEquals(15 * 0.9545 / (Math.PI * 2 * 2 * 1.5 * 2 * 1.2), Gaussian2DPeakResultHelper.getSNR(15, 2, 1.5, 2, 1.2), 1e-3);
-//		//@formatter:on
-
-		// Test fixed versions verse dynamic
-		RandomGenerator r = new Well19937c();
-		for (int i = 0; i < 10; i++)
+		Assert.assertEquals(0, Gaussian2DPeakResultHelper.cumulative2D(0), 0);
+		Assert.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative2D(Double.POSITIVE_INFINITY));
+		Assert.assertEquals(0, Gaussian2DPeakResultHelper.inverseCumulative2D(0), 0);
+		Assert.assertTrue(Double.POSITIVE_INFINITY == Gaussian2DPeakResultHelper.inverseCumulative2D(1));
+		for (int i = 1; i <= 10; i++)
 		{
-			double intensity = r.nextDouble() * 100;
-			double sx = r.nextDouble() * 2;
-			double sy = r.nextDouble() * 2;
-			double noise = r.nextDouble() * 3;
-			Assert.assertEquals(Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 1, noise),
-					Gaussian2DPeakResultHelper.getSNR1(intensity, sx, sy, noise), 1e-3);
-			Assert.assertEquals(Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 2, noise),
-					Gaussian2DPeakResultHelper.getSNR2(intensity, sx, sy, noise), 1e-3);
+			double r = i / 10.0;
+			double p = Gaussian2DPeakResultHelper.cumulative2D(r);
+			double r2 = Gaussian2DPeakResultHelper.inverseCumulative2D(p);
+			Assert.assertEquals(r, r2, r * 1e-8);
 		}
 	}
 
 	@Test
-	public void canComputeSNRVersesTotalSNR()
+	public void canComputeMeanSignalUsingR()
 	{
-		Assume.assumeTrue(false);
+		RandomGenerator rg = new Well19937c();
 
-		double intensity = 100;
-		double noise = 3;
-
-		for (int i = 0; i <= 10; i++)
+		for (int i = 0; i < 10; i++)
 		{
-			double sx = 1 + i / 10.0;
-			for (int j = 0; j <= 10; j++)
-			{
-				double sy = 1 + j / 10.0;
-				System.out.printf("%g,%g  %g  : %g  %g  %g  %g\n", sx, sy, intensity / noise,
-						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 1, noise),
-						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 1.5, noise),
-						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 2, noise),
-						Gaussian2DPeakResultHelper.getSNR(intensity, sx, sy, 3, noise));
-				;
-			}
+			double intensity = rg.nextDouble() * 100;
+			double sx = rg.nextDouble() * 2;
+			double sy = rg.nextDouble() * 2;
+			double r = rg.nextDouble() * 5;
+			assertEquals(intensity * Gaussian2DPeakResultHelper.cumulative2D(r) / (Math.PI * r * r * sx * sy),
+					Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, r));
+
+			// Test fixed versions verse dynamic
+			assertEquals(Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, 1),
+					Gaussian2DPeakResultHelper.getMeanSignalUsingR1(intensity, sx, sy));
+			assertEquals(Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, 2),
+					Gaussian2DPeakResultHelper.getMeanSignalUsingR2(intensity, sx, sy));
+		}
+	}
+
+	private static void assertEquals(double e, double o)
+	{
+		Assert.assertEquals(e, o, e * 1e-10);
+	}
+
+	@Test
+	public void canComputeMeanSignalUsingP()
+	{
+		RandomGenerator rg = new Well19937c();
+
+		for (int i = 0; i < 10; i++)
+		{
+			double intensity = rg.nextDouble() * 100;
+			double sx = rg.nextDouble() * 2;
+			double sy = rg.nextDouble() * 2;
+			double p = rg.nextDouble();
+			double e = intensity * p /
+					(Math.PI * Maths.pow2(Gaussian2DPeakResultHelper.inverseCumulative2D(p)) * sx * sy);
+			double o = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, p);
+			assertEquals(e, o);
+
+			// Test fixed versions verse dynamic
+			e = Gaussian2DPeakResultHelper.getMeanSignalUsingP(intensity, sx, sy, 0.5);
+			o = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensity, sx, sy);
+			assertEquals(e, o);
 		}
 	}
 }

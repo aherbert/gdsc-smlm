@@ -35,7 +35,7 @@ public class Gaussian2DPeakResultMeanSignalData extends PeakResultDataFloat
 	 */
 	public Float getValue(PeakResult result)
 	{
-		return new Float(Gaussian2DPeakResultHelper.getMeanSignal1(result.getSignal(), result.getParameter(i),
+		return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getSignal(), result.getParameter(i),
 				result.getParameter(j)));
 	}
 

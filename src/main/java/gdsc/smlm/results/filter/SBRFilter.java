@@ -72,7 +72,7 @@ public class SBRFilter extends DirectFilter
 		if (background > 0)
 		{
 			// Get the mean signal assuming the integral / area of 1 SD of the Gaussian
-			if (Gaussian2DPeakResultHelper.getMeanSignal1(peak.getSignal(), peak.getXSD(), peak.getYSD()) /
+			if (Gaussian2DPeakResultHelper.getMeanSignalUsingR1(peak.getSignal(), peak.getXSD(), peak.getYSD()) /
 					Math.sqrt(background) < this.sbr)
 				return V_PHOTONS | V_BACKGROUND;
 			return 0;

@@ -115,7 +115,7 @@ public class FunctionHelperTest
 		double scale = Maths.sum(values) / intensity;
 		for (int range = 1; range <= 3; range++)
 		{
-			double e = Gaussian2DPeakResultHelper.getMeanSignal(intensity, sx, sy, range);
+			double e = Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, range);
 			double o = FunctionHelper.getMeanValue(values.clone(),
 					scale * Gaussian2DPeakResultHelper.cumulative2D(range));
 			//System.out.printf("%d  %g %g  %g\n", range, e, o, e / o);

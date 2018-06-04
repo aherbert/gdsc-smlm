@@ -21,8 +21,8 @@ import gdsc.smlm.results.PeakResult;
  * standard deviation of the background. The result must have the standard deviation for
  * each dimension in the first two additional parameters of the PeakResult parameter array.
  * <p>
- * Assumes that the mean signal is the total signal within 1 standard deviation of the centre divided by the elliptical
- * area of the Gaussian.
+ * Assumes that the mean signal is half the total signal divided by the ellipsoid area of the Gaussian that contains
+ * half the signal.
  */
 public class Gaussian2DPeakResultSNRData extends PeakResultDataFloat
 {
@@ -36,8 +36,8 @@ public class Gaussian2DPeakResultSNRData extends PeakResultDataFloat
 	 */
 	public Float getValue(PeakResult result)
 	{
-		return new Float(Gaussian2DPeakResultHelper.getSNR1(result.getSignal(), result.getParameter(i),
-				result.getParameter(j), result.getNoise()));
+		return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingP05(result.getSignal(), result.getParameter(i),
+				result.getParameter(j)) / result.getNoise());
 	}
 
 	/*

@@ -71,7 +71,7 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
 				@Override
 				public Float getValue(PeakResult result)
 				{
-					return new Float(Gaussian2DPeakResultHelper.getMeanSignal1(result.getSignal(),
+					return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingP05(result.getSignal(),
 							result.getParameter(isx), result.getParameter(isy)));
 				}
 			};

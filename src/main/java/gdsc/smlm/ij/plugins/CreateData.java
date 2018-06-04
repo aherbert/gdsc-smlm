@@ -3398,7 +3398,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Q. What if the noise is zero, i.e. no background photon / read noise?
 			// Just ignore it at current. This is only an approximation to the SNR estimate
 			// if this is not a Gaussian spot.
-			final double snr = Gaussian2DPeakResultHelper.getSNR1(intensityInPhotons, sx, sy, noise);
+			final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(intensityInPhotons, sx, sy) / noise;
 			stats[SIGNAL].add(intensityInPhotons);
 			stats[NOISE].add(noise);
 			if (noise != 0)
