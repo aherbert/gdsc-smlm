@@ -21,7 +21,7 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultData;
-import gdsc.smlm.results.data.Gaussian2DPeakResultMeanSignalData;
+import gdsc.smlm.results.data.Gaussian2DPeakResultDataMeanSignal;
 
 /**
  * Filter results using a signal-to-background ratio (SBR) threshold.
@@ -39,7 +39,7 @@ public class SBRFilter extends DirectFilter
 	final float sbr;
 
 	@XStreamOmitField
-	final PeakResultData<Float> converter = new Gaussian2DPeakResultMeanSignalData();
+	final PeakResultData<Float> converter = new Gaussian2DPeakResultDataMeanSignal();
 
 	public SBRFilter(float sbr)
 	{

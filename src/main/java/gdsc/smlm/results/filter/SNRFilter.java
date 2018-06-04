@@ -18,7 +18,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultData;
-import gdsc.smlm.results.data.Gaussian2DPeakResultMeanSignalData;
+import gdsc.smlm.results.data.Gaussian2DPeakResultDataMeanSignal;
 
 /**
  * Filter results using a signal-to-noise ratio (SNR) threshold
@@ -30,7 +30,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	public static final double DEFAULT_INCREMENT = 1;
 	public static final double DEFAULT_RANGE = 10;
 
-	static final PeakResultData<Float> converter = new Gaussian2DPeakResultMeanSignalData();
+	static final PeakResultData<Float> converter = new Gaussian2DPeakResultDataMeanSignal();
 
 	@XStreamAsAttribute
 	final float snr;
