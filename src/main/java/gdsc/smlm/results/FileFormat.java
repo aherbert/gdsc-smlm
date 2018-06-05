@@ -19,8 +19,8 @@ package gdsc.smlm.results;
 public enum FileFormat
 {
 	//@formatter:off
-	SMLM_TEXT{ public String getName() { return "SMLM Text"; }}, 
-	SMLM_BINARY{ public String getName() { return "SMLM Binary"; }},
+	SMLM_TEXT{ public String getName() { return "SMLM Text"; } public boolean isSMLM(){return true;}}, 
+	SMLM_BINARY{ public String getName() { return "SMLM Binary"; } public boolean isSMLM(){return true;}},
 	RAPID_STORM{ public String getName() { return "RapidSTORM"; }}, 
 	NSTORM{ public String getName() { return "NSTORM"; }},
 	SMLM_TABLE{ public String getName() { return "SMLM Table"; }}, 
@@ -41,4 +41,14 @@ public enum FileFormat
 	 * @return the name
 	 */
 	abstract public String getName();
+
+	/**
+	 * Checks if is a GDSC SMLM format.
+	 *
+	 * @return true, if is a GDSC SMLM format
+	 */
+	public boolean isSMLM()
+	{
+		return false;
+	}
 }

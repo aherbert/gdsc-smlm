@@ -513,7 +513,7 @@ public class PeakResultsReaderTest
 
 	private void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
 	{
-		MemoryPeakResults out = createResults(200, false, false, false, false);
+		MemoryPeakResults out = createResults(1, false, false, false, false);
 
 		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);

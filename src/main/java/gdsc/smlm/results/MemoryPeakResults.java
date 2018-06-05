@@ -1244,13 +1244,14 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		// Update the calibration
 		setCalibration(helper.getCalibration());
 
-		// We must convert the noise
-		Converter noiseConverter = converters[PeakResult.INTENSITY];
+		// We must convert the noise and mean intensity
+		Converter intensityConverter = converters[PeakResult.INTENSITY];
 
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			PeakResult p = getfX(i);
-			p.setNoise(noiseConverter.convert(p.getNoise()));
+			p.setNoise(intensityConverter.convert(p.getNoise()));
+			p.setMeanIntensity(intensityConverter.convert(p.getMeanIntensity()));
 			if (p.hasParameterDeviations())
 			{
 				for (int j = 0; j < converters.length; j++)
