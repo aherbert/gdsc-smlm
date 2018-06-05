@@ -39448,6 +39448,11 @@ public final class GUIProtos {
      * <code>bool enable_dynamic_transparency = 31;</code>
      */
     boolean getEnableDynamicTransparency();
+
+    /**
+     * <code>bool add_to_selection = 32;</code>
+     */
+    boolean getAddToSelection();
   }
   /**
    * <pre>
@@ -39495,6 +39500,7 @@ public final class GUIProtos {
       nameCounter_ = 0;
       supportDynamicTransparency_ = false;
       enableDynamicTransparency_ = false;
+      addToSelection_ = false;
     }
 
     @java.lang.Override
@@ -39687,6 +39693,11 @@ public final class GUIProtos {
             case 248: {
 
               enableDynamicTransparency_ = input.readBool();
+              break;
+            }
+            case 256: {
+
+              addToSelection_ = input.readBool();
               break;
             }
           }
@@ -40103,6 +40114,15 @@ public final class GUIProtos {
       return enableDynamicTransparency_;
     }
 
+    public static final int ADD_TO_SELECTION_FIELD_NUMBER = 32;
+    private boolean addToSelection_;
+    /**
+     * <code>bool add_to_selection = 32;</code>
+     */
+    public boolean getAddToSelection() {
+      return addToSelection_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -40207,6 +40227,9 @@ public final class GUIProtos {
       }
       if (enableDynamicTransparency_ != false) {
         output.writeBool(31, enableDynamicTransparency_);
+      }
+      if (addToSelection_ != false) {
+        output.writeBool(32, addToSelection_);
       }
     }
 
@@ -40335,6 +40358,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(31, enableDynamicTransparency_);
       }
+      if (addToSelection_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(32, addToSelection_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -40440,6 +40467,8 @@ public final class GUIProtos {
           == other.getSupportDynamicTransparency());
       result = result && (getEnableDynamicTransparency()
           == other.getEnableDynamicTransparency());
+      result = result && (getAddToSelection()
+          == other.getAddToSelection());
       return result;
     }
 
@@ -40531,6 +40560,9 @@ public final class GUIProtos {
       hash = (37 * hash) + ENABLE_DYNAMIC_TRANSPARENCY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getEnableDynamicTransparency());
+      hash = (37 * hash) + ADD_TO_SELECTION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAddToSelection());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -40730,6 +40762,8 @@ public final class GUIProtos {
 
         enableDynamicTransparency_ = false;
 
+        addToSelection_ = false;
+
         return this;
       }
 
@@ -40787,6 +40821,7 @@ public final class GUIProtos {
         result.nameCounter_ = nameCounter_;
         result.supportDynamicTransparency_ = supportDynamicTransparency_;
         result.enableDynamicTransparency_ = enableDynamicTransparency_;
+        result.addToSelection_ = addToSelection_;
         onBuilt();
         return result;
       }
@@ -40924,6 +40959,9 @@ public final class GUIProtos {
         }
         if (other.getEnableDynamicTransparency() != false) {
           setEnableDynamicTransparency(other.getEnableDynamicTransparency());
+        }
+        if (other.getAddToSelection() != false) {
+          setAddToSelection(other.getAddToSelection());
         }
         onChanged();
         return this;
@@ -42016,6 +42054,32 @@ public final class GUIProtos {
       public Builder clearEnableDynamicTransparency() {
         
         enableDynamicTransparency_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean addToSelection_ ;
+      /**
+       * <code>bool add_to_selection = 32;</code>
+       */
+      public boolean getAddToSelection() {
+        return addToSelection_;
+      }
+      /**
+       * <code>bool add_to_selection = 32;</code>
+       */
+      public Builder setAddToSelection(boolean value) {
+        
+        addToSelection_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool add_to_selection = 32;</code>
+       */
+      public Builder clearAddToSelection() {
+        
+        addToSelection_ = false;
         onChanged();
         return this;
       }
@@ -44092,7 +44156,7 @@ public final class GUIProtos {
       "\010\022\016\n\006plot_y\030\004 \001(\010\022\016\n\006plot_z\030\005 \001(\010\022\022\n\nplo" +
       "t_noise\030\006 \001(\010\022\020\n\010plot_snr\030\007 \001(\010\022\026\n\016plot_" +
       "precision\030\010 \001(\010\022\025\n\rhistgram_bins\030\t \001(\005\022\027" +
-      "\n\017remove_outliers\030\n \001(\005\"\214\006\n\035ImageJ3DResu" +
+      "\n\017remove_outliers\030\n \001(\005\"\246\006\n\035ImageJ3DResu" +
       "ltsViewerSettings\022\024\n\014input_option\030\001 \001(\t\022" +
       "\014\n\004size\030\002 \001(\001\022\024\n\014transparency\030\003 \001(\001\022\013\n\003l" +
       "ut\030\004 \001(\005\022\021\n\trendering\030\005 \001(\005\022\016\n\006shaded\030\006 " +
@@ -44112,17 +44176,18 @@ public final class GUIProtos {
       "on\030\033 \001(\005\022\023\n\013name_suffix\030\034 \001(\t\022\024\n\014name_co" +
       "unter\030\035 \001(\005\022$\n\034support_dynamic_transpare" +
       "ncy\030\036 \001(\010\022#\n\033enable_dynamic_transparency" +
-      "\030\037 \001(\010\"\220\001\n\030TranslateResultsSettings\022\024\n\014i" +
-      "nput_option\030\001 \001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(" +
-      "\001\022\n\n\002dz\030\004 \001(\001\022:\n\rdistance_unit\030\005 \001(\0162#.g" +
-      "dsc.smlm.data.config.DistanceUnit\"\250\001\n\017Sp" +
-      "otFitSettings\022\017\n\007channel\030\001 \001(\005\022\025\n\rsearch" +
-      "_radius\030\002 \001(\005\022\022\n\nfit_radius\030\003 \001(\005\022\024\n\014sho" +
-      "w_overlay\030\004 \001(\010\022\027\n\017attach_to_slice\030\005 \001(\010",
-      "\022\024\n\014log_progress\030\006 \001(\010\022\024\n\014show_fit_roi\030\007" +
-      " \001(\010*O\n\014TemplateType\022\023\n\017INLINE_TEMPLATE\020" +
-      "\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPL" +
-      "ATE\020\002B\013B\tGUIProtosb\006proto3"
+      "\030\037 \001(\010\022\030\n\020add_to_selection\030  \001(\010\"\220\001\n\030Tra" +
+      "nslateResultsSettings\022\024\n\014input_option\030\001 " +
+      "\001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022" +
+      ":\n\rdistance_unit\030\005 \001(\0162#.gdsc.smlm.data." +
+      "config.DistanceUnit\"\250\001\n\017SpotFitSettings\022" +
+      "\017\n\007channel\030\001 \001(\005\022\025\n\rsearch_radius\030\002 \001(\005\022" +
+      "\022\n\nfit_radius\030\003 \001(\005\022\024\n\014show_overlay\030\004 \001(",
+      "\010\022\027\n\017attach_to_slice\030\005 \001(\010\022\024\n\014log_progre" +
+      "ss\030\006 \001(\010\022\024\n\014show_fit_roi\030\007 \001(\010*O\n\014Templa" +
+      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
+      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPr" +
+      "otosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -44272,7 +44337,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_ImageJ3DResultsViewerSettings_descriptor,
-        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", "OutputName", "NameOption", "NameSuffix", "NameCounter", "SupportDynamicTransparency", "EnableDynamicTransparency", });
+        new java.lang.String[] { "InputOption", "Size", "Transparency", "Lut", "Rendering", "Shaded", "NewWindow", "SizeMode", "PixelSize", "ResultsTableSettings", "DepthMode", "DepthRange", "DitherSeed", "TransparencyMode", "MinTransparency", "MaxTransparency", "SortMode", "SortDirectionX", "SortDirectionY", "SortDirectionZ", "SortEyeX", "SortEyeY", "SortEyeZ", "SaveEyePoint", "HighlightColour", "OutputName", "NameOption", "NameSuffix", "NameCounter", "SupportDynamicTransparency", "EnableDynamicTransparency", "AddToSelection", });
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_descriptor =
       getDescriptor().getMessageTypes().get(22);
     internal_static_gdsc_smlm_data_config_TranslateResultsSettings_fieldAccessorTable = new

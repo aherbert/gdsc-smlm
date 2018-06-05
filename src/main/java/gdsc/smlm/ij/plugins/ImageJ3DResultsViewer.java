@@ -682,8 +682,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 			// Highlight the localisation using an outline.
 			// Add to or replace previous selection.
-			boolean add = true;
-			if (add)
+			if (addToSelection)
 				listSelectionModel.addSelectionInterval(i, i);
 			else
 				listSelectionModel.setSelectionInterval(i, i);
@@ -700,6 +699,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables = new HashMap<PeakResultsDigest, Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>>();
 	private static ResultsTableSettings.Builder resultsTableSettings;
+	private static boolean addToSelection;
 	private static Color3f highlightColor = null;
 
 	private Image3DUniverse univ;
@@ -750,6 +750,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
 				.toBuilder();
+		
+		addToSelection = settings.getAddToSelection();
 
 		// Get a list of the window titles available. Allow the user to select 
 		// an existing window or a new one.
@@ -2295,7 +2297,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
 				egd.addMessage("The results contain " + size +
 						" transparent objects.\nDynamic transparency may take a long time to render.");
-				egd.setOKLabel("Continue");
+				egd.setOKLabel("Dynamic");
+				egd.setCancelLabel("Standard");
 				egd.showDialog();
 				if (egd.wasCanceled())
 					return;
@@ -3314,6 +3317,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				}
 			});
 			tf[0] = gd.getLastTextField();
+			gd.addCheckbox("Add_to_selection", settings.getAddToSelection());
 			ResultsManager.addTableResultsOptions(gd, s, ResultsManager.FLAG_NO_SECTION_HEADER);
 			gd.addMessage("Allow the 'Find Eye Point' command to save to settings");
 			gd.addCheckbox("Save_eye_point", settings.getSaveEyePoint());
@@ -3374,6 +3378,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			if (gd.wasCanceled())
 				return;
 			settings.setHighlightColour(gd.getNextString());
+			addToSelection = gd.getNextBoolean();
+			settings.setAddToSelection(addToSelection);
 			resultsTableSettings = s.getResultsTableSettingsBuilder();
 			resultsTableSettings.setShowTable(gd.getNextBoolean());
 			settings.setSaveEyePoint(gd.getNextBoolean());
