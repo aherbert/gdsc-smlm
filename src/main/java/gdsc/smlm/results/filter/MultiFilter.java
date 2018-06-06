@@ -68,7 +68,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	@XStreamOmitField
 	boolean widthEnabled;
 	@XStreamOmitField
-	boolean xyWidths;
+	int flags;
 	@XStreamOmitField
 	boolean zEnabled;
 	@XStreamOmitField
@@ -141,7 +141,12 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		// Configure the precision limit
 		variance = Filter.getDUpperSquaredLimit(precision);
 
-		zEnabled = (minZ != 0 || maxZ != 0);
+		zEnabled = isZEnabled();
+	}
+
+	private boolean isZEnabled()
+	{
+		return (minZ != 0 || maxZ != 0) && minZ <= maxZ;
 	}
 
 	protected void setupCalculator(MemoryPeakResults peakResults)
@@ -155,7 +160,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		filterSetupFlags = 0;
 		this.filterSetupData = null;
-		setup(true, true, false);
+		setup(true, true, 0);
 	}
 
 	@Override
@@ -164,15 +169,20 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		filterSetupFlags = flags;
 		this.filterSetupData = null;
 		setup(!areSet(flags, DirectFilter.NO_WIDTH), !areSet(flags, DirectFilter.NO_SHIFT),
-				areSet(flags, DirectFilter.XY_WIDTH));
+				// Pass through the flags that are recognised
+				flags & (DirectFilter.XY_WIDTH | DirectFilter.NO_Z));
 	}
 
-	private void setup(final boolean widthEnabled, final boolean shiftEnabled, final boolean xyWidths)
+	private void setup(final boolean widthEnabled, final boolean shiftEnabled, final int flags)
 	{
-		if (components_Width_Shift == null || this.xyWidths != xyWidths)
+		// Note: The filter caches the combinations that are likely to be turned on/off:
+		// width filtering and shift filtering
+		// Other filters related to the PSF (XY widths, z-depth) are assumed to be constant.
+		
+		if (components_Width_Shift == null || this.flags != flags)
 		{
-			// Store this in case the filter is setup with different width filtering 
-			this.xyWidths = xyWidths;
+			// Store this in case the filter is setup with different flags 
+			this.flags = flags;
 
 			// Create the components we require
 			final MultiFilterComponent[] components1 = new MultiFilterComponent[7];
@@ -189,7 +199,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			if ((maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY) || (minWidth > 0 && minWidth < 1))
 			{
 				// Handle the width being 1/2 axis variable.
-				if (xyWidths)
+				if (areSet(flags, DirectFilter.XY_WIDTH))
 					components1[s1++] = new MultiFilterXYWidthComponent(minWidth, maxWidth);
 				else
 					components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
@@ -212,7 +222,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			{
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
 			}
-			if (isFiniteStrictlyPositive(maxZ) || isFiniteStrictlyNegative(minZ))
+			if (isZEnabled() && !areSet(flags, DirectFilter.NO_Z))
 			{
 				components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
 			}

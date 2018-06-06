@@ -130,6 +130,11 @@ public interface IDirectFilter
 	 * Enable filtering both X and Y widths
 	 */
 	final static int XY_WIDTH = 0x000000004;
+	
+	/**
+	 * Disable Z filtering (use when not fitting in 3D)
+	 */
+	final static int NO_Z = 0x000000008;
 
 	/**
 	 * Gets the flags indicating all the fields that are used during validation. These flags may be returned by the

@@ -1699,7 +1699,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Check if the PSF is 3D but avoid exceptions from creating the z-model
 		zEnabled = getPSFTypeValue() == PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE
 		//is3D() // This can throw
-				&& (getMaxZ() != 0 || getMinZ() != 0);
+				&& (getMaxZ() != 0 || getMinZ() != 0) && (getMinZ() <= getMaxZ());
 	}
 
 	/**
@@ -2474,8 +2474,6 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		return variance;
 	}
-
-	private final static int Y_OFFSET = Gaussian2DFunction.Y_POSITION - Gaussian2DFunction.X_POSITION;
 
 	/**
 	 * Gets the variance. This is computed using the mean of the variance for the X and Y parameters.
@@ -3541,10 +3539,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setup(int flags)
 	{
-		// Handle switching to a 2 axis width filter
-		if (isTwoAxisGaussian2D)
-			flags |= IDirectFilter.XY_WIDTH;
-		filterSetupFlags = flags;
+		filterSetupFlags = createFlags(flags);
 		this.filterSetupData = null;
 
 		if (directFilter != null)
@@ -3567,6 +3562,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 	}
 
+	private int createFlags(int flags)
+	{
+		// Handle switching to a 2 axis width filter
+		if (isTwoAxisGaussian2D)
+			flags |= IDirectFilter.XY_WIDTH;
+		// Ignore z if not 3D
+		if (!zEnabled)
+			flags |= IDirectFilter.NO_Z;
+		return flags;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -3574,10 +3580,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
-		// Handle switching to a 2 axis width filter
-		if (isTwoAxisGaussian2D)
-			flags |= IDirectFilter.XY_WIDTH;
-		filterSetupFlags = flags;
+		filterSetupFlags = createFlags(flags);
 		this.filterSetupData = filterSetupData;
 
 		if (directFilter != null)
