@@ -142,6 +142,8 @@
 			<artifactId>xstream</artifactId>
 			<version>1.4.10</version>
 			<exclusions>
+				<!-- XStream issue 117: Duplicate classes in xpp3_min and xmlpull (https://github.com/x-stream/xstream/issues/117). 
+					Current resolution is to ignore xmlpull. -->
 				<exclusion>
 					<groupId>xmlpull</groupId>
 					<artifactId>xmlpull</artifactId>
