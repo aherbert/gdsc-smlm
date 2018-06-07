@@ -503,7 +503,6 @@ public class MeanVarianceTest implements PlugIn
 				// Compute total gain
 				final double totalGain = emGain * cameraGain;
 				
-				// This should be 2x the read noise without EM ???
 				double readNoise = avBiasNoise / cameraGain;
 				// Effective noise is standard deviation of the bias image divided by the total gain (in Count/e-)
 				double readNoiseE = avBiasNoise / totalGain;
