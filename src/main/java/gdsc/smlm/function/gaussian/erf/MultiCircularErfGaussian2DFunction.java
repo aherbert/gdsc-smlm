@@ -66,6 +66,25 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			createDeltaETable(n, maxy, one_sSqrt2, deltaEy, ty);
 		}
 	}
+	
+
+	@Override
+	public double integral(double[] a)
+	{
+		double sum = a[Gaussian2DFunction.BACKGROUND] * size();
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
+		{
+			final double tI = a[i + Gaussian2DFunction.SIGNAL];
+			// Pre-compute the offset by 0.5
+			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
+			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
+			final double s = abs(a[i + Gaussian2DFunction.X_SD]);
+			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
+			sum += tI * compute1DIntegral(one_sSqrt2, maxx, tx) *
+					compute1DIntegral(one_sSqrt2, maxy, ty);
+		}
+		return sum;
+	}	
 
 	public void initialise1(double[] a)
 	{

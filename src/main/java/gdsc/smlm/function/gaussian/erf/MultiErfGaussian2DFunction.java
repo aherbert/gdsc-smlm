@@ -282,4 +282,8 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction
 		}
 		return values;
 	}
+
+	// Force implementation
+	@Override
+	public abstract double integral(double[] a);
 }

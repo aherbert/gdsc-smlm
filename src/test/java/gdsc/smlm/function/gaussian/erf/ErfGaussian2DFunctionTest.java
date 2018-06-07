@@ -3,6 +3,7 @@ package gdsc.smlm.function.gaussian.erf;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
@@ -16,6 +17,7 @@ import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
+import gdsc.smlm.function.IntegralValueProcedure;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
@@ -177,7 +179,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondBackgroundGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		if (f2.evaluatesBackground())
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
 	}
@@ -185,7 +187,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondSignalGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		if (f2.evaluatesSignal())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
@@ -197,7 +199,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondXGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
 		functionComputesSecondTargetGradientWith2Peaks(
 				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -206,7 +208,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondYGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
 		functionComputesSecondTargetGradientWith2Peaks(
 				Gaussian2DFunction.Y_POSITION + Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -215,7 +217,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondZGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		if (f2.evaluatesZ())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
@@ -227,7 +229,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondXWidthGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		if (f2.evaluatesSD0())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
@@ -239,7 +241,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondYWidthGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		if (f2.evaluatesSD1())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
@@ -251,7 +253,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesSecondAngleGradientWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		if (f2.evaluatesAngle())
 		{
 			functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
@@ -655,7 +657,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesGradientForEachWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
 
 		final int n = f2.size();
@@ -774,7 +776,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionComputesExtendedGradientForEachWith2Peaks()
 	{
-		org.junit.Assume.assumeNotNull(f2);
+		Assume.assumeNotNull(f2);
 		final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
 
 		final int nparams = f2.getNumberOfGradients();
@@ -1068,5 +1070,138 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
 		n--;
 		Assert.assertTrue("2 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
+	}
+
+	@Test
+	public void functionCanComputeIntegral()
+	{
+		double[] a;
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+							for (double[] w1 : testw1)
+								for (double angle1 : testangle1)
+								{
+									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+									double e = new IntegralValueProcedure().getIntegral(f1, a);
+									double o = f1.integral(a);
+									Assert.assertEquals(e, o, e * 1e-8);
+								}
+	}
+
+	@Test
+	public void computeIntegralIsFaster()
+	{
+		Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+
+		TurboList<double[]> p = new TurboList<double[]>();
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+							for (double[] w1 : testw1)
+								for (double angle1 : testangle1)
+								{
+									p.add(createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1));
+								}
+		int n = (int) Math.ceil(10000.0 / p.size());
+		double s1 = 0, s2 = 0;
+		long t1 = System.nanoTime();
+		for (int i = n; i-- > 0;)
+			for (int j = p.size(); j-- > 0;)
+				s1 += new IntegralValueProcedure().getIntegral(f1, p.getf(j));
+		long t2 = System.nanoTime();
+		for (int i = n; i-- > 0;)
+			for (int j = p.size(); j-- > 0;)
+				s2 += f1.integral(p.getf(j));
+		long t3 = System.nanoTime();
+		t1 = t2 - t1;
+		t2 = t3 - t2;
+		System.out.printf("computeIntegralIsFaster %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1, t2,
+				(double) t1 / t2);
+		Assert.assertEquals(s1, s2, s1 * 1e-3);
+		Assert.assertTrue(t2 < t1);
+	}
+
+	@Test
+	public void functionCanComputeIntegralWith2Peaks()
+	{
+		Assume.assumeNotNull(f2);
+
+		double[] a;
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+							for (double[] w1 : testw1)
+								for (double angle1 : testangle1)
+									// Peak 2
+									for (double signal2 : testsignal2)
+										for (double cx2 : testcx2)
+											for (double cy2 : testcy2)
+												for (double cz2 : testcz2)
+													for (double[] w2 : testw2)
+														for (double angle2 : testangle2)
+														{
+															a = createParameters(background, signal1, cx1, cy1, cz1,
+																	w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
+																	w2[1], angle2);
+															double e = new IntegralValueProcedure().getIntegral(f2, a);
+															double o = f2.integral(a);
+															Assert.assertEquals(e, o, e * 1e-8);
+														}
+	}
+
+	@Test
+	public void computeIntegralIsFasterWith2Peaks()
+	{
+		Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		Assume.assumeNotNull(f2);
+
+		TurboList<double[]> p = new TurboList<double[]>();
+		for (double background : testbackground)
+			// Peak 1
+			for (double signal1 : testsignal1)
+				for (double cx1 : testcx1)
+					for (double cy1 : testcy1)
+						for (double cz1 : testcz1)
+							for (double[] w1 : testw1)
+								for (double angle1 : testangle1)
+									// Peak 2
+									for (double signal2 : testsignal2)
+										for (double cx2 : testcx2)
+											for (double cy2 : testcy2)
+												for (double cz2 : testcz2)
+													for (double[] w2 : testw2)
+														for (double angle2 : testangle2)
+														{
+															p.add(createParameters(background, signal1, cx1, cy1, cz1,
+																	w1[0], w1[1], angle1, signal2, cx2, cy2, cz2, w2[0],
+																	w2[1], angle2));
+														}
+		int n = (int) Math.ceil(10000.0 / p.size());
+		double s1 = 0, s2 = 0;
+		long t1 = System.nanoTime();
+		for (int i = n; i-- > 0;)
+			for (int j = p.size(); j-- > 0;)
+				s1 += new IntegralValueProcedure().getIntegral(f2, p.getf(j));
+		long t2 = System.nanoTime();
+		for (int i = n; i-- > 0;)
+			for (int j = p.size(); j-- > 0;)
+				s2 += f2.integral(p.getf(j));
+		long t3 = System.nanoTime();
+		t1 = t2 - t1;
+		t2 = t3 - t2;
+		System.out.printf("computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1,
+				t2, (double) t1 / t2);
+		Assert.assertEquals(s1, s2, s1 * 1e-3);
+		Assert.assertTrue(t2 < t1);
 	}
 }

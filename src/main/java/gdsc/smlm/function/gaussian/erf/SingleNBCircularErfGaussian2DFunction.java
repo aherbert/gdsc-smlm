@@ -4,7 +4,6 @@ import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -47,19 +46,6 @@ public class SingleNBCircularErfGaussian2DFunction extends SingleCircularErfGaus
 	public ErfGaussian2DFunction copy()
 	{
 		return new SingleNBCircularErfGaussian2DFunction(maxx, maxy);
-	}
-
-	@Override
-	public double integral(double[] a)
-	{
-		final double tI = a[Gaussian2DFunction.SIGNAL];
-		// Pre-compute the offset by 0.5
-		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
-		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double s = abs(a[Gaussian2DFunction.X_SD]);
-
-		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-		return tI * compute1DIntegral(one_sSqrt2, maxx, tx) * compute1DIntegral(one_sSqrt2, maxy, ty);
 	}
 
 	/*

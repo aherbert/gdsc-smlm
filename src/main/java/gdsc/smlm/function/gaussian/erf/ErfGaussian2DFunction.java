@@ -280,4 +280,21 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	{
 		return errorFunction.erf(x);
 	}
+    
+	/**
+	 * Compute the 1D integral from 0 to n. This is the sum of the Gaussian function using the error function for all of
+	 * the pixels from 0 to n.
+	 *
+	 * @param one_sSqrt2
+	 *            one over (s times sqrt(2))
+	 * @param n
+	 *            the n
+	 * @param u
+	 *            the mean of the Gaussian
+	 * @return the integral
+	 */
+	protected double compute1DIntegral(double one_sSqrt2, int n, double u)
+	{
+		return 0.5 * (erf((n - u) * one_sSqrt2) - erf(-u * one_sSqrt2));
+	}
 }

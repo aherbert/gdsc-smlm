@@ -77,6 +77,24 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		}
 	}
 
+	@Override
+	public double integral(double[] a)
+	{
+		double sum = a[Gaussian2DFunction.BACKGROUND] * size();
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
+		{
+			final double tI = a[i + Gaussian2DFunction.SIGNAL];
+			// Pre-compute the offset by 0.5
+			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
+			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
+			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
+			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
+			sum += tI * compute1DIntegral(ONE_OVER_ROOT2 / tsx, maxx, tx) *
+					compute1DIntegral(ONE_OVER_ROOT2 / tsy, maxy, ty);
+		}
+		return sum;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

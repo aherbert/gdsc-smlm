@@ -28,7 +28,7 @@ public abstract class Gaussian2DFunctionTest
 
 	protected int[] testx = new int[] { 4, 5, 6 };
 	protected int[] testy = new int[] { 4, 5, 6 };
-	protected double[] testbackground = new double[] { 0, 400 };
+	protected double[] testbackground = new double[] { 1, 400 };
 
 	protected double[] testsignal1 = new double[] { 15, 55, 105 };
 	protected double[] testcx1 = new double[] { 4.9, 5.3 };

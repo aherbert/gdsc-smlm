@@ -109,6 +109,26 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 		}
 	}
 
+	@Override
+	public double integral(double[] a)
+	{
+		double sum = a[Gaussian2DFunction.BACKGROUND] * size();
+		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
+		{
+			final double tI = a[i + Gaussian2DFunction.SIGNAL];
+			// Pre-compute the offset by 0.5
+			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
+			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
+			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
+
+			final double sx = zModel.getSx(tz);
+			final double sy = zModel.getSy(tz);
+			sum += tI * compute1DIntegral(ONE_OVER_ROOT2 / sx, maxx, tx) *
+					compute1DIntegral(ONE_OVER_ROOT2 / sy, maxy, ty);
+		}
+		return sum;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
