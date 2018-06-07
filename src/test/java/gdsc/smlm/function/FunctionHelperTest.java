@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -99,27 +100,45 @@ public class FunctionHelperTest
 	public void canGetMeanValueForGaussian()
 	{
 		float intensity = 100;
-		float sx = 20f;
-		float sy = 20f;
-		int size = 1 + 2 * (int) Math.ceil(Math.max(sx, sy) * 4);
-		float[] a = Gaussian2DPeakResultHelper.createParams(0.f, intensity, size / 2f, size / 2f, 0.f, sx, sy, 0);
-		Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, GaussianFunctionFactory.FIT_FREE_CIRCLE
-		//| GaussianFunctionFactory.FIT_SIMPLE
-				, null);
-		double[] values = f.computeValues(SimpleArrayUtils.toDouble(a));
-		//ImagePlus imp = new ImagePlus("gauss", new FloatProcessor(size, size, values));
-		//double cx = size / 2.;
-		//Shape shape = new Ellipse2D.Double(cx - sx, cx - sy, 2 * sx, 2 * sy);
-		//imp.setRoi(new ShapeRoi(shape));
-		//IJ.save(imp, "/Users/ah403/1.tif");
-		double scale = Maths.sum(values) / intensity;
-		for (int range = 1; range <= 3; range++)
+		// Realistic standard deviations.
+		// Only test the highest
+		float[] s = { 1, 1.2f, 1.5f, 2, 2.5f };
+		int n_1 = s.length - 1;
+		// Flag to indicate that all levels should be run and the difference reported
+		boolean debug = false;
+		for (int i = (debug) ? 0 : n_1; i < s.length; i++)
 		{
-			double e = Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, range);
-			double o = FunctionHelper.getMeanValue(values.clone(),
-					scale * Gaussian2DPeakResultHelper.cumulative2D(range));
-			//System.out.printf("%d  %g %g  %g\n", range, e, o, e / o);
-			Assert.assertEquals(e, o, e * 1e-2);
+			float sx = s[i];
+			for (int j = i; j < s.length; j++)
+			{
+				float sy = s[j];
+				int size = 1 + 2 * (int) Math.ceil(Math.max(sx, sy) * 4);
+				float[] a = Gaussian2DPeakResultHelper.createParams(0.f, intensity, size / 2f, size / 2f, 0.f, sx, sy,
+						0);
+				Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size,
+						GaussianFunctionFactory.FIT_FREE_CIRCLE
+						//| GaussianFunctionFactory.FIT_SIMPLE
+						, null);
+				double[] values = f.computeValues(SimpleArrayUtils.toDouble(a));
+				//ImagePlus imp = new ImagePlus("gauss", new FloatProcessor(size, size, values));
+				//double cx = size / 2.;
+				//Shape shape = new Ellipse2D.Double(cx - sx, cx - sy, 2 * sx, 2 * sy);
+				//imp.setRoi(new ShapeRoi(shape));
+				//IJ.save(imp, "/Users/ah403/1.tif");
+				double scale = Maths.sum(values) / intensity;
+				for (int range = 1; range <= 3; range++)
+				{
+					double e = Gaussian2DPeakResultHelper.getMeanSignalUsingR(intensity, sx, sy, range);
+					double o = FunctionHelper.getMeanValue(values.clone(),
+							scale * Gaussian2DPeakResultHelper.cumulative2D(range));
+					if (debug)
+						System.out.printf("%g,%g   %d  %g %g  %g\n", sx, sy, range, e, o,
+								DoubleEquality.relativeError(e, o));
+					// Only test the highest
+					if (i == n_1)
+						Assert.assertEquals(e, o, e * 0.025);
+				}
+			}
 		}
 	}
 }
