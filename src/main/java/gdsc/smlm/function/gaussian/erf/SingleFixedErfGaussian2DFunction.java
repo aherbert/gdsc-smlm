@@ -23,7 +23,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
-public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGaussian2DFunction
+public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2DFunction
 {
 	static final int[] gradientIndices;
 	static
@@ -68,26 +68,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleFreeCircularErfGauss
 	{
 		return new SingleFixedErfGaussian2DFunction(maxx, maxy);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise0(double[])
-	 */
-	public void initialise0(double[] a)
-	{
-		tB = a[Gaussian2DFunction.BACKGROUND];
-		tI = a[Gaussian2DFunction.SIGNAL];
-		// Pre-compute the offset by 0.5
-		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
-		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
-		final double s = abs(a[Gaussian2DFunction.X_SD]);
-
-		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-		createDeltaETable(one_sSqrt2, deltaEx, tx);
-		createDeltaETable(one_sSqrt2, deltaEy, ty);
-	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

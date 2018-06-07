@@ -23,7 +23,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
-public class MultiFixedErfGaussian2DFunction extends MultiFreeCircularErfGaussian2DFunction
+public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DFunction
 {
 	/**
 	 * Constructor.
@@ -69,28 +69,6 @@ public class MultiFixedErfGaussian2DFunction extends MultiFreeCircularErfGaussia
 	public ErfGaussian2DFunction copy()
 	{
 		return new MultiFixedErfGaussian2DFunction(nPeaks, maxx, maxy);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise0(double[])
-	 */
-	public void initialise0(double[] a)
-	{
-		tB = a[Gaussian2DFunction.BACKGROUND];
-		for (int n = 0, i = 0; n < nPeaks; n++, i += PARAMETERS_PER_PEAK)
-		{
-			tI[n] = a[i + Gaussian2DFunction.SIGNAL];
-			// Pre-compute the offset by 0.5
-			final double tx = a[i + Gaussian2DFunction.X_POSITION] + 0.5;
-			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
-			final double s = abs(a[i + Gaussian2DFunction.X_SD]);
-
-			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-			createDeltaETable(n, maxx, one_sSqrt2, deltaEx, tx);
-			createDeltaETable(n, maxy, one_sSqrt2, deltaEy, ty);
-		}
 	}
 
 	/*
