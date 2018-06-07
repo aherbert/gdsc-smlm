@@ -2,7 +2,7 @@ package gdsc.smlm.function.gaussian.erf;
 
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
-public class SingleFreeCircularErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
+public class SingleFreeCircularErfGaussian2DFunctionTest extends SingleErfGaussian2DFunctionTest
 {
 	protected void init()
 	{

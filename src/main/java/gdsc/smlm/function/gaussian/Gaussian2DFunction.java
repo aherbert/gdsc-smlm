@@ -2,11 +2,11 @@ package gdsc.smlm.function.gaussian;
 
 import java.util.Arrays;
 
-
 import gdsc.smlm.function.ExtendedNonLinearFunction;
-import gdsc.smlm.function.Gradient1Procedure;
-import gdsc.smlm.function.NamedFunction;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient1Procedure;
+import gdsc.smlm.function.IntegralValueProcedure;
+import gdsc.smlm.function.NamedFunction;
 import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.utils.Pair;
@@ -418,6 +418,18 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 			}
 		});
 		return values;
+	}
+
+	/**
+	 * Compute the integral. This is the sum of the values.
+	 *
+	 * @param a
+	 *            an array of coefficients
+	 * @return the integral
+	 */
+	public double integral(double[] a)
+	{
+		return new IntegralValueProcedure().getIntegral(this, a);
 	}
 
 	/*

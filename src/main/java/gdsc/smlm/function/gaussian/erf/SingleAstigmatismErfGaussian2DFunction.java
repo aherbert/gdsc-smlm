@@ -77,6 +77,23 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		createDeltaETable(ONE_OVER_ROOT2 / sy, deltaEy, ty);
 	}
 
+	@Override
+	public double integral(double[] a)
+	{
+		final double tB = a[Gaussian2DFunction.BACKGROUND];
+		final double tI = a[Gaussian2DFunction.SIGNAL];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double tz = a[ErfGaussian2DFunction.Z_POSITION];
+
+		final double sx = zModel.getSx(tz);
+		final double sy = zModel.getSy(tz);
+
+		return tB * size() + tI * compute1DIntegral(ONE_OVER_ROOT2 / sx, maxx, tx) *
+				compute1DIntegral(ONE_OVER_ROOT2 / sy, maxy, ty);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

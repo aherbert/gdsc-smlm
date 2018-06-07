@@ -3,7 +3,7 @@ package gdsc.smlm.function.gaussian.erf;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
-public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
+public class SingleAstigmatismErfGaussian2DFunctionTest extends SingleErfGaussian2DFunctionTest
 {
 	protected void init()
 	{

@@ -62,6 +62,20 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		createDeltaETable(one_sSqrt2, deltaEy, ty);
 	}
 
+	@Override
+	public double integral(double[] a)
+	{
+		final double tB = a[Gaussian2DFunction.BACKGROUND];
+		final double tI = a[Gaussian2DFunction.SIGNAL];
+		// Pre-compute the offset by 0.5
+		final double tx = a[Gaussian2DFunction.X_POSITION] + 0.5;
+		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
+		final double s = abs(a[Gaussian2DFunction.X_SD]);
+
+		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
+		return tB * size() + tI * compute1DIntegral(one_sSqrt2, maxx, tx) * compute1DIntegral(one_sSqrt2, maxy, ty);
+	}
+
 	public void initialise1(double[] a)
 	{
 		create1Arrays();
