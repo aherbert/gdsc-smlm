@@ -45,7 +45,11 @@ public class Gaussian2DPeakResultHelper
 	private static final double ROOT2 = Math.sqrt(2);
 	private static final double R1 = cumulative2D(1) / Math.PI;
 	private static final double R2 = cumulative2D(2) / (Math.PI * 4);
-	private static final double P05 = 0.5 / (Math.PI * Maths.pow2(inverseCumulative2D(0.5)));
+	/** 
+	 * The Mahalanobis distance r for a 2D Gaussian that contains 50 percent of the integral. 
+	 */
+	public static final double R_2D_50 = inverseCumulative2D(0.5);
+	private static final double P05 = 0.5 / (Math.PI * Maths.pow2(R_2D_50));
 
 	private static class BaseGaussian2DPeakResultCalculator implements Gaussian2DPeakResultCalculator
 	{
