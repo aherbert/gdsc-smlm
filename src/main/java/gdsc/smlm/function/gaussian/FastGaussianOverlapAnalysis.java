@@ -1,8 +1,5 @@
 package gdsc.smlm.function.gaussian;
 
-import gdsc.smlm.function.ValueFunction;
-import gdsc.smlm.function.ValueProcedure;
-
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -22,7 +19,7 @@ import gdsc.smlm.function.ValueProcedure;
  * Given an input 2D Gaussian a region is created that covers a range of the function. The overlap of other
  * functions within this region can be computed.
  */
-public class FastGaussianOverlapAnalysis implements ValueProcedure
+public class FastGaussianOverlapAnalysis
 {
 	/**
 	 * A constant holding the maximum value an {@code int} can
@@ -135,25 +132,7 @@ public class FastGaussianOverlapAnalysis implements ValueProcedure
 			params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION] += centrex;
 			params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] += centrey;
 		}
-		f.initialise(params);
-		
-		// Assume the function is a ValueFunction
-		((ValueFunction) f).forEach(this);
-		
-		//		for (int k = 0; k < size; k++)
-		//		{
-		//			overlap += f.eval(k);
-		//		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
-	 */
-	public void execute(double value)
-	{
-		overlap += value;
+		overlap += f.integral(params);
 	}
 
 	/**
