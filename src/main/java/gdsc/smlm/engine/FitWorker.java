@@ -2014,6 +2014,26 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return sum;
 		}
 
+		// TODO - Using the standard deviation around each spot generates a noise
+		// that is far too high.
+		// Previously the noise was estimated using the local background created
+		// from the fitted background and all the other fitted spots.
+		// This should be changed to:
+		// localbackground = fitted background    (single peak)
+		//                 = (local sum - fitted peak) / n
+		// noise = localbackground + (read Noise)^2
+		// Optionally localbackground is doubled for EM-CCD.
+		// Note that the read noise must be in the same units as those used 
+		// for fitting. 
+		// If an EM-CCD read noise (photons) = read noise (Count) / EM-gain
+		// If a  CCD read noise (photons) = read noise (Count) / gain
+
+		// This was previous code in the FitConfiguration.
+		//return (float) ((localBackground > 0)
+		//		? (isFitCameraCounts()) ? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
+		//				: PeakResultHelper.localBackgroundToNoise(localBackground, emCCD)
+		
+		
 		/**
 		 * Gets the local background and noise for the given peak assuming that multiple peaks were fit.
 		 * <p>
@@ -2062,6 +2082,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			Gaussian2DFunction f = fitConfig.createGaussianFunction(1, r2.width, r2.height);
 			result[0] = (stats[AreaStatistics.SUM] - f.integral(spotParams)) / stats[AreaStatistics.N];
 			result[1] = stats[AreaStatistics.SD];
+			
+			// Assume mean is pure shot noise.
+			result[1] = (result[0] > 0) ? Math.sqrt(result[0]) : fitConfig.getNoise();
+			
 			return result;
 		}
 
@@ -2130,6 +2154,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			double[] stats = area.getStatistics(r2);
 			// Just use the standard deviation. The local background is from the fit result.
 			result[1] = stats[AreaStatistics.SD];
+
+			// Assume mean is pure shot noise.
+			result[1] = (result[0] > 0) ? Math.sqrt(result[0]) : fitConfig.getNoise();
+			
 			return result;
 		}
 
@@ -4165,13 +4193,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean isValid;
 		@SuppressWarnings("unused")
 		int extra = 0;
-		final AreaStatistics area = new AreaStatistics(data, width, height);
+		final AreaStatistics area;
 
 		public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic)
 		{
 			this.frame = FitWorker.this.slice;
 			this.width = cc.dataBounds.width;
 			this.height = cc.dataBounds.height;
+			area = new AreaStatistics(data, width, height);
 			this.ie = ie;
 			this.ie2 = ie2;
 			this.dynamic = dynamic;
