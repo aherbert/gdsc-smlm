@@ -56,7 +56,6 @@ import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.model.camera.NullCameraModel;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.PeakResultHelper;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult;
 import gdsc.smlm.results.filter.BasePreprocessedPeakResult.ResultType;
 import gdsc.smlm.results.filter.DirectFilter;
@@ -2139,6 +2138,34 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Interface used to pass additional data for validation of fitting results.
+	 */
+	public interface PeakResultValidationData
+	{
+		/**
+		 * Sets the result.
+		 *
+		 * @param n
+		 *            The peak number
+		 * @param initialParams
+		 *            The initial peak parameters
+		 * @param params
+		 *            The fitted peak parameters
+		 * @param paramDevs
+		 *            the fitted peak parameter variances (can be null)
+		 */
+		public void setResult(int n, double[] initialParams, double[] params, double[] paramDevs);
+
+		public double getLocalBackground();
+
+		public double getNoise();
+	}
+
+	private FitStatus result;
+	private Object statusData;
+	private PeakResultValidationData peakResultValidationData = null;
+
+	/**
 	 * @return the result
 	 */
 	public FitStatus getValidationResult()
@@ -2161,8 +2188,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		return result;
 	}
 
-	private FitStatus result;
-	private Object statusData;
+	/**
+	 * Sets the peak result validation data. This is used to obtain extra information about each peak during calls to
+	 * {@link #validatePeak(int, double[], double[], double[])}.
+	 * <p>
+	 * The object is discarded after a call to {@link #validateFit(int, double[], double[], double[])} or
+	 * {@link #validateFit(double[], double[], double[])}.
+	 *
+	 * @param peakResultValidationData
+	 *            the new peak result validation data
+	 */
+	public void setPeakResultValidationData(PeakResultValidationData peakResultValidationData)
+	{
+		this.peakResultValidationData = peakResultValidationData;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -2177,7 +2216,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			if (result != FitStatus.OK)
 				break;
 		}
-
+		peakResultValidationData = null;
 		return result;
 	}
 
@@ -2194,7 +2233,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitStatus validateFit(double[] initialParams, double[] params, double[] paramDevs)
 	{
-		return validatePeak(0, initialParams, params, paramDevs);
+		validatePeak(0, initialParams, params, paramDevs);
+		peakResultValidationData = null;
+		return result;
 	}
 
 	/**
@@ -2212,11 +2253,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public FitStatus validatePeak(int n, double[] initialParams, double[] params, double[] paramDevs)
 	{
+		// This requires local background and noise so that validation works the same
+		// way for simple filteroing as it would for a PreprocessedPeakResult.
+
+		// TODO - Update this so it can use a callback function to get 
+		// local background / noise.
+		// These can be cached by the FitWorker so it doesn't have to compute them again.
+
 		if (isDirectFilter())
 		{
-			// Always specify a new result and we have no local background or offset
-			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, paramDevs, 0,
-					ResultType.NEW, 0, 0, false);
+			// Always specify a new result and we have no local background or offset. 
+			// Use the global noise.
+			if (peakResultValidationData != null)
+			{
+				peakResultValidationData.setResult(n, initialParams, params, paramDevs);
+			}
+			PreprocessedPeakResult peak = createPreprocessedPeakResult(0, n, initialParams, params, paramDevs,
+					peakResultValidationData, ResultType.NEW, 0, 0, false);
 			if (directFilter.accept(peak))
 				return setValidationResult(FitStatus.OK, null);
 			if (log != null)
@@ -2322,6 +2375,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			ysd = params[Gaussian2DFunction.Y_SD + offset];
 		}
 
+		double noise = this.noise;
+		if (peakResultValidationData != null)
+		{
+			peakResultValidationData.setResult(n, initialParams, params, paramDevs);
+			noise = peakResultValidationData.getNoise();
+		}
+
 		// Check SNR threshold. Assume the noise has been set in the same units as the fit result.
 		final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, ysd) / noise;
 
@@ -2376,7 +2436,9 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
 					final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd)
 							: xsd;
-					variance = getVariance(params[Gaussian2DFunction.BACKGROUND],
+					final double localBackground = isPrecisionUsingBackground() && peakResultValidationData != null
+							? peakResultValidationData.getLocalBackground() : params[Gaussian2DFunction.BACKGROUND];
+					variance = getVariance(localBackground,
 							params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd,
 							isPrecisionUsingBackground());
 					break;
@@ -2541,7 +2603,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double[] params;
 		double[] paramsDev;
 		double xsd, ysd;
-		double localBackground;
+		PeakResultValidationData peakResultValidationData;
 		boolean existingResult;
 		boolean newResult;
 		float offsetx;
@@ -2549,10 +2611,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		double var, var2, varCRLB;
 
 		DynamicPeakResult(int candidateId, int n, double[] initialParams, double[] params, double[] paramsDev,
-				double localBackground, ResultType resultType, float offsetx, float offsety)
+				PeakResultValidationData peakResultValidationData, ResultType resultType, float offsetx, float offsety)
 		{
-			setParameters(candidateId, n, initialParams, params, paramsDev, localBackground, resultType, offsetx,
-					offsety);
+			setParameters(candidateId, n, initialParams, params, paramsDev, peakResultValidationData, resultType,
+					offsetx, offsety);
 		}
 
 		DynamicPeakResult()
@@ -2575,6 +2637,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 *            the parameter variances (can be null)
 		 * @param localBackground
 		 *            the local background
+		 * @param noise
+		 *            the noise
 		 * @param resultType
 		 *            the result type
 		 * @param offsetx
@@ -2583,7 +2647,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 *            the offsety
 		 */
 		void setParameters(int candidateId, int n, double[] initialParams, double[] params, double[] paramsDev,
-				double localBackground, ResultType resultType, float offsetx, float offsety)
+				PeakResultValidationData peakResultValidationData, ResultType resultType, float offsetx, float offsety)
 		{
 			this.id = n;
 			this.candidateId = candidateId;
@@ -2591,7 +2655,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			this.initialParams = initialParams;
 			this.params = params;
 			this.paramsDev = paramsDev;
-			this.localBackground = localBackground;
+			this.peakResultValidationData = peakResultValidationData;
 			this.existingResult = resultType == ResultType.EXISTING;
 			this.newResult = resultType == ResultType.NEW;
 			this.offsetx = offsetx;
@@ -2647,19 +2711,49 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		public float getNoise()
 		{
-			// Comment this out to use the configured local background, i.e. this.localBackground.
-			// If uncommented then the background will be either the local background or the fitted background.
-			final double localBackground = getLocalBackground();
+			if (peakResultValidationData != null)
+			{
+				// Because this is dynamic the id must be reset. 
+				// The other arguments should be identical to what is already stored.
+				peakResultValidationData.setResult(id, initialParams, params, paramsDev);
+				return (float) peakResultValidationData.getNoise();
+			}
 
-			return (float) ((localBackground > 0)
-					? (isFitCameraCounts()) ? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
-							: PeakResultHelper.localBackgroundToNoise(localBackground, emCCD)
-					: FitConfiguration.this.noise);
+			return (float) FitConfiguration.this.noise;
+
+			// This code is obsolete now that a noise estimate is used
+
+			//// Note: This gets the noise estimate using the local background as photon
+			//// shot noise. The noise is doubled if an EM-CCD.
+			//// If the local background is zero then the global noise estimate is used.
+			//
+			//// TODO: Change so that the noise uses a region of the data around the spot centre,
+			//// e.g. 5x5 pixels.
+			//
+			//// The local background is important for precision using the local background.
+			//// it is not used for anything else.
+			//
+			//// Comment this out to use the configured local background, i.e. this.localBackground.
+			//// If uncommented then the background will be either the local background or the fitted background.
+			//final double localBackground = getLocalBackground();
+			//
+			//return (float) ((localBackground > 0)
+			//		? (isFitCameraCounts()) ? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
+			//				: PeakResultHelper.localBackgroundToNoise(localBackground, emCCD)
+			//		: FitConfiguration.this.noise);
 		}
 
 		private double getLocalBackground()
 		{
-			return (localBackground > 0) ? localBackground : params[Gaussian2DFunction.BACKGROUND];
+			if (peakResultValidationData != null)
+			{
+				// Because this is dynamic the id must be reset. 
+				// The other arguments should be identical to what is already stored.
+				peakResultValidationData.setResult(id, initialParams, params, paramsDev);
+				double localBackground = peakResultValidationData.getLocalBackground();
+				return (localBackground > 0) ? localBackground : params[Gaussian2DFunction.BACKGROUND];
+			}
+			return params[Gaussian2DFunction.BACKGROUND];
 		}
 
 		public double getLocationVariance()
@@ -2859,8 +2953,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The fitted peak parameters
 	 * @param paramVariances
 	 *            the parameter variances (can be null)
-	 * @param localBackground
-	 *            the local background
+	 * @param peakResultValidationData
+	 *            the peak result validation data
 	 * @param resultType
 	 *            the result type
 	 * @param offsetx
@@ -2870,11 +2964,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	public PreprocessedPeakResult createDynamicPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double[] paramVariances, double localBackground, ResultType resultType, float offsetx,
-			float offsety)
+			double[] params, double[] paramVariances, PeakResultValidationData peakResultValidationData,
+			ResultType resultType, float offsetx, float offsety)
 	{
-		return createPreprocessedPeakResult(candidateId, n, initialParams, params, paramVariances, localBackground,
-				resultType, offsetx, offsety, true);
+		return createPreprocessedPeakResult(candidateId, n, initialParams, params, paramVariances,
+				peakResultValidationData, resultType, offsetx, offsety, true);
 	}
 
 	/**
@@ -2903,8 +2997,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            The fitted peak parameters
 	 * @param paramVariances
 	 *            the parameter variances (can be null)
-	 * @param localBackground
-	 *            the local background
+	 * @param peakResultValidationData
+	 *            the peak result validation data
 	 * @param resultType
 	 *            the result type
 	 * @param offsetx
@@ -2916,14 +3010,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @return A preprocessed peak result
 	 */
 	private PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-			double[] params, double[] paramVariances, double localBackground, ResultType resultType, float offsetx,
-			float offsety, boolean newObject)
+			double[] params, double[] paramVariances, PeakResultValidationData peakResultValidationData,
+			ResultType resultType, float offsetx, float offsety, boolean newObject)
 	{
 		if (newObject)
-			return new DynamicPeakResult(candidateId, n, initialParams, params, paramVariances, localBackground,
-					resultType, offsetx, offsety);
+			return new DynamicPeakResult(candidateId, n, initialParams, params, paramVariances,
+					peakResultValidationData, resultType, offsetx, offsety);
 
-		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, paramVariances, localBackground,
+		dynamicPeakResult.setParameters(candidateId, n, initialParams, params, paramVariances, peakResultValidationData,
 				resultType, offsetx, offsety);
 		return dynamicPeakResult;
 	}
@@ -2953,24 +3047,25 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 *            the parameters
 	 * @param paramVariances
 	 *            the parameter variances (can be null)
-	 * @param localBackground
-	 *            the local background (set to negative to use the fitted background instead)
+	 * @param peakResultValidationData
+	 *            the peak result validation data
 	 * @param resultType
 	 *            the result type
 	 * @param offsetx
-	 *            the offsetx to adjust the x-position
+	 *            the offsetx
 	 * @param offsety
-	 *            the offsety to adjust the y-position
+	 *            the offsety
 	 * @return A preprocessed peak result
 	 */
 	public BasePreprocessedPeakResult createPreprocessedPeakResult(int frame, int candidateId, int n,
-			double[] initialParameters, double[] parameters, double[] paramVariances, double localBackground,
-			ResultType resultType, float offsetx, float offsety)
+			double[] initialParameters, double[] parameters, double[] paramVariances,
+			PeakResultValidationData peakResultValidationData, ResultType resultType, float offsetx, float offsety)
 	{
+		peakResultValidationData.setResult(n, initialParameters, parameters, paramVariances);
+
 		final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		final double signal = parameters[offset + Gaussian2DFunction.SIGNAL] * signalToPhotons;
-		final double b = signalToPhotons *
-				((localBackground > 0) ? localBackground : parameters[Gaussian2DFunction.BACKGROUND]);
+		final double b = signalToPhotons * peakResultValidationData.getLocalBackground();
 		final double angle = parameters[offset + Gaussian2DFunction.ANGLE];
 		final double x = parameters[offset + Gaussian2DFunction.X_POSITION] + offsetx;
 		final double y = parameters[offset + Gaussian2DFunction.Y_POSITION] + offsety;
@@ -2996,14 +3091,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		final double variance2 = getVariance(b, signal, sd, true);
 		final double varianceCRLB = getVariance(paramVariances, n);
 
-		// Q. Should noise be the local background or the estimate from the whole image?
-
-		// This uses the local background if specified or the estimate from the whole image 
-		//final double noise = (localBackground > bias)
-		//		? PeakResult.localBackgroundToNoise(localBackground - bias, this.gain, this.emCCD) : this.noise;
-
-		// This uses the local fitted background to estimate the noise
-		final double noise = (b > 0) ? PeakResultHelper.localBackgroundToNoise(b, this.emCCD) : this.noise;
+		final double noise = peakResultValidationData.getNoise();
 		final double u = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, ysd);
 		return new BasePreprocessedPeakResult(frame, n, candidateId, signal, u, noise, b, angle, x, y, z, x0, y0, xsd,
 				ysd, xsd0, ysd0, variance, variance2, varianceCRLB, resultType);

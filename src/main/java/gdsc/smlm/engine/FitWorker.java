@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.core.filters.AreaStatistics;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
@@ -24,6 +25,7 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.engine.FitConfiguration.PeakResultValidationData;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -54,7 +56,6 @@ import gdsc.smlm.fitting.WLSEFunctionSolver;
 import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.FastGaussianOverlapAnalysis;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.camera.CameraModel;
 import gdsc.smlm.results.AttributePeakResult;
@@ -140,6 +141,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private int border, borderLimitX, borderLimitY;
 	private FitJob job;
 	private boolean benchmarking;
+	private boolean localBackground;
 	private float[] data;
 	private DataEstimator dataEstimator = null;
 	//private float[] filteredData;
@@ -241,7 +243,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		/**
-		 * Conversion from the raw fit coordindates to the global bounds.
+		 * Conversion from the raw fit coordinates to the global bounds.
 		 *
 		 * @return the x offset
 		 */
@@ -251,13 +253,35 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		/**
-		 * Conversion from the raw fit coordindates to the global bounds.
+		 * Conversion from the raw fit coordinates to the global bounds.
 		 *
 		 * @return the y offset
 		 */
 		public double fromFitRegionToGlobalY()
 		{
 			return 0.5 + dataBounds.y + regionBounds.y;
+		}
+
+		/**
+		 * Conversion from the raw fit coordinates to the data bounds.
+		 *
+		 * @return the x offset
+		 */
+		@SuppressWarnings("unused")
+		public double fromFitRegionToDataX()
+		{
+			return 0.5 + regionBounds.x;
+		}
+
+		/**
+		 * Conversion from the raw fit coordinates to the data bounds.
+		 *
+		 * @return the y offset
+		 */
+		@SuppressWarnings("unused")
+		public double fromFitRegionToDataY()
+		{
+			return 0.5 + regionBounds.y;
 		}
 	}
 
@@ -634,9 +658,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 
 			// If we are benchmarking then do not generate results dynamically since we will store all 
-			// results in the fit job
+			// results in the fit job. 
 			dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, ie2, !benchmarking);
 			//dynamicMultiPathFitResult = new DynamicMultiPathFitResult(ie, false);
+
+			// The local background computation is only required for the precision method.
+			// Also compute it when benchmarking.
+			localBackground = benchmarking ||
+					fitConfig.getPrecisionMethodValue() == PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE;
 
 			// Debug where the fit config may be different between benchmarking and fitting
 			if (slice == -1)
@@ -1052,7 +1081,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		PreprocessedPeakResult createPreprocessedPeakResult(int candidateId, int n, double[] initialParams,
-				double[] params, double[] paramVariances, double localBackground, ResultType resultType)
+				double[] params, double[] paramVariances, PeakResultValidationData peakResultValidationData,
+				ResultType resultType)
 		{
 			//if (dynamicMultiPathFitResult.candidateId < candidateId && resultType == ResultType.NEW)
 			//	System.out.println("WTF");
@@ -1069,11 +1099,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
 			initialParams[Gaussian2DFunction.X_SD + offset] = xsd;
 			initialParams[Gaussian2DFunction.Y_SD + offset] = ysd;
-			return createResult(candidateId, n, initialParams, params, paramVariances, localBackground, resultType);
+			return createResult(candidateId, n, initialParams, params, paramVariances, peakResultValidationData,
+					resultType);
 		}
 
 		abstract PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
-				double[] paramVariances, double localBackground, ResultType resultType);
+				double[] paramVariances, PeakResultValidationData peakResultValidationData, ResultType resultType);
 	}
 
 	/**
@@ -1088,10 +1119,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
-				double[] paramVariances, double localBackground, ResultType resultType)
+				double[] paramVariances, PeakResultValidationData peakResultValidationData, ResultType resultType)
 		{
 			return fitConfig.createDynamicPreprocessedPeakResult(candidateId, n, initialParams, params, paramVariances,
-					localBackground, resultType, offsetx, offsety);
+					peakResultValidationData, resultType, offsetx, offsety);
 		}
 	}
 
@@ -1106,12 +1137,51 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		}
 
 		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
-				double[] paramVariances,
-
-				double localBackground, ResultType resultType)
+				double[] paramVariances, PeakResultValidationData peakResultValidationData, ResultType resultType)
 		{
 			return fitConfig.createPreprocessedPeakResult(slice, candidateId, n, initialParams, params, paramVariances,
-					localBackground, resultType, offsetx, offsety);
+					peakResultValidationData, resultType, offsetx, offsety);
+		}
+	}
+
+	private abstract class DynamicPeakResultValidationData implements FitConfiguration.PeakResultValidationData
+	{
+		int n;
+		double[] params;
+		double[][] localStats;
+
+		DynamicPeakResultValidationData(int n)
+		{
+			localStats = new double[n][];
+		}
+
+		@Override
+		public void setResult(int n, double[] initialParams, double[] params, double[] paramDevs)
+		{
+			this.n = n;
+			this.params = params;
+		}
+
+		protected abstract void compute(int n);
+
+		@Override
+		public double getLocalBackground()
+		{
+			// Do not compute a local background unless it is required by the configuration
+			if (!localBackground)
+				return 0;
+
+			if (localStats[n] == null)
+				compute(n);
+			return localStats[n][0];
+		}
+
+		@Override
+		public double getNoise()
+		{
+			if (localStats[n] == null)
+				compute(n);
+			return localStats[n][1];
 		}
 	}
 
@@ -1133,6 +1203,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		final int width;
 		final int height;
 		final int parametersPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
+		final AreaStatistics area;
 
 		int neighbours;
 		double singleBackground = Double.NaN, multiBackground = Double.NaN;
@@ -1164,7 +1235,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		QuadrantAnalysis qaSingle = null;
 
 		public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
-				double[] var_g2, Rectangle regionBounds, int candidateId)
+				double[] var_g2, Rectangle regionBounds, int candidateId, AreaStatistics area)
 		{
 			this.gf = gf;
 			this.resultFactory = resultFactory;
@@ -1173,6 +1244,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			//this.var_g2 = var_g2;
 			this.regionBounds = regionBounds;
 			this.candidateId = candidateId;
+			this.area = area;
 
 			// Initialise
 			width = regionBounds.width;
@@ -1546,6 +1618,17 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					maxEvaluations + maxEvaluations * (npeaks - 1) * EVALUATION_INCREASE_FOR_MULTIPLE_PEAKS);
 
 			gf.setBounds(lower, upper);
+
+			// Allow dynamic look-up of local background and noise
+			DynamicPeakResultValidationData validationData = new DynamicPeakResultValidationData(npeaks)
+			{
+				@Override
+				protected void compute(int n)
+				{
+					localStats[n] = getLocalStatistics(n, params);
+				}
+			};
+			fitConfig.setPeakResultValidationData(validationData);
 			fitConfig.setPrecomputedFunctionValues(precomputedFittedNeighboursMulti);
 			final FitResult fitResult = gf.fit(region, width, height, npeaks, params, amplitudeEstimate,
 					params[Gaussian2DFunction.BACKGROUND] == 0);
@@ -1790,15 +1873,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				results = new PreprocessedPeakResult[npeaks];
 
 				// We must compute a local background for all the spots
-				final double[] frozenParams = fitParams.clone();
-				final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
-						fitConfig.getAstigmatismZModel(), frozenParams);
+
+				//final double[] frozenParams = fitParams.clone();
+				//final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
+				//		fitConfig.getAstigmatismZModel(), frozenParams);
+
+				validationData.setResult(0, initialParams, fitParams, fitParamStdDevs);
 
 				// Note: This could be the current candidate or drift to another candidate
-				localBackgroundMulti = getLocalBackground(0, npeaks, frozenParams, flags,
-						precomputedFittedNeighboursMulti);
+				localBackgroundMulti = validationData.getLocalBackground();
+				//getLocalBackground(0, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti);
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
-						fitParamStdDevs, localBackgroundMulti, resultType);
+						fitParamStdDevs, validationData, resultType);
 
 				// Neighbours
 				int n = 1;
@@ -1806,8 +1892,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					final Candidate candidateNeighbour = candidateNeighbours[i];
 					results[n] = resultFactory.createPreprocessedPeakResult(candidateNeighbour.index, n, initialParams,
-							fitParams, fitParamStdDevs,
-							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
+							fitParams, fitParamStdDevs, validationData,
+							//getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
 							ResultType.CANDIDATE);
 					n++;
 				}
@@ -1819,8 +1905,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						continue;
 					int candidateId = fittedNeighbours[i].index;
 					results[n] = resultFactory.createPreprocessedPeakResult(candidateId, n, initialParams, fitParams,
-							fitParamStdDevs,
-							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
+							fitParamStdDevs, validationData,
+							//getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
 							ResultType.EXISTING);
 					n++;
 				}
@@ -1839,6 +1925,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 		/**
 		 * Gets the local background for the given peak.
+		 * <p>
+		 * This is computed using the sum of all the other peaks plus the
+		 * fitted background plus the contribution from the pre-computed peaks.
 		 *
 		 * @param n
 		 *            the peak number
@@ -1852,6 +1941,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 *            the precomputed function
 		 * @return the local background
 		 */
+		@SuppressWarnings("unused")
 		private double getLocalBackground(int n, int npeaks, double[] params, final int flags,
 				double[] precomputedFunction)
 		{
@@ -1922,6 +2012,125 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			}
 
 			return sum;
+		}
+
+		/**
+		 * Gets the local background and noise for the given peak assuming that multiple peaks were fit.
+		 * <p>
+		 * The local region is defined using the region within 1 SD of the centre.
+		 * <p>
+		 * The local background is computed using the sum of the region minus the sum of the function to get the region
+		 * average.
+		 * <p>
+		 * The noise is computed using the standard deviation of the region.
+		 *
+		 * @param n
+		 *            the peak number
+		 * @param params
+		 *            the params
+		 * @return [local background, noise]
+		 */
+		private double[] getLocalStatistics(int n, double[] params)
+		{
+			// This obtains the parameters without the background
+			double[] spotParams = extractSpotParams(params, n);
+			double[] result = new double[2];
+
+			// Note: area statistics is for the data frame so
+			// adjust to the data bounds
+			spotParams[Gaussian2DFunction.X_POSITION] += cc.regionBounds.x;
+			spotParams[Gaussian2DFunction.Y_POSITION] += cc.regionBounds.y;
+
+			// Add the 0.5 pixel offset to get the centre pixel
+			int x = (int) (spotParams[Gaussian2DFunction.X_POSITION] + 0.5);
+			int y = (int) (spotParams[Gaussian2DFunction.Y_POSITION] + 0.5);
+			// Do not evaluate over a large region for speed. 
+			// Use only 50% of the Gaussian volume or 3 pixels.
+			int nx = getRange(spotParams[Gaussian2DFunction.X_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
+			int ny = getRange(spotParams[Gaussian2DFunction.Y_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
+
+			Rectangle r1 = new Rectangle(x - nx, y - ny, 2 * nx + 1, 2 * ny + 1);
+			Rectangle r2 = r1.intersection(new Rectangle(0, 0, area.maxx, area.maxy));
+
+			double[] stats = area.getStatistics(r2);
+
+			// If there are multiple peaks then the local background must subtract the
+			// value of the target peak over the same region.
+			// Adjust the coordinates for clipping (r2 will be >= r1).
+			spotParams[Gaussian2DFunction.X_POSITION] -= r2.x - r1.x;
+			spotParams[Gaussian2DFunction.Y_POSITION] -= r2.y - r1.y;
+			Gaussian2DFunction f = fitConfig.createGaussianFunction(1, r2.width, r2.height);
+			result[0] = (stats[AreaStatistics.SUM] - f.integral(spotParams)) / stats[AreaStatistics.N];
+			result[1] = stats[AreaStatistics.SD];
+			return result;
+		}
+
+		/**
+		 * Gets the range over which to evaluate a Gaussian using a factor of the standard deviation.
+		 * <p>
+		 * The range is clipped to 1 to max.
+		 *
+		 * @param range
+		 *            the range factor
+		 * @param max
+		 *            the max value to return
+		 * @return the range
+		 */
+		public int getRange(double range, int max)
+		{
+			double l = Math.ceil(range);
+			if (l < 1L)
+				return 1;
+			if (l >= max)
+				return max;
+			return (int) l;
+		}
+
+		/**
+		 * Gets the local background and noise for a single fitted peak.
+		 * <p>
+		 * The local region is defined using the region within 1 SD of the centre.
+		 * <p>
+		 * The local background is computed using the
+		 * fitted background plus the contribution from the pre-computed peaks.
+		 * <p>
+		 * The noise is computed using the standard deviation of the region.
+		 *
+		 * @param params
+		 *            the params
+		 * @param precomputedFunction
+		 *            the precomputed function
+		 * @return [local background, noise]
+		 */
+		private double[] getLocalStatistics(double[] params, double[] precomputedFunction)
+		{
+			// This obtains the parameters without the background
+			double[] spotParams = extractSpotParams(params, 0);
+
+			double[] result = new double[2];
+			result[0] = params[Gaussian2DFunction.BACKGROUND] +
+					getBackgroundContribution(precomputedFunction, spotParams);
+
+			// Note: area statistics is for the data frame so
+			// adjust to the data bounds
+			spotParams[Gaussian2DFunction.X_POSITION] += cc.regionBounds.x;
+			spotParams[Gaussian2DFunction.Y_POSITION] += cc.regionBounds.y;
+
+			// Add the 0.5 pixel offset to get the centre pixel
+			int x = (int) (spotParams[Gaussian2DFunction.X_POSITION] + 0.5);
+			int y = (int) (spotParams[Gaussian2DFunction.Y_POSITION] + 0.5);
+			// Do not evaluate over a large region for speed. 
+			// Use only 50% of the Gaussian volume or 3 pixels.
+			int nx = getRange(spotParams[Gaussian2DFunction.X_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
+			int ny = getRange(spotParams[Gaussian2DFunction.Y_SD] * Gaussian2DPeakResultHelper.R_2D_50, 3);
+
+			Rectangle r1 = new Rectangle(x - nx, y - ny, 2 * nx + 1, 2 * ny + 1);
+			Rectangle r2 = r1.intersection(new Rectangle(0, 0, area.maxx, area.maxy));
+
+			double[] stats = area.getStatistics(r2);
+			// Just use the standard deviation. The local background is from the fit result.
+			result[1] = stats[AreaStatistics.SD];
+			return result;
 		}
 
 		private boolean getEstimate(Candidate candidate, double[] params, int j, boolean close)
@@ -2010,6 +2219,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		 */
 		private void updateResult(FitResult result)
 		{
+			fitConfig.setPeakResultValidationData(null);
 			fitConfig.updateVariance(result.getParameterDeviations());
 
 			// Q. Should the parameters be mapped using the z-model. Currently the validatePeak(...)
@@ -2273,9 +2483,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						resultMulti.results.length - 1];
 
 				// We must compute a local background for all the spots
-				final double[] frozenParams = params.clone();
-				final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
-						fitConfig.getAstigmatismZModel(), frozenParams);
+				DynamicPeakResultValidationData validationData = new DynamicPeakResultValidationData(npeaks)
+				{
+					@Override
+					protected void compute(int n)
+					{
+						localStats[n] = getLocalStatistics(n, params);
+					}
+				};
+
+				//				final double[] frozenParams = params.clone();
+				//				final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
+				//						fitConfig.getAstigmatismZModel(), frozenParams);
 
 				int n = 0;
 				for (int i = 0; i < resultDoubletMulti.results.length; i++)
@@ -2283,8 +2502,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					PreprocessedPeakResult r = resultDoubletMulti.results[i];
 					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
 							initialParams, params, paramDevs,
-							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
-							(r.isExistingResult()) ? ResultType.EXISTING
+							//getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
+							validationData, (r.isExistingResult()) ? ResultType.EXISTING
 									: (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 					n++;
 				}
@@ -2296,8 +2515,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					// accommodate 2 preceding peaks and not 1 
 					results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId() + 1,
 							initialParams, params, paramDevs,
-							getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
-							(r.isExistingResult()) ? ResultType.EXISTING
+							//getLocalBackground(n, npeaks, frozenParams, flags, precomputedFittedNeighboursMulti),
+							validationData, (r.isExistingResult()) ? ResultType.EXISTING
 									: (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 					n++;
 				}
@@ -2462,6 +2681,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 					params[Gaussian2DFunction.Y_POSITION] += 0.001;
 			}
 
+			// Allow dynamic look-up of local background and noise.
+			DynamicPeakResultValidationData validationData = new DynamicPeakResultValidationData(1)
+			{
+				@Override
+				protected void compute(int n)
+				{
+					localStats[n] = (fittedNeighbourCount == 0)
+							// If there are no other fitted peaks in the region then compute
+							// using the fitted background 
+							? getLocalStatistics(params, null)
+							// If there are other fitted peaks in the region then compute the local
+							// background using the mean without the function value
+							: getLocalStatistics(0, params);
+				}
+			};
+			fitConfig.setPeakResultValidationData(validationData);
 			fitConfig.setPrecomputedFunctionValues(precomputedFittedNeighboursSingle);
 			final FitResult fitResult = gf.fit(region, width, height, 1, params, amplitudeEstimate,
 					params[Gaussian2DFunction.BACKGROUND] == 0);
@@ -2630,63 +2865,65 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				results = new PreprocessedPeakResult[1];
 
 				double[] fitParamDevs = fitResult.getParameterDeviations();
-				localBackgroundSingle = 0;
 
-				int npeaks = 1 + fittedNeighbourCount - precomputedFittedNeighbourCount;
-				if (npeaks > 1)
-				{
-					// We must compute a local background using the influence from neighbours.
-					// For equivalence with the multi-fit we only include the fits within the region.
+				localBackgroundSingle = validationData.getLocalBackground();
 
-					// The fitted result will be relative to (0,0) and have a 0.5 pixel offset applied
-					final double xOffset = regionBounds.x + 0.5;
-					final double yOffset = regionBounds.y + 0.5;
+				//				int npeaks = 1 + fittedNeighbourCount - precomputedFittedNeighbourCount;
+				//				if (npeaks > 1)
+				//				{
+				//					// We must compute a local background using the influence from neighbours.
+				//					// For equivalence with the multi-fit we only include the fits within the region.
+				//
+				//					// The fitted result will be relative to (0,0) and have a 0.5 pixel offset applied
+				//					final double xOffset = regionBounds.x + 0.5;
+				//					final double yOffset = regionBounds.y + 0.5;
+				//
+				//					functionParamsSingle = new double[1 + parametersPerPeak * npeaks];
+				//					System.arraycopy(fitParams, 0, functionParamsSingle, 0, fitParams.length);
+				//					for (int i = 0, j = parametersPerPeak; i < fittedNeighbourCount; i++)
+				//					{
+				//						// Check if within the region
+				//						if (!precomputed[i])
+				//						{
+				//							getFittedParams(i, functionParamsSingle, j);
+				//
+				//							// Adjust position relative to extracted region
+				//							functionParamsSingle[j + Gaussian2DFunction.X_POSITION] -= xOffset;
+				//							functionParamsSingle[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
+				//							j += parametersPerPeak;
+				//						}
+				//					}
+				//
+				//					final double[] frozenParams = functionParamsSingle.clone();
+				//					final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
+				//							fitConfig.getAstigmatismZModel(), frozenParams);
+				//					localBackgroundSingle = getLocalBackground(0, npeaks, frozenParams, flags,
+				//							getPrecomputedFittedNeighbours());
+				//
+				//					if (fitParamDevs != null)
+				//					{
+				//						// Recompute the deviations with all the parameters.
+				//						double[] paramDevs1 = new double[functionParamsSingle.length];
+				//						// These pre-computed values will be those peaks outside the region
+				//						fitConfig.setPrecomputedFunctionValues(getPrecomputedFittedNeighbours());
+				//						if (gf.computeDeviations(region, width, height, npeaks, functionParamsSingle, paramDevs1))
+				//							System.arraycopy(paramDevs1, 0, fitParamDevs, 0, fitParamDevs.length);
+				//						fitConfig.setPrecomputedFunctionValues(null);
+				//					}
+				//				}
+				//				else if (precomputedFittedNeighbourCount != 0)
+				//				{
+				//					// Add the contribution from the precomputed neighbours 
+				//					localBackgroundSingle = fitParams[Gaussian2DFunction.BACKGROUND] +
+				//							getBackgroundContribution(getPrecomputedFittedNeighbours(), fitParams);
+				//					//// Debug if this ever adds a significant amount
+				//					//System.out.printf("Background=%f, Neighbours=%f (%f)\n", fitParams[Gaussian2DFunction.BACKGROUND],
+				//					//		localBackgroundSingle - fitParams[Gaussian2DFunction.BACKGROUND],
+				//					//		localBackgroundSingle / fitParams[Gaussian2DFunction.BACKGROUND]);
+				//				}
 
-					functionParamsSingle = new double[1 + parametersPerPeak * npeaks];
-					System.arraycopy(fitParams, 0, functionParamsSingle, 0, fitParams.length);
-					for (int i = 0, j = parametersPerPeak; i < fittedNeighbourCount; i++)
-					{
-						// Check if within the region
-						if (!precomputed[i])
-						{
-							getFittedParams(i, functionParamsSingle, j);
-
-							// Adjust position relative to extracted region
-							functionParamsSingle[j + Gaussian2DFunction.X_POSITION] -= xOffset;
-							functionParamsSingle[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
-							j += parametersPerPeak;
-						}
-					}
-
-					final double[] frozenParams = functionParamsSingle.clone();
-					final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
-							fitConfig.getAstigmatismZModel(), frozenParams);
-					localBackgroundSingle = getLocalBackground(0, npeaks, frozenParams, flags,
-							getPrecomputedFittedNeighbours());
-
-					if (fitParamDevs != null)
-					{
-						// Recompute the deviations with all the parameters.
-						double[] paramDevs1 = new double[functionParamsSingle.length];
-						// These pre-computed values will be those peaks outside the region
-						fitConfig.setPrecomputedFunctionValues(getPrecomputedFittedNeighbours());
-						if (gf.computeDeviations(region, width, height, npeaks, functionParamsSingle, paramDevs1))
-							System.arraycopy(paramDevs1, 0, fitParamDevs, 0, fitParamDevs.length);
-						fitConfig.setPrecomputedFunctionValues(null);
-					}
-				}
-				else if (precomputedFittedNeighbourCount != 0)
-				{
-					// Add the contribution from the precomputed neighbours 
-					localBackgroundSingle = fitParams[Gaussian2DFunction.BACKGROUND] +
-							getBackgroundContribution(getPrecomputedFittedNeighbours(), fitParams);
-					//// Debug if this ever adds a significant amount
-					//System.out.printf("Background=%f, Neighbours=%f (%f)\n", fitParams[Gaussian2DFunction.BACKGROUND],
-					//		localBackgroundSingle - fitParams[Gaussian2DFunction.BACKGROUND],
-					//		localBackgroundSingle / fitParams[Gaussian2DFunction.BACKGROUND]);
-				}
 				results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams, fitParams,
-						fitParamDevs, localBackgroundSingle, resultType);
+						fitParamDevs, validationData, resultType);
 			}
 
 			resultSingle = createResult(fitResult, results);
@@ -2795,11 +3032,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				double[] initialParams = doubletFitResult.getInitialParameters();
 				PreprocessedPeakResult[] results = resultDoubletSingle.results;
+				
+				// We must compute a local background for all the spots
+				DynamicPeakResultValidationData validationData = new DynamicPeakResultValidationData(npeaks)
+				{
+					@Override
+					protected void compute(int n)
+					{
+						localStats[n] = getLocalStatistics(n, params);
+					}
+				};
+				
 				for (int i = 0; i < results.length; i++)
 				{
 					PreprocessedPeakResult r = results[i];
 					results[i] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
-							initialParams, params, paramDevs, localBackgroundSingle, (r.isExistingResult())
+							initialParams, params, paramDevs, validationData, (r.isExistingResult())
 									? ResultType.EXISTING : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 				}
 			}
@@ -2941,6 +3189,15 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			final boolean isComputeResiduals = gf.isComputeResiduals();
 			gf.setComputeResiduals(false);
 			final boolean[] amplitudeEstimate = new boolean[2];
+			DynamicPeakResultValidationData validationData = new DynamicPeakResultValidationData(2)
+			{
+				@Override
+				protected void compute(int n)
+				{
+					localStats[n] = getLocalStatistics(n, params);
+				}
+			};
+			fitConfig.setPeakResultValidationData(validationData);
 			fitConfig.setPrecomputedFunctionValues(precomputedFunctionValues);
 			final FitResult newFitResult = gf.fit(region, width, height, 2, doubletParams, amplitudeEstimate,
 					doubletParams[Gaussian2DFunction.BACKGROUND] == 0);
@@ -3238,7 +3495,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 							// If there was a pre-computed function then the deviations must be recomputed using the neighbours.
 							: null;
 					results[i] = resultFactory.createPreprocessedPeakResult(candidateIndex[i], position[i],
-							initialParams, fitParams, fitParamDevs, localBackground, resultType);
+							initialParams, fitParams, fitParamDevs, validationData, resultType);
 				}
 
 				return createResult(newFitResult, results);
@@ -3908,6 +4165,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean isValid;
 		@SuppressWarnings("unused")
 		int extra = 0;
+		final AreaStatistics area = new AreaStatistics(data, width, height);
 
 		public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic)
 		{
@@ -3988,7 +4246,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				final ResultFactory factory = (dynamic) ? new DynamicResultFactory(offsetx, offsety)
 						: new FixedResultFactory(offsetx, offsety);
-				spotFitter = new CandidateSpotFitter(gf, factory, region, region2, var_g2, regionBounds, candidateId);
+				spotFitter = new CandidateSpotFitter(gf, factory, region, region2, var_g2, regionBounds, candidateId,
+						area);
 			}
 		}
 
