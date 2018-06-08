@@ -1184,8 +1184,8 @@ public class PeakFit implements PlugInFilter, ItemListener
 		});
 	}
 
-	/** Flag to indicate that read noise should be configured. */
-	public static final int FLAG_READ_NOISE = 0x00000001;
+	/** Flag to indicate that read noise should not be configured. */
+	public static final int FLAG_NO_READ_NOISE = 0x00000001;
 	/** Flag to indicate that quantum efficiency should be configured. */
 	public static final int FLAG_QUANTUM_EFFICIENCY = 0x00000002;
 	/** Flag to indicate that gain should not be configured. */
@@ -1236,7 +1236,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 							egd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
 							if (BitFlags.anyNotSet(options, FLAG_NO_GAIN))
 								egd.addNumericField("Gain", calibration.getCountPerPhoton(), 4, 6, "Count/photon");
-							if (BitFlags.areSet(options, FLAG_READ_NOISE))
+							if (BitFlags.anyNotSet(options, FLAG_NO_READ_NOISE))
 								egd.addNumericField("Read_noise", calibration.getReadNoise(), 4, 6, "Count");
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								egd.addNumericField("Quantum_efficiency", calibration.getQuantumEfficiency(), 4, 6,
@@ -1266,7 +1266,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 							calibration.setBias(Math.abs(egd.getNextNumber()));
 							if (BitFlags.anyNotSet(options, FLAG_NO_GAIN))
 								calibration.setCountPerPhoton(Math.abs(egd.getNextNumber()));
-							if (BitFlags.areSet(options, FLAG_READ_NOISE))
+							if (BitFlags.anyNotSet(options, FLAG_NO_READ_NOISE))
 								calibration.setReadNoise(Math.abs(egd.getNextNumber()));
 							if (BitFlags.areSet(options, FLAG_QUANTUM_EFFICIENCY))
 								calibration.setQuantumEfficiency(Math.abs(egd.getNextNumber()));

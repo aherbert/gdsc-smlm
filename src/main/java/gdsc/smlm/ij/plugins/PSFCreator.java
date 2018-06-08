@@ -4604,7 +4604,7 @@ public class PSFCreator implements PlugInFilter
 		gd.addChoice("PSF_type", PSF_TYPE, settings.getPsfType());
 		gd.addNumericField("nm_per_pixel", cw.getNmPerPixel(), 2, 6, "nm");
 		gd.addNumericField("nm_per_slice", settings.getNmPerSlice(), 0, 6, "nm");
-		PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN, cw);
+		PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN | PeakFit.FLAG_NO_READ_NOISE, cw);
 
 		// For reset
 		final TurboList<TextField> tf = new TurboList<TextField>();

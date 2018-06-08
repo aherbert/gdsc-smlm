@@ -101,7 +101,7 @@ public class CalibrateResults implements PlugIn
 		gd.addStringField("Name", results.getName(), Math.max(Math.min(results.getName().length(), 60), 20));
 		if (existingCalibration)
 			gd.addCheckbox("Update_all_linked_results", updateAll);
-		PeakFit.addCameraOptions(gd, PeakFit.FLAG_QUANTUM_EFFICIENCY | PeakFit.FLAG_READ_NOISE, cw);
+		PeakFit.addCameraOptions(gd, PeakFit.FLAG_QUANTUM_EFFICIENCY, cw);
 		gd.addNumericField("Calibration (nm/px)", cw.getNmPerPixel(), 2);
 		gd.addNumericField("Exposure_time (ms)", cw.getExposureTime(), 2);
 
