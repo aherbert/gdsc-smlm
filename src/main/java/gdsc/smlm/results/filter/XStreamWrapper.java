@@ -33,6 +33,9 @@ public abstract class XStreamWrapper
 		{
 			try
 			{
+				XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+				xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
+				
 				xs.autodetectAnnotations(true);
 
 				addAlias(FilterSet.class);

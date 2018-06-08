@@ -60,6 +60,10 @@ public class XmlUtils extends gdsc.core.utils.XmlUtils
 	private static void init()
 	{
 		if (xs == null)
+		{
 			xs = new XStream(new DomDriver());
+			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+			xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
+		}
 	}
 }

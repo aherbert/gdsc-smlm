@@ -499,6 +499,8 @@ public class BatchPeakFit implements PlugIn
 	private XStream createXStream()
 	{
 		XStream xs = new XStream(new DomDriver());
+		XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+		xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
 		xs.alias("gdsc.fitting.batchSettings", BatchSettings.class);
 		xs.alias("parameter", ParameterSettings.class);
 		xs.alias("gdsc.fitting.batchRun", BatchRun.class);

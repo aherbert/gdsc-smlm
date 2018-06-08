@@ -470,6 +470,8 @@ public abstract class ImageSource
 		XStream xs = new XStream(new DomDriver());
 		try
 		{
+			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+			xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
 			xs.autodetectAnnotations(true);
 			return xs.toXML(this);
 		}
@@ -485,6 +487,8 @@ public abstract class ImageSource
 		XStream xs = new XStream(new DomDriver());
 		try
 		{
+			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+			xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
 			xs.autodetectAnnotations(true);
 			return (ImageSource) xs.fromXML(xml);
 		}

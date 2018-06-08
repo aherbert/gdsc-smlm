@@ -182,6 +182,8 @@ public class PCPALMAnalysis implements PlugInFilter
 		else if (getDirectory())
 		{
 			XStream xs = new XStream(new DomDriver());
+			XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+			xs.allowTypes(new Class[] { CorrelationResult.class });
 			for (CorrelationResult result : results)
 				saveResult(xs, result);
 		}
@@ -246,6 +248,8 @@ public class PCPALMAnalysis implements PlugInFilter
 			for (int i = 0; i < fileList.length; i++)
 			{
 				XStream xs = new XStream(new DomDriver());
+				XStream.setupDefaultSecurity(xs); // to be removed after 1.5
+				xs.allowTypes(new Class[] { CorrelationResult.class });
 				if (fileList[i].isFile())
 					if (loadResult(xs, fileList[i].getPath()))
 						count++;
