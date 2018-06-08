@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.math3.util.FastMath;
 
-import gdsc.core.filters.AreaStatistics;
+import gdsc.core.filters.AreaSum;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
@@ -169,8 +169,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	private static byte FILTER_RANK_MINIMAL = (byte) 0;
 	private static byte FILTER_RANK_PRIMARY = (byte) 1;
 
+	/** Flag to indicate that the data is in raw count units (not photon-eletcrons). */
 	private final boolean isFitCameraCounts;
+
+	/**
+	 * The total gain of the system. This is only used if fitting in camera counts to
+	 * accurately model the local noise.
+	 */
+	private final float totalGain;
 	private final CameraModel cameraModel;
+	
+	/** Flag if this is an EM-CCD camera. This is used during local noise estimation. */
+	private final boolean isEMCCD;
 
 	/**
 	 * Encapsulate all conversion of coordinates between the frame of data (data bounds) and the sub-section currently
@@ -446,6 +456,18 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		// Store this flag so we know how to process the data
 		isFitCameraCounts = fitConfig.isFitCameraCounts();
 		cameraModel = fitConfig.getCameraModel();
+		// When fitting counts distinguish if the camera model is valid or unknown
+		if (isFitCameraCounts && fitConfig.hasValidCameraModelType() && !cameraModel.isPerPixelModel())
+		{
+			// In this case the model has a global gain to convert to photons.
+			// This can be used for local noise estimation.
+			totalGain = cameraModel.getGain(0, 0);
+		}
+		else
+		{
+			totalGain = 0;
+		}
+		isEMCCD = fitConfig.getCalibrationReader().isEMCCD();
 	}
 
 	/**
@@ -1203,7 +1225,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		final int width;
 		final int height;
 		final int parametersPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
-		final AreaStatistics area;
+		final AreaSum area;
 
 		int neighbours;
 		double singleBackground = Double.NaN, multiBackground = Double.NaN;
@@ -1235,7 +1257,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		QuadrantAnalysis qaSingle = null;
 
 		public CandidateSpotFitter(Gaussian2DFitter gf, ResultFactory resultFactory, double[] region, double[] region2,
-				double[] var_g2, Rectangle regionBounds, int candidateId, AreaStatistics area)
+				double[] var_g2, Rectangle regionBounds, int candidateId, AreaSum area)
 		{
 			this.gf = gf;
 			this.resultFactory = resultFactory;
@@ -2014,26 +2036,35 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			return sum;
 		}
 
-		// TODO - Using the standard deviation around each spot generates a noise
-		// that is far too high.
-		// Previously the noise was estimated using the local background created
-		// from the fitted background and all the other fitted spots.
+		// Local Background
+		// ----------------
+		// Previously created from the fitted background and all the other fitted spots.
+		// This does not scale well with multiple spots.
+		//
 		// This should be changed to:
 		// localbackground = fitted background    (single peak)
-		//                 = (local sum - fitted peak) / n
-		// noise = localbackground + (read Noise)^2
-		// Optionally localbackground is doubled for EM-CCD.
-		// Note that the read noise must be in the same units as those used 
-		// for fitting. 
-		// If an EM-CCD read noise (photons) = read noise (Count) / EM-gain
-		// If a  CCD read noise (photons) = read noise (Count) / gain
+		//                 = ([local sum] - [peak sum]) / area  (multiple peaks)
 
-		// This was previous code in the FitConfiguration.
-		//return (float) ((localBackground > 0)
-		//		? (isFitCameraCounts()) ? PeakResultHelper.localBackgroundToNoise(localBackground, gain, emCCD)
-		//				: PeakResultHelper.localBackgroundToNoise(localBackground, emCCD)
-		
-		
+		// Noise
+		// -----		
+		// Using the standard deviation around each spot generates a noise
+		// that is far too high. The standard deviation can only be used from 
+		// background regions. This is the global noise estimate and is used
+		// when there is no calibration to convert to photons.
+		//
+		// When a calibration is available then the local background can be used
+		// assuming it is Poisson shot noise. The local background must be converted
+		// to photons and combined with the read noise of the camera in photons.
+		// If an EM-CCD camera the photon shot variance must be doubled 
+		// (EM-CCD noise factor of 2).
+		//
+		// Note that the read noise must be in the same units as those used 
+		// for fitting so it is then converted back if the fitting is done in counts.
+
+		// The FitConfiguration provides a flag for fitting in camera counts and
+		// can produce the total gain. If the total gain is 0 then no conversion
+		// to photons is possible and the noise defaults to the global estimate.
+
 		/**
 		 * Gets the local background and noise for the given peak assuming that multiple peaks were fit.
 		 * <p>
@@ -2080,13 +2111,38 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			spotParams[Gaussian2DFunction.X_POSITION] -= r2.x - r1.x;
 			spotParams[Gaussian2DFunction.Y_POSITION] -= r2.y - r1.y;
 			Gaussian2DFunction f = fitConfig.createGaussianFunction(1, r2.width, r2.height);
-			result[0] = (stats[AreaStatistics.SUM] - f.integral(spotParams)) / stats[AreaStatistics.N];
-			result[1] = stats[AreaStatistics.SD];
+			result[0] = (stats[AreaSum.SUM] - f.integral(spotParams)) / stats[AreaSum.N];
+			if (result[0] < 0)
+				result[0] = params[Gaussian2DFunction.BACKGROUND];
 			
-			// Assume mean is pure shot noise.
-			result[1] = (result[0] > 0) ? Math.sqrt(result[0]) : fitConfig.getNoise();
-			
+			result[1] = noiseEstimateFromBackground(result[0], r2);
+
 			return result;
+		}
+
+		private double noiseEstimateFromBackground(double b, Rectangle bounds)
+		{
+			if (isFitCameraCounts)
+			{
+				if (totalGain == 0)
+					// Unknown calibration so use the global noise estimate
+					return fitConfig.getNoise();
+				
+				// Convert the local background to photons
+				b /= totalGain;
+			}
+			
+			// Apply the EM-CCD noise factor of 2 to the photon shot noise
+			if (isEMCCD)
+				b *= 2;
+			
+			// Using the mean variance allows an estimate for a per-pixel camera model
+			double noise = Math.sqrt(b + cameraModel.getMeanVariance(bounds)); 
+			
+			if (isFitCameraCounts)
+				noise *= totalGain;
+			
+			return noise;
 		}
 
 		/**
@@ -2151,13 +2207,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			Rectangle r1 = new Rectangle(x - nx, y - ny, 2 * nx + 1, 2 * ny + 1);
 			Rectangle r2 = r1.intersection(new Rectangle(0, 0, area.maxx, area.maxy));
 
-			double[] stats = area.getStatistics(r2);
-			// Just use the standard deviation. The local background is from the fit result.
-			result[1] = stats[AreaStatistics.SD];
+			result[1] = noiseEstimateFromBackground(result[0], r2);
 
-			// Assume mean is pure shot noise.
-			result[1] = (result[0] > 0) ? Math.sqrt(result[0]) : fitConfig.getNoise();
-			
 			return result;
 		}
 
@@ -3060,7 +3111,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
 				double[] initialParams = doubletFitResult.getInitialParameters();
 				PreprocessedPeakResult[] results = resultDoubletSingle.results;
-				
+
 				// We must compute a local background for all the spots
 				DynamicPeakResultValidationData validationData = new DynamicPeakResultValidationData(npeaks)
 				{
@@ -3070,13 +3121,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 						localStats[n] = getLocalStatistics(n, params);
 					}
 				};
-				
+
 				for (int i = 0; i < results.length; i++)
 				{
 					PreprocessedPeakResult r = results[i];
 					results[i] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
-							initialParams, params, paramDevs, validationData, (r.isExistingResult())
-									? ResultType.EXISTING : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
+							initialParams, params, paramDevs, validationData,
+							(r.isExistingResult()) ? ResultType.EXISTING
+									: (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 				}
 			}
 
@@ -4193,14 +4245,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		boolean isValid;
 		@SuppressWarnings("unused")
 		int extra = 0;
-		final AreaStatistics area;
+		final AreaSum area;
 
 		public DynamicMultiPathFitResult(ImageExtractor ie, ImageExtractor ie2, boolean dynamic)
 		{
 			this.frame = FitWorker.this.slice;
 			this.width = cc.dataBounds.width;
 			this.height = cc.dataBounds.height;
-			area = new AreaStatistics(data, width, height);
+			area = new AreaSum(data, width, height);
 			this.ie = ie;
 			this.ie2 = ie2;
 			this.dynamic = dynamic;
