@@ -2,6 +2,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
 import java.awt.Choice;
+import java.awt.Color;
 import java.awt.Label;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -322,6 +323,10 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 			//			});
 			PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
 			roi.setPointType(3);
+			// Leave to ImageJ default. Then the user can change it using the options.
+			//Color c = Color.GREEN;
+			//roi.setStrokeColor(c);
+			//roi.setFillColor(c);
 			imp.getWindow().toFront();
 			imp.setOverlay(new Overlay(roi));
 
