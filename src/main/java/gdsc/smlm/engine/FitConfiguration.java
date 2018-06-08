@@ -4260,6 +4260,26 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	}
 
 	/**
+	 * Checks for a valid camera model type. This does not validate if a camera model is present, only that an attempt
+	 * can be made to create one.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean hasValidCameraModelType()
+	{
+		switch (getCameraTypeValue())
+		{
+			case CameraType.CCD_VALUE:
+			case CameraType.EMCCD_VALUE:
+			case CameraType.SCMOS_VALUE:
+				return true;
+
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * Sets the camera model name. This should contain all the information required to load the camera model, e.g. in
 	 * the case of a per-pixel camera model for sCMOS cameras.
 	 * <p>
