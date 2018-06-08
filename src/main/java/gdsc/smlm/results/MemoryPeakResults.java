@@ -2382,12 +2382,25 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/**
 	 * Fix zero background to the given background.
+	 * <p>
+	 * This will fail if the calibration is missing information to convert the units.
 	 *
+	 * @param intensityUnit
+	 *            the intensity unit
 	 * @param newBackground
 	 *            the new background
+	 * @param procedure
+	 *            the procedure
+	 * @throws ConversionException
+	 *             if the conversion is not possible
+	 * @throws ConfigurationException
+	 *             if the configuration is invalid
 	 */
-	public void setZeroBackground(float newBackground)
+	public void setZeroBackground(IntensityUnit intensityUnit, float newBackground)
+			throws ConversionException, ConfigurationException
 	{
+		TypeConverter<IntensityUnit> ic = getIntensityConverter(intensityUnit);
+		newBackground = ic.convertBack(newBackground);
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getfX(i);

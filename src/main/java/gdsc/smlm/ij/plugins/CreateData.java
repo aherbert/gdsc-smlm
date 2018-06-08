@@ -5751,12 +5751,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (results.hasBackground())
 			return;
 
-		// Simple fix is to use the bias plus the global photon background.
+		// Simple fix is to use the global photon background.
 		// TODO - Subtract the spots from the local region and compute the true local background.
 		// Note this requires knowing the PSF width. If this is a loaded ground truth dataset then 
 		// it probably will not have Gaussian widths.
-		final float b = (float) (simulationParameters.bias + simulationParameters.gain * simulationParameters.b);
-		results.setZeroBackground(b);
+		results.setZeroBackground(IntensityUnit.PHOTON, (float) simulationParameters.b);
 	}
 
 	/**
@@ -5794,13 +5793,15 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		// Convert noise units from counts to the result format
 		final TypeConverter<IntensityUnit> c = results.getIntensityConverter(IntensityUnit.COUNT);
-
+		for (int i = 0; i < noise.length; i++)
+			noise[i] = c.convertBack(noise[i]);
+		
 		results.forEach(new PeakResultProcedure()
 		{
 			public void execute(PeakResult p)
 			{
 				if (p.getFrame() < noise.length)
-					p.setNoise(c.convertBack(noise[p.getFrame()]));
+					p.setNoise(noise[p.getFrame()]);
 			}
 		});
 	}
