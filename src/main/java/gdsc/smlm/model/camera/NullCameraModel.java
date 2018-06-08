@@ -101,6 +101,30 @@ public class NullCameraModel extends BaseCameraModel
 		return newArray(bounds, 0);
 	}
 
+	@Override
+	public float getBias(int x, int y)
+	{
+		return 0f;
+	}
+
+	@Override
+	public float getGain(int x, int y)
+	{
+		return 1f;
+	}
+
+	@Override
+	public float getVariance(int x, int y)
+	{
+		return 0f;
+	}
+
+	@Override
+	public float getNormalisedVariance(int x, int y)
+	{
+		return 0f;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -109,7 +133,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public double getMeanVariance(Rectangle bounds)
 	{
-		return 0;
+		return 0d;
 	}
 
 	/*
@@ -120,7 +144,7 @@ public class NullCameraModel extends BaseCameraModel
 	@Override
 	public double getMeanNormalisedVariance(Rectangle bounds)
 	{
-		return 0;
+		return 0d;
 	}
 
 	/*

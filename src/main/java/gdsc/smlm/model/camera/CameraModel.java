@@ -103,7 +103,54 @@ public interface CameraModel
 	public float[] getNormalisedVariance(Rectangle bounds);
 
 	/**
-	 * Gets the mean of the per-pixel variance. This is the variance of the pixel in camera counts. 
+	 * Gets the per-pixel camera bias (offset). The coordinates are expected to fit within the camera bounds.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the bias
+	 */
+	public float getBias(int x, int y);
+
+	/**
+	 * Gets the per-pixel camera gain (in count/photon). The coordinates are expected to fit within the camera bounds.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the gain
+	 */
+	public float getGain(int x, int y);
+
+	/**
+	 * Gets the per-pixel variance. This is the variance of the pixel in camera counts. The coordinates are expected to
+	 * fit
+	 * within the camera bounds.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the variance
+	 */
+	public float getVariance(int x, int y);
+
+	/**
+	 * Gets the per-pixel normalised variance. This is the variance of the pixel in camera counts divided by the squared
+	 * gain, i.e. the variance in photon units. The coordinates are expected to fit within the camera bounds.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @return the normalised variance
+	 */
+	public float getNormalisedVariance(int x, int y);
+
+	/**
+	 * Gets the mean of the per-pixel variance. This is the variance of the pixel in camera counts.
 	 * The bounds are expected to fit within the camera bounds.
 	 *
 	 * @param bounds
@@ -113,7 +160,8 @@ public interface CameraModel
 	public double getMeanVariance(Rectangle bounds);
 
 	/**
-	 * Gets the mean of the per-pixel normalised variance. This is the variance of the pixel in camera counts divided by the squared
+	 * Gets the mean of the per-pixel normalised variance. This is the variance of the pixel in camera counts divided by
+	 * the squared
 	 * gain, i.e. the variance in photon units. The bounds are expected to fit within the camera bounds.
 	 *
 	 * @param bounds
@@ -121,7 +169,7 @@ public interface CameraModel
 	 * @return the normalised variance
 	 */
 	public double getMeanNormalisedVariance(Rectangle bounds);
-	
+
 	/**
 	 * Gets the per-pixel weights, for example 1/variance.
 	 *
@@ -130,7 +178,7 @@ public interface CameraModel
 	 * @return the weights
 	 */
 	public float[] getWeights(Rectangle bounds);
-	
+
 	/**
 	 * Gets the per-pixel normalised weights, for example 1/[normalised variance].
 	 *
@@ -225,7 +273,8 @@ public interface CameraModel
 	public void removeGain(float[] data);
 
 	/**
-	 * Remove the per-pixel camera bias (offset) and gain from the crop of the camera data. The data length is expected to
+	 * Remove the per-pixel camera bias (offset) and gain from the crop of the camera data. The data length is expected
+	 * to
 	 * match the camera bounds.
 	 *
 	 * @param data

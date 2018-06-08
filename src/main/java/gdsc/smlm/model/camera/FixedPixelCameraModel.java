@@ -175,6 +175,30 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 		return newArray(bounds, var_g2);
 	}
 
+	@Override
+	public float getBias(int x, int y)
+	{
+		return bias;
+	}
+
+	@Override
+	public float getGain(int x, int y)
+	{
+		return gain;
+	}
+
+	@Override
+	public float getVariance(int x, int y)
+	{
+		return variance;
+	}
+
+	@Override
+	public float getNormalisedVariance(int x, int y)
+	{
+		return var_g2;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

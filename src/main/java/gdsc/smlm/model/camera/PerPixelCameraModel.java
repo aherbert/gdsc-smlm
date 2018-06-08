@@ -423,6 +423,30 @@ public class PerPixelCameraModel extends BaseCameraModel
 		}
 	}
 
+	@Override
+	public float getBias(int x, int y)
+	{
+		return getData(x, y, bias);
+	}
+
+	@Override
+	public float getGain(int x, int y)
+	{
+		return getData(x, y, gain);
+	}
+
+	@Override
+	public float getVariance(int x, int y)
+	{
+		return getData(x, y, variance);
+	}
+
+	@Override
+	public float getNormalisedVariance(int x, int y)
+	{
+		return getData(x, y, getNormalisedVarianceInternal());
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -608,6 +632,28 @@ public class PerPixelCameraModel extends BaseCameraModel
 				sum += pixels[i];
 			return sum / pixels.length;
 		}
+	}
+
+	/**
+	 * Gets the data value.
+	 *
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param data
+	 *            the data
+	 * @return the data value
+	 * @throws IllegalArgumentException
+	 *             If the coordinates are not inside the bounds
+	 */
+	private float getData(int x, int y, float[] data) throws IllegalArgumentException
+	{
+		x -= cameraBounds.x;
+		y -= cameraBounds.y;
+		if (x < 0 || y < 0 || x >= cameraBounds.width || y >= cameraBounds.height)
+			throw new IllegalArgumentException("Coordinates must be within the camera bounds");
+		return data[y * cameraBounds.width + x];
 	}
 
 	/*

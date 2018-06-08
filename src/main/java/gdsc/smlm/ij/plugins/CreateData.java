@@ -2627,10 +2627,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
-			// Use a dummy bounds to find out the fixed variance and gain 
-			Rectangle bounds = new Rectangle(1, 1);
-			float variance = cameraModel.getVariance(bounds)[0];
-			float gain = cameraModel.getGain(bounds)[0];
+			// Use a dummy coordinate to find out the fixed variance and gain 
+			float variance = cameraModel.getVariance(0, 0);
+			float gain = cameraModel.getGain(0, 0);
 
 			// Avoid sqrt on all the same value
 			this.readNoise = new float[settings.getSize() * settings.getSize()];
@@ -2650,11 +2649,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	}
 
 	/**
-	 * Creates the CCD camera model. 
+	 * Creates the CCD camera model.
 	 * <p>
 	 * Note that the model only has camera gain applied thus the normalised variance is
-	 * the read noise in electrons. This is standard for a CCD model but omits the EM-gain 
-	 * for an EM-CCD model. This model is intended to be used to generate electron 
+	 * the read noise in electrons. This is standard for a CCD model but omits the EM-gain
+	 * for an EM-CCD model. This model is intended to be used to generate electron
 	 * noise during the simulation.
 	 *
 	 * @return the camera model

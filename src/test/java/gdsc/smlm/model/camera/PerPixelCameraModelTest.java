@@ -249,4 +249,26 @@ public class PerPixelCameraModelTest
 			Assert.assertEquals(e, o, 0);
 		}
 	}
+
+	@Test
+	public void canGetCoordinateData()
+	{
+		int ox = 2;
+		int oy = 3;
+		int w = 8;
+		int h = 10;
+		int size = w * h;
+		float[] bias = Arrays.copyOf(PerPixelCameraModelTest.bias, size);
+		float[] gain = Arrays.copyOf(PerPixelCameraModelTest.gain, size);
+		float[] variance = Arrays.copyOf(PerPixelCameraModelTest.variance, size);
+		PerPixelCameraModel model = new PerPixelCameraModel(ox, oy, w, h, bias, gain, variance);
+		for (int y = 0, y1 = oy, i = 0; y < h; y++, y1++)
+			for (int x = 0, x1 = ox; x < w; x++, x1++, i++)
+			{
+				Assert.assertEquals(bias[i], model.getBias(x1, y1), 0);
+				Assert.assertEquals(gain[i], model.getGain(x1, y1), 0);
+				Assert.assertEquals(variance[i], model.getVariance(x1, y1), 0);
+				Assert.assertEquals(var_g2[i], model.getNormalisedVariance(x1, y1), 0);
+			}
+	}
 }
