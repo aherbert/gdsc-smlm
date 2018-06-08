@@ -2,6 +2,8 @@ package gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
 
+import gdsc.core.utils.SimpleArrayUtils;
+
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
  * 
@@ -94,7 +96,6 @@ public class PerPixelCameraModel extends BaseCameraModel
 			throws IllegalArgumentException
 	{
 		this(bounds, bias, gain, variance, true, true);
-
 	}
 
 	/**
@@ -122,7 +123,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 			throw new IllegalArgumentException("Bounds must not be null");
 		checkBounds(bounds);
 		cameraBounds = (cloneBounds) ? new Rectangle(bounds) : bounds;
-		int size = bounds.width * bounds.height;
+		int size = SimpleArrayUtils.check2DSize(bounds.width, bounds.height);
 		checkArray(bias, size);
 		checkArray(gain, size);
 		checkArray(variance, size);
@@ -422,6 +423,28 @@ public class PerPixelCameraModel extends BaseCameraModel
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getMeanVariance(java.awt.Rectangle)
+	 */
+	@Override
+	public double getMeanVariance(Rectangle bounds)
+	{
+		return getMean(bounds, variance);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
+	 */
+	@Override
+	public double getMeanNormalisedVariance(Rectangle bounds)
+	{
+		return getMean(bounds, getNormalisedVarianceInternal());
+	}
+
 	/**
 	 * Return the weights as 1/variance.
 	 * 
@@ -455,6 +478,21 @@ public class PerPixelCameraModel extends BaseCameraModel
 	{
 		Rectangle intersection = getIntersection(bounds);
 		return getData(values, intersection, true);
+	}
+
+	/**
+	 * Gets the mean of the data from the values using the intersection of the bounds.
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @param values
+	 *            the values
+	 * @return the mean of the data
+	 */
+	private double getMean(Rectangle bounds, float[] values)
+	{
+		Rectangle intersection = getIntersection(bounds);
+		return getMean(values, intersection);
 	}
 
 	/**
@@ -538,6 +576,37 @@ public class PerPixelCameraModel extends BaseCameraModel
 		else
 		{
 			return (copy) ? pixels.clone() : pixels;
+		}
+	}
+
+	/**
+	 * Get the mean of the data from the per-pixel data using the given bounds.
+	 *
+	 * @param pixels
+	 *            the pixels
+	 * @param bounds
+	 *            the bounds
+	 * @return the mean of the data
+	 */
+	private double getMean(float[] pixels, final Rectangle bounds)
+	{
+		double sum = 0;
+		if (bounds.x != 0 || bounds.y != 0 || bounds.width != cameraBounds.width ||
+				bounds.height != cameraBounds.height)
+		{
+			final int width = cameraBounds.width;
+			for (int ys = 0; ys < bounds.height; ys++)
+			{
+				for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
+					sum += pixels[offset2++];
+			}
+			return sum / (bounds.height * bounds.width);
+		}
+		else
+		{
+			for (int i = pixels.length; i-- > 0;)
+				sum += pixels[i];
+			return sum / pixels.length;
 		}
 	}
 

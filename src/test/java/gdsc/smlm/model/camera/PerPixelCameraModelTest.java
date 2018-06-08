@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import ij.process.FloatProcessor;
 
@@ -217,5 +218,35 @@ public class PerPixelCameraModelTest
 		for (int i = 0; i < e.length; i++)
 			e[i] = (e[i] == 0) ? (float) (1.0 / min) : (float) (1.0 / e[i]);
 		Assert.assertArrayEquals(e, w, 0);
+	}
+
+	@Test
+	public void canGetMeanVariance()
+	{
+		canGetMeanVariance(true, false);
+		canGetMeanVariance(false, false);
+	}
+
+	@Test
+	public void canGetMeanNormalisedVariance()
+	{
+		canGetMeanVariance(true, true);
+		canGetMeanVariance(false, true);
+	}
+
+	private void canGetMeanVariance(boolean initialise, boolean normalised)
+	{
+		PerPixelCameraModel model = createModel(initialise);
+		RandomGenerator rand = new Well19937c(30051977);
+		ImageExtractor ie = new ImageExtractor(bias, w, h);
+		for (int i = 0; i < 10; i++)
+		{
+			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
+					5 + rand.nextInt(5));
+			float[] v = (normalised) ? model.getNormalisedVariance(bounds) : model.getVariance(bounds);
+			double e = Maths.sum(v) / v.length;
+			double o = (normalised) ? model.getMeanNormalisedVariance(bounds) : model.getMeanVariance(bounds);
+			Assert.assertEquals(e, o, 0);
+		}
 	}
 }

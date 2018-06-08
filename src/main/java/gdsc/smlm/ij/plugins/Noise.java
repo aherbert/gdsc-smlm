@@ -19,8 +19,9 @@ import gdsc.smlm.data.config.FitProtosHelper;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.IJImageConverter;
+import gdsc.smlm.model.camera.CCDCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
-import gdsc.smlm.model.camera.FixedPixelCameraModel;
+import gdsc.smlm.model.camera.EMCCDCameraModel;
 import gdsc.smlm.model.camera.NullCameraModel;
 import ij.IJ;
 import ij.ImagePlus;
@@ -156,8 +157,10 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		switch (calibration.getCameraType())
 		{
 			case CCD:
+				cameraModel = new CCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
+				break;
 			case EMCCD:
-				cameraModel = new FixedPixelCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
+				cameraModel = new EMCCDCameraModel(calibration.getBias(), calibration.getCountPerPhoton());
 				break;
 			case SCMOS:
 				cameraModel = CameraModelManager.load(calibration.getCameraModelName());

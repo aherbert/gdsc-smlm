@@ -104,6 +104,28 @@ public class NullCameraModel extends BaseCameraModel
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getMeanVariance(java.awt.Rectangle)
+	 */
+	@Override
+	public double getMeanVariance(Rectangle bounds)
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.model.camera.CameraModel#getMeanNormalisedVariance(java.awt.Rectangle)
+	 */
+	@Override
+	public double getMeanNormalisedVariance(Rectangle bounds)
+	{
+		return 0;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
 	 */
 	public float[] getWeights(Rectangle bounds)

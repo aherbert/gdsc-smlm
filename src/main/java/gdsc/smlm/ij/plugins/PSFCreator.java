@@ -94,11 +94,11 @@ import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePSF;
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.ij.utils.IJImageConverter;
 import gdsc.smlm.ij.utils.Image2DAligner;
 import gdsc.smlm.ij.utils.Image3DAligner;
-import gdsc.smlm.ij.utils.IJImageConverter;
+import gdsc.smlm.model.camera.CCDCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
-import gdsc.smlm.model.camera.FixedPixelCameraModel;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.SynchronizedPeakResults;
@@ -2735,7 +2735,7 @@ public class PSFCreator implements PlugInFilter
 		}
 		else
 		{
-			cameraModel = new FixedPixelCameraModel(calibration.getBias(), 1);
+			cameraModel = new CCDCameraModel(calibration.getBias(), 1);
 		}
 
 		// Extract the image data for processing as float

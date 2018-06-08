@@ -133,8 +133,9 @@ import gdsc.smlm.model.SpatialIllumination;
 import gdsc.smlm.model.SphericalDistribution;
 import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
+import gdsc.smlm.model.camera.CCDCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
-import gdsc.smlm.model.camera.FixedPixelCameraModel;
+import gdsc.smlm.model.camera.EMCCDCameraModel;
 import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.IdPeakResult;
@@ -2648,6 +2649,16 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return null;
 	}
 
+	/**
+	 * Creates the CCD camera model. 
+	 * <p>
+	 * Note that the model only has camera gain applied thus the normalised variance is
+	 * the read noise in electrons. This is standard for a CCD model but omits the EM-gain 
+	 * for an EM-CCD model. This model is intended to be used to generate electron 
+	 * noise during the simulation.
+	 *
+	 * @return the camera model
+	 */
 	private CameraModel createCCDCameraModel()
 	{
 		float bias = settings.getBias();
@@ -2658,7 +2669,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 
 		float readNoise = (float) new CreateDataSettingsHelper(settings).getReadNoiseInCounts();
 
-		return new FixedPixelCameraModel(bias, gain, (float) Maths.pow2(readNoise));
+		return new CCDCameraModel(bias, gain, (float) Maths.pow2(readNoise));
 	}
 
 	/**
@@ -3662,7 +3673,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
-					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
+					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
+					: stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -6142,8 +6154,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		switch (parameters.cameraType)
 		{
 			case CCD:
+				return new CCDCameraModel(parameters.bias, parameters.gain);
 			case EMCCD:
-				return new FixedPixelCameraModel(parameters.bias, parameters.gain);
+				return new EMCCDCameraModel(parameters.bias, parameters.gain);
 
 			case SCMOS:
 				CameraModel cameraModel = CameraModelManager.load(parameters.cameraModelName);

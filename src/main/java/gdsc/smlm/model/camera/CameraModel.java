@@ -103,6 +103,26 @@ public interface CameraModel
 	public float[] getNormalisedVariance(Rectangle bounds);
 
 	/**
+	 * Gets the mean of the per-pixel variance. This is the variance of the pixel in camera counts. 
+	 * The bounds are expected to fit within the camera bounds.
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @return the variance
+	 */
+	public double getMeanVariance(Rectangle bounds);
+
+	/**
+	 * Gets the mean of the per-pixel normalised variance. This is the variance of the pixel in camera counts divided by the squared
+	 * gain, i.e. the variance in photon units. The bounds are expected to fit within the camera bounds.
+	 *
+	 * @param bounds
+	 *            the bounds
+	 * @return the normalised variance
+	 */
+	public double getMeanNormalisedVariance(Rectangle bounds);
+	
+	/**
 	 * Gets the per-pixel weights, for example 1/variance.
 	 *
 	 * @param bounds

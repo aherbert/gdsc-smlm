@@ -51,8 +51,9 @@ import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
+import gdsc.smlm.model.camera.CCDCameraModel;
 import gdsc.smlm.model.camera.CameraModel;
-import gdsc.smlm.model.camera.FixedPixelCameraModel;
+import gdsc.smlm.model.camera.EMCCDCameraModel;
 import gdsc.smlm.model.camera.NullCameraModel;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
@@ -2437,7 +2438,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd)
 							: xsd;
 					final double localBackground = isPrecisionUsingBackground() && peakResultValidationData != null
-							? peakResultValidationData.getLocalBackground() : params[Gaussian2DFunction.BACKGROUND];
+							? peakResultValidationData.getLocalBackground()
+							: params[Gaussian2DFunction.BACKGROUND];
 					variance = getVariance(localBackground,
 							params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd,
 							isPrecisionUsingBackground());
@@ -4228,7 +4230,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	{
 		if (cameraModel == null)
 		{
-			switch (getCameraTypeValue())
+			int value = getCameraTypeValue();
+			switch (value)
 			{
 				case CameraType.CAMERA_TYPE_NA_VALUE:
 					// We can support this by doing nothing to pixels values
@@ -4237,11 +4240,12 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 				case CameraType.CCD_VALUE:
 				case CameraType.EMCCD_VALUE:
-					float bias = (float) calibration.getBias();
-					float gain = (float) calibration.getCountPerPhoton();
-					float variance = (float) Maths.pow2(calibration.getReadNoise());
-					// This will throw an exception if the calibration is invalid
-					cameraModel = new FixedPixelCameraModel(bias, gain, variance);
+					double bias = calibration.getBias();
+					double gain = calibration.getCountPerPhoton();
+					double variance = Maths.pow2(calibration.getReadNoise());
+					// This will throw an exception if the calibration is invalid.
+					cameraModel = (value == CameraType.EMCCD_VALUE) ? new EMCCDCameraModel(bias, gain, variance)
+							: new CCDCameraModel(bias, gain, variance);
 					break;
 
 				case CameraType.SCMOS_VALUE:
