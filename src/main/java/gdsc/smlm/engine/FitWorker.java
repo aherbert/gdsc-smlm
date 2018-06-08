@@ -2108,8 +2108,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// If there are multiple peaks then the local background must subtract the
 			// value of the target peak over the same region.
 			// Adjust the coordinates for clipping (r2 will be >= r1).
-			spotParams[Gaussian2DFunction.X_POSITION] -= r2.x - r1.x;
-			spotParams[Gaussian2DFunction.Y_POSITION] -= r2.y - r1.y;
+			// This effectively makes nx/ny represent the number of pixels before the centre pixel
+			nx -= r2.x - r1.x;
+			ny -= r2.y - r1.y;
+			// Put the spot in the centre of the region
+			spotParams[Gaussian2DFunction.X_POSITION] += nx  - x;
+			spotParams[Gaussian2DFunction.Y_POSITION] += ny  - y;
 			Gaussian2DFunction f = fitConfig.createGaussianFunction(1, r2.width, r2.height);
 			result[0] = (stats[AreaSum.SUM] - f.integral(spotParams)) / stats[AreaSum.N];
 			if (result[0] < 0)
@@ -2136,8 +2140,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			if (isEMCCD)
 				b *= 2;
 			
-			// Using the mean variance allows an estimate for a per-pixel camera model
-			double noise = Math.sqrt(b + cameraModel.getMeanVariance(bounds)); 
+			// Using the mean variance allows an estimate for a per-pixel camera model.
+			// Use the normalised variance (i.e. the variance in photo-electrons).
+			double noise = Math.sqrt(b + cameraModel.getMeanNormalisedVariance(bounds)); 
 			
 			if (isFitCameraCounts)
 				noise *= totalGain;
