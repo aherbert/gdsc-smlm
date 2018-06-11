@@ -266,6 +266,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public double probability(int x)
 	{
 		final double logProbability = logProbability(x);
@@ -294,6 +295,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public double cumulativeProbability(int x)
 	{
 		if (x < 0)
@@ -334,6 +336,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 *
 	 * For mean parameter {@code p}, the mean is {@code p}.
 	 */
+	@Override
 	public double getNumericalMean()
 	{
 		return getMean();
@@ -344,6 +347,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 *
 	 * For mean parameter {@code p}, the variance is {@code p}.
 	 */
+	@Override
 	public double getNumericalVariance()
 	{
 		return getMean();
@@ -356,6 +360,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 *
 	 * @return lower bound of the support (always 0)
 	 */
+	@Override
 	public int getSupportLowerBound()
 	{
 		return 0;
@@ -371,6 +376,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 * @return upper bound of the support (always {@code Integer.MAX_VALUE} for
 	 *         positive infinity)
 	 */
+	@Override
 	public int getSupportUpperBound()
 	{
 		return Integer.MAX_VALUE;
@@ -383,6 +389,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	 *
 	 * @return {@code true}
 	 */
+	@Override
 	public boolean isSupportConnected()
 	{
 		return true;

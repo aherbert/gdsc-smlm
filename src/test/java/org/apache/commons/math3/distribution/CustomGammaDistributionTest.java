@@ -48,11 +48,13 @@ public class CustomGammaDistributionTest
 			r = new Well19937c();
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			r.setSeed(30051977);
@@ -71,6 +73,7 @@ public class CustomGammaDistributionTest
 			rdg = new RandomDataGenerator(r);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double[] e = new double[n * m];
@@ -96,6 +99,7 @@ public class CustomGammaDistributionTest
 			dist = new CustomGammaDistribution(r, 1, scale);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double[] e = new double[n * m];
@@ -111,18 +115,18 @@ public class CustomGammaDistributionTest
 			return e;
 		}
 	}
-	
+
 	@Test
 	public void canCreateSamples()
 	{
 		StaticTimingTask t1 = new StaticTimingTask();
 		t1.getData(0);
 		double[] e = (double[]) t1.run(null);
-		
+
 		InstanceTimingTask t2 = new InstanceTimingTask();
 		t2.getData(0);
 		double[] o = (double[]) t2.run(null);
-		
+
 		Assert.assertArrayEquals(e, o, 0);
 	}
 
@@ -136,7 +140,7 @@ public class CustomGammaDistributionTest
 		int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
-		
+
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
 }

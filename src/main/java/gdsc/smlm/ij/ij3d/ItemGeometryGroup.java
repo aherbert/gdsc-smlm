@@ -25,7 +25,6 @@ package gdsc.smlm.ij.ij3d;
 
 import java.util.Arrays;
 
-
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Bounds;
 import org.scijava.java3d.GeometryArray;
@@ -561,6 +560,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		// Global colour
@@ -596,6 +596,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		if (color == null)
@@ -637,6 +638,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
+	@Override
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		if (color == null)
@@ -677,6 +679,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
 	 */
+	@Override
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		if (alpha != null)
@@ -753,6 +756,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
 	 */
+	@Override
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
 		if (alphas == null)
@@ -813,6 +817,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
 	 */
+	@Override
 	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		int size = size();

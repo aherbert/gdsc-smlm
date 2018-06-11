@@ -28,7 +28,6 @@ import java.util.List;
 import gdsc.smlm.filters.Spot;
 import gdsc.smlm.results.filter.MultiPathFilter;
 
-
 /**
  * Specifies additional parameters for the job.
  * <p>
@@ -39,9 +38,12 @@ public class FitParameters
 	public enum FitTask
 	{
 		//@formatter:off
-		PSF_FITTING{ public String getName() { return "PSF Fitting"; }},
-		MAXIMA_IDENITIFICATION{ public String getName() { return "Maxima Identification"; }}, 
-		BENCHMARKING{ public String getName() { return "Benchmarking"; }};
+		PSF_FITTING{ @Override
+		public String getName() { return "PSF Fitting"; }},
+		MAXIMA_IDENITIFICATION{ @Override
+		public String getName() { return "Maxima Identification"; }}, 
+		BENCHMARKING{ @Override
+		public String getName() { return "Benchmarking"; }};
 		//@formatter:on
 
 		@Override
@@ -86,12 +88,14 @@ public class FitParameters
 	 * 
 	 * @deprecated Filtering is no longer supported
 	 */
+	@Deprecated
 	public List<float[]> filter = null;
 	/**
 	 * The distance threshold to use when checking if fitted peaks match the desired results.
 	 * 
 	 * @deprecated Filtering is no longer supported
 	 */
+	@Deprecated
 	public float distanceThreshold = 1;
 	/**
 	 * The task to perform

@@ -38,7 +38,6 @@ import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.PoissonCalculator;
 
-
 /**
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
@@ -416,6 +415,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 *            Standard deviation of the set of m coefficients (output)
 	 * @return The fit status
 	 */
+	@Override
 	public FitStatus computeFit(double[] y, double[] yFit, final double[] a, final double[] aDev)
 	{
 		int n = y.length;
@@ -513,6 +513,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(gdsc.smlm.function.GradientFunction)
 	 */
+	@Override
 	public void setGradientFunction(GradientFunction f)
 	{
 		super.setGradientFunction(f);
@@ -649,6 +650,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * 
 	 * @see gdsc.smlm.fitting.WLSEFunctionSolver#getChiSquared()
 	 */
+	@Override
 	public double getChiSquared()
 	{
 		if (getType() == FunctionSolverType.WLSE)
@@ -662,6 +664,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
+	@Override
 	public double getLogLikelihood()
 	{
 		if (getType() == FunctionSolverType.MLE && lastY != null)
@@ -680,6 +683,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
+	@Override
 	public double getLogLikelihoodRatio()
 	{
 		if (getType() == FunctionSolverType.MLE)
@@ -693,6 +697,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
+	@Override
 	public double getQ()
 	{
 		if (getType() == FunctionSolverType.MLE)

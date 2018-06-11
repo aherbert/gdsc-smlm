@@ -73,7 +73,7 @@ public class InterpolatedPoissonFisherInformationTest
 
 		// Upper bound
 		check(f, fi, max, 1e-2);
-		
+
 		// Beyond upper bound
 		check(f, fi, max + 1, 1e-2);
 	}
@@ -120,10 +120,11 @@ public class InterpolatedPoissonFisherInformationTest
 
 		// Lower fixed I
 		InterpolatedPoissonFisherInformation fi = new InterpolatedPoissonFisherInformation(logU, alpha, true, f);
-		
+
 		final double I = f.getFisherInformation(FastMath.exp(min));
 		BasePoissonFisherInformation fixedI = new BasePoissonFisherInformation()
 		{
+			@Override
 			public double getFisherInformation(double t) throws IllegalArgumentException
 			{
 				return I;
@@ -146,10 +147,11 @@ public class InterpolatedPoissonFisherInformationTest
 
 		// Lower fixed alpha
 		fi = new InterpolatedPoissonFisherInformation(logU, alpha, false, f);
-		
-		final double A = alpha[0]; 
+
+		final double A = alpha[0];
 		BasePoissonFisherInformation fixedA = new BasePoissonFisherInformation()
 		{
+			@Override
 			public double getFisherInformation(double t) throws IllegalArgumentException
 			{
 				return t / A;

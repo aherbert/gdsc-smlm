@@ -26,1595 +26,1950 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused"})
-public final class TestProtos {
-  private TestProtos() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
-  }
-
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-    registerAllExtensions(
-        (com.google.protobuf.ExtensionRegistryLite) registry);
-  }
-  public interface Message1OrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Message1)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>int32 field1 = 1;</code>
-     */
-    int getField1();
-
-    /**
-     * <code>bool field2 = 2;</code>
-     */
-    boolean getField2();
-  }
-  /**
-   * Protobuf type {@code gdsc.smlm.data.config.Message1}
-   */
-  public  static final class Message1 extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Message1)
-      Message1OrBuilder {
-    // Use Message1.newBuilder() to construct.
-    private Message1(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Message1() {
-      field1_ = 0;
-      field2_ = false;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private Message1(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-
-              field1_ = input.readInt32();
-              break;
-            }
-            case 16: {
-
-              field2_ = input.readBool();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.TestProtos.Message1.class, gdsc.smlm.data.config.TestProtos.Message1.Builder.class);
-    }
-
-    public static final int FIELD1_FIELD_NUMBER = 1;
-    private int field1_;
-    /**
-     * <code>int32 field1 = 1;</code>
-     */
-    public int getField1() {
-      return field1_;
-    }
-
-    public static final int FIELD2_FIELD_NUMBER = 2;
-    private boolean field2_;
-    /**
-     * <code>bool field2 = 2;</code>
-     */
-    public boolean getField2() {
-      return field2_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (field1_ != 0) {
-        output.writeInt32(1, field1_);
-      }
-      if (field2_ != false) {
-        output.writeBool(2, field2_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (field1_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, field1_);
-      }
-      if (field2_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, field2_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message1)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TestProtos.Message1 other = (gdsc.smlm.data.config.TestProtos.Message1) obj;
-
-      boolean result = true;
-      result = result && (getField1()
-          == other.getField1());
-      result = result && (getField2()
-          == other.getField2());
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + FIELD1_FIELD_NUMBER;
-      hash = (53 * hash) + getField1();
-      hash = (37 * hash) + FIELD2_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getField2());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message1 prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code gdsc.smlm.data.config.Message1}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Message1)
-        gdsc.smlm.data.config.TestProtos.Message1OrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.TestProtos.Message1.class, gdsc.smlm.data.config.TestProtos.Message1.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.TestProtos.Message1.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        field1_ = 0;
-
-        field2_ = false;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.TestProtos.Message1.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message1 build() {
-        gdsc.smlm.data.config.TestProtos.Message1 result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message1 buildPartial() {
-        gdsc.smlm.data.config.TestProtos.Message1 result = new gdsc.smlm.data.config.TestProtos.Message1(this);
-        result.field1_ = field1_;
-        result.field2_ = field2_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TestProtos.Message1) {
-          return mergeFrom((gdsc.smlm.data.config.TestProtos.Message1)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message1 other) {
-        if (other == gdsc.smlm.data.config.TestProtos.Message1.getDefaultInstance()) return this;
-        if (other.getField1() != 0) {
-          setField1(other.getField1());
-        }
-        if (other.getField2() != false) {
-          setField2(other.getField2());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.TestProtos.Message1 parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.TestProtos.Message1) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private int field1_ ;
-      /**
-       * <code>int32 field1 = 1;</code>
-       */
-      public int getField1() {
-        return field1_;
-      }
-      /**
-       * <code>int32 field1 = 1;</code>
-       */
-      public Builder setField1(int value) {
-        
-        field1_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 field1 = 1;</code>
-       */
-      public Builder clearField1() {
-        
-        field1_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private boolean field2_ ;
-      /**
-       * <code>bool field2 = 2;</code>
-       */
-      public boolean getField2() {
-        return field2_;
-      }
-      /**
-       * <code>bool field2 = 2;</code>
-       */
-      public Builder setField2(boolean value) {
-        
-        field2_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>bool field2 = 2;</code>
-       */
-      public Builder clearField2() {
-        
-        field2_ = false;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Message1)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Message1)
-    private static final gdsc.smlm.data.config.TestProtos.Message1 DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.TestProtos.Message1();
-    }
-
-    public static gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Message1>
-        PARSER = new com.google.protobuf.AbstractParser<Message1>() {
-      public Message1 parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Message1(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Message1> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Message1> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface Message2OrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Message2)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>int32 entry1 = 1;</code>
-     */
-    int getEntry1();
-
-    /**
-     * <code>double entry2 = 2;</code>
-     */
-    double getEntry2();
-  }
-  /**
-   * Protobuf type {@code gdsc.smlm.data.config.Message2}
-   */
-  public  static final class Message2 extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Message2)
-      Message2OrBuilder {
-    // Use Message2.newBuilder() to construct.
-    private Message2(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Message2() {
-      entry1_ = 0;
-      entry2_ = 0D;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private Message2(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-
-              entry1_ = input.readInt32();
-              break;
-            }
-            case 17: {
-
-              entry2_ = input.readDouble();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.TestProtos.Message2.class, gdsc.smlm.data.config.TestProtos.Message2.Builder.class);
-    }
-
-    public static final int ENTRY1_FIELD_NUMBER = 1;
-    private int entry1_;
-    /**
-     * <code>int32 entry1 = 1;</code>
-     */
-    public int getEntry1() {
-      return entry1_;
-    }
-
-    public static final int ENTRY2_FIELD_NUMBER = 2;
-    private double entry2_;
-    /**
-     * <code>double entry2 = 2;</code>
-     */
-    public double getEntry2() {
-      return entry2_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (entry1_ != 0) {
-        output.writeInt32(1, entry1_);
-      }
-      if (entry2_ != 0D) {
-        output.writeDouble(2, entry2_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (entry1_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, entry1_);
-      }
-      if (entry2_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, entry2_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message2)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TestProtos.Message2 other = (gdsc.smlm.data.config.TestProtos.Message2) obj;
-
-      boolean result = true;
-      result = result && (getEntry1()
-          == other.getEntry1());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getEntry2())
-          == java.lang.Double.doubleToLongBits(
-              other.getEntry2()));
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ENTRY1_FIELD_NUMBER;
-      hash = (53 * hash) + getEntry1();
-      hash = (37 * hash) + ENTRY2_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getEntry2()));
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message2 prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code gdsc.smlm.data.config.Message2}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Message2)
-        gdsc.smlm.data.config.TestProtos.Message2OrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.TestProtos.Message2.class, gdsc.smlm.data.config.TestProtos.Message2.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.TestProtos.Message2.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        entry1_ = 0;
-
-        entry2_ = 0D;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.TestProtos.Message2.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message2 build() {
-        gdsc.smlm.data.config.TestProtos.Message2 result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message2 buildPartial() {
-        gdsc.smlm.data.config.TestProtos.Message2 result = new gdsc.smlm.data.config.TestProtos.Message2(this);
-        result.entry1_ = entry1_;
-        result.entry2_ = entry2_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TestProtos.Message2) {
-          return mergeFrom((gdsc.smlm.data.config.TestProtos.Message2)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message2 other) {
-        if (other == gdsc.smlm.data.config.TestProtos.Message2.getDefaultInstance()) return this;
-        if (other.getEntry1() != 0) {
-          setEntry1(other.getEntry1());
-        }
-        if (other.getEntry2() != 0D) {
-          setEntry2(other.getEntry2());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.TestProtos.Message2 parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.TestProtos.Message2) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private int entry1_ ;
-      /**
-       * <code>int32 entry1 = 1;</code>
-       */
-      public int getEntry1() {
-        return entry1_;
-      }
-      /**
-       * <code>int32 entry1 = 1;</code>
-       */
-      public Builder setEntry1(int value) {
-        
-        entry1_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 entry1 = 1;</code>
-       */
-      public Builder clearEntry1() {
-        
-        entry1_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private double entry2_ ;
-      /**
-       * <code>double entry2 = 2;</code>
-       */
-      public double getEntry2() {
-        return entry2_;
-      }
-      /**
-       * <code>double entry2 = 2;</code>
-       */
-      public Builder setEntry2(double value) {
-        
-        entry2_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double entry2 = 2;</code>
-       */
-      public Builder clearEntry2() {
-        
-        entry2_ = 0D;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Message2)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Message2)
-    private static final gdsc.smlm.data.config.TestProtos.Message2 DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.TestProtos.Message2();
-    }
-
-    public static gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Message2>
-        PARSER = new com.google.protobuf.AbstractParser<Message2>() {
-      public Message2 parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Message2(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Message2> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Message2> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface Message3OrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Message3)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>double field1 = 1;</code>
-     */
-    double getField1();
-
-    /**
-     * <code>int32 field2 = 2;</code>
-     */
-    int getField2();
-  }
-  /**
-   * Protobuf type {@code gdsc.smlm.data.config.Message3}
-   */
-  public  static final class Message3 extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Message3)
-      Message3OrBuilder {
-    // Use Message3.newBuilder() to construct.
-    private Message3(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Message3() {
-      field1_ = 0D;
-      field2_ = 0;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private Message3(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 9: {
-
-              field1_ = input.readDouble();
-              break;
-            }
-            case 16: {
-
-              field2_ = input.readInt32();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.TestProtos.Message3.class, gdsc.smlm.data.config.TestProtos.Message3.Builder.class);
-    }
-
-    public static final int FIELD1_FIELD_NUMBER = 1;
-    private double field1_;
-    /**
-     * <code>double field1 = 1;</code>
-     */
-    public double getField1() {
-      return field1_;
-    }
-
-    public static final int FIELD2_FIELD_NUMBER = 2;
-    private int field2_;
-    /**
-     * <code>int32 field2 = 2;</code>
-     */
-    public int getField2() {
-      return field2_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (field1_ != 0D) {
-        output.writeDouble(1, field1_);
-      }
-      if (field2_ != 0) {
-        output.writeInt32(2, field2_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (field1_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1, field1_);
-      }
-      if (field2_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, field2_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message3)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.TestProtos.Message3 other = (gdsc.smlm.data.config.TestProtos.Message3) obj;
-
-      boolean result = true;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getField1())
-          == java.lang.Double.doubleToLongBits(
-              other.getField1()));
-      result = result && (getField2()
-          == other.getField2());
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + FIELD1_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getField1()));
-      hash = (37 * hash) + FIELD2_FIELD_NUMBER;
-      hash = (53 * hash) + getField2();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message3 prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code gdsc.smlm.data.config.Message3}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Message3)
-        gdsc.smlm.data.config.TestProtos.Message3OrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.TestProtos.Message3.class, gdsc.smlm.data.config.TestProtos.Message3.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.TestProtos.Message3.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        field1_ = 0D;
-
-        field2_ = 0;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.TestProtos.Message3.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message3 build() {
-        gdsc.smlm.data.config.TestProtos.Message3 result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.TestProtos.Message3 buildPartial() {
-        gdsc.smlm.data.config.TestProtos.Message3 result = new gdsc.smlm.data.config.TestProtos.Message3(this);
-        result.field1_ = field1_;
-        result.field2_ = field2_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.TestProtos.Message3) {
-          return mergeFrom((gdsc.smlm.data.config.TestProtos.Message3)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message3 other) {
-        if (other == gdsc.smlm.data.config.TestProtos.Message3.getDefaultInstance()) return this;
-        if (other.getField1() != 0D) {
-          setField1(other.getField1());
-        }
-        if (other.getField2() != 0) {
-          setField2(other.getField2());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.TestProtos.Message3 parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.TestProtos.Message3) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private double field1_ ;
-      /**
-       * <code>double field1 = 1;</code>
-       */
-      public double getField1() {
-        return field1_;
-      }
-      /**
-       * <code>double field1 = 1;</code>
-       */
-      public Builder setField1(double value) {
-        
-        field1_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double field1 = 1;</code>
-       */
-      public Builder clearField1() {
-        
-        field1_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private int field2_ ;
-      /**
-       * <code>int32 field2 = 2;</code>
-       */
-      public int getField2() {
-        return field2_;
-      }
-      /**
-       * <code>int32 field2 = 2;</code>
-       */
-      public Builder setField2(int value) {
-        
-        field2_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 field2 = 2;</code>
-       */
-      public Builder clearField2() {
-        
-        field2_ = 0;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Message3)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Message3)
-    private static final gdsc.smlm.data.config.TestProtos.Message3 DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.TestProtos.Message3();
-    }
-
-    public static gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Message3>
-        PARSER = new com.google.protobuf.AbstractParser<Message3>() {
-      public Message3 parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Message3(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Message3> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Message3> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_Message1_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_Message2_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_Message3_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable;
-
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
-  }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
-  static {
-    java.lang.String[] descriptorData = {
-      "\n\ntest.proto\022\025gdsc.smlm.data.config\"*\n\010M" +
-      "essage1\022\016\n\006field1\030\001 \001(\005\022\016\n\006field2\030\002 \001(\010\"" +
-      "*\n\010Message2\022\016\n\006entry1\030\001 \001(\005\022\016\n\006entry2\030\002 " +
-      "\001(\001\"*\n\010Message3\022\016\n\006field1\030\001 \001(\001\022\016\n\006field" +
-      "2\030\002 \001(\005B\014B\nTestProtosb\006proto3"
-    };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
-    internal_static_gdsc_smlm_data_config_Message1_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_Message1_descriptor,
-        new java.lang.String[] { "Field1", "Field2", });
-    internal_static_gdsc_smlm_data_config_Message2_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_Message2_descriptor,
-        new java.lang.String[] { "Entry1", "Entry2", });
-    internal_static_gdsc_smlm_data_config_Message3_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_Message3_descriptor,
-        new java.lang.String[] { "Field1", "Field2", });
-  }
-
-  // @@protoc_insertion_point(outer_class_scope)
+@SuppressWarnings({ "unchecked", "unused" })
+public final class TestProtos
+{
+	private TestProtos()
+	{
+	}
+
+	public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry)
+	{
+	}
+
+	public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry)
+	{
+		registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
+	}
+
+	public interface Message1OrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Message1)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>int32 field1 = 1;</code>
+		 */
+		int getField1();
+
+		/**
+		 * <code>bool field2 = 2;</code>
+		 */
+		boolean getField2();
+	}
+
+	/**
+	 * Protobuf type {@code gdsc.smlm.data.config.Message1}
+	 */
+	public static final class Message1 extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Message1)
+			Message1OrBuilder
+	{
+		// Use Message1.newBuilder() to construct.
+		private Message1(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private Message1()
+		{
+			field1_ = 0;
+			field2_ = false;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private Message1(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 8:
+						{
+
+							field1_ = input.readInt32();
+							break;
+						}
+						case 16:
+						{
+
+							field2_ = input.readBool();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.TestProtos.Message1.class,
+							gdsc.smlm.data.config.TestProtos.Message1.Builder.class);
+		}
+
+		public static final int FIELD1_FIELD_NUMBER = 1;
+		private int field1_;
+
+		/**
+		 * <code>int32 field1 = 1;</code>
+		 */
+		@Override
+		public int getField1()
+		{
+			return field1_;
+		}
+
+		public static final int FIELD2_FIELD_NUMBER = 2;
+		private boolean field2_;
+
+		/**
+		 * <code>bool field2 = 2;</code>
+		 */
+		@Override
+		public boolean getField2()
+		{
+			return field2_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (field1_ != 0)
+			{
+				output.writeInt32(1, field1_);
+			}
+			if (field2_ != false)
+			{
+				output.writeBool(2, field2_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (field1_ != 0)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, field1_);
+			}
+			if (field2_ != false)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeBoolSize(2, field2_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message1))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.TestProtos.Message1 other = (gdsc.smlm.data.config.TestProtos.Message1) obj;
+
+			boolean result = true;
+			result = result && (getField1() == other.getField1());
+			result = result && (getField2() == other.getField2());
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + FIELD1_FIELD_NUMBER;
+			hash = (53 * hash) + getField1();
+			hash = (37 * hash) + FIELD2_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(getField2());
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message1 prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * Protobuf type {@code gdsc.smlm.data.config.Message1}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Message1)
+				gdsc.smlm.data.config.TestProtos.Message1OrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.TestProtos.Message1.class,
+								gdsc.smlm.data.config.TestProtos.Message1.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.TestProtos.Message1.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				field1_ = 0;
+
+				field2_ = false;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.TestProtos.Message1.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message1 build()
+			{
+				gdsc.smlm.data.config.TestProtos.Message1 result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message1 buildPartial()
+			{
+				gdsc.smlm.data.config.TestProtos.Message1 result = new gdsc.smlm.data.config.TestProtos.Message1(this);
+				result.field1_ = field1_;
+				result.field2_ = field2_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.TestProtos.Message1)
+				{
+					return mergeFrom((gdsc.smlm.data.config.TestProtos.Message1) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message1 other)
+			{
+				if (other == gdsc.smlm.data.config.TestProtos.Message1.getDefaultInstance())
+					return this;
+				if (other.getField1() != 0)
+				{
+					setField1(other.getField1());
+				}
+				if (other.getField2() != false)
+				{
+					setField2(other.getField2());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.TestProtos.Message1 parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.TestProtos.Message1) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private int field1_;
+
+			/**
+			 * <code>int32 field1 = 1;</code>
+			 */
+			@Override
+			public int getField1()
+			{
+				return field1_;
+			}
+
+			/**
+			 * <code>int32 field1 = 1;</code>
+			 */
+			public Builder setField1(int value)
+			{
+
+				field1_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>int32 field1 = 1;</code>
+			 */
+			public Builder clearField1()
+			{
+
+				field1_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private boolean field2_;
+
+			/**
+			 * <code>bool field2 = 2;</code>
+			 */
+			@Override
+			public boolean getField2()
+			{
+				return field2_;
+			}
+
+			/**
+			 * <code>bool field2 = 2;</code>
+			 */
+			public Builder setField2(boolean value)
+			{
+
+				field2_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>bool field2 = 2;</code>
+			 */
+			public Builder clearField2()
+			{
+
+				field2_ = false;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Message1)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Message1)
+		private static final gdsc.smlm.data.config.TestProtos.Message1 DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.TestProtos.Message1();
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<Message1> PARSER = new com.google.protobuf.AbstractParser<Message1>()
+		{
+			@Override
+			public Message1 parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new Message1(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<Message1> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<Message1> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface Message2OrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Message2)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>int32 entry1 = 1;</code>
+		 */
+		int getEntry1();
+
+		/**
+		 * <code>double entry2 = 2;</code>
+		 */
+		double getEntry2();
+	}
+
+	/**
+	 * Protobuf type {@code gdsc.smlm.data.config.Message2}
+	 */
+	public static final class Message2 extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Message2)
+			Message2OrBuilder
+	{
+		// Use Message2.newBuilder() to construct.
+		private Message2(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private Message2()
+		{
+			entry1_ = 0;
+			entry2_ = 0D;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private Message2(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 8:
+						{
+
+							entry1_ = input.readInt32();
+							break;
+						}
+						case 17:
+						{
+
+							entry2_ = input.readDouble();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.TestProtos.Message2.class,
+							gdsc.smlm.data.config.TestProtos.Message2.Builder.class);
+		}
+
+		public static final int ENTRY1_FIELD_NUMBER = 1;
+		private int entry1_;
+
+		/**
+		 * <code>int32 entry1 = 1;</code>
+		 */
+		@Override
+		public int getEntry1()
+		{
+			return entry1_;
+		}
+
+		public static final int ENTRY2_FIELD_NUMBER = 2;
+		private double entry2_;
+
+		/**
+		 * <code>double entry2 = 2;</code>
+		 */
+		@Override
+		public double getEntry2()
+		{
+			return entry2_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (entry1_ != 0)
+			{
+				output.writeInt32(1, entry1_);
+			}
+			if (entry2_ != 0D)
+			{
+				output.writeDouble(2, entry2_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (entry1_ != 0)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, entry1_);
+			}
+			if (entry2_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(2, entry2_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message2))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.TestProtos.Message2 other = (gdsc.smlm.data.config.TestProtos.Message2) obj;
+
+			boolean result = true;
+			result = result && (getEntry1() == other.getEntry1());
+			result = result && (java.lang.Double.doubleToLongBits(getEntry2()) == java.lang.Double
+					.doubleToLongBits(other.getEntry2()));
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + ENTRY1_FIELD_NUMBER;
+			hash = (53 * hash) + getEntry1();
+			hash = (37 * hash) + ENTRY2_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getEntry2()));
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message2 prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * Protobuf type {@code gdsc.smlm.data.config.Message2}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Message2)
+				gdsc.smlm.data.config.TestProtos.Message2OrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.TestProtos.Message2.class,
+								gdsc.smlm.data.config.TestProtos.Message2.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.TestProtos.Message2.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				entry1_ = 0;
+
+				entry2_ = 0D;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.TestProtos.Message2.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message2 build()
+			{
+				gdsc.smlm.data.config.TestProtos.Message2 result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message2 buildPartial()
+			{
+				gdsc.smlm.data.config.TestProtos.Message2 result = new gdsc.smlm.data.config.TestProtos.Message2(this);
+				result.entry1_ = entry1_;
+				result.entry2_ = entry2_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.TestProtos.Message2)
+				{
+					return mergeFrom((gdsc.smlm.data.config.TestProtos.Message2) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message2 other)
+			{
+				if (other == gdsc.smlm.data.config.TestProtos.Message2.getDefaultInstance())
+					return this;
+				if (other.getEntry1() != 0)
+				{
+					setEntry1(other.getEntry1());
+				}
+				if (other.getEntry2() != 0D)
+				{
+					setEntry2(other.getEntry2());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.TestProtos.Message2 parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.TestProtos.Message2) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private int entry1_;
+
+			/**
+			 * <code>int32 entry1 = 1;</code>
+			 */
+			@Override
+			public int getEntry1()
+			{
+				return entry1_;
+			}
+
+			/**
+			 * <code>int32 entry1 = 1;</code>
+			 */
+			public Builder setEntry1(int value)
+			{
+
+				entry1_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>int32 entry1 = 1;</code>
+			 */
+			public Builder clearEntry1()
+			{
+
+				entry1_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private double entry2_;
+
+			/**
+			 * <code>double entry2 = 2;</code>
+			 */
+			@Override
+			public double getEntry2()
+			{
+				return entry2_;
+			}
+
+			/**
+			 * <code>double entry2 = 2;</code>
+			 */
+			public Builder setEntry2(double value)
+			{
+
+				entry2_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>double entry2 = 2;</code>
+			 */
+			public Builder clearEntry2()
+			{
+
+				entry2_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Message2)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Message2)
+		private static final gdsc.smlm.data.config.TestProtos.Message2 DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.TestProtos.Message2();
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<Message2> PARSER = new com.google.protobuf.AbstractParser<Message2>()
+		{
+			@Override
+			public Message2 parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new Message2(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<Message2> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<Message2> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface Message3OrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Message3)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>double field1 = 1;</code>
+		 */
+		double getField1();
+
+		/**
+		 * <code>int32 field2 = 2;</code>
+		 */
+		int getField2();
+	}
+
+	/**
+	 * Protobuf type {@code gdsc.smlm.data.config.Message3}
+	 */
+	public static final class Message3 extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Message3)
+			Message3OrBuilder
+	{
+		// Use Message3.newBuilder() to construct.
+		private Message3(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private Message3()
+		{
+			field1_ = 0D;
+			field2_ = 0;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private Message3(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 9:
+						{
+
+							field1_ = input.readDouble();
+							break;
+						}
+						case 16:
+						{
+
+							field2_ = input.readInt32();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.TestProtos.Message3.class,
+							gdsc.smlm.data.config.TestProtos.Message3.Builder.class);
+		}
+
+		public static final int FIELD1_FIELD_NUMBER = 1;
+		private double field1_;
+
+		/**
+		 * <code>double field1 = 1;</code>
+		 */
+		@Override
+		public double getField1()
+		{
+			return field1_;
+		}
+
+		public static final int FIELD2_FIELD_NUMBER = 2;
+		private int field2_;
+
+		/**
+		 * <code>int32 field2 = 2;</code>
+		 */
+		@Override
+		public int getField2()
+		{
+			return field2_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (field1_ != 0D)
+			{
+				output.writeDouble(1, field1_);
+			}
+			if (field2_ != 0)
+			{
+				output.writeInt32(2, field2_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (field1_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1, field1_);
+			}
+			if (field2_ != 0)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, field2_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.TestProtos.Message3))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.TestProtos.Message3 other = (gdsc.smlm.data.config.TestProtos.Message3) obj;
+
+			boolean result = true;
+			result = result && (java.lang.Double.doubleToLongBits(getField1()) == java.lang.Double
+					.doubleToLongBits(other.getField1()));
+			result = result && (getField2() == other.getField2());
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + FIELD1_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getField1()));
+			hash = (37 * hash) + FIELD2_FIELD_NUMBER;
+			hash = (53 * hash) + getField2();
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message3 prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * Protobuf type {@code gdsc.smlm.data.config.Message3}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Message3)
+				gdsc.smlm.data.config.TestProtos.Message3OrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.TestProtos.Message3.class,
+								gdsc.smlm.data.config.TestProtos.Message3.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.TestProtos.Message3.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				field1_ = 0D;
+
+				field2_ = 0;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.TestProtos.Message3.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message3 build()
+			{
+				gdsc.smlm.data.config.TestProtos.Message3 result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.TestProtos.Message3 buildPartial()
+			{
+				gdsc.smlm.data.config.TestProtos.Message3 result = new gdsc.smlm.data.config.TestProtos.Message3(this);
+				result.field1_ = field1_;
+				result.field2_ = field2_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.TestProtos.Message3)
+				{
+					return mergeFrom((gdsc.smlm.data.config.TestProtos.Message3) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.TestProtos.Message3 other)
+			{
+				if (other == gdsc.smlm.data.config.TestProtos.Message3.getDefaultInstance())
+					return this;
+				if (other.getField1() != 0D)
+				{
+					setField1(other.getField1());
+				}
+				if (other.getField2() != 0)
+				{
+					setField2(other.getField2());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.TestProtos.Message3 parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.TestProtos.Message3) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private double field1_;
+
+			/**
+			 * <code>double field1 = 1;</code>
+			 */
+			@Override
+			public double getField1()
+			{
+				return field1_;
+			}
+
+			/**
+			 * <code>double field1 = 1;</code>
+			 */
+			public Builder setField1(double value)
+			{
+
+				field1_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>double field1 = 1;</code>
+			 */
+			public Builder clearField1()
+			{
+
+				field1_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private int field2_;
+
+			/**
+			 * <code>int32 field2 = 2;</code>
+			 */
+			@Override
+			public int getField2()
+			{
+				return field2_;
+			}
+
+			/**
+			 * <code>int32 field2 = 2;</code>
+			 */
+			public Builder setField2(int value)
+			{
+
+				field2_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>int32 field2 = 2;</code>
+			 */
+			public Builder clearField2()
+			{
+
+				field2_ = 0;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Message3)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Message3)
+		private static final gdsc.smlm.data.config.TestProtos.Message3 DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.TestProtos.Message3();
+		}
+
+		public static gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<Message3> PARSER = new com.google.protobuf.AbstractParser<Message3>()
+		{
+			@Override
+			public Message3 parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new Message3(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<Message3> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<Message3> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_Message1_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_Message2_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_Message3_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable;
+
+	public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor()
+	{
+		return descriptor;
+	}
+
+	private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+	static
+	{
+		java.lang.String[] descriptorData = { "\n\ntest.proto\022\025gdsc.smlm.data.config\"*\n\010M" +
+				"essage1\022\016\n\006field1\030\001 \001(\005\022\016\n\006field2\030\002 \001(\010\"" +
+				"*\n\010Message2\022\016\n\006entry1\030\001 \001(\005\022\016\n\006entry2\030\002 " +
+				"\001(\001\"*\n\010Message3\022\016\n\006field1\030\001 \001(\001\022\016\n\006field" +
+				"2\030\002 \001(\005B\014B\nTestProtosb\006proto3" };
+		com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner = new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner()
+		{
+			@Override
+			public com.google.protobuf.ExtensionRegistry assignDescriptors(
+					com.google.protobuf.Descriptors.FileDescriptor root)
+			{
+				descriptor = root;
+				return null;
+			}
+		};
+		com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(descriptorData,
+				new com.google.protobuf.Descriptors.FileDescriptor[] {}, assigner);
+		internal_static_gdsc_smlm_data_config_Message1_descriptor = getDescriptor().getMessageTypes().get(0);
+		internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_Message1_descriptor,
+				new java.lang.String[] { "Field1", "Field2", });
+		internal_static_gdsc_smlm_data_config_Message2_descriptor = getDescriptor().getMessageTypes().get(1);
+		internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_Message2_descriptor,
+				new java.lang.String[] { "Entry1", "Entry2", });
+		internal_static_gdsc_smlm_data_config_Message3_descriptor = getDescriptor().getMessageTypes().get(2);
+		internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_Message3_descriptor,
+				new java.lang.String[] { "Field1", "Field2", });
+	}
+
+	// @@protoc_insertion_point(outer_class_scope)
 }

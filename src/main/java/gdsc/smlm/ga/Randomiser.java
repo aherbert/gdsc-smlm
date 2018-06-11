@@ -25,7 +25,6 @@ package gdsc.smlm.ga;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 
-
 /**
  * Base class for data generation using randomness
  */

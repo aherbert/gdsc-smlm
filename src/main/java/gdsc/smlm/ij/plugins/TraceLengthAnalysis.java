@@ -41,7 +41,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.IdPeakResultComparator;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -91,6 +90,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -258,6 +258,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		dThreshold = gd.getNextNumber();
@@ -374,6 +375,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -407,6 +409,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 	private TIntArrayList lengthList = new TIntArrayList();
 	private TIntArrayList idList = new TIntArrayList();
 
+	@Override
 	public void execute(PeakResult peakResult)
 	{
 		int id = peakResult.getId();

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Contains common functionality for weighted filters.
  */
@@ -72,6 +71,7 @@ public abstract class BaseWeightedFilter extends BaseFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public BaseWeightedFilter clone()
 	{
 		return (BaseWeightedFilter) super.clone();

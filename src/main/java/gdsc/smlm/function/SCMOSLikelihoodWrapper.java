@@ -26,7 +26,6 @@ package gdsc.smlm.function;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a per-pixel Poisson distribution
  * with Gaussian noise (i.e. the noise from a sCMOS camera). This uses the MLE-sCMOS formula from Huang, et al
@@ -258,6 +257,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
 	 */
+	@Override
 	public double computeLikelihood()
 	{
 		// Compute the negative log-likelihood to be minimised:
@@ -365,6 +365,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[])
 	 */
+	@Override
 	public double computeLikelihood(double[] gradient)
 	{
 		// Compute the negative log-likelihood to be minimised
@@ -414,6 +415,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
 	 */
+	@Override
 	public double computeLikelihood(int i)
 	{
 		double u = f.eval(i);
@@ -435,6 +437,7 @@ public class SCMOSLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[], int)
 	 */
+	@Override
 	public double computeLikelihood(double[] gradient, int i)
 	{
 		for (int j = 0; j < nVariables; j++)

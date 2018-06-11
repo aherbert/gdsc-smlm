@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 
-
 /**
  * Wrap the NonLinearFunction to allow use with the Apache Commons Math library
  */
@@ -41,6 +40,7 @@ public class MultivariateMatrixFunctionWrapper extends NonLinearFunctionWrapper 
 	 * 
 	 * @see org.apache.commons.math3.analysis.MultivariateMatrixFunction#value(double[])
 	 */
+	@Override
 	public double[][] value(double[] point) throws IllegalArgumentException
 	{
 		return computeJacobian(point);

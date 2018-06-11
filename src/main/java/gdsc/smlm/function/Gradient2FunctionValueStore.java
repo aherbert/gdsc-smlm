@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wrap a function and store the only the values from the procedure.
  */
@@ -118,6 +117,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		f1.initialise(a);
@@ -128,6 +128,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		f1.initialise(a);
@@ -138,6 +139,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return f1.gradientIndices();
@@ -148,6 +150,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
+	@Override
 	public int getNumberOfGradients()
 	{
 		return f1.getNumberOfGradients();
@@ -158,6 +161,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#forEach(gdsc.smlm.function.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		i = 0;
@@ -171,6 +175,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		values[i++] = value;
@@ -182,6 +187,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
 	 */
+	@Override
 	public void initialise2(double[] a)
 	{
 		f2.initialise2(a);
@@ -192,6 +198,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		i = 0;
@@ -205,6 +212,7 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da, double[] d2y_da2)
 	{
 		values[i++] = value;

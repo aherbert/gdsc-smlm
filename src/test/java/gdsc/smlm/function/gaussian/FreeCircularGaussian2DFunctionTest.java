@@ -28,9 +28,10 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class FreeCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE; 
+		flags = GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE;
 		f1 = new FreeCircularGaussian2DFunction(1, maxx, maxy);
 		f2 = new FreeCircularGaussian2DFunction(2, maxx, maxy);
 	}

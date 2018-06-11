@@ -69,7 +69,8 @@ import org.apache.commons.math3.util.FastMath;
  * This class supports both the Fletcher-Reeves and the Polak-Ribière
  * update formulas for the conjugate search directions.
  * It also supports optional preconditioning. <br/>
- * The class is based on the org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer but
+ * The class is based on the
+ * org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer but
  * updated to support bounds checking on the current point within the optimisation space.
  */
 public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivariateOptimizer
@@ -299,7 +300,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 				try
 				{
 					uB = findUpperBound(lsf, 0, initialStep);
-					
+
 					// Use this method to do some more extensive searching with checking for invalid gradients
 					//uB = findUpperBoundWithCheck(lsf, 0, initialStep);
 
@@ -545,6 +546,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	public static class IdentityPreconditioner implements Preconditioner
 	{
 		/** {@inheritDoc} */
+		@Override
 		public double[] precondition(double[] variables, double[] r)
 		{
 			return r.clone();
@@ -605,6 +607,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 			final int n = p.length;
 			final UnivariateFunction f = new UnivariateFunction()
 			{
+				@Override
 				public double value(double alpha)
 				{
 					final double[] x = new double[n];
@@ -658,6 +661,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 		}
 
 		/** {@inheritDoc} */
+		@Override
 		public double value(double x)
 		{
 			// current point in the search direction

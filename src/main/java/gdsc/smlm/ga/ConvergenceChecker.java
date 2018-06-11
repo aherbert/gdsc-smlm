@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ga;
 
-
 /**
  * Defines convergence of a chromosome
  */

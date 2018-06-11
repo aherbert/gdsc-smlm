@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Contains a set of components of the multi filter.
  */
@@ -39,6 +38,7 @@ public class MultiFilterComponentSet3 extends MultiFilterComponentSet
 		this.component1 = components[1];
 		this.component2 = components[2];
 	}
+
 	@Override
 	public int getValidationFlags()
 	{

@@ -27,7 +27,6 @@ import java.awt.AWTEvent;
 import java.awt.Choice;
 import java.awt.Point;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -424,7 +423,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 					break;
 			}
 		}
-		
+
 		if (map.size() != settings.getDefaultTemplatesCount())
 		{
 			// This occurs if we cannot reload some of the templates. 
@@ -698,7 +697,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			if (file == null)
 				file = template.file;
 		}
-		
+
 		// Replace any existing template with a new one
 		template = new Template(settings, TemplateType.CUSTOM, file, null);
 
@@ -784,11 +783,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		{
 			this.name = name;
 		}
+		@Override
 		public String getName()
 		{
 			return name;
 		}
 
+		@Override
 		public String getShortName()
 		{
 			return name;
@@ -809,6 +810,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -864,11 +866,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems()
 		{
+			@Override
 			public int size()
 			{
 				return templates.length + inlineNames.length;
 			}
 
+			@Override
 			public String getFormattedName(int i)
 			{
 				if (i < inlineNames.length)
@@ -947,6 +951,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		// Search the configuration directory and add any custom templates that can be deserialised from XML files
 		File[] fileList = (new File(newDirectory)).listFiles(new FileFilter()
 		{
+			@Override
 			public boolean accept(File file)
 			{
 				// We can try and deserialise everything that is not a tif image
@@ -972,11 +977,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		// Select
 		MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems()
 		{
+			@Override
 			public int size()
 			{
 				return sortedList.length;
 			}
 
+			@Override
 			public String getFormattedName(int i)
 			{
 				String[] path = Utils.decodePath(sortedList[i]);
@@ -1028,11 +1035,13 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		final String[] names = getTemplateNames();
 		MultiDialog md = new MultiDialog("Select templates to remove", new MultiDialog.BaseItems()
 		{
+			@Override
 			public int size()
 			{
 				return names.length;
 			}
 
+			@Override
 			public String getFormattedName(int i)
 			{
 				return names[i];
@@ -1244,6 +1253,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		if (e != null && e.getSource() instanceof Choice)
@@ -1263,6 +1273,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * 
 	 * @see ij.ImageListener#imageOpened(ij.ImagePlus)
 	 */
+	@Override
 	public void imageOpened(ImagePlus imp)
 	{
 
@@ -1273,6 +1284,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * 
 	 * @see ij.ImageListener#imageClosed(ij.ImagePlus)
 	 */
+	@Override
 	public void imageClosed(ImagePlus imp)
 	{
 	}
@@ -1282,6 +1294,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 * 
 	 * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
 	 */
+	@Override
 	public void imageUpdated(ImagePlus imp)
 	{
 		if (imp != null && imp == this.imp)

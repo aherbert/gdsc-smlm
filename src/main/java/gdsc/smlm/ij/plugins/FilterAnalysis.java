@@ -41,7 +41,6 @@ import gdsc.core.ij.Utils;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.utils.UnicodeReader;
 
-
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -62,6 +61,7 @@ import gdsc.smlm.results.filter.XStreamWrapper;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import ij.IJ;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.io.OpenDialog;
@@ -137,10 +137,11 @@ public class FilterAnalysis implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (getInputDirectory() == null)
 			return;
 
@@ -299,6 +300,7 @@ public class FilterAnalysis implements PlugIn
 		List<MemoryPeakResults> resultsList = new LinkedList<MemoryPeakResults>();
 		File[] fileList = (new File(inputDirectory)).listFiles(new FilenameFilter()
 		{
+			@Override
 			public boolean accept(File dir, String name)
 			{
 				return (name.endsWith(".xls") || name.endsWith(".csv") || name.endsWith(".bin"));
@@ -341,6 +343,7 @@ public class FilterAnalysis implements PlugIn
 			total += r.size();
 			r.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult p)
 				{
 					if (p.getOrigValue() != 0)
@@ -632,7 +635,7 @@ public class FilterAnalysis implements PlugIn
 			plot.setColor(Color.RED);
 			plot.draw();
 			plot.setColor(Color.BLUE);
-			plot.addPoints(p.xValues, p.yValues, Plot2.CROSS);
+			plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
 			PlotWindow plotWindow = Utils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}
@@ -943,7 +946,7 @@ public class FilterAnalysis implements PlugIn
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append(filter.getName()).append('\t');
-			sb.append(s.getTP()+s.getFP()).append('\t');
+			sb.append(s.getTP() + s.getFP()).append('\t');
 			sb.append(s.getTP()).append('\t');
 			sb.append(s.getFP()).append('\t');
 			sb.append(s.getTN()).append('\t');
@@ -1001,6 +1004,7 @@ public class FilterAnalysis implements PlugIn
 			this.score = getMaximum(yValues);
 		}
 
+		@Override
 		public int compareTo(NamedPlot o)
 		{
 			if (score > o.score)

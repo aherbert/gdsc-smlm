@@ -54,7 +54,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 
-
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.filter.AndFilter;
@@ -85,6 +84,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -147,7 +147,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			throws TransformerFactoryConfigurationError, TransformerException
 	{
 		// Get entire element as a string
-		String xmlString = XmlUtils.getString(node, false);
+		String xmlString = gdsc.core.utils.XmlUtils.getString(node, false);
 
 		ArrayList<StringBuilder> out = new ArrayList<StringBuilder>();
 
@@ -261,7 +261,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 				FileOutputStream fos = new FileOutputStream(filterSettings.getFilterSetFilename());
 				out = new OutputStreamWriter(fos, "UTF-8");
-				out.write(XmlUtils.prettyPrintXml(sw.toString()));
+				out.write(gdsc.core.utils.XmlUtils.prettyPrintXml(sw.toString()));
 				SettingsManager.writeSettings(filterSettings.build());
 				IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());
 			}
@@ -324,6 +324,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		return SettingsManager.writeSettings(filterSettings.build());
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		// When the checkbox is clicked, output the list of available filters to the ImageJ log
@@ -385,7 +386,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			//IJ.log(sb.toString());
 			xml = sb.toString();
 		}
-		IJ.log(XmlUtils.prettyPrintXml(xml));
+		IJ.log(gdsc.core.utils.XmlUtils.prettyPrintXml(xml));
 	}
 
 	/*

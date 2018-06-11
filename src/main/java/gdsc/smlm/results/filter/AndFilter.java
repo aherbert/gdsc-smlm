@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 import gdsc.smlm.results.PeakResult;
 
 /**
@@ -48,6 +47,7 @@ public class AndFilter extends CombinedFilter
 		return accept1(peak) && accept2(peak);
 	}
 
+	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (accept1(peak) && accept2(peak))

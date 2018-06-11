@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using z-depth
  */
@@ -42,6 +41,7 @@ public class MultiFilterZComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		final float z = peak.getZ();
@@ -53,6 +53,7 @@ public class MultiFilterZComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return IDirectFilter.V_Z;

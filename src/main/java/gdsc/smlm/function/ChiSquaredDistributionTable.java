@@ -28,7 +28,6 @@ import java.util.Arrays;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.special.Gamma;
 
-
 /**
  * Computes probability values from the Chi-squared distribution
  * <p>

@@ -41,7 +41,6 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
-
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.utils.Pair;
@@ -56,26 +55,45 @@ public class Shape3DHelper
 	//@formatter:off
 	public enum Rendering implements NamedObject
 	{
-		POINT { public String getName() { return "Point"; } 
+		POINT { @Override
+		public String getName() { return "Point"; } 
+				@Override
 				public boolean is2D() { return true; }},
-		SQUARE { public String getName() { return "Square"; }
+		SQUARE { @Override
+		public String getName() { return "Square"; }
+				@Override
 				public boolean is2D() { return true; }},
-		HEXAGON{ public String getName() { return "Hexagon"; }
+		HEXAGON{ @Override
+		public String getName() { return "Hexagon"; }
+			@Override
 			public boolean is2D() { return true; }},
-		LOW_RES_CIRCLE { public String getName() { return "Low resolution circle"; }
+		LOW_RES_CIRCLE { @Override
+		public String getName() { return "Low resolution circle"; }
+			@Override
 			public boolean is2D() { return true; }},
-		HIGH_RES_CIRCLE { public String getName() { return "High resolution circle"; }
+		HIGH_RES_CIRCLE { @Override
+		public String getName() { return "High resolution circle"; }
+			@Override
 			public boolean is2D() { return true; }},
-        CUBE { public String getName() { return "Cube"; }},
-        ICOSAHEDRON	{ public String getName() { return "Icosahedron"; }},
-        LOW_RES_SPHERE { public String getName() { return "Low Resolution Sphere"; }
-        		public boolean isHighResolution() { return true; }},
-        HIGH_RES_SPHERE	{ public String getName() { return "High Resolution Sphere"; }
-        		public boolean isHighResolution() { return true; }},
-        SUPER_HIGH_RES_SPHERE	{ public String getName() { return "Super-High Resolution Sphere"; }
+        CUBE { @Override
+		public String getName() { return "Cube"; }},
+        ICOSAHEDRON	{ @Override
+		public String getName() { return "Icosahedron"; }},
+        LOW_RES_SPHERE { @Override
+		public String getName() { return "Low Resolution Sphere"; }
+        		@Override
+				public boolean isHighResolution() { return true; }},
+        HIGH_RES_SPHERE	{ @Override
+		public String getName() { return "High Resolution Sphere"; }
+        		@Override
+				public boolean isHighResolution() { return true; }},
+        SUPER_HIGH_RES_SPHERE	{ @Override
+		public String getName() { return "Super-High Resolution Sphere"; }
+		@Override
 		public boolean isHighResolution() { return true; }},
         ;
 
+		@Override
 		public String getShortName()
 		{
 			return getName();

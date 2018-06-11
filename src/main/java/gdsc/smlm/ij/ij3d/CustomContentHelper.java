@@ -28,7 +28,6 @@ import java.util.List;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 
-
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.utils.Pair;
 import gnu.trove.list.array.TIntArrayList;
@@ -48,12 +47,12 @@ public class CustomContentHelper
 	 * Define the largest array size for Java 3D.
 	 * If an ArrayGeometry is larger than this then there will be exceptions
 	 * within the Java 3D code. The code writes the float array of a GeometryArray
-	 * into a ByteBuffer. If the current ByteBuffer is too small then it is doubled 
-	 * in size. This sets a limit on the array size of a ByteBuffer as the maximum 
-	 * length of an array in java divided by 4 (4 bytes to a float) divided by 2 (to 
+	 * into a ByteBuffer. If the current ByteBuffer is too small then it is doubled
+	 * in size. This sets a limit on the array size of a ByteBuffer as the maximum
+	 * length of an array in java divided by 4 (4 bytes to a float) divided by 2 (to
 	 * allow buffer doubling).
-	 * If the max array size is 2^30, rather than Integer.MAX_VALUE, to give header 
-	 * space then the recommended max size for a single strip of a GeometryArray is 
+	 * If the max array size is 2^30, rather than Integer.MAX_VALUE, to give header
+	 * space then the recommended max size for a single strip of a GeometryArray is
 	 * 2^30 / 2^2 / 2 = 2^27.
 	 */
 	public static final int MAX_ARRAY_SIZE = 1 << 27;
@@ -165,7 +164,7 @@ public class CustomContentHelper
 			center.set(points[0]);
 			return;
 		}
-		
+
 		// Weighted centre of mass
 		double sumx = min.x;
 		double sumy = min.y;

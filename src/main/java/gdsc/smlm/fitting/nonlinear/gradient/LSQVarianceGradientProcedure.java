@@ -29,7 +29,6 @@ import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
 
-
 /**
  * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
  * <p>
@@ -120,7 +119,7 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 		initialise();
 		if (a != null)
 			func.initialise1(a);
-		func.forEach((Gradient1Procedure) this);
+		func.forEach(this);
 		if (finish())
 			return STATUS_BAD_GRADIENTS;
 		if (!solver.invert(I, n))
@@ -134,6 +133,7 @@ public class LSQVarianceGradientProcedure implements Gradient1Procedure
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(final double Ei, double[] Eix)
 	{
 		for (int a = 0; a < n; a++)

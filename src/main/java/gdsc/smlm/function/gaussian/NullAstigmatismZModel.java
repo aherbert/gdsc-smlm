@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Implements a no astigmatism model of a 2D Gaussian function. The width is constant.
  */
@@ -52,17 +51,20 @@ public class NullAstigmatismZModel implements AstigmatismZModel
 		this.sy = sy;
 	}
 
+	@Override
 	public double getSx(double z)
 	{
 		return sx;
 	}
 
+	@Override
 	public double getSx(double z, double[] ds_dz)
 	{
 		ds_dz[0] = 0;
 		return sx;
 	}
 
+	@Override
 	public double getSx2(double z, double[] ds_dz)
 	{
 		ds_dz[0] = 0;
@@ -70,17 +72,20 @@ public class NullAstigmatismZModel implements AstigmatismZModel
 		return sx;
 	}
 
+	@Override
 	public double getSy(double z)
 	{
 		return sy;
 	}
 
+	@Override
 	public double getSy(double z, double[] ds_dz)
 	{
 		ds_dz[0] = 0;
 		return sy;
 	}
 
+	@Override
 	public double getSy2(double z, double[] ds_dz)
 	{
 		ds_dz[0] = 0;

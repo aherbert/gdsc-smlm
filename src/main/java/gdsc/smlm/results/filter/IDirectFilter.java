@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Support direct filtering of PreprocessedPeakResult objects.
  * <p>
@@ -141,7 +140,7 @@ public interface IDirectFilter
 	 * Enable filtering both X and Y widths
 	 */
 	final static int XY_WIDTH = 0x000000004;
-	
+
 	/**
 	 * Disable Z filtering (use when not fitting in 3D)
 	 */

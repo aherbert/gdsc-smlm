@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -56,6 +55,7 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 		return peak.getSNR() >= this.snr;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_SNR;
@@ -165,56 +165,67 @@ public class SNRFilter extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return snr;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return 0;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.NONE;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return 0;

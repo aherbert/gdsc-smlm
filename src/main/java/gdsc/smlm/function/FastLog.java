@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Base class for an algorithm computing a fast approximation to the log function
  */

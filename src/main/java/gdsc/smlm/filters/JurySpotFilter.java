@@ -26,7 +26,6 @@ package gdsc.smlm.filters;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with a collection of filters and
  * the combined height used to identify candidates.
@@ -63,6 +62,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
 	 */
+	@Override
 	public boolean isAbsoluteIntensity()
 	{
 		return true;
@@ -184,6 +184,7 @@ public final class JurySpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public JurySpotFilter clone()
 	{
 		JurySpotFilter f = (JurySpotFilter) super.clone();

@@ -48,6 +48,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -222,10 +223,11 @@ public class MeanVarianceTest implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (Utils.isExtraOptions())
 		{
 			ImagePlus imp = WindowManager.getCurrentImage();
@@ -272,10 +274,8 @@ public class MeanVarianceTest implements PlugIn
 				IJ.error(TITLE, "Not enough images in the selected directory");
 				return;
 			}
-			if (!IJ.showMessageWithCancel(
-					TITLE,
-					String.format("Analyse %d images, first image:\n%s", series.getNumberOfImages(),
-							series.getImageList()[0])))
+			if (!IJ.showMessageWithCancel(TITLE, String.format("Analyse %d images, first image:\n%s",
+					series.getNumberOfImages(), series.getImageList()[0])))
 			{
 				return;
 			}
@@ -361,11 +361,11 @@ public class MeanVarianceTest implements PlugIn
 		int total = 0;
 		for (int i = start; i < images.size(); i++)
 			total += images.get(i).samples.size();
-		
+
 		if (showTable && total > 2000)
 		{
 			gd = new GenericDialog(TITLE);
-			gd.addMessage("Table output requires "+total+" entries.\n \nYou may want to disable the table.");
+			gd.addMessage("Table output requires " + total + " entries.\n \nYou may want to disable the table.");
 			gd.addCheckbox("Show_table", showTable);
 			gd.showDialog();
 			if (gd.wasCanceled())
@@ -374,7 +374,7 @@ public class MeanVarianceTest implements PlugIn
 		}
 
 		TextWindow results = (showTable) ? createResultsWindow() : null;
-		
+
 		double[] mean = new double[total];
 		double[] variance = new double[mean.length];
 		Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
@@ -387,7 +387,7 @@ public class MeanVarianceTest implements PlugIn
 			{
 				if (j % 16 == 0)
 					IJ.showProgress(j, total);
-					
+
 				mean[j] = pair.getMean();
 				variance[j] = pair.variance;
 				// Gain is in Count / e
@@ -500,10 +500,10 @@ public class MeanVarianceTest implements PlugIn
 					yrange = 0.05;
 				plot.setLimits(xlimits[0] - xrange, xlimits[1] + xrange, ylimits[0] - yrange, ylimits[1] + yrange);
 				plot.setColor(Color.blue);
-				plot.addPoints(mean, variance, Plot2.CROSS);
+				plot.addPoints(mean, variance, Plot.CROSS);
 				plot.setColor(Color.red);
-				plot.addPoints(new double[] { mean[0], mean[mean.length - 1] }, new double[] { fitted.value(mean[0]),
-						fitted.value(mean[mean.length - 1]) }, Plot2.LINE);
+				plot.addPoints(new double[] { mean[0], mean[mean.length - 1] },
+						new double[] { fitted.value(mean[0]), fitted.value(mean[mean.length - 1]) }, Plot.LINE);
 				Utils.display(title, plot);
 			}
 
@@ -519,13 +519,13 @@ public class MeanVarianceTest implements PlugIn
 				// In an EM-CCD there is a noise factor of 2.
 				// Q. Is this true for a correct noise factor calibration:
 				//double noiseFactor = (Read Noise EM-CCD) / (Read Noise CCD)
-				
+
 				// Em-gain is the observed gain divided by the noise factor multiplied by camera gain
 				final double emGain = best[1] / (2 * cameraGain);
 
 				// Compute total gain
 				final double totalGain = emGain * cameraGain;
-				
+
 				double readNoise = avBiasNoise / cameraGain;
 				// Effective noise is standard deviation of the bias image divided by the total gain (in Count/e-)
 				double readNoiseE = avBiasNoise / totalGain;
@@ -587,6 +587,7 @@ public class MeanVarianceTest implements PlugIn
 		// Sort to ensure all 0 exposure images are first, the remaining order is arbitrary
 		Collections.sort(images, new Comparator<ImageSample>()
 		{
+			@Override
 			public int compare(ImageSample o1, ImageSample o2)
 			{
 				if (o1.exposure < o2.exposure)
@@ -635,6 +636,7 @@ public class MeanVarianceTest implements PlugIn
 		}
 		Arrays.sort(indexes, new Comparator<Integer>()
 		{
+			@Override
 			public int compare(final Integer o1, final Integer o2)
 			{
 				return data[o1].compareTo(data[o2]);

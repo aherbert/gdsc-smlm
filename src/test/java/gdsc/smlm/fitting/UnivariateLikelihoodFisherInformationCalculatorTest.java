@@ -133,7 +133,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			// Assumes half the poisson fisher information 
 			SimpleArrayUtils.multiply(e, 0.5);
 		}
-		
+
 		Assert.assertArrayEquals(e, o, 1e-6);
 
 		if (model == Model.POISSON || model == Model.HALF_POISSON)

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins.pcpalm;
 
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -100,6 +99,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
@@ -188,6 +188,7 @@ public class PCPALMMolecules implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -461,9 +462,9 @@ public class PCPALMMolecules implements PlugIn
 		roiBounds.y /= yscale;
 		roiBounds.height /= yscale;
 
-		final float minX = (int) (roiBounds.x);
+		final float minX = (roiBounds.x);
 		final float maxX = (int) Math.ceil(roiBounds.x + roiBounds.width);
-		final float minY = (int) (roiBounds.y);
+		final float minY = (roiBounds.y);
 		final float maxY = (int) Math.ceil(roiBounds.y + roiBounds.height);
 
 		// Update the area with the cropped region
@@ -475,6 +476,7 @@ public class PCPALMMolecules implements PlugIn
 		newResults.begin();
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float x, float y, PeakResult result)
 			{
 				if (x >= minX && x <= maxX && y >= minY && y <= maxY)
@@ -767,7 +769,7 @@ public class PCPALMMolecules implements PlugIn
 			for (int i = 0; i < y.length; i++)
 				x[i] += dx;
 			plot.setColor(Color.red);
-			addToPlot(plot, x, skewParameters, Plot2.LINE);
+			addToPlot(plot, x, skewParameters, Plot.LINE);
 
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
@@ -834,6 +836,7 @@ public class PCPALMMolecules implements PlugIn
 				.target(function.calculateTarget())
 				.weight(new DiagonalMatrix(function.calculateWeights()))
 				.model(function, new MultivariateMatrixFunction() {
+					@Override
 					public double[][] value(double[] point) throws IllegalArgumentException
 					{
 						return function.jacobian(point);
@@ -1579,7 +1582,7 @@ public class PCPALMMolecules implements PlugIn
 				max = FastMath.max(max, interIdHist[1][interIdHist[1].length - 1]);
 			plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
 			plot.setColor(Color.blue);
-			plot.addPoints(interIdHist[0], interIdHist[1], Plot2.LINE);
+			plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
 		}
@@ -1759,6 +1762,7 @@ public class PCPALMMolecules implements PlugIn
 			this.end = end;
 		}
 
+		@Override
 		public void execute(PeakResult r)
 		{
 			if (start > r.getFrame())
@@ -2059,8 +2063,8 @@ public class PCPALMMolecules implements PlugIn
 			this.y = new TDoubleArrayList();
 			for (int i = 0; i < x.length; i++)
 			{
-				this.x.add((double) x[i]);
-				this.y.add((double) y[i]);
+				this.x.add(x[i]);
+				this.y.add(y[i]);
 			}
 		}
 
@@ -2122,6 +2126,7 @@ public class PCPALMMolecules implements PlugIn
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			double[] values = new double[x.size()];
@@ -2146,6 +2151,7 @@ public class PCPALMMolecules implements PlugIn
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] point)
 		{
 			// Objective function is to minimise sum-of-squares

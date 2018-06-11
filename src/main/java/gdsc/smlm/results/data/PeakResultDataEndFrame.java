@@ -25,7 +25,6 @@ package gdsc.smlm.results.data;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Gets the end frame from a result.
  */
@@ -36,6 +35,7 @@ public class PeakResultDataEndFrame extends PeakResultDataInteger
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValue(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public Integer getValue(PeakResult result)
 	{
 		return result.getEndFrame();
@@ -46,6 +46,7 @@ public class PeakResultDataEndFrame extends PeakResultDataInteger
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
+	@Override
 	public String getValueName()
 	{
 		return "End Frame";

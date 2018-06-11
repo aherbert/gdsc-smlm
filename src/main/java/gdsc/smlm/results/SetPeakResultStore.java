@@ -30,7 +30,6 @@ import java.util.HashSet;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
-
 /**
  * Stores peak results using a set. This is similar to an HashSet but does not have concurrency checking.
  */
@@ -66,6 +65,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#size()
 	 */
+	@Override
 	public int size()
 	{
 		return results.size();
@@ -76,6 +76,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean add(PeakResult result)
 	{
 		return results.add(result);
@@ -86,6 +87,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addCollection(java.util.Collection)
 	 */
+	@Override
 	public boolean addCollection(Collection<PeakResult> results)
 	{
 		return this.results.addAll(results);
@@ -96,6 +98,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addArray(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public boolean addArray(PeakResult[] results)
 	{
 		return this.results.addAll(Arrays.asList(results));
@@ -106,6 +109,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addStore(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public boolean addStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
@@ -123,6 +127,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean remove(PeakResult result)
 	{
 		return results.remove(result);
@@ -133,6 +138,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeCollection(java.util.Collection)
 	 */
+	@Override
 	public boolean removeCollection(Collection<PeakResult> results)
 	{
 		return this.results.removeAll(results);
@@ -143,6 +149,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeArray(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public boolean removeArray(PeakResult[] results)
 	{
 		return this.results.removeAll(Arrays.asList(results));
@@ -153,6 +160,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeStore(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public boolean removeStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
@@ -170,6 +178,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#retainCollection(java.util.Collection)
 	 */
+	@Override
 	public boolean retainCollection(Collection<PeakResult> results)
 	{
 		return this.results.retainAll(results);
@@ -180,6 +189,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#retainArray(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public boolean retainArray(PeakResult[] results)
 	{
 		return this.results.retainAll(Arrays.asList(results));
@@ -190,6 +200,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#retainStore(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public boolean retainStore(PeakResultStore results)
 	{
 		if (results instanceof PeakResultStoreCollection)
@@ -207,6 +218,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#clear()
 	 */
+	@Override
 	public void clear()
 	{
 		results.clear();
@@ -217,6 +229,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#trimToSize()
 	 */
+	@Override
 	public void trimToSize()
 	{
 		//results.trimToSize();
@@ -227,6 +240,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#toArray()
 	 */
+	@Override
 	public PeakResult[] toArray()
 	{
 		return results.toArray(new PeakResult[size()]);
@@ -237,6 +251,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#copy()
 	 */
+	@Override
 	public PeakResultStore copy()
 	{
 		return new SetPeakResultStore(this);
@@ -247,6 +262,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#copy(boolean)
 	 */
+	@Override
 	public PeakResultStore copy(boolean deepCopy)
 	{
 		if (deepCopy)
@@ -264,6 +280,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.PeakResultPredicate)
 	 */
+	@Override
 	public boolean removeIf(final PeakResultPredicate filter)
 	{
 		// Delegate to the list implementation
@@ -279,6 +296,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#forEach(gdsc.smlm.results.procedures.PeakResultProcedure)
 	 */
+	@Override
 	public void forEach(PeakResultProcedure procedure)
 	{
 		for (PeakResult r : results)
@@ -290,6 +308,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#subset(gdsc.smlm.results.procedures.PeakResultPredicate)
 	 */
+	@Override
 	public PeakResult[] subset(PeakResultPredicate filter)
 	{
 		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
@@ -304,6 +323,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#contains(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean contains(PeakResult result)
 	{
 		return results.contains(result);
@@ -314,6 +334,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreCollection#getCollection()
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<PeakResult> getCollection()
 	{
@@ -325,6 +346,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreCollection#getCollectionReference()
 	 */
+	@Override
 	public Collection<PeakResult> getCollectionReference()
 	{
 		return results;

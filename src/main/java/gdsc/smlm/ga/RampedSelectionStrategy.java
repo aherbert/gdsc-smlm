@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 
-
 /**
  * Selects the individuals using a linear ramp from the highest rank to the lowest to set the probability of selection.
  * Selection of breeding couples is uniform from the top n (n is incremented from 1 each selection) crossed with a
@@ -101,7 +100,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 		subset.add(sorted.get(0));
 
 		// Get the cumulative total of the rank: total = n(n+1)/2
-		long cumulative = ((long) n * (n + 1l)) / 2l;
+		long cumulative = (n * (n + 1l)) / 2l;
 
 		// Build an array of rank weighting. The highest ranked starts at n.
 		// The first index is ignored since this has been included already.

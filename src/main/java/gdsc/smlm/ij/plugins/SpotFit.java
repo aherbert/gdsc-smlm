@@ -28,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.SimpleArrayUtils;
@@ -539,6 +538,7 @@ public class SpotFit implements PlugIn
 		IJ.showStatus("Added " + TITLE + " Tool");
 	}
 
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);

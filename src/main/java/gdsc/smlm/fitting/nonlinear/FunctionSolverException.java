@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear;
 
 import gdsc.smlm.fitting.FitStatus;
 
-
 /**
  * Exception to throw if a function solver failed.
  */
@@ -40,7 +39,8 @@ public class FunctionSolverException extends RuntimeException
 	/**
 	 * Instantiates a new function solver exception.
 	 *
-	 * @param fitStatus the fit status
+	 * @param fitStatus
+	 *            the fit status
 	 */
 	public FunctionSolverException(FitStatus fitStatus)
 	{
@@ -51,8 +51,10 @@ public class FunctionSolverException extends RuntimeException
 	/**
 	 * Instantiates a new function solver exception.
 	 *
-	 * @param fitStatus the fit status
-	 * @param message the message
+	 * @param fitStatus
+	 *            the fit status
+	 * @param message
+	 *            the message
 	 */
 	public FunctionSolverException(FitStatus fitStatus, String message)
 	{
@@ -63,9 +65,12 @@ public class FunctionSolverException extends RuntimeException
 	/**
 	 * Instantiates a new function solver exception.
 	 *
-	 * @param fitStatus the fit status
-	 * @param message the message
-	 * @param cause the cause
+	 * @param fitStatus
+	 *            the fit status
+	 * @param message
+	 *            the message
+	 * @param cause
+	 *            the cause
 	 */
 	public FunctionSolverException(FitStatus fitStatus, String message, Throwable cause)
 	{
@@ -76,8 +81,10 @@ public class FunctionSolverException extends RuntimeException
 	/**
 	 * Instantiates a new function solver exception.
 	 *
-	 * @param fitStatus the fit status
-	 * @param cause the cause
+	 * @param fitStatus
+	 *            the fit status
+	 * @param cause
+	 *            the cause
 	 */
 	public FunctionSolverException(FitStatus fitStatus, Throwable cause)
 	{

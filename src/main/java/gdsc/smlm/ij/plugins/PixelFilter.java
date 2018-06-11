@@ -38,7 +38,6 @@ import java.awt.Label;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Filters pixels using the surrounding region.
  */
@@ -61,10 +60,11 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -73,6 +73,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 		return FLAGS;
 	}
 
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		// Compute rolling sums
@@ -263,6 +264,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		this.pfr = pfr;
@@ -298,6 +300,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		label.setText("");
@@ -313,6 +316,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Ignore		

@@ -50,7 +50,6 @@ import ij.io.FileInfo;
 import ij.io.OpenDialog;
 import ij3d.Content;
 
-
 import ij3d.ContentInstant;
 import ij3d.ContentNode;
 import ij3d.UniverseSettings;
@@ -145,6 +144,7 @@ public class CustomContentInstant extends ContentInstant
 		plPanel = new PointListPanel(name, points);
 	}
 
+	@Override
 	public void displayAs(final int type)
 	{
 		if (image == null)
@@ -213,6 +213,7 @@ public class CustomContentInstant extends ContentInstant
 		return 1;
 	}
 
+	@Override
 	public void display(final ContentNode node)
 	{
 		// remove everything if possible
@@ -337,6 +338,7 @@ public class CustomContentInstant extends ContentInstant
 	 * swapping
 	 *
 	 ***********************************************************/
+	@Override
 	public void swapDisplayedData()
 	{
 		if (!available)
@@ -345,6 +347,7 @@ public class CustomContentInstant extends ContentInstant
 		available = false;
 	}
 
+	@Override
 	public void restoreDisplayedData()
 	{
 		System.out.println("restoreDisplayedData " + getName());
@@ -357,6 +360,7 @@ public class CustomContentInstant extends ContentInstant
 		available = true;
 	}
 
+	@Override
 	public void clearDisplayedData()
 	{
 		if (!available)
@@ -365,6 +369,7 @@ public class CustomContentInstant extends ContentInstant
 		available = false;
 	}
 
+	@Override
 	public boolean isAvailable()
 	{
 		return available;
@@ -392,6 +397,7 @@ public class CustomContentInstant extends ContentInstant
 	 *
 	 ***********************************************************/
 
+	@Override
 	public void setVisible(final boolean b)
 	{
 		visible = b;
@@ -405,18 +411,21 @@ public class CustomContentInstant extends ContentInstant
 		}
 	}
 
+	@Override
 	public void showBoundingBox(final boolean b)
 	{
 		bbVisible = b;
 		setSwitch(BB, b);
 	}
 
+	@Override
 	public void showCoordinateSystem(final boolean b)
 	{
 		coordVisible = b;
 		setSwitch(CS, b);
 	}
 
+	@Override
 	public void setSelected(final boolean selected)
 	{
 		this.selected = selected;
@@ -430,11 +439,13 @@ public class CustomContentInstant extends ContentInstant
 	 *
 	 ***********************************************************/
 
+	@Override
 	public void setPointListDialog(final PointListDialog p)
 	{
 		this.plDialog = p;
 	}
 
+	@Override
 	public void showPointList(final boolean b)
 	{
 		if (plShape == null)
@@ -448,6 +459,7 @@ public class CustomContentInstant extends ContentInstant
 			plDialog.removePointList(plPanel);
 	}
 
+	@Override
 	public void loadPointList()
 	{
 		final PointList points = PointList.load(image);
@@ -455,6 +467,7 @@ public class CustomContentInstant extends ContentInstant
 			setPointList(points);
 	}
 
+	@Override
 	public void setPointList(final PointList points)
 	{
 		this.points = points;
@@ -462,6 +475,7 @@ public class CustomContentInstant extends ContentInstant
 		plShape.setPointList(points);
 	}
 
+	@Override
 	public void savePointList()
 	{
 		String dir = OpenDialog.getDefaultDirectory();
@@ -475,6 +489,7 @@ public class CustomContentInstant extends ContentInstant
 		points.save(dir, n);
 	}
 
+	@Override
 	public void savePointList(final PrintStream out) throws IOException
 	{
 		points.save(out, false);
@@ -484,6 +499,7 @@ public class CustomContentInstant extends ContentInstant
 	 * @deprecated
 	 * @param p
 	 */
+	@Override
 	@Deprecated
 	public void addPointListPoint(final Point3d p)
 	{
@@ -497,32 +513,38 @@ public class CustomContentInstant extends ContentInstant
 	 * @param i
 	 * @param pos
 	 */
+	@Override
 	@Deprecated
 	public void setListPointPos(final int i, final Point3d pos)
 	{
 		points.placePoint(points.get(i), pos.x, pos.y, pos.z);
 	}
 
+	@Override
 	public float getLandmarkPointSize()
 	{
 		return plShape.getRadius();
 	}
 
+	@Override
 	public void setLandmarkPointSize(final float r)
 	{
 		plShape.setRadius(r);
 	}
 
+	@Override
 	public Color3f getLandmarkColor()
 	{
 		return plShape.getColor();
 	}
 
+	@Override
 	public void setLandmarkColor(final Color3f color)
 	{
 		plShape.setColor(color);
 	}
 
+	@Override
 	public PointList getPointList()
 	{
 		return points;
@@ -532,6 +554,7 @@ public class CustomContentInstant extends ContentInstant
 	 * @deprecated
 	 * @param i
 	 */
+	@Override
 	@Deprecated
 	public void deletePointListPoint(final int i)
 	{
@@ -545,21 +568,25 @@ public class CustomContentInstant extends ContentInstant
 	 * setters - transform
 	 *
 	 **************************************************************/
+	@Override
 	public void toggleLock()
 	{
 		locked = !locked;
 	}
 
+	@Override
 	public void setLocked(final boolean b)
 	{
 		locked = b;
 	}
 
+	@Override
 	public void applyTransform(final double[] matrix)
 	{
 		applyTransform(new Transform3D(matrix));
 	}
 
+	@Override
 	public void applyTransform(final Transform3D transform)
 	{
 		final Transform3D t1 = new Transform3D();
@@ -572,6 +599,7 @@ public class CustomContentInstant extends ContentInstant
 		setTransform(t1);
 	}
 
+	@Override
 	public void setTransform(final double[] matrix)
 	{
 		if (contentNode == null)
@@ -579,6 +607,7 @@ public class CustomContentInstant extends ContentInstant
 		setTransform(new Transform3D(matrix));
 	}
 
+	@Override
 	public void setTransform(final Transform3D transform)
 	{
 		if (contentNode == null)
@@ -613,6 +642,7 @@ public class CustomContentInstant extends ContentInstant
 	 *
 	 ***********************************************************/
 
+	@Override
 	public void setLUT(final int[] rLUT, final int[] gLUT, final int[] bLUT, final int[] aLUT)
 	{
 		this.rLUT = rLUT;
@@ -623,6 +653,7 @@ public class CustomContentInstant extends ContentInstant
 			contentNode.lutUpdated(rLUT, gLUT, bLUT, aLUT);
 	}
 
+	@Override
 	public void setChannels(final boolean[] channels)
 	{
 		final boolean channelsChanged = channels[0] != this.channels[0] || channels[1] != this.channels[1] ||
@@ -634,6 +665,7 @@ public class CustomContentInstant extends ContentInstant
 			contentNode.channelsUpdated(channels);
 	}
 
+	@Override
 	public void setThreshold(final int th)
 	{
 		if (th != threshold)
@@ -644,6 +676,7 @@ public class CustomContentInstant extends ContentInstant
 		}
 	}
 
+	@Override
 	public void setShaded(final boolean b)
 	{
 		if (b != shaded)
@@ -654,11 +687,13 @@ public class CustomContentInstant extends ContentInstant
 		}
 	}
 
+	@Override
 	public boolean isShaded()
 	{
 		return shaded;
 	}
 
+	@Override
 	public void setSaturatedVolumeRendering(final boolean b)
 	{
 		if (contentNode != null && type == VOLUME)
@@ -667,12 +702,14 @@ public class CustomContentInstant extends ContentInstant
 		}
 	}
 
+	@Override
 	public boolean isSaturatedVolumeRendering()
 	{
 		return contentNode != null && type == VOLUME &&
 				((VoltexGroup) contentNode).getRenderer().getVolume().isSaturatedVolumeRendering();
 	}
 
+	@Override
 	public void applySurfaceColors(final ImagePlus imp)
 	{
 		if (contentNode == null)
@@ -692,6 +729,7 @@ public class CustomContentInstant extends ContentInstant
 		mesh.loadSurfaceColorsFromImage(imp);
 	}
 
+	@Override
 	public void setColor(final Color3f color)
 	{
 		if ((this.color == null && color == null) || (this.color != null && color != null && this.color.equals(color)))
@@ -702,6 +740,7 @@ public class CustomContentInstant extends ContentInstant
 			contentNode.colorUpdated(this.color);
 	}
 
+	@Override
 	public synchronized void setTransparency(float transparency)
 	{
 		transparency = transparency < 0 ? 0 : transparency;
@@ -769,6 +808,7 @@ public class CustomContentInstant extends ContentInstant
 		eyePtChanged(view);
 	}
 
+	@Override
 	public void eyePtChanged(final View view)
 	{
 		if (contentNode != null)
@@ -780,106 +820,127 @@ public class CustomContentInstant extends ContentInstant
 	 * getters
 	 *
 	 **************************************************************/
+	@Override
 	public int getType()
 	{
 		return type;
 	}
 
+	@Override
 	public ContentNode getContent()
 	{
 		return contentNode;
 	}
 
+	@Override
 	public ImagePlus getImage()
 	{
 		return image;
 	}
 
+	@Override
 	public boolean[] getChannels()
 	{
 		return channels;
 	}
 
+	@Override
 	public void getRedLUT(final int[] l)
 	{
 		System.arraycopy(rLUT, 0, l, 0, rLUT.length);
 	}
 
+	@Override
 	public void getGreenLUT(final int[] l)
 	{
 		System.arraycopy(gLUT, 0, l, 0, gLUT.length);
 	}
 
+	@Override
 	public void getBlueLUT(final int[] l)
 	{
 		System.arraycopy(bLUT, 0, l, 0, bLUT.length);
 	}
 
+	@Override
 	public void getAlphaLUT(final int[] l)
 	{
 		System.arraycopy(aLUT, 0, l, 0, aLUT.length);
 	}
 
+	@Override
 	public Color3f getColor()
 	{
 		return color;
 	}
 
+	@Override
 	public int getThreshold()
 	{
 		return threshold;
 	}
 
+	@Override
 	public float getTransparency()
 	{
 		return transparency;
 	}
 
+	@Override
 	public int getResamplingFactor()
 	{
 		return resamplingF;
 	}
 
+	@Override
 	public TransformGroup getLocalRotate()
 	{
 		return localRotate;
 	}
 
+	@Override
 	public TransformGroup getLocalTranslate()
 	{
 		return localTranslate;
 	}
 
+	@Override
 	public void getLocalRotate(final Transform3D t)
 	{
 		localRotate.getTransform(t);
 	}
 
+	@Override
 	public void getLocalTranslate(final Transform3D t)
 	{
 		localTranslate.getTransform(t);
 	}
 
+	@Override
 	public boolean isLocked()
 	{
 		return locked;
 	}
 
+	@Override
 	public boolean isVisible()
 	{
 		return visible;
 	}
 
+	@Override
 	public boolean hasCoord()
 	{
 		return coordVisible;
 	}
 
+	@Override
 	public boolean hasBoundingBox()
 	{
 		return bbVisible;
 	}
 
+	@Override
 	public boolean isPLVisible()
 	{
 		return showPL;

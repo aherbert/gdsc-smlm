@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -73,6 +72,7 @@ public class ZCoordinateFilter extends DirectFilter
 		return peak.getZPosition() >= minZ && peak.getZPosition() <= maxZ;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_Z;
@@ -230,6 +230,7 @@ public class ZCoordinateFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
+	@Override
 	public int length()
 	{
 		return 2;
@@ -240,6 +241,7 @@ public class ZCoordinateFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
+	@Override
 	public double[] sequence()
 	{
 		// Ignore the mode parameters
@@ -251,6 +253,7 @@ public class ZCoordinateFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE, DEFAULT_RANGE };

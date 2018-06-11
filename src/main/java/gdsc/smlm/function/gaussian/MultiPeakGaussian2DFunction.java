@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Abstract base class for an N-dimensional Gaussian function for a configured number of peaks.
  * <p>
@@ -71,6 +70,7 @@ public abstract class MultiPeakGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;

@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 
-
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
@@ -237,6 +236,7 @@ public class BenchmarkFit implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -568,6 +568,7 @@ public class BenchmarkFit implements PlugIn
 		stats[ADJUSTED_Y_SD].add(result[Gaussian2DFunction.Y_SD] - sa);
 	}
 
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -633,7 +634,7 @@ public class BenchmarkFit implements PlugIn
 			// for a Gaussian over the pixel. Using the ERF function computes the actual 
 			// integral over the pixel.
 			//fitConfig.setInitialPeakStdDev(sa);
-			
+
 			// Set the PSF. This requires the CreateData plugin to store the most appropriate
 			// PSF used for the simulation.
 			fitConfig.setPSF(benchmarkParameters.psf);
@@ -644,12 +645,14 @@ public class BenchmarkFit implements PlugIn
 		gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(), fitConfig.getFitSolver().ordinal());
 		gd.addChoice("Origin_XY", ORIGIN_XY, originXY, new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				originXY = value;
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -673,12 +676,14 @@ public class BenchmarkFit implements PlugIn
 		});
 		gd.addChoice("Origin_Z", ORIGIN_Z, originZ, new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				originZ = value;
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -702,12 +707,14 @@ public class BenchmarkFit implements PlugIn
 		gd.addCheckbox("Zero_offset", zeroOffset);
 		gd.addNumericField("Offset_points", offsetPoints, 0, new OptionListener<Double>()
 		{
+			@Override
 			public boolean collectOptions(Double value)
 			{
 				offsetPoints = Math.max(0, value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -733,12 +740,14 @@ public class BenchmarkFit implements PlugIn
 		});
 		gd.addCheckbox("Background_fitting", backgroundFitting, new OptionListener<Boolean>()
 		{
+			@Override
 			public boolean collectOptions(Boolean value)
 			{
 				backgroundFitting = value;
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -762,12 +771,14 @@ public class BenchmarkFit implements PlugIn
 				" function");
 		gd.addCheckbox("Signal_fitting", signalFitting, new OptionListener<Boolean>()
 		{
+			@Override
 			public boolean collectOptions(Boolean value)
 			{
 				signalFitting = value;
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -812,7 +823,7 @@ public class BenchmarkFit implements PlugIn
 		// Do this before the call to is3D()
 		if (!PeakFit.configurePSFModel(config))
 			return false;
-		
+
 		getStartPoints(fitConfig.is3D());
 
 		if (startPoints.length == 0)
@@ -1446,7 +1457,7 @@ public class BenchmarkFit implements PlugIn
 
 		// Get the number of start points valid for all the results 
 		final int totalFrames = benchmarkParameters.frames;
-		final double numberOfStartPoints = (double) (length / totalFrames);
+		final double numberOfStartPoints = length / totalFrames;
 
 		createAnalysisTable();
 

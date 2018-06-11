@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using a single component of the multi filter.
  */

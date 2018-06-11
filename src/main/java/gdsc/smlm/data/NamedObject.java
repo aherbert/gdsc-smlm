@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.data;
 
-
 /**
  * Interface for any object that has a name
  */

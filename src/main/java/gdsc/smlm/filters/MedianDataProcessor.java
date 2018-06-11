@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an median box filter.
  */
@@ -116,7 +115,7 @@ public class MedianDataProcessor extends DataProcessor
 			smoothData = Arrays.copyOf(data, width * height);
 
 			// Check upper limits are safe
-			final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
+			final int tmpSmooth = FastMath.min(smooth, FastMath.min(width, height) / 2);
 
 			// JUnit speed tests show that the rolling median is faster on windows of n<=3
 			if (tmpSmooth <= 3)
@@ -158,6 +157,7 @@ public class MedianDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public MedianDataProcessor clone()
 	{
 		MedianDataProcessor f = (MedianDataProcessor) super.clone();

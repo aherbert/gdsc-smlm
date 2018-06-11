@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 /**
  * Wraps an image source and allows data to be interlaced within regular blocks.
  */

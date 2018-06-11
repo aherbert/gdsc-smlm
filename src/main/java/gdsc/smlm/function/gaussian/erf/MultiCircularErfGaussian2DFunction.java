@@ -28,7 +28,6 @@ import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
@@ -61,6 +60,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 		return new MultiCircularErfGaussian2DFunction(nPeaks, maxx, maxy);
 	}
 
+	@Override
 	public void initialise0(double[] a)
 	{
 		tB = a[Gaussian2DFunction.BACKGROUND];
@@ -77,7 +77,6 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			createDeltaETable(n, maxy, one_sSqrt2, deltaEy, ty);
 		}
 	}
-	
 
 	@Override
 	public double integral(double[] a)
@@ -91,12 +90,12 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double s = abs(a[i + Gaussian2DFunction.X_SD]);
 			final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
-			sum += tI * compute1DIntegral(one_sSqrt2, maxx, tx) *
-					compute1DIntegral(one_sSqrt2, maxy, ty);
+			sum += tI * compute1DIntegral(one_sSqrt2, maxx, tx) * compute1DIntegral(one_sSqrt2, maxy, ty);
 		}
 		return sum;
-	}	
+	}
 
+	@Override
 	public void initialise1(double[] a)
 	{
 		create1Arrays();
@@ -123,6 +122,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 		}
 	}
 
+	@Override
 	public void initialise2(double[] a)
 	{
 		create2Arrays();
@@ -156,6 +156,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 		}
 	}
 
+	@Override
 	public void initialiseExtended2(double[] a)
 	{
 		createEx2Arrays();
@@ -196,6 +197,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda)
 	{
 		// Unpack the predictor into the dimensions
@@ -222,6 +224,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
 		// Unpack the predictor into the dimensions
@@ -299,6 +302,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -327,6 +331,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -365,6 +370,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
 	 * 
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
+	@Override
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		final int ng = getNumberOfGradients();

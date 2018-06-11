@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Calculate the Fisher information for a Poisson-Gaussian distribution using an approximation of the Poisson (mean=t)
  * as a Gaussian (u=t, var=t).
@@ -59,13 +58,14 @@ public class PoissonGaussianApproximationFisherInformation extends BasePoissonFi
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
+	@Override
 	public double getFisherInformation(double t) throws IllegalArgumentException
 	{
 		if (t <= 0)
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		return 1.0 / (t + variance);
 	}
-	
+
 	@Override
 	public double getAlpha(double t)
 	{
@@ -73,7 +73,7 @@ public class PoissonGaussianApproximationFisherInformation extends BasePoissonFi
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		return t / (t + variance);
 	}
-	
+
 	@Override
 	protected void postClone()
 	{

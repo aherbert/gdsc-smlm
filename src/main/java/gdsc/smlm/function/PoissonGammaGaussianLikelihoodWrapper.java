@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson-Gamma-Gaussian
  * distribution.
@@ -83,6 +82,7 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
 	 */
+	@Override
 	public double computeLikelihood()
 	{
 		// Compute the negative log-likelihood
@@ -99,6 +99,7 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
 	 */
+	@Override
 	public double computeLikelihood(int i)
 	{
 		return -p.logLikelihood(data[i], f.eval(i));

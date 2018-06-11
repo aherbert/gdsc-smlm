@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
@@ -134,6 +133,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
+	@Override
 	public double likelihood(double o, double e)
 	{
 		// convert to photons
@@ -192,6 +192,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
 	 * 
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
+	@Override
 	public double logLikelihood(double o, double e)
 	{
 		// convert to photons

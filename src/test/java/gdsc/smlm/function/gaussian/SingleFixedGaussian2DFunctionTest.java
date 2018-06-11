@@ -28,9 +28,10 @@ import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 
 public class SingleFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_SIMPLE_FIXED; 
+		flags = GaussianFunctionFactory.FIT_SIMPLE_FIXED;
 		f1 = new SingleFixedGaussian2DFunction(maxx, maxx);
 	}
 }

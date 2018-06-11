@@ -100,6 +100,7 @@ public abstract class CoordinateChecker implements OptimizationData, Convergence
 	 * 
 	 * @see org.apache.commons.math3.optim.ConvergenceChecker#converged(int, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public boolean converged(int iteration, PointValuePair previous, PointValuePair current)
 	{
 		return converged(previous.getPointRef(), current.getPointRef());

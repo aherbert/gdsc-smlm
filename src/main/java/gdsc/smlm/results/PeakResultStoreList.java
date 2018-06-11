@@ -27,7 +27,6 @@ import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-
 /**
  * Stores peak results with list access.
  */

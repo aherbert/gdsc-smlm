@@ -103,7 +103,6 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 
-
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
@@ -184,11 +183,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	//@formatter:off
 	private enum SizeMode implements NamedObject
 	{
-		FIXED_SIZE { public String getName() { return "Fixed"; }},
-		XY_PRECISION { public String getName() { return "XY Precision"; }},
-		XYZ_DEVIATIONS { public String getName() { return "XYZ Deviations"; }},
+		FIXED_SIZE { @Override
+		public String getName() { return "Fixed"; }},
+		XY_PRECISION { @Override
+		public String getName() { return "XY Precision"; }},
+		XYZ_DEVIATIONS { @Override
+		public String getName() { return "XYZ Deviations"; }},
         ;
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -209,11 +212,15 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private enum DepthMode implements NamedObject
 	{
-		NONE { public String getName() { return "None"; }},
-		INTENSITY { public String getName() { return "Intensity"; }},
-		DITHER { public String getName() { return "Dither"; }},
+		NONE { @Override
+		public String getName() { return "None"; }},
+		INTENSITY { @Override
+		public String getName() { return "Intensity"; }},
+		DITHER { @Override
+		public String getName() { return "Dither"; }},
         ;
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -232,13 +239,19 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	
 	private enum TransparencyMode implements NamedObject
 	{
-		NONE { public String getName() { return "None"; }},
-		SIZE { public String getName() { return "Size"; }},
-		INTENSITY { public String getName() { return "Intensity"; }},
-		XY_PRECISION { public String getName() { return "XY Precision"; }},
-		XYZ_DEVIATIONS { public String getName() { return "XYZ Deviations"; }},
+		NONE { @Override
+		public String getName() { return "None"; }},
+		SIZE { @Override
+		public String getName() { return "Size"; }},
+		INTENSITY { @Override
+		public String getName() { return "Intensity"; }},
+		XY_PRECISION { @Override
+		public String getName() { return "XY Precision"; }},
+		XYZ_DEVIATIONS { @Override
+		public String getName() { return "XYZ Deviations"; }},
         ;
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -257,16 +270,25 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private enum SortMode implements NamedObject
 	{
-		NONE { public String getName() { return "None"; }
+		NONE { @Override
+		public String getName() { return "None"; }
+		@Override
 		public String getDescription() { return ""; }},
-		XYZ { public String getName() { return "XYZ"; }
+		XYZ { @Override
+		public String getName() { return "XYZ"; }
+		@Override
 		public String getDescription() { return "Sort using XYZ. The order is defined by the direction with the major component used first, e.g. 1,2,3 for zyx ascending, -3,-2,-1 for xyz descending."; }},
-		OTHOGRAPHIC { public String getName() { return "Othographic"; }
+		OTHOGRAPHIC { @Override
+		public String getName() { return "Othographic"; }
+		@Override
 		public String getDescription() { return "Project all points to the plane defined by the direction. Rank by distance to the plane."; }},
-		PERSPECTIVE { public String getName() { return "Perspective"; }
+		PERSPECTIVE { @Override
+		public String getName() { return "Perspective"; }
+		@Override
 		public String getDescription() { return "Rank by distance to the eye position for true depth perspective rendering."; }},
         ;
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -302,6 +324,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		// has not been created.
 		java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>()
 		{
+			@Override
 			public String run()
 			{
 				return System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true));
@@ -563,6 +586,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			updateSelection();
 		}
 
+		@Override
 		public void valueChanged(ListSelectionEvent e)
 		{
 			if (e.getValueIsAdjusting())
@@ -627,6 +651,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			// Remove the old selection no longer required
 			oldSelection.forEachEntry(new TObjectIntProcedure<PeakResult>()
 			{
+				@Override
 				public boolean execute(PeakResult r, int i)
 				{
 					contentInstance.setCustomSwitch(i, false);
@@ -736,6 +761,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		// For testing
@@ -761,7 +787,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 		final ImageJ3DResultsViewerSettings.Builder settings = SettingsManager.readImageJ3DResultsViewerSettings(0)
 				.toBuilder();
-		
+
 		addToSelection = settings.getAddToSelection();
 
 		// Get a list of the window titles available. Allow the user to select 
@@ -784,11 +810,13 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addChoice("Window", titles, window);
 		gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency(), new OptionListener<Double>()
 		{
+			@Override
 			public boolean collectOptions(Double value)
 			{
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -811,12 +839,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addChoice("Colour", LUTHelper.luts, settings.getLut());
 		gd.addChoice("Rendering", RENDERING, settings.getRendering(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setRendering(value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -840,12 +870,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addCheckbox("Shaded", settings.getShaded());
 		gd.addChoice("Size_mode", SIZE_MODE, settings.getSizeMode(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setSizeMode(value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -874,12 +906,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		});
 		gd.addChoice("Sort_mode", SORT_MODE, settings.getSortMode(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setSortMode(value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -926,12 +960,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addChoice("Transparency_mode", TRANSPARENCY_MODE, settings.getTransparencyMode(),
 				new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer value)
 					{
 						settings.setTransparencyMode(value);
 						return collectOptions(false);
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -957,12 +993,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		gd.addMessage("2D options");
 		gd.addChoice("Depth_mode", DEPTH_MODE, settings.getDepthMode(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setDepthMode(value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -1259,6 +1297,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			int i = 0;
 
+			@Override
 			public boolean execute(PeakResult peakResult)
 			{
 				float x = peakResult.getParameterDeviation(PeakResult.X);
@@ -1453,6 +1492,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		{
 			results.forEach(DistanceUnit.NM, new XYZResultProcedure()
 			{
+				@Override
 				public void executeXYZ(float x, float y, float z)
 				{
 					points.addf(new Point3f(x, y, z));
@@ -1464,6 +1504,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			results.forEach(DistanceUnit.NM, new XYResultProcedure()
 			{
 
+				@Override
 				public void executeXY(float x, float y)
 				{
 					points.addf(new Point3f(x, y, 0));
@@ -1662,6 +1703,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.index = i;
 		}
 
+		@Override
 		public int compareTo(CustomSortObject o)
 		{
 			if (f1 < o.f1)
@@ -2109,6 +2151,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		WindowManager.addWindow(w);
 		w.addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowClosed(WindowEvent e)
 			{
 				WindowManager.removeWindow(w);
@@ -2162,6 +2205,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		final PeakResultTableModelFrame finalTable = table;
 		table.addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowClosed(WindowEvent e)
 			{
 				// We must unmap the selection since we use the selection model
@@ -2201,30 +2245,35 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return (flags & flag) != 0 && !e.isConsumed();
 		}
 
+		@Override
 		public void mouseClicked(MouseEvent e)
 		{
 			if (run(e, MOUSE_CLICKED))
 				l.mouseClicked(e);
 		}
 
+		@Override
 		public void mousePressed(MouseEvent e)
 		{
 			if (run(e, MOUSE_PRESSED))
 				l.mousePressed(e);
 		}
 
+		@Override
 		public void mouseReleased(MouseEvent e)
 		{
 			if (run(e, MOUSE_RELEASED))
 				l.mouseReleased(e);
 		}
 
+		@Override
 		public void mouseEntered(MouseEvent e)
 		{
 			if (run(e, MOUSE_ENTERED))
 				l.mouseEntered(e);
 		}
 
+		@Override
 		public void mouseExited(MouseEvent e)
 		{
 			if (run(e, MOUSE_EXITED))
@@ -2252,12 +2301,14 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			return (flags & flag) != 0 && !e.isConsumed();
 		}
 
+		@Override
 		public void mouseDragged(MouseEvent e)
 		{
 			if (run(e, MOUSE_DRAGGED))
 				l.mouseDragged(e);
 		}
 
+		@Override
 		public void mouseMoved(MouseEvent e)
 		{
 			if (run(e, MOUSE_MOVED))
@@ -2496,6 +2547,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static abstract class BaseContentAction implements ContentAction
 	{
+		@Override
 		public void finish()
 		{
 		}
@@ -2505,6 +2557,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		ImageJ3DResultsViewerSettings.Builder settings = null;
 
+		@Override
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
@@ -2555,6 +2608,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	{
 		float pointSize = -1;
 
+		@Override
 		public int run(Content c)
 		{
 			final ContentInstant content = c.getCurrent();
@@ -2628,6 +2682,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.error = error;
 		}
 
+		@Override
 		public int run(Content c)
 		{
 			if (c.isLocked())
@@ -2745,6 +2800,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			}
 		}
 
+		@Override
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
@@ -2849,6 +2905,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class ToggleShadedAction extends BaseContentAction
 	{
+		@Override
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
@@ -2902,6 +2959,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			cameraToVWorld.transform(dir1InVWorld);
 		}
 
+		@Override
 		public int run(Content c)
 		{
 			final Transform3D vWorldToLocal = getVworldToLocal(c.getCurrent());
@@ -2964,6 +3022,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			this.reverse = reverse;
 		}
 
+		@Override
 		public int run(Content c)
 		{
 			int result = super.run(c);
@@ -3025,6 +3084,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		static boolean resetTransparency = true;
 		ImagePlus imp = null;
 
+		@Override
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
@@ -3066,7 +3126,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				ItemGroup g = node.getItemGroup();
 				if (resetTransparency)
 					g.setTransparency(0);
-				itemShape = (ItemShape) g;
+				itemShape = g;
 			}
 			CustomContentHelper.loadSurfaceColorsFromImage2D(itemShape, imp);
 			return 0;
@@ -3079,6 +3139,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		private final Point2d p2d = new Point2d();
 		ImageJ3DResultsViewerSettings.Builder settings = null;
 
+		@Override
 		public int run(Content c)
 		{
 			if (!(c.getUserData() instanceof ResultsMetaData))
@@ -3202,6 +3263,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 
 	private static class UpdateHighlightColourAction extends BaseContentAction
 	{
+		@Override
 		public int run(Content c)
 		{
 			if (c.getUserData() instanceof ResultsMetaData)
@@ -3229,6 +3291,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	 * 
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void actionPerformed(ActionEvent e)
 	{
@@ -3289,6 +3352,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			final TextField[] tf = new TextField[1];
 			gd.addStringField("Highlight_colour", settings.getHighlightColour(), new OptionListener<String>()
 			{
+				@Override
 				public boolean collectOptions(String value)
 				{
 					createHighlightColour(value);
@@ -3322,6 +3386,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 					return true;
 				}
 
+				@Override
 				public boolean collectOptions()
 				{
 					return false;
@@ -3336,6 +3401,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 			gd.addChoice("Crop_name_option", CropResults.NAME_OPTIONS, settings.getNameOption(),
 					new OptionListener<Integer>()
 					{
+						@Override
 						public boolean collectOptions(Integer value)
 						{
 							settings.setNameOption(value);
@@ -3379,6 +3445,7 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 							return true;
 						}
 
+						@Override
 						public boolean collectOptions()
 						{
 							return false;
@@ -3793,10 +3860,12 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle, progress);
 	}
 
+	@Override
 	public void transformationStarted(View view)
 	{
 	}
 
+	@Override
 	public void transformationUpdated(View view)
 	{
 		// This is called when the zoom is adjusted. We can update clipping
@@ -3804,14 +3873,17 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		//System.out.println(univ.getViewer().getView().getFrontClipDistance());
 	}
 
+	@Override
 	public void transformationFinished(View view)
 	{
 	}
 
+	@Override
 	public void contentAdded(Content c)
 	{
 	}
 
+	@Override
 	public void contentRemoved(Content c)
 	{
 		// Unregister from the selection model
@@ -3822,18 +3894,22 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		}
 	}
 
+	@Override
 	public void contentChanged(Content c)
 	{
 	}
 
+	@Override
 	public void contentSelected(Content c)
 	{
 	}
 
+	@Override
 	public void canvasResized()
 	{
 	}
 
+	@Override
 	public void universeClosed()
 	{
 

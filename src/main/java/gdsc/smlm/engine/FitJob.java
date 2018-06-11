@@ -30,7 +30,6 @@ import gdsc.smlm.results.filter.MultiPathFitResult;
 import java.awt.Rectangle;
 import java.util.List;
 
-
 /**
  * Specifies a job for peak fitting.
  */
@@ -39,9 +38,12 @@ public class FitJob
 	public enum Status
 	{
 		//@formatter:off
-		PENDING{ public String getName() { return "Pending"; }}, 
-		IN_PROGRESS{ public String getName() { return "In-progress"; }}, 
-		FINISHED{ public String getName() { return "Finished"; }};
+		PENDING{ @Override
+		public String getName() { return "Pending"; }}, 
+		IN_PROGRESS{ @Override
+		public String getName() { return "In-progress"; }}, 
+		FINISHED{ @Override
+		public String getName() { return "Finished"; }};
 		//@formatter:on
 
 		@Override

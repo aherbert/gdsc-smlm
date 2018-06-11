@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import gdsc.smlm.function.GradientFunction;
 
-
 /**
  * Allow restricting parameter steps.
  * <p>

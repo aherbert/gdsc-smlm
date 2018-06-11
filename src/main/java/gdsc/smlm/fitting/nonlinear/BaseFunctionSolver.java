@@ -32,7 +32,6 @@ import gdsc.smlm.fitting.FunctionSolverType;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.NamedFunction;
 
-
 /**
  * Abstract class with utility methods for the FunctionSolver interface.
  */
@@ -87,6 +86,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getType()
 	 */
+	@Override
 	public FunctionSolverType getType()
 	{
 		return type;
@@ -97,6 +97,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(double[], double[], double[], double[])
 	 */
+	@Override
 	public FitStatus fit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		// Reset the results
@@ -140,6 +141,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[])
 	 */
+	@Override
 	public boolean evaluate(double[] y, double[] yFit, double[] a)
 	{
 		// Reset the results
@@ -167,6 +169,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#computeDeviations(double[], double[], double[])
 	 */
+	@Override
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
 		// Use a dedicated solver optimised for inverting the matrix diagonal. 
@@ -283,6 +286,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedParameters()
 	 */
+	@Override
 	public int getNumberOfFittedParameters()
 	{
 		return f.getNumberOfGradients();
@@ -293,6 +297,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedPoints()
 	 */
+	@Override
 	public int getNumberOfFittedPoints()
 	{
 		return numberOfFittedPoints;
@@ -303,6 +308,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getIterations()
 	 */
+	@Override
 	public int getIterations()
 	{
 		return iterations;
@@ -313,6 +319,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getEvaluations()
 	 */
+	@Override
 	public int getEvaluations()
 	{
 		return evaluations;
@@ -340,6 +347,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isBounded()
 	 */
+	@Override
 	public boolean isBounded()
 	{
 		return false;
@@ -350,6 +358,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isConstrained()
 	 */
+	@Override
 	public boolean isConstrained()
 	{
 		return false;
@@ -360,6 +369,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isWeighted()
 	 */
+	@Override
 	public boolean isWeighted()
 	{
 		return false;
@@ -370,6 +380,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isStrictlyPositiveFunction()
 	 */
+	@Override
 	public boolean isStrictlyPositiveFunction()
 	{
 		// Provide a default implementation based on the type. 
@@ -397,6 +408,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
+	@Override
 	public void setBounds(double[] lower, double[] upper)
 	{
 	}
@@ -406,6 +418,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(double[], double[])
 	 */
+	@Override
 	public void setConstraints(double[] lower, double[] upper)
 	{
 	}
@@ -415,6 +428,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setWeights(double[])
 	 */
+	@Override
 	public void setWeights(double[] weights)
 	{
 	}
@@ -424,6 +438,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getValue()
 	 */
+	@Override
 	public double getValue()
 	{
 		return value;
@@ -457,6 +472,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#getName(int)
 	 */
+	@Override
 	public String getName(int i)
 	{
 		if (f instanceof NamedFunction)

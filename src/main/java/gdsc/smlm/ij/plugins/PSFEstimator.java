@@ -114,6 +114,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -386,6 +387,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		int result;
@@ -816,6 +818,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		IJ.log(String.format(format, args));
 	}
 
+	@Override
 	public void begin()
 	{
 		sampleNew[ANGLE] = new DescriptiveStatistics();
@@ -828,6 +831,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
+	@Override
 	public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared, float noise,
 			float meanIntensity, float[] params, float[] paramsStdDev)
 	{
@@ -848,12 +852,14 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		return size() >= settings.getNumberOfPeaks();
 	}
 
+	@Override
 	public void add(PeakResult result)
 	{
 		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
 				result.getNoise(), result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations());
 	}
 
+	@Override
 	public synchronized void addAll(PeakResult[] results)
 	{
 		for (PeakResult result : results)
@@ -862,6 +868,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 					result.getParameterDeviations());
 	}
 
+	@Override
 	public synchronized void addAll(Collection<PeakResult> results)
 	{
 		for (PeakResult result : results)
@@ -870,16 +877,19 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 					result.getParameterDeviations());
 	}
 
+	@Override
 	public void addAll(PeakResultStore results)
 	{
 		addAll(results.toArray());
 	}
 
+	@Override
 	public int size()
 	{
 		return (int) sampleNew[X].getN();
 	}
 
+	@Override
 	public void end()
 	{
 		// Do nothing
@@ -890,6 +900,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return true;
@@ -900,72 +911,85 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		// Ignored		
 	}
 
+	@Override
 	public ImageSource getSource()
 	{
 		// Ignored		
 		return null;
 	}
 
+	@Override
 	public void setBounds(Rectangle bounds)
 	{
 		// Ignored		
 	}
 
+	@Override
 	public Rectangle getBounds()
 	{
 		// Ignored		
 		return null;
 	}
 
+	@Override
 	public void setCalibration(Calibration calibration)
 	{
 		// Ignored
 	}
 
+	@Override
 	public Calibration getCalibration()
 	{
 		// Ignored
 		return null;
 	}
 
+	@Override
 	public void setConfiguration(String configuration)
 	{
 		// Ignored		
 	}
 
+	@Override
 	public String getConfiguration()
 	{
 		// Ignored
 		return null;
 	}
 
+	@Override
 	public void copySettings(PeakResults peakResults)
 	{
 		// Ignored
 	}
 
+	@Override
 	public void setSource(ImageSource source)
 	{
 		// Ignored
 	}
 
+	@Override
 	public String getName()
 	{
 		// Ignored
 		return null;
 	}
 
+	@Override
 	public void setName(String name)
 	{
 		// Ignored
 	}
 
+	@Override
 	public PSF getPSF()
 	{
 		// Ignored
 		return null;
 	}
 
+	@Override
 	public void setPSF(PSF psf)
 	{
 		// Ignored

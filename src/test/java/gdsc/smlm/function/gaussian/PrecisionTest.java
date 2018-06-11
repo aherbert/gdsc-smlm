@@ -109,6 +109,7 @@ public class PrecisionTest
 			super(maxx);
 		}
 
+		@Override
 		public void initialise(double[] a)
 		{
 			background = a[BACKGROUND];
@@ -127,6 +128,7 @@ public class PrecisionTest
 			ax = 1.0 / sx3;
 		}
 
+		@Override
 		public double eval(final int x, final double[] dyda)
 		{
 			dyda[0] = 1.0;
@@ -156,6 +158,7 @@ public class PrecisionTest
 			return y;
 		}
 
+		@Override
 		public double eval(final int x)
 		{
 			final int x1 = x / maxx;
@@ -184,6 +187,7 @@ public class PrecisionTest
 			super(maxx);
 		}
 
+		@Override
 		public void initialise(float[] a)
 		{
 			background = a[BACKGROUND];
@@ -201,6 +205,7 @@ public class PrecisionTest
 			ax = 1.0f / sx3;
 		}
 
+		@Override
 		public float eval(final int x, final float[] dyda)
 		{
 			dyda[0] = 1.0f;
@@ -230,6 +235,7 @@ public class PrecisionTest
 			return y;
 		}
 
+		@Override
 		public float eval(final int x)
 		{
 			final int x1 = x / maxx;
@@ -259,6 +265,7 @@ public class PrecisionTest
 			super(maxx);
 		}
 
+		@Override
 		public void initialise(double[] a)
 		{
 			background = a[BACKGROUND];
@@ -274,6 +281,7 @@ public class PrecisionTest
 			aa2 = -2.0 * aa;
 		}
 
+		@Override
 		public double eval(final int x, final double[] dyda)
 		{
 			dyda[0] = 1.0;
@@ -300,6 +308,7 @@ public class PrecisionTest
 			return y;
 		}
 
+		@Override
 		public double eval(final int x)
 		{
 			final int x1 = x / maxx;
@@ -329,6 +338,7 @@ public class PrecisionTest
 			super(maxx);
 		}
 
+		@Override
 		public void initialise(float[] a)
 		{
 			background = a[BACKGROUND];
@@ -344,6 +354,7 @@ public class PrecisionTest
 			aa2 = -2.0f * aa;
 		}
 
+		@Override
 		public float eval(final int x, final float[] dyda)
 		{
 			dyda[0] = 1.0f;
@@ -370,6 +381,7 @@ public class PrecisionTest
 			return y;
 		}
 
+		@Override
 		public float eval(final int x)
 		{
 			final int x1 = x / maxx;
@@ -581,8 +593,8 @@ public class PrecisionTest
 			time2 += runDoubleWithGradients(maxx, f2, p2);
 		}
 
-		System.out.printf("%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "", f1.getClass()
-				.getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
+		System.out.printf("%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
+				f1.getClass().getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
 		Assert.assertTrue(time1 * SPEED_UP_FACTOR < time2);
 	}
 
@@ -650,7 +662,7 @@ public class PrecisionTest
 		final int n = params1.length;
 		double[] g = new double[n];
 		double[] tg = new double[n];
-		
+
 		// Warm up
 		for (int j = 0; j < 10; j++)
 		{

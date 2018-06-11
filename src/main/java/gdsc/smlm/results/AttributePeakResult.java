@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Specifies a peak fitting result with assignable attributes. If the attributes are not set then the default values are
  * returned.

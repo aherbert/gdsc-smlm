@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -96,6 +95,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.FilePeakResults#getHeaderEnd()
 	 */
+	@Override
 	protected String getHeaderEnd()
 	{
 		return END_HEADER;
@@ -106,6 +106,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.FilePeakResults#getHeaderComments()
 	 */
+	@Override
 	protected String[] getHeaderComments()
 	{
 		fieldNames = new PeakResultConversionHelper(null, getPSF()).getNames();
@@ -140,6 +141,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.FilePeakResults#getFieldNames()
 	 */
+	@Override
 	protected String[] getFieldNames()
 	{
 		ArrayList<String> names = new ArrayList<String>(20);
@@ -170,6 +172,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 		return names.toArray(new String[names.size()]);
 	}
 
+	@Override
 	protected void closeOutput()
 	{
 		super.closeOutput();
@@ -196,6 +199,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
+	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
 			float[] params, float[] paramsStdDev)
 	{
@@ -258,6 +262,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			buffer.writeFloat((float) precision);
 	}
 
+	@Override
 	public void add(PeakResult result)
 	{
 		if (fos == null)
@@ -289,6 +294,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		if (fos == null)
@@ -368,6 +374,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
+	@Override
 	protected void sort() throws IOException
 	{
 		try
@@ -508,6 +515,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 			slice = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
 		}
 
+		@Override
 		public int compareTo(Result o)
 		{
 			// Sort by slice number

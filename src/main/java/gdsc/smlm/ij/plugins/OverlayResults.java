@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
 import java.awt.Choice;
-import java.awt.Color;
 import java.awt.Label;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -37,7 +36,6 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
 
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
@@ -130,6 +128,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		PeakResultView view = null;
 		TypeConverter<DistanceUnit> converter;
 
+		@Override
 		public void run()
 		{
 			while (running)
@@ -377,6 +376,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -461,19 +461,23 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		}
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		show();
 	}
 
+	@Override
 	public void imageClosed(ImagePlus arg0)
 	{
 	}
 
+	@Override
 	public void imageOpened(ImagePlus arg0)
 	{
 	}
 
+	@Override
 	public void imageUpdated(ImagePlus imp)
 	{
 		if (imp == null)

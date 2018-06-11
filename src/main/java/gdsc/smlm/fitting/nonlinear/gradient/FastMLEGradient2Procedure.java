@@ -31,7 +31,6 @@ import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.ValueProcedure;
 
-
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second partial derivatives.
  * <p>
@@ -113,6 +112,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
 	 */
+	@Override
 	public void execute(double uk, double[] duk_dt, double[] d2uk_dt2)
 	{
 		u[k] = uk;
@@ -168,6 +168,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double uk, double[] duk_dt)
 	{
 		u[k] = uk;
@@ -211,6 +212,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	 * 
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
+	@Override
 	public void execute(double uk)
 	{
 		u[k++] = uk;

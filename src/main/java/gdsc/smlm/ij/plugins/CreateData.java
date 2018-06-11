@@ -67,7 +67,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import com.google.protobuf.TextFormat;
 
-
 import gdsc.core.clustering.DensityManager;
 import gdsc.core.data.DataException;
 import gdsc.core.data.utils.ConversionException;
@@ -529,6 +528,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			// Get the signal and background in photons
 			results.forEach(IntensityUnit.PHOTON, new BIRResultProcedure()
 			{
+				@Override
 				public void executeBIR(float bg, float intensity, PeakResult result)
 				{
 					int i = result.getFrame() - 1;
@@ -590,6 +590,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -886,7 +887,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			imageModel.setConfinementAttempts(10);
 
 			localisations = imageModel.createImage(molecules, settings.getFixedFraction(), totalSteps,
-					(double) settings.getPhotonsPerSecond() / settings.getStepsPerSecond(), correlation,
+					settings.getPhotonsPerSecond() / settings.getStepsPerSecond(), correlation,
 					settings.getRotateDuringSimulation());
 
 			// Re-adjust the fluorophores to the correct time
@@ -1442,21 +1443,25 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					settings.getYPosition() / settings.getPixelPitch(),
 					settings.getZPosition() / settings.getPixelPitch() };
 
+			@Override
 			public double[] next()
 			{
 				return xyz;
 			}
 
+			@Override
 			public boolean isWithinXY(double[] xyz)
 			{
 				return true;
 			}
 
+			@Override
 			public boolean isWithin(double[] xyz)
 			{
 				return true;
 			}
 
+			@Override
 			public void initialise(double[] xyz)
 			{
 			}
@@ -1784,7 +1789,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					if (stats.getSum() > 0)
 					{
 						// Update the statistics to the desired mean.
-						double scale = (double) settings.getPhotonsPerSecond() / stats.getMean();
+						double scale = settings.getPhotonsPerSecond() / stats.getMean();
 						double[] values = stats.getValues();
 						for (int i = 0; i < values.length; i++)
 							values[i] *= scale;
@@ -2723,6 +2728,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			if (Utils.isInterrupted())
@@ -3039,7 +3045,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 							continue;
 						}
 						dist.setShapeUnsafe(image[i]);
-						image[i] = (float) Math.round(dist.sample());
+						image[i] = Math.round(dist.sample());
 					}
 				}
 			}
@@ -3579,6 +3585,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				final FrameCounter counter = results.newFrameCounter();
 				results.forEach(new PeakResultProcedure()
 				{
+					@Override
 					public void execute(PeakResult r)
 					{
 						if (counter.advance(r.getFrame()))
@@ -3603,6 +3610,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				counter.reset();
 				results.forEach(new PeakResultProcedure()
 				{
+					@Override
 					public void execute(PeakResult r)
 					{
 						int density = allDensity[counter.getAndIncrement()];
@@ -3683,8 +3691,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		for (int i = 0; i < nStats; i++)
 		{
 			double centre = (alwaysRemoveOutliers[i])
-					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50)
-					: stats[i].getMean();
+					? ((StoredDataStatistics) stats[i]).getStatistics().getPercentile(50) : stats[i].getMean();
 			sb.append(Utils.rounded(centre, 4)).append('\t');
 		}
 		if (java.awt.GraphicsEnvironment.isHeadless())
@@ -3735,6 +3742,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		coordsY.resetQuick();
 		futures.add(threadPool.submit(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				incrementProgress();
@@ -3795,6 +3803,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		Collections.sort(localisations, new Comparator<LocalisationModel>()
 		{
+			@Override
 			public int compare(LocalisationModel o1, LocalisationModel o2)
 			{
 				// Order by ID then time
@@ -3815,6 +3824,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		Collections.sort(localisations, new Comparator<LocalisationModel>()
 		{
+			@Override
 			public int compare(LocalisationModel o1, LocalisationModel o2)
 			{
 				// Order by n time
@@ -4033,6 +4043,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Sort using the ID
 		Arrays.sort(peakResults, new Comparator<PeakResult>()
 		{
+			@Override
 			public int compare(PeakResult o1, PeakResult o2)
 			{
 				return o1.getId() - o2.getId();
@@ -4067,6 +4078,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Sort using the ID
 		Arrays.sort(peakResults, new Comparator<PeakResult>()
 		{
+			@Override
 			public int compare(PeakResult o1, PeakResult o2)
 			{
 				return o1.getId() - o2.getId();
@@ -4584,12 +4596,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer field)
 					{
 						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
 						return collectOptions(false);
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -4840,12 +4854,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final String[] models = availableModels.toArray(new String[availableModels.size()]);
 		gd.addChoice("PSF_model", models, settings.getPsfModel(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setPsfModel(models[value]);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -5430,6 +5446,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		return null;
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		// When the checkbox is clicked, output example compounds to the ImageJ log
@@ -5644,6 +5661,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	 * 
 	 * @see gdsc.smlm.model.RandomGeneratorFactory#createRandomGenerator()
 	 */
+	@Override
 	public RandomGenerator createRandomGenerator()
 	{
 		return new Well44497b(getSeedOffset() + getSeedAddition());
@@ -5795,7 +5813,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		{
 			float[] data = source.next();
 			// Use the trimmed method as there may be a lot of spots in the frame
-			noise[slice] = (float) FitWorker.estimateNoise(data, width, height,
+			noise[slice] = FitWorker.estimateNoise(data, width, height,
 					NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 		}
 
@@ -5806,9 +5824,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		final TypeConverter<IntensityUnit> c = results.getIntensityConverter(IntensityUnit.COUNT);
 		for (int i = 0; i < noise.length; i++)
 			noise[i] = c.convertBack(noise[i]);
-		
+
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult p)
 			{
 				if (p.getFrame() < noise.length)
@@ -5932,6 +5951,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer field)
 					{
 						settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
@@ -5939,6 +5959,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 						return result;
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);

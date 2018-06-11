@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.ij3d;
 
-
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Group;
@@ -83,6 +82,7 @@ public class OrderedItemGeometryGroup extends ItemGeometryGroup implements Updat
 	 *
 	 * @return the parent group
 	 */
+	@Override
 	protected Group getParentGroup()
 	{
 		// Force the results to be ordered
@@ -98,6 +98,7 @@ public class OrderedItemGeometryGroup extends ItemGeometryGroup implements Updat
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdateableItemShape#reorder(int[])
 	 */
+	@Override
 	public void reorder(int[] indices) throws IllegalArgumentException
 	{
 		reorderFast(indices);
@@ -108,6 +109,7 @@ public class OrderedItemGeometryGroup extends ItemGeometryGroup implements Updat
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdateableItemShape#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		orderedGroup.setChildIndexOrder(indices);

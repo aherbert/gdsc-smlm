@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Gets a data value from a peak result.
  */
@@ -37,7 +36,7 @@ public interface PeakResultData<E>
 	 * @return the value
 	 */
 	public E getValue(PeakResult result);
-	
+
 	/**
 	 * Gets the name of the value.
 	 *

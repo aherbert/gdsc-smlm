@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Interface for functions to produce a value and first partial derivative
  */

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.utils;
 
-
 import java.awt.Color;
 
 import gdsc.core.ij.Utils;
@@ -73,6 +72,7 @@ public class ImageROIPainter extends TextPanelMouseListener
 	 *            the selected index
 	 * @see gdsc.smlm.ij.utils.TextPanelMouseListener#selected(int)
 	 */
+	@Override
 	public void selected(int selectedIndex)
 	{
 		if (selectedIndex < 0 || selectedIndex >= textPanel.getLineCount())
@@ -105,6 +105,7 @@ public class ImageROIPainter extends TextPanelMouseListener
 	 *            the selection end
 	 * @see gdsc.smlm.ij.utils.TextPanelMouseListener#selected(int, int)
 	 */
+	@Override
 	public void selected(int selectionStart, int selectionEnd)
 	{
 		if (selectionStart < 0 || selectionStart >= textPanel.getLineCount())

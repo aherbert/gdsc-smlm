@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Specifies the result of fitting a frame using different fitting methods.
  * <p>
@@ -53,11 +52,12 @@ public interface IMultiPathFitResults
 	 * @return the result
 	 */
 	MultiPathFitResult getResult(int index);
-	
+
 	/**
 	 * Called when the results that would be returned by {@link #getResult(int)} are no longer required
 	 *
-	 * @param index the index
+	 * @param index
+	 *            the index
 	 */
 	void complete(int index);
 

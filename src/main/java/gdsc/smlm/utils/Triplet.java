@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.utils;
 
-
 /**
  * A generic triplet.
  * 

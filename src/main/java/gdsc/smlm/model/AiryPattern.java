@@ -27,9 +27,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.smlm.function.Bessel;
 
-
 /**
- * Simple class to calculate AiryPattern. 
+ * Simple class to calculate AiryPattern.
  */
 public class AiryPattern
 {

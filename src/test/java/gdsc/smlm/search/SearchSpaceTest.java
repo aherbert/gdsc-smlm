@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.search;
 
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,23 +44,23 @@ public class SearchSpaceTest
 	{
 		SearchDimension d1 = new SearchDimension(0, 10, 2, 10);
 		SearchDimension d2 = new SearchDimension(0, 10, 1, 10);
-		
-		double[][] ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[]{ 0, 5 });
+
+		double[][] ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[] { 0, 5 });
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
 		Assert.assertEquals(2 + 3, ss.length);
-		
-		ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[]{ 4, 5 });
+
+		ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[] { 4, 5 });
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
 		Assert.assertEquals(3 + 3, ss.length);
-		
-		ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[]{ 10, 5 });
+
+		ss = SearchSpace.createRefineSpace(createDimensions(d1, d2), new double[] { 10, 5 });
 		//for (double[] p : ss)
 		//	System.out.println(java.util.Arrays.toString(p));
 		Assert.assertEquals(2 + 3, ss.length);
 	}
-	
+
 	@Test
 	public void canMoveCentre()
 	{
@@ -71,11 +70,11 @@ public class SearchSpaceTest
 		Assert.assertTrue(d1.isAtBounds(v1[0]));
 		Assert.assertTrue(d1.isAtBounds(v1[v1.length - 1]));
 		Assert.assertFalse(d1.isAtBounds(5));
-		
+
 		d1.setCentre(0);
 		Assert.assertTrue(d1.isAtBounds(0));
 		Assert.assertTrue(d1.isAtBounds(5));
-		
+
 		double[] v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v1));
 		//System.out.println(java.util.Arrays.toString(v2));
@@ -101,13 +100,13 @@ public class SearchSpaceTest
 	{
 		SearchDimension d1 = new SearchDimension(0, 10, 0, 1, 2.5, 7.5);
 		d1.setPad(false);
-		
+
 		double[] v1 = d1.values();
 		Assert.assertTrue(d1.isAtBounds(0));
-		
+
 		d1.setCentre(0);
 		Assert.assertTrue(d1.isAtBounds(0));
-		
+
 		double[] v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v1));
 		//System.out.println(java.util.Arrays.toString(v2));
@@ -117,20 +116,20 @@ public class SearchSpaceTest
 		v2 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v2));
 		Assert.assertTrue(v1.length > v2.length);
-		
+
 		d1.setPad(true);
-		
+
 		double[] v3 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v3));
 		Assert.assertTrue(v1.length == v3.length);
-		
+
 		d1.setCentre(0);
-		
+
 		v3 = d1.values();
 		//System.out.println(java.util.Arrays.toString(v3));
 		Assert.assertTrue(v1.length == v3.length);
 	}
-	
+
 	private static SearchDimension[] createDimensions(SearchDimension... d)
 	{
 		return d;

@@ -31,7 +31,6 @@ import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 import gdsc.smlm.results.PeakResult;
 
 /**
@@ -84,6 +83,7 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 		return calculator.getLSEPrecision(peak.getParameters(), peak.getNoise()) <= variance;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_LOCATION_VARIANCE2;
@@ -215,56 +215,67 @@ public class PrecisionFilter2 extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { PrecisionFilter.DEFAULT_RANGE };
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return precision;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.ESTIMATE_USING_LOCAL_BACKGROUND;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return 0;

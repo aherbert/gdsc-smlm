@@ -38,7 +38,6 @@ import gdsc.core.match.MatchCalculator;
 import gdsc.core.match.MatchResult;
 import gdsc.core.match.PointPair;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
@@ -86,6 +85,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -494,6 +494,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			// Add the results to the lists
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult p)
 				{
 					final float x, y, z;
@@ -539,6 +540,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		final TIntHashSet hashset = new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
 		final TIntProcedure p = new TIntProcedure()
 		{
+			@Override
 			public boolean execute(int value)
 			{
 				hashset.add(value);
@@ -692,6 +694,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	 * 
 	 * @see gdsc.smlm.ij.utils.CoordinateProvider#getCoordinates(java.lang.String)
 	 */
+	@Override
 	public double[] getCoordinates(String line)
 	{
 		// Extract the startT and x,y coordinates from the first pulse in the line
@@ -748,6 +751,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		final TIntHashSet ids = new TIntHashSet(results.size());
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult p)
 			{
 				ids.add(p.getId());

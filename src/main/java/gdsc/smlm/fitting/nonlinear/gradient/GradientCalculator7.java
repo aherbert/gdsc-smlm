@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.NonLinearFunction;
 
-
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the gradient vector of the function's partial first derivatives with respect to the parameters.
@@ -45,6 +44,7 @@ public class GradientCalculator7 extends GradientCalculator
 	 * @see gdsc.fitting.model.GradientCalculator#findLinearised(int[], double[] double[], double[][], double[],
 	 * gdsc.fitting.function.NonLinearFunction)
 	 */
+	@Override
 	public double findLinearised(int[] x, double[] y, double[] a, double[][] alpha, double[] beta,
 			NonLinearFunction func)
 	{
@@ -221,6 +221,7 @@ public class GradientCalculator7 extends GradientCalculator
 	 * @see gdsc.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[] double[], double[][],
 	 * double[], gdsc.fitting.function.NonLinearFunction)
 	 */
+	@Override
 	public double findLinearised(int n, double[] y, double[] a, double[][] alpha, double[] beta, NonLinearFunction func)
 	{
 		double ssx = 0;

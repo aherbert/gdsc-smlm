@@ -54,7 +54,6 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.logging.Logger;
 import gdsc.core.logging.NullLogger;
 
-
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
@@ -349,6 +348,7 @@ public class JumpDistanceAnalysis
 						.target(function.getY())
 						.weight(new DiagonalMatrix(function.getWeights()))
 						.model(function, new MultivariateMatrixFunction() {
+							@Override
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return function.jacobian(point);
@@ -540,6 +540,7 @@ public class JumpDistanceAnalysis
 					.target(functionGradient.getY())
 					.weight(new DiagonalMatrix(functionGradient.getWeights()))
 					.model(functionGradient, new MultivariateMatrixFunction() {
+						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return functionGradient.jacobian(point);
@@ -1395,6 +1396,7 @@ public class JumpDistanceAnalysis
 
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 
+		@Override
 		public double evaluate(double x, double[] params)
 		{
 			// Compute the probability:
@@ -1423,6 +1425,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] variables)
 		{
 			// Compute the log-likelihood:
@@ -1506,6 +1509,7 @@ public class JumpDistanceAnalysis
 
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 
+		@Override
 		public double evaluate(double x, double[] params)
 		{
 			return 1 - FastMath.exp(-x / (4 * params[0]));
@@ -1516,6 +1520,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			final double[] values = new double[x.length];
@@ -1532,6 +1537,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		 */
+		@Override
 		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation:
@@ -1582,6 +1588,7 @@ public class JumpDistanceAnalysis
 			super(x, null, estimatedD, n);
 		}
 
+		@Override
 		public double evaluate(double x, double[] params)
 		{
 			// Compute the probability:
@@ -1639,6 +1646,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] params)
 		{
 			// Compute the log-likelihood
@@ -1676,6 +1684,7 @@ public class JumpDistanceAnalysis
 			super(x, y, estimatedD, n);
 		}
 
+		@Override
 		public double evaluate(double x, double[] params)
 		{
 			double sum = 0;
@@ -1738,6 +1747,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] point) throws IllegalArgumentException
 		{
 			return getValue(point);
@@ -1748,6 +1758,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		 */
+		@Override
 		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation:
@@ -1861,6 +1872,7 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] parameters)
 		{
 			final double[] obs = getValue(parameters);
@@ -2050,7 +2062,8 @@ public class JumpDistanceAnalysis
 	 * Note that diffusion of a molecule within a frame means that the position of the molecule is an average within the
 	 * frame. This leads to condensation of the observed distance traveled by the particle between two frames. The
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
-	 * the effect of reducing the effective time that diffusion occurred in the start and end frame. The observed MSD can
+	 * the effect of reducing the effective time that diffusion occurred in the start and end frame. The observed MSD
+	 * can
 	 * be converted to the corrected MSD by applying a factor:
 	 * 
 	 * <pre>
@@ -2065,7 +2078,7 @@ public class JumpDistanceAnalysis
 	 */
 	public static double getConversionfactor(int n)
 	{
-		return (double) n / (n - THIRD);
+		return n / (n - THIRD);
 	}
 
 	/**

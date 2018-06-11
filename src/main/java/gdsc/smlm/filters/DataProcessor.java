@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Define a class to pre-process the data, ignoring a defined border.
  */
@@ -99,6 +98,7 @@ public abstract class DataProcessor implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public DataProcessor clone()
 	{
 		try

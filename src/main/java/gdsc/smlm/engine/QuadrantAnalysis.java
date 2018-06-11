@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine;
 
-
 /**
  * Performs quadrant analysis on fit residuals to look for asymmetry
  */
@@ -293,12 +292,12 @@ public class QuadrantAnalysis
 				y2 = 0;
 			else if (y2 >= height)
 				y2 = height - 0.01;
-			
+
 			xi1 = (int) (x1);
 			yi1 = (int) (y1);
 			xi2 = (int) (x2);
 			yi2 = (int) (y2);
-			
+
 			return (xi1 != xi2 || yi1 != yi2);
 		}
 

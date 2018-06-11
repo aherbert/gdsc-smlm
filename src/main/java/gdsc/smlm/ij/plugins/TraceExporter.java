@@ -68,11 +68,13 @@ public class TraceExporter implements PlugIn
 			this.name = name;
 		}
 
+		@Override
 		public String getName()
 		{
 			return name;
 		}
 
+		@Override
 		public String getShortName()
 		{
 			return name;
@@ -96,12 +98,14 @@ public class TraceExporter implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		MemoryResultsItems items = new MemoryResultsItems(new MultiDialog.MemoryResultsFilter()
 		{
+			@Override
 			public boolean accept(MemoryPeakResults results)
 			{
 				return results.hasId();
@@ -199,6 +203,7 @@ public class TraceExporter implements PlugIn
 		// Strip results with no trace Id
 		results.removeIf(new PeakResultPredicate()
 		{
+			@Override
 			public boolean test(PeakResult t)
 			{
 				return t.getId() <= 0;
@@ -234,6 +239,7 @@ public class TraceExporter implements PlugIn
 		{
 			results.removeIf(new PeakResultPredicate()
 			{
+				@Override
 				public boolean test(PeakResult t)
 				{
 					return remove.contains(t.getId());
@@ -251,6 +257,7 @@ public class TraceExporter implements PlugIn
 			final boolean is3D = results.is3D();
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peakResult)
 				{
 					peakResult.setXPosition((float) (peakResult.getXPosition() + w * r.nextGaussian()));
@@ -341,6 +348,7 @@ public class TraceExporter implements PlugIn
 			final BufferedWriter writer = out;
 			results.forEach(DistanceUnit.UM, new XYRResultProcedure()
 			{
+				@Override
 				public void executeXYR(float x, float y, PeakResult result)
 				{
 					try

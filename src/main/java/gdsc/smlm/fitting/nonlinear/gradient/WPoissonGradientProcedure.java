@@ -28,7 +28,6 @@ import java.util.Arrays;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
 
-
 /**
  * Calculates the Fisher information matrix for a Poisson process.
  * <p>
@@ -137,7 +136,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 			initialiseWorkingMatrix();
 		if (a != null)
 			func.initialise1(a);
-		func.forEach((Gradient1Procedure) this);
+		func.forEach(this);
 	}
 
 	/**
@@ -153,6 +152,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		// Note: Ignore the value

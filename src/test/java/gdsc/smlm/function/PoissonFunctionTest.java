@@ -23,14 +23,10 @@
  */
 package gdsc.smlm.function;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.utils.DoubleEquality;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings("unused")

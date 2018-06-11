@@ -27,7 +27,6 @@ import gdsc.core.utils.StoredData;
 
 import java.awt.Rectangle;
 
-
 /**
  * Computes the filter using a circular mask.
  * <p>

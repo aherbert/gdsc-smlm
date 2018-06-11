@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 import gdsc.core.match.ImmutableFractionalAssignment;
 
 /**

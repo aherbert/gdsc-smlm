@@ -69,7 +69,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngine;
 
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
 import gdsc.smlm.engine.FitQueue;
@@ -292,6 +291,7 @@ public class AstigmatismModelManager implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -723,6 +723,7 @@ public class AstigmatismModelManager implements PlugIn
 		// We have fit the results so they will be in the preferred units 
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				int i = counter.getAndIncrement();
@@ -831,6 +832,7 @@ public class AstigmatismModelManager implements PlugIn
 			xyPlot.getImagePlus().killRoi();
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			int oldMinz = minz;
@@ -1047,6 +1049,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private class AstigmatismVectorFunction implements MultivariateVectorFunction
 	{
+		@Override
 		public double[] value(double[] p) throws IllegalArgumentException
 		{
 			double one_d2 = 1.0 / Maths.pow2(p[P_D]);
@@ -1076,6 +1079,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private class AstigmatismMatrixFunction implements MultivariateMatrixFunction
 	{
+		@Override
 		public double[][] value(double[] p) throws IllegalArgumentException
 		{
 			double[] pu = p.clone();
@@ -1279,7 +1283,8 @@ public class AstigmatismModelManager implements PlugIn
 		gd.addMessage("Save the model");
 		gd.addCheckbox("Save_model", pluginSettings.getSaveModel());
 		gd.addStringField("Model_name", pluginSettings.getModelName());
-		gd.addMessage("Save the model width to this plugin's settings, e.g. to use\non another selected PSF when creating a model.");
+		gd.addMessage(
+				"Save the model width to this plugin's settings, e.g. to use\non another selected PSF when creating a model.");
 		gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
 		//gd.setCancelLabel(" No ");
 		gd.showDialog();
@@ -1507,7 +1512,7 @@ public class AstigmatismModelManager implements PlugIn
 		String legend = "Sx\nSy";
 		if (pluginSettings.getShowCombinedWidth())
 		{
-			double [] s = new double[z.length];
+			double[] s = new double[z.length];
 			for (int i = 0; i < z.length; i++)
 			{
 				s[i] = Gaussian2DPeakResultHelper.getStandardDeviation(sx[i], sy[i]);
@@ -1567,6 +1572,7 @@ public class AstigmatismModelManager implements PlugIn
 				gd.setOKLabel(" Close ");
 				gd.addAndGetButton("Reset", new ActionListener()
 				{
+					@Override
 					public void actionPerformed(ActionEvent e)
 					{
 						update();
@@ -1581,6 +1587,7 @@ public class AstigmatismModelManager implements PlugIn
 			SettingsManager.writeSettings(pluginSettings);
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			z = gd.getNextNumber();
@@ -1635,6 +1642,7 @@ public class AstigmatismModelManager implements PlugIn
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Stop evaluating when a number of cumulative failures occurs. The counting is weighted so that fails increment and
  * passes decrement different amounts.
@@ -87,6 +86,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass()
 	 */
+	@Override
 	public void pass()
 	{
 		failCount -= passDecrement;
@@ -99,6 +99,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass(int)
 	 */
+	@Override
 	public void pass(int n)
 	{
 		if (n < 0)
@@ -113,6 +114,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail()
 	 */
+	@Override
 	public void fail()
 	{
 		failCount += failIncrement;
@@ -125,6 +127,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail(int)
 	 */
+	@Override
 	public void fail(int n)
 	{
 		if (n < 0)
@@ -139,6 +142,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#isOK()
 	 */
+	@Override
 	public boolean isOK()
 	{
 		return failCount <= allowedFailures;
@@ -149,6 +153,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#newCounter()
 	 */
+	@Override
 	public FailCounter newCounter()
 	{
 		return new WeightedFailCounter(allowedFailures, failIncrement, passDecrement);
@@ -159,6 +164,7 @@ public class WeightedFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#reset()
 	 */
+	@Override
 	public void reset()
 	{
 		failCount = 0L;

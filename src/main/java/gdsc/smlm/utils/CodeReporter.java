@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.utils;
 
-
 /**
  * Allow the position of executing code to be reported
  */

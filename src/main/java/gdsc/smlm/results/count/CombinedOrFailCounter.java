@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Combine the result of two fail counters using an OR operator
  */
@@ -42,18 +41,18 @@ public class CombinedOrFailCounter extends CombinedFailCounter
 		super(c1, c2);
 	}
 
-	
 	@Override
 	protected String getOperator()
 	{
 		return "&&";
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#isOK()
 	 */
+	@Override
 	public boolean isOK()
 	{
 		return c1.isOK() || c2.isOK();
@@ -64,15 +63,16 @@ public class CombinedOrFailCounter extends CombinedFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#newCounter()
 	 */
+	@Override
 	public FailCounter newCounter()
 	{
 		return new CombinedOrFailCounter(c1.newCounter(), c2.newCounter());
 	}
-	
+
 	/**
-	 * Join the fail counters. 
+	 * Join the fail counters.
 	 * <p>
-	 * If both are not null then return a combined fail counter. 
+	 * If both are not null then return a combined fail counter.
 	 * <p>
 	 * If either are null then a single counter will be returned.
 	 * <p>

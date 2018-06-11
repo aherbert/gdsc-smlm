@@ -25,6 +25,7 @@ package gdsc.smlm.function.gaussian;
 
 public class SingleNSFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_SIMPLE_NS_FIXED;

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Marker interface to specify that the add methods of the PeakResults interface are thread safe
  */

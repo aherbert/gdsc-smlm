@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using Precision using the Cramér-Rao lower bound (CRLB) on the variance of the estimators.
  */
@@ -41,6 +40,7 @@ public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		return (peak.getLocationVarianceCRLB() > variance);
@@ -51,6 +51,7 @@ public class MultiFilterVarianceCRLBComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return IDirectFilter.V_LOCATION_VARIANCE_CRLB;

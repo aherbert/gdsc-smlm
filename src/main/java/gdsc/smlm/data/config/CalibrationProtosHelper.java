@@ -26,7 +26,6 @@ package gdsc.smlm.data.config;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 
-
 /**
  * Contains helper functions for the CalibrationProtos class.
  */

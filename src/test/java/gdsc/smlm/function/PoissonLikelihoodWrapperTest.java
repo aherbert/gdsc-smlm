@@ -73,7 +73,7 @@ public class PoissonLikelihoodWrapperTest
 	double[] testcy1_ = new double[] { 4.8, 5.2 };
 	double[] testcz1_ = new double[] { -1.5, 1.0 };
 	double[][] testw1_ = new double[][] { { 1.1, 1.4 }, { 1.1, 1.7 }, { 1.5, 1.2 }, { 1.3, 1.7 }, };
-	double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
+	double[] testangle1_ = new double[] { Math.PI / 5, Math.PI / 3 };
 
 	double[] testbackground, testsignal1, testangle1, testcx1, testcy1, testcz1;
 	double[][] testw1;
@@ -559,6 +559,7 @@ public class PoissonLikelihoodWrapperTest
 
 		p = in.integrate(20000, new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				return PoissonLikelihoodWrapper.likelihood(mu, x);
@@ -592,40 +593,48 @@ public class PoissonLikelihoodWrapperTest
 
 		NonLinearFunction nlf = new NonLinearFunction()
 		{
+			@Override
 			public void initialise(double[] a)
 			{
 			}
 
+			@Override
 			public int[] gradientIndices()
 			{
 				return new int[0];
 			}
 
+			@Override
 			public double eval(int x, double[] dyda, double[] w)
 			{
 				return 0;
 			}
 
+			@Override
 			public double eval(int x)
 			{
 				return mu;
 			}
 
+			@Override
 			public double eval(int x, double[] dyda)
 			{
 				return mu;
 			}
 
+			@Override
 			public boolean canComputeWeights()
 			{
 				return false;
 			}
 
+			@Override
 			public double evalw(int x, double[] w)
 			{
 				return 0;
 			}
 
+			@Override
 			public int getNumberOfGradients()
 			{
 				return 0;

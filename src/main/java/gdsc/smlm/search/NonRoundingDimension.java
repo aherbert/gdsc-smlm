@@ -23,47 +23,54 @@
  */
 package gdsc.smlm.search;
 
-
 /**
  * Null implementation of the Dimension interface that does not perform rounding
  */
 class NonRoundingDimension implements Dimension
 {
+	@Override
 	public double getLower()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getUpper()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getCentre()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMin()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMax()
 	{
 		return 0;
 	}
 
+	@Override
 	public boolean isActive()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean isAtBounds(double v)
 	{
 		return false;
 	}
 
+	@Override
 	public Dimension create(double lower, double upper)
 	{
 		return null;
@@ -74,13 +81,15 @@ class NonRoundingDimension implements Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#round(double)
 	 */
+	@Override
 	public double round(double value)
 	{
 		return value;
 	}
 
+	@Override
 	public boolean canRound()
 	{
 		return true;
-	}		
+	}
 }

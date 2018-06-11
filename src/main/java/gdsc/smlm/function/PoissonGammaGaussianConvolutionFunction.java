@@ -27,7 +27,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
 
-
 /**
  * Implements the probability density function for a Poisson-Gamma-Gaussian Mixture. The Gaussian is assumed to have
  * mean of
@@ -137,6 +136,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
+	@Override
 	public double likelihood(final double o, final double e)
 	{
 		if (e <= 0)
@@ -237,6 +237,7 @@ public class PoissonGammaGaussianConvolutionFunction implements LikelihoodFuncti
 	 * 
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
+	@Override
 	public double logLikelihood(double o, double e)
 	{
 		if (e <= 0)

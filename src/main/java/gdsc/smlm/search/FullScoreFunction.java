@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.search;
 
-
 /**
  * Calculate the score of points within a search space
  */

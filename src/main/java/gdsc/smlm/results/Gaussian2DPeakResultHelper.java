@@ -47,7 +47,6 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.function.Erf;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Contains helper functions for working with Gaussian 2D peak results
  */
@@ -56,8 +55,8 @@ public class Gaussian2DPeakResultHelper
 	private static final double ROOT2 = Math.sqrt(2);
 	private static final double R1 = cumulative2D(1) / Math.PI;
 	private static final double R2 = cumulative2D(2) / (Math.PI * 4);
-	/** 
-	 * The Mahalanobis distance r for a 2D Gaussian that contains 50 percent of the integral. 
+	/**
+	 * The Mahalanobis distance r for a 2D Gaussian that contains 50 percent of the integral.
 	 */
 	public static final double R_2D_50 = inverseCumulative2D(0.5);
 	private static final double P05 = 0.5 / (Math.PI * Maths.pow2(R_2D_50));
@@ -122,17 +121,20 @@ public class Gaussian2DPeakResultHelper
 			this.emCCD = helper.emCCD;
 		}
 
+		@Override
 		public float getStandardDeviation(float[] params)
 		{
 			return (oneAxisSD) ? params[isx]
 					: (float) Gaussian2DPeakResultHelper.getStandardDeviation(params[isx], params[isy]);
 		}
 
+		@Override
 		public float getStandardDeviation2(float[] params)
 		{
 			return (oneAxisSD) ? params[isx] * params[isx] : Math.abs(params[isx] * params[isy]);
 		}
 
+		@Override
 		public float getAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -147,6 +149,7 @@ public class Gaussian2DPeakResultHelper
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
+		@Override
 		public float getPixelAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -196,6 +199,7 @@ public class Gaussian2DPeakResultHelper
 			return Erf.erf(lx * (ONE_OVER_ROOT2 / s), (lx + 1) * (ONE_OVER_ROOT2 / s));
 		}
 
+		@Override
 		public double getLSEPrecision(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -225,6 +229,7 @@ public class Gaussian2DPeakResultHelper
 			//	throw new ConfigurationException("Not a valid calibration: CCD/EM-CCD camera type is required");
 		}
 
+		@Override
 		public double getLSEPrecision(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -242,6 +247,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
+		@Override
 		public double getLSEVariance(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -258,6 +264,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
+		@Override
 		public double getLSEVariance(float[] params) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -275,6 +282,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
+		@Override
 		public double getMLEPrecision(float[] params, float noise) throws ConfigurationException, ConversionException
 		{
 			// Try to create the converter
@@ -291,6 +299,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
+		@Override
 		public double getMLEPrecision(float[] params)
 				throws ConfigurationException, ConversionException, ConversionException
 		{
@@ -309,6 +318,7 @@ public class Gaussian2DPeakResultHelper
 					emCCD);
 		}
 
+		@Override
 		public double getMLEVariance(float[] params, float noise)
 				throws ConfigurationException, ConversionException, ConversionException
 		{
@@ -326,6 +336,7 @@ public class Gaussian2DPeakResultHelper
 					toPhoton.convert(params[PeakResult.INTENSITY]), toPhoton.convert(noise), emCCD);
 		}
 
+		@Override
 		public double getMLEVariance(float[] params)
 				throws ConfigurationException, ConversionException, ConversionException
 		{
@@ -363,6 +374,7 @@ public class Gaussian2DPeakResultHelper
 					(twoPi * toPixel.convert(params[isx]) * toPixel.convert(params[isy])));
 		}
 
+		@Override
 		public float getPixelAmplitude(float[] params) throws ConfigurationException, ConversionException
 		{
 			return getPixelAmplitudeImpl(params);
@@ -994,6 +1006,7 @@ public class Gaussian2DPeakResultHelper
 		// Specify the function to integrate
 		UnivariateFunction f = new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				return x * Math.log(x) / (x + rho);

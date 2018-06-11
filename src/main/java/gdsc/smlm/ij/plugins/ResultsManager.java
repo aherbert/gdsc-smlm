@@ -42,7 +42,6 @@ import java.util.EnumSet;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
-
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.BitFlags;
@@ -102,12 +101,18 @@ public class ResultsManager implements PlugIn
 	public enum InputSource
 	{
 		//@formatter:off
-		FILE{ public String getName() { return "File"; }}, 
-		MEMORY{ public String getName() { return "Memory"; }}, 
-		MEMORY_MULTI_FRAME{ public String getName() { return "Memory (Multi-Frame)"; }},
-		MEMORY_SINGLE_FRAME{ public String getName() { return "Memory (Single-Frame)"; }},
-		MEMORY_CLUSTERED{ public String getName() { return "Memory (Clustered)"; }}, 
-		NONE{ public String getName() { return "None"; }};
+		FILE{ @Override
+		public String getName() { return "File"; }}, 
+		MEMORY{ @Override
+		public String getName() { return "Memory"; }}, 
+		MEMORY_MULTI_FRAME{ @Override
+		public String getName() { return "Memory (Multi-Frame)"; }},
+		MEMORY_SINGLE_FRAME{ @Override
+		public String getName() { return "Memory (Single-Frame)"; }},
+		MEMORY_CLUSTERED{ @Override
+		public String getName() { return "Memory (Clustered)"; }}, 
+		NONE{ @Override
+		public String getName() { return "None"; }};
 		//@formatter:on
 
 		@Override
@@ -148,6 +153,7 @@ public class ResultsManager implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		extraOptions = Utils.isExtraOptions();
@@ -314,6 +320,7 @@ public class ResultsManager implements PlugIn
 		IJ.showProgress(0);
 		results.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult result)
 			{
 				batch.add(result);
@@ -518,6 +525,7 @@ public class ResultsManager implements PlugIn
 			final Label saveLabel = gd.getLastLabel();
 			ItemListener listener = new ItemListener()
 			{
+				@Override
 				public void itemStateChanged(ItemEvent e)
 				{
 					boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
@@ -605,6 +613,7 @@ public class ResultsManager implements PlugIn
 			gd.addChoice("Table", SettingsManager.getResultsTableFormatNames(),
 					tableSettings.getResultsTableFormatValue(), new OptionListener<Integer>()
 					{
+						@Override
 						public boolean collectOptions(Integer field)
 						{
 							tableSettings.setResultsTableFormatValue(field);
@@ -612,6 +621,7 @@ public class ResultsManager implements PlugIn
 							return result;
 						}
 
+						@Override
 						public boolean collectOptions()
 						{
 							return collectOptions(true);
@@ -653,6 +663,7 @@ public class ResultsManager implements PlugIn
 		{
 			gd.addCheckbox("Show_results_table", tableSettings.getShowTable(), new OptionListener<Boolean>()
 			{
+				@Override
 				public boolean collectOptions(Boolean field)
 				{
 					tableSettings.setShowTable(field);
@@ -660,6 +671,7 @@ public class ResultsManager implements PlugIn
 					return result;
 				}
 
+				@Override
 				public boolean collectOptions()
 				{
 					return collectOptions(true);
@@ -718,6 +730,7 @@ public class ResultsManager implements PlugIn
 		gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(), imageSettings.getImageTypeValue(),
 				new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer field)
 					{
 						imageSettings.setImageTypeValue(field);
@@ -725,6 +738,7 @@ public class ResultsManager implements PlugIn
 						return result;
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -773,6 +787,7 @@ public class ResultsManager implements PlugIn
 		gd.addChoice("Results_format", SettingsManager.getResultsFileFormatNames(), fileSettings.getFileFormatValue(),
 				new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer field)
 					{
 						fileSettings.setFileFormatValue(field);
@@ -780,6 +795,7 @@ public class ResultsManager implements PlugIn
 						return result;
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -939,6 +955,7 @@ public class ResultsManager implements PlugIn
 				final Panel p = gd.getLastPanel();
 				ItemListener listener = new ItemListener()
 				{
+					@Override
 					public void itemStateChanged(ItemEvent e)
 					{
 						boolean enable = INPUT_FILE.equals(c.getSelectedItem());
@@ -1073,6 +1090,7 @@ public class ResultsManager implements PlugIn
 	{
 		return memoryResults.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult r)
 			{
 				return r.getFrame() < r.getEndFrame();
@@ -1090,6 +1108,7 @@ public class ResultsManager implements PlugIn
 	{
 		return memoryResults.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult r)
 			{
 				return r.getId() > 0;
@@ -1107,6 +1126,7 @@ public class ResultsManager implements PlugIn
 	{
 		return !memoryResults.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult r)
 			{
 				return r.getId() <= 0;
@@ -1124,6 +1144,7 @@ public class ResultsManager implements PlugIn
 	{
 		return !memoryResults.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult r)
 			{
 				return !(r instanceof ExtendedPeakResult);
@@ -1552,6 +1573,7 @@ public class ResultsManager implements PlugIn
 		{
 			EventQueue.invokeAndWait(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					JFileChooser fc = new JFileChooser();

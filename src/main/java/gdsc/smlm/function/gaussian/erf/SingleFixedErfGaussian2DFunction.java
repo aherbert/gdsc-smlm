@@ -30,7 +30,6 @@ import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
@@ -79,12 +78,13 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	{
 		return new SingleFixedErfGaussian2DFunction(maxx, maxy);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		create1Arrays();
@@ -110,6 +110,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise2(double[])
 	 */
+	@Override
 	public void initialise2(double[] a)
 	{
 		create2Arrays();
@@ -136,6 +137,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialiseExtended2(double[])
 	 */
+	@Override
 	public void initialiseExtended2(double[] a)
 	{
 		initialise2(a);
@@ -234,6 +236,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda)
 	{
 		// Unpack the predictor into the dimensions
@@ -261,6 +264,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 *            Partial second gradient of function with respect to each coefficient
 	 * @return The predicted value
 	 */
+	@Override
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
 		// Unpack the predictor into the dimensions
@@ -328,6 +332,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
@@ -338,6 +343,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
+	@Override
 	public int getNumberOfGradients()
 	{
 		return 4;
@@ -348,6 +354,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -371,6 +378,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -398,6 +406,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 	 * 
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
+	@Override
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		final int n = getNumberOfGradients();

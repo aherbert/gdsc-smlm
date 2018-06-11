@@ -27,7 +27,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import gdsc.core.utils.Maths;
 
-
 /**
  * Compute the inertia tensor for a 3D object
  * 

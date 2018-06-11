@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -394,7 +393,7 @@ public class PeakResultsReader
 				if (xml != null && xml.length() > 0 && xml.startsWith("<"))
 				{
 					// Convert the XML back
-					source = (ImageSource) ImageSource.fromXML(xml);
+					source = ImageSource.fromXML(xml);
 				}
 			}
 		}
@@ -598,7 +597,7 @@ public class PeakResultsReader
 			if (configuration != null && configuration.length() > 0)
 			{
 				// Format the XML back
-				configuration = XmlUtils.formatXml(configuration);
+				configuration = gdsc.core.utils.XmlUtils.formatXml(configuration);
 			}
 		}
 		return configuration;
@@ -736,6 +735,7 @@ public class PeakResultsReader
 		// Determine if the angle is non-zero with asymmetric widths 
 		if (results.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult peakResult)
 			{
 				return (peakResult.getParameter(ia) != 0 &&
@@ -772,6 +772,7 @@ public class PeakResultsReader
 		// Determine if sy is redundant
 		if (results.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult peakResult)
 			{
 				return (peakResult.getParameter(isx) != peakResult.getParameter(isy));
@@ -805,6 +806,7 @@ public class PeakResultsReader
 		{
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peakResult)
 				{
 					peakResult.resizeParameters(newLength);
@@ -815,6 +817,7 @@ public class PeakResultsReader
 		{
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peakResult)
 				{
 					peakResult.resizeParameters(newLength);
@@ -840,6 +843,7 @@ public class PeakResultsReader
 			final int isy = indices[1];
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peakResult)
 				{
 					float[] p = peakResult.getParameters();
@@ -1218,6 +1222,7 @@ public class PeakResultsReader
 	private class LineReaderV4 extends LineReader {
 		int nFields;
 		LineReaderV4(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultV4(line, nFields);
 		}
@@ -1225,6 +1230,7 @@ public class PeakResultsReader
 	private class LineReaderDV4 extends LineReader {
 		int nFields;
 		LineReaderDV4(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultDeviationsV4(line, nFields);
 		}
@@ -1232,6 +1238,7 @@ public class PeakResultsReader
 	private class LineReaderV3 extends LineReader {
 		int nFields;
 		LineReaderV3(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultV3(line, nFields);
 		}
@@ -1239,30 +1246,35 @@ public class PeakResultsReader
 	private class LineReaderDV3 extends LineReader {
 		int nFields;
 		LineReaderDV3(MemoryPeakResults results, int nFields) { super(results); this.nFields=nFields; }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultDeviationsV3(line, nFields);
 		}
 	}
 	private class LineReaderV2 extends LineReader {
 		LineReaderV2(MemoryPeakResults results, int nFields) { super(results); }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultV2(line);
 		}
 	}
 	private class LineReaderDV2 extends LineReader {
 		LineReaderDV2(MemoryPeakResults results, int nFields) { super(results); }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultDeviationsV2(line);
 		}
 	}
 	private class LineReaderV1 extends LineReader {
 		LineReaderV1(MemoryPeakResults results, int nFields) { super(results); }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultV1(line);
 		}
 	}
 	private class LineReaderDV1 extends LineReader {
 		LineReaderDV1(MemoryPeakResults results, int nFields) { super(results); }
+		@Override
 		PeakResult read(String line) {
 			return createPeakResultDeviationsV1(line);
 		}
@@ -2607,6 +2619,7 @@ public class PeakResultsReader
 		{
 			final double twoPi = 2 * Math.PI;
 
+			@Override
 			public boolean execute(PeakResult p)
 			{
 				if (p.getFrame() == p.getEndFrame())

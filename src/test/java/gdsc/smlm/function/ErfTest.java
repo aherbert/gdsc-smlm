@@ -47,25 +47,33 @@ public class ErfTest
 	private class ApacheErf extends BaseErf
 	{
 		ApacheErf() {	super("apache erf"); }
+		@Override
 		double erf(double x) { return org.apache.commons.math3.special.Erf.erf(x); }
+		@Override
 		double erf(double x1, double x2) { return org.apache.commons.math3.special.Erf.erf(x1, x2); }
 	}
 	private class Erf extends BaseErf
 	{
 		Erf() {	super("erf"); }
+		@Override
 		double erf(double x) { return gdsc.smlm.function.Erf.erf(x); }
+		@Override
 		double erf(double x1, double x2) { return gdsc.smlm.function.Erf.erf(x1, x2); }
 	}
 	private class Erf0 extends BaseErf
 	{
 		Erf0() { super("erf0"); }
+		@Override
 		double erf(double x) { return gdsc.smlm.function.Erf.erf0(x); }
+		@Override
 		double erf(double x1, double x2) { return gdsc.smlm.function.Erf.erf0(x1, x2); }
 	}
 	private class Erf2 extends BaseErf
 	{
 		Erf2() { super("erf2"); }
+		@Override
 		double erf(double x) { return gdsc.smlm.function.Erf.erf2(x); }
+		@Override
 		double erf(double x1, double x2) { return gdsc.smlm.function.Erf.erf2(x1, x2); }
 	}
 	//@formatter:on
@@ -332,16 +340,19 @@ public class ErfTest
 			this.x = x;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			for (int i = 0; i < x.length; i++)
@@ -518,31 +529,37 @@ public class ErfTest
 	private class MathPow4 extends BasePow
 	{
 		MathPow4() {	super("Math pow4"); }
+		@Override
 		double pow(double x) { return Math.pow(x, 4); }
 	}
 	private class FastMathPow4 extends BasePow
 	{
 		FastMathPow4() {	super("FastMath pow4"); }
+		@Override
 		double pow(double x) { return FastMath.pow(x, 4L); }
 	}
 	private class Pow4 extends BasePow
 	{
 		Pow4() {	super("pow4"); }
+		@Override
 		double pow(double x) { return gdsc.smlm.function.Erf.pow4(x); }
 	}
 	private class MathPow16 extends BasePow
 	{
 		MathPow16() {	super("Math pow16"); }
+		@Override
 		double pow(double x) { return Math.pow(x, 16); }
 	}
 	private class FastMathPow16 extends BasePow
 	{
 		FastMathPow16() {	super("FastMath pow16"); }
+		@Override
 		double pow(double x) { return FastMath.pow(x, 16); }
 	}
 	private class Pow16 extends BasePow
 	{
 		Pow16() {	super("pow16"); }
+		@Override
 		double pow(double x) { return gdsc.smlm.function.Erf.pow16(x); }
 	}
 	//@formatter:on
@@ -559,16 +576,19 @@ public class ErfTest
 			this.x = x;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			for (int i = 0; i < x.length; i++)

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Implements an astigmatism model of a 2D Gaussian function, where z-depth determines the x and y width. This is a
  * simple quadratic model where the z-depth for the width at 1.5 can be specified.
@@ -123,6 +122,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double)
 	 */
+	@Override
 	public double getSx(double z)
 	{
 		return getS(z - gamma, zDepth);
@@ -133,6 +133,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double, double[])
 	 */
+	@Override
 	public double getSx(double z, double[] ds_dz)
 	{
 		return getS1(z - gamma, zDepth, ds_dz);
@@ -143,6 +144,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSx2(double, double[])
 	 */
+	@Override
 	public double getSx2(double z, double[] ds_dz)
 	{
 		return getS2(z - gamma, ds_dz);
@@ -153,6 +155,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double)
 	 */
+	@Override
 	public double getSy(double z)
 	{
 		return getS(z + gamma, zDepth);
@@ -163,6 +166,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double, double[])
 	 */
+	@Override
 	public double getSy(double z, double[] ds_dz)
 	{
 		return getS1(z + gamma, zDepth, ds_dz);
@@ -173,6 +177,7 @@ public class QuadraticAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSy2(double, double[])
 	 */
+	@Override
 	public double getSy2(double z, double[] ds_dz)
 	{
 		return getS2(z + gamma, ds_dz);

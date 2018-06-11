@@ -29,7 +29,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 
-
 /**
  * Container for the Fisher information, a symmetric positive definite matrix containing the amount of information that
  * an observable random variable X carries about an unknown parameter θ of a distribution that models X.

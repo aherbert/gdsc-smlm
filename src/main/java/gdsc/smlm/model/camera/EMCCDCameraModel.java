@@ -25,7 +25,6 @@ package gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
 
-
 /**
  * An EM-CCD camera model with all pixels treated equally.
  *
@@ -144,6 +143,7 @@ public class EMCCDCameraModel extends FixedPixelCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
+	@Override
 	public EMCCDCameraModel copy()
 	{
 		return clone();

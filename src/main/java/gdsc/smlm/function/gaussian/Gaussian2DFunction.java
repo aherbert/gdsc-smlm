@@ -34,7 +34,6 @@ import gdsc.smlm.function.NoiseModel;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.utils.Pair;
 
-
 /**
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
@@ -112,6 +111,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.NamedFunction#getParameterName(int)
 	 */
+	@Override
 	public String getParameterName(int i)
 	{
 		return getName(i);
@@ -259,6 +259,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int)
 	 */
+	@Override
 	public abstract double eval(final int x);
 
 	/**
@@ -278,6 +279,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
 	 */
+	@Override
 	public abstract double eval(final int x, final double[] dyda);
 
 	/**
@@ -287,6 +289,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 *             if the noise model is null
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, float[], float[])
 	 */
+	@Override
 	public double eval(final int x, final double[] dyda, final double[] w) throws NullPointerException
 	{
 		final double value = eval(x, dyda);
@@ -303,6 +306,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 *             if the noise model is null
 	 * @see gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
 	 */
+	@Override
 	public double evalw(int x, double[] w)
 	{
 		final double value = eval(x);
@@ -336,6 +340,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
 	 */
+	@Override
 	public boolean canComputeWeights()
 	{
 		return (noiseModel != null);
@@ -415,6 +420,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
+	@Override
 	public double[] computeValues(double[] variables)
 	{
 		initialise0(variables);
@@ -423,6 +429,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		{
 			int i = 0;
 
+			@Override
 			public void execute(double value)
 			{
 				values[i++] = value;
@@ -448,6 +455,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
 	 */
+	@Override
 	public double[][] computeJacobian(double[] variables)
 	{
 		return computeValuesAndJacobian(variables).b;
@@ -458,6 +466,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
 	 */
+	@Override
 	public boolean canComputeValuesAndJacobian()
 	{
 		return true;
@@ -468,6 +477,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
 	 */
+	@Override
 	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
 	{
 		initialise1(variables);
@@ -478,6 +488,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 		{
 			int i = 0;
 
+			@Override
 			public void execute(double value, double[] dy_da)
 			{
 				values[i] = value;
@@ -492,6 +503,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#size()
 	 */
+	@Override
 	public int size()
 	{
 		return maxx * maxy;
@@ -502,6 +514,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
+	@Override
 	public int getNumberOfGradients()
 	{
 		return gradientIndices().length;
@@ -512,6 +525,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.ValueProcedure)
 	 */
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		for (int i = 0, n = size(); i < n; i++)
@@ -523,6 +537,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -538,6 +553,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
+	@Override
 	public void initialise0(double[] a)
 	{
 		// TODO - Update these functions to support initialisation
@@ -550,6 +566,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		initialise(a);

@@ -32,7 +32,6 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import gdsc.smlm.utils.ImageConverter;
 
-
 /**
  * Abstract base class for the image source for peak results.
  */
@@ -183,7 +182,7 @@ public abstract class ImageSource
 	{
 		return height;
 	}
-	
+
 	/**
 	 * Gets the bounds. This just uses the X and Y origin and the width and height.
 	 *

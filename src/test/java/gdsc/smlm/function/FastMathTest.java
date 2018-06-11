@@ -37,8 +37,11 @@ public class FastMathTest
 	{
 		double[] data;
 		FunctionTimingTask(String name, double[] data) { super(name); this.data = data; }
+		@Override
 		public int getSize() { return 1; }
+		@Override
 		public Object getData(int i) { return null;	}
+		@Override
 		public Object run(Object o)
 		{
 			for (int i=0; i<data.length; i++)
@@ -98,7 +101,7 @@ public class FastMathTest
 		int size = ts.getSize();
 		ts.repeat(size);
 		ts.report();
-		
+
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
 	}

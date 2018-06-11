@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine;
 
-
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -44,6 +43,7 @@ class CandidateList
 		 * 
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public int compare(Candidate o1, Candidate o2)
 		{
 			return o1.index - o2.index;

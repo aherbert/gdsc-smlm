@@ -23,10 +23,10 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Specifies a peak fitting result for use in filtering. Any result implementing this interface can be directly filtered
- * without requiring the filter to be initialised with calibration data. This result can be assigned matches to actual data.
+ * without requiring the filter to be initialised with calibration data. This result can be assigned matches to actual
+ * data.
  */
 public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 {
@@ -37,11 +37,12 @@ public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 	 *            The assignments
 	 */
 	void setAssignments(ResultAssignment[] assignments);
-	
+
 	/**
 	 * Sets the ignore flag. If true then the result should be ignored from the total counts when scoring.
 	 *
-	 * @param ignore the new ignore flag
+	 * @param ignore
+	 *            the new ignore flag
 	 */
-	void setIgnore(boolean ignore);	
+	void setIgnore(boolean ignore);
 }

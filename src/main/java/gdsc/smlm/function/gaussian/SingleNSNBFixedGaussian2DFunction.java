@@ -25,7 +25,6 @@ package gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
@@ -83,6 +82,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		background = a[BACKGROUND];
@@ -107,8 +107,10 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	 * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x, final double[] dyda)
 	{
 		// Unpack the predictor into the dimensions
@@ -136,8 +138,10 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	 * Evaluates an 2-dimensional fixed circular Gaussian function for a single peak.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x)
 	{
 		// Unpack the predictor into the dimensions
@@ -203,6 +207,7 @@ public class SingleNSNBFixedGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;

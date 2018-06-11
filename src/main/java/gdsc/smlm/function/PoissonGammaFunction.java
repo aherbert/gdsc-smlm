@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Implements the probability density function for a Poisson-Gamma Mixture.
  * <p>
@@ -561,6 +560,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
+	@Override
 	public double likelihood(final double o, final double e)
 	{
 		return poissonGamma(o, e, m);
@@ -571,6 +571,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * 
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
+	@Override
 	public double logLikelihood(double o, double e)
 	{
 		return logPoissonGamma(o, e, m);
@@ -581,6 +582,7 @@ public class PoissonGammaFunction implements LikelihoodFunction, LogLikelihoodFu
 	 * 
 	 * @see gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
 	 */
+	@Override
 	public double likelihood(double o, double t, double[] dp_dt)
 	{
 		return poissonGamma(o, t, m, dp_dt);

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ga;
 
-
 /**
  * Defines recombination crossover of a chromosome pair
  */

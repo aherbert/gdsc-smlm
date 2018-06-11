@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 /**
  * Represent a named results source providing data from memory.
  */

@@ -28,7 +28,6 @@ import java.awt.Rectangle;
 
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DifferenceSpotFilter;
@@ -72,6 +71,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		if (arg.equals("final"))
@@ -106,12 +106,13 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		// Note: We cannot use a NonBlockinnericDialog as scrolling through the image
 		// throws away the snap shot. The pixel data for the previous slice is then fixed
 		// with the preview. So we can only support a single slice.
-		
+
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
@@ -137,6 +138,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		filter1 = gd.getNextChoiceIndex();
@@ -154,6 +156,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		Rectangle bounds = ip.getRoi();
@@ -194,6 +197,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Nothing to do		

@@ -31,7 +31,6 @@ import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.GradientFunction;
 
-
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a).
  */
@@ -298,11 +297,11 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	{
 		return initialLambda;
 	}
-	
+
 	@Override
 	public void setGradientFunction(GradientFunction f)
 	{
 		super.setGradientFunction(f);
 		gradientProcedure = null;
-	}	
+	}
 }

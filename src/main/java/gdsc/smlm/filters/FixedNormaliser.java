@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Defines normalisation of an area around a point using a fixed normalisation
  */
@@ -52,6 +51,7 @@ public class FixedNormaliser implements Normaliser
 	 *            the index
 	 * @return the normalised value
 	 */
+	@Override
 	public float normalise(double sum, int index)
 	{
 		return (float) (sum / normalisation);
@@ -66,6 +66,7 @@ public class FixedNormaliser implements Normaliser
 	 *            the index
 	 * @return the normalised value
 	 */
+	@Override
 	public float normalise(float sum, int index)
 	{
 		return sum / normalisation;
@@ -76,6 +77,7 @@ public class FixedNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int)
 	 */
+	@Override
 	public void normalise(float[] data, int size)
 	{
 		for (int i = 0; i < size; i++)
@@ -87,6 +89,7 @@ public class FixedNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
 	 */
+	@Override
 	public void normalise(float[] data, float[] out, int size)
 	{
 		for (int i = 0; i < size; i++)
@@ -98,6 +101,7 @@ public class FixedNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
 	 */
+	@Override
 	public void normalise(float[] data, int maxx, int maxy, int border)
 	{
 		int xlimit = maxx - border;
@@ -116,6 +120,7 @@ public class FixedNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
 	 */
+	@Override
 	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
 	{
 		int xlimit = maxx - border;
@@ -134,6 +139,7 @@ public class FixedNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
 	 */
+	@Override
 	public void normalise(double[] data, float[] out, int size)
 	{
 		for (int i = 0; i < size; i++)
@@ -145,6 +151,7 @@ public class FixedNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
 	 */
+	@Override
 	public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
 	{
 		int xlimit = maxx - border;

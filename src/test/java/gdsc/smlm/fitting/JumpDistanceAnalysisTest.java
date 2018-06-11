@@ -93,6 +93,7 @@ public class JumpDistanceAnalysisTest
 			double x = d / 8;
 			UnivariateFunction func = new UnivariateFunction()
 			{
+				@Override
 				public double value(double x)
 				{
 					return fp.evaluate(x, params);
@@ -128,6 +129,7 @@ public class JumpDistanceAnalysisTest
 				double x = d / 8;
 				UnivariateFunction func = new UnivariateFunction()
 				{
+					@Override
 					public double value(double x)
 					{
 						return fp.evaluate(x, params);
@@ -219,7 +221,7 @@ public class JumpDistanceAnalysisTest
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
 		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
-		
+
 		String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
 		AssertionError error = null;
 		for (int i = 0; i < D.length; i++)
@@ -256,7 +258,7 @@ public class JumpDistanceAnalysisTest
 	{
 		// Skip this as it is slow
 		Assume.assumeTrue(false);
-		
+
 		out = null;
 		try
 		{
@@ -553,6 +555,7 @@ public class JumpDistanceAnalysisTest
 				this.f[i] = f[i] / sum;
 		}
 
+		@Override
 		public boolean equals(Object obj)
 		{
 			if (!(obj instanceof DataSample))

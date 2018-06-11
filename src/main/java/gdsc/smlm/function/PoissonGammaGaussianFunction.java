@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.CustomSimpsonIntegrator;
@@ -115,6 +114,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 			this.e = e;
 		}
 
+		@Override
 		public double value(double u)
 		{
 			i++;
@@ -196,6 +196,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
+	@Override
 	public double likelihood(final double o, final double e)
 	{
 		// This did not speed up MLE fitting so has been commented out.
@@ -303,7 +304,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 				// Make this an option. For now just set to true as this mode should not be used 
 				// anyway. The Simpson integrator should be faster.
 				boolean doSimpson = true;
-				
+
 				double pg;
 				// This is the CDF of the Gaussian
 				double g;
@@ -318,9 +319,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					// Upper = 0.5
 					pg = PoissonGammaFunction.poissonGammaN(0.5, p, m);
 					g = gaussianErf(0.5 - o);
-					double sum = (doSimpson) 
-							? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
-							: (prevPG + pg) / 4; 
+					double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(0.25, e, m)) / 12
+							: (prevPG + pg) / 4;
 					p += sum * (g - prevG) / 2;
 					lower++;
 				}
@@ -338,9 +338,8 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 					final double prevG = g;
 					pg = PoissonGammaFunction.poissonGammaN(u + 0.5, e, m);
 					g = gaussianErf(u + 0.5 - o);
-					double sum = (doSimpson) 
-							? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
-							: (prevPG + pg) / 2; 
+					double sum = (doSimpson) ? (prevPG + pg + 4 * PoissonGammaFunction.poissonGammaN(u, e, m)) / 6
+							: (prevPG + pg) / 2;
 					p += sum * (g - prevG) / 2;
 				}
 			}
@@ -495,6 +494,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 	 * @see #likelihood(double, double)
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
+	@Override
 	public double logLikelihood(final double o, final double e)
 	{
 		return Math.log(likelihood(o, e));

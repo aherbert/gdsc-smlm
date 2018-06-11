@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -255,6 +254,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -309,7 +309,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			if (requireSNR)
 			{
 				tSnr = System.nanoTime();
-				data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null, data);
+				data = IJImageConverter.getData(stack.getPixels(frame), stack.getWidth(), stack.getHeight(), null,
+						data);
 				final int maxx = stack.getWidth();
 				final int maxy = stack.getHeight();
 				final ImageExtractor ie = new ImageExtractor(data, maxx, maxy);
@@ -517,6 +518,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -738,6 +740,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		progress = 0;
 		filterCandidates.forEachKey(new TIntProcedure()
 		{
+			@Override
 			public boolean execute(int value)
 			{
 				put(jobs, value);
@@ -806,6 +809,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		final int[] nX = new int[2];
 		filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
+			@Override
 			public boolean execute(int frame, FilterResult r)
 			{
 				// Determine the number of positives to find. This score may be fractional.
@@ -938,6 +942,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 			this.result = result;
 		}
 
+		@Override
 		public int compareTo(ScoredResult o)
 		{
 			if (score < o.score)
@@ -966,6 +971,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		final int[] counter2 = new int[2];
 		filterCandidates.forEachValue(new TObjectProcedure<FilterCandidates>()
 		{
+			@Override
 			public boolean execute(FilterCandidates result)
 			{
 				counter1[0] += result.np;
@@ -1019,6 +1025,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		final int[] counter = new int[1];
 		rankResults.forEachEntry(new TIntObjectProcedure<RankResults>()
 		{
+			@Override
 			public boolean execute(int a, RankResults b)
 			{
 				frames[counter[0]] = a;

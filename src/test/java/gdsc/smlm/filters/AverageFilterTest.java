@@ -169,8 +169,8 @@ public class AverageFilterTest
 		else
 		{
 			filter.filter(data2, width, height, boxSize);
-			floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %.1f", width, height, boxSize), data1,
-					data2, width, height, 0);
+			floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %.1f", width, height, boxSize), data1, data2,
+					width, height, 0);
 		}
 	}
 
@@ -195,11 +195,13 @@ public class AverageFilterTest
 	{
 		DataFilter filter = new DataFilter("block", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverage(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverageInternal(data, width, height, boxSize);
@@ -213,11 +215,13 @@ public class AverageFilterTest
 	{
 		DataFilter filter = new DataFilter("stripedBlock", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageInternal(data, width, height, boxSize);
@@ -231,11 +235,13 @@ public class AverageFilterTest
 	{
 		DataFilter filter = new DataFilter("rollingBlock", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.rollingBlockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
@@ -459,11 +465,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("block", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverageInternal(data, width, height, (int) boxSize);
@@ -471,11 +479,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageInternal(data, width, height, (int) boxSize);
@@ -491,11 +501,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("block", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverage(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverageInternal(data, width, height, boxSize);
@@ -503,11 +515,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageInternal(data, width, height, boxSize);
@@ -523,11 +537,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("block", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.blockAverageInternal(data, width, height, (int) boxSize);
@@ -535,11 +551,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("rollingBlock", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.rollingBlockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
@@ -555,11 +573,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlock", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageInternal(data, width, height, (int) boxSize);
@@ -567,11 +587,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("rollingBlock", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.rollingBlockAverage(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.rollingBlockAverageInternal(data, width, height, (int) boxSize);
@@ -587,11 +609,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
@@ -599,11 +623,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock3x3", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage3x3(data, width, height);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage3x3Internal(data, width, height);
@@ -620,11 +646,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxN(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
@@ -632,11 +660,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock3x3", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage3x3(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage3x3Internal(data, width, height, boxSize);
@@ -653,11 +683,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
@@ -665,11 +697,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock5x5", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage5x5(data, width, height);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage5x5Internal(data, width, height);
@@ -686,11 +720,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxN(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
@@ -698,11 +734,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock5x5", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage5x5(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage5x5Internal(data, width, height, boxSize);
@@ -719,11 +757,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlockNxN", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxN(data, width, height, (int) boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxNInternal(data, width, height, (int) boxSize);
@@ -731,11 +771,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock7x7", false)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage7x7(data, width, height);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage7x7Internal(data, width, height);
@@ -752,11 +794,13 @@ public class AverageFilterTest
 	{
 		DataFilter slow = new DataFilter("stripedBlockNxN", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxN(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverageNxNInternal(data, width, height, boxSize);
@@ -764,11 +808,13 @@ public class AverageFilterTest
 		};
 		DataFilter fast = new DataFilter("stripedBlock7x7", true)
 		{
+			@Override
 			public void filter(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage7x7(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(float[] data, int width, int height, float boxSize)
 			{
 				f.stripedBlockAverage7x7Internal(data, width, height, boxSize);
@@ -778,4 +824,5 @@ public class AverageFilterTest
 		int[] testBoxSizes = new int[] { 3 };
 		speedTest(fast, slow, testBoxSizes);
 		speedTestInternal(fast, slow, testBoxSizes);
-	}}
+	}
+}

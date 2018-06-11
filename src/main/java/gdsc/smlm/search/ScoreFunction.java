@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.search;
 
-
 /**
  * Calculate the optimum point within a search space
  */

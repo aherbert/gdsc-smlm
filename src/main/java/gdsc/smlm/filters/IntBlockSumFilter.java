@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes the sum of the neighbourhood for each point within the array using a rolling block algorithm.
  * <p>
@@ -494,6 +493,7 @@ public class IntBlockSumFilter extends BaseFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public IntBlockSumFilter clone()
 	{
 		IntBlockSumFilter o = (IntBlockSumFilter) super.clone();

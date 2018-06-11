@@ -77,6 +77,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -136,7 +137,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		String text;
 		try
 		{
-			text = XmlUtils.prettyPrintXml(filterSettings.getFreeFilter());
+			text = gdsc.core.utils.XmlUtils.prettyPrintXml(filterSettings.getFreeFilter());
 		}
 		catch (Exception e)
 		{
@@ -168,6 +169,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		return SettingsManager.writeSettings(filterSettings.build());
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		// When the checkbox is clicked, output the list of available filters to the ImageJ log

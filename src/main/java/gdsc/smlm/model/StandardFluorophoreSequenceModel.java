@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -199,6 +198,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel
 
 	/**
 	 * Get the number of blinks using the specified random data generator using a Poisson or Geometric distribution.
+	 * 
 	 * @param useGeometricBlinkingDistribution
 	 * @param rand
 	 * @param mean

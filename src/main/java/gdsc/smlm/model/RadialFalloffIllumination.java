@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Specifies the illumination with radial fall-off to simulate a wide field
  * confocal microscope.
@@ -76,6 +75,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
 	 * 
 	 * @see gdsc.smlm.model.SpatialIllumination#getPhotons(double[])
 	 */
+	@Override
 	public double getPhotons(double[] xyz)
 	{
 		return photons * getIntensity(xyz);
@@ -98,6 +98,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
 	 * 
 	 * @see gdsc.smlm.model.SpatialIllumination#getPulsedPhotons(double[], int)
 	 */
+	@Override
 	public double[] getPulsedPhotons(double[] xyz, int t)
 	{
 		final double intensity = getIntensity(xyz);
@@ -114,6 +115,7 @@ public class RadialFalloffIllumination implements SpatialIllumination
 	 * @return The average intensity from the centre to the radius (specified in
 	 *         the constructor)
 	 */
+	@Override
 	public double getAveragePhotons()
 	{
 		// This should be the integral of the getIntensity() score from r = 0 ..

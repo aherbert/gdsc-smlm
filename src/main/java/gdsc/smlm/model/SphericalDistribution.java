@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
@@ -60,6 +59,7 @@ public class SphericalDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
+	@Override
 	public double[] next()
 	{
 		double[] xyz = new double[3];
@@ -114,6 +114,7 @@ public class SphericalDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
+	@Override
 	public boolean isWithin(double[] xyz)
 	{
 		final double[] delta = { xyz[0] - origin[0], xyz[1] - origin[1], xyz[2] - origin[2] };
@@ -125,6 +126,7 @@ public class SphericalDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
+	@Override
 	public boolean isWithinXY(double[] xyz)
 	{
 		final double[] delta = { xyz[0] - origin[0], xyz[1] - origin[1] };
@@ -156,6 +158,7 @@ public class SphericalDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] xyz)
 	{
 		if (xyz != null && xyz.length > 2)

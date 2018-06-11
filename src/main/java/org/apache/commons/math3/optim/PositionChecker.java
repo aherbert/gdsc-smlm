@@ -27,8 +27,7 @@ package org.apache.commons.math3.optim;
 /**
  * Check if the position has converged
  */
-public class PositionChecker extends SimplePointChecker<PointValuePair>
-		implements OptimizationData
+public class PositionChecker extends SimplePointChecker<PointValuePair> implements OptimizationData
 {
 	/**
 	 * Build an instance with specified thresholds.

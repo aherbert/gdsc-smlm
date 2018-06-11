@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a configured number of peaks.
  * <p>
@@ -65,8 +64,10 @@ public class NBEllipticalGaussian2DFunction extends EllipticalGaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x, final double[] dyda)
 	{
 		// Track the position of the parameters

@@ -58,7 +58,6 @@ import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.CurveLogger;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -72,6 +71,7 @@ import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -157,6 +157,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1314,6 +1315,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					.target(function.getY())
 					.weight(new DiagonalMatrix(function.getWeights()))
 					.model(function, new MultivariateMatrixFunction() {
+						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
@@ -1364,6 +1366,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					.target(function.getY())
 					.weight(new DiagonalMatrix(function.getWeights()))
 					.model(function, new MultivariateMatrixFunction() {
+						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
@@ -1436,6 +1439,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 						.target(function.getY())
 						.weight(new DiagonalMatrix(function.getWeights()))
 						.model(function, new MultivariateMatrixFunction() {
+							@Override
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return function.jacobian(point);
@@ -1567,6 +1571,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			double[] values = new double[x.length];
@@ -1651,6 +1656,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			// y = ax + 4c^2
@@ -1739,6 +1745,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			// When x>=1:
@@ -1848,11 +1855,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		return fit;
 	}
 
+	@Override
 	public int getNumberOfCurvePoints()
 	{
 		return 300;
 	}
 
+	@Override
 	public void saveSinglePopulationCurve(double[][] curve)
 	{
 		double[] x = curve[0];
@@ -1862,6 +1871,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		addToJumpDistancePlot(x, y, Color.magenta);
 	}
 
+	@Override
 	public void saveMixedPopulationCurve(double[][] curve)
 	{
 		double[] x = curve[0];
@@ -1874,7 +1884,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private void addToJumpDistancePlot(double[] x, double[] y, Color color)
 	{
 		jdPlot.setColor(color);
-		jdPlot.addPoints(x, y, Plot2.LINE);
+		jdPlot.addPoints(x, y, Plot.LINE);
 		display(jdTitle, jdPlot);
 	}
 

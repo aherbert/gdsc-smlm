@@ -25,6 +25,7 @@ package gdsc.smlm.function.cspline;
 
 public class MultiCubicSplineFunctionTest extends CubicSplineFunctionTest
 {
+	@Override
 	protected void init()
 	{
 		f1 = new MultiCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);

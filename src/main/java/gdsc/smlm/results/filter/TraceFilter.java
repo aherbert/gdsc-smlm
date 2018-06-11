@@ -29,7 +29,6 @@ import java.util.Set;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -44,7 +43,7 @@ public class TraceFilter extends Filter
 	private static final int DEFAULT_TIME_INCREMENT = 1;
 	private static final double DEFAULT_DISTANCE_RANGE = 2;
 	private static final int DEFAULT_TIME_RANGE = 10;
-	
+
 	@XStreamAsAttribute
 	final double d;
 	@XStreamAsAttribute
@@ -141,8 +140,10 @@ public class TraceFilter extends Filter
 				return t;
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
 	 */
 	@Override
@@ -175,7 +176,7 @@ public class TraceFilter extends Filter
 				return ParameterType.TIME_THRESHOLD;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -222,6 +223,7 @@ public class TraceFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_DISTANCE_RANGE, DEFAULT_TIME_RANGE };

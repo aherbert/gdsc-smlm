@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes the mean using a circular mask.
  * <p>
@@ -61,6 +60,7 @@ public class CircularMeanFilter extends CircularFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public CircularMeanFilter clone()
 	{
 		CircularMeanFilter o = (CircularMeanFilter) super.clone();

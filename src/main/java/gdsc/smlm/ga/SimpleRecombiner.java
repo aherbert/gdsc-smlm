@@ -30,7 +30,6 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import gdsc.core.utils.SimpleArrayUtils;
 
-
 /**
  * Recombine sequence by selecting random positions for crossover.
  */
@@ -66,6 +65,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 	 * 
 	 * @see gdsc.smlm.ga.Recombiner#cross(gdsc.smlm.ga.Chromosome<T>, gdsc.smlm.ga.Chromosome<T>)
 	 */
+	@Override
 	public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2)
 	{
 		int nChildren = 1;
@@ -103,7 +103,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 		RandomGenerator ran = random.getRandomGenerator();
 		for (int i = positions.length, n = nCrossovers; i-- > 1 && n-- > 0;)
 		{
-			int j = (int) (ran.nextInt(i + 1));
+			int j = (ran.nextInt(i + 1));
 			int tmp = positions[i];
 			positions[i] = positions[j];
 			positions[j] = tmp;

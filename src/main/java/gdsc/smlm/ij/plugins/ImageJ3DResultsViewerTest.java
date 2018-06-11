@@ -30,6 +30,7 @@ import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Shape3D;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.java3d.View;
+import org.scijava.java3d.utils.geometry.Primitive;
 import org.scijava.java3d.utils.geometry.Sphere;
 import org.scijava.vecmath.Point3f;
 
@@ -80,6 +81,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 		// has not been created.
 		java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>()
 		{
+			@Override
 			public String run()
 			{
 				return System.setProperty("j3d.sortShape3DBounds", Boolean.toString(true));
@@ -103,6 +105,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		if (version == null)
@@ -135,8 +138,9 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 				ItemMesh mesh = new ReferenceItemMesh(new Point3f[] { new Point3f(x, y, 0) },
 						(GeometryArray) shape.getGeometry(), a, null, null, 0f);
 
-				System.out.printf("R=%s %s  Vc=%d  V=%d  T=%d\n", rendering, shape.getGeometry().getClass().getSimpleName(),
-						mesh.getVerticesCountPerItem(), mesh.getVerticesPerItem(), Shape3DHelper.getNumberOfTriangles(rendering));
+				System.out.printf("R=%s %s  Vc=%d  V=%d  T=%d\n", rendering,
+						shape.getGeometry().getClass().getSimpleName(), mesh.getVerticesCountPerItem(),
+						mesh.getVerticesPerItem(), Shape3DHelper.getNumberOfTriangles(rendering));
 
 				if (rendering == Rendering.POINT)
 					a.getPointAttributes().setPointSize(10);
@@ -198,7 +202,7 @@ public class ImageJ3DResultsViewerTest implements PlugIn
 			for (int d = 4; d < 50; d += 4)
 			{
 				// This is a triangle strip array so is more space efficient
-				Sphere s = new Sphere(1, Sphere.GENERATE_NORMALS, d);
+				Sphere s = new Sphere(1, Primitive.GENERATE_NORMALS, d);
 				int t = s.getNumTriangles();
 				System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), t);
 

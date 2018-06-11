@@ -34,7 +34,6 @@ import gdsc.smlm.fitting.nonlinear.gradient.WPoissonGradientProcedureFactory;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using weighted least squares
  * estimation.
@@ -136,9 +135,9 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	protected FisherInformationMatrix computeFisherInformationMatrix(double[] yFit)
 	{
 		// Get the values if necessary
-		if (yFit != null && yFit.length == ((Gradient1Function)f).size())
+		if (yFit != null && yFit.length == ((Gradient1Function) f).size())
 			computeValues(yFit);
-		
+
 		// TODO. Check if these deviations are correct.
 		// Note: Huang et al (2015) compute:
 		// Iab = 1 / (uk + var/g^2) * duda * dudb
@@ -169,6 +168,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	 * 
 	 * @see gdsc.smlm.fitting.WLSEFunctionSolver#getChiSquared()
 	 */
+	@Override
 	public double getChiSquared()
 	{
 		return value;
@@ -179,6 +179,7 @@ public class WLSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver imp
 	 * 
 	 * @see gdsc.smlm.fitting.WLSEFunctionSolver#getQ()
 	 */
+	@Override
 	public double getQ()
 	{
 		// Value will be the Chi-squared

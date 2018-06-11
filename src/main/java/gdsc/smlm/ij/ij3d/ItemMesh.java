@@ -43,7 +43,6 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
-
 import customnode.CustomMesh;
 import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.Maths;
@@ -781,6 +780,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
 	 */
+	@Override
 	public void reorder(int[] indices) throws IllegalArgumentException
 	{
 		ItemPointMesh.checkIndices(indices, points.length);
@@ -792,6 +792,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		changed = true;
@@ -856,6 +857,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 		ga.updateData(new GeometryUpdater()
 		{
+			@Override
 			public void updateData(Geometry geometry)
 			{
 				GeometryArray ga = (GeometryArray) geometry;
@@ -909,6 +911,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
 	 */
+	@Override
 	public int size()
 	{
 		return points.length;
@@ -919,6 +922,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
 	 */
+	@Override
 	public Point3f getCoordinate(int i)
 	{
 		return points[i];
@@ -942,6 +946,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		if (color == null)
@@ -988,6 +993,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		if (!hasColor())
@@ -1044,6 +1050,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
+	@Override
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		if (!hasColor4())
@@ -1071,6 +1078,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
 	 */
+	@Override
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		if (!hasColor4())
@@ -1101,6 +1109,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
 	 */
+	@Override
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
 		if (!hasColor4())
@@ -1129,6 +1138,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
 	 */
+	@Override
 	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		if (!hasColor4())

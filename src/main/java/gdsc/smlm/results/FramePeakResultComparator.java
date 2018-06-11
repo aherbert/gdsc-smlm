@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import java.util.Comparator;
 
-
 /**
  * Compares the results by frame
  */
@@ -39,6 +38,7 @@ public class FramePeakResultComparator implements Comparator<PeakResult>
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public int compare(PeakResult o1, PeakResult o2)
 	{
 		// Sort by frame

@@ -28,7 +28,6 @@ import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
 
-
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
@@ -58,12 +57,13 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	{
 		return new SingleNBFreeCircularErfGaussian2DFunction(maxx, maxy);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda)
 	{
 		// Unpack the predictor into the dimensions
@@ -86,6 +86,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
 		// Unpack the predictor into the dimensions
@@ -155,6 +156,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
@@ -165,6 +167,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
+	@Override
 	public int getNumberOfGradients()
 	{
 		return 5;
@@ -175,6 +178,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.ValueProcedure)
 	 */
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		if (tB == 0)
@@ -202,6 +206,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -227,6 +232,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -259,6 +265,7 @@ public class SingleNBFreeCircularErfGaussian2DFunction extends SingleFreeCircula
 	 * 
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
+	@Override
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		final int n = getNumberOfGradients();

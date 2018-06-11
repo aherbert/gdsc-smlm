@@ -29,7 +29,6 @@ import java.util.Arrays;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 
-
 /**
  * Base class for the camera model
  *

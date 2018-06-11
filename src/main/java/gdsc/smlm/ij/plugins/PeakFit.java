@@ -144,7 +144,6 @@ import ij.process.LUT;
 import ij.process.LUTHelper;
 import ij.process.LUTHelper.LutColour;
 
-
 /**
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits
  * fail to meet the fit criteria.
@@ -268,6 +267,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -301,6 +301,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			final FrameCounter counter = new FrameCounter(singleFrame);
 			results.forEach(new PeakResultProcedureX()
 			{
+				@Override
 				public boolean execute(PeakResult peakResult)
 				{
 					// The counter will return true (stop execution) if a new frame
@@ -493,6 +494,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		{
 			private static final long serialVersionUID = 275144634537614122L;
 
+			@Override
 			public void approveSelection()
 			{
 				if (getSelectedFile().isFile())
@@ -657,7 +659,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// This is added first as it cannot be closed. If the table is closed then the
 		// number of results at the end is reported incorrectly.
 		addMemoryResults(results, false);
-		
+
 		addTableResults(results);
 		ResultsManager.addImageResults(results, resultsSettings.getResultsImageSettings(), bounds,
 				(extraOptions) ? ResultsManager.FLAG_EXTRA_OPTIONS : 0);
@@ -842,6 +844,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		FitConfigurationProvider fitConfigurationProvider = new FitConfigurationProvider()
 		{
+			@Override
 			public FitConfiguration getFitConfiguration()
 			{
 				return fitConfig;
@@ -850,6 +853,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
 		{
+			@Override
 			public FitEngineConfiguration getFitEngineConfiguration()
 			{
 				return config;
@@ -925,10 +929,10 @@ public class PeakFit implements PlugInFilter, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
-			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
-			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
-			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			Vector<TextField> texts = gd.getStringFields();
+			Vector<TextField> numerics = gd.getNumericFields();
+			Vector<Checkbox> checkboxes = gd.getCheckboxes();
+			Vector<Choice> choices = gd.getChoices();
 
 			int n = 0;
 			int t = 0;
@@ -1143,11 +1147,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		addCameraOptions(gd, options, new CalibrationProvider()
 		{
+			@Override
 			public Calibration getCalibration()
 			{
 				return fitConfig.getCalibration();
 			}
 
+			@Override
 			public void saveCalibration(Calibration calibration)
 			{
 				fitConfig.mergeCalibration(calibration);
@@ -1183,11 +1189,13 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		addCameraOptions(gd, options, new PeakFit.CalibrationProvider()
 		{
+			@Override
 			public Calibration getCalibration()
 			{
 				return calibrationWriter.getCalibration();
 			}
 
+			@Override
 			public void saveCalibration(Calibration calibration)
 			{
 				calibrationWriter.mergeCalibration(calibration);
@@ -1220,6 +1228,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
 				CalibrationProtosHelper.getName(calibration.getCameraType()), new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer field)
 					{
 						CalibrationWriter calibration = new CalibrationWriter(calibrationProvider.getCalibration());
@@ -1233,6 +1242,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						return result;
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -1336,6 +1346,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			this.c = c;
 		}
 
+		@Override
 		public FitEngineConfiguration getFitEngineConfiguration()
 		{
 			return c;
@@ -1351,6 +1362,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			this.c = c;
 		}
 
+		@Override
 		public FitConfiguration getFitConfiguration()
 		{
 			return c;
@@ -1391,6 +1403,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addChoice("PSF", getPSFTypeNames(), PSFProtosHelper.getName(fitConfig.getPSFType()),
 				new OptionListener<Integer>()
 				{
+					@Override
 					public boolean collectOptions(Integer field)
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
@@ -1399,6 +1412,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						return result;
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -1518,12 +1532,14 @@ public class PeakFit implements PlugInFilter, ItemListener
 		final String label = rp.getDialogName();
 		gd.addSlider(label, rp.getMin(), rp.getMax(), rp.getValue(), new OptionListener<Double>()
 		{
+			@Override
 			public boolean collectOptions(Double value)
 			{
 				// Nothing depends on the input double value so just collect the options
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -1558,6 +1574,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		gd.addOptionCollectedListener(new OptionCollectedListener()
 		{
+			@Override
 			public void optionCollected(OptionCollectedEvent e)
 			{
 				if (label.equals(e.getLabel()))
@@ -1785,6 +1802,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		gd.addNumericField("Precision", fitConfigurationProvider.getFitConfiguration().getPrecisionThreshold(), 2,
 				new OptionListener<Double>()
 				{
+					@Override
 					public boolean collectOptions(Double field)
 					{
 						FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
@@ -1793,6 +1811,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 						return result;
 					}
 
+					@Override
 					public boolean collectOptions()
 					{
 						return collectOptions(true);
@@ -2074,6 +2093,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
 			gd.addAndGetButton("Run PSF calculator", new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent e)
 				{
 					// Run the PSF Calculator
@@ -2094,6 +2114,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		return true;
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getSource() instanceof Choice)
@@ -2181,7 +2202,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	private void enableEditing(TextField textField)
 	{
 		textField.setEditable(true);
-		textField.setBackground(SystemColor.white);
+		textField.setBackground(Color.white);
 	}
 
 	private boolean readDialog(ExtendedGenericDialog gd, boolean isCrop)
@@ -2421,7 +2442,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	{
 		return configurePSFModel(config, FLAG_NO_SAVE);
 	}
-	
+
 	/**
 	 * Show a dialog to configure the PSF model. The updated settings are saved to the settings file.
 	 * <p>
@@ -2566,7 +2587,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			xml = fitConfig.getDefaultSmartFilterXML();
 
 		gd.addMessage("Smart filter (used to pick optimum results during fitting)");
-		gd.addTextAreas(XmlUtils.convertQuotes(xml), null, 8, 60);
+		gd.addTextAreas(gdsc.core.utils.XmlUtils.convertQuotes(xml), null, 8, 60);
 		// Add message about precision filtering
 		gd.addMessage(TextUtils.wrap("Note: Smart filters using precision may require a local background level. " +
 				"Ensure the camera calibration is correct including any bias.", 80));
@@ -2576,7 +2597,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			return false;
 
 		xml = gd.getNextText();
-		Filter f = DirectFilter.fromXML(xml);
+		Filter f = Filter.fromXML(xml);
 		if (f == null || !(f instanceof DirectFilter))
 			return false;
 
@@ -2635,6 +2656,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 
 		FitEngineConfigurationProvider fitEngineConfigurationProvider = new FitEngineConfigurationProvider()
 		{
+			@Override
 			public FitEngineConfiguration getFitEngineConfiguration()
 			{
 				return config;
@@ -3300,6 +3322,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		if (source == null)
@@ -3361,6 +3384,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			final ImagePlus finalImp = imp;
 			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
+				@Override
 				public void executeXYR(float x, float y, PeakResult r)
 				{
 					PointRoi roi = new PointRoi(x, y);
@@ -3707,6 +3731,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 		final FrameCounter counter = new FrameCounter(results.getFirstFrame());
 		results.forEach(new PeakResultProcedureX()
 		{
+			@Override
 			public boolean execute(PeakResult r)
 			{
 				if (counter.advance(r.getFrame()))

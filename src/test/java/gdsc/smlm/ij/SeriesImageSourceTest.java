@@ -70,7 +70,7 @@ public class SeriesImageSourceTest
 	{
 		canReadBigTIFFSequentially(true, false);
 	}
-	
+
 	private void canReadBigTIFFSequentially(boolean inMemory, boolean intelByteOrder) throws IOException
 	{
 		int n = 2;

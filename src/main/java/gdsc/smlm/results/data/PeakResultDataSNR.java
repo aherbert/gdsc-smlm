@@ -25,7 +25,6 @@ package gdsc.smlm.results.data;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Gets the Signal-toNoise Ratio (SNR) from a result.
  */
@@ -36,6 +35,7 @@ public class PeakResultDataSNR extends PeakResultDataFloat
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValue(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public Float getValue(PeakResult result)
 	{
 		return result.getSNR();
@@ -46,6 +46,7 @@ public class PeakResultDataSNR extends PeakResultDataFloat
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
+	@Override
 	public String getValueName()
 	{
 		return "SNR";

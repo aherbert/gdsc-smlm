@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Contains methods for sampling the spatial position of a molecule.
  * <p>
@@ -61,7 +60,8 @@ public interface SpatialDistribution
 
 	/**
 	 * Initialise the distribution with a set of coordinates. This can be used before calls to
-	 * {@link #isWithin(double[])} or {@link #isWithinXY(double[])} if the implementation depends on knowing the original
+	 * {@link #isWithin(double[])} or {@link #isWithinXY(double[])} if the implementation depends on knowing the
+	 * original
 	 * coordinate location.
 	 * 
 	 * @param xyz

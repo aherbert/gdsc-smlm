@@ -34,7 +34,6 @@ import org.apache.commons.math3.random.RandomGenerator;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
-
 /**
  * Stores peak results using an array.
  */
@@ -93,6 +92,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#get(int)
 	 */
+	@Override
 	public PeakResult get(int index)
 	{
 		return results[index];
@@ -103,6 +103,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#size()
 	 */
+	@Override
 	public int size()
 	{
 		return size;
@@ -136,6 +137,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean add(PeakResult result)
 	{
 		checkCapacity(1);
@@ -148,6 +150,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addAll(java.util.Collection)
 	 */
+	@Override
 	public boolean addCollection(Collection<PeakResult> results)
 	{
 		return addArray(results.toArray(new PeakResult[results.size()]));
@@ -158,6 +161,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#addAll(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public boolean addArray(PeakResult[] results)
 	{
 		if (results == null)
@@ -173,6 +177,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#add(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public boolean addStore(PeakResultStore results)
 	{
 		if (results instanceof ArrayPeakResultStore)
@@ -190,6 +195,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int)
 	 */
+	@Override
 	public PeakResult remove(int index)
 	{
 		rangeCheck(index);
@@ -244,6 +250,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#remove(int, int)
 	 */
+	@Override
 	public void remove(int fromIndex, int toIndex)
 	{
 		if (fromIndex > toIndex)
@@ -266,6 +273,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean remove(PeakResult result)
 	{
 		int index = indexOf(result);
@@ -282,6 +290,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeAll(java.util.Collection)
 	 */
+	@Override
 	public boolean removeCollection(Collection<PeakResult> results)
 	{
 		return removeArray(results.toArray(new PeakResult[results.size()]));
@@ -292,6 +301,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeAll(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public boolean removeArray(PeakResult[] results)
 	{
 		if (results == null || results.length == 0)
@@ -304,6 +314,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#remove(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public boolean removeStore(PeakResultStore results)
 	{
 		if (results instanceof ArrayPeakResultStore)
@@ -354,6 +365,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#retainAll(java.util.Collection)
 	 */
+	@Override
 	public boolean retainCollection(Collection<PeakResult> results)
 	{
 		return retainArray(results.toArray(new PeakResult[results.size()]));
@@ -364,6 +376,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#retainArray(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public boolean retainArray(PeakResult[] results)
 	{
 		if (results == null || results.length == 0)
@@ -380,6 +393,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#retain(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public boolean retainStore(PeakResultStore results)
 	{
 		if (results instanceof ArrayPeakResultStore)
@@ -400,6 +414,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#clear()
 	 */
+	@Override
 	public void clear()
 	{
 		size = 0;
@@ -410,6 +425,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#trimToSize()
 	 */
+	@Override
 	public void trimToSize()
 	{
 		if (size < results.length)
@@ -421,6 +437,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#sort()
 	 */
+	@Override
 	public void sort()
 	{
 		Arrays.sort(results, 0, size);
@@ -431,6 +448,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
 	 */
+	@Override
 	public void sort(Comparator<PeakResult> comparator)
 	{
 		Arrays.sort(results, 0, size, comparator);
@@ -441,6 +459,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#toArray()
 	 */
+	@Override
 	public PeakResult[] toArray()
 	{
 		PeakResult[] array = new PeakResult[size];
@@ -453,6 +472,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#copy()
 	 */
+	@Override
 	public PeakResultStore copy()
 	{
 		return new ArrayPeakResultStore(this);
@@ -463,6 +483,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#copy(boolean)
 	 */
+	@Override
 	public PeakResultStore copy(boolean deepCopy)
 	{
 		if (deepCopy)
@@ -483,6 +504,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#removeIf(gdsc.smlm.results.predicates.PeakResultPredicate)
 	 */
+	@Override
 	public boolean removeIf(PeakResultPredicate filter)
 	{
 		Objects.requireNonNull(filter);
@@ -529,6 +551,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#forEach(gdsc.smlm.results.procedures.PeakResultProcedure)
 	 */
+	@Override
 	public void forEach(PeakResultProcedure procedure)
 	{
 		for (int i = 0; i < size; i++)
@@ -540,6 +563,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#subset(gdsc.smlm.results.procedures.PeakResultPredicate)
 	 */
+	@Override
 	public PeakResult[] subset(PeakResultPredicate filter)
 	{
 		final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
@@ -554,6 +578,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#shuffle(org.apache.commons.math3.random.RandomGenerator)
 	 */
+	@Override
 	public void shuffle(RandomGenerator randomGenerator)
 	{
 		// Fisher-Yates shuffle
@@ -571,6 +596,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#indexOf(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public int indexOf(PeakResult result)
 	{
 		if (result == null)
@@ -593,6 +619,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#lastIndexOf(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public int lastIndexOf(PeakResult result)
 	{
 		if (result == null)
@@ -615,6 +642,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	 * 
 	 * @see gdsc.smlm.results.PeakResultStore#contains(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean contains(PeakResult result)
 	{
 		return indexOf(result) != -1;

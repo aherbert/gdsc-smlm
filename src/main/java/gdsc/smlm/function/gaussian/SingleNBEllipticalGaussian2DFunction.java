@@ -25,7 +25,6 @@ package gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
  * <p>
@@ -71,8 +70,10 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 	 * Evaluates an 2-dimensional elliptical Gaussian function for a single peak.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x, final double[] dyda)
 	{
 		// Unpack the predictor into the dimensions
@@ -104,7 +105,7 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 			dy_da[4] = y * (ny + cy * dy2);
 
 			dy_da[5] = y * (bb2 * dxy);
-			
+
 			return y;
 		}
 		else
@@ -120,7 +121,7 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 			dy_da[4] = y * (ny + ay * dx2 + by * dxy + cy * dy2);
 
 			dy_da[5] = y * (aa2 * dx2 + bb2 * dxy + cc2 * dy2);
-			
+
 			return y;
 		}
 	}
@@ -136,6 +137,7 @@ public class SingleNBEllipticalGaussian2DFunction extends SingleEllipticalGaussi
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;

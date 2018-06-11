@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.core.match.FractionalAssignment;
 
-
 /**
  * Specifies a peak fitting result for use in filtering. Any result implementing this interface can be directly filtered
  * without requiring the filter to be initialised with calibration data.
@@ -76,7 +75,7 @@ public interface PreprocessedPeakResult
 	 * @return The mean signal (in photons)
 	 */
 	float getMeanSignal();
-	
+
 	/**
 	 * Get the signal-to-noise ratio (SNR). This is ratio of the average signal value to the standard deviation of the
 	 * background. Ideally the standard deviation of the background is computed in the region around the centre.
@@ -85,7 +84,8 @@ public interface PreprocessedPeakResult
 	 * 
 	 * @return The SNR
 	 */
-	default float getSNR() {
+	default float getSNR()
+	{
 		return getMeanSignal() / getNoise();
 	}
 
@@ -95,7 +95,7 @@ public interface PreprocessedPeakResult
 	 * @return The noise (in photons)
 	 */
 	float getNoise();
-	
+
 	/**
 	 * The localisation variance using the noise estimate for the data to approximate the local noise
 	 * 

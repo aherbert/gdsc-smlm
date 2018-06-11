@@ -29,7 +29,6 @@ import java.util.Collection;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
-
 /**
  * Specifies the interface for saving peak fitting results
  */

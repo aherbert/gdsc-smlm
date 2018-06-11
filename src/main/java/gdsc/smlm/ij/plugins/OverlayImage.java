@@ -46,10 +46,11 @@ public class OverlayImage implements PlugIn
 	private static boolean transparent = true, replace = true;
 	private static String title = "";
 
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		addImage();
 	}
 

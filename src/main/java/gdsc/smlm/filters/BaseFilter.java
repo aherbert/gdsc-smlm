@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Contains common functionality for filters.
  */
@@ -34,6 +33,7 @@ public abstract class BaseFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public BaseFilter clone()
 	{
 		try

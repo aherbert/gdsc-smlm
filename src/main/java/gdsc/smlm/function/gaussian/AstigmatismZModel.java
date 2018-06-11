@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Implements a astigmatism model of a 2D Gaussian function, where z-depth determines the x and y width.
  */

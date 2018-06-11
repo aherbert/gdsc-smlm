@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine.filter;
 
-
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
 
@@ -33,8 +32,10 @@ import java.util.List;
  * Provides a system for filtering the fitted results using distance to a set of target coordinates.
  * <p>
  * Note that the target coordinates should be relative to the fitting region bounds, not the bounds of the data frame.
+ * 
  * @deprecated Filtering of the results is no longer supported
  */
+@Deprecated
 public abstract class ResultFilter
 {
 	protected List<float[]> filter;

@@ -34,7 +34,6 @@ import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 /**
  * Contains helper functions for the PSFProtos class.
  */

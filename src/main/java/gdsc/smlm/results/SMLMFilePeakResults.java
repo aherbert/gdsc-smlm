@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Saves the fit results to file
  */
@@ -120,6 +119,7 @@ public abstract class SMLMFilePeakResults extends FilePeakResults
 	/**
 	 * @return A line containing the file format version
 	 */
+	@Override
 	protected String getVersion()
 	{
 		StringBuilder sb = new StringBuilder();

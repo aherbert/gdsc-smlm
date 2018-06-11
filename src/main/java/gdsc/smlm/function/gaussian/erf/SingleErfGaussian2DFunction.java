@@ -25,7 +25,6 @@ package gdsc.smlm.function.gaussian.erf;
 
 import gdsc.smlm.function.ValueProcedure;
 
-
 /**
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
@@ -68,6 +67,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
+	@Override
 	public double eval(final int i)
 	{
 		// Unpack the predictor into the dimensions
@@ -88,6 +88,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
 	 */
+	@Override
 	public abstract double eval(final int i, final double[] duda);
 
 	/**
@@ -101,6 +102,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 *            Partial second gradient of function with respect to each coefficient
 	 * @return The predicted value
 	 */
+	@Override
 	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
 	/*
@@ -108,6 +110,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.ValueProcedure)
 	 */
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		if (tB == 0)
@@ -139,6 +142,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
+	@Override
 	public double[] computeValues(double[] variables)
 	{
 		initialise0(variables);

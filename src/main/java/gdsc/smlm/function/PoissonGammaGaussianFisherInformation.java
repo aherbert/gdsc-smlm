@@ -42,7 +42,6 @@ import gdsc.smlm.utils.GaussianKernel;
 import gnu.trove.function.TDoubleFunction;
 import gnu.trove.list.array.TDoubleArrayList;
 
-
 /**
  * Calculate the Fisher information for a Poisson-Gamma-Gaussian distribution.
  * <p>
@@ -64,6 +63,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			this.scale = scale;
 		}
 
+		@Override
 		public double execute(double value)
 		{
 			return value * scale;
@@ -255,6 +255,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
+	@Override
 	public double getFisherInformation(double t) throws IllegalArgumentException
 	{
 		final double I = getPoissonGammaGaussianI(t);
@@ -774,6 +775,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	{
 		double sum2 = 0, sum4 = 0;
 
+		@Override
 		public boolean execute(double pz, double az)
 		{
 			++i;
@@ -806,6 +808,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	{
 		double sum2 = 0, sum3 = 0;
 
+		@Override
 		public boolean execute(double pz, double az)
 		{
 			++i;
@@ -836,6 +839,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 	private static class UncheckedSimpsonIntegrationProcedure extends SimpsonIntegrationProcedure
 	{
+		@Override
 		public boolean execute(double pz, double az)
 		{
 			// Simpson's rule.
@@ -851,6 +855,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 	private static class UncheckedSimpson38IntegrationProcedure extends Simpson38IntegrationProcedure
 	{
+		@Override
 		public boolean execute(double pz, double az)
 		{
 			// Simpson's 3/8 rule based on cubic interpolation has a lower error.
@@ -1223,6 +1228,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		{
 			double[] dG_dp = new double[1];
 
+			@Override
 			public double value(double x)
 			{
 				// Return F without the dirac. This is so that the maximum of the function
@@ -1305,6 +1311,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		{
 			double[] dG_dp = new double[1];
 
+			@Override
 			public double value(double x)
 			{
 				double G = PoissonGammaFunction.unscaledPoissonGammaPartial(x, t, m, dG_dp);

@@ -40,7 +40,6 @@ import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.OffsetGradient1Function;
 import gdsc.smlm.function.OffsetGradient2Function;
 
-
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using maximum likelihood
  * estimation.
@@ -257,7 +256,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 		// Add the weights if necessary
 		if (w != null)
 		{
-			f1 = OffsetGradient2Function.wrapGradient1Function(f1, w);
+			f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
 		}
 		PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(f1);
 		p.computeFisherInformation(lastA);
@@ -291,6 +290,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
+	@Override
 	public double getLogLikelihood()
 	{
 		if (Double.isNaN(ll))
@@ -326,6 +326,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
+	@Override
 	public double getLogLikelihoodRatio()
 	{
 		// This method computes the log-likelihood ratio directly
@@ -337,6 +338,7 @@ public class MLELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
+	@Override
 	public double getQ()
 	{
 		// Wilks theorum states the LLR approaches the chi-squared distribution for large n.

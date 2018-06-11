@@ -25,7 +25,6 @@ package gdsc.smlm.ij.ij3d;
 
 import java.util.Arrays;
 
-
 import org.scijava.java3d.Group;
 import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
@@ -237,6 +236,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#size()
 	 */
+	@Override
 	public int size()
 	{
 		return points.length;
@@ -247,6 +247,7 @@ public abstract class ItemGroup extends Group implements ItemShape
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
 	 */
+	@Override
 	public Point3f getCoordinate(int i)
 	{
 		return points[i];

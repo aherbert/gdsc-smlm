@@ -28,7 +28,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.data.config.PSFHelper;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -73,7 +72,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(int flags)
 	{
-		if (areSet(flags, DirectFilter.NO_SHIFT))
+		if (areSet(flags, IDirectFilter.NO_SHIFT))
 			shiftEnabled = false;
 		else
 			setup(eshift);
@@ -82,7 +81,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
-		if (areSet(flags, DirectFilter.NO_SHIFT))
+		if (areSet(flags, IDirectFilter.NO_SHIFT))
 		{
 			shiftEnabled = false;
 			return;
@@ -111,7 +110,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		eshift2 = getUpperSquaredLimit(eshift);
 		shiftEnabled = (eshift2 != Float.POSITIVE_INFINITY);
 	}
-	
+
 	@Override
 	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
 	{
@@ -130,9 +129,9 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int getFilterSetupFlags() throws IllegalStateException
 	{
-		return (shiftEnabled) ? 0 : DirectFilter.NO_SHIFT;
+		return (shiftEnabled) ? 0 : IDirectFilter.NO_SHIFT;
 	}
-	
+
 	@Override
 	public boolean accept(PeakResult peak)
 	{
@@ -141,6 +140,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 		return dx * dx + dy * dy <= eoffset;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
@@ -275,56 +275,67 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return eshift;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return 0;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.NONE;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return 0;

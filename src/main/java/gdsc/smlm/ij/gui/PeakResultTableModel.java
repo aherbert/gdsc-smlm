@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -42,7 +43,6 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFProtos.PSF;
-
 
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.ResultsProtosHelper;
@@ -290,6 +290,7 @@ public class PeakResultTableModel extends AbstractTableModel
 			// Must be converted
 			valuesList.add(new PeakResultDataFloat()
 			{
+				@Override
 				public Float getValue(PeakResult result)
 				{
 					return ic.convert(result.getNoise());
@@ -298,6 +299,7 @@ public class PeakResultTableModel extends AbstractTableModel
 			addName("Noise", namesList, unitNames[PeakResult.INTENSITY]);
 			valuesList.add(new PeakResultDataFloat()
 			{
+				@Override
 				public Float getValue(PeakResult result)
 				{
 					return ic.convert(result.getMeanIntensity());
@@ -388,6 +390,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 * 
 	 * @see javax.swing.table.TableModel#getRowCount()
 	 */
+	@Override
 	public int getRowCount()
 	{
 		return data.size();
@@ -420,6 +423,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 * 
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
+	@Override
 	public int getColumnCount()
 	{
 		return values.length;
@@ -430,6 +434,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	 * 
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		if (rowCounter)
@@ -955,7 +960,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	private TableCellRenderer createTableCellRenderer(DefaultTableCellRenderer renderer)
 	{
-		renderer.setHorizontalAlignment(DefaultTableCellRenderer.TRAILING);
+		renderer.setHorizontalAlignment(SwingConstants.TRAILING);
 		return renderer;
 	}
 }

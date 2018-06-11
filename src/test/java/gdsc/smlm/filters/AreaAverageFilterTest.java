@@ -116,9 +116,9 @@ public class AreaAverageFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float areaAverageInternal [%dx%d] @ %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float areaAverageInternal [%dx%d] @ %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
@@ -194,21 +194,21 @@ public class AreaAverageFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float areaAverageUsingAverages [%dx%d] @ %.1f : %d => stripedBlockAverage %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float areaAverageUsingAverages [%dx%d] @ %.1f : %d => stripedBlockAverage %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float areaAverageUsingAverages %d => stripedBlockAverage %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float areaAverageUsingAverages %d => stripedBlockAverage %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -272,25 +272,26 @@ public class AreaAverageFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float areaAverageUsingAveragesInternal %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
+			System.out.printf(
+					"float areaAverageUsingAveragesInternal %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float areaAverageUsingAveragesInternal %d => stripedBlockAverageInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float areaAverageUsingAveragesInternal %d => stripedBlockAverageInternal %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
-	
+
 	private ArrayList<float[]> createSpeedData(int iter)
 	{
 		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Used to pass a new shift value to a filter
  */
@@ -34,7 +33,8 @@ public class ShiftFilterSetupData implements FilterSetupData
 	/**
 	 * Instantiates a new shift filter setup data.
 	 *
-	 * @param shift the shift
+	 * @param shift
+	 *            the shift
 	 */
 	public ShiftFilterSetupData(double shift)
 	{

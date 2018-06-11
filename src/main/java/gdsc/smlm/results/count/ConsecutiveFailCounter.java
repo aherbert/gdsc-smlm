@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Stop evaluating when a number of consecutive failures occurs.
  */
@@ -68,6 +67,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass()
 	 */
+	@Override
 	public void pass()
 	{
 		failCount = 0;
@@ -78,6 +78,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass(int)
 	 */
+	@Override
 	public void pass(int n)
 	{
 		failCount = 0;
@@ -88,6 +89,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail()
 	 */
+	@Override
 	public void fail()
 	{
 		if (failCount == Integer.MAX_VALUE)
@@ -100,6 +102,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail(int)
 	 */
+	@Override
 	public void fail(int n)
 	{
 		if (n < 0)
@@ -114,6 +117,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#isOK()
 	 */
+	@Override
 	public boolean isOK()
 	{
 		return failCount <= allowedFailures;
@@ -124,6 +128,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#newCounter()
 	 */
+	@Override
 	public FailCounter newCounter()
 	{
 		return new ConsecutiveFailCounter(allowedFailures);
@@ -134,6 +139,7 @@ public class ConsecutiveFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#reset()
 	 */
+	@Override
 	public void reset()
 	{
 		failCount = 0;

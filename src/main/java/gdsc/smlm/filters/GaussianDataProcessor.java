@@ -28,7 +28,6 @@ import gdsc.core.ij.Utils;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with a Gaussian filter.
  */
@@ -133,6 +132,7 @@ public class GaussianDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public GaussianDataProcessor clone()
 	{
 		GaussianDataProcessor f = (GaussianDataProcessor) super.clone();

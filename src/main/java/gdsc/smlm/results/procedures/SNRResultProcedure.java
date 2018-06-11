@@ -27,7 +27,6 @@ import gdsc.core.data.DataException;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Contains functionality to obtain the Signal-to-Noise Ratio (SNR) for results.
  */
@@ -67,7 +66,7 @@ public class SNRResultProcedure extends AbstractResultProcedure implements
 	{
 		i = 0;
 		snr = allocate(snr);
-		results.forEach((PeakResultProcedure) this);
+		results.forEach(this);
 		return snr;
 	}
 

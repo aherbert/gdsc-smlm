@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Interface for the evaluation of whether to stop a sequential analysis.
  */
@@ -35,7 +34,7 @@ public interface FailCounter
 	 * @return the description (including any parameter values)
 	 */
 	public String getDescription();
-	
+
 	/**
 	 * Called when the most recent event passed.
 	 */
@@ -46,7 +45,8 @@ public interface FailCounter
 	 * <p>
 	 * This method can be used when a series of events are known to pass.
 	 *
-	 * @param n the n
+	 * @param n
+	 *            the n
 	 */
 	public void pass(int n);
 
@@ -62,7 +62,8 @@ public interface FailCounter
 	 * <p>
 	 * This method can be used when a series of events are known to fail.
 	 *
-	 * @param n the n
+	 * @param n
+	 *            the n
 	 */
 	public void fail(int n);
 

@@ -136,11 +136,10 @@ public class PoissonGaussianFisherInformationTest
 			double lower = f.getPoissonGaussianApproximationI(u);
 			double upper = PoissonFisherInformation.getPoissonI(u);
 			double alpha = I / upper;
-			System.out.printf("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, 
-					I2, lower, upper, alpha);
+			System.out.printf("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, I2, lower, upper, alpha);
 			Assert.assertTrue(I > lower);
 			Assert.assertTrue(I < upper);
-			
+
 			// Test convergence
 			Assert.assertEquals(I, I2, 1e-50);
 		}

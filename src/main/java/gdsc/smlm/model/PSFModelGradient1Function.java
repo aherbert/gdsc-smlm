@@ -56,6 +56,7 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
 		this.height = height;
 	}
 
+	@Override
 	public int size()
 	{
 		return width * height;
@@ -68,11 +69,13 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
+	@Override
 	public void initialise0(double[] a)
 	{
 		this.a = a;
 	}
 
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		final double[] v = new double[size()];
@@ -94,16 +97,19 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		initialise0(a);
 	}
 
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return 5;
@@ -116,11 +122,13 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		initialise0(a);
 	}
 
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] v = new double[size()];
@@ -144,6 +152,7 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
 		}
 	}
 
+	@Override
 	public String getParameterName(int i)
 	{
 		switch (i)

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -51,6 +50,7 @@ public class ResequenceResults implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -130,6 +130,7 @@ public class ResequenceResults implements PlugIn
 			this.tracker = tracker;
 		}
 
+		@Override
 		public void execute(PeakResult r)
 		{
 			int t = 1; // The current frame in the results

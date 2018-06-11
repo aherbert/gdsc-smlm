@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import gdsc.core.utils.SimpleArrayUtils;
 
-
 /**
  * Wraps a set of function values to implement the forEach procedure
  */
@@ -74,26 +73,31 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction imple
 		return g1;
 	}
 
+	@Override
 	public void initialise(double[] a)
 	{
 		// Ignore
 	}
 
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return gradientIndices.length;
 	}
 
+	@Override
 	public void initialise1(double[] a)
 	{
 		// Ignore
 	}
 
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		for (int i = 0; i < values.length; i++)

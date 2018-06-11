@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
@@ -256,6 +255,7 @@ public class MaskDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
+	@Override
 	public double[] next()
 	{
 		final int randomPosition = randomGenerator.nextInt(indices.length);
@@ -274,6 +274,7 @@ public class MaskDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
+	@Override
 	public boolean isWithin(double[] xyz)
 	{
 		if (!isWithinXY(xyz))
@@ -288,6 +289,7 @@ public class MaskDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
+	@Override
 	public boolean isWithinXY(double[] xyz)
 	{
 		// Ensure XY = 0 is the centre of the image
@@ -319,6 +321,7 @@ public class MaskDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] xyz)
 	{
 		findParticles();

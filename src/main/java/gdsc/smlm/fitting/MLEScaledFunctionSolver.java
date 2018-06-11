@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Wrap a function solver to scale the function value. Parameters that are scaled must be provided in the constructor.
  * It is assumed that a linear scale can be applied to all these parameters with the effect that the output function
@@ -54,16 +53,19 @@ public class MLEScaledFunctionSolver extends ScaledFunctionSolver implements MLE
 		mleSolver = solver;
 	}
 
+	@Override
 	public double getLogLikelihood()
 	{
 		return mleSolver.getLogLikelihood();
 	}
 
+	@Override
 	public double getLogLikelihoodRatio()
 	{
 		return mleSolver.getLogLikelihoodRatio();
 	}
 
+	@Override
 	public double getQ()
 	{
 		return mleSolver.getQ();

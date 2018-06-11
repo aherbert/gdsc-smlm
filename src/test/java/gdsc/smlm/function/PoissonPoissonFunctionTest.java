@@ -129,6 +129,7 @@ public class PoissonPoissonFunctionTest
 		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				return f.likelihood(x, e);

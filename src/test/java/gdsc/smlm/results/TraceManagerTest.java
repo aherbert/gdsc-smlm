@@ -224,6 +224,7 @@ public class TraceManagerTest
 	{
 		Arrays.sort(traces, new Comparator<Trace>()
 		{
+			@Override
 			public int compare(Trace o1, Trace o2)
 			{
 				PeakResult p1 = o1.getHead();

@@ -29,7 +29,6 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import gdsc.core.data.DataException;
 
-
 /**
  * Stores peak results and prevents modification.
  */
@@ -49,51 +48,61 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore imple
 		this.store = store;
 	}
 
+	@Override
 	public PeakResult get(int index)
 	{
 		return new ImmutablePeakResult(store.get(index));
 	}
 
+	@Override
 	public PeakResult remove(int index)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public void remove(int fromIndex, int toIndex)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public void sort()
 	{
 		store.sort();
 	}
 
+	@Override
 	public void sort(Comparator<PeakResult> comparator)
 	{
 		store.sort(comparator);
 	}
 
+	@Override
 	public PeakResultStoreList copy()
 	{
 		return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy());
 	}
 
+	@Override
 	public PeakResultStoreList copy(boolean deepCopy)
 	{
 		return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy(deepCopy));
 	}
 
+	@Override
 	public void shuffle(final RandomGenerator randomGenerator)
 	{
 		store.shuffle(randomGenerator);
 	}
 
+	@Override
 	public int indexOf(PeakResult result)
 	{
 		return store.indexOf(result);
 	}
 
+	@Override
 	public int lastIndexOf(PeakResult result)
 	{
 		return store.lastIndexOf(result);

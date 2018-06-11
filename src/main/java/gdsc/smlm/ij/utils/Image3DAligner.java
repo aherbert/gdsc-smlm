@@ -48,7 +48,6 @@ import gdsc.smlm.function.cspline.CubicSplineCalculator;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
-
 /**
  * Perform 3D image alignment using normalised cross-correlation.
  * <p>
@@ -722,7 +721,7 @@ public class Image3DAligner implements Cloneable
 		target = createDHT(image, target);
 		return align(target, refinements, 1e-2);
 	}
-	
+
 	/**
 	 * Align the image with the reference with sub-pixel accuracy. Compute the translation required to move the target
 	 * image onto the reference image for maximum correlation.
@@ -1128,11 +1127,13 @@ public class Image3DAligner implements Cloneable
 						// Scale the error for the position check
 						new PositionChecker(-1, error / 3.0),
 						new ObjectiveFunction(new MultivariateFunction(){
+							@Override
 							public double value(double[] point)
 							{
 								return sf.value(point);
 							}}),
 						new ObjectiveFunctionGradient(new MultivariateVectorFunction(){
+							@Override
 							public double[] value(double[] point) throws IllegalArgumentException
 							{
 								// This must be new each time

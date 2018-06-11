@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.ij3d;
 
-
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;

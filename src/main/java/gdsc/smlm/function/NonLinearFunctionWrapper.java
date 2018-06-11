@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import gdsc.smlm.utils.Pair;
 
-
 /**
  * Wrap the NonLinearFunction to remove the parameters that are fixed from the evaluation methods
  */
@@ -64,6 +63,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] variables)
 	{
 		int[] gradientIndices = fun.gradientIndices();
@@ -77,11 +77,13 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return gradientIndices.length;
@@ -92,6 +94,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(int x, double[] dyda)
 	{
 		return fun.eval(x, dyda);
@@ -102,6 +105,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int)
 	 */
+	@Override
 	public double eval(int x)
 	{
 		return fun.eval(x);
@@ -112,6 +116,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#eval(int, double[], double[])
 	 */
+	@Override
 	public double eval(int x, double[] dyda, double[] w)
 	{
 		return fun.eval(x, dyda, w);
@@ -122,6 +127,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
 	 */
+	@Override
 	public double evalw(int x, double[] w)
 	{
 		return fun.eval(x, w);
@@ -132,6 +138,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
 	 */
+	@Override
 	public boolean canComputeWeights()
 	{
 		return fun.canComputeWeights();
@@ -142,6 +149,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
+	@Override
 	public double[] computeValues(double[] variables)
 	{
 		initialise(variables);
@@ -159,6 +167,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
 	 */
+	@Override
 	public double[][] computeJacobian(double[] variables)
 	{
 		initialise(variables);
@@ -181,6 +190,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
 	 */
+	@Override
 	public boolean canComputeValuesAndJacobian()
 	{
 		return true;
@@ -191,6 +201,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction
 	 * 
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
 	 */
+	@Override
 	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables)
 	{
 		initialise(variables);

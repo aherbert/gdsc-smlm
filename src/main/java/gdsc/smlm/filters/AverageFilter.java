@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Computes the block average for each point within the array.
  * <p>
@@ -2687,6 +2686,7 @@ public class AverageFilter extends BaseFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public AverageFilter clone()
 	{
 		AverageFilter o = (AverageFilter) super.clone();

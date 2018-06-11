@@ -26,7 +26,6 @@ package gdsc.smlm.function;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Computes likelihood values for a Poisson function
  */
@@ -1010,5 +1009,5 @@ public class PoissonCalculator
 		{
 			return -2.0 * u;
 		}
-	}	
+	}
 }

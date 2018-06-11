@@ -167,15 +167,15 @@ public class MedianFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockMedianNxNInternal %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockMedianNxNInternal %d : %d => rollingMedianNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -196,7 +196,6 @@ public class MedianFilterTest
 		return dataSet;
 	}
 
-
 	@Test
 	public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult()
 	{
@@ -207,8 +206,8 @@ public class MedianFilterTest
 				floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(MedianFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(MedianFilter filter, int width, int height)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
@@ -273,9 +272,8 @@ public class MedianFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf(
-							"float blockMedianNxNInternal [%dx%d] %d => blockMedian3x3Internal %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float blockMedianNxNInternal [%dx%d] %d => blockMedian3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -339,8 +337,8 @@ public class MedianFilterTest
 				boxFastTotal += fastTime;
 				if (debug)
 					System.out.printf(
-							"float blockMedian3x3Internal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+							"float blockMedian3x3Internal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -349,7 +347,6 @@ public class MedianFilterTest
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
-
 
 	@Test
 	public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
@@ -361,8 +358,8 @@ public class MedianFilterTest
 				floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(filter, width, height);
 	}
 
-	private void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(MedianFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(MedianFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
@@ -427,14 +424,14 @@ public class MedianFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("float rollingMedianNxNInternal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"float rollingMedianNxNInternal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float rollingMedianNxNInternal %d => rollingMedian3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingMedianNxNInternal %d => rollingMedian3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -464,8 +461,8 @@ public class MedianFilterTest
 		}
 	}
 
-	private void floatCompareBlockMedianNxNAndRollingMedianNxN(MedianFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockMedianNxNAndRollingMedianNxN(MedianFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
@@ -533,8 +530,8 @@ public class MedianFilterTest
 					boxFastTotal += fastTime;
 					if (debug)
 						System.out.printf(
-								"float blockMedianNxN [%dx%d] @ %d : %d => blockMedianNxNInternal %d = %.2fx\n",
-								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+								"float blockMedianNxN [%dx%d] @ %d : %d => blockMedianNxNInternal %d = %.2fx\n", width,
+								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
@@ -606,15 +603,14 @@ public class MedianFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"float blockMedianNxN [%dx%d] @ %d : %d => rollingMedianNxN %d = %.2fx\n",
+						System.out.printf("float blockMedianNxN [%dx%d] @ %d : %d => rollingMedianNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockMedianNxN %d : %d => rollingMedianNxN %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockMedianNxN %d : %d => rollingMedianNxN %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -680,21 +676,21 @@ public class MedianFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float rollingMedianNxN [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float rollingMedianNxN [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float rollingMedianNxN %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float rollingMedianNxN %d : %d => rollingMedianNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float rollingMedianNxN %d => rollingMedianNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingMedianNxN %d => rollingMedianNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -775,8 +771,8 @@ public class MedianFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float blockMedianNxN [%dx%d] %d => blockMedian3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float blockMedianNxN [%dx%d] %d => blockMedian3x3 %d = %.2fx\n", width, height,
+							time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -862,13 +858,13 @@ public class MedianFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float rollingMedianNxN [%dx%d] %d => rollingMedian3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float rollingMedianNxN [%dx%d] %d => rollingMedian3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
-		System.out.printf("float rollingMedianNxN %d => rollingMedian3x3 %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingMedianNxN %d => rollingMedian3x3 %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -926,8 +922,8 @@ public class MedianFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float blockMedian3x3 [%dx%d] %d => rollingMedian3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float blockMedian3x3 [%dx%d] %d => rollingMedian3x3 %d = %.2fx\n", width, height,
+							time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}

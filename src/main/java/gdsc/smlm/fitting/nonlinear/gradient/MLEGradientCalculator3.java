@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the gradient vector of the function's partial first derivatives with respect to the parameters.

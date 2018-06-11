@@ -25,7 +25,6 @@ package gdsc.smlm.engine;
 
 import gdsc.smlm.filters.Spot;
 
-
 /**
  * Extends the Spot class with fields used during fitting
  */

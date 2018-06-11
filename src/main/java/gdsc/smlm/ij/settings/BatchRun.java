@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.settings;
 
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 
 /**
@@ -33,11 +32,12 @@ public class BatchRun
 {
 	public String image;
 	public FitEngineConfiguration fitEngineConfiguration = null;
-	
+
 	public BatchRun()
 	{
 		fitEngineConfiguration = new FitEngineConfiguration();
 	}
+
 	public BatchRun(String image, FitEngineConfiguration fitEngineConfiguration)
 	{
 		this.image = image;

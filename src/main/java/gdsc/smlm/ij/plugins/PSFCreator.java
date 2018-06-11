@@ -92,7 +92,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
 
-
 import gdsc.smlm.engine.FitEngine;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
@@ -251,6 +250,7 @@ public class PSFCreator implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -360,6 +360,7 @@ public class PSFCreator implements PlugInFilter
 			}
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			settings.setMode(gd.getNextChoiceIndex());
@@ -387,6 +388,7 @@ public class PSFCreator implements PlugInFilter
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -497,6 +499,7 @@ public class PSFCreator implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		if (settings.getMode() == MODE_FITTING)
@@ -597,6 +600,7 @@ public class PSFCreator implements PlugInFilter
 			// We have fit the results so they will be in the preferred units 
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					int i = counter.getAndIncrement();
@@ -1018,6 +1022,7 @@ public class PSFCreator implements PlugInFilter
 
 	private class SimpleInteractivePlotListener implements DialogListener
 	{
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			slice = (int) gd.getNextNumber();
@@ -1038,11 +1043,11 @@ public class PSFCreator implements PlugInFilter
 			Plot2 plot = new Plot2(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
 			double[] limits2 = Maths.limits(Maths.limits(a), smoothA);
 			plot.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
-			plot.addPoints(z, a, Plot2.CIRCLE);
+			plot.addPoints(z, a, Plot.CIRCLE);
 
 			// Add a line for the z-centre
 			plot.setColor(Color.GREEN);
-			plot.addPoints(new double[] { cz, cz }, limits2, Plot2.LINE);
+			plot.addPoints(new double[] { cz, cz }, limits2, Plot.LINE);
 			plot.setColor(Color.BLACK);
 
 			double amplitude = Double.NaN;
@@ -1079,19 +1084,19 @@ public class PSFCreator implements PlugInFilter
 			double[] sd2 = invert(sd);
 			double[] limits = Maths.limits(Maths.limits(Maths.limits(Maths.limits(xCoord), yCoord), sd), sd2);
 			plot.setLimits(z[0], z[z.length - 1], limits[0], limits[1]);
-			plot.addPoints(newZ, invert(smoothSd), Plot2.LINE);
-			plot.addPoints(z, sd, Plot2.DOT);
-			plot.addPoints(z, sd2, Plot2.DOT);
+			plot.addPoints(newZ, invert(smoothSd), Plot.LINE);
+			plot.addPoints(z, sd, Plot.DOT);
+			plot.addPoints(z, sd2, Plot.DOT);
 			plot.setColor(Color.BLUE);
-			plot.addPoints(z, xCoord, Plot2.DOT);
-			plot.addPoints(newZ, smoothX, Plot2.LINE);
+			plot.addPoints(z, xCoord, Plot.DOT);
+			plot.addPoints(newZ, smoothX, Plot.LINE);
 			plot.setColor(Color.RED);
-			plot.addPoints(z, yCoord, Plot2.DOT);
-			plot.addPoints(newZ, smoothY, Plot2.LINE);
+			plot.addPoints(z, yCoord, Plot.DOT);
+			plot.addPoints(newZ, smoothY, Plot.LINE);
 
 			// Add a line for the z-centre
 			plot.setColor(Color.GREEN);
-			plot.addPoints(new double[] { cz, cz }, limits, Plot2.LINE);
+			plot.addPoints(new double[] { cz, cz }, limits, Plot.LINE);
 			plot.setColor(Color.BLACK);
 
 			double width = Double.NaN;
@@ -1345,6 +1350,7 @@ public class PSFCreator implements PlugInFilter
 
 			futures.add(threadPool.submit(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (Utils.isInterrupted())
@@ -1994,6 +2000,7 @@ public class PSFCreator implements PlugInFilter
 		results.forEach(new PeakResultProcedure()
 		{
 
+			@Override
 			public void execute(PeakResult peak)
 			{
 				int i = counter.getAndIncrement();
@@ -2159,6 +2166,7 @@ public class PSFCreator implements PlugInFilter
 
 	private class InteractivePlotListener implements DialogListener
 	{
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			slice = (int) gd.getNextNumber();
@@ -2194,6 +2202,7 @@ public class PSFCreator implements PlugInFilter
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -2229,6 +2238,7 @@ public class PSFCreator implements PlugInFilter
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -2265,6 +2275,7 @@ public class PSFCreator implements PlugInFilter
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -2385,6 +2396,7 @@ public class PSFCreator implements PlugInFilter
 			// Run in a new thread to allow the GUI to continue updating
 			new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					try
@@ -2865,7 +2877,7 @@ public class PSFCreator implements PlugInFilter
 					Roi roi = new Roi(cx - box, cy - box, 2 * box, 2 * box);
 					o.add(roi);
 					// The centre is absolute within the original stack
-					imp.setSlice(Maths.clip(1, n, (int) Math.round(centres[j].getZ())));
+					imp.setSlice(Maths.clip(1, n, Math.round(centres[j].getZ())));
 					Rectangle r = ic.getSrcRect();
 					int x = centres[j].getXint();
 					int y = centres[j].getYint();
@@ -2884,6 +2896,7 @@ public class PSFCreator implements PlugInFilter
 					final int spotIndex = j;
 					gd.addAndGetButton("Exclude spot", new ActionListener()
 					{
+						@Override
 						public void actionPerformed(ActionEvent e)
 						{
 							if (excluded[spotIndex])
@@ -3750,6 +3763,7 @@ public class PSFCreator implements PlugInFilter
 			final String defaultZ = tf.getText();
 			gd.addAndGetButton("Reset", new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent e)
 				{
 					tf.setText(defaultZ);
@@ -3830,6 +3844,7 @@ public class PSFCreator implements PlugInFilter
 			drawCoMBorder();
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			zCentre = gd.getNextNumber() - 1;
@@ -3896,6 +3911,7 @@ public class PSFCreator implements PlugInFilter
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -4101,6 +4117,7 @@ public class PSFCreator implements PlugInFilter
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -4189,6 +4206,7 @@ public class PSFCreator implements PlugInFilter
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -4227,6 +4245,7 @@ public class PSFCreator implements PlugInFilter
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -4274,6 +4293,7 @@ public class PSFCreator implements PlugInFilter
 			gd.addMessage("Click ... to configure the output options");
 			gd.addChoice("Output_type", OUTPUT_TYPE, settings.getOutputType(), new OptionListener<Integer>()
 			{
+				@Override
 				public boolean collectOptions(Integer value)
 				{
 					settings.setOutputType(value);
@@ -4281,6 +4301,7 @@ public class PSFCreator implements PlugInFilter
 					return result;
 				}
 
+				@Override
 				public boolean collectOptions()
 				{
 					return collectOptions(true);
@@ -4326,6 +4347,7 @@ public class PSFCreator implements PlugInFilter
 			{
 				gd.addOptionCollectedListener(new OptionCollectedListener()
 				{
+					@Override
 					public void optionCollected(OptionCollectedEvent e)
 					{
 						update();
@@ -4386,6 +4408,7 @@ public class PSFCreator implements PlugInFilter
 			return new ExtractedPSF(psf2, bounds.width, bounds.height);
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			slice = (int) gd.getNextNumber();
@@ -4440,13 +4463,13 @@ public class PSFCreator implements PlugInFilter
 			{
 				Size next = size.enlarge(psfMagnification);
 				long future = next.getTotalFunctionPoints() * 4; // 4 bytes for a float
-				String futureS = Utils.rounded((double) (future / 1048576));
+				String futureS = Utils.rounded(future / 1048576);
 				label1.setText(String.format("Size for Image PSF = %s MB", futureS));
 			}
 			else
 			{
 				long current = size.getMemoryFootprint(singlePrecision);
-				String currentS = Utils.rounded((double) (current / 1048576));
+				String currentS = Utils.rounded(current / 1048576);
 				label1.setText(String.format("Size of Cubic Spline = %s MB", currentS));
 			}
 
@@ -4468,6 +4491,7 @@ public class PSFCreator implements PlugInFilter
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -4522,6 +4546,7 @@ public class PSFCreator implements PlugInFilter
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -4641,6 +4666,7 @@ public class PSFCreator implements PlugInFilter
 		{
 			gd.addAndGetButton("Reset", new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent e)
 				{
 					boolean interactive = PSFCreator.this.settings.getInteractiveMode();
@@ -4750,6 +4776,7 @@ public class PSFCreator implements PlugInFilter
 			final int index = i;
 			futures.add(threadPool.submit(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					psfs[index] = new ExtractedPSF(image, w, h, centres[index], boxRadius, zRadius,
@@ -5726,6 +5753,7 @@ public class PSFCreator implements PlugInFilter
 				final int ii = i;
 				futures.add(threadPool.submit(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						ExtractedPSF psf = psfs[jj];
@@ -5772,6 +5800,7 @@ public class PSFCreator implements PlugInFilter
 			final int jj = j;
 			futures.add(threadPool.submit(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					ExtractedPSF psf = psfs[jj];
@@ -5831,6 +5860,7 @@ public class PSFCreator implements PlugInFilter
 				final int ii = i;
 				futures.add(threadPool.submit(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						ExtractedPSF psf = psfs[jj];

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount of information that
  * an observable random variable X carries about an unknown parameter θ of a distribution that models X.

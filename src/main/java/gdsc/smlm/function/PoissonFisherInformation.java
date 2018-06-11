@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Calculate the Fisher information for a Poisson distribution.
  * <p>
@@ -38,6 +37,7 @@ public class PoissonFisherInformation extends BasePoissonFisherInformation
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
+	@Override
 	public double getFisherInformation(double t)
 	{
 		if (t <= 0)
@@ -58,13 +58,13 @@ public class PoissonFisherInformation extends BasePoissonFisherInformation
 			throw new IllegalArgumentException("Poisson mean must be positive");
 		return 1.0 / t;
 	}
-	
+
 	@Override
 	public double getAlpha(double t)
 	{
 		return 1;
 	}
-	
+
 	@Override
 	protected void postClone()
 	{

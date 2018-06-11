@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import gdsc.smlm.utils.Pair;
 
-
 /**
  * Defines the non-linear fitting function
  */

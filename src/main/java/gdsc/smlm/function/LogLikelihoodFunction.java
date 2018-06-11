@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Provides functions to compute the log likelihood for a univariate distribution.
  */

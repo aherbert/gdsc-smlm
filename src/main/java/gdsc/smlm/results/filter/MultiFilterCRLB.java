@@ -58,7 +58,6 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 	{
 		return new MultiFilterVarianceCRLBComponent(precision);
 	}
-	
 
 	@Override
 	protected double getVariance(PeakResult peak)
@@ -70,7 +69,7 @@ public class MultiFilterCRLB extends MultiFilter implements IMultiFilter
 			return (vx * vx + vy * vy);
 		}
 		return variance; // Return the current limit
-	}	
+	}
 
 	/*
 	 * (non-Javadoc)

@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import gdsc.core.data.DataException;
 
-
 /**
  * Specifies a peak fitting result that cannot be modified.
  * <p>
@@ -138,36 +137,36 @@ public class ImmutablePeakResult extends AttributePeakResult
 			throw new DataException("This result is immutable");
 		super.setPrecision(precision);
 	}
-	
+
 	@Override
 	public void setParameter(int i, float value)
 	{
 		throw new DataException("This result is immutable");
 	}
-	
+
 	@Override
 	public void setParameterDeviation(int i, float value)
 	{
 		throw new DataException("This result is immutable");
 	}
-	
+
 	@Override
 	public void clearHasEndFrame()
 	{
 		throw new DataException("This result is immutable");
 	}
-	
+
 	@Override
 	public void clearHasId()
 	{
 		throw new DataException("This result is immutable");
 	}
-	
+
 	@Override
 	public void clearHasPrecision()
 	{
 		throw new DataException("This result is immutable");
-	}	
+	}
 
 	/**
 	 * Gets a copy of the parameters.

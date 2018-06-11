@@ -25,7 +25,6 @@ package gdsc.smlm.function.gaussian;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Evaluates an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
@@ -79,6 +78,7 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		this.a = a;
@@ -103,8 +103,10 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Evaluates an 2-dimensional fixed circular Gaussian function for multiple peaks.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x, final double[] dyda)
 	{
 		// Track the position of the parameters
@@ -152,8 +154,10 @@ public class FixedGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Evaluates an 2-dimensional fixed circular Gaussian function for multiple peaks.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
 	 */
+	@Override
 	public double eval(final int x)
 	{
 		// Track the position of the parameters

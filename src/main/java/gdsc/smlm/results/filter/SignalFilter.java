@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -61,6 +60,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 		return peak.getSignal() >= signalThreshold;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_PHOTONS;
@@ -170,56 +170,67 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return signal;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return 0;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.NONE;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return 0;

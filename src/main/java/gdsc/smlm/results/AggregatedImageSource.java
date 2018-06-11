@@ -28,7 +28,6 @@ import java.util.Arrays;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 /**
  * Wraps an image source and allows aggregation of consecutive frames.
  */

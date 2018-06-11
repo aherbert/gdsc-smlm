@@ -28,7 +28,6 @@ import java.util.HashMap;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
 
-
 /**
  * Contain helper functions for the ImagePOSF class
  */

@@ -25,7 +25,6 @@ package gdsc.smlm.results.predicates;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Test a result using the frame
  */
@@ -50,6 +49,7 @@ public class FramePeakResultPredicate implements PeakResultPredicate
 	 * 
 	 * @see gdsc.smlm.results.procedures.PeakResultPredicate#test(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean test(PeakResult t)
 	{
 		return t.getFrame() == frame;

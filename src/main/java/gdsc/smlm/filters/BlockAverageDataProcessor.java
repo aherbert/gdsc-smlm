@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter.
  */
@@ -146,6 +145,7 @@ public class BlockAverageDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public BlockAverageDataProcessor clone()
 	{
 		BlockAverageDataProcessor f = (BlockAverageDataProcessor) super.clone();

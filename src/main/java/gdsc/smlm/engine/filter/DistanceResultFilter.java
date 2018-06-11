@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine.filter;
 
-
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
 
@@ -34,8 +33,10 @@ import java.util.List;
 /**
  * Filter the results using the distance to a set of coordinates. Any fitted position within the distance to the
  * target coordinates is accepted.
+ * 
  * @deprecated Filtering of the results is no longer supported
  */
+@Deprecated
 public class DistanceResultFilter extends ResultFilter
 {
 	public DistanceResultFilter(List<float[]> filter, float d, int nMaxima)
@@ -46,8 +47,11 @@ public class DistanceResultFilter extends ResultFilter
 		peakResults = new ArrayList<PeakResult>(nMaxima);
 	}
 
-	/* (non-Javadoc)
-	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, gdsc.smlm.results.PeakResult[])
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int,
+	 * gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
 	public void filter(FitResult fitResult, int maxIndex, PeakResult... results)
@@ -78,7 +82,9 @@ public class DistanceResultFilter extends ResultFilter
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.engine.filter.ResultFilter#filter(gdsc.smlm.fitting.FitResult, int, float, float)
 	 */
 	@Override
@@ -104,7 +110,9 @@ public class DistanceResultFilter extends ResultFilter
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.engine.filter.ResultFilter#finalise()
 	 */
 	@Override

@@ -276,8 +276,9 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 		this.scale = scale;
 		uninitialised = true;
 	}
-	
+
 	/** {@inheritDoc} */
+	@Override
 	public double density(double x)
 	{
 		/*
@@ -367,6 +368,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 * <li>Casella, G., & Berger, R. (1990). <i>Statistical Inference</i>. Belmont, CA: Duxbury Press.</li>
 	 * </ul>
 	 */
+	@Override
 	public double cumulativeProbability(double x)
 	{
 		double ret;
@@ -396,6 +398,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 * For shape parameter {@code alpha} and scale parameter {@code beta}, the
 	 * mean is {@code alpha * beta}.
 	 */
+	@Override
 	public double getNumericalMean()
 	{
 		return shape * scale;
@@ -409,6 +412,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 *
 	 * @return {@inheritDoc}
 	 */
+	@Override
 	public double getNumericalVariance()
 	{
 		return shape * scale * scale;
@@ -421,6 +425,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 *
 	 * @return lower bound of the support (always 0)
 	 */
+	@Override
 	public double getSupportLowerBound()
 	{
 		return 0;
@@ -434,18 +439,21 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 *
 	 * @return upper bound of the support (always Double.POSITIVE_INFINITY)
 	 */
+	@Override
 	public double getSupportUpperBound()
 	{
 		return Double.POSITIVE_INFINITY;
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean isSupportLowerBoundInclusive()
 	{
 		return true;
 	}
 
 	/** {@inheritDoc} */
+	@Override
 	public boolean isSupportUpperBoundInclusive()
 	{
 		return false;
@@ -458,6 +466,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution
 	 *
 	 * @return {@code true}
 	 */
+	@Override
 	public boolean isSupportConnected()
 	{
 		return true;

@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Count the type of fit that was performed
  */

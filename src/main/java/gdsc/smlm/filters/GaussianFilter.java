@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
-
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array.
  * <p>
@@ -628,6 +627,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public GaussianFilter clone()
 	{
 		GaussianFilter o = (GaussianFilter) super.clone();

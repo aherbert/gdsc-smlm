@@ -31,7 +31,6 @@ import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 
-
 /**
  * Wraps peak results in memory and prevents modification of the results size.
  * <p>

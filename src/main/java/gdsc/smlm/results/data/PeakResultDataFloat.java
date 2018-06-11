@@ -25,7 +25,6 @@ package gdsc.smlm.results.data;
 
 import gdsc.smlm.results.PeakResultData;
 
-
 /**
  * Gets a float data value from a result.
  */
@@ -36,6 +35,7 @@ public abstract class PeakResultDataFloat implements PeakResultData<Float>
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
+	@Override
 	public String getValueName()
 	{
 		return "";
@@ -46,6 +46,7 @@ public abstract class PeakResultDataFloat implements PeakResultData<Float>
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueClass()
 	 */
+	@Override
 	public Class<?> getValueClass()
 	{
 		return Float.class;

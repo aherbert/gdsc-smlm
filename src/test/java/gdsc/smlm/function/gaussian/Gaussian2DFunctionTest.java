@@ -58,14 +58,14 @@ public abstract class Gaussian2DFunctionTest
 	protected double[] testcy1 = new double[] { 4.8, 5.2 };
 	protected double[] testcz1 = new double[] { -1.5, 1.0 };
 	protected double[][] testw1 = new double[][] { { 1.1, 1.2 }, { 1.5, 1.2 }, { 1.1, 1.7 }, { 1.5, 1.7 }, };
-	protected double[] testangle1 = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
+	protected double[] testangle1 = new double[] { Math.PI / 5, Math.PI / 3 };
 
 	protected double[] testsignal2 = new double[] { 20, 50 };
 	protected double[] testcx2 = new double[] { 4.8, 5.3 };
 	protected double[] testcy2 = new double[] { 5.1, 4.9 };
 	protected double[] testcz2 = new double[] { -1.9, 0.7 };
 	protected double[][] testw2 = new double[][] { { 1.2, 1.4 }, { 1.3, 1.4 }, { 1.2, 1.5 }, { 1.3, 1.5 }, };
-	protected double[] testangle2 = new double[] { (double) (Math.PI / 7), (double) (Math.PI / 11) };
+	protected double[] testangle2 = new double[] { Math.PI / 7, Math.PI / 11 };
 
 	// Different widths to test for non-square function evaluation
 	protected int maxx = 10, maxy = 9;
@@ -634,7 +634,7 @@ public abstract class Gaussian2DFunctionTest
 								}
 
 								Assert.assertTrue(sum + " != " + signal1,
-										eq3.almostEqualRelativeOrAbsolute((double) sum, signal1));
+										eq3.almostEqualRelativeOrAbsolute(sum, signal1));
 							}
 	}
 

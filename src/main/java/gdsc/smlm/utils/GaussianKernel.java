@@ -30,7 +30,6 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.utils.Maths;
 import gnu.trove.list.array.TDoubleArrayList;
 
-
 /**
  * Store a Gaussian kernel for use in convolution
  */
@@ -74,7 +73,7 @@ public class GaussianKernel implements Cloneable
 	 * Gets the normalisation for the Gaussian:
 	 * 
 	 * <pre>
-	 * 1/sqrt(2* pi*s^2)
+	 * 1 / sqrt(2 * pi * s ^ 2)
 	 * </pre>
 	 * <p>
 	 * This is the normalisation component that should be
@@ -109,7 +108,7 @@ public class GaussianKernel implements Cloneable
 	 */
 	public double getConversionFactor(double[] kernel)
 	{
-		return  getNormalisation() / kernel[kernel.length / 2];
+		return getNormalisation() / kernel[kernel.length / 2];
 	}
 
 	/**

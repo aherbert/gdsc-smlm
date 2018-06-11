@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;

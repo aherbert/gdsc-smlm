@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * A fail counter that always returns OK. Failures are ignored.
  */
@@ -32,37 +31,45 @@ public class NullFailCounter implements FailCounter
 	/** An instance */
 	public static final NullFailCounter INSTANCE = new NullFailCounter();
 
+	@Override
 	public String getDescription()
 	{
 		return "ignoreAllFailures";
 	}
-	
+
+	@Override
 	public void pass()
 	{
 	}
 
+	@Override
 	public void pass(int n)
 	{
 	}
 
+	@Override
 	public void fail()
 	{
 	}
 
+	@Override
 	public void fail(int n)
 	{
 	}
 
+	@Override
 	public boolean isOK()
 	{
 		return true;
 	}
 
+	@Override
 	public FailCounter newCounter()
 	{
 		return this; // This doesn't matter
 	}
 
+	@Override
 	public void reset()
 	{
 	}

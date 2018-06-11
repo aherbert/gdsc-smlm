@@ -33,7 +33,6 @@ import gdsc.core.utils.Maths;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-
 /**
  * Perform 2D image alignment using normalised cross-correlation.
  * <p>

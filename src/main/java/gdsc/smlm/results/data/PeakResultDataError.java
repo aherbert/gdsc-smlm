@@ -25,7 +25,6 @@ package gdsc.smlm.results.data;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Gets the error from a result.
  */
@@ -36,6 +35,7 @@ public class PeakResultDataError extends PeakResultDataDouble
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValue(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public Double getValue(PeakResult result)
 	{
 		return result.getError();
@@ -46,6 +46,7 @@ public class PeakResultDataError extends PeakResultDataDouble
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
+	@Override
 	public String getValueName()
 	{
 		return "Error";

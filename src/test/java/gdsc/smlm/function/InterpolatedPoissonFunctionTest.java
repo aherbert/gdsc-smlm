@@ -265,6 +265,7 @@ public class InterpolatedPoissonFunctionTest
 		{
 			p = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
+				@Override
 				public double value(double x)
 				{
 					return f.likelihood(x, o);

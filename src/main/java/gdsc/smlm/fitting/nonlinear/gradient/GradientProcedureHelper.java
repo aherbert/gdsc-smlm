@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-
 /**
  * Helper functions for the gradient procedures
  */

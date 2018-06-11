@@ -30,7 +30,6 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
-
 import customnode.CustomIndexedTriangleMesh;
 
 /**

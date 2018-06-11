@@ -27,9 +27,10 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 public class SingleFreeCircularErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE; 
+		flags = GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE;
 		f1 = new SingleFreeCircularErfGaussian2DFunction(maxx, maxy);
 	}
 }

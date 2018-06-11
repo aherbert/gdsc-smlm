@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.utils;
 
-
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;

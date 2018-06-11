@@ -31,7 +31,6 @@ import gdsc.core.utils.Maths;
 import gdsc.smlm.data.NamedObject;
 import ij.process.FHT2;
 
-
 /**
  * Computes a convolution/correlation in the frequency domain using a Fast Hartley Tranform. An option edge window
  * function can be applied.
@@ -44,11 +43,15 @@ public class FHTFilter extends BaseFilter
 	public enum Operation implements NamedObject
 	{
 		//@formatter:off
-		CORRELATION { public String getName() { return "Correlation"; } },
-		CONVOLUTION { public String getName() { return "Convolution"; } },
-		DECONVOLUTION { public String getName() { return "Deconvolution"; } };
+		CORRELATION { @Override
+		public String getName() { return "Correlation"; } },
+		CONVOLUTION { @Override
+		public String getName() { return "Convolution"; } },
+		DECONVOLUTION { @Override
+		public String getName() { return "Deconvolution"; } };
 		//@formatter:on
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -423,6 +426,7 @@ public class FHTFilter extends BaseFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public FHTFilter clone()
 	{
 		FHTFilter fht = (FHTFilter) super.clone();

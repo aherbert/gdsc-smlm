@@ -76,8 +76,8 @@ public class SumFilterTest
 					floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height,
+			int boxSize) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
@@ -101,8 +101,8 @@ public class SumFilterTest
 					floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width, int height,
+			int boxSize) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
@@ -124,8 +124,8 @@ public class SumFilterTest
 				floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
@@ -145,12 +145,12 @@ public class SumFilterTest
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(filter,
-							width, height, boxSize);
+					floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(filter, width, height,
+							boxSize);
 	}
 
-	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
-			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
+	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
@@ -224,15 +224,15 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -308,15 +308,15 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -382,22 +382,21 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf(
-					"float stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+			System.out.printf("float stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -412,8 +411,8 @@ public class SumFilterTest
 				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(SumFilter filter, int width, int height)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
@@ -478,14 +477,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf(
-							"float blockSumNxNInternal [%dx%d] %d => blockSum3x3Internal %d = %.2fx\n", width,
+					System.out.printf("float blockSumNxNInternal [%dx%d] %d => blockSum3x3Internal %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -543,8 +541,7 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf(
-							"float blockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
+					System.out.printf("float blockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
@@ -608,8 +605,7 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf(
-							"float blockSum3x3Internal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
+					System.out.printf("float blockSum3x3Internal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
@@ -673,14 +669,14 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("float stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"float stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -695,8 +691,8 @@ public class SumFilterTest
 				floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
 	}
 
-	private void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		float[] data1 = floatCreateData(width, height);
@@ -761,14 +757,14 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("float rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"float rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -826,14 +822,14 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("float stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"float stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -893,21 +889,20 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			if (debug)
-				System.out
-						.printf("float rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-								boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+				System.out.printf(
+						"float rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+						boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf(
-				"float rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+		System.out.printf("float rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
@@ -935,8 +930,8 @@ public class SumFilterTest
 					floatCompareBlockSumNxNAndStripedBlockSumNxN(filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
@@ -959,8 +954,8 @@ public class SumFilterTest
 					floatCompareBlockSumNxNAndRollingBlockSumNxN(filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		float[] data1 = floatCreateData(width, height);
@@ -1027,15 +1022,14 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"float blockSumNxN [%dx%d] @ %d : %d => blockSumNxNInternal %d = %.2fx\n",
+						System.out.printf("float blockSumNxN [%dx%d] @ %d : %d => blockSumNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -1101,15 +1095,14 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"float blockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxN %d = %.2fx\n",
+						System.out.printf("float blockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -1175,15 +1168,15 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -1249,15 +1242,14 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"float blockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxN %d = %.2fx\n",
+						System.out.printf("float blockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -1323,15 +1315,15 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("float rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"float rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("float rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -1418,8 +1410,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float blockSumNxN [%dx%d] %d => blockSum3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float blockSumNxN [%dx%d] %d => blockSum3x3 %d = %.2fx\n", width, height, time,
+							fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -1505,13 +1497,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float stripedBlockSumNxN [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float stripedBlockSumNxN [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		stripedBlockTime, time), stripedBlockTime < time);
 			}
-		System.out.printf("float stripedBlockSumNxN %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float stripedBlockSumNxN %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -1592,13 +1584,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float rollingBlockSumNxN [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float rollingBlockSumNxN [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
-		System.out.printf("float rollingBlockSumNxN %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float rollingBlockSumNxN %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -1656,8 +1648,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float blockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float blockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width, height,
+							time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -1720,8 +1712,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float blockSum3x3 [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float blockSum3x3 [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width, height,
+							time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -1784,13 +1776,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("float stripedBlockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("float stripedBlockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float stripedBlockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("float stripedBlockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -1806,8 +1798,8 @@ public class SumFilterTest
 					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height,
+			int boxSize) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
@@ -1831,8 +1823,8 @@ public class SumFilterTest
 					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width, int height,
+			int boxSize) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
@@ -1854,8 +1846,8 @@ public class SumFilterTest
 				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
@@ -1875,12 +1867,12 @@ public class SumFilterTest
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(filter, width,
-							height, boxSize);
+					intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(filter, width, height,
+							boxSize);
 	}
 
-	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(
-			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
+	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
@@ -1954,21 +1946,21 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int blockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("int blockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int blockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2038,21 +2030,21 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int blockSumNxNInternal [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("int blockSumNxNInternal %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int blockSumNxNInternal %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2112,22 +2104,21 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int stripedBlockSumNxNInternal [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf(
-					"int stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+			System.out.printf("int stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("int stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2208,13 +2199,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int blockSumNxNInternal [%dx%d] %d => blockSum3x3Internal %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int blockSumNxNInternal [%dx%d] %d => blockSum3x3Internal %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2272,14 +2263,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf(
-							"int blockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
+					System.out.printf("int blockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int blockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2337,14 +2327,13 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf(
-							"int blockSum3x3Internal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
+					System.out.printf("int blockSum3x3Internal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSum3x3Internal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int blockSum3x3Internal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2402,14 +2391,14 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("int stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"int stripedBlockSum3x3Internal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2424,8 +2413,8 @@ public class SumFilterTest
 				intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
 	}
 
-	private void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter,
-			int width, int height) throws ArrayComparisonFailure
+	private void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051977);
 		int[] data1 = intCreateData(width, height);
@@ -2490,14 +2479,14 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("int rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"int rollingBlockSumNxNInternal [%dx%d] %d => rollingBlockSum3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2555,14 +2544,14 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out
-							.printf("int stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
-									width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf(
+							"int stripedBlockSumNxNInternal [%dx%d] %d => stripedBlockSum3x3Internal %d = %.2fx\n",
+							width, height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2622,21 +2611,20 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int rollingBlockSumNxNInternalTransposed [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			if (debug)
-				System.out
-						.printf("int rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-								boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+				System.out.printf(
+						"int rollingBlockSumNxNInternalTransposed %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+						boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf(
-				"int rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+		System.out.printf("int rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n",
 				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
@@ -2664,8 +2652,8 @@ public class SumFilterTest
 					intCompareBlockSumNxNAndStripedBlockSumNxN(filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
@@ -2688,8 +2676,8 @@ public class SumFilterTest
 					intCompareBlockSumNxNAndRollingBlockSumNxN(filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
+			throws ArrayComparisonFailure
 	{
 		rand = new gdsc.core.utils.Random(-30051976);
 		int[] data1 = intCreateData(width, height);
@@ -2756,15 +2744,14 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"int blockSumNxN [%dx%d] @ %d : %d => blockSumNxNInternal %d = %.2fx\n", width,
-								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf("int blockSumNxN [%dx%d] @ %d : %d => blockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -2830,15 +2817,14 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"int blockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxN %d = %.2fx\n", width,
+						System.out.printf("int blockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxN %d = %.2fx\n", width,
 								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -2904,21 +2890,21 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int stripedBlockSumNxN [%dx%d] @ %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("int stripedBlockSumNxN %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int stripedBlockSumNxN %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -2978,15 +2964,14 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf(
-								"int blockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxN %d = %.2fx\n", width,
+						System.out.printf("int blockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxN %d = %.2fx\n", width,
 								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
@@ -3052,21 +3037,21 @@ public class SumFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out
-								.printf("int rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-										width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf(
+								"int rollingBlockSumNxN [%dx%d] @ %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
+								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			System.out.printf("int rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			if (TestSettings.ASSERT_SPEED_TESTS)
 				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("int rollingBlockSumNxN %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
+		System.out.printf("int rollingBlockSumNxN %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 		if (TestSettings.ASSERT_SPEED_TESTS)
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
@@ -3147,8 +3132,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int blockSumNxN [%dx%d] %d => blockSum3x3 %d = %.2fx\n", width, height,
-							time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int blockSumNxN [%dx%d] %d => blockSum3x3 %d = %.2fx\n", width, height, time,
+							fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -3234,8 +3219,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int stripedBlockSumNxN [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int stripedBlockSumNxN [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		stripedBlockTime, time), stripedBlockTime < time);
 			}
@@ -3321,8 +3306,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int rollingBlockSumNxN [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int rollingBlockSumNxN [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
@@ -3385,8 +3370,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int blockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int blockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width, height,
+							time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -3449,8 +3434,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int blockSum3x3 [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width,
-							height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int blockSum3x3 [%dx%d] %d => stripedBlockSum3x3 %d = %.2fx\n", width, height,
+							time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
@@ -3513,8 +3498,8 @@ public class SumFilterTest
 				boxSlowTotal += time;
 				boxFastTotal += fastTime;
 				if (debug)
-					System.out.printf("int stripedBlockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n",
-							width, height, time, fastTime, speedUpFactor(time, fastTime));
+					System.out.printf("int stripedBlockSum3x3 [%dx%d] %d => rollingBlockSum3x3 %d = %.2fx\n", width,
+							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}

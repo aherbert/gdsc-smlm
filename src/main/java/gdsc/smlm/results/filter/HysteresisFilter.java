@@ -33,7 +33,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.CalibrationReader;
 
-
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -268,6 +267,7 @@ public abstract class HysteresisFilter extends Filter
 		final LinkedList<PeakResult> candidates = new LinkedList<PeakResult>();
 		peakResults.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult result)
 			{
 				switch (getStatus(result))
@@ -458,6 +458,7 @@ public abstract class HysteresisFilter extends Filter
 	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getChromosomeParameters()
 	 */
+	@Override
 	public int[] getChromosomeParameters()
 	{
 		// Hysteresis filters remove their search and time mode parameters in their Chromosome sequence

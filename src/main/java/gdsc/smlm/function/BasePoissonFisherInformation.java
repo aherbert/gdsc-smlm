@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Base class for any probability distribution that can calculate the Fisher information for a Poisson distributed mean.
  * <p>
@@ -41,6 +40,7 @@ public abstract class BasePoissonFisherInformation implements FisherInformation,
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#isValid(double)
 	 */
+	@Override
 	public boolean isValid(double t)
 	{
 		return t >= MIN_MEAN;

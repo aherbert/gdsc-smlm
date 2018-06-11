@@ -28,7 +28,6 @@ import org.jtransforms.dht.FloatDHT_2D;
 import ij.process.ImageProcessor;
 import pl.edu.icm.jlargearrays.LargeArray;
 
-
 /**
  * Wrapper to compute the discrete Hartley transform on 2D data. This uses the JTransforms library.
  */
@@ -504,8 +503,8 @@ public class FloatDHT2D extends FloatImage2D
 			{
 				// This is a copy of the divide operation in ij.process.FHT
 				int j = nr_m_r * nc + nc_m_c;
-				double h2i = (double) h2[i];
-				double h2j = (double) h2[j];
+				double h2i = h2[i];
+				double h2j = h2[j];
 				double mag = h2i * h2i + h2j * h2j;
 				if (mag < 1e-20)
 					mag = 1e-20;

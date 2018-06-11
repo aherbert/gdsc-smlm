@@ -61,7 +61,6 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -114,10 +113,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	private enum Correction
 	{
 		//@formatter:off
-		NONE{ public String getName() { return "None"; }},
-		SUBTRACTION{ public String getName() { return "Subtraction"; }},
-		MOST_LIKELY{ public String getName() { return "Most likely"; }},
-		WEIGHTED_RANDOM{ public String getName() { return "Weighted random"; }};
+		NONE{ @Override
+		public String getName() { return "None"; }},
+		SUBTRACTION{ @Override
+		public String getName() { return "Subtraction"; }},
+		MOST_LIKELY{ @Override
+		public String getName() { return "Most likely"; }},
+		WEIGHTED_RANDOM{ @Override
+		public String getName() { return "Weighted random"; }};
 		//@formatter:on
 
 		@Override
@@ -146,9 +149,12 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	private enum SimulationDistribution
 	{
 		//@formatter:off
-		POINT{ public String getName() { return "Point"; }},
-		LINE{ public String getName() { return "Line"; }},
-		CIRCLE{ public String getName() { return "Circle"; }};
+		POINT{ @Override
+		public String getName() { return "Point"; }},
+		LINE{ @Override
+		public String getName() { return "Line"; }},
+		CIRCLE{ @Override
+		public String getName() { return "Circle"; }};
 		//@formatter:on
 
 		@Override
@@ -379,6 +385,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		 * 
 		 * @see gdsc.core.clustering.DensityCounter.Molecule#getX()
 		 */
+		@Override
 		public float getX()
 		{
 			return x;
@@ -389,6 +396,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		 * 
 		 * @see gdsc.core.clustering.DensityCounter.Molecule#getY()
 		 */
+		@Override
 		public float getY()
 		{
 			return y;
@@ -399,6 +407,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		 * 
 		 * @see gdsc.core.clustering.DensityCounter.Molecule#getID()
 		 */
+		@Override
 		public int getID()
 		{
 			// Allow the ID to be updated from the original channel by using a current channel field
@@ -415,6 +424,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1200,6 +1210,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		// The event is null when the NonBlockingExtendedGenericDialog is first shown
@@ -1294,6 +1305,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
 	 * OptionCollectedEvent)
 	 */
+	@Override
 	public void optionCollected(OptionCollectedEvent e)
 	{
 		resultsSettings = resultsSettingsBuilder.build();
@@ -1754,6 +1766,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			for (int i = from; i < to; i++)
@@ -1848,6 +1861,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			// TODO - We could do other non-specific assignments.
@@ -2322,6 +2336,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		return true;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		ImagePlus imp = WindowManager.getImage(results.getName() + " " + TITLE);
@@ -2378,6 +2393,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			MemoryPeakResults results = (MemoryPeakResults) output[i].getOutput(0);
 			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
+				@Override
 				public void executeXYR(float xx, float yy, PeakResult result)
 				{
 					if (r.contains(xx, yy))

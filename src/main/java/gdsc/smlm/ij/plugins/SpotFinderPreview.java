@@ -58,7 +58,6 @@ import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import gdsc.smlm.engine.FitConfiguration;
 
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.MaximaSpotFilter;
 import gdsc.smlm.filters.Spot;
@@ -156,6 +155,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -182,6 +182,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
@@ -269,8 +270,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			ImagePlus.addImageListener(this);
 
 			// Support template settings
-			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
-			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			Vector<TextField> numerics = gd.getNumericFields();
+			Vector<Choice> choices = gd.getChoices();
 
 			int n = 0;
 			int ch = 0;
@@ -317,6 +318,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		if (refreshing)
@@ -351,9 +353,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			showFP = gd.getNextBoolean();
 		}
 		preview = gd.getNextBoolean();
-		
-		((ExtendedGenericDialog)gd).collectOptions();
-		
+
+		((ExtendedGenericDialog) gd).collectOptions();
+
 		boolean result = !gd.invalidNumber();
 		if (!preview)
 		{
@@ -383,6 +385,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		if (refreshing)
@@ -608,11 +611,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			double[] rank = SimpleArrayUtils.newArray(precision.length, 0, 1.0);
 			plot.setLimits(0, nPredicted, 0, 1.05);
 			plot.setColor(Color.blue);
-			plot.addPoints(rank, precision, Plot2.LINE);
+			plot.addPoints(rank, precision, Plot.LINE);
 			plot.setColor(Color.red);
-			plot.addPoints(rank, recall, Plot2.LINE);
+			plot.addPoints(rank, recall, Plot.LINE);
 			plot.setColor(Color.black);
-			plot.addPoints(rank, jaccard, Plot2.LINE);
+			plot.addPoints(rank, jaccard, Plot.LINE);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
 
@@ -623,7 +626,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			plot = new Plot2(title, "Recall", "Precision");
 			plot.setLimits(0, 1, 0, 1.05);
 			plot.setColor(Color.red);
-			plot.addPoints(recall, precision, Plot2.LINE);
+			plot.addPoints(recall, precision, Plot.LINE);
 			plot.drawLine(recall[recall.length - 1], precision[recall.length - 1], recall[recall.length - 1], 0);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
@@ -783,20 +786,24 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Nothing to do		
 	}
 
+	@Override
 	public void imageOpened(ImagePlus imp)
 	{
 
 	}
 
+	@Override
 	public void imageClosed(ImagePlus imp)
 	{
 	}
 
+	@Override
 	public void imageUpdated(ImagePlus imp)
 	{
 		if (this.imp.getID() == imp.getID() && preview)
@@ -808,6 +815,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		}
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getSource() instanceof Choice)
@@ -883,8 +891,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		textSmooth.setText("" + config.getDataFilterParameterValue(0));
 		if (config.getDataFiltersCount() > 1)
 		{
-			textDataFilterMethod2
-					.select(SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal()]);
+			textDataFilterMethod2.select(SettingsManager.getDataFilterMethodNames()[config
+					.getDataFilterMethod(1, defaultDataFilterMethod).ordinal()]);
 			textSmooth2.setText("" + config.getDataFilterParameterValue(1, defaultSmooth));
 			// XXX - What about the Abolute/Relative flag?
 		}
@@ -897,6 +905,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * 
 	 * @see gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
 	 */
+	@Override
 	public FitConfiguration getFitConfiguration()
 	{
 		return fitConfig;
@@ -908,6 +917,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 	 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
 	 * OptionCollectedEvent)
 	 */
+	@Override
 	public void optionCollected(OptionCollectedEvent e)
 	{
 		// Just run on the current processor

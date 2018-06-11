@@ -33,7 +33,6 @@ import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
-
 /**
  * Contains helper functions for the writing a Calibration class.
  */
@@ -144,6 +143,7 @@ public class CalibrationWriter extends CalibrationReader
 	 * 
 	 * @see gdsc.smlm.data.config.CalibrationReader#getCalibrationOrBuilder()
 	 */
+	@Override
 	public CalibrationOrBuilder getCalibrationOrBuilder()
 	{
 		// If changes have been made then return the builder
@@ -323,7 +323,8 @@ public class CalibrationWriter extends CalibrationReader
 	/**
 	 * Set the precision method used for the results.
 	 *
-	 * @param precision method
+	 * @param precision
+	 *            method
 	 *            The new precision method
 	 */
 	public void setPrecisionMethod(PrecisionMethod precisionMethod)
@@ -344,7 +345,7 @@ public class CalibrationWriter extends CalibrationReader
 		b.setBias(0);
 		b.setReadNoise(0);
 		setCountPerPhoton(0); // gain
-		
+
 		// This is still relevant to per-pixel camera settings as it is related to the chip sensitivity
 		//b.setQuantumEfficiency(0);   
 	}

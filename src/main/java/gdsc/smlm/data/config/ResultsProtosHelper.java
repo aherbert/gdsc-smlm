@@ -28,7 +28,6 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
 
-
 /**
  * Contains helper functions for the ResultsProtos class.
  */
@@ -46,8 +45,8 @@ public class ResultsProtosHelper
 		builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
 		builder.getResultsInMemorySettingsBuilder().setInMemory(true);
 		defaultResultsSettings = builder.build();
-	}	
-	
+	}
+
 	/**
 	 * Gets the name.
 	 *
@@ -161,7 +160,7 @@ public class ResultsProtosHelper
 				throw new IllegalStateException("Unknown name: " + value);
 		}
 	}
-	
+
 	/**
 	 * Gets the name.
 	 *

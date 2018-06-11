@@ -26,7 +26,6 @@ package gdsc.smlm.results.predicates;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultValue;
 
-
 /**
  * Accept results with a value within a min/max range
  */
@@ -69,6 +68,7 @@ public class MinMaxPeakResultPredicate implements PeakResultPredicate
 	 * 
 	 * @see gdsc.smlm.results.procedures.PeakResultPredicate#test(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean test(PeakResult t)
 	{
 		final float v = value.getValue(t);

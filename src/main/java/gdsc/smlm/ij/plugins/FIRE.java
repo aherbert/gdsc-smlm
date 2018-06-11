@@ -90,7 +90,6 @@ import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.function.Erf;
 
-
 import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;
@@ -202,19 +201,22 @@ public class FIRE implements PlugIn
 		/**
 		 * Use a fixed value for the precision distribution mean and standard deviation
 		 */
-		FIXED{ public String getName() { return "Fixed"; }},
+		FIXED{ @Override
+		public String getName() { return "Fixed"; }},
 		/**
 		 * Use the precision value that is stored in the results, e.g. from loaded data. 
 		 * The values can then be used to fit the entire distribution using a Gaussian or 
 		 * sampled to construct a decay curve from which the parameters are estimated. 
 		 */
-		STORED{ public String getName() { return "Stored"; }},
+		STORED{ @Override
+		public String getName() { return "Stored"; }},
 		/**
 		 * Calculate the precision of each localisation using the formula of Mortensen. 
 		 * The values can then be used to fit the entire distribution using a Gaussian or 
 		 * sampled to construct a decay curve from which the parameters are estimated.
 		 */
-		CALCULATE{ public String getName() { return "Calculate"; }};
+		CALCULATE{ @Override
+		public String getName() { return "Calculate"; }};
 		//@formatter:on
 
 		@Override
@@ -339,6 +341,7 @@ public class FIRE implements PlugIn
 			name = results.getName() + " [" + id + "]";
 		}
 
+		@Override
 		public void run()
 		{
 			try
@@ -365,6 +368,7 @@ public class FIRE implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		extraOptions = Utils.isExtraOptions();
@@ -613,6 +617,7 @@ public class FIRE implements PlugIn
 		newResults.begin();
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float x, float y, PeakResult result)
 			{
 				if (x < minX || x > maxX || y < minY || y > maxY)
@@ -972,6 +977,7 @@ public class FIRE implements PlugIn
 
 	private static class FixedSignalProvider implements SignalProvider
 	{
+		@Override
 		public float getSignal(PeakResult p)
 		{
 			return 1f;
@@ -980,6 +986,7 @@ public class FIRE implements PlugIn
 
 	private static class PeakSignalProvider implements SignalProvider
 	{
+		@Override
 		public float getSignal(PeakResult p)
 		{
 			return p.getSignal();
@@ -1044,6 +1051,7 @@ public class FIRE implements PlugIn
 			final IJImagePeakResults i1 = image1;
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult p)
 				{
 					float x = p.getXPosition() - minx;
@@ -1054,6 +1062,7 @@ public class FIRE implements PlugIn
 			final IJImagePeakResults i2 = image2;
 			results2.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult p)
 				{
 					float x = p.getXPosition() - minx;
@@ -1085,6 +1094,7 @@ public class FIRE implements PlugIn
 			final PeakResult[][] blocks = new PeakResult[nBlocks][blockSize];
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult p)
 				{
 					if (i.getCount() == finalBlockSize)
@@ -1226,7 +1236,7 @@ public class FIRE implements PlugIn
 			if (color == null)
 				return;
 			plot.setColor(color);
-			plot.addPoints(xValues, y, Plot2.LINE);
+			plot.addPoints(xValues, y, Plot.LINE);
 		}
 
 		Plot2 getPlot()
@@ -1299,7 +1309,7 @@ public class FIRE implements PlugIn
 					break;
 			}
 
-			x.add((double) t);
+			x.add(t);
 
 			FIRE f = this.copy();
 			FireResult result = f.calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod, fourierImageScale,
@@ -1312,7 +1322,7 @@ public class FIRE implements PlugIn
 		}
 
 		// Add the final fire number
-		x.add((double) maxT);
+		x.add(maxT);
 		y.add(fireNumber);
 
 		double[] xValues = x.toArray();
@@ -1823,11 +1833,13 @@ public class FIRE implements PlugIn
 
 	private class Quadratic implements ParametricUnivariateFunction
 	{
+		@Override
 		public double value(double x, double... parameters)
 		{
 			return parameters[0] + parameters[1] * x * x;
 		}
 
+		@Override
 		public double[] gradient(double x, double... parameters)
 		{
 			return new double[] { 1, x * x };
@@ -1933,6 +1945,7 @@ public class FIRE implements PlugIn
 			n2 = frcnum_noisevar * frcnum_noisevar;
 		}
 
+		@Override
 		public double value(double qValue)
 		{
 			if (qValue < 1e-16)
@@ -1955,6 +1968,7 @@ public class FIRE implements PlugIn
 			return v;
 		}
 
+		@Override
 		public double value(double[] point) throws IllegalArgumentException
 		{
 			return value(point[0]);
@@ -2004,6 +2018,7 @@ public class FIRE implements PlugIn
 			n2 = frcnum_noisevar * frcnum_noisevar;
 		}
 
+		@Override
 		public double value(double[] point) throws IllegalArgumentException
 		{
 			double mean = point[0];
@@ -2552,6 +2567,7 @@ public class FIRE implements PlugIn
 			final StoredDataStatistics p = precision;
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult r)
 				{
 					p.add(r.getPrecision());
@@ -3039,6 +3055,7 @@ public class FIRE implements PlugIn
 			//	workflow.startPreview();
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			// Delay reading the dialog when in interactive mode. This is a workaround for a bug
@@ -3090,6 +3107,7 @@ public class FIRE implements PlugIn
 			return true;
 		}
 
+		@Override
 		public void mouseClicked(MouseEvent e)
 		{
 			// Reset the slider on double-click
@@ -3106,21 +3124,25 @@ public class FIRE implements PlugIn
 				tf3.setText(q);
 		}
 
+		@Override
 		public void mousePressed(MouseEvent e)
 		{
 			// Ignore			
 		}
 
+		@Override
 		public void mouseReleased(MouseEvent e)
 		{
 			// Ignore			
 		}
 
+		@Override
 		public void mouseEntered(MouseEvent e)
 		{
 			// Ignore			
 		}
 
+		@Override
 		public void mouseExited(MouseEvent e)
 		{
 			// Ignore			

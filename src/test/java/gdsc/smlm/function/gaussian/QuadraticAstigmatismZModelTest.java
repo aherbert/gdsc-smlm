@@ -45,7 +45,7 @@ public class QuadraticAstigmatismZModelTest
 		canStaticComputeGradient(1.2);
 		canStaticComputeGradient(0.3);
 	}
-	
+
 	private void canStaticComputeGradient(double zDepth)
 	{
 		double[] ds_dz = new double[1];

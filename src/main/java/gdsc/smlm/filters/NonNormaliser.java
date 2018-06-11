@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Defines no normalisation of an area around a point
  */
@@ -31,7 +30,7 @@ public class NonNormaliser implements Normaliser
 {
 	/** An instance for applying no normalisation */
 	public static final NonNormaliser INSTANCE = new NonNormaliser();
-	
+
 	/**
 	 * Normalise the sum.
 	 *
@@ -41,6 +40,7 @@ public class NonNormaliser implements Normaliser
 	 *            the index
 	 * @return the normalised value
 	 */
+	@Override
 	public float normalise(double sum, int index)
 	{
 		return (float) sum;
@@ -55,6 +55,7 @@ public class NonNormaliser implements Normaliser
 	 *            the index
 	 * @return the normalised value
 	 */
+	@Override
 	public float normalise(float sum, int index)
 	{
 		return sum;
@@ -65,6 +66,7 @@ public class NonNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int)
 	 */
+	@Override
 	public void normalise(float[] data, int size)
 	{
 	}
@@ -74,6 +76,7 @@ public class NonNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int)
 	 */
+	@Override
 	public void normalise(float[] data, float[] out, int size)
 	{
 		System.arraycopy(data, 0, out, 0, size);
@@ -84,6 +87,7 @@ public class NonNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], int, int, int)
 	 */
+	@Override
 	public void normalise(float[] data, int maxx, int maxy, int border)
 	{
 	}
@@ -93,6 +97,7 @@ public class NonNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(float[], float[], int, int, int)
 	 */
+	@Override
 	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
 	{
 		int width = maxx - 2 * border;
@@ -108,6 +113,7 @@ public class NonNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(double[], float[], int)
 	 */
+	@Override
 	public void normalise(double[] data, float[] out, int size)
 	{
 		for (int i = 0; i < size; i++)
@@ -119,6 +125,7 @@ public class NonNormaliser implements Normaliser
 	 * 
 	 * @see gdsc.smlm.filters.Normaliser#normalise(double[], float[], int, int, int)
 	 */
+	@Override
 	public void normalise(double[] data, float[] out, int maxx, int maxy, int border)
 	{
 		int xlimit = maxx - border;

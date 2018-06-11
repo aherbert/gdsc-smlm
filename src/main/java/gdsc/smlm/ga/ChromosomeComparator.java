@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-
 /**
  * Sorts chromosome using the fitness, highest fitness first.
  */
@@ -39,6 +38,7 @@ public class ChromosomeComparator<T extends Comparable<T>> implements Comparator
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public int compare(Chromosome<T> chromosome1, Chromosome<T> chromosome2)
 	{
 		return chromosome1.getFitness().compareTo(chromosome2.getFitness());

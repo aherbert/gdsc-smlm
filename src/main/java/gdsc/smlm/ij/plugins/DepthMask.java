@@ -47,6 +47,7 @@ public class DepthMask implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -137,7 +138,7 @@ public class DepthMask implements PlugIn
 			//		else if (maskYZ[z * maxy + y] == 0)
 			//			mask[i] = 0;
 			//	}
-			
+
 			for (int x = 0, i = maxx * z; x < maxx; x++, i++)
 			{
 				if (maskXZ[i] == 0)

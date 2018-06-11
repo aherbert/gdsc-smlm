@@ -28,7 +28,6 @@ import org.jtransforms.dht.DoubleDHT_3D;
 import ij.ImageStack;
 import pl.edu.icm.jlargearrays.LargeArray;
 
-
 /**
  * Wrapper to compute the discrete Hartley transform on 3D data. This uses the JTransforms library.
  */

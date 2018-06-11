@@ -32,13 +32,13 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitConverterFactory;
 
-
 /**
  * Contain the calibration settings for the microscope
  * <p>
  * The calibration has flags to indicate that a valid value has been set for each property. If these are false then the
  * property get method can optionally throw an exception.
  * <p>
+ * 
  * @deprecated This class has been replaced with generated objects using Google protocol buffers. It is left to support
  *             deserialisation of legacy files.
  */
@@ -412,6 +412,7 @@ class Calibration implements Cloneable
 	 * @deprecated This has been replaced by camaraType. It is left to enable XStream deserialisation of old
 	 *             configuration.
 	 */
+	@Deprecated
 	boolean emCCD;
 	/**
 	 * The camera amplification (ADUs/e-) used when modelling a microscope camera.
@@ -471,6 +472,7 @@ class Calibration implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Calibration clone()
 	{
 		Calibration c;

@@ -29,7 +29,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
 import gdsc.core.logging.FileLogger;
 import gdsc.core.logging.Logger;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;

@@ -187,6 +187,7 @@ public class CubicSplineManager implements PlugIn
 			final int kk = k;
 			futures.add(threadPool.submit(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					CubicSplineCalculator calc = new CubicSplineCalculator();
@@ -478,6 +479,7 @@ public class CubicSplineManager implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -586,6 +588,7 @@ public class CubicSplineManager implements PlugIn
 			{
 				gd.addAndGetButton("Reset", new ActionListener()
 				{
+					@Override
 					public void actionPerformed(ActionEvent e)
 					{
 						pluginSettings.setXShift(0);
@@ -605,6 +608,7 @@ public class CubicSplineManager implements PlugIn
 			gd.showDialog();
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			pluginSettings.setScale((int) gd.getNextNumber());
@@ -690,6 +694,7 @@ public class CubicSplineManager implements PlugIn
 				// Run in a new thread to allow the GUI to continue updating
 				new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						try
@@ -755,6 +760,7 @@ public class CubicSplineManager implements PlugIn
 
 		File[] fileList = (new File(directory)).listFiles(new FileFilter()
 		{
+			@Override
 			public boolean accept(File pathname)
 			{
 				return pathname.isFile();

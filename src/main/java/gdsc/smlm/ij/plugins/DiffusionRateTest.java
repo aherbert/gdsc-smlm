@@ -51,7 +51,6 @@ import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
 
-
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.DiffusionType;
@@ -162,6 +161,7 @@ public class DiffusionRateTest implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -402,7 +402,7 @@ public class DiffusionRateTest implements PlugIn
 		for (int j = 0; j < totalSteps; j++)
 		{
 			// Convert steps to seconds
-			xValues[j] = (double) (j + 1) / settings.getStepsPerSecond();
+			xValues[j] = (j + 1) / settings.getStepsPerSecond();
 
 			// Convert values in pixels^2 to um^2
 			final double mean2D = stats2D[j].getMean() / conversionFactor;
@@ -507,13 +507,13 @@ public class DiffusionRateTest implements PlugIn
 		limits = Maths.limits(limits, lower);
 		plot.setLimits(0, totalSteps / settings.getStepsPerSecond(), limits[0], limits[1]);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, lower, Plot2.LINE);
-		plot.addPoints(xValues, upper, Plot2.LINE);
+		plot.addPoints(xValues, lower, Plot.LINE);
+		plot.addPoints(xValues, upper, Plot.LINE);
 		if (fitted != null)
 		{
 			plot.setColor(Color.red);
 			plot.addPoints(new double[] { xValues[0], xValues[xValues.length - 1] },
-					new double[] { fitted.value(xValues[0]), fitted.value(xValues[xValues.length - 1]) }, Plot2.LINE);
+					new double[] { fitted.value(xValues[0]), fitted.value(xValues[xValues.length - 1]) }, Plot.LINE);
 		}
 		plot.setColor(Color.black);
 
@@ -843,9 +843,9 @@ public class DiffusionRateTest implements PlugIn
 		limits = Maths.limits(limits, yUm);
 		plot.setLimits(0, totalSteps / settings.getStepsPerSecond(), limits[0], limits[1]);
 		plot.setColor(Color.red);
-		plot.addPoints(xValues, xUm, Plot2.LINE);
+		plot.addPoints(xValues, xUm, Plot.LINE);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, yUm, Plot2.LINE);
+		plot.addPoints(xValues, yUm, Plot.LINE);
 
 		Utils.display(title, plot);
 
@@ -890,7 +890,7 @@ public class DiffusionRateTest implements PlugIn
 			ip.drawLine(round(x[j - 1]), round(y[j - 1]), round(x[j]), round(y[j]));
 		}
 		// Draw the final position
-		ip.putPixel((int) round(x[totalSteps - 1]), (int) round(y[totalSteps - 1]), 255);
+		ip.putPixel(round(x[totalSteps - 1]), round(y[totalSteps - 1]), 255);
 
 		ImagePlus imp = Utils.display(TITLE + " example", ip);
 
@@ -913,7 +913,7 @@ public class DiffusionRateTest implements PlugIn
 
 	private int round(float f)
 	{
-		return (int) Math.round(f);
+		return Math.round(f);
 	}
 
 	private float[] getLimits(float[] x)

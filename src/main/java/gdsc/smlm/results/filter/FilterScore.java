@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Store the filter score used in benchmarking
  */
@@ -43,6 +42,7 @@ public class FilterScore implements Comparable<FilterScore>
 		this.criteriaPassed = criteriaPassed;
 	}
 
+	@Override
 	public int compareTo(FilterScore that)
 	{
 		if (that == null)

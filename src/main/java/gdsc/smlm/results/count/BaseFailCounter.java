@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Base class for fail counters
  */
@@ -36,6 +35,7 @@ public abstract class BaseFailCounter implements FailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#getDescription()
 	 */
+	@Override
 	public String getDescription()
 	{
 		if (description == null)
@@ -63,11 +63,12 @@ public abstract class BaseFailCounter implements FailCounter
 		if (c < 0)
 			throw new IllegalStateException("Negative count: " + c);
 	}
-	
+
 	/**
 	 * Adds the result.
 	 *
-	 * @param pass Set to true if a pass
+	 * @param pass
+	 *            Set to true if a pass
 	 */
 	public void addResult(boolean pass)
 	{

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wrap a function and store the values from the procedure.
  */
@@ -70,6 +69,7 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
 	 */
+	@Override
 	public void initialise2(double[] a)
 	{
 		f.initialise2(a);
@@ -80,6 +80,7 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		i = 0;
@@ -101,6 +102,7 @@ public class Gradient2FunctionStore extends Gradient1FunctionStore implements Gr
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da, double[] d2y_da2)
 	{
 		values[i] = value;

@@ -163,11 +163,13 @@ public class JTransformsTest
 			this.data = data;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return clone(data);
@@ -181,6 +183,7 @@ public class JTransformsTest
 			return data2;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			return run((float[][]) data);
@@ -201,7 +204,7 @@ public class JTransformsTest
 		{
 			return this;
 		}
-		
+
 		@Override
 		public ImageProcessor convertToFloat()
 		{

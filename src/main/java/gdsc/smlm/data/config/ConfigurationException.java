@@ -25,7 +25,6 @@ package gdsc.smlm.data.config;
 
 import gdsc.core.data.DataException;
 
-
 /**
  * Exception to throw if configuration is invalid
  */

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Implement a fixed value non-linear fitting function
  */
@@ -36,41 +35,49 @@ public class FixedNonLinearFunction implements NonLinearFunction
 		this.values = values;
 	}
 
+	@Override
 	public void initialise(double[] a)
 	{
 
 	}
 
+	@Override
 	public int[] gradientIndices()
 	{
 		return new int[0];
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return 0;
 	}
 
+	@Override
 	public double eval(int x, double[] dyda)
 	{
 		return values[x];
 	}
 
+	@Override
 	public double eval(int x)
 	{
 		return values[x];
 	}
 
+	@Override
 	public double eval(int x, double[] dyda, double[] w)
 	{
 		return values[x];
 	}
 
+	@Override
 	public double evalw(int x, double[] w)
 	{
 		return values[x];
 	}
 
+	@Override
 	public boolean canComputeWeights()
 	{
 		return false;

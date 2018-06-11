@@ -72,7 +72,7 @@ public class SCMOSLikelihoodWrapperTest
 	// Do not test zero background since this is an edge case for the likelihood function
 	private double[] testbackground_ = new double[] { 0.1, 1, 10 };
 	private double[] testsignal1_ = new double[] { 15, 55, 105 };
-	private double[] testangle1_ = new double[] { (double) (Math.PI / 5), (double) (Math.PI / 3) };
+	private double[] testangle1_ = new double[] { Math.PI / 5, Math.PI / 3 };
 	private double[] testcx1_ = new double[] { 4.9, 5.3 };
 	private double[] testcy1_ = new double[] { 4.8, 5.2 };
 	private double[] testcz1_ = new double[] { -1.5, 1.0 };
@@ -105,7 +105,7 @@ public class SCMOSLikelihoodWrapperTest
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 		for (int i = 0; i < n; i++)
 		{
-			o[i] = (float) pd.sample();
+			o[i] = pd.sample();
 			var[i] = (float) ed.sample();
 			sd[i] = (float) Math.sqrt(var[i]);
 			g[i] = (float) (G + rg.nextGaussian() * G_SD);
@@ -572,6 +572,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		p = in.integrate(20000, new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				double v;
@@ -619,40 +620,48 @@ public class SCMOSLikelihoodWrapperTest
 
 		NonLinearFunction nlf = new NonLinearFunction()
 		{
+			@Override
 			public void initialise(double[] a)
 			{
 			}
 
+			@Override
 			public int[] gradientIndices()
 			{
 				return new int[0];
 			}
 
+			@Override
 			public double eval(int x, double[] dyda, double[] w)
 			{
 				return 0;
 			}
 
+			@Override
 			public double eval(int x)
 			{
 				return mu;
 			}
 
+			@Override
 			public double eval(int x, double[] dyda)
 			{
 				return mu;
 			}
 
+			@Override
 			public boolean canComputeWeights()
 			{
 				return false;
 			}
 
+			@Override
 			public double evalw(int x, double[] w)
 			{
 				return 0;
 			}
 
+			@Override
 			public int getNumberOfGradients()
 			{
 				return 0;
@@ -733,36 +742,43 @@ public class SCMOSLikelihoodWrapperTest
 			this.name = name;
 		}
 
+		@Override
 		public void initialise(double[] a)
 		{
 			this.a = a;
 		}
 
+		@Override
 		public int[] gradientIndices()
 		{
 			return new int[1];
 		}
 
+		@Override
 		public double eval(int x, double[] dyda, double[] w)
 		{
 			return 0;
 		}
 
+		@Override
 		public double eval(int x, double[] dyda)
 		{
 			return 0;
 		}
 
+		@Override
 		public boolean canComputeWeights()
 		{
 			return false;
 		}
 
+		@Override
 		public double evalw(int x, double[] w)
 		{
 			return 0;
 		}
 
+		@Override
 		public int getNumberOfGradients()
 		{
 			return 1;
@@ -776,18 +792,22 @@ public class SCMOSLikelihoodWrapperTest
 		//@formatter:off
 		canComputePValue(new BaseNonLinearFunction("Linear")
 		{
+			@Override
 			public double eval(int x) {	return a[0] * (x-n2); }
 		});		
 		canComputePValue(new BaseNonLinearFunction("Quadratic")
 		{
+			@Override
 			public double eval(int x) {	return a[0] * (x-n2) * (x-n2); }
 		});		
 		canComputePValue(new BaseNonLinearFunction("Linear+C")
 		{
+			@Override
 			public double eval(int x) {	return 10 * a[0] + (x-n2); }
 		});		
 		canComputePValue(new BaseNonLinearFunction("Gaussian")
 		{
+			@Override
 			public double eval(int x) {	return 100 * FastMath.exp(-0.5 * Math.pow(x - n2, 2) / (a[0] * a[0])); }
 		});		
 		//@formatter:on

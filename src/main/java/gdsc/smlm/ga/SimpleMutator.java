@@ -25,7 +25,6 @@ package gdsc.smlm.ga;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 
-
 /**
  * Mutates the sequence by selecting random positions and random shifts.
  */
@@ -107,6 +106,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 	 * 
 	 * @see gdsc.smlm.ga.Mutator#mutate(gdsc.smlm.ga.Chromosome)
 	 */
+	@Override
 	public Chromosome<T> mutate(Chromosome<T> chromosome)
 	{
 		final double[] sequence = chromosome.sequence().clone();

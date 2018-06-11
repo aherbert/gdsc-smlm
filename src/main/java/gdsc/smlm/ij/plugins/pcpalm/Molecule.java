@@ -29,7 +29,7 @@ package gdsc.smlm.ij.plugins.pcpalm;
 public class Molecule
 {
 	public double x, y, precision, photons;
-	
+
 	// Used to construct a single linked list of molecules
 	public Molecule next = null;
 

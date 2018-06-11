@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model.camera;
 
-
 /**
  * A per-pixel camera model with all pixels treated equally. Note that this concept is invalid since this model reports
  * itself as a per-pixel model even though all pixels are treated equally. This allows testing algorithms that require a
@@ -94,6 +93,7 @@ public class FakePerPixelCameraModel extends FixedPixelCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
 	 */
+	@Override
 	public boolean isPerPixelModel()
 	{
 		return true;

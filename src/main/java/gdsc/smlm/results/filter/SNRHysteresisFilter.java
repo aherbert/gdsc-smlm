@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -216,6 +215,7 @@ public class SNRHysteresisFilter extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { getDefaultSearchRange(), getDefaultTimeRange(), SNRFilter.DEFAULT_RANGE,

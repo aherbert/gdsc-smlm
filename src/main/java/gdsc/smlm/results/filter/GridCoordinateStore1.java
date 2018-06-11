@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows checking for duplicates.
  * <p>

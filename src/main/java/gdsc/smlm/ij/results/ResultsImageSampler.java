@@ -45,7 +45,6 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.process.ImageProcessor;
 
-
 /**
  * Allows sampling sections from a source image for localisation results.
  */
@@ -117,6 +116,7 @@ public class ResultsImageSampler
 
 	private static class IndexComparator implements Comparator<ResultsSample>
 	{
+		@Override
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
 			return Long.compare(o1.index, o2.index);
@@ -125,6 +125,7 @@ public class ResultsImageSampler
 
 	private static class CountComparator implements Comparator<ResultsSample>
 	{
+		@Override
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
 			int result = compareInt(o1.size(), o2.size());
@@ -137,6 +138,7 @@ public class ResultsImageSampler
 
 	private static class ReverseCountComparator implements Comparator<ResultsSample>
 	{
+		@Override
 		public int compare(ResultsSample o1, ResultsSample o2)
 		{
 			int result = compareInt(o2.size(), o1.size());

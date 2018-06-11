@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 import java.util.Arrays;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -53,8 +52,8 @@ public abstract class OptimiserFunction
 		this.y = new TDoubleArrayList();
 		for (int i = 0; i < x.length; i++)
 		{
-			this.x.add((double) x[i]);
-			this.y.add((double) y[i]);
+			this.x.add(x[i]);
+			this.y.add(y[i]);
 		}
 	}
 

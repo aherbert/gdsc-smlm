@@ -167,6 +167,7 @@ public class FastMLEGradient2ProcedureTest
 			{
 				int k = 0;
 
+				@Override
 				public void execute(double value)
 				{
 					x[k++] = (value > 0) ? rdg.nextPoisson(value) : 0;
@@ -182,6 +183,7 @@ public class FastMLEGradient2ProcedureTest
 			{
 				int k = 0;
 
+				@Override
 				public void execute(double value)
 				{
 					b[k++] = value;
@@ -518,7 +520,8 @@ public class FastMLEGradient2ProcedureTest
 				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualRelativeOrAbsolute(gradient1, d1[j]));
 				if (!eq.almostEqualRelativeOrAbsolute(gradient2, d2[j]))
 				{
-					Assert.fail("Not same gradient2 @ " + j + " error = " + DoubleEquality.relativeError(gradient2, d2[j]));
+					Assert.fail(
+							"Not same gradient2 @ " + j + " error = " + DoubleEquality.relativeError(gradient2, d2[j]));
 				}
 			}
 		}

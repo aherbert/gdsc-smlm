@@ -101,7 +101,7 @@ public abstract class WeightedFilterTest
 	private void assertArrayEquals(float[] e, float[] o, float f)
 	{
 		// TODO Auto-generated method stub
-		for (int i=0; i<e.length; i++)
+		for (int i = 0; i < e.length; i++)
 			Assert.assertEquals(e[i], o[i], Math.abs(e[i]) * f);
 	}
 

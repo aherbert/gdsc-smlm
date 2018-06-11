@@ -26,7 +26,6 @@ package gdsc.smlm.fitting.nonlinear.stop;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 
-
 /**
  * Defines the stopping criteria for the {@link gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
  * <p>
@@ -93,6 +92,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria
 	 * 
 	 * @see gdsc.fitting.model.StoppingCriteria#copyCoefficients(double[])
 	 */
+	@Override
 	protected void copyCoefficients(double[] a)
 	{
 		// Do nothing

@@ -299,8 +299,7 @@ public class LSQVarianceGradientProcedureTest
 		// Remove the timing of the function call by creating a dummy function
 		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
-				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
-				: f;
+				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3)) : f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -402,7 +401,7 @@ public class LSQVarianceGradientProcedureTest
 	public void varianceMatchesFormula()
 	{
 		//Assume.assumeTrue(false);
-		
+
 		double[] N_ = new double[] { 20, 50, 100, 500 };
 		double[] b2_ = new double[] { 0, 1, 2, 4 };
 		double[] s_ = new double[] { 1, 1.2, 1.5 };

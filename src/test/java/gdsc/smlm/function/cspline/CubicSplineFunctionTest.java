@@ -783,16 +783,19 @@ public abstract class CubicSplineFunctionTest
 			this.order = order;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			s = 0;
@@ -824,16 +827,19 @@ public abstract class CubicSplineFunctionTest
 			return s;
 		}
 
+		@Override
 		public void execute(double value)
 		{
 			s += value;
 		}
 
+		@Override
 		public void execute(double value, double[] dy_da)
 		{
 			s += value;
 		}
 
+		@Override
 		public void execute(double value, double[] dy_da, double[] d2y_da2)
 		{
 			s += value;

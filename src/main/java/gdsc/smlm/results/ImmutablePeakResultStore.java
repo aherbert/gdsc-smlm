@@ -29,7 +29,6 @@ import gdsc.core.data.DataException;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
-
 /**
  * Stores peak results and prevents modification.
  */
@@ -50,76 +49,91 @@ public class ImmutablePeakResultStore implements PeakResultStore
 		this.store = store;
 	}
 
+	@Override
 	public int size()
 	{
 		return store.size();
 	}
 
+	@Override
 	public boolean add(PeakResult result)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean addCollection(Collection<PeakResult> results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean addArray(PeakResult[] results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean addStore(PeakResultStore results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean remove(PeakResult result)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean removeCollection(Collection<PeakResult> results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean removeArray(PeakResult[] results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean removeStore(PeakResultStore results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean retainCollection(Collection<PeakResult> results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean retainArray(PeakResult[] results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public boolean retainStore(PeakResultStore results)
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public void clear()
 	{
 		throw new DataException("This result store is immutable");
 	}
 
+	@Override
 	public void trimToSize()
 	{
 		store.trimToSize();
 	}
 
+	@Override
 	public PeakResult[] toArray()
 	{
 		return makeImmutable(store.toArray());
@@ -139,16 +153,19 @@ public class ImmutablePeakResultStore implements PeakResultStore
 		return array;
 	}
 
+	@Override
 	public PeakResultStore copy()
 	{
 		return new ImmutablePeakResultStore(store.copy());
 	}
 
+	@Override
 	public PeakResultStore copy(boolean deepCopy)
 	{
 		return new ImmutablePeakResultStore(store.copy(deepCopy));
 	}
 
+	@Override
 	public boolean removeIf(PeakResultPredicate filter)
 	{
 		throw new DataException("This result store is immutable");
@@ -166,22 +183,26 @@ public class ImmutablePeakResultStore implements PeakResultStore
 			this.procedure = procedure;
 		}
 
+		@Override
 		public void execute(PeakResult peakResult)
 		{
 			procedure.execute(new ImmutablePeakResult(peakResult));
 		}
 	}
 
+	@Override
 	public void forEach(PeakResultProcedure procedure)
 	{
 		store.forEach(new ImmutablePeakResultProcedure(procedure));
 	}
 
+	@Override
 	public PeakResult[] subset(PeakResultPredicate filter)
 	{
 		return makeImmutable(store.subset(filter));
 	}
 
+	@Override
 	public boolean contains(PeakResult result)
 	{
 		return store.contains(result);

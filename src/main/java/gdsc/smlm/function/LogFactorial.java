@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.special.Gamma;
 
-
 /**
  * Compute the log of n!
  */

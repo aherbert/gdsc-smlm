@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Contains a model for an image of blinking fluorophores under constant activation illumination.
  * <p>

@@ -28,7 +28,6 @@ import org.jtransforms.dht.DoubleDHT_2D;
 import ij.process.ImageProcessor;
 import pl.edu.icm.jlargearrays.LargeArray;
 
-
 /**
  * Wrapper to compute the discrete Hartley transform on 2D data. This uses the JTransforms library.
  */

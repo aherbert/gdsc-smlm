@@ -23,14 +23,13 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Factory class for creating a fast log instance
  */
 public class FastLogFactory
 {
 	private static FastLog fastLog = null;
-	
+
 	/**
 	 * Gets the global fast log instance.
 	 *
@@ -42,7 +41,7 @@ public class FastLogFactory
 			fastLog = new TurboLog();
 		return fastLog;
 	}
-	
+
 	/**
 	 * Gets an instance of FastLog that uses Math.log, i.e. this is not fast.
 	 *

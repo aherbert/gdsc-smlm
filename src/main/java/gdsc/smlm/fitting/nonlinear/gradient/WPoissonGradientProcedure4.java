@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Calculates the Fisher information matrix for a Poisson process. The class can be used as a substitute for
  * {@link WLSQLVMGradientProcedure} if the user only requires the alpha matrix.

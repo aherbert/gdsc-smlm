@@ -49,6 +49,7 @@ public class ShowResultsHeader implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -107,7 +108,7 @@ public class ShowResultsHeader implements PlugIn
 			return false;
 		String text = (data instanceof String) ? (String) data : XmlUtils.toXML(data);
 		if (text.startsWith("<"))
-			text = XmlUtils.prettyPrintXml(text);
+			text = gdsc.core.utils.XmlUtils.prettyPrintXml(text);
 		Utils.log("%s: %s", title, text);
 		return true;
 	}
@@ -118,5 +119,5 @@ public class ShowResultsHeader implements PlugIn
 			return false;
 		Utils.log("%s:\n%s", title, data.toString());
 		return true;
-	}	
+	}
 }

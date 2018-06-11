@@ -369,6 +369,7 @@ public class ConvolutionTest
 					{
 						int i = 0;
 
+						@Override
 						public boolean execute(double value)
 						{
 							o2[i++] = value;
@@ -411,6 +412,7 @@ public class ConvolutionTest
 					{
 						int i = 0;
 
+						@Override
 						public boolean execute(double value1, double value2)
 						{
 							o2[0][i] = value1;
@@ -473,6 +475,7 @@ public class ConvolutionTest
 					{
 						int i = 0;
 
+						@Override
 						public boolean execute(double value)
 						{
 							o[i++] = value;
@@ -516,6 +519,7 @@ public class ConvolutionTest
 					{
 						int i = 0;
 
+						@Override
 						public boolean execute(double value1, double value2)
 						{
 							o[0][i] = value1;

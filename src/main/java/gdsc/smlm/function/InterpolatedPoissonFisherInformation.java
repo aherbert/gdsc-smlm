@@ -29,7 +29,6 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 
-
 /**
  * Calculate the Fisher information for a Poisson-distributed random variable using an interpolation
  * of the alpha scale parameter. The alpha scale parameter is the ratio between the Fisher information
@@ -160,6 +159,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
+	@Override
 	public double getFisherInformation(double t) throws IllegalArgumentException
 	{
 		if (t <= 0)
@@ -178,6 +178,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
 	 * 
 	 * @see gdsc.smlm.function.BasePoissonFisherInformation#getAlpha(double)
 	 */
+	@Override
 	public double getAlpha(double t)
 	{
 		if (t <= 0)

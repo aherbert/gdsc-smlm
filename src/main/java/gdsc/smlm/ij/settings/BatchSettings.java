@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.settings;
 
-
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
 import java.util.ArrayList;

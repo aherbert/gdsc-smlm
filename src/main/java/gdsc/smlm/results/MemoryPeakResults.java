@@ -72,7 +72,6 @@ import gdsc.smlm.results.procedures.XYZRResultProcedure;
 import gdsc.smlm.results.procedures.XYZResultProcedure;
 import gdsc.smlm.results.procedures.ZResultProcedure;
 
-
 /**
  * Stores peak results in memory.
  * <p>
@@ -146,6 +145,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#size()
 	 */
+	@Override
 	public int size()
 	{
 		return this.results.size();
@@ -157,6 +157,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * @param result
 	 *            the result
 	 */
+	@Override
 	public void add(PeakResult result)
 	{
 		this.results.add(result);
@@ -171,6 +172,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#addCollection(java.util.Collection)
 	 */
+	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
 		this.results.addCollection(results);
@@ -183,6 +185,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		this.results.addArray(results);
@@ -195,6 +198,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public void addAll(PeakResultStore results)
 	{
 		this.results.addStore(results);
@@ -264,6 +268,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		this.results.removeIf(new PeakResultPredicate()
 		{
+			@Override
 			public boolean test(PeakResult t)
 			{
 				return t == null;
@@ -673,6 +678,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#begin()
 	 */
+	@Override
 	public void begin()
 	{
 		clear();
@@ -687,8 +693,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
-	public void add(int peak, int origX, int origY, float origValue, double error, float noise,
-			float meanIntensity, float[] params, float[] paramsStdDev)
+	@Override
+	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
+			float[] params, float[] paramsStdDev)
 	{
 		add(new PeakResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev));
 	}
@@ -698,6 +705,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#end()
 	 */
+	@Override
 	public void end()
 	{
 		if (isSortAfterEnd())
@@ -807,6 +815,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return true;

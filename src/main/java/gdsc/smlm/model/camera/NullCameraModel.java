@@ -25,7 +25,6 @@ package gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
 
-
 /**
  * A camera model with all pixels treated equally.
  *
@@ -38,6 +37,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBounds()
 	 */
+	@Override
 	public Rectangle getBounds()
 	{
 		return null;
@@ -48,6 +48,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
 	 */
+	@Override
 	public void setOrigin(int x, int y)
 	{
 	}
@@ -57,6 +58,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
+	@Override
 	public CameraModel crop(Rectangle bounds, boolean resetOrigin)
 	{
 		return this;
@@ -67,6 +69,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
 	 */
+	@Override
 	public boolean isPerPixelModel()
 	{
 		return false;
@@ -77,6 +80,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBias(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getBias(Rectangle bounds)
 	{
 		return newArray(bounds, 0);
@@ -87,6 +91,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getGain(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getGain(Rectangle bounds)
 	{
 		return newArray(bounds, 1f);
@@ -97,6 +102,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getVariance(Rectangle bounds)
 	{
 		return newArray(bounds, 0);
@@ -107,6 +113,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedVariance(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getNormalisedVariance(Rectangle bounds)
 	{
 		return newArray(bounds, 0);
@@ -163,6 +170,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getWeights(Rectangle bounds)
 	{
 		return newArray(bounds, 1f);
@@ -173,6 +181,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getNormalisedWeights(Rectangle bounds)
 	{
 		return newArray(bounds, 1f);
@@ -183,6 +192,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeBias(Rectangle bounds, float[] data)
 	{
 	}
@@ -192,6 +202,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeGain(Rectangle bounds, float[] data)
 	{
 	}
@@ -201,6 +212,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeBiasAndGain(Rectangle bounds, float[] data)
 	{
 	}
@@ -210,6 +222,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyBias(Rectangle bounds, float[] data)
 	{
 	}
@@ -219,6 +232,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyGain(Rectangle bounds, float[] data)
 	{
 	}
@@ -228,6 +242,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyGainAndBias(Rectangle bounds, float[] data)
 	{
 	}
@@ -237,6 +252,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
 	 */
+	@Override
 	public void removeBias(float[] data)
 	{
 	}
@@ -246,6 +262,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
 	 */
+	@Override
 	public void removeGain(float[] data)
 	{
 	}
@@ -255,6 +272,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndGain(float[])
 	 */
+	@Override
 	public void removeBiasAndGain(float[] data)
 	{
 	}
@@ -264,6 +282,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
 	 */
+	@Override
 	public void applyBias(float[] data)
 	{
 	}
@@ -273,6 +292,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
 	 */
+	@Override
 	public void applyGain(float[] data)
 	{
 	}
@@ -282,6 +302,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
 	 */
+	@Override
 	public void applyGainAndBias(float[] data)
 	{
 	}
@@ -291,6 +312,7 @@ public class NullCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
+	@Override
 	public NullCameraModel copy()
 	{
 		return this; // no state so no need to clone()

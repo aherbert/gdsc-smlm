@@ -41,7 +41,6 @@ import gdsc.smlm.function.Gradient2FunctionValueStore;
 import gdsc.smlm.function.OffsetGradient1Function;
 import gdsc.smlm.function.OffsetGradient2Function;
 
-
 /**
  * Uses the Fast MLE method to fit a gradient function with coefficients (a).
  * <p>
@@ -91,11 +90,13 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 			return name;
 		}
 
+		@Override
 		public String getName()
 		{
 			return name;
 		}
 
+		@Override
 		public String getShortName()
 		{
 			return name;
@@ -548,6 +549,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
+	@Override
 	public double getLogLikelihood()
 	{
 		if (Double.isNaN(ll))
@@ -568,6 +570,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
+	@Override
 	public double getLogLikelihoodRatio()
 	{
 		if (Double.isNaN(llr))
@@ -582,6 +585,7 @@ public class FastMLESteppingFunctionSolver extends SteppingFunctionSolver implem
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
+	@Override
 	public double getQ()
 	{
 		// Wilks theorum states the LLR approaches the chi-squared distribution for large n.

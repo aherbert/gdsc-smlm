@@ -27,7 +27,6 @@ import gdsc.core.logging.TrackProgress;
 
 import java.util.List;
 
-
 /**
  * Defines a selection strategy of a population of individuals
  */

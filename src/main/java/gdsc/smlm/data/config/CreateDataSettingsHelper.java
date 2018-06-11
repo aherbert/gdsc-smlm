@@ -27,7 +27,6 @@ import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettingsOrBuilder;
 import gdsc.smlm.model.DiffusionType;
 
-
 /**
  * Contain the helper functionality for the CreateDataSettings
  */

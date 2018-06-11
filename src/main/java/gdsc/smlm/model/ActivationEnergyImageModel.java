@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Contains a model for an image of blinking fluorophores under pulsed activation illumination. Activation energy is
  * sampled from an exponential distribution. Fluorophores are created when the activation energy has been achieved under

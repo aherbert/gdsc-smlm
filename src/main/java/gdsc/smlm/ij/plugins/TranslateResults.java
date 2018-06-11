@@ -28,7 +28,6 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -50,6 +49,7 @@ public class TranslateResults implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -59,7 +59,7 @@ public class TranslateResults implements PlugIn
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;
 		}
-		
+
 		TranslateResultsSettings.Builder settings = SettingsManager.readTranslateResultsSettings(0).toBuilder();
 
 		// Show a dialog allowing the results set to be filtered
@@ -79,9 +79,9 @@ public class TranslateResults implements PlugIn
 		settings.setDy(gd.getNextNumber());
 		settings.setDz(gd.getNextNumber());
 		settings.setDistanceUnitValue(gd.getNextChoiceIndex());
-		
-		SettingsManager.writeSettings(settings);		
-		
+
+		SettingsManager.writeSettings(settings);
+
 		MemoryPeakResults results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
 		if (results == null || results.size() == 0)
 		{
@@ -110,6 +110,7 @@ public class TranslateResults implements PlugIn
 
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peakResult)
 			{
 				// Requires a direct reference!

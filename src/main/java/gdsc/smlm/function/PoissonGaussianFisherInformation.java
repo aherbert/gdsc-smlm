@@ -38,7 +38,6 @@ import gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import gdsc.smlm.utils.GaussianKernel;
 import gnu.trove.list.array.TDoubleArrayList;
 
-
 /**
  * Calculate the Fisher information for a Poisson-Gaussian distribution.
  * <p>
@@ -297,6 +296,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 	 * 
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
+	@Override
 	public double getFisherInformation(double t) throws IllegalArgumentException
 	{
 		final double I = getPoissonGaussianI(t);
@@ -551,6 +551,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 			pz_1 = new double[scale];
 		}
 
+		@Override
 		public boolean execute(double pz)
 		{
 			int index = i % scale;
@@ -560,7 +561,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 			if (pz > 0)
 			{
 				//sum(az * az / pz);
-				
+
 				// Compute with respect to the ultimate limit.
 				// Both az and pz should be < 1
 				// if az < 1 : az^2 -> 0

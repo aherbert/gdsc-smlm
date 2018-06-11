@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Specifies a peak fitting result that spans multiple frames
  */
@@ -145,6 +144,7 @@ public class ExtendedPeakResult extends IdPeakResult
 	 * 
 	 * @see gdsc.smlm.results.PeakResult#compareTo(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending

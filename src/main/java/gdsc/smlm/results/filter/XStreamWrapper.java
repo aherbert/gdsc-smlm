@@ -28,7 +28,6 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-
 /**
  * Wraps the XStream functionality for reading/writing package members as XML. Initialises XStream for tidy XML.
  */
@@ -46,7 +45,7 @@ public abstract class XStreamWrapper
 			{
 				XStream.setupDefaultSecurity(xs); // to be removed after 1.5
 				xs.allowTypesByWildcard(new String[] { "gdsc.smlm.**" });
-				
+
 				xs.autodetectAnnotations(true);
 
 				addAlias(FilterSet.class);
@@ -69,7 +68,7 @@ public abstract class XStreamWrapper
 				addAlias(OrFilter.class);
 				addAlias(PrecisionFilter.class);
 				addAlias(PrecisionFilter2.class);
-				addAlias(PrecisionCRLBFilter.class);				
+				addAlias(PrecisionCRLBFilter.class);
 				addAlias(PrecisionHysteresisFilter.class);
 				addAlias(PrecisionHysteresisFilter2.class);
 				addAlias(SBRFilter.class);

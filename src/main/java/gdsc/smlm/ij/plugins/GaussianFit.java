@@ -46,7 +46,6 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.filters.BlockMeanFilter;
 
-
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
@@ -64,6 +63,7 @@ import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
+import ij.measure.Measurements;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
@@ -94,7 +94,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	private double absoluteThreshold = Prefs.get(Constants.absoluteThreshold, 1e-10);
 	private boolean singleFit = Prefs.get(Constants.singleFit, false);
 	private int singleRegionSize = (int) Prefs.get(Constants.singleRegionSize, 10);
-	private double initialPeakStdDev = (double) Prefs.get(Constants.initialPeakStdDev0, 0);
+	private double initialPeakStdDev = Prefs.get(Constants.initialPeakStdDev0, 0);
 	private boolean showDeviations = Prefs.get(Constants.showDeviations, false);
 	private boolean filterResults = Prefs.get(Constants.filterResults, false);
 	private boolean showFit = Prefs.get(Constants.showFit, false);
@@ -113,6 +113,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -180,6 +181,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		double[] limits = getLimits(imp.getProcessor());
@@ -252,7 +254,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 */
 	private double[] getLimits(ImageProcessor ip)
 	{
-		ImageStatistics stats = ImageStatistics.getStatistics(ip, ImageStatistics.MIN_MAX, null);
+		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.MIN_MAX, null);
 		double[] limits = new double[] { stats.min, stats.max };
 
 		// Use histogram to cover x% of the data
@@ -283,6 +285,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		smooth = gd.getNextNumber();
@@ -303,7 +306,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		absoluteThreshold = gd.getNextNumber();
 		singleFit = gd.getNextBoolean();
 		singleRegionSize = (int) gd.getNextNumber();
-		initialPeakStdDev = (double) gd.getNextNumber();
+		initialPeakStdDev = gd.getNextNumber();
 		logProgress = gd.getNextBoolean();
 		showDeviations = gd.getNextBoolean();
 		filterResults = gd.getNextBoolean();
@@ -373,6 +376,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		Rectangle bounds = ip.getRoi();
@@ -1027,6 +1031,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 		return null;
 	}
 
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Nothing to do		

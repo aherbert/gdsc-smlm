@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.procedures;
 
-
 /**
  * Interface for accessing the localisation precision of Gaussian 2D fitting computed using the Mortensen formula for
  * Maximum Likelihood Estimation using a local noise estimate.

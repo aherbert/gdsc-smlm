@@ -82,7 +82,6 @@ import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
 
-
 /**
  * Model the on-chip amplification from an EM-CCD camera, CCD or sCMOS camera.
  */
@@ -116,18 +115,25 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		// CCD / sCMOS 
 		///////////////
 		
-		POISSON_PMF { public String getName() { return "Poisson PMF"; } },
-		POISSON_DISRECTE { public String getName() { return "Poisson (Discrete)"; } },
-		POISSON_CONTINUOUS { public String getName() { return "Poisson (Continuous)"; } },
-		POISSON_GAUSSIAN_PDF { public String getName() { return "Poisson+Gaussian PDF integration"; } },
+		POISSON_PMF { @Override
+		public String getName() { return "Poisson PMF"; } },
+		POISSON_DISRECTE { @Override
+		public String getName() { return "Poisson (Discrete)"; } },
+		POISSON_CONTINUOUS { @Override
+		public String getName() { return "Poisson (Continuous)"; } },
+		POISSON_GAUSSIAN_PDF { @Override
+		public String getName() { return "Poisson+Gaussian PDF integration"; } },
 		
 		// Best for CCD/sCMOS
-		POISSON_GAUSSIAN_PMF { public String getName() { return "Poisson+Gaussian PMF integration"; } },
+		POISSON_GAUSSIAN_PMF { @Override
+		public String getName() { return "Poisson+Gaussian PMF integration"; } },
 		// Saddle-point approximation.
 		// Very good. Relatively worse than POISSON_GAUSSIAN_PMF at very low photons.
-		POISSON_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gaussian approximation"; } },
+		POISSON_GAUSSIAN_APPROX { @Override
+		public String getName() { return "Poisson+Gaussian approximation"; } },
 		 // Mixed Poisson distribution (Noise is added as a second Poisson)
-		POISSON_POISSON { public String getName() { return "Poisson+Poisson"; } },
+		POISSON_POISSON { @Override
+		public String getName() { return "Poisson+Poisson"; } },
 		
 		///////////////
 		// EMCCD 
@@ -138,30 +144,38 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		
 		// Good when no noise.
 		// Under-estimates total probability when gain is low (<15) and photons are low (<2).
-		POISSON_GAMMA_PMF { public String getName() { return "Poisson+Gamma PMF"; } },
+		POISSON_GAMMA_PMF { @Override
+		public String getName() { return "Poisson+Gamma PMF"; } },
 		
 		// Good but relatively worse as the read noise increases.
 		// Requires full integration when read noise is low (<1) and photons are low (<5).
-		POISSON_GAMMA_GAUSSIAN_APPROX { public String getName() { return "Poisson+Gamma+Gaussian approximation"; } },
+		POISSON_GAMMA_GAUSSIAN_APPROX { @Override
+		public String getName() { return "Poisson+Gamma+Gaussian approximation"; } },
 		// Good when read noise is >>1.
 		// Requires full integration when read noise is low (<1).
-		POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian PDF integration"; } },
+		POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION { @Override
+		public String getName() { return "Poisson+Gamma+Gaussian PDF integration"; } },
 		// Good
 		// Slow
-		POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian PMF integration"; } },
+		POISSON_GAMMA_GAUSSIAN_PMF_INTEGRATION { @Override
+		public String getName() { return "Poisson+Gamma+Gaussian PMF integration"; } },
 		// Best for EM-CCD. 
 		// Very robust (computes the full convolution
 		// of the Gaussian and the Poisson-Gamma plus the delta function PMF contribution).
-		POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Simpson's integration"; } },
+		POISSON_GAMMA_GAUSSIAN_SIMPSON_INTEGRATION { @Override
+		public String getName() { return "Poisson+Gamma+Gaussian Simpson's integration"; } },
 		// Good
-		POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION { public String getName() { return "Poisson+Gamma+Gaussian Legendre-Gauss integration"; } },
+		POISSON_GAMMA_GAUSSIAN_LEGENDRE_GAUSS_INTEGRATION { @Override
+		public String getName() { return "Poisson+Gamma+Gaussian Legendre-Gauss integration"; } },
 		// Independent implementation of POISSON_GAMMA_GAUSSIAN_PDF_INTEGRATION.
 		// Good when read noise is >>1.
 		// Requires full integration when read noise is low (<1).
-		POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION { public String getName() { return "Poisson+Gamma*Gaussian convolution"; } },
+		POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION { @Override
+		public String getName() { return "Poisson+Gamma*Gaussian convolution"; } },
 		;
 
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -184,10 +198,12 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	}
 	private static class RoundDown extends Round
 	{
+		@Override
 		int round(double d) { return (int) Math.floor(d); }
 	}
 	private static class RoundUpDown extends Round
 	{
+		@Override
 		int round(double d) { return (int) Math.round(d); }
 	}
 	private static Round ROUND_DOWN = new RoundDown();
@@ -229,6 +245,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		return NO_IMAGE_REQUIRED;
@@ -240,6 +257,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		settings = SettingsManager.readCameraModelAnalysisSettings(0).toBuilder();
@@ -252,12 +270,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		gd.addNumericField("Photons", settings.getPhotons(), 2);
 		gd.addChoice("Mode", MODE, settings.getMode(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setMode(value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -332,6 +352,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		dirty = true;
@@ -351,6 +372,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		return true;
 	}
 
+	@Override
 	public void optionCollected(OptionCollectedEvent e)
 	{
 		if (gd.getPreviewCheckbox().getState())
@@ -378,6 +400,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Ignore
@@ -388,6 +411,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		execute();
@@ -502,7 +526,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 		double scale = n / (Maths.sum(y) * (x[1] - x[0]));
 		for (int i = 0; i < y.length; i++)
 			y[i] *= scale;
-		plot.addPoints(x, y, Plot2.LINE);
+		plot.addPoints(x, y, Plot.LINE);
 
 		plot.setColor(Color.black);
 		plot.addLegend("Sample\nExpected");
@@ -1009,7 +1033,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 				else
 					g = Convolution.convolveFast(kernel, g);
 			}
-			
+
 			// The convolution will have created a larger array so we must adjust the offset for this
 			int radius = kernel.length / 2;
 			zero -= radius * step;
@@ -1329,6 +1353,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter, DialogListener
 			this.p = p;
 		}
 
+		@Override
 		public double value(double x)
 		{
 			double v = fun.likelihood(x, p);

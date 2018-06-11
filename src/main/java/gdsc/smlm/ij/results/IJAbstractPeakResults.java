@@ -27,7 +27,6 @@ import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.results.AbstractPeakResults;
 import gdsc.smlm.results.ThreadSafePeakResults;
 
-
 /**
  * Wrap the fit results to provide convenience methods
  */

@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Contains a collection of localisations associated with a discrete-time. This can be used to model a moving
  * localisation
@@ -99,6 +98,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(LocalisationModelSet o)
 	{
 		return time - o.time;

@@ -28,7 +28,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.data.config.PSFHelper;
 
-
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -177,13 +176,12 @@ public class MultiHysteresisFilter extends HysteresisFilter
 		super.setup(peakResults);
 	}
 
-
 	protected void setupCalculator(MemoryPeakResults peakResults)
 	{
 		calculator = Gaussian2DPeakResultHelper.create(peakResults.getPSF(), peakResults.getCalibration(),
 				Gaussian2DPeakResultHelper.LSE_PRECISION);
 	}
-	
+
 	@Override
 	protected PeakStatus getStatus(PeakResult result)
 	{
@@ -221,7 +219,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	{
 		return calculator.getLSEVariance(result.getParameters(), result.getNoise());
 	}
-	
+
 	@Override
 	public double getNumericalValue()
 	{
@@ -384,7 +382,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	{
 		return ParameterType.PRECISION_RANGE;
 	}
-	
+
 	static double[] defaultRange = new double[] { 0, 0, 0, 0, SignalFilter.DEFAULT_RANGE, SignalFilter.DEFAULT_RANGE,
 			SNRFilter.DEFAULT_RANGE, SNRFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE,
 			WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, WidthFilter.DEFAULT_RANGE,
@@ -488,6 +486,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { getDefaultSearchRange(), getDefaultTimeRange(), SignalFilter.DEFAULT_RANGE,

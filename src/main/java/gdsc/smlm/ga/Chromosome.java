@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ga;
 
-
 /**
  * Define the genetic sequence that can evolve
  */

@@ -60,8 +60,7 @@ public class PoissonGammaGaussianFisherInformationTest
 	{
 		double[] max = f.findMaximum(u, 1e-6);
 		double[] upper = f.findUpperLimit(u, max, 1e-6);
-		System.out.printf("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)\n", f.m, u, max[0], max[1], max[2], 
-				upper[0],
+		System.out.printf("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)\n", f.m, u, max[0], max[1], max[2], upper[0],
 				upper[1], upper[2]);
 	}
 

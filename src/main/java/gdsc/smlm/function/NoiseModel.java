@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Defines the expected variance of a function value (i.e. the noise)
  */

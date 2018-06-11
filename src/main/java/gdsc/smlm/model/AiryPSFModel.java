@@ -159,12 +159,13 @@ public class AiryPSFModel extends PSFModel
 	{
 		super();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
 	 */
+	@Override
 	public double create3D(float[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -188,6 +189,7 @@ public class AiryPSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
 	 */
+	@Override
 	public double create3D(double[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -658,6 +660,7 @@ public class AiryPSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
+	@Override
 	public AiryPSFModel copy()
 	{
 		AiryPSFModel model = new AiryPSFModel();
@@ -671,7 +674,7 @@ public class AiryPSFModel extends PSFModel
 		model.maxSamplesPerDimension = maxSamplesPerDimension;
 		return model;
 	}
-	
+
 	/**
 	 * @return the ring limit for the calculated Airy pattern
 	 */
@@ -827,7 +830,7 @@ public class AiryPSFModel extends PSFModel
 	{
 		if (spline != null)
 			return;
-		
+
 		final double relativeAccuracy = 1e-4;
 		final double absoluteAccuracy = 1e-8;
 		final int minimalIterationCount = 3;
@@ -837,6 +840,7 @@ public class AiryPSFModel extends PSFModel
 				minimalIterationCount, maximalIterationCount);
 		UnivariateFunction f = new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				// The pattern profile is in one dimension. 

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Class for evaluating a function
  */
@@ -78,6 +77,7 @@ public class StandardValueProcedure implements ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
+	@Override
 	public void execute(double value)
 	{
 		values[i++] = value;

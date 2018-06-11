@@ -93,7 +93,6 @@ import gdsc.smlm.results.filter.MultiFilterCRLB;
 import gdsc.smlm.results.filter.PreprocessedPeakResult;
 import gdsc.smlm.results.filter.ShiftFilterSetupData;
 
-
 /**
  * Specifies the fitting configuration
  */
@@ -627,7 +626,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		String xml = filterSettings.getSmartFilterString();
 		if (TextUtils.isNullOrEmpty(xml))
 			return;
-		Filter f = DirectFilter.fromXML(xml);
+		Filter f = Filter.fromXML(xml);
 		if (f == null || !(f instanceof DirectFilter))
 		{
 			// Throw to ensure the filter is OK
@@ -647,6 +646,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public FitConfiguration clone()
 	{
 		// Make a new initialised instance. This will have new settings builder objects.
@@ -719,6 +719,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @param params
 	 *            The Gaussian parameters
 	 */
+	@Override
 	public void initialise(int npeaks, int maxx, int maxy, double[] params)
 	{
 		{
@@ -820,6 +821,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return the initialAngle
 	 */
+	@Override
 	public double getInitialAngle()
 	{
 		// Provide backward compatibility
@@ -913,6 +915,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @throws ConfigurationException
 	 *             if the PSF type is astigmatism and the model cannot be constructed
 	 */
+	@Override
 	public double getInitialXSD() throws ConfigurationException
 	{
 		if (getAstigmatismZModel() != null)
@@ -944,6 +947,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * @throws ConfigurationException
 	 *             if the PSF type is astigmatism and the model cannot be constructed
 	 */
+	@Override
 	public double getInitialYSD() throws ConfigurationException
 	{
 		if (getAstigmatismZModel() != null)
@@ -972,6 +976,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#isComputeDeviations()
 	 */
+	@Override
 	public boolean isComputeDeviations()
 	{
 		if (computeDeviations)
@@ -1095,6 +1100,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return True if fitting the background
 	 */
+	@Override
 	public boolean isBackgroundFitting()
 	{
 		return !fitSolverSettings.getDisableBackgroundFitting();
@@ -1124,6 +1130,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return True if fitting an elliptical peak (with an angle parameter)
 	 */
+	@Override
 	public boolean isAngleFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_ANGLE) != 0;
@@ -1132,6 +1139,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return True if fitting the z-position
 	 */
+	@Override
 	public boolean isZFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_Z) != 0;
@@ -1140,6 +1148,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return True if fitting the peak width in dimension 0
 	 */
+	@Override
 	public boolean isXSDFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_X_WIDTH) != 0;
@@ -1148,6 +1157,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return True if fitting the peak width in dimension 1
 	 */
+	@Override
 	public boolean isYSDFitting()
 	{
 		return (flags & GaussianFunctionFactory.FIT_Y_WIDTH) != 0;
@@ -1178,6 +1188,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return True if fit should be validated with {@link #validatePeak(int, double[], double[])}
 	 */
+	@Override
 	public boolean isFitValidation()
 	{
 		return isDirectFilter() || isRegionValidation() || !isDisableSimpleFilter();
@@ -1481,6 +1492,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private class VarianceSelector extends BaseVarianceSelector
 	{
+		@Override
 		double getLocationVariance(PreprocessedPeakResult peak)
 		{
 			return peak.getLocationVariance();
@@ -1489,6 +1501,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private class VarianceSelector2 extends BaseVarianceSelector
 	{
+		@Override
 		double getLocationVariance(PreprocessedPeakResult peak)
 		{
 			return peak.getLocationVariance2();
@@ -1497,6 +1510,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	private class VarianceSelectorCRLB extends BaseVarianceSelector
 	{
+		@Override
 		double getLocationVariance(PreprocessedPeakResult peak)
 		{
 			return peak.getLocationVarianceCRLB();
@@ -1623,6 +1637,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return the widthFactor (or zero if not configured)
 	 */
+	@Override
 	public double getMaxWidthFactor()
 	{
 		double widthFactor = filterSettings.getMaxWidthFactor();
@@ -1655,6 +1670,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return the minWidthFactor
 	 */
+	@Override
 	public double getMinWidthFactor()
 	{
 		double minWidthFactor = filterSettings.getMinWidthFactor();
@@ -1734,6 +1750,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return the computeResiduals
 	 */
+	@Override
 	public boolean isComputeResiduals()
 	{
 		return computeResiduals;
@@ -2188,6 +2205,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return Data associated with the validation result
 	 */
+	@Override
 	public Object getValidationData()
 	{
 		return statusData;
@@ -2220,6 +2238,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
 	 */
+	@Override
 	public FitStatus validateFit(int nPeaks, double[] initialParams, double[] params, double[] paramDevs)
 	{
 		for (int n = 0; n < nPeaks; n++)
@@ -2449,8 +2468,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					final double sd = (isTwoAxisGaussian2D) ? Gaussian2DPeakResultHelper.getStandardDeviation(xsd, ysd)
 							: xsd;
 					final double localBackground = isPrecisionUsingBackground() && peakResultValidationData != null
-							? peakResultValidationData.getLocalBackground()
-							: params[Gaussian2DFunction.BACKGROUND];
+							? peakResultValidationData.getLocalBackground() : params[Gaussian2DFunction.BACKGROUND];
 					variance = getVariance(localBackground,
 							params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons, sd,
 							isPrecisionUsingBackground());
@@ -2688,28 +2706,33 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			}
 		}
 
+		@Override
 		public int getFrame()
 		{
 			// Not implemented
 			return 0;
 		}
 
+		@Override
 		public int getUniqueId()
 		{
 			// In the future we may want to use this so throw an exception so we notice
 			throw new NotImplementedException("Unique Id not available");
 		}
 
+		@Override
 		public int getId()
 		{
 			return id;
 		}
 
+		@Override
 		public int getCandidateId()
 		{
 			return candidateId;
 		}
 
+		@Override
 		public float getSignal()
 		{
 			return (float) (params[Gaussian2DFunction.SIGNAL + offset] * signalToPhotons);
@@ -2722,6 +2745,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 					xsd, ysd);
 		}
 
+		@Override
 		public float getNoise()
 		{
 			if (peakResultValidationData != null)
@@ -2769,6 +2793,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return params[Gaussian2DFunction.BACKGROUND];
 		}
 
+		@Override
 		public double getLocationVariance()
 		{
 			// We do not use the local background so set as zero
@@ -2778,6 +2803,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return var;
 		}
 
+		@Override
 		public double getLocationVariance2()
 		{
 			if (var2 == -1)
@@ -2786,6 +2812,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return var2;
 		}
 
+		@Override
 		public double getLocationVarianceCRLB()
 		{
 			if (varCRLB == -1)
@@ -2793,6 +2820,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return varCRLB;
 		}
 
+		@Override
 		public float getSD()
 		{
 			if (isTwoAxisGaussian2D)
@@ -2800,36 +2828,43 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return (float) xsd;
 		}
 
+		@Override
 		public float getBackground()
 		{
 			return (float) params[Gaussian2DFunction.BACKGROUND];
 		}
 
+		@Override
 		public float getAmplitude()
 		{
 			return (float) (params[Gaussian2DFunction.SIGNAL + offset] / (2 * Math.PI * xsd * ysd));
 		}
 
+		@Override
 		public float getAngle()
 		{
 			return (float) params[Gaussian2DFunction.ANGLE + offset];
 		}
 
+		@Override
 		public float getX()
 		{
 			return (float) params[Gaussian2DFunction.X_POSITION + offset] + offsetx;
 		}
 
+		@Override
 		public float getY()
 		{
 			return (float) params[Gaussian2DFunction.Y_POSITION + offset] + offsety;
 		}
 
+		@Override
 		public float getZ()
 		{
 			return (float) params[Gaussian2DFunction.Z_POSITION + offset];
 		}
 
+		@Override
 		public float getXRelativeShift2()
 		{
 			final double d = (params[Gaussian2DFunction.X_POSITION + offset] -
@@ -2838,6 +2873,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return (float) (d * d);
 		}
 
+		@Override
 		public float getYRelativeShift2()
 		{
 			final double d = (params[Gaussian2DFunction.Y_POSITION + offset] -
@@ -2846,31 +2882,37 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			return (float) (d * d);
 		}
 
+		@Override
 		public float getXSD()
 		{
 			return (float) xsd;
 		}
 
+		@Override
 		public float getYSD()
 		{
 			return (float) ysd;
 		}
 
+		@Override
 		public float getXSDFactor()
 		{
 			return (float) (xsd / initialParams[Gaussian2DFunction.X_SD + offset]);
 		}
 
+		@Override
 		public float getYSDFactor()
 		{
 			return (float) (ysd / initialParams[Gaussian2DFunction.Y_SD + offset]);
 		}
 
+		@Override
 		public boolean isExistingResult()
 		{
 			return existingResult;
 		}
 
+		@Override
 		public boolean isNewResult()
 		{
 			return newResult;
@@ -2881,11 +2923,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * 
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
 		 */
+		@Override
 		public FractionalAssignment[] getAssignments(int predictedId)
 		{
 			return null;
 		}
 
+		@Override
 		public double[] toGaussian2DParameters()
 		{
 			final double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -2904,6 +2948,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * 
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
 		 */
+		@Override
 		public void setValidationResult(int result)
 		{
 			throw new NotImplementedException("The validation result should not be set on a dynamic result");
@@ -2914,6 +2959,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * 
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
 		 */
+		@Override
 		public int getValidationResult()
 		{
 			throw new NotImplementedException("The validation result should not be set on a dynamic result");
@@ -2924,6 +2970,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * 
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
 		 */
+		@Override
 		public boolean ignore()
 		{
 			return false;
@@ -2934,6 +2981,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 * 
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
 		 */
+		@Override
 		public boolean isNotDuplicate()
 		{
 			return false;
@@ -3217,6 +3265,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * @return The function solver for the current configuration
 	 */
+	@Override
 	public FunctionSolver getFunctionSolver()
 	{
 		if (functionSolver == null || gaussianFunction == null)
@@ -3628,6 +3677,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup()
 	 */
+	@Override
 	public void setup()
 	{
 		setup(0);
@@ -3638,6 +3688,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int)
 	 */
+	@Override
 	public void setup(int flags)
 	{
 		filterSetupFlags = createFlags(flags);
@@ -3649,8 +3700,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 		else
 		{
-			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
-			if (DirectFilter.areSet(flags, DirectFilter.NO_SHIFT))
+			widthEnabled = !DirectFilter.areSet(flags, IDirectFilter.NO_WIDTH);
+			if (DirectFilter.areSet(flags, IDirectFilter.NO_SHIFT))
 			{
 				offset = Float.POSITIVE_INFINITY;
 			}
@@ -3679,6 +3730,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(gdsc.smlm.results.filter.FilterSetupData[])
 	 */
+	@Override
 	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
 		filterSetupFlags = createFlags(flags);
@@ -3691,8 +3743,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		else
 		{
 			// Note: These variables should be copied in copySettings(...)
-			widthEnabled = !DirectFilter.areSet(flags, DirectFilter.NO_WIDTH);
-			if (DirectFilter.areSet(flags, DirectFilter.NO_SHIFT))
+			widthEnabled = !DirectFilter.areSet(flags, IDirectFilter.NO_WIDTH);
+			if (DirectFilter.areSet(flags, IDirectFilter.NO_SHIFT))
 			{
 				offset = Float.POSITIVE_INFINITY;
 			}
@@ -3726,6 +3778,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupFlags()
 	 */
+	@Override
 	public int getFilterSetupFlags() throws IllegalStateException
 	{
 		// Cached for speed
@@ -3737,6 +3790,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
 	 */
+	@Override
 	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
 	{
 		// Cached for speed
@@ -3748,6 +3802,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#accept(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean accept(PreprocessedPeakResult peak)
 	{
 		return (filterResult = validate(peak)) == 0;
@@ -3758,6 +3813,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public int validate(PreprocessedPeakResult peak)
 	{
 		final int flags = doValidate(peak);
@@ -3775,6 +3831,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
 	 */
+	@Override
 	public int getValidationFlags()
 	{
 		if (directFilter != null)
@@ -3888,6 +3945,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterType()
 	 */
+	@Override
 	public FilterType getFilterType()
 	{
 		return FilterType.DIRECT;
@@ -3898,6 +3956,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getResult()
 	 */
+	@Override
 	public int getResult()
 	{
 		return filterResult;
@@ -3908,9 +3967,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#copy()
 	 */
+	@Override
 	public IDirectFilter copy()
 	{
-		return (IDirectFilter) clone();
+		return clone();
 	}
 
 	/**

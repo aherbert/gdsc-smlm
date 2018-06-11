@@ -62,7 +62,6 @@ import gdsc.smlm.ij.plugins.OPTICS.SpanningTreeMode;
 import gdsc.smlm.results.TraceManager.TraceMode;
 import ij.process.LUTHelper.LutColour;
 
-
 /**
  * Contains helper functions for the GUIProtos class.
  */

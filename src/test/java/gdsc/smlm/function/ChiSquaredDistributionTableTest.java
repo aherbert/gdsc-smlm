@@ -131,7 +131,7 @@ public class ChiSquaredDistributionTableTest
 			int df = x.length - 1;
 			double o = ChiSquaredDistributionTable.computeQValue(chi2, df);
 			Assert.assertEquals(ep, o, 1e-10);
-			
+
 			ChiSquaredDistributionTable upperTable = ChiSquaredDistributionTable.createUpperTailed(o, df);
 
 			double upper = chi2 * 1.01;

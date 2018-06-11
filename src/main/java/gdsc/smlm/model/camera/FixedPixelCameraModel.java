@@ -25,7 +25,6 @@ package gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
 
-
 /**
  * A camera model with all pixels treated equally.
  *
@@ -112,6 +111,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBounds()
 	 */
+	@Override
 	public Rectangle getBounds()
 	{
 		return null;
@@ -122,6 +122,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
 	 */
+	@Override
 	public void setOrigin(int x, int y)
 	{
 	}
@@ -131,6 +132,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
+	@Override
 	public CameraModel crop(Rectangle bounds, boolean resetOrigin)
 	{
 		return this;
@@ -141,6 +143,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
 	 */
+	@Override
 	public boolean isPerPixelModel()
 	{
 		return false;
@@ -151,6 +154,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBias(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getBias(Rectangle bounds)
 	{
 		return newArray(bounds, bias);
@@ -161,6 +165,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getGain(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getGain(Rectangle bounds)
 	{
 		return newArray(bounds, gain);
@@ -171,6 +176,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getVariance(Rectangle bounds)
 	{
 		return newArray(bounds, variance);
@@ -181,6 +187,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedVariance(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getNormalisedVariance(Rectangle bounds)
 	{
 		return newArray(bounds, var_g2);
@@ -237,6 +244,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getWeights(Rectangle bounds)
 	{
 		return newArray(bounds, 1f);
@@ -247,6 +255,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getNormalisedWeights(Rectangle bounds)
 	{
 		return newArray(bounds, 1f);
@@ -257,6 +266,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeBias(Rectangle bounds, float[] data)
 	{
 		removeBias(data);
@@ -267,6 +277,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeGain(Rectangle bounds, float[] data)
 	{
 		removeGain(data);
@@ -277,6 +288,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeBiasAndGain(Rectangle bounds, float[] data)
 	{
 		removeBiasAndGain(data);
@@ -287,6 +299,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyBias(Rectangle bounds, float[] data)
 	{
 		applyBias(data);
@@ -297,6 +310,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyGain(Rectangle bounds, float[] data)
 	{
 		applyGain(data);
@@ -307,6 +321,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyGainAndBias(Rectangle bounds, float[] data)
 	{
 		applyGainAndBias(data);
@@ -317,6 +332,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
 	 */
+	@Override
 	public void removeBias(float[] data)
 	{
 		if (data == null)
@@ -330,6 +346,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
 	 */
+	@Override
 	public void removeGain(float[] data)
 	{
 		if (data == null)
@@ -343,6 +360,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(float[])
 	 */
+	@Override
 	public void removeBiasAndGain(float[] data)
 	{
 		if (data == null)
@@ -356,6 +374,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
 	 */
+	@Override
 	public void applyBias(float[] data)
 	{
 		if (data == null)
@@ -369,6 +388,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
 	 */
+	@Override
 	public void applyGain(float[] data)
 	{
 		if (data == null)
@@ -382,6 +402,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
 	 */
+	@Override
 	public void applyGainAndBias(float[] data)
 	{
 		if (data == null)
@@ -395,6 +416,7 @@ public abstract class FixedPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
+	@Override
 	public FixedPixelCameraModel copy()
 	{
 		return clone();

@@ -26,7 +26,6 @@ package gdsc.smlm.results.filter;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -67,11 +66,13 @@ public class ANRFilter extends DirectFilter
 				: Float.POSITIVE_INFINITY;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_AMPLITUDE | V_NOISE;
 	}
-	
+
+	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		if (getANR(peak) < this.anr)
@@ -180,6 +181,7 @@ public class ANRFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { SNRFilter.DEFAULT_RANGE };

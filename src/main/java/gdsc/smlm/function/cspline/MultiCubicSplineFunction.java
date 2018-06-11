@@ -31,7 +31,6 @@ import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Represent a cubic spline function for multiple points.
  */
@@ -144,6 +143,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		if (gradientIndices == null)
@@ -156,6 +156,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
+	@Override
 	public int getNumberOfGradients()
 	{
 		return 1 + 4 * n;
@@ -166,6 +167,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	 * 
 	 * @see gdsc.smlm.function.cspline.CubicSplineFunction#initialise(double[], int)
 	 */
+	@Override
 	protected void initialise(double[] a, int order)
 	{
 		tB = a[PeakResult.BACKGROUND];
@@ -198,6 +200,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#forEach(gdsc.smlm.function.ValueProcedure)
 	 */
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		for (int n = 0; n < w; n++)
@@ -238,6 +241,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#forEach(gdsc.smlm.function.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -281,6 +285,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];

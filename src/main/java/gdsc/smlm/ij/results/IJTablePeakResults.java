@@ -134,6 +134,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#begin()
 	 */
+	@Override
 	public void begin()
 	{
 		tableActive = false;
@@ -390,6 +391,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
+	@Override
 	public void add(int frame, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
 			float[] params, float[] paramsDev)
 	{
@@ -466,7 +468,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		if (showNoiseData)
 		{
 			// These should be converted
-			add(sb, ic.convert(noise)); 
+			add(sb, ic.convert(noise));
 			add(sb, ic.convert(meanIntensity));
 			add(sb, meanIntensity / noise);
 		}
@@ -531,6 +533,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 		}
 	}
 
+	@Override
 	public void add(PeakResult result)
 	{
 		addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(), result.getOrigY(),
@@ -543,6 +546,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		if (!tableActive)
@@ -567,6 +571,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
+	@Override
 	public int size()
 	{
 		return size;
@@ -577,6 +582,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
+	@Override
 	public void end()
 	{
 		tableActive = false;
@@ -613,6 +619,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return tableActive;
@@ -723,6 +730,7 @@ public class IJTablePeakResults extends IJAbstractPeakResults implements Coordin
 	 * @param line
 	 * @return
 	 */
+	@Override
 	public double[] getCoordinates(String line)
 	{
 		// Extract the startT and x,y coordinates from the PeakResult line

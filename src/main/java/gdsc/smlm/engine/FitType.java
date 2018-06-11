@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine;
 
-
 /**
  * Define the type of fit that was performed
  */

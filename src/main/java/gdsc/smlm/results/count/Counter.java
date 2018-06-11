@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Class to encapsulate counting
  */
@@ -187,7 +186,7 @@ public class Counter
 		count -= value;
 		return old;
 	}
-	
+
 	/**
 	 * Gets the count.
 	 *

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Contains helper functions for working with peak results
  */
@@ -59,7 +58,7 @@ public class PeakResultHelper
 	/**
 	 * Convert the local background to an estimate of noise. Local background and noise are in photons units.
 	 * <p>
-	 * This assumes the local background is photon shot noise. 
+	 * This assumes the local background is photon shot noise.
 	 * The shot noise is taken assuming a Poisson distribution (thus the variance equals the number of photons).
 	 * This is amplified by 2 if the data was taken on an EM-CCD camera. The square root is the noise in photons.
 	 * 

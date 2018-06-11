@@ -61,6 +61,7 @@ public class CorrelationResult implements Comparable<CorrelationResult>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(CorrelationResult o)
 	{
 		return id - o.id;

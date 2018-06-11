@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
@@ -692,8 +691,8 @@ public class Gaussian2DFitter
 				// SD = (sx+sy)/2 => Range = sx+sy
 				final int range = Math.max(1, (int) Math.ceil(sx + sy));
 				final double[] com = findCentreOfMass(y, dim, range, position);
-				xpos = (double) com[0];
-				ypos = (double) com[1];
+				xpos = com[0];
+				ypos = com[1];
 			}
 
 			// Convert amplitudes to signal
@@ -1123,7 +1122,7 @@ public class Gaussian2DFitter
 	 */
 	public static double fwhm2sd(double fwhm)
 	{
-		return (double) (fwhm / (2 * Math.sqrt(2 * Math.log(2))));
+		return fwhm / (2 * Math.sqrt(2 * Math.log(2)));
 	}
 
 	/**
@@ -1134,7 +1133,7 @@ public class Gaussian2DFitter
 	 */
 	public static double sd2fwhm(final double sd)
 	{
-		return (double) (sd * 2 * Math.sqrt(2 * Math.log(2)));
+		return sd * 2 * Math.sqrt(2 * Math.log(2));
 	}
 
 	/**

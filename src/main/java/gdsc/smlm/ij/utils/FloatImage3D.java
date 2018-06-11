@@ -26,7 +26,6 @@ package gdsc.smlm.ij.utils;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
-
 /**
  * Store a 3D image in a single float array. Forms a base for 3D DHT transform using the JTransforms library.
  */
@@ -157,6 +156,7 @@ public class FloatImage3D extends Image3D
 	 * 
 	 * @see gdsc.smlm.ij.utils.Image3D#copy()
 	 */
+	@Override
 	public FloatImage3D copy()
 	{
 		return new FloatImage3D(nc, nr, ns, nr_by_nc, data.clone());

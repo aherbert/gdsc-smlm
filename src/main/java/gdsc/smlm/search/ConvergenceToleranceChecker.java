@@ -25,7 +25,6 @@ package gdsc.smlm.search;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Check if converged using a tolerance on the score and/or position change, and the number of iterations
  */
@@ -155,6 +154,7 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
 	 * 
 	 * @see gdsc.smlm.search.ConvergenceChecker#converged(gdsc.smlm.search.ScoreResult, gdsc.smlm.search.ScoreResult)
 	 */
+	@Override
 	public boolean converged(SearchResult<T> previous, SearchResult<T> current)
 	{
 		iterations++;

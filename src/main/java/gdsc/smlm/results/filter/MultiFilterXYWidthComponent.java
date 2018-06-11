@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using Width. Assume XY width are different.
  */
@@ -39,12 +38,13 @@ public class MultiFilterXYWidthComponent extends MultiFilterComponent
 			lowerSigmaThreshold = 0;
 		upperSigmaThreshold = Filter.getUpperLimit(maxWidth * maxWidth);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		final float s2 = peak.getXSDFactor() * peak.getYSDFactor();
@@ -56,6 +56,7 @@ public class MultiFilterXYWidthComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;

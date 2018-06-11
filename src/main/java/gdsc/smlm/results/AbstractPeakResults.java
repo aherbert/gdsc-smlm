@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 import java.awt.Rectangle;
 import java.util.Collection;
 
@@ -58,6 +57,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(java.util.Collection)
 	 */
+	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
 		// Utility function 
@@ -69,6 +69,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResultStore)
 	 */
+	@Override
 	public void addAll(PeakResultStore results)
 	{
 		// Utility function 
@@ -80,6 +81,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#setSource(java.lang.String)
 	 */
+	@Override
 	public void setSource(ImageSource source)
 	{
 		this.source = source;
@@ -90,6 +92,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#getSource()
 	 */
+	@Override
 	public ImageSource getSource()
 	{
 		return source;
@@ -100,6 +103,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#setBounds(java.lang.String)
 	 */
+	@Override
 	public void setBounds(Rectangle bounds)
 	{
 		this.bounds = bounds;
@@ -110,6 +114,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#getBounds()
 	 */
+	@Override
 	public Rectangle getBounds()
 	{
 		return bounds;
@@ -129,6 +134,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#setCalibration(java.lang.String)
 	 */
+	@Override
 	public void setCalibration(Calibration calibration)
 	{
 		this.calibration = calibration;
@@ -140,6 +146,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#getCalibration()
 	 */
+	@Override
 	public Calibration getCalibration()
 	{
 		return calibration;
@@ -196,6 +203,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#getPSF()
 	 */
+	@Override
 	public PSF getPSF()
 	{
 		return psf;
@@ -206,6 +214,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#setPSF(gdsc.smlm.data.config.SMLMSettings.PSF)
 	 */
+	@Override
 	public void setPSF(PSF psf)
 	{
 		this.psf = psf;
@@ -216,6 +225,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#setConfiguration(java.lang.String)
 	 */
+	@Override
 	public void setConfiguration(String configuration)
 	{
 		this.configuration = configuration;
@@ -226,6 +236,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#getConfiguration()
 	 */
+	@Override
 	public String getConfiguration()
 	{
 		return configuration;
@@ -234,6 +245,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	/**
 	 * @return The name of the results set (or the source if empty)
 	 */
+	@Override
 	public String getName()
 	{
 		if (name.length() > 0)
@@ -245,6 +257,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * @param name
 	 *            The name of the results set
 	 */
+	@Override
 	public void setName(String name)
 	{
 		if (name == null)
@@ -289,6 +302,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * @return the EMCCD flag
 	 * @deprecated Replaced by the camera type
 	 */
+	@Deprecated
 	public boolean isEMCCD()
 	{
 		return (calibration != null && calibrationReader.isCCDCamera()) ? calibrationReader.isEMCCD() : DEFAULT_EMCCD;
@@ -340,6 +354,7 @@ public abstract class AbstractPeakResults implements PeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#copySettings(gdsc.utils.fitting.results.PeakResults)
 	 */
+	@Override
 	public void copySettings(PeakResults peakResults)
 	{
 		this.setSource(peakResults.getSource());

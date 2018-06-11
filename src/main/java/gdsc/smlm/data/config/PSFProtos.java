@@ -26,8434 +26,9954 @@
 
 package gdsc.smlm.data.config;
 
-@SuppressWarnings({"unchecked", "unused", "deprecation"})
-public final class PSFProtos {
-  private PSFProtos() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
-  }
-
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-    registerAllExtensions(
-        (com.google.protobuf.ExtensionRegistryLite) registry);
-  }
-  /**
-   * <pre>
-   * The type of Point Spread Function (PSF)
-   * </pre>
-   *
-   * Protobuf enum {@code gdsc.smlm.data.config.PSFType}
-   */
-  public enum PSFType
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <pre>
-     * Not available. Only the standard parameters are supported.
-     * </pre>
-     *
-     * <code>PSF_TYPE_NA = 0;</code>
-     */
-    PSF_TYPE_NA(0),
-    /**
-     * <pre>
-     * A 2D Gaussian with the same standard deviation in X and Y dimensions
-     * </pre>
-     *
-     * <code>ONE_AXIS_GAUSSIAN_2D = 1;</code>
-     */
-    ONE_AXIS_GAUSSIAN_2D(1),
-    /**
-     * <pre>
-     * A 2D Gaussian with standard deviations in X and Y dimensions
-     * </pre>
-     *
-     * <code>TWO_AXIS_GAUSSIAN_2D = 2;</code>
-     */
-    TWO_AXIS_GAUSSIAN_2D(2),
-    /**
-     * <pre>
-     * A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
-     * </pre>
-     *
-     * <code>TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3;</code>
-     */
-    TWO_AXIS_AND_THETA_GAUSSIAN_2D(3),
-    /**
-     * <pre>
-     * A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
-     * </pre>
-     *
-     * <code>ASTIGMATIC_GAUSSIAN_2D = 4;</code>
-     */
-    ASTIGMATIC_GAUSSIAN_2D(4),
-    /**
-     * <pre>
-     * A custom point spread function (PSF) 
-     * </pre>
-     *
-     * <code>CUSTOM = 5;</code>
-     */
-    CUSTOM(5),
-    UNRECOGNIZED(-1),
-    ;
-
-    /**
-     * <pre>
-     * Not available. Only the standard parameters are supported.
-     * </pre>
-     *
-     * <code>PSF_TYPE_NA = 0;</code>
-     */
-    public static final int PSF_TYPE_NA_VALUE = 0;
-    /**
-     * <pre>
-     * A 2D Gaussian with the same standard deviation in X and Y dimensions
-     * </pre>
-     *
-     * <code>ONE_AXIS_GAUSSIAN_2D = 1;</code>
-     */
-    public static final int ONE_AXIS_GAUSSIAN_2D_VALUE = 1;
-    /**
-     * <pre>
-     * A 2D Gaussian with standard deviations in X and Y dimensions
-     * </pre>
-     *
-     * <code>TWO_AXIS_GAUSSIAN_2D = 2;</code>
-     */
-    public static final int TWO_AXIS_GAUSSIAN_2D_VALUE = 2;
-    /**
-     * <pre>
-     * A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
-     * </pre>
-     *
-     * <code>TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3;</code>
-     */
-    public static final int TWO_AXIS_AND_THETA_GAUSSIAN_2D_VALUE = 3;
-    /**
-     * <pre>
-     * A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
-     * </pre>
-     *
-     * <code>ASTIGMATIC_GAUSSIAN_2D = 4;</code>
-     */
-    public static final int ASTIGMATIC_GAUSSIAN_2D_VALUE = 4;
-    /**
-     * <pre>
-     * A custom point spread function (PSF) 
-     * </pre>
-     *
-     * <code>CUSTOM = 5;</code>
-     */
-    public static final int CUSTOM_VALUE = 5;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static PSFType valueOf(int value) {
-      return forNumber(value);
-    }
-
-    public static PSFType forNumber(int value) {
-      switch (value) {
-        case 0: return PSF_TYPE_NA;
-        case 1: return ONE_AXIS_GAUSSIAN_2D;
-        case 2: return TWO_AXIS_GAUSSIAN_2D;
-        case 3: return TWO_AXIS_AND_THETA_GAUSSIAN_2D;
-        case 4: return ASTIGMATIC_GAUSSIAN_2D;
-        case 5: return CUSTOM;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<PSFType>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        PSFType> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<PSFType>() {
-            public PSFType findValueByNumber(int number) {
-              return PSFType.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.getDescriptor().getEnumTypes().get(0);
-    }
-
-    private static final PSFType[] VALUES = values();
-
-    public static PSFType valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private PSFType(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.PSFType)
-  }
-
-  /**
-   * <pre>
-   * Define the type of units supported in the Point Spread Function (PSF)
-   * </pre>
-   *
-   * Protobuf enum {@code gdsc.smlm.data.config.PSFParameterUnit}
-   */
-  public enum PSFParameterUnit
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <pre>
-     * Not available
-     * </pre>
-     *
-     * <code>PSF_PARAMETER_UNIT_NA = 0;</code>
-     */
-    PSF_PARAMETER_UNIT_NA(0),
-    /**
-     * <pre>
-     * The parameter describes a distance
-     * </pre>
-     *
-     * <code>DISTANCE = 1;</code>
-     */
-    DISTANCE(1),
-    /**
-     * <pre>
-     * The parameter describes an intensity
-     * </pre>
-     *
-     * <code>INTENSITY = 2;</code>
-     */
-    INTENSITY(2),
-    /**
-     * <pre>
-     * The parameter describes an angle
-     * </pre>
-     *
-     * <code>ANGLE = 3;</code>
-     */
-    ANGLE(3),
-    UNRECOGNIZED(-1),
-    ;
-
-    /**
-     * <pre>
-     * Not available
-     * </pre>
-     *
-     * <code>PSF_PARAMETER_UNIT_NA = 0;</code>
-     */
-    public static final int PSF_PARAMETER_UNIT_NA_VALUE = 0;
-    /**
-     * <pre>
-     * The parameter describes a distance
-     * </pre>
-     *
-     * <code>DISTANCE = 1;</code>
-     */
-    public static final int DISTANCE_VALUE = 1;
-    /**
-     * <pre>
-     * The parameter describes an intensity
-     * </pre>
-     *
-     * <code>INTENSITY = 2;</code>
-     */
-    public static final int INTENSITY_VALUE = 2;
-    /**
-     * <pre>
-     * The parameter describes an angle
-     * </pre>
-     *
-     * <code>ANGLE = 3;</code>
-     */
-    public static final int ANGLE_VALUE = 3;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static PSFParameterUnit valueOf(int value) {
-      return forNumber(value);
-    }
-
-    public static PSFParameterUnit forNumber(int value) {
-      switch (value) {
-        case 0: return PSF_PARAMETER_UNIT_NA;
-        case 1: return DISTANCE;
-        case 2: return INTENSITY;
-        case 3: return ANGLE;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<PSFParameterUnit>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        PSFParameterUnit> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<PSFParameterUnit>() {
-            public PSFParameterUnit findValueByNumber(int number) {
-              return PSFParameterUnit.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.getDescriptor().getEnumTypes().get(1);
-    }
-
-    private static final PSFParameterUnit[] VALUES = values();
-
-    public static PSFParameterUnit valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private PSFParameterUnit(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.PSFParameterUnit)
-  }
-
-  public interface PSFParameterOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSFParameter)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
-    /**
-     * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-     */
-    int getUnitValue();
-    /**
-     * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-     */
-    gdsc.smlm.data.config.PSFProtos.PSFParameterUnit getUnit();
-
-    /**
-     * <code>double value = 3;</code>
-     */
-    double getValue();
-  }
-  /**
-   * <pre>
-   * Define the additional parameters of the Point Spread Function (PSF)
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.PSFParameter}
-   */
-  public  static final class PSFParameter extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.PSFParameter)
-      PSFParameterOrBuilder {
-    // Use PSFParameter.newBuilder() to construct.
-    private PSFParameter(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private PSFParameter() {
-      name_ = "";
-      unit_ = 0;
-      value_ = 0D;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private PSFParameter(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-
-              unit_ = rawValue;
-              break;
-            }
-            case 25: {
-
-              value_ = input.readDouble();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.PSFParameter.class, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder.class);
-    }
-
-    public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
-    /**
-     * <code>string name = 1;</code>
-     */
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int UNIT_FIELD_NUMBER = 2;
-    private int unit_;
-    /**
-     * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-     */
-    public int getUnitValue() {
-      return unit_;
-    }
-    /**
-     * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-     */
-    public gdsc.smlm.data.config.PSFProtos.PSFParameterUnit getUnit() {
-      gdsc.smlm.data.config.PSFProtos.PSFParameterUnit result = gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.valueOf(unit_);
-      return result == null ? gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.UNRECOGNIZED : result;
-    }
-
-    public static final int VALUE_FIELD_NUMBER = 3;
-    private double value_;
-    /**
-     * <code>double value = 3;</code>
-     */
-    public double getValue() {
-      return value_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
-      }
-      if (unit_ != gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber()) {
-        output.writeEnum(2, unit_);
-      }
-      if (value_ != 0D) {
-        output.writeDouble(3, value_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
-      }
-      if (unit_ != gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(2, unit_);
-      }
-      if (value_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, value_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.PSFParameter)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.PSFParameter other = (gdsc.smlm.data.config.PSFProtos.PSFParameter) obj;
-
-      boolean result = true;
-      result = result && getName()
-          .equals(other.getName());
-      result = result && unit_ == other.unit_;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getValue())
-          == java.lang.Double.doubleToLongBits(
-              other.getValue()));
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getName().hashCode();
-      hash = (37 * hash) + UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + unit_;
-      hash = (37 * hash) + VALUE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getValue()));
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.PSFParameter prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the additional parameters of the Point Spread Function (PSF)
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.PSFParameter}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.PSFParameter)
-        gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.PSFParameter.class, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.PSFParameter.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        name_ = "";
-
-        unit_ = 0;
-
-        value_ = 0D;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter build() {
-        gdsc.smlm.data.config.PSFProtos.PSFParameter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.PSFParameter result = new gdsc.smlm.data.config.PSFProtos.PSFParameter(this);
-        result.name_ = name_;
-        result.unit_ = unit_;
-        result.value_ = value_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.PSFParameter) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.PSFParameter)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.PSFParameter other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance()) return this;
-        if (!other.getName().isEmpty()) {
-          name_ = other.name_;
-          onChanged();
-        }
-        if (other.unit_ != 0) {
-          setUnitValue(other.getUnitValue());
-        }
-        if (other.getValue() != 0D) {
-          setValue(other.getValue());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.PSFParameter parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.PSFParameter) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private java.lang.Object name_ = "";
-      /**
-       * <code>string name = 1;</code>
-       */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        name_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string name = 1;</code>
-       */
-      public Builder clearName() {
-        
-        name_ = getDefaultInstance().getName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        name_ = value;
-        onChanged();
-        return this;
-      }
-
-      private int unit_ = 0;
-      /**
-       * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-       */
-      public int getUnitValue() {
-        return unit_;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-       */
-      public Builder setUnitValue(int value) {
-        unit_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFParameterUnit getUnit() {
-        gdsc.smlm.data.config.PSFProtos.PSFParameterUnit result = gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.valueOf(unit_);
-        return result == null ? gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.UNRECOGNIZED : result;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-       */
-      public Builder setUnit(gdsc.smlm.data.config.PSFProtos.PSFParameterUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        unit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
-       */
-      public Builder clearUnit() {
-        
-        unit_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private double value_ ;
-      /**
-       * <code>double value = 3;</code>
-       */
-      public double getValue() {
-        return value_;
-      }
-      /**
-       * <code>double value = 3;</code>
-       */
-      public Builder setValue(double value) {
-        
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double value = 3;</code>
-       */
-      public Builder clearValue() {
-        
-        value_ = 0D;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.PSFParameter)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.PSFParameter)
-    private static final gdsc.smlm.data.config.PSFProtos.PSFParameter DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.PSFParameter();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.PSFParameter getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<PSFParameter>
-        PARSER = new com.google.protobuf.AbstractParser<PSFParameter>() {
-      public PSFParameter parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new PSFParameter(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<PSFParameter> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<PSFParameter> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.PSFParameter getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface AstigmatismModelOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModel)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The gamma parameter (half the distance between the focal planes). 
-     * Note that a positive gamma puts the focal plane for the X-dimension above the 
-     * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
-     * (negative Z). If gamma is negative then the orientation of the focal planes of X 
-     * and Y are reversed.	
-     * </pre>
-     *
-     * <code>double gamma = 1;</code>
-     */
-    double getGamma();
-
-    /**
-     * <pre>
-     * Depth-of-focus. This is the z-distance where the width is enlarged by 
-     * a factor of sqrt(2) compared to the width in the focal plane.   
-     * </pre>
-     *
-     * <code>double d = 2;</code>
-     */
-    double getD();
-
-    /**
-     * <pre>
-     * Empirical constant A for the x-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double ax = 3;</code>
-     */
-    double getAx();
-
-    /**
-     * <pre>
-     * Empirical constant B for the x-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double bx = 4;</code>
-     */
-    double getBx();
-
-    /**
-     * <pre>
-     * Empirical constant A for the y-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double ay = 5;</code>
-     */
-    double getAy();
-
-    /**
-     * <pre>
-     * Empirical constant B for the y-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double by = 6;</code>
-     */
-    double getBy();
-
-    /**
-     * <pre>
-     * The width (standard deviation) in the x-focal plane
-     * </pre>
-     *
-     * <code>double s0x = 7;</code>
-     */
-    double getS0X();
-
-    /**
-     * <pre>
-     * The width (standard deviation) in the y-focal plane
-     * </pre>
-     *
-     * <code>double s0y = 8;</code>
-     */
-    double getS0Y();
-
-    /**
-     * <pre>
-     * The input distance unit for z (μm, nm)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-     */
-    int getZDistanceUnitValue();
-    /**
-     * <pre>
-     * The input distance unit for z (μm, nm)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-     */
-    gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit();
-
-    /**
-     * <pre>
-     * The output distance unit for s (may be pixels)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-     */
-    int getSDistanceUnitValue();
-    /**
-     * <pre>
-     * The output distance unit for s (may be pixels)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-     */
-    gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit();
-
-    /**
-     * <pre>
-     * The pixel size used to create the model. A model is only valid when used 
-     * with the same light path (objective, magnification, camera sensor). The entire 
-     * light path is not recorded but the pixel size is stored. This can be used as 
-     * a quick validation of matching calibration, or to convert output width in pixels.
-     * </pre>
-     *
-     * <code>double nm_per_pixel = 11;</code>
-     */
-    double getNmPerPixel();
-
-    /**
-     * <pre>
-     * The z-centre. This is assumed to be zero but can be used to store the results
-     * of curve fitting where the z-centre is a parameter.
-     * </pre>
-     *
-     * <code>double z0 = 12;</code>
-     */
-    double getZ0();
-  }
-  /**
-   * <pre>
-   * Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
-   * for the X and Y dimensions. 
-   * Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
-   * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
-   * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
-   * Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual 
-   * quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
-   * For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModel}
-   */
-  public  static final class AstigmatismModel extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModel)
-      AstigmatismModelOrBuilder {
-    // Use AstigmatismModel.newBuilder() to construct.
-    private AstigmatismModel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private AstigmatismModel() {
-      gamma_ = 0D;
-      d_ = 0D;
-      ax_ = 0D;
-      bx_ = 0D;
-      ay_ = 0D;
-      by_ = 0D;
-      s0X_ = 0D;
-      s0Y_ = 0D;
-      zDistanceUnit_ = 0;
-      sDistanceUnit_ = 0;
-      nmPerPixel_ = 0D;
-      z0_ = 0D;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private AstigmatismModel(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 9: {
-
-              gamma_ = input.readDouble();
-              break;
-            }
-            case 17: {
-
-              d_ = input.readDouble();
-              break;
-            }
-            case 25: {
-
-              ax_ = input.readDouble();
-              break;
-            }
-            case 33: {
-
-              bx_ = input.readDouble();
-              break;
-            }
-            case 41: {
-
-              ay_ = input.readDouble();
-              break;
-            }
-            case 49: {
-
-              by_ = input.readDouble();
-              break;
-            }
-            case 57: {
-
-              s0X_ = input.readDouble();
-              break;
-            }
-            case 65: {
-
-              s0Y_ = input.readDouble();
-              break;
-            }
-            case 72: {
-              int rawValue = input.readEnum();
-
-              zDistanceUnit_ = rawValue;
-              break;
-            }
-            case 80: {
-              int rawValue = input.readEnum();
-
-              sDistanceUnit_ = rawValue;
-              break;
-            }
-            case 89: {
-
-              nmPerPixel_ = input.readDouble();
-              break;
-            }
-            case 97: {
-
-              z0_ = input.readDouble();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.AstigmatismModel.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder.class);
-    }
-
-    public static final int GAMMA_FIELD_NUMBER = 1;
-    private double gamma_;
-    /**
-     * <pre>
-     * The gamma parameter (half the distance between the focal planes). 
-     * Note that a positive gamma puts the focal plane for the X-dimension above the 
-     * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
-     * (negative Z). If gamma is negative then the orientation of the focal planes of X 
-     * and Y are reversed.	
-     * </pre>
-     *
-     * <code>double gamma = 1;</code>
-     */
-    public double getGamma() {
-      return gamma_;
-    }
-
-    public static final int D_FIELD_NUMBER = 2;
-    private double d_;
-    /**
-     * <pre>
-     * Depth-of-focus. This is the z-distance where the width is enlarged by 
-     * a factor of sqrt(2) compared to the width in the focal plane.   
-     * </pre>
-     *
-     * <code>double d = 2;</code>
-     */
-    public double getD() {
-      return d_;
-    }
-
-    public static final int AX_FIELD_NUMBER = 3;
-    private double ax_;
-    /**
-     * <pre>
-     * Empirical constant A for the x-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double ax = 3;</code>
-     */
-    public double getAx() {
-      return ax_;
-    }
-
-    public static final int BX_FIELD_NUMBER = 4;
-    private double bx_;
-    /**
-     * <pre>
-     * Empirical constant B for the x-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double bx = 4;</code>
-     */
-    public double getBx() {
-      return bx_;
-    }
-
-    public static final int AY_FIELD_NUMBER = 5;
-    private double ay_;
-    /**
-     * <pre>
-     * Empirical constant A for the y-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double ay = 5;</code>
-     */
-    public double getAy() {
-      return ay_;
-    }
-
-    public static final int BY_FIELD_NUMBER = 6;
-    private double by_;
-    /**
-     * <pre>
-     * Empirical constant B for the y-astigmatism of the PSF
-     * </pre>
-     *
-     * <code>double by = 6;</code>
-     */
-    public double getBy() {
-      return by_;
-    }
-
-    public static final int S0X_FIELD_NUMBER = 7;
-    private double s0X_;
-    /**
-     * <pre>
-     * The width (standard deviation) in the x-focal plane
-     * </pre>
-     *
-     * <code>double s0x = 7;</code>
-     */
-    public double getS0X() {
-      return s0X_;
-    }
-
-    public static final int S0Y_FIELD_NUMBER = 8;
-    private double s0Y_;
-    /**
-     * <pre>
-     * The width (standard deviation) in the y-focal plane
-     * </pre>
-     *
-     * <code>double s0y = 8;</code>
-     */
-    public double getS0Y() {
-      return s0Y_;
-    }
-
-    public static final int Z_DISTANCE_UNIT_FIELD_NUMBER = 9;
-    private int zDistanceUnit_;
-    /**
-     * <pre>
-     * The input distance unit for z (μm, nm)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-     */
-    public int getZDistanceUnitValue() {
-      return zDistanceUnit_;
-    }
-    /**
-     * <pre>
-     * The input distance unit for z (μm, nm)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-     */
-    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
-      return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
-    }
-
-    public static final int S_DISTANCE_UNIT_FIELD_NUMBER = 10;
-    private int sDistanceUnit_;
-    /**
-     * <pre>
-     * The output distance unit for s (may be pixels)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-     */
-    public int getSDistanceUnitValue() {
-      return sDistanceUnit_;
-    }
-    /**
-     * <pre>
-     * The output distance unit for s (may be pixels)
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-     */
-    public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
-      gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
-      return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
-    }
-
-    public static final int NM_PER_PIXEL_FIELD_NUMBER = 11;
-    private double nmPerPixel_;
-    /**
-     * <pre>
-     * The pixel size used to create the model. A model is only valid when used 
-     * with the same light path (objective, magnification, camera sensor). The entire 
-     * light path is not recorded but the pixel size is stored. This can be used as 
-     * a quick validation of matching calibration, or to convert output width in pixels.
-     * </pre>
-     *
-     * <code>double nm_per_pixel = 11;</code>
-     */
-    public double getNmPerPixel() {
-      return nmPerPixel_;
-    }
-
-    public static final int Z0_FIELD_NUMBER = 12;
-    private double z0_;
-    /**
-     * <pre>
-     * The z-centre. This is assumed to be zero but can be used to store the results
-     * of curve fitting where the z-centre is a parameter.
-     * </pre>
-     *
-     * <code>double z0 = 12;</code>
-     */
-    public double getZ0() {
-      return z0_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (gamma_ != 0D) {
-        output.writeDouble(1, gamma_);
-      }
-      if (d_ != 0D) {
-        output.writeDouble(2, d_);
-      }
-      if (ax_ != 0D) {
-        output.writeDouble(3, ax_);
-      }
-      if (bx_ != 0D) {
-        output.writeDouble(4, bx_);
-      }
-      if (ay_ != 0D) {
-        output.writeDouble(5, ay_);
-      }
-      if (by_ != 0D) {
-        output.writeDouble(6, by_);
-      }
-      if (s0X_ != 0D) {
-        output.writeDouble(7, s0X_);
-      }
-      if (s0Y_ != 0D) {
-        output.writeDouble(8, s0Y_);
-      }
-      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(9, zDistanceUnit_);
-      }
-      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        output.writeEnum(10, sDistanceUnit_);
-      }
-      if (nmPerPixel_ != 0D) {
-        output.writeDouble(11, nmPerPixel_);
-      }
-      if (z0_ != 0D) {
-        output.writeDouble(12, z0_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (gamma_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1, gamma_);
-      }
-      if (d_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, d_);
-      }
-      if (ax_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, ax_);
-      }
-      if (bx_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, bx_);
-      }
-      if (ay_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(5, ay_);
-      }
-      if (by_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(6, by_);
-      }
-      if (s0X_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(7, s0X_);
-      }
-      if (s0Y_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(8, s0Y_);
-      }
-      if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(9, zDistanceUnit_);
-      }
-      if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(10, sDistanceUnit_);
-      }
-      if (nmPerPixel_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(11, nmPerPixel_);
-      }
-      if (z0_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(12, z0_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModel)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.AstigmatismModel other = (gdsc.smlm.data.config.PSFProtos.AstigmatismModel) obj;
-
-      boolean result = true;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getGamma())
-          == java.lang.Double.doubleToLongBits(
-              other.getGamma()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getD())
-          == java.lang.Double.doubleToLongBits(
-              other.getD()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getAx())
-          == java.lang.Double.doubleToLongBits(
-              other.getAx()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getBx())
-          == java.lang.Double.doubleToLongBits(
-              other.getBx()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getAy())
-          == java.lang.Double.doubleToLongBits(
-              other.getAy()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getBy())
-          == java.lang.Double.doubleToLongBits(
-              other.getBy()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getS0X())
-          == java.lang.Double.doubleToLongBits(
-              other.getS0X()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getS0Y())
-          == java.lang.Double.doubleToLongBits(
-              other.getS0Y()));
-      result = result && zDistanceUnit_ == other.zDistanceUnit_;
-      result = result && sDistanceUnit_ == other.sDistanceUnit_;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getNmPerPixel())
-          == java.lang.Double.doubleToLongBits(
-              other.getNmPerPixel()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getZ0())
-          == java.lang.Double.doubleToLongBits(
-              other.getZ0()));
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + GAMMA_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getGamma()));
-      hash = (37 * hash) + D_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getD()));
-      hash = (37 * hash) + AX_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getAx()));
-      hash = (37 * hash) + BX_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getBx()));
-      hash = (37 * hash) + AY_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getAy()));
-      hash = (37 * hash) + BY_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getBy()));
-      hash = (37 * hash) + S0X_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getS0X()));
-      hash = (37 * hash) + S0Y_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getS0Y()));
-      hash = (37 * hash) + Z_DISTANCE_UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + zDistanceUnit_;
-      hash = (37 * hash) + S_DISTANCE_UNIT_FIELD_NUMBER;
-      hash = (53 * hash) + sDistanceUnit_;
-      hash = (37 * hash) + NM_PER_PIXEL_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getNmPerPixel()));
-      hash = (37 * hash) + Z0_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getZ0()));
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.AstigmatismModel prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
-     * for the X and Y dimensions. 
-     * Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
-     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
-     * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
-     * Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual 
-     * quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
-     * For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModel}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModel)
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.AstigmatismModel.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.AstigmatismModel.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        gamma_ = 0D;
-
-        d_ = 0D;
-
-        ax_ = 0D;
-
-        bx_ = 0D;
-
-        ay_ = 0D;
-
-        by_ = 0D;
-
-        s0X_ = 0D;
-
-        s0Y_ = 0D;
-
-        zDistanceUnit_ = 0;
-
-        sDistanceUnit_ = 0;
-
-        nmPerPixel_ = 0D;
-
-        z0_ = 0D;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel build() {
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModel result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModel result = new gdsc.smlm.data.config.PSFProtos.AstigmatismModel(this);
-        result.gamma_ = gamma_;
-        result.d_ = d_;
-        result.ax_ = ax_;
-        result.bx_ = bx_;
-        result.ay_ = ay_;
-        result.by_ = by_;
-        result.s0X_ = s0X_;
-        result.s0Y_ = s0Y_;
-        result.zDistanceUnit_ = zDistanceUnit_;
-        result.sDistanceUnit_ = sDistanceUnit_;
-        result.nmPerPixel_ = nmPerPixel_;
-        result.z0_ = z0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModel) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.AstigmatismModel)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.AstigmatismModel other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance()) return this;
-        if (other.getGamma() != 0D) {
-          setGamma(other.getGamma());
-        }
-        if (other.getD() != 0D) {
-          setD(other.getD());
-        }
-        if (other.getAx() != 0D) {
-          setAx(other.getAx());
-        }
-        if (other.getBx() != 0D) {
-          setBx(other.getBx());
-        }
-        if (other.getAy() != 0D) {
-          setAy(other.getAy());
-        }
-        if (other.getBy() != 0D) {
-          setBy(other.getBy());
-        }
-        if (other.getS0X() != 0D) {
-          setS0X(other.getS0X());
-        }
-        if (other.getS0Y() != 0D) {
-          setS0Y(other.getS0Y());
-        }
-        if (other.zDistanceUnit_ != 0) {
-          setZDistanceUnitValue(other.getZDistanceUnitValue());
-        }
-        if (other.sDistanceUnit_ != 0) {
-          setSDistanceUnitValue(other.getSDistanceUnitValue());
-        }
-        if (other.getNmPerPixel() != 0D) {
-          setNmPerPixel(other.getNmPerPixel());
-        }
-        if (other.getZ0() != 0D) {
-          setZ0(other.getZ0());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModel parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.AstigmatismModel) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private double gamma_ ;
-      /**
-       * <pre>
-       * The gamma parameter (half the distance between the focal planes). 
-       * Note that a positive gamma puts the focal plane for the X-dimension above the 
-       * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
-       * (negative Z). If gamma is negative then the orientation of the focal planes of X 
-       * and Y are reversed.	
-       * </pre>
-       *
-       * <code>double gamma = 1;</code>
-       */
-      public double getGamma() {
-        return gamma_;
-      }
-      /**
-       * <pre>
-       * The gamma parameter (half the distance between the focal planes). 
-       * Note that a positive gamma puts the focal plane for the X-dimension above the 
-       * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
-       * (negative Z). If gamma is negative then the orientation of the focal planes of X 
-       * and Y are reversed.	
-       * </pre>
-       *
-       * <code>double gamma = 1;</code>
-       */
-      public Builder setGamma(double value) {
-        
-        gamma_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The gamma parameter (half the distance between the focal planes). 
-       * Note that a positive gamma puts the focal plane for the X-dimension above the 
-       * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
-       * (negative Z). If gamma is negative then the orientation of the focal planes of X 
-       * and Y are reversed.	
-       * </pre>
-       *
-       * <code>double gamma = 1;</code>
-       */
-      public Builder clearGamma() {
-        
-        gamma_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double d_ ;
-      /**
-       * <pre>
-       * Depth-of-focus. This is the z-distance where the width is enlarged by 
-       * a factor of sqrt(2) compared to the width in the focal plane.   
-       * </pre>
-       *
-       * <code>double d = 2;</code>
-       */
-      public double getD() {
-        return d_;
-      }
-      /**
-       * <pre>
-       * Depth-of-focus. This is the z-distance where the width is enlarged by 
-       * a factor of sqrt(2) compared to the width in the focal plane.   
-       * </pre>
-       *
-       * <code>double d = 2;</code>
-       */
-      public Builder setD(double value) {
-        
-        d_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Depth-of-focus. This is the z-distance where the width is enlarged by 
-       * a factor of sqrt(2) compared to the width in the focal plane.   
-       * </pre>
-       *
-       * <code>double d = 2;</code>
-       */
-      public Builder clearD() {
-        
-        d_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double ax_ ;
-      /**
-       * <pre>
-       * Empirical constant A for the x-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double ax = 3;</code>
-       */
-      public double getAx() {
-        return ax_;
-      }
-      /**
-       * <pre>
-       * Empirical constant A for the x-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double ax = 3;</code>
-       */
-      public Builder setAx(double value) {
-        
-        ax_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Empirical constant A for the x-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double ax = 3;</code>
-       */
-      public Builder clearAx() {
-        
-        ax_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double bx_ ;
-      /**
-       * <pre>
-       * Empirical constant B for the x-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double bx = 4;</code>
-       */
-      public double getBx() {
-        return bx_;
-      }
-      /**
-       * <pre>
-       * Empirical constant B for the x-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double bx = 4;</code>
-       */
-      public Builder setBx(double value) {
-        
-        bx_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Empirical constant B for the x-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double bx = 4;</code>
-       */
-      public Builder clearBx() {
-        
-        bx_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double ay_ ;
-      /**
-       * <pre>
-       * Empirical constant A for the y-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double ay = 5;</code>
-       */
-      public double getAy() {
-        return ay_;
-      }
-      /**
-       * <pre>
-       * Empirical constant A for the y-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double ay = 5;</code>
-       */
-      public Builder setAy(double value) {
-        
-        ay_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Empirical constant A for the y-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double ay = 5;</code>
-       */
-      public Builder clearAy() {
-        
-        ay_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double by_ ;
-      /**
-       * <pre>
-       * Empirical constant B for the y-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double by = 6;</code>
-       */
-      public double getBy() {
-        return by_;
-      }
-      /**
-       * <pre>
-       * Empirical constant B for the y-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double by = 6;</code>
-       */
-      public Builder setBy(double value) {
-        
-        by_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Empirical constant B for the y-astigmatism of the PSF
-       * </pre>
-       *
-       * <code>double by = 6;</code>
-       */
-      public Builder clearBy() {
-        
-        by_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double s0X_ ;
-      /**
-       * <pre>
-       * The width (standard deviation) in the x-focal plane
-       * </pre>
-       *
-       * <code>double s0x = 7;</code>
-       */
-      public double getS0X() {
-        return s0X_;
-      }
-      /**
-       * <pre>
-       * The width (standard deviation) in the x-focal plane
-       * </pre>
-       *
-       * <code>double s0x = 7;</code>
-       */
-      public Builder setS0X(double value) {
-        
-        s0X_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The width (standard deviation) in the x-focal plane
-       * </pre>
-       *
-       * <code>double s0x = 7;</code>
-       */
-      public Builder clearS0X() {
-        
-        s0X_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double s0Y_ ;
-      /**
-       * <pre>
-       * The width (standard deviation) in the y-focal plane
-       * </pre>
-       *
-       * <code>double s0y = 8;</code>
-       */
-      public double getS0Y() {
-        return s0Y_;
-      }
-      /**
-       * <pre>
-       * The width (standard deviation) in the y-focal plane
-       * </pre>
-       *
-       * <code>double s0y = 8;</code>
-       */
-      public Builder setS0Y(double value) {
-        
-        s0Y_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The width (standard deviation) in the y-focal plane
-       * </pre>
-       *
-       * <code>double s0y = 8;</code>
-       */
-      public Builder clearS0Y() {
-        
-        s0Y_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private int zDistanceUnit_ = 0;
-      /**
-       * <pre>
-       * The input distance unit for z (μm, nm)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-       */
-      public int getZDistanceUnitValue() {
-        return zDistanceUnit_;
-      }
-      /**
-       * <pre>
-       * The input distance unit for z (μm, nm)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-       */
-      public Builder setZDistanceUnitValue(int value) {
-        zDistanceUnit_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The input distance unit for z (μm, nm)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-       */
-      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(zDistanceUnit_);
-        return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The input distance unit for z (μm, nm)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-       */
-      public Builder setZDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        zDistanceUnit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The input distance unit for z (μm, nm)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
-       */
-      public Builder clearZDistanceUnit() {
-        
-        zDistanceUnit_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int sDistanceUnit_ = 0;
-      /**
-       * <pre>
-       * The output distance unit for s (may be pixels)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-       */
-      public int getSDistanceUnitValue() {
-        return sDistanceUnit_;
-      }
-      /**
-       * <pre>
-       * The output distance unit for s (may be pixels)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-       */
-      public Builder setSDistanceUnitValue(int value) {
-        sDistanceUnit_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The output distance unit for s (may be pixels)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-       */
-      public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit() {
-        gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit.valueOf(sDistanceUnit_);
-        return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The output distance unit for s (may be pixels)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-       */
-      public Builder setSDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        sDistanceUnit_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The output distance unit for s (may be pixels)
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
-       */
-      public Builder clearSDistanceUnit() {
-        
-        sDistanceUnit_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private double nmPerPixel_ ;
-      /**
-       * <pre>
-       * The pixel size used to create the model. A model is only valid when used 
-       * with the same light path (objective, magnification, camera sensor). The entire 
-       * light path is not recorded but the pixel size is stored. This can be used as 
-       * a quick validation of matching calibration, or to convert output width in pixels.
-       * </pre>
-       *
-       * <code>double nm_per_pixel = 11;</code>
-       */
-      public double getNmPerPixel() {
-        return nmPerPixel_;
-      }
-      /**
-       * <pre>
-       * The pixel size used to create the model. A model is only valid when used 
-       * with the same light path (objective, magnification, camera sensor). The entire 
-       * light path is not recorded but the pixel size is stored. This can be used as 
-       * a quick validation of matching calibration, or to convert output width in pixels.
-       * </pre>
-       *
-       * <code>double nm_per_pixel = 11;</code>
-       */
-      public Builder setNmPerPixel(double value) {
-        
-        nmPerPixel_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The pixel size used to create the model. A model is only valid when used 
-       * with the same light path (objective, magnification, camera sensor). The entire 
-       * light path is not recorded but the pixel size is stored. This can be used as 
-       * a quick validation of matching calibration, or to convert output width in pixels.
-       * </pre>
-       *
-       * <code>double nm_per_pixel = 11;</code>
-       */
-      public Builder clearNmPerPixel() {
-        
-        nmPerPixel_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double z0_ ;
-      /**
-       * <pre>
-       * The z-centre. This is assumed to be zero but can be used to store the results
-       * of curve fitting where the z-centre is a parameter.
-       * </pre>
-       *
-       * <code>double z0 = 12;</code>
-       */
-      public double getZ0() {
-        return z0_;
-      }
-      /**
-       * <pre>
-       * The z-centre. This is assumed to be zero but can be used to store the results
-       * of curve fitting where the z-centre is a parameter.
-       * </pre>
-       *
-       * <code>double z0 = 12;</code>
-       */
-      public Builder setZ0(double value) {
-        
-        z0_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The z-centre. This is assumed to be zero but can be used to store the results
-       * of curve fitting where the z-centre is a parameter.
-       * </pre>
-       *
-       * <code>double z0 = 12;</code>
-       */
-      public Builder clearZ0() {
-        
-        z0_ = 0D;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModel)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModel)
-    private static final gdsc.smlm.data.config.PSFProtos.AstigmatismModel DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.AstigmatismModel();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<AstigmatismModel>
-        PARSER = new com.google.protobuf.AbstractParser<AstigmatismModel>() {
-      public AstigmatismModel parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new AstigmatismModel(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<AstigmatismModel> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<AstigmatismModel> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface AstigmatismModelSettingsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModelSettings)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-    int getAstigmatismModelResourcesCount();
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-    boolean containsAstigmatismModelResources(
-        java.lang.String key);
-    /**
-     * Use {@link #getAstigmatismModelResourcesMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-    getAstigmatismModelResources();
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-    getAstigmatismModelResourcesMap();
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-
-    gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
-        java.lang.String key,
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue);
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-
-    gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
-        java.lang.String key);
-  }
-  /**
-   * <pre>
-   * Define the astigmatism model settings
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelSettings}
-   */
-  public  static final class AstigmatismModelSettings extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModelSettings)
-      AstigmatismModelSettingsOrBuilder {
-    // Use AstigmatismModelSettings.newBuilder() to construct.
-    private AstigmatismModelSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private AstigmatismModelSettings() {
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private AstigmatismModelSettings(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                astigmatismModelResources_ = com.google.protobuf.MapField.newMapField(
-                    AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000001;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-              astigmatismModelResources__ = input.readMessage(
-                  AstigmatismModelResourcesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              astigmatismModelResources_.getMutableMap().put(
-                  astigmatismModelResources__.getKey(), astigmatismModelResources__.getValue());
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
-    }
-
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 1:
-          return internalGetAstigmatismModelResources();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.Builder.class);
-    }
-
-    public static final int ASTIGMATISM_MODEL_RESOURCES_FIELD_NUMBER = 1;
-    private static final class AstigmatismModelResourcesDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>newDefaultInstance(
-                  gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "",
-                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                  gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance());
-    }
-    private com.google.protobuf.MapField<
-        java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources_;
-    private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-    internalGetAstigmatismModelResources() {
-      if (astigmatismModelResources_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
-      }
-      return astigmatismModelResources_;
-    }
-
-    public int getAstigmatismModelResourcesCount() {
-      return internalGetAstigmatismModelResources().getMap().size();
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-
-    public boolean containsAstigmatismModelResources(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetAstigmatismModelResources().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getAstigmatismModelResourcesMap()} instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources() {
-      return getAstigmatismModelResourcesMap();
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-
-    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap() {
-      return internalGetAstigmatismModelResources().getMap();
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-
-    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
-        java.lang.String key,
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
-          internalGetAstigmatismModelResources().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-     */
-
-    public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
-          internalGetAstigmatismModelResources().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      com.google.protobuf.GeneratedMessageV3
-        .serializeStringMapTo(
-          output,
-          internalGetAstigmatismModelResources(),
-          AstigmatismModelResourcesDefaultEntryHolder.defaultEntry,
-          1);
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> entry
-           : internalGetAstigmatismModelResources().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-        astigmatismModelResources__ = AstigmatismModelResourcesDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(1, astigmatismModelResources__);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings other = (gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) obj;
-
-      boolean result = true;
-      result = result && internalGetAstigmatismModelResources().equals(
-          other.internalGetAstigmatismModelResources());
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (!internalGetAstigmatismModelResources().getMap().isEmpty()) {
-        hash = (37 * hash) + ASTIGMATISM_MODEL_RESOURCES_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetAstigmatismModelResources().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the astigmatism model settings
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelSettings}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModelSettings)
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettingsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
-      }
-
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMapField(
-          int number) {
-        switch (number) {
-          case 1:
-            return internalGetAstigmatismModelResources();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMutableMapField(
-          int number) {
-        switch (number) {
-          case 1:
-            return internalGetMutableAstigmatismModelResources();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.class, gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        internalGetMutableAstigmatismModelResources().clear();
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings build() {
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings result = new gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings(this);
-        int from_bitField0_ = bitField0_;
-        result.astigmatismModelResources_ = internalGetAstigmatismModelResources();
-        result.astigmatismModelResources_.makeImmutable();
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.getDefaultInstance()) return this;
-        internalGetMutableAstigmatismModelResources().mergeFrom(
-            other.internalGetAstigmatismModelResources());
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private com.google.protobuf.MapField<
-          java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources_;
-      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-      internalGetAstigmatismModelResources() {
-        if (astigmatismModelResources_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
-        }
-        return astigmatismModelResources_;
-      }
-      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-      internalGetMutableAstigmatismModelResources() {
-        onChanged();;
-        if (astigmatismModelResources_ == null) {
-          astigmatismModelResources_ = com.google.protobuf.MapField.newMapField(
-              AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
-        }
-        if (!astigmatismModelResources_.isMutable()) {
-          astigmatismModelResources_ = astigmatismModelResources_.copy();
-        }
-        return astigmatismModelResources_;
-      }
-
-      public int getAstigmatismModelResourcesCount() {
-        return internalGetAstigmatismModelResources().getMap().size();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-
-      public boolean containsAstigmatismModelResources(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        return internalGetAstigmatismModelResources().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getAstigmatismModelResourcesMap()} instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources() {
-        return getAstigmatismModelResourcesMap();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-
-      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap() {
-        return internalGetAstigmatismModelResources().getMap();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
-          java.lang.String key,
-          gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
-            internalGetAstigmatismModelResources().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-
-      public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map =
-            internalGetAstigmatismModelResources().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
-      }
-
-      public Builder clearAstigmatismModelResources() {
-        internalGetMutableAstigmatismModelResources().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-
-      public Builder removeAstigmatismModelResources(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableAstigmatismModelResources().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel>
-      getMutableAstigmatismModelResources() {
-        return internalGetMutableAstigmatismModelResources().getMutableMap();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-      public Builder putAstigmatismModelResources(
-          java.lang.String key,
-          gdsc.smlm.data.config.PSFProtos.AstigmatismModel value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableAstigmatismModelResources().getMutableMap()
-            .put(key, value);
-        return this;
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
-       */
-
-      public Builder putAllAstigmatismModelResources(
-          java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> values) {
-        internalGetMutableAstigmatismModelResources().getMutableMap()
-            .putAll(values);
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModelSettings)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModelSettings)
-    private static final gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<AstigmatismModelSettings>
-        PARSER = new com.google.protobuf.AbstractParser<AstigmatismModelSettings>() {
-      public AstigmatismModelSettings parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new AstigmatismModelSettings(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<AstigmatismModelSettings> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<AstigmatismModelSettings> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface PSFOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSF)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The PSF type
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-     */
-    int getPsfTypeValue();
-    /**
-     * <pre>
-     * The PSF type
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-     */
-    gdsc.smlm.data.config.PSFProtos.PSFType getPsfType();
-
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> 
-        getParametersList();
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    gdsc.smlm.data.config.PSFProtos.PSFParameter getParameters(int index);
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    int getParametersCount();
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    java.util.List<? extends gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> 
-        getParametersOrBuilderList();
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(
-        int index);
-
-    /**
-     * <pre>
-     * The PSF model name. This should contain all the information required to
-     * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-     * </pre>
-     *
-     * <code>string model_name = 3;</code>
-     */
-    java.lang.String getModelName();
-    /**
-     * <pre>
-     * The PSF model name. This should contain all the information required to
-     * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-     * </pre>
-     *
-     * <code>string model_name = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getModelNameBytes();
-  }
-  /**
-   * <pre>
-   * Define the Point Spread Function (PSF)
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.PSF}
-   */
-  public  static final class PSF extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.PSF)
-      PSFOrBuilder {
-    // Use PSF.newBuilder() to construct.
-    private PSF(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private PSF() {
-      psfType_ = 0;
-      parameters_ = java.util.Collections.emptyList();
-      modelName_ = "";
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private PSF(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              int rawValue = input.readEnum();
-
-              psfType_ = rawValue;
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                parameters_ = new java.util.ArrayList<gdsc.smlm.data.config.PSFProtos.PSFParameter>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              parameters_.add(
-                  input.readMessage(gdsc.smlm.data.config.PSFProtos.PSFParameter.parser(), extensionRegistry));
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              modelName_ = s;
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          parameters_ = java.util.Collections.unmodifiableList(parameters_);
-        }
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.PSF.class, gdsc.smlm.data.config.PSFProtos.PSF.Builder.class);
-    }
-
-    private int bitField0_;
-    public static final int PSF_TYPE_FIELD_NUMBER = 1;
-    private int psfType_;
-    /**
-     * <pre>
-     * The PSF type
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-     */
-    public int getPsfTypeValue() {
-      return psfType_;
-    }
-    /**
-     * <pre>
-     * The PSF type
-     * </pre>
-     *
-     * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-     */
-    public gdsc.smlm.data.config.PSFProtos.PSFType getPsfType() {
-      gdsc.smlm.data.config.PSFProtos.PSFType result = gdsc.smlm.data.config.PSFProtos.PSFType.valueOf(psfType_);
-      return result == null ? gdsc.smlm.data.config.PSFProtos.PSFType.UNRECOGNIZED : result;
-    }
-
-    public static final int PARAMETERS_FIELD_NUMBER = 2;
-    private java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> parameters_;
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    public java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> getParametersList() {
-      return parameters_;
-    }
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    public java.util.List<? extends gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> 
-        getParametersOrBuilderList() {
-      return parameters_;
-    }
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    public int getParametersCount() {
-      return parameters_.size();
-    }
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    public gdsc.smlm.data.config.PSFProtos.PSFParameter getParameters(int index) {
-      return parameters_.get(index);
-    }
-    /**
-     * <pre>
-     * The names of the PSF parameters. The results are stored using the standard parameters of 
-     * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-     * parameters array. The names of the non-standard parameters, in order, can be defined here.
-     * </pre>
-     *
-     * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-     */
-    public gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(
-        int index) {
-      return parameters_.get(index);
-    }
-
-    public static final int MODEL_NAME_FIELD_NUMBER = 3;
-    private volatile java.lang.Object modelName_;
-    /**
-     * <pre>
-     * The PSF model name. This should contain all the information required to
-     * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-     * </pre>
-     *
-     * <code>string model_name = 3;</code>
-     */
-    public java.lang.String getModelName() {
-      java.lang.Object ref = modelName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        modelName_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The PSF model name. This should contain all the information required to
-     * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-     * </pre>
-     *
-     * <code>string model_name = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getModelNameBytes() {
-      java.lang.Object ref = modelName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        modelName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (psfType_ != gdsc.smlm.data.config.PSFProtos.PSFType.PSF_TYPE_NA.getNumber()) {
-        output.writeEnum(1, psfType_);
-      }
-      for (int i = 0; i < parameters_.size(); i++) {
-        output.writeMessage(2, parameters_.get(i));
-      }
-      if (!getModelNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, modelName_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (psfType_ != gdsc.smlm.data.config.PSFProtos.PSFType.PSF_TYPE_NA.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, psfType_);
-      }
-      for (int i = 0; i < parameters_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, parameters_.get(i));
-      }
-      if (!getModelNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, modelName_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.PSF)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.PSF other = (gdsc.smlm.data.config.PSFProtos.PSF) obj;
-
-      boolean result = true;
-      result = result && psfType_ == other.psfType_;
-      result = result && getParametersList()
-          .equals(other.getParametersList());
-      result = result && getModelName()
-          .equals(other.getModelName());
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + PSF_TYPE_FIELD_NUMBER;
-      hash = (53 * hash) + psfType_;
-      if (getParametersCount() > 0) {
-        hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
-        hash = (53 * hash) + getParametersList().hashCode();
-      }
-      hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getModelName().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.PSF prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the Point Spread Function (PSF)
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.PSF}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.PSF)
-        gdsc.smlm.data.config.PSFProtos.PSFOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.PSF.class, gdsc.smlm.data.config.PSFProtos.PSF.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.PSF.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getParametersFieldBuilder();
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        psfType_ = 0;
-
-        if (parametersBuilder_ == null) {
-          parameters_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
-        } else {
-          parametersBuilder_.clear();
-        }
-        modelName_ = "";
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.PSF getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.PSF build() {
-        gdsc.smlm.data.config.PSFProtos.PSF result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.PSF buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.PSF result = new gdsc.smlm.data.config.PSFProtos.PSF(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        result.psfType_ = psfType_;
-        if (parametersBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
-            parameters_ = java.util.Collections.unmodifiableList(parameters_);
-            bitField0_ = (bitField0_ & ~0x00000002);
-          }
-          result.parameters_ = parameters_;
-        } else {
-          result.parameters_ = parametersBuilder_.build();
-        }
-        result.modelName_ = modelName_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.PSF) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.PSF)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.PSF other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance()) return this;
-        if (other.psfType_ != 0) {
-          setPsfTypeValue(other.getPsfTypeValue());
-        }
-        if (parametersBuilder_ == null) {
-          if (!other.parameters_.isEmpty()) {
-            if (parameters_.isEmpty()) {
-              parameters_ = other.parameters_;
-              bitField0_ = (bitField0_ & ~0x00000002);
-            } else {
-              ensureParametersIsMutable();
-              parameters_.addAll(other.parameters_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.parameters_.isEmpty()) {
-            if (parametersBuilder_.isEmpty()) {
-              parametersBuilder_.dispose();
-              parametersBuilder_ = null;
-              parameters_ = other.parameters_;
-              bitField0_ = (bitField0_ & ~0x00000002);
-              parametersBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getParametersFieldBuilder() : null;
-            } else {
-              parametersBuilder_.addAllMessages(other.parameters_);
-            }
-          }
-        }
-        if (!other.getModelName().isEmpty()) {
-          modelName_ = other.modelName_;
-          onChanged();
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.PSF parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.PSF) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private int psfType_ = 0;
-      /**
-       * <pre>
-       * The PSF type
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-       */
-      public int getPsfTypeValue() {
-        return psfType_;
-      }
-      /**
-       * <pre>
-       * The PSF type
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-       */
-      public Builder setPsfTypeValue(int value) {
-        psfType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF type
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFType getPsfType() {
-        gdsc.smlm.data.config.PSFProtos.PSFType result = gdsc.smlm.data.config.PSFProtos.PSFType.valueOf(psfType_);
-        return result == null ? gdsc.smlm.data.config.PSFProtos.PSFType.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * The PSF type
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-       */
-      public Builder setPsfType(gdsc.smlm.data.config.PSFProtos.PSFType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        psfType_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF type
-       * </pre>
-       *
-       * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
-       */
-      public Builder clearPsfType() {
-        
-        psfType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> parameters_ =
-        java.util.Collections.emptyList();
-      private void ensureParametersIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          parameters_ = new java.util.ArrayList<gdsc.smlm.data.config.PSFProtos.PSFParameter>(parameters_);
-          bitField0_ |= 0x00000002;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.PSFProtos.PSFParameter, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder, gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> parametersBuilder_;
-
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> getParametersList() {
-        if (parametersBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(parameters_);
-        } else {
-          return parametersBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public int getParametersCount() {
-        if (parametersBuilder_ == null) {
-          return parameters_.size();
-        } else {
-          return parametersBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter getParameters(int index) {
-        if (parametersBuilder_ == null) {
-          return parameters_.get(index);
-        } else {
-          return parametersBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder setParameters(
-          int index, gdsc.smlm.data.config.PSFProtos.PSFParameter value) {
-        if (parametersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureParametersIsMutable();
-          parameters_.set(index, value);
-          onChanged();
-        } else {
-          parametersBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder setParameters(
-          int index, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder builderForValue) {
-        if (parametersBuilder_ == null) {
-          ensureParametersIsMutable();
-          parameters_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          parametersBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder addParameters(gdsc.smlm.data.config.PSFProtos.PSFParameter value) {
-        if (parametersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureParametersIsMutable();
-          parameters_.add(value);
-          onChanged();
-        } else {
-          parametersBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder addParameters(
-          int index, gdsc.smlm.data.config.PSFProtos.PSFParameter value) {
-        if (parametersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureParametersIsMutable();
-          parameters_.add(index, value);
-          onChanged();
-        } else {
-          parametersBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder addParameters(
-          gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder builderForValue) {
-        if (parametersBuilder_ == null) {
-          ensureParametersIsMutable();
-          parameters_.add(builderForValue.build());
-          onChanged();
-        } else {
-          parametersBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder addParameters(
-          int index, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder builderForValue) {
-        if (parametersBuilder_ == null) {
-          ensureParametersIsMutable();
-          parameters_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          parametersBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder addAllParameters(
-          java.lang.Iterable<? extends gdsc.smlm.data.config.PSFProtos.PSFParameter> values) {
-        if (parametersBuilder_ == null) {
-          ensureParametersIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, parameters_);
-          onChanged();
-        } else {
-          parametersBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder clearParameters() {
-        if (parametersBuilder_ == null) {
-          parameters_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
-          onChanged();
-        } else {
-          parametersBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public Builder removeParameters(int index) {
-        if (parametersBuilder_ == null) {
-          ensureParametersIsMutable();
-          parameters_.remove(index);
-          onChanged();
-        } else {
-          parametersBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder getParametersBuilder(
-          int index) {
-        return getParametersFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(
-          int index) {
-        if (parametersBuilder_ == null) {
-          return parameters_.get(index);  } else {
-          return parametersBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public java.util.List<? extends gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> 
-           getParametersOrBuilderList() {
-        if (parametersBuilder_ != null) {
-          return parametersBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(parameters_);
-        }
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder addParametersBuilder() {
-        return getParametersFieldBuilder().addBuilder(
-            gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder addParametersBuilder(
-          int index) {
-        return getParametersFieldBuilder().addBuilder(
-            index, gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * The names of the PSF parameters. The results are stored using the standard parameters of 
-       * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
-       * parameters array. The names of the non-standard parameters, in order, can be defined here.
-       * </pre>
-       *
-       * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
-       */
-      public java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder> 
-           getParametersBuilderList() {
-        return getParametersFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.PSFProtos.PSFParameter, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder, gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> 
-          getParametersFieldBuilder() {
-        if (parametersBuilder_ == null) {
-          parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.PSFProtos.PSFParameter, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder, gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder>(
-                  parameters_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
-                  getParentForChildren(),
-                  isClean());
-          parameters_ = null;
-        }
-        return parametersBuilder_;
-      }
-
-      private java.lang.Object modelName_ = "";
-      /**
-       * <pre>
-       * The PSF model name. This should contain all the information required to
-       * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-       * </pre>
-       *
-       * <code>string model_name = 3;</code>
-       */
-      public java.lang.String getModelName() {
-        java.lang.Object ref = modelName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          modelName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The PSF model name. This should contain all the information required to
-       * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-       * </pre>
-       *
-       * <code>string model_name = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getModelNameBytes() {
-        java.lang.Object ref = modelName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          modelName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The PSF model name. This should contain all the information required to
-       * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-       * </pre>
-       *
-       * <code>string model_name = 3;</code>
-       */
-      public Builder setModelName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        modelName_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF model name. This should contain all the information required to
-       * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-       * </pre>
-       *
-       * <code>string model_name = 3;</code>
-       */
-      public Builder clearModelName() {
-        
-        modelName_ = getDefaultInstance().getModelName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The PSF model name. This should contain all the information required to
-       * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
-       * </pre>
-       *
-       * <code>string model_name = 3;</code>
-       */
-      public Builder setModelNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        modelName_ = value;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.PSF)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.PSF)
-    private static final gdsc.smlm.data.config.PSFProtos.PSF DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.PSF();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.PSF getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<PSF>
-        PARSER = new com.google.protobuf.AbstractParser<PSF>() {
-      public PSF parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new PSF(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<PSF> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<PSF> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.PSF getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface OffsetOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Offset)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>double cx = 2;</code>
-     */
-    double getCx();
-
-    /**
-     * <code>double cy = 3;</code>
-     */
-    double getCy();
-  }
-  /**
-   * <pre>
-   * Define the offset for slice alignment correction
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.Offset}
-   */
-  public  static final class Offset extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Offset)
-      OffsetOrBuilder {
-    // Use Offset.newBuilder() to construct.
-    private Offset(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private Offset() {
-      cx_ = 0D;
-      cy_ = 0D;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private Offset(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 17: {
-
-              cx_ = input.readDouble();
-              break;
-            }
-            case 25: {
-
-              cy_ = input.readDouble();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.Offset.class, gdsc.smlm.data.config.PSFProtos.Offset.Builder.class);
-    }
-
-    public static final int CX_FIELD_NUMBER = 2;
-    private double cx_;
-    /**
-     * <code>double cx = 2;</code>
-     */
-    public double getCx() {
-      return cx_;
-    }
-
-    public static final int CY_FIELD_NUMBER = 3;
-    private double cy_;
-    /**
-     * <code>double cy = 3;</code>
-     */
-    public double getCy() {
-      return cy_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (cx_ != 0D) {
-        output.writeDouble(2, cx_);
-      }
-      if (cy_ != 0D) {
-        output.writeDouble(3, cy_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (cx_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, cx_);
-      }
-      if (cy_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, cy_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.Offset)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.Offset other = (gdsc.smlm.data.config.PSFProtos.Offset) obj;
-
-      boolean result = true;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getCx())
-          == java.lang.Double.doubleToLongBits(
-              other.getCx()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getCy())
-          == java.lang.Double.doubleToLongBits(
-              other.getCy()));
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CX_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getCx()));
-      hash = (37 * hash) + CY_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getCy()));
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.Offset prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the offset for slice alignment correction
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.Offset}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Offset)
-        gdsc.smlm.data.config.PSFProtos.OffsetOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.Offset.class, gdsc.smlm.data.config.PSFProtos.Offset.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.Offset.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        cx_ = 0D;
-
-        cy_ = 0D;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.Offset getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.Offset.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.Offset build() {
-        gdsc.smlm.data.config.PSFProtos.Offset result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.Offset buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.Offset result = new gdsc.smlm.data.config.PSFProtos.Offset(this);
-        result.cx_ = cx_;
-        result.cy_ = cy_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.Offset) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.Offset)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.Offset other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.Offset.getDefaultInstance()) return this;
-        if (other.getCx() != 0D) {
-          setCx(other.getCx());
-        }
-        if (other.getCy() != 0D) {
-          setCy(other.getCy());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.Offset parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.Offset) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private double cx_ ;
-      /**
-       * <code>double cx = 2;</code>
-       */
-      public double getCx() {
-        return cx_;
-      }
-      /**
-       * <code>double cx = 2;</code>
-       */
-      public Builder setCx(double value) {
-        
-        cx_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double cx = 2;</code>
-       */
-      public Builder clearCx() {
-        
-        cx_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double cy_ ;
-      /**
-       * <code>double cy = 3;</code>
-       */
-      public double getCy() {
-        return cy_;
-      }
-      /**
-       * <code>double cy = 3;</code>
-       */
-      public Builder setCy(double value) {
-        
-        cy_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double cy = 3;</code>
-       */
-      public Builder clearCy() {
-        
-        cy_ = 0D;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Offset)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Offset)
-    private static final gdsc.smlm.data.config.PSFProtos.Offset DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.Offset();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.Offset getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<Offset>
-        PARSER = new com.google.protobuf.AbstractParser<Offset>() {
-      public Offset parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Offset(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<Offset> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Offset> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.Offset getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ImagePSFOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ImagePSF)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The number of images in the PSF
-     * </pre>
-     *
-     * <code>int32 image_count = 1;</code>
-     */
-    int getImageCount();
-
-    /**
-     * <pre>
-     * The image containing the focal plane of the PSF. This is 1-indexed.
-     * </pre>
-     *
-     * <code>int32 centre_image = 2;</code>
-     */
-    int getCentreImage();
-
-    /**
-     * <pre>
-     * The size of the PSF pixel in nanometers
-     * </pre>
-     *
-     * <code>double pixel_size = 3;</code>
-     */
-    double getPixelSize();
-
-    /**
-     * <pre>
-     * The depth of the PSF pixel in nanometers
-     * </pre>
-     *
-     * <code>double pixel_depth = 4;</code>
-     */
-    double getPixelDepth();
-
-    /**
-     * <pre>
-     * The Full Width at Half Maxima (FWHM) in image pixels
-     * </pre>
-     *
-     * <code>double fwhm = 5;</code>
-     */
-    double getFwhm();
-
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-    int getNotesCount();
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-    boolean containsNotes(
-        java.lang.String key);
-    /**
-     * Use {@link #getNotesMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.String, java.lang.String>
-    getNotes();
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-    java.util.Map<java.lang.String, java.lang.String>
-    getNotesMap();
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-
-    java.lang.String getNotesOrDefault(
-        java.lang.String key,
-        java.lang.String defaultValue);
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-
-    java.lang.String getNotesOrThrow(
-        java.lang.String key);
-
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-    int getOffsetsCount();
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-    boolean containsOffsets(
-        int key);
-    /**
-     * Use {@link #getOffsetsMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-    getOffsets();
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-    java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-    getOffsetsMap();
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-
-    gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrDefault(
-        int key,
-        gdsc.smlm.data.config.PSFProtos.Offset defaultValue);
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-
-    gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(
-        int key);
-
-    /**
-     * <pre>
-     * X-centre. This can be used instead of the offsets. This is the distance
-     * through the image width that is the x-centre. 
-     * </pre>
-     *
-     * <code>double x_centre = 8;</code>
-     */
-    double getXCentre();
-
-    /**
-     * <pre>
-     * Y-centre. This can be used instead of the offsets. This is the distance
-     * through the image width that is the y-centre. 
-     * </pre>
-     *
-     * <code>double y_centre = 9;</code>
-     */
-    double getYCentre();
-
-    /**
-     * <pre>
-     * Z-centre. This can be used instead of the centre_image. This is the distance
-     * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
-     * should use rounding to the nearest integer and then add 1. 
-     * </pre>
-     *
-     * <code>double z_centre = 10;</code>
-     */
-    double getZCentre();
-  }
-  /**
-   * <pre>
-   * Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.ImagePSF}
-   */
-  public  static final class ImagePSF extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.ImagePSF)
-      ImagePSFOrBuilder {
-    // Use ImagePSF.newBuilder() to construct.
-    private ImagePSF(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private ImagePSF() {
-      imageCount_ = 0;
-      centreImage_ = 0;
-      pixelSize_ = 0D;
-      pixelDepth_ = 0D;
-      fwhm_ = 0D;
-      xCentre_ = 0D;
-      yCentre_ = 0D;
-      zCentre_ = 0D;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private ImagePSF(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-
-              imageCount_ = input.readInt32();
-              break;
-            }
-            case 16: {
-
-              centreImage_ = input.readInt32();
-              break;
-            }
-            case 25: {
-
-              pixelSize_ = input.readDouble();
-              break;
-            }
-            case 33: {
-
-              pixelDepth_ = input.readDouble();
-              break;
-            }
-            case 41: {
-
-              fwhm_ = input.readDouble();
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                notes_ = com.google.protobuf.MapField.newMapField(
-                    NotesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000020;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-              notes__ = input.readMessage(
-                  NotesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              notes_.getMutableMap().put(
-                  notes__.getKey(), notes__.getValue());
-              break;
-            }
-            case 58: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
-                offsets_ = com.google.protobuf.MapField.newMapField(
-                    OffsetsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000040;
-              }
-              com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-              offsets__ = input.readMessage(
-                  OffsetsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              offsets_.getMutableMap().put(
-                  offsets__.getKey(), offsets__.getValue());
-              break;
-            }
-            case 65: {
-
-              xCentre_ = input.readDouble();
-              break;
-            }
-            case 73: {
-
-              yCentre_ = input.readDouble();
-              break;
-            }
-            case 81: {
-
-              zCentre_ = input.readDouble();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
-    }
-
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 6:
-          return internalGetNotes();
-        case 7:
-          return internalGetOffsets();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.ImagePSF.class, gdsc.smlm.data.config.PSFProtos.ImagePSF.Builder.class);
-    }
-
-    private int bitField0_;
-    public static final int IMAGE_COUNT_FIELD_NUMBER = 1;
-    private int imageCount_;
-    /**
-     * <pre>
-     * The number of images in the PSF
-     * </pre>
-     *
-     * <code>int32 image_count = 1;</code>
-     */
-    public int getImageCount() {
-      return imageCount_;
-    }
-
-    public static final int CENTRE_IMAGE_FIELD_NUMBER = 2;
-    private int centreImage_;
-    /**
-     * <pre>
-     * The image containing the focal plane of the PSF. This is 1-indexed.
-     * </pre>
-     *
-     * <code>int32 centre_image = 2;</code>
-     */
-    public int getCentreImage() {
-      return centreImage_;
-    }
-
-    public static final int PIXEL_SIZE_FIELD_NUMBER = 3;
-    private double pixelSize_;
-    /**
-     * <pre>
-     * The size of the PSF pixel in nanometers
-     * </pre>
-     *
-     * <code>double pixel_size = 3;</code>
-     */
-    public double getPixelSize() {
-      return pixelSize_;
-    }
-
-    public static final int PIXEL_DEPTH_FIELD_NUMBER = 4;
-    private double pixelDepth_;
-    /**
-     * <pre>
-     * The depth of the PSF pixel in nanometers
-     * </pre>
-     *
-     * <code>double pixel_depth = 4;</code>
-     */
-    public double getPixelDepth() {
-      return pixelDepth_;
-    }
-
-    public static final int FWHM_FIELD_NUMBER = 5;
-    private double fwhm_;
-    /**
-     * <pre>
-     * The Full Width at Half Maxima (FWHM) in image pixels
-     * </pre>
-     *
-     * <code>double fwhm = 5;</code>
-     */
-    public double getFwhm() {
-      return fwhm_;
-    }
-
-    public static final int NOTES_FIELD_NUMBER = 6;
-    private static final class NotesDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.String, java.lang.String> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.String, java.lang.String>newDefaultInstance(
-                  gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "",
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "");
-    }
-    private com.google.protobuf.MapField<
-        java.lang.String, java.lang.String> notes_;
-    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetNotes() {
-      if (notes_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            NotesDefaultEntryHolder.defaultEntry);
-      }
-      return notes_;
-    }
-
-    public int getNotesCount() {
-      return internalGetNotes().getMap().size();
-    }
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-
-    public boolean containsNotes(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetNotes().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getNotesMap()} instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.String> getNotes() {
-      return getNotesMap();
-    }
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-
-    public java.util.Map<java.lang.String, java.lang.String> getNotesMap() {
-      return internalGetNotes().getMap();
-    }
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-
-    public java.lang.String getNotesOrDefault(
-        java.lang.String key,
-        java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.String> map =
-          internalGetNotes().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <pre>
-     * Notes about the PSF, added as Key-Value pairs.
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; notes = 6;</code>
-     */
-
-    public java.lang.String getNotesOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.String> map =
-          internalGetNotes().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    public static final int OFFSETS_FIELD_NUMBER = 7;
-    private static final class OffsetsDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>newDefaultInstance(
-                  gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.INT32,
-                  0,
-                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                  gdsc.smlm.data.config.PSFProtos.Offset.getDefaultInstance());
-    }
-    private com.google.protobuf.MapField<
-        java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> offsets_;
-    private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-    internalGetOffsets() {
-      if (offsets_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            OffsetsDefaultEntryHolder.defaultEntry);
-      }
-      return offsets_;
-    }
-
-    public int getOffsetsCount() {
-      return internalGetOffsets().getMap().size();
-    }
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-
-    public boolean containsOffsets(
-        int key) {
-      
-      return internalGetOffsets().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getOffsetsMap()} instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsets() {
-      return getOffsetsMap();
-    }
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-
-    public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsetsMap() {
-      return internalGetOffsets().getMap();
-    }
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-
-    public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrDefault(
-        int key,
-        gdsc.smlm.data.config.PSFProtos.Offset defaultValue) {
-      
-      java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map =
-          internalGetOffsets().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <pre>
-     * The alignment correction for each slice in pixels. This is the shift required to 
-     * move the centre of the image to the centre of the PSF. The PSF centre may be 
-     * determined by PSF fitting.
-     * If missing then the alignment is assumed to be 0,0.
-     * </pre>
-     *
-     * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-     */
-
-    public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(
-        int key) {
-      
-      java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map =
-          internalGetOffsets().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    public static final int X_CENTRE_FIELD_NUMBER = 8;
-    private double xCentre_;
-    /**
-     * <pre>
-     * X-centre. This can be used instead of the offsets. This is the distance
-     * through the image width that is the x-centre. 
-     * </pre>
-     *
-     * <code>double x_centre = 8;</code>
-     */
-    public double getXCentre() {
-      return xCentre_;
-    }
-
-    public static final int Y_CENTRE_FIELD_NUMBER = 9;
-    private double yCentre_;
-    /**
-     * <pre>
-     * Y-centre. This can be used instead of the offsets. This is the distance
-     * through the image width that is the y-centre. 
-     * </pre>
-     *
-     * <code>double y_centre = 9;</code>
-     */
-    public double getYCentre() {
-      return yCentre_;
-    }
-
-    public static final int Z_CENTRE_FIELD_NUMBER = 10;
-    private double zCentre_;
-    /**
-     * <pre>
-     * Z-centre. This can be used instead of the centre_image. This is the distance
-     * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
-     * should use rounding to the nearest integer and then add 1. 
-     * </pre>
-     *
-     * <code>double z_centre = 10;</code>
-     */
-    public double getZCentre() {
-      return zCentre_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (imageCount_ != 0) {
-        output.writeInt32(1, imageCount_);
-      }
-      if (centreImage_ != 0) {
-        output.writeInt32(2, centreImage_);
-      }
-      if (pixelSize_ != 0D) {
-        output.writeDouble(3, pixelSize_);
-      }
-      if (pixelDepth_ != 0D) {
-        output.writeDouble(4, pixelDepth_);
-      }
-      if (fwhm_ != 0D) {
-        output.writeDouble(5, fwhm_);
-      }
-      com.google.protobuf.GeneratedMessageV3
-        .serializeStringMapTo(
-          output,
-          internalGetNotes(),
-          NotesDefaultEntryHolder.defaultEntry,
-          6);
-      com.google.protobuf.GeneratedMessageV3
-        .serializeIntegerMapTo(
-          output,
-          internalGetOffsets(),
-          OffsetsDefaultEntryHolder.defaultEntry,
-          7);
-      if (xCentre_ != 0D) {
-        output.writeDouble(8, xCentre_);
-      }
-      if (yCentre_ != 0D) {
-        output.writeDouble(9, yCentre_);
-      }
-      if (zCentre_ != 0D) {
-        output.writeDouble(10, zCentre_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (imageCount_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, imageCount_);
-      }
-      if (centreImage_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, centreImage_);
-      }
-      if (pixelSize_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(3, pixelSize_);
-      }
-      if (pixelDepth_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(4, pixelDepth_);
-      }
-      if (fwhm_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(5, fwhm_);
-      }
-      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
-           : internalGetNotes().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-        notes__ = NotesDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(6, notes__);
-      }
-      for (java.util.Map.Entry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> entry
-           : internalGetOffsets().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-        offsets__ = OffsetsDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(7, offsets__);
-      }
-      if (xCentre_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(8, xCentre_);
-      }
-      if (yCentre_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(9, yCentre_);
-      }
-      if (zCentre_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(10, zCentre_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.ImagePSF)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.ImagePSF other = (gdsc.smlm.data.config.PSFProtos.ImagePSF) obj;
-
-      boolean result = true;
-      result = result && (getImageCount()
-          == other.getImageCount());
-      result = result && (getCentreImage()
-          == other.getCentreImage());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getPixelSize())
-          == java.lang.Double.doubleToLongBits(
-              other.getPixelSize()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getPixelDepth())
-          == java.lang.Double.doubleToLongBits(
-              other.getPixelDepth()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getFwhm())
-          == java.lang.Double.doubleToLongBits(
-              other.getFwhm()));
-      result = result && internalGetNotes().equals(
-          other.internalGetNotes());
-      result = result && internalGetOffsets().equals(
-          other.internalGetOffsets());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getXCentre())
-          == java.lang.Double.doubleToLongBits(
-              other.getXCentre()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getYCentre())
-          == java.lang.Double.doubleToLongBits(
-              other.getYCentre()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getZCentre())
-          == java.lang.Double.doubleToLongBits(
-              other.getZCentre()));
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + IMAGE_COUNT_FIELD_NUMBER;
-      hash = (53 * hash) + getImageCount();
-      hash = (37 * hash) + CENTRE_IMAGE_FIELD_NUMBER;
-      hash = (53 * hash) + getCentreImage();
-      hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getPixelSize()));
-      hash = (37 * hash) + PIXEL_DEPTH_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getPixelDepth()));
-      hash = (37 * hash) + FWHM_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getFwhm()));
-      if (!internalGetNotes().getMap().isEmpty()) {
-        hash = (37 * hash) + NOTES_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetNotes().hashCode();
-      }
-      if (!internalGetOffsets().getMap().isEmpty()) {
-        hash = (37 * hash) + OFFSETS_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetOffsets().hashCode();
-      }
-      hash = (37 * hash) + X_CENTRE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getXCentre()));
-      hash = (37 * hash) + Y_CENTRE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getYCentre()));
-      hash = (37 * hash) + Z_CENTRE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getZCentre()));
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.ImagePSF prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.ImagePSF}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.ImagePSF)
-        gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
-      }
-
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMapField(
-          int number) {
-        switch (number) {
-          case 6:
-            return internalGetNotes();
-          case 7:
-            return internalGetOffsets();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMutableMapField(
-          int number) {
-        switch (number) {
-          case 6:
-            return internalGetMutableNotes();
-          case 7:
-            return internalGetMutableOffsets();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.ImagePSF.class, gdsc.smlm.data.config.PSFProtos.ImagePSF.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.ImagePSF.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        imageCount_ = 0;
-
-        centreImage_ = 0;
-
-        pixelSize_ = 0D;
-
-        pixelDepth_ = 0D;
-
-        fwhm_ = 0D;
-
-        internalGetMutableNotes().clear();
-        internalGetMutableOffsets().clear();
-        xCentre_ = 0D;
-
-        yCentre_ = 0D;
-
-        zCentre_ = 0D;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.ImagePSF getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.ImagePSF.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.ImagePSF build() {
-        gdsc.smlm.data.config.PSFProtos.ImagePSF result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.ImagePSF buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.ImagePSF result = new gdsc.smlm.data.config.PSFProtos.ImagePSF(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        result.imageCount_ = imageCount_;
-        result.centreImage_ = centreImage_;
-        result.pixelSize_ = pixelSize_;
-        result.pixelDepth_ = pixelDepth_;
-        result.fwhm_ = fwhm_;
-        result.notes_ = internalGetNotes();
-        result.notes_.makeImmutable();
-        result.offsets_ = internalGetOffsets();
-        result.offsets_.makeImmutable();
-        result.xCentre_ = xCentre_;
-        result.yCentre_ = yCentre_;
-        result.zCentre_ = zCentre_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.ImagePSF) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.ImagePSF)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.ImagePSF other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.ImagePSF.getDefaultInstance()) return this;
-        if (other.getImageCount() != 0) {
-          setImageCount(other.getImageCount());
-        }
-        if (other.getCentreImage() != 0) {
-          setCentreImage(other.getCentreImage());
-        }
-        if (other.getPixelSize() != 0D) {
-          setPixelSize(other.getPixelSize());
-        }
-        if (other.getPixelDepth() != 0D) {
-          setPixelDepth(other.getPixelDepth());
-        }
-        if (other.getFwhm() != 0D) {
-          setFwhm(other.getFwhm());
-        }
-        internalGetMutableNotes().mergeFrom(
-            other.internalGetNotes());
-        internalGetMutableOffsets().mergeFrom(
-            other.internalGetOffsets());
-        if (other.getXCentre() != 0D) {
-          setXCentre(other.getXCentre());
-        }
-        if (other.getYCentre() != 0D) {
-          setYCentre(other.getYCentre());
-        }
-        if (other.getZCentre() != 0D) {
-          setZCentre(other.getZCentre());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.ImagePSF parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.ImagePSF) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private int imageCount_ ;
-      /**
-       * <pre>
-       * The number of images in the PSF
-       * </pre>
-       *
-       * <code>int32 image_count = 1;</code>
-       */
-      public int getImageCount() {
-        return imageCount_;
-      }
-      /**
-       * <pre>
-       * The number of images in the PSF
-       * </pre>
-       *
-       * <code>int32 image_count = 1;</code>
-       */
-      public Builder setImageCount(int value) {
-        
-        imageCount_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The number of images in the PSF
-       * </pre>
-       *
-       * <code>int32 image_count = 1;</code>
-       */
-      public Builder clearImageCount() {
-        
-        imageCount_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int centreImage_ ;
-      /**
-       * <pre>
-       * The image containing the focal plane of the PSF. This is 1-indexed.
-       * </pre>
-       *
-       * <code>int32 centre_image = 2;</code>
-       */
-      public int getCentreImage() {
-        return centreImage_;
-      }
-      /**
-       * <pre>
-       * The image containing the focal plane of the PSF. This is 1-indexed.
-       * </pre>
-       *
-       * <code>int32 centre_image = 2;</code>
-       */
-      public Builder setCentreImage(int value) {
-        
-        centreImage_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The image containing the focal plane of the PSF. This is 1-indexed.
-       * </pre>
-       *
-       * <code>int32 centre_image = 2;</code>
-       */
-      public Builder clearCentreImage() {
-        
-        centreImage_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private double pixelSize_ ;
-      /**
-       * <pre>
-       * The size of the PSF pixel in nanometers
-       * </pre>
-       *
-       * <code>double pixel_size = 3;</code>
-       */
-      public double getPixelSize() {
-        return pixelSize_;
-      }
-      /**
-       * <pre>
-       * The size of the PSF pixel in nanometers
-       * </pre>
-       *
-       * <code>double pixel_size = 3;</code>
-       */
-      public Builder setPixelSize(double value) {
-        
-        pixelSize_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The size of the PSF pixel in nanometers
-       * </pre>
-       *
-       * <code>double pixel_size = 3;</code>
-       */
-      public Builder clearPixelSize() {
-        
-        pixelSize_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double pixelDepth_ ;
-      /**
-       * <pre>
-       * The depth of the PSF pixel in nanometers
-       * </pre>
-       *
-       * <code>double pixel_depth = 4;</code>
-       */
-      public double getPixelDepth() {
-        return pixelDepth_;
-      }
-      /**
-       * <pre>
-       * The depth of the PSF pixel in nanometers
-       * </pre>
-       *
-       * <code>double pixel_depth = 4;</code>
-       */
-      public Builder setPixelDepth(double value) {
-        
-        pixelDepth_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The depth of the PSF pixel in nanometers
-       * </pre>
-       *
-       * <code>double pixel_depth = 4;</code>
-       */
-      public Builder clearPixelDepth() {
-        
-        pixelDepth_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double fwhm_ ;
-      /**
-       * <pre>
-       * The Full Width at Half Maxima (FWHM) in image pixels
-       * </pre>
-       *
-       * <code>double fwhm = 5;</code>
-       */
-      public double getFwhm() {
-        return fwhm_;
-      }
-      /**
-       * <pre>
-       * The Full Width at Half Maxima (FWHM) in image pixels
-       * </pre>
-       *
-       * <code>double fwhm = 5;</code>
-       */
-      public Builder setFwhm(double value) {
-        
-        fwhm_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The Full Width at Half Maxima (FWHM) in image pixels
-       * </pre>
-       *
-       * <code>double fwhm = 5;</code>
-       */
-      public Builder clearFwhm() {
-        
-        fwhm_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.MapField<
-          java.lang.String, java.lang.String> notes_;
-      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-      internalGetNotes() {
-        if (notes_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              NotesDefaultEntryHolder.defaultEntry);
-        }
-        return notes_;
-      }
-      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-      internalGetMutableNotes() {
-        onChanged();;
-        if (notes_ == null) {
-          notes_ = com.google.protobuf.MapField.newMapField(
-              NotesDefaultEntryHolder.defaultEntry);
-        }
-        if (!notes_.isMutable()) {
-          notes_ = notes_.copy();
-        }
-        return notes_;
-      }
-
-      public int getNotesCount() {
-        return internalGetNotes().getMap().size();
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-
-      public boolean containsNotes(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        return internalGetNotes().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getNotesMap()} instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.String> getNotes() {
-        return getNotesMap();
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-
-      public java.util.Map<java.lang.String, java.lang.String> getNotesMap() {
-        return internalGetNotes().getMap();
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-
-      public java.lang.String getNotesOrDefault(
-          java.lang.String key,
-          java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.String> map =
-            internalGetNotes().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-
-      public java.lang.String getNotesOrThrow(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, java.lang.String> map =
-            internalGetNotes().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
-      }
-
-      public Builder clearNotes() {
-        internalGetMutableNotes().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-
-      public Builder removeNotes(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableNotes().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.String>
-      getMutableNotes() {
-        return internalGetMutableNotes().getMutableMap();
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-      public Builder putNotes(
-          java.lang.String key,
-          java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableNotes().getMutableMap()
-            .put(key, value);
-        return this;
-      }
-      /**
-       * <pre>
-       * Notes about the PSF, added as Key-Value pairs.
-       * </pre>
-       *
-       * <code>map&lt;string, string&gt; notes = 6;</code>
-       */
-
-      public Builder putAllNotes(
-          java.util.Map<java.lang.String, java.lang.String> values) {
-        internalGetMutableNotes().getMutableMap()
-            .putAll(values);
-        return this;
-      }
-
-      private com.google.protobuf.MapField<
-          java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> offsets_;
-      private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-      internalGetOffsets() {
-        if (offsets_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              OffsetsDefaultEntryHolder.defaultEntry);
-        }
-        return offsets_;
-      }
-      private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-      internalGetMutableOffsets() {
-        onChanged();;
-        if (offsets_ == null) {
-          offsets_ = com.google.protobuf.MapField.newMapField(
-              OffsetsDefaultEntryHolder.defaultEntry);
-        }
-        if (!offsets_.isMutable()) {
-          offsets_ = offsets_.copy();
-        }
-        return offsets_;
-      }
-
-      public int getOffsetsCount() {
-        return internalGetOffsets().getMap().size();
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-
-      public boolean containsOffsets(
-          int key) {
-        
-        return internalGetOffsets().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getOffsetsMap()} instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsets() {
-        return getOffsetsMap();
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-
-      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsetsMap() {
-        return internalGetOffsets().getMap();
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-
-      public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrDefault(
-          int key,
-          gdsc.smlm.data.config.PSFProtos.Offset defaultValue) {
-        
-        java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map =
-            internalGetOffsets().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-
-      public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(
-          int key) {
-        
-        java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map =
-            internalGetOffsets().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
-      }
-
-      public Builder clearOffsets() {
-        internalGetMutableOffsets().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-
-      public Builder removeOffsets(
-          int key) {
-        
-        internalGetMutableOffsets().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset>
-      getMutableOffsets() {
-        return internalGetMutableOffsets().getMutableMap();
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-      public Builder putOffsets(
-          int key,
-          gdsc.smlm.data.config.PSFProtos.Offset value) {
-        
-        if (value == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableOffsets().getMutableMap()
-            .put(key, value);
-        return this;
-      }
-      /**
-       * <pre>
-       * The alignment correction for each slice in pixels. This is the shift required to 
-       * move the centre of the image to the centre of the PSF. The PSF centre may be 
-       * determined by PSF fitting.
-       * If missing then the alignment is assumed to be 0,0.
-       * </pre>
-       *
-       * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
-       */
-
-      public Builder putAllOffsets(
-          java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> values) {
-        internalGetMutableOffsets().getMutableMap()
-            .putAll(values);
-        return this;
-      }
-
-      private double xCentre_ ;
-      /**
-       * <pre>
-       * X-centre. This can be used instead of the offsets. This is the distance
-       * through the image width that is the x-centre. 
-       * </pre>
-       *
-       * <code>double x_centre = 8;</code>
-       */
-      public double getXCentre() {
-        return xCentre_;
-      }
-      /**
-       * <pre>
-       * X-centre. This can be used instead of the offsets. This is the distance
-       * through the image width that is the x-centre. 
-       * </pre>
-       *
-       * <code>double x_centre = 8;</code>
-       */
-      public Builder setXCentre(double value) {
-        
-        xCentre_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * X-centre. This can be used instead of the offsets. This is the distance
-       * through the image width that is the x-centre. 
-       * </pre>
-       *
-       * <code>double x_centre = 8;</code>
-       */
-      public Builder clearXCentre() {
-        
-        xCentre_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double yCentre_ ;
-      /**
-       * <pre>
-       * Y-centre. This can be used instead of the offsets. This is the distance
-       * through the image width that is the y-centre. 
-       * </pre>
-       *
-       * <code>double y_centre = 9;</code>
-       */
-      public double getYCentre() {
-        return yCentre_;
-      }
-      /**
-       * <pre>
-       * Y-centre. This can be used instead of the offsets. This is the distance
-       * through the image width that is the y-centre. 
-       * </pre>
-       *
-       * <code>double y_centre = 9;</code>
-       */
-      public Builder setYCentre(double value) {
-        
-        yCentre_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Y-centre. This can be used instead of the offsets. This is the distance
-       * through the image width that is the y-centre. 
-       * </pre>
-       *
-       * <code>double y_centre = 9;</code>
-       */
-      public Builder clearYCentre() {
-        
-        yCentre_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double zCentre_ ;
-      /**
-       * <pre>
-       * Z-centre. This can be used instead of the centre_image. This is the distance
-       * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
-       * should use rounding to the nearest integer and then add 1. 
-       * </pre>
-       *
-       * <code>double z_centre = 10;</code>
-       */
-      public double getZCentre() {
-        return zCentre_;
-      }
-      /**
-       * <pre>
-       * Z-centre. This can be used instead of the centre_image. This is the distance
-       * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
-       * should use rounding to the nearest integer and then add 1. 
-       * </pre>
-       *
-       * <code>double z_centre = 10;</code>
-       */
-      public Builder setZCentre(double value) {
-        
-        zCentre_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Z-centre. This can be used instead of the centre_image. This is the distance
-       * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
-       * should use rounding to the nearest integer and then add 1. 
-       * </pre>
-       *
-       * <code>double z_centre = 10;</code>
-       */
-      public Builder clearZCentre() {
-        
-        zCentre_ = 0D;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.ImagePSF)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.ImagePSF)
-    private static final gdsc.smlm.data.config.PSFProtos.ImagePSF DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.ImagePSF();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.ImagePSF getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<ImagePSF>
-        PARSER = new com.google.protobuf.AbstractParser<ImagePSF>() {
-      public ImagePSF parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new ImagePSF(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<ImagePSF> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ImagePSF> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.ImagePSF getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface CubicSplineResourceOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineResource)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * The filename where the spline data is stored
-     * </pre>
-     *
-     * <code>string filename = 1;</code>
-     */
-    java.lang.String getFilename();
-    /**
-     * <pre>
-     * The filename where the spline data is stored
-     * </pre>
-     *
-     * <code>string filename = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getFilenameBytes();
-
-    /**
-     * <pre>
-     * The size of the spline scale in nanometers
-     * </pre>
-     *
-     * <code>double spline_scale = 2;</code>
-     */
-    double getSplineScale();
-  }
-  /**
-   * <pre>
-   * Define a cubic spline resource that can be loaded
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.CubicSplineResource}
-   */
-  public  static final class CubicSplineResource extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineResource)
-      CubicSplineResourceOrBuilder {
-    // Use CubicSplineResource.newBuilder() to construct.
-    private CubicSplineResource(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private CubicSplineResource() {
-      filename_ = "";
-      splineScale_ = 0D;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private CubicSplineResource(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              filename_ = s;
-              break;
-            }
-            case 17: {
-
-              splineScale_ = input.readDouble();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.CubicSplineResource.class, gdsc.smlm.data.config.PSFProtos.CubicSplineResource.Builder.class);
-    }
-
-    public static final int FILENAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object filename_;
-    /**
-     * <pre>
-     * The filename where the spline data is stored
-     * </pre>
-     *
-     * <code>string filename = 1;</code>
-     */
-    public java.lang.String getFilename() {
-      java.lang.Object ref = filename_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        filename_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The filename where the spline data is stored
-     * </pre>
-     *
-     * <code>string filename = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getFilenameBytes() {
-      java.lang.Object ref = filename_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        filename_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SPLINE_SCALE_FIELD_NUMBER = 2;
-    private double splineScale_;
-    /**
-     * <pre>
-     * The size of the spline scale in nanometers
-     * </pre>
-     *
-     * <code>double spline_scale = 2;</code>
-     */
-    public double getSplineScale() {
-      return splineScale_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!getFilenameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filename_);
-      }
-      if (splineScale_ != 0D) {
-        output.writeDouble(2, splineScale_);
-      }
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!getFilenameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filename_);
-      }
-      if (splineScale_ != 0D) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, splineScale_);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineResource)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.CubicSplineResource other = (gdsc.smlm.data.config.PSFProtos.CubicSplineResource) obj;
-
-      boolean result = true;
-      result = result && getFilename()
-          .equals(other.getFilename());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getSplineScale())
-          == java.lang.Double.doubleToLongBits(
-              other.getSplineScale()));
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
-      hash = (53 * hash) + getFilename().hashCode();
-      hash = (37 * hash) + SPLINE_SCALE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getSplineScale()));
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.CubicSplineResource prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define a cubic spline resource that can be loaded
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.CubicSplineResource}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineResource)
-        gdsc.smlm.data.config.PSFProtos.CubicSplineResourceOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.CubicSplineResource.class, gdsc.smlm.data.config.PSFProtos.CubicSplineResource.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.CubicSplineResource.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        filename_ = "";
-
-        splineScale_ = 0D;
-
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource build() {
-        gdsc.smlm.data.config.PSFProtos.CubicSplineResource result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.CubicSplineResource result = new gdsc.smlm.data.config.PSFProtos.CubicSplineResource(this);
-        result.filename_ = filename_;
-        result.splineScale_ = splineScale_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineResource) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.CubicSplineResource)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.CubicSplineResource other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance()) return this;
-        if (!other.getFilename().isEmpty()) {
-          filename_ = other.filename_;
-          onChanged();
-        }
-        if (other.getSplineScale() != 0D) {
-          setSplineScale(other.getSplineScale());
-        }
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.CubicSplineResource parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.CubicSplineResource) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private java.lang.Object filename_ = "";
-      /**
-       * <pre>
-       * The filename where the spline data is stored
-       * </pre>
-       *
-       * <code>string filename = 1;</code>
-       */
-      public java.lang.String getFilename() {
-        java.lang.Object ref = filename_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          filename_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The filename where the spline data is stored
-       * </pre>
-       *
-       * <code>string filename = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getFilenameBytes() {
-        java.lang.Object ref = filename_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          filename_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The filename where the spline data is stored
-       * </pre>
-       *
-       * <code>string filename = 1;</code>
-       */
-      public Builder setFilename(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        filename_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The filename where the spline data is stored
-       * </pre>
-       *
-       * <code>string filename = 1;</code>
-       */
-      public Builder clearFilename() {
-        
-        filename_ = getDefaultInstance().getFilename();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The filename where the spline data is stored
-       * </pre>
-       *
-       * <code>string filename = 1;</code>
-       */
-      public Builder setFilenameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        filename_ = value;
-        onChanged();
-        return this;
-      }
-
-      private double splineScale_ ;
-      /**
-       * <pre>
-       * The size of the spline scale in nanometers
-       * </pre>
-       *
-       * <code>double spline_scale = 2;</code>
-       */
-      public double getSplineScale() {
-        return splineScale_;
-      }
-      /**
-       * <pre>
-       * The size of the spline scale in nanometers
-       * </pre>
-       *
-       * <code>double spline_scale = 2;</code>
-       */
-      public Builder setSplineScale(double value) {
-        
-        splineScale_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The size of the spline scale in nanometers
-       * </pre>
-       *
-       * <code>double spline_scale = 2;</code>
-       */
-      public Builder clearSplineScale() {
-        
-        splineScale_ = 0D;
-        onChanged();
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineResource)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineResource)
-    private static final gdsc.smlm.data.config.PSFProtos.CubicSplineResource DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.CubicSplineResource();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<CubicSplineResource>
-        PARSER = new com.google.protobuf.AbstractParser<CubicSplineResource>() {
-      public CubicSplineResource parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new CubicSplineResource(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<CubicSplineResource> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<CubicSplineResource> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface CubicSplineSettingsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineSettings)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-    int getCubicSplineResourcesCount();
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-    boolean containsCubicSplineResources(
-        java.lang.String key);
-    /**
-     * Use {@link #getCubicSplineResourcesMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-    getCubicSplineResources();
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-    java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-    getCubicSplineResourcesMap();
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-
-    gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
-        java.lang.String key,
-        gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue);
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-
-    gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
-        java.lang.String key);
-  }
-  /**
-   * <pre>
-   * Define the cubic spline settings
-   * </pre>
-   *
-   * Protobuf type {@code gdsc.smlm.data.config.CubicSplineSettings}
-   */
-  public  static final class CubicSplineSettings extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineSettings)
-      CubicSplineSettingsOrBuilder {
-    // Use CubicSplineSettings.newBuilder() to construct.
-    private CubicSplineSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private CubicSplineSettings() {
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
-    }
-    private CubicSplineSettings(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!input.skipField(tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                cubicSplineResources_ = com.google.protobuf.MapField.newMapField(
-                    CubicSplineResourcesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000001;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-              cubicSplineResources__ = input.readMessage(
-                  CubicSplineResourcesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              cubicSplineResources_.getMutableMap().put(
-                  cubicSplineResources__.getKey(), cubicSplineResources__.getValue());
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
-    }
-
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 1:
-          return internalGetCubicSplineResources();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.class, gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.Builder.class);
-    }
-
-    public static final int CUBIC_SPLINE_RESOURCES_FIELD_NUMBER = 1;
-    private static final class CubicSplineResourcesDefaultEntryHolder {
-      static final com.google.protobuf.MapEntry<
-          java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> defaultEntry =
-              com.google.protobuf.MapEntry
-              .<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>newDefaultInstance(
-                  gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor, 
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "",
-                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                  gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance());
-    }
-    private com.google.protobuf.MapField<
-        java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources_;
-    private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-    internalGetCubicSplineResources() {
-      if (cubicSplineResources_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            CubicSplineResourcesDefaultEntryHolder.defaultEntry);
-      }
-      return cubicSplineResources_;
-    }
-
-    public int getCubicSplineResourcesCount() {
-      return internalGetCubicSplineResources().getMap().size();
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-
-    public boolean containsCubicSplineResources(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetCubicSplineResources().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getCubicSplineResourcesMap()} instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources() {
-      return getCubicSplineResourcesMap();
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-
-    public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap() {
-      return internalGetCubicSplineResources().getMap();
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-
-    public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
-        java.lang.String key,
-        gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
-          internalGetCubicSplineResources().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-     */
-
-    public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
-          internalGetCubicSplineResources().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      com.google.protobuf.GeneratedMessageV3
-        .serializeStringMapTo(
-          output,
-          internalGetCubicSplineResources(),
-          CubicSplineResourcesDefaultEntryHolder.defaultEntry,
-          1);
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> entry
-           : internalGetCubicSplineResources().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-        cubicSplineResources__ = CubicSplineResourcesDefaultEntryHolder.defaultEntry.newBuilderForType()
-            .setKey(entry.getKey())
-            .setValue(entry.getValue())
-            .build();
-        size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(1, cubicSplineResources__);
-      }
-      memoizedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineSettings)) {
-        return super.equals(obj);
-      }
-      gdsc.smlm.data.config.PSFProtos.CubicSplineSettings other = (gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) obj;
-
-      boolean result = true;
-      result = result && internalGetCubicSplineResources().equals(
-          other.internalGetCubicSplineResources());
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (!internalGetCubicSplineResources().getMap().isEmpty()) {
-        hash = (37 * hash) + CUBIC_SPLINE_RESOURCES_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetCubicSplineResources().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Define the cubic spline settings
-     * </pre>
-     *
-     * Protobuf type {@code gdsc.smlm.data.config.CubicSplineSettings}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineSettings)
-        gdsc.smlm.data.config.PSFProtos.CubicSplineSettingsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
-      }
-
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMapField(
-          int number) {
-        switch (number) {
-          case 1:
-            return internalGetCubicSplineResources();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapField internalGetMutableMapField(
-          int number) {
-        switch (number) {
-          case 1:
-            return internalGetMutableCubicSplineResources();
-          default:
-            throw new RuntimeException(
-                "Invalid map field number: " + number);
-        }
-      }
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.class, gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.Builder.class);
-      }
-
-      // Construct using gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      public Builder clear() {
-        super.clear();
-        internalGetMutableCubicSplineResources().clear();
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstanceForType() {
-        return gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.getDefaultInstance();
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings build() {
-        gdsc.smlm.data.config.PSFProtos.CubicSplineSettings result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings buildPartial() {
-        gdsc.smlm.data.config.PSFProtos.CubicSplineSettings result = new gdsc.smlm.data.config.PSFProtos.CubicSplineSettings(this);
-        int from_bitField0_ = bitField0_;
-        result.cubicSplineResources_ = internalGetCubicSplineResources();
-        result.cubicSplineResources_.makeImmutable();
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) {
-          return mergeFrom((gdsc.smlm.data.config.PSFProtos.CubicSplineSettings)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings other) {
-        if (other == gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.getDefaultInstance()) return this;
-        internalGetMutableCubicSplineResources().mergeFrom(
-            other.internalGetCubicSplineResources());
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private com.google.protobuf.MapField<
-          java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources_;
-      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-      internalGetCubicSplineResources() {
-        if (cubicSplineResources_ == null) {
-          return com.google.protobuf.MapField.emptyMapField(
-              CubicSplineResourcesDefaultEntryHolder.defaultEntry);
-        }
-        return cubicSplineResources_;
-      }
-      private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-      internalGetMutableCubicSplineResources() {
-        onChanged();;
-        if (cubicSplineResources_ == null) {
-          cubicSplineResources_ = com.google.protobuf.MapField.newMapField(
-              CubicSplineResourcesDefaultEntryHolder.defaultEntry);
-        }
-        if (!cubicSplineResources_.isMutable()) {
-          cubicSplineResources_ = cubicSplineResources_.copy();
-        }
-        return cubicSplineResources_;
-      }
-
-      public int getCubicSplineResourcesCount() {
-        return internalGetCubicSplineResources().getMap().size();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-
-      public boolean containsCubicSplineResources(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        return internalGetCubicSplineResources().getMap().containsKey(key);
-      }
-      /**
-       * Use {@link #getCubicSplineResourcesMap()} instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources() {
-        return getCubicSplineResourcesMap();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-
-      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap() {
-        return internalGetCubicSplineResources().getMap();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
-          java.lang.String key,
-          gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
-            internalGetCubicSplineResources().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-
-      public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map =
-            internalGetCubicSplineResources().getMap();
-        if (!map.containsKey(key)) {
-          throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
-      }
-
-      public Builder clearCubicSplineResources() {
-        internalGetMutableCubicSplineResources().getMutableMap()
-            .clear();
-        return this;
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-
-      public Builder removeCubicSplineResources(
-          java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableCubicSplineResources().getMutableMap()
-            .remove(key);
-        return this;
-      }
-      /**
-       * Use alternate mutation accessors instead.
-       */
-      @java.lang.Deprecated
-      public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource>
-      getMutableCubicSplineResources() {
-        return internalGetMutableCubicSplineResources().getMutableMap();
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-      public Builder putCubicSplineResources(
-          java.lang.String key,
-          gdsc.smlm.data.config.PSFProtos.CubicSplineResource value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
-        internalGetMutableCubicSplineResources().getMutableMap()
-            .put(key, value);
-        return this;
-      }
-      /**
-       * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
-       */
-
-      public Builder putAllCubicSplineResources(
-          java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> values) {
-        internalGetMutableCubicSplineResources().getMutableMap()
-            .putAll(values);
-        return this;
-      }
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return this;
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineSettings)
-    }
-
-    // @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineSettings)
-    private static final gdsc.smlm.data.config.PSFProtos.CubicSplineSettings DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.CubicSplineSettings();
-    }
-
-    public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<CubicSplineSettings>
-        PARSER = new com.google.protobuf.AbstractParser<CubicSplineSettings>() {
-      public CubicSplineSettings parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new CubicSplineSettings(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<CubicSplineSettings> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<CubicSplineSettings> getParserForType() {
-      return PARSER;
-    }
-
-    public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_PSF_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_Offset_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_fieldAccessorTable;
-
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
-  }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
-  static {
-    java.lang.String[] descriptorData = {
-      "\n\tpsf.proto\022\025gdsc.smlm.data.config\032\nunit" +
-      ".proto\"b\n\014PSFParameter\022\014\n\004name\030\001 \001(\t\0225\n\004" +
-      "unit\030\002 \001(\0162\'.gdsc.smlm.data.config.PSFPa" +
-      "rameterUnit\022\r\n\005value\030\003 \001(\001\"\224\002\n\020Astigmati" +
-      "smModel\022\r\n\005gamma\030\001 \001(\001\022\t\n\001d\030\002 \001(\001\022\n\n\002ax\030" +
-      "\003 \001(\001\022\n\n\002bx\030\004 \001(\001\022\n\n\002ay\030\005 \001(\001\022\n\n\002by\030\006 \001(" +
-      "\001\022\013\n\003s0x\030\007 \001(\001\022\013\n\003s0y\030\010 \001(\001\022<\n\017z_distanc" +
-      "e_unit\030\t \001(\0162#.gdsc.smlm.data.config.Dis" +
-      "tanceUnit\022<\n\017s_distance_unit\030\n \001(\0162#.gds" +
-      "c.smlm.data.config.DistanceUnit\022\024\n\014nm_pe",
-      "r_pixel\030\013 \001(\001\022\n\n\002z0\030\014 \001(\001\"\372\001\n\030Astigmatis" +
-      "mModelSettings\022s\n\033astigmatism_model_reso" +
-      "urces\030\001 \003(\0132N.gdsc.smlm.data.config.Asti" +
-      "gmatismModelSettings.AstigmatismModelRes" +
-      "ourcesEntry\032i\n\036AstigmatismModelResources" +
-      "Entry\022\013\n\003key\030\001 \001(\t\0226\n\005value\030\002 \001(\0132\'.gdsc" +
-      ".smlm.data.config.AstigmatismModel:\0028\001\"\204" +
-      "\001\n\003PSF\0220\n\010psf_type\030\001 \001(\0162\036.gdsc.smlm.dat" +
-      "a.config.PSFType\0227\n\nparameters\030\002 \003(\0132#.g" +
-      "dsc.smlm.data.config.PSFParameter\022\022\n\nmod",
-      "el_name\030\003 \001(\t\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002c" +
-      "y\030\003 \001(\001\"\231\003\n\010ImagePSF\022\023\n\013image_count\030\001 \001(" +
-      "\005\022\024\n\014centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003 " +
-      "\001(\001\022\023\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229" +
-      "\n\005notes\030\006 \003(\0132*.gdsc.smlm.data.config.Im" +
-      "agePSF.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gds" +
-      "c.smlm.data.config.ImagePSF.OffsetsEntry" +
-      "\022\020\n\010x_centre\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010" +
-      "z_centre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(" +
-      "\t\022\r\n\005value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003",
-      "key\030\001 \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.dat" +
-      "a.config.Offset:\0028\001\"=\n\023CubicSplineResour" +
-      "ce\022\020\n\010filename\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001" +
-      "(\001\"\344\001\n\023CubicSplineSettings\022d\n\026cubic_spli" +
-      "ne_resources\030\001 \003(\0132D.gdsc.smlm.data.conf" +
-      "ig.CubicSplineSettings.CubicSplineResour" +
-      "cesEntry\032g\n\031CubicSplineResourcesEntry\022\013\n" +
-      "\003key\030\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.da" +
-      "ta.config.CubicSplineResource:\0028\001*\232\001\n\007PS" +
-      "FType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSS",
-      "IAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TW" +
-      "O_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGM" +
-      "ATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFPar" +
-      "ameterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n" +
-      "\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B" +
-      "\tPSFProtosb\006proto3"
-    };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-          gdsc.smlm.data.config.UnitProtos.getDescriptor(),
-        }, assigner);
-    internal_static_gdsc_smlm_data_config_PSFParameter_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_PSFParameter_descriptor,
-        new java.lang.String[] { "Name", "Unit", "Value", });
-    internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor,
-        new java.lang.String[] { "Gamma", "D", "Ax", "Bx", "Ay", "By", "S0X", "S0Y", "ZDistanceUnit", "SDistanceUnit", "NmPerPixel", "Z0", });
-    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor,
-        new java.lang.String[] { "AstigmatismModelResources", });
-    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor =
-      internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor.getNestedTypes().get(0);
-    internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_gdsc_smlm_data_config_PSF_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_PSF_descriptor,
-        new java.lang.String[] { "PsfType", "Parameters", "ModelName", });
-    internal_static_gdsc_smlm_data_config_Offset_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_Offset_descriptor,
-        new java.lang.String[] { "Cx", "Cy", });
-    internal_static_gdsc_smlm_data_config_ImagePSF_descriptor =
-      getDescriptor().getMessageTypes().get(5);
-    internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_ImagePSF_descriptor,
-        new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes", "Offsets", "XCentre", "YCentre", "ZCentre", });
-    internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor =
-      internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(0);
-    internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor =
-      internal_static_gdsc_smlm_data_config_ImagePSF_descriptor.getNestedTypes().get(1);
-    internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor,
-        new java.lang.String[] { "Filename", "SplineScale", });
-    internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor =
-      getDescriptor().getMessageTypes().get(7);
-    internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor,
-        new java.lang.String[] { "CubicSplineResources", });
-    internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor =
-      internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor.getNestedTypes().get(0);
-    internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    gdsc.smlm.data.config.UnitProtos.getDescriptor();
-  }
-
-  // @@protoc_insertion_point(outer_class_scope)
+@SuppressWarnings({ "unchecked", "unused", "deprecation" })
+public final class PSFProtos
+{
+	private PSFProtos()
+	{
+	}
+
+	public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry)
+	{
+	}
+
+	public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry)
+	{
+		registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
+	}
+
+	/**
+	 * <pre>
+	 * The type of Point Spread Function (PSF)
+	 * </pre>
+	 *
+	 * Protobuf enum {@code gdsc.smlm.data.config.PSFType}
+	 */
+	public enum PSFType implements com.google.protobuf.ProtocolMessageEnum
+	{
+		/**
+		 * <pre>
+		 * Not available. Only the standard parameters are supported.
+		 * </pre>
+		 *
+		 * <code>PSF_TYPE_NA = 0;</code>
+		 */
+		PSF_TYPE_NA(0),
+		/**
+		 * <pre>
+		 * A 2D Gaussian with the same standard deviation in X and Y dimensions
+		 * </pre>
+		 *
+		 * <code>ONE_AXIS_GAUSSIAN_2D = 1;</code>
+		 */
+		ONE_AXIS_GAUSSIAN_2D(1),
+		/**
+		 * <pre>
+		 * A 2D Gaussian with standard deviations in X and Y dimensions
+		 * </pre>
+		 *
+		 * <code>TWO_AXIS_GAUSSIAN_2D = 2;</code>
+		 */
+		TWO_AXIS_GAUSSIAN_2D(2),
+		/**
+		 * <pre>
+		 * A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+		 * </pre>
+		 *
+		 * <code>TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3;</code>
+		 */
+		TWO_AXIS_AND_THETA_GAUSSIAN_2D(3),
+		/**
+		 * <pre>
+		 * A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+		 * </pre>
+		 *
+		 * <code>ASTIGMATIC_GAUSSIAN_2D = 4;</code>
+		 */
+		ASTIGMATIC_GAUSSIAN_2D(4),
+		/**
+		 * <pre>
+		 * A custom point spread function (PSF)
+		 * </pre>
+		 *
+		 * <code>CUSTOM = 5;</code>
+		 */
+		CUSTOM(5), UNRECOGNIZED(-1),;
+
+		/**
+		 * <pre>
+		 * Not available. Only the standard parameters are supported.
+		 * </pre>
+		 *
+		 * <code>PSF_TYPE_NA = 0;</code>
+		 */
+		public static final int PSF_TYPE_NA_VALUE = 0;
+		/**
+		 * <pre>
+		 * A 2D Gaussian with the same standard deviation in X and Y dimensions
+		 * </pre>
+		 *
+		 * <code>ONE_AXIS_GAUSSIAN_2D = 1;</code>
+		 */
+		public static final int ONE_AXIS_GAUSSIAN_2D_VALUE = 1;
+		/**
+		 * <pre>
+		 * A 2D Gaussian with standard deviations in X and Y dimensions
+		 * </pre>
+		 *
+		 * <code>TWO_AXIS_GAUSSIAN_2D = 2;</code>
+		 */
+		public static final int TWO_AXIS_GAUSSIAN_2D_VALUE = 2;
+		/**
+		 * <pre>
+		 * A 2D Gaussian with standard deviations in X and Y dimensions and a rotation angle
+		 * </pre>
+		 *
+		 * <code>TWO_AXIS_AND_THETA_GAUSSIAN_2D = 3;</code>
+		 */
+		public static final int TWO_AXIS_AND_THETA_GAUSSIAN_2D_VALUE = 3;
+		/**
+		 * <pre>
+		 * A 2D Gaussian with standard deviations in X and Y dimensions defined by the z-depth
+		 * </pre>
+		 *
+		 * <code>ASTIGMATIC_GAUSSIAN_2D = 4;</code>
+		 */
+		public static final int ASTIGMATIC_GAUSSIAN_2D_VALUE = 4;
+		/**
+		 * <pre>
+		 * A custom point spread function (PSF)
+		 * </pre>
+		 *
+		 * <code>CUSTOM = 5;</code>
+		 */
+		public static final int CUSTOM_VALUE = 5;
+
+		@Override
+		public final int getNumber()
+		{
+			if (this == UNRECOGNIZED)
+			{
+				throw new java.lang.IllegalArgumentException("Can't get the number of an unknown enum value.");
+			}
+			return value;
+		}
+
+		/**
+		 * @deprecated Use {@link #forNumber(int)} instead.
+		 */
+		@java.lang.Deprecated
+		public static PSFType valueOf(int value)
+		{
+			return forNumber(value);
+		}
+
+		public static PSFType forNumber(int value)
+		{
+			switch (value)
+			{
+				case 0:
+					return PSF_TYPE_NA;
+				case 1:
+					return ONE_AXIS_GAUSSIAN_2D;
+				case 2:
+					return TWO_AXIS_GAUSSIAN_2D;
+				case 3:
+					return TWO_AXIS_AND_THETA_GAUSSIAN_2D;
+				case 4:
+					return ASTIGMATIC_GAUSSIAN_2D;
+				case 5:
+					return CUSTOM;
+				default:
+					return null;
+			}
+		}
+
+		public static com.google.protobuf.Internal.EnumLiteMap<PSFType> internalGetValueMap()
+		{
+			return internalValueMap;
+		}
+
+		private static final com.google.protobuf.Internal.EnumLiteMap<PSFType> internalValueMap = new com.google.protobuf.Internal.EnumLiteMap<PSFType>()
+		{
+			@Override
+			public PSFType findValueByNumber(int number)
+			{
+				return PSFType.forNumber(number);
+			}
+		};
+
+		@Override
+		public final com.google.protobuf.Descriptors.EnumValueDescriptor getValueDescriptor()
+		{
+			return getDescriptor().getValues().get(ordinal());
+		}
+
+		@Override
+		public final com.google.protobuf.Descriptors.EnumDescriptor getDescriptorForType()
+		{
+			return getDescriptor();
+		}
+
+		public static final com.google.protobuf.Descriptors.EnumDescriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.getDescriptor().getEnumTypes().get(0);
+		}
+
+		private static final PSFType[] VALUES = values();
+
+		public static PSFType valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
+		{
+			if (desc.getType() != getDescriptor())
+			{
+				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
+			}
+			if (desc.getIndex() == -1)
+			{
+				return UNRECOGNIZED;
+			}
+			return VALUES[desc.getIndex()];
+		}
+
+		private final int value;
+
+		private PSFType(int value)
+		{
+			this.value = value;
+		}
+
+		// @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.PSFType)
+	}
+
+	/**
+	 * <pre>
+	 * Define the type of units supported in the Point Spread Function (PSF)
+	 * </pre>
+	 *
+	 * Protobuf enum {@code gdsc.smlm.data.config.PSFParameterUnit}
+	 */
+	public enum PSFParameterUnit implements com.google.protobuf.ProtocolMessageEnum
+	{
+		/**
+		 * <pre>
+		 * Not available
+		 * </pre>
+		 *
+		 * <code>PSF_PARAMETER_UNIT_NA = 0;</code>
+		 */
+		PSF_PARAMETER_UNIT_NA(0),
+		/**
+		 * <pre>
+		 * The parameter describes a distance
+		 * </pre>
+		 *
+		 * <code>DISTANCE = 1;</code>
+		 */
+		DISTANCE(1),
+		/**
+		 * <pre>
+		 * The parameter describes an intensity
+		 * </pre>
+		 *
+		 * <code>INTENSITY = 2;</code>
+		 */
+		INTENSITY(2),
+		/**
+		 * <pre>
+		 * The parameter describes an angle
+		 * </pre>
+		 *
+		 * <code>ANGLE = 3;</code>
+		 */
+		ANGLE(3), UNRECOGNIZED(-1),;
+
+		/**
+		 * <pre>
+		 * Not available
+		 * </pre>
+		 *
+		 * <code>PSF_PARAMETER_UNIT_NA = 0;</code>
+		 */
+		public static final int PSF_PARAMETER_UNIT_NA_VALUE = 0;
+		/**
+		 * <pre>
+		 * The parameter describes a distance
+		 * </pre>
+		 *
+		 * <code>DISTANCE = 1;</code>
+		 */
+		public static final int DISTANCE_VALUE = 1;
+		/**
+		 * <pre>
+		 * The parameter describes an intensity
+		 * </pre>
+		 *
+		 * <code>INTENSITY = 2;</code>
+		 */
+		public static final int INTENSITY_VALUE = 2;
+		/**
+		 * <pre>
+		 * The parameter describes an angle
+		 * </pre>
+		 *
+		 * <code>ANGLE = 3;</code>
+		 */
+		public static final int ANGLE_VALUE = 3;
+
+		@Override
+		public final int getNumber()
+		{
+			if (this == UNRECOGNIZED)
+			{
+				throw new java.lang.IllegalArgumentException("Can't get the number of an unknown enum value.");
+			}
+			return value;
+		}
+
+		/**
+		 * @deprecated Use {@link #forNumber(int)} instead.
+		 */
+		@java.lang.Deprecated
+		public static PSFParameterUnit valueOf(int value)
+		{
+			return forNumber(value);
+		}
+
+		public static PSFParameterUnit forNumber(int value)
+		{
+			switch (value)
+			{
+				case 0:
+					return PSF_PARAMETER_UNIT_NA;
+				case 1:
+					return DISTANCE;
+				case 2:
+					return INTENSITY;
+				case 3:
+					return ANGLE;
+				default:
+					return null;
+			}
+		}
+
+		public static com.google.protobuf.Internal.EnumLiteMap<PSFParameterUnit> internalGetValueMap()
+		{
+			return internalValueMap;
+		}
+
+		private static final com.google.protobuf.Internal.EnumLiteMap<PSFParameterUnit> internalValueMap = new com.google.protobuf.Internal.EnumLiteMap<PSFParameterUnit>()
+		{
+			@Override
+			public PSFParameterUnit findValueByNumber(int number)
+			{
+				return PSFParameterUnit.forNumber(number);
+			}
+		};
+
+		@Override
+		public final com.google.protobuf.Descriptors.EnumValueDescriptor getValueDescriptor()
+		{
+			return getDescriptor().getValues().get(ordinal());
+		}
+
+		@Override
+		public final com.google.protobuf.Descriptors.EnumDescriptor getDescriptorForType()
+		{
+			return getDescriptor();
+		}
+
+		public static final com.google.protobuf.Descriptors.EnumDescriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.getDescriptor().getEnumTypes().get(1);
+		}
+
+		private static final PSFParameterUnit[] VALUES = values();
+
+		public static PSFParameterUnit valueOf(com.google.protobuf.Descriptors.EnumValueDescriptor desc)
+		{
+			if (desc.getType() != getDescriptor())
+			{
+				throw new java.lang.IllegalArgumentException("EnumValueDescriptor is not for this type.");
+			}
+			if (desc.getIndex() == -1)
+			{
+				return UNRECOGNIZED;
+			}
+			return VALUES[desc.getIndex()];
+		}
+
+		private final int value;
+
+		private PSFParameterUnit(int value)
+		{
+			this.value = value;
+		}
+
+		// @@protoc_insertion_point(enum_scope:gdsc.smlm.data.config.PSFParameterUnit)
+	}
+
+	public interface PSFParameterOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSFParameter)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>string name = 1;</code>
+		 */
+		java.lang.String getName();
+
+		/**
+		 * <code>string name = 1;</code>
+		 */
+		com.google.protobuf.ByteString getNameBytes();
+
+		/**
+		 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+		 */
+		int getUnitValue();
+
+		/**
+		 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+		 */
+		gdsc.smlm.data.config.PSFProtos.PSFParameterUnit getUnit();
+
+		/**
+		 * <code>double value = 3;</code>
+		 */
+		double getValue();
+	}
+
+	/**
+	 * <pre>
+	 * Define the additional parameters of the Point Spread Function (PSF)
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.PSFParameter}
+	 */
+	public static final class PSFParameter extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.PSFParameter)
+			PSFParameterOrBuilder
+	{
+		// Use PSFParameter.newBuilder() to construct.
+		private PSFParameter(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private PSFParameter()
+		{
+			name_ = "";
+			unit_ = 0;
+			value_ = 0D;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private PSFParameter(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 10:
+						{
+							java.lang.String s = input.readStringRequireUtf8();
+
+							name_ = s;
+							break;
+						}
+						case 16:
+						{
+							int rawValue = input.readEnum();
+
+							unit_ = rawValue;
+							break;
+						}
+						case 25:
+						{
+
+							value_ = input.readDouble();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.PSFParameter.class,
+							gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder.class);
+		}
+
+		public static final int NAME_FIELD_NUMBER = 1;
+		private volatile java.lang.Object name_;
+
+		/**
+		 * <code>string name = 1;</code>
+		 */
+		@Override
+		public java.lang.String getName()
+		{
+			java.lang.Object ref = name_;
+			if (ref instanceof java.lang.String)
+			{
+				return (java.lang.String) ref;
+			}
+			else
+			{
+				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				java.lang.String s = bs.toStringUtf8();
+				name_ = s;
+				return s;
+			}
+		}
+
+		/**
+		 * <code>string name = 1;</code>
+		 */
+		@Override
+		public com.google.protobuf.ByteString getNameBytes()
+		{
+			java.lang.Object ref = name_;
+			if (ref instanceof java.lang.String)
+			{
+				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				name_ = b;
+				return b;
+			}
+			else
+			{
+				return (com.google.protobuf.ByteString) ref;
+			}
+		}
+
+		public static final int UNIT_FIELD_NUMBER = 2;
+		private int unit_;
+
+		/**
+		 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+		 */
+		@Override
+		public int getUnitValue()
+		{
+			return unit_;
+		}
+
+		/**
+		 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+		 */
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.PSFParameterUnit getUnit()
+		{
+			gdsc.smlm.data.config.PSFProtos.PSFParameterUnit result = gdsc.smlm.data.config.PSFProtos.PSFParameterUnit
+					.valueOf(unit_);
+			return result == null ? gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.UNRECOGNIZED : result;
+		}
+
+		public static final int VALUE_FIELD_NUMBER = 3;
+		private double value_;
+
+		/**
+		 * <code>double value = 3;</code>
+		 */
+		@Override
+		public double getValue()
+		{
+			return value_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (!getNameBytes().isEmpty())
+			{
+				com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+			}
+			if (unit_ != gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber())
+			{
+				output.writeEnum(2, unit_);
+			}
+			if (value_ != 0D)
+			{
+				output.writeDouble(3, value_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (!getNameBytes().isEmpty())
+			{
+				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+			}
+			if (unit_ != gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.PSF_PARAMETER_UNIT_NA.getNumber())
+			{
+				size += com.google.protobuf.CodedOutputStream.computeEnumSize(2, unit_);
+			}
+			if (value_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(3, value_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.PSFParameter))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.PSFParameter other = (gdsc.smlm.data.config.PSFProtos.PSFParameter) obj;
+
+			boolean result = true;
+			result = result && getName().equals(other.getName());
+			result = result && unit_ == other.unit_;
+			result = result && (java.lang.Double.doubleToLongBits(getValue()) == java.lang.Double
+					.doubleToLongBits(other.getValue()));
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + NAME_FIELD_NUMBER;
+			hash = (53 * hash) + getName().hashCode();
+			hash = (37 * hash) + UNIT_FIELD_NUMBER;
+			hash = (53 * hash) + unit_;
+			hash = (37 * hash) + VALUE_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getValue()));
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.PSFParameter prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the additional parameters of the Point Spread Function (PSF)
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.PSFParameter}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.PSFParameter)
+				gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.PSFParameter.class,
+								gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.PSFParameter.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				name_ = "";
+
+				unit_ = 0;
+
+				value_ = 0D;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter build()
+			{
+				gdsc.smlm.data.config.PSFProtos.PSFParameter result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.PSFParameter result = new gdsc.smlm.data.config.PSFProtos.PSFParameter(
+						this);
+				result.name_ = name_;
+				result.unit_ = unit_;
+				result.value_ = value_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.PSFParameter)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.PSFParameter) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.PSFParameter other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance())
+					return this;
+				if (!other.getName().isEmpty())
+				{
+					name_ = other.name_;
+					onChanged();
+				}
+				if (other.unit_ != 0)
+				{
+					setUnitValue(other.getUnitValue());
+				}
+				if (other.getValue() != 0D)
+				{
+					setValue(other.getValue());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.PSFParameter parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.PSFParameter) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private java.lang.Object name_ = "";
+
+			/**
+			 * <code>string name = 1;</code>
+			 */
+			@Override
+			public java.lang.String getName()
+			{
+				java.lang.Object ref = name_;
+				if (!(ref instanceof java.lang.String))
+				{
+					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					java.lang.String s = bs.toStringUtf8();
+					name_ = s;
+					return s;
+				}
+				else
+				{
+					return (java.lang.String) ref;
+				}
+			}
+
+			/**
+			 * <code>string name = 1;</code>
+			 */
+			@Override
+			public com.google.protobuf.ByteString getNameBytes()
+			{
+				java.lang.Object ref = name_;
+				if (ref instanceof String)
+				{
+					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+							.copyFromUtf8((java.lang.String) ref);
+					name_ = b;
+					return b;
+				}
+				else
+				{
+					return (com.google.protobuf.ByteString) ref;
+				}
+			}
+
+			/**
+			 * <code>string name = 1;</code>
+			 */
+			public Builder setName(java.lang.String value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				name_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>string name = 1;</code>
+			 */
+			public Builder clearName()
+			{
+
+				name_ = getDefaultInstance().getName();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>string name = 1;</code>
+			 */
+			public Builder setNameBytes(com.google.protobuf.ByteString value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+				checkByteStringIsUtf8(value);
+
+				name_ = value;
+				onChanged();
+				return this;
+			}
+
+			private int unit_ = 0;
+
+			/**
+			 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+			 */
+			@Override
+			public int getUnitValue()
+			{
+				return unit_;
+			}
+
+			/**
+			 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+			 */
+			public Builder setUnitValue(int value)
+			{
+				unit_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+			 */
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFParameterUnit getUnit()
+			{
+				gdsc.smlm.data.config.PSFProtos.PSFParameterUnit result = gdsc.smlm.data.config.PSFProtos.PSFParameterUnit
+						.valueOf(unit_);
+				return result == null ? gdsc.smlm.data.config.PSFProtos.PSFParameterUnit.UNRECOGNIZED : result;
+			}
+
+			/**
+			 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+			 */
+			public Builder setUnit(gdsc.smlm.data.config.PSFProtos.PSFParameterUnit value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				unit_ = value.getNumber();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>.gdsc.smlm.data.config.PSFParameterUnit unit = 2;</code>
+			 */
+			public Builder clearUnit()
+			{
+
+				unit_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private double value_;
+
+			/**
+			 * <code>double value = 3;</code>
+			 */
+			@Override
+			public double getValue()
+			{
+				return value_;
+			}
+
+			/**
+			 * <code>double value = 3;</code>
+			 */
+			public Builder setValue(double value)
+			{
+
+				value_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>double value = 3;</code>
+			 */
+			public Builder clearValue()
+			{
+
+				value_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.PSFParameter)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.PSFParameter)
+		private static final gdsc.smlm.data.config.PSFProtos.PSFParameter DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.PSFParameter();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSFParameter getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<PSFParameter> PARSER = new com.google.protobuf.AbstractParser<PSFParameter>()
+		{
+			@Override
+			public PSFParameter parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new PSFParameter(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<PSFParameter> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<PSFParameter> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.PSFParameter getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface AstigmatismModelOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModel)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <pre>
+		 * The gamma parameter (half the distance between the focal planes). 
+		 * Note that a positive gamma puts the focal plane for the X-dimension above the 
+		 * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+		 * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+		 * and Y are reversed.
+		 * </pre>
+		 *
+		 * <code>double gamma = 1;</code>
+		 */
+		double getGamma();
+
+		/**
+		 * <pre>
+		 * Depth-of-focus. This is the z-distance where the width is enlarged by 
+		 * a factor of sqrt(2) compared to the width in the focal plane.
+		 * </pre>
+		 *
+		 * <code>double d = 2;</code>
+		 */
+		double getD();
+
+		/**
+		 * <pre>
+		 * Empirical constant A for the x-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double ax = 3;</code>
+		 */
+		double getAx();
+
+		/**
+		 * <pre>
+		 * Empirical constant B for the x-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double bx = 4;</code>
+		 */
+		double getBx();
+
+		/**
+		 * <pre>
+		 * Empirical constant A for the y-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double ay = 5;</code>
+		 */
+		double getAy();
+
+		/**
+		 * <pre>
+		 * Empirical constant B for the y-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double by = 6;</code>
+		 */
+		double getBy();
+
+		/**
+		 * <pre>
+		 * The width (standard deviation) in the x-focal plane
+		 * </pre>
+		 *
+		 * <code>double s0x = 7;</code>
+		 */
+		double getS0X();
+
+		/**
+		 * <pre>
+		 * The width (standard deviation) in the y-focal plane
+		 * </pre>
+		 *
+		 * <code>double s0y = 8;</code>
+		 */
+		double getS0Y();
+
+		/**
+		 * <pre>
+		 * The input distance unit for z (μm, nm)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+		 */
+		int getZDistanceUnitValue();
+
+		/**
+		 * <pre>
+		 * The input distance unit for z (μm, nm)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+		 */
+		gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit();
+
+		/**
+		 * <pre>
+		 * The output distance unit for s (may be pixels)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+		 */
+		int getSDistanceUnitValue();
+
+		/**
+		 * <pre>
+		 * The output distance unit for s (may be pixels)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+		 */
+		gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit();
+
+		/**
+		 * <pre>
+		 * The pixel size used to create the model. A model is only valid when used 
+		 * with the same light path (objective, magnification, camera sensor). The entire 
+		 * light path is not recorded but the pixel size is stored. This can be used as 
+		 * a quick validation of matching calibration, or to convert output width in pixels.
+		 * </pre>
+		 *
+		 * <code>double nm_per_pixel = 11;</code>
+		 */
+		double getNmPerPixel();
+
+		/**
+		 * <pre>
+		 * The z-centre. This is assumed to be zero but can be used to store the results
+		 * of curve fitting where the z-centre is a parameter.
+		 * </pre>
+		 *
+		 * <code>double z0 = 12;</code>
+		 */
+		double getZ0();
+	}
+
+	/**
+	 * <pre>
+	 * Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
+	 * for the X and Y dimensions. 
+	 * Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
+	 * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
+	 * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
+	 * Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual 
+	 * quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
+	 * For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModel}
+	 */
+	public static final class AstigmatismModel extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModel)
+			AstigmatismModelOrBuilder
+	{
+		// Use AstigmatismModel.newBuilder() to construct.
+		private AstigmatismModel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private AstigmatismModel()
+		{
+			gamma_ = 0D;
+			d_ = 0D;
+			ax_ = 0D;
+			bx_ = 0D;
+			ay_ = 0D;
+			by_ = 0D;
+			s0X_ = 0D;
+			s0Y_ = 0D;
+			zDistanceUnit_ = 0;
+			sDistanceUnit_ = 0;
+			nmPerPixel_ = 0D;
+			z0_ = 0D;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private AstigmatismModel(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 9:
+						{
+
+							gamma_ = input.readDouble();
+							break;
+						}
+						case 17:
+						{
+
+							d_ = input.readDouble();
+							break;
+						}
+						case 25:
+						{
+
+							ax_ = input.readDouble();
+							break;
+						}
+						case 33:
+						{
+
+							bx_ = input.readDouble();
+							break;
+						}
+						case 41:
+						{
+
+							ay_ = input.readDouble();
+							break;
+						}
+						case 49:
+						{
+
+							by_ = input.readDouble();
+							break;
+						}
+						case 57:
+						{
+
+							s0X_ = input.readDouble();
+							break;
+						}
+						case 65:
+						{
+
+							s0Y_ = input.readDouble();
+							break;
+						}
+						case 72:
+						{
+							int rawValue = input.readEnum();
+
+							zDistanceUnit_ = rawValue;
+							break;
+						}
+						case 80:
+						{
+							int rawValue = input.readEnum();
+
+							sDistanceUnit_ = rawValue;
+							break;
+						}
+						case 89:
+						{
+
+							nmPerPixel_ = input.readDouble();
+							break;
+						}
+						case 97:
+						{
+
+							z0_ = input.readDouble();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.AstigmatismModel.class,
+							gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder.class);
+		}
+
+		public static final int GAMMA_FIELD_NUMBER = 1;
+		private double gamma_;
+
+		/**
+		 * <pre>
+		 * The gamma parameter (half the distance between the focal planes). 
+		 * Note that a positive gamma puts the focal plane for the X-dimension above the 
+		 * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+		 * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+		 * and Y are reversed.
+		 * </pre>
+		 *
+		 * <code>double gamma = 1;</code>
+		 */
+		@Override
+		public double getGamma()
+		{
+			return gamma_;
+		}
+
+		public static final int D_FIELD_NUMBER = 2;
+		private double d_;
+
+		/**
+		 * <pre>
+		 * Depth-of-focus. This is the z-distance where the width is enlarged by 
+		 * a factor of sqrt(2) compared to the width in the focal plane.
+		 * </pre>
+		 *
+		 * <code>double d = 2;</code>
+		 */
+		@Override
+		public double getD()
+		{
+			return d_;
+		}
+
+		public static final int AX_FIELD_NUMBER = 3;
+		private double ax_;
+
+		/**
+		 * <pre>
+		 * Empirical constant A for the x-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double ax = 3;</code>
+		 */
+		@Override
+		public double getAx()
+		{
+			return ax_;
+		}
+
+		public static final int BX_FIELD_NUMBER = 4;
+		private double bx_;
+
+		/**
+		 * <pre>
+		 * Empirical constant B for the x-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double bx = 4;</code>
+		 */
+		@Override
+		public double getBx()
+		{
+			return bx_;
+		}
+
+		public static final int AY_FIELD_NUMBER = 5;
+		private double ay_;
+
+		/**
+		 * <pre>
+		 * Empirical constant A for the y-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double ay = 5;</code>
+		 */
+		@Override
+		public double getAy()
+		{
+			return ay_;
+		}
+
+		public static final int BY_FIELD_NUMBER = 6;
+		private double by_;
+
+		/**
+		 * <pre>
+		 * Empirical constant B for the y-astigmatism of the PSF
+		 * </pre>
+		 *
+		 * <code>double by = 6;</code>
+		 */
+		@Override
+		public double getBy()
+		{
+			return by_;
+		}
+
+		public static final int S0X_FIELD_NUMBER = 7;
+		private double s0X_;
+
+		/**
+		 * <pre>
+		 * The width (standard deviation) in the x-focal plane
+		 * </pre>
+		 *
+		 * <code>double s0x = 7;</code>
+		 */
+		@Override
+		public double getS0X()
+		{
+			return s0X_;
+		}
+
+		public static final int S0Y_FIELD_NUMBER = 8;
+		private double s0Y_;
+
+		/**
+		 * <pre>
+		 * The width (standard deviation) in the y-focal plane
+		 * </pre>
+		 *
+		 * <code>double s0y = 8;</code>
+		 */
+		@Override
+		public double getS0Y()
+		{
+			return s0Y_;
+		}
+
+		public static final int Z_DISTANCE_UNIT_FIELD_NUMBER = 9;
+		private int zDistanceUnit_;
+
+		/**
+		 * <pre>
+		 * The input distance unit for z (μm, nm)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+		 */
+		@Override
+		public int getZDistanceUnitValue()
+		{
+			return zDistanceUnit_;
+		}
+
+		/**
+		 * <pre>
+		 * The input distance unit for z (μm, nm)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+		 */
+		@Override
+		public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit()
+		{
+			gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit
+					.valueOf(zDistanceUnit_);
+			return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+		}
+
+		public static final int S_DISTANCE_UNIT_FIELD_NUMBER = 10;
+		private int sDistanceUnit_;
+
+		/**
+		 * <pre>
+		 * The output distance unit for s (may be pixels)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+		 */
+		@Override
+		public int getSDistanceUnitValue()
+		{
+			return sDistanceUnit_;
+		}
+
+		/**
+		 * <pre>
+		 * The output distance unit for s (may be pixels)
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+		 */
+		@Override
+		public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit()
+		{
+			gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit
+					.valueOf(sDistanceUnit_);
+			return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+		}
+
+		public static final int NM_PER_PIXEL_FIELD_NUMBER = 11;
+		private double nmPerPixel_;
+
+		/**
+		 * <pre>
+		 * The pixel size used to create the model. A model is only valid when used 
+		 * with the same light path (objective, magnification, camera sensor). The entire 
+		 * light path is not recorded but the pixel size is stored. This can be used as 
+		 * a quick validation of matching calibration, or to convert output width in pixels.
+		 * </pre>
+		 *
+		 * <code>double nm_per_pixel = 11;</code>
+		 */
+		@Override
+		public double getNmPerPixel()
+		{
+			return nmPerPixel_;
+		}
+
+		public static final int Z0_FIELD_NUMBER = 12;
+		private double z0_;
+
+		/**
+		 * <pre>
+		 * The z-centre. This is assumed to be zero but can be used to store the results
+		 * of curve fitting where the z-centre is a parameter.
+		 * </pre>
+		 *
+		 * <code>double z0 = 12;</code>
+		 */
+		@Override
+		public double getZ0()
+		{
+			return z0_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (gamma_ != 0D)
+			{
+				output.writeDouble(1, gamma_);
+			}
+			if (d_ != 0D)
+			{
+				output.writeDouble(2, d_);
+			}
+			if (ax_ != 0D)
+			{
+				output.writeDouble(3, ax_);
+			}
+			if (bx_ != 0D)
+			{
+				output.writeDouble(4, bx_);
+			}
+			if (ay_ != 0D)
+			{
+				output.writeDouble(5, ay_);
+			}
+			if (by_ != 0D)
+			{
+				output.writeDouble(6, by_);
+			}
+			if (s0X_ != 0D)
+			{
+				output.writeDouble(7, s0X_);
+			}
+			if (s0Y_ != 0D)
+			{
+				output.writeDouble(8, s0Y_);
+			}
+			if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+			{
+				output.writeEnum(9, zDistanceUnit_);
+			}
+			if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+			{
+				output.writeEnum(10, sDistanceUnit_);
+			}
+			if (nmPerPixel_ != 0D)
+			{
+				output.writeDouble(11, nmPerPixel_);
+			}
+			if (z0_ != 0D)
+			{
+				output.writeDouble(12, z0_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (gamma_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(1, gamma_);
+			}
+			if (d_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(2, d_);
+			}
+			if (ax_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(3, ax_);
+			}
+			if (bx_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(4, bx_);
+			}
+			if (ay_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(5, ay_);
+			}
+			if (by_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(6, by_);
+			}
+			if (s0X_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(7, s0X_);
+			}
+			if (s0Y_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(8, s0Y_);
+			}
+			if (zDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+			{
+				size += com.google.protobuf.CodedOutputStream.computeEnumSize(9, zDistanceUnit_);
+			}
+			if (sDistanceUnit_ != gdsc.smlm.data.config.UnitProtos.DistanceUnit.DISTANCE_UNIT_NA.getNumber())
+			{
+				size += com.google.protobuf.CodedOutputStream.computeEnumSize(10, sDistanceUnit_);
+			}
+			if (nmPerPixel_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(11, nmPerPixel_);
+			}
+			if (z0_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(12, z0_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModel))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.AstigmatismModel other = (gdsc.smlm.data.config.PSFProtos.AstigmatismModel) obj;
+
+			boolean result = true;
+			result = result && (java.lang.Double.doubleToLongBits(getGamma()) == java.lang.Double
+					.doubleToLongBits(other.getGamma()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getD()) == java.lang.Double.doubleToLongBits(other.getD()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getAx()) == java.lang.Double.doubleToLongBits(other.getAx()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getBx()) == java.lang.Double.doubleToLongBits(other.getBx()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getAy()) == java.lang.Double.doubleToLongBits(other.getAy()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getBy()) == java.lang.Double.doubleToLongBits(other.getBy()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getS0X()) == java.lang.Double.doubleToLongBits(other.getS0X()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getS0Y()) == java.lang.Double.doubleToLongBits(other.getS0Y()));
+			result = result && zDistanceUnit_ == other.zDistanceUnit_;
+			result = result && sDistanceUnit_ == other.sDistanceUnit_;
+			result = result && (java.lang.Double.doubleToLongBits(getNmPerPixel()) == java.lang.Double
+					.doubleToLongBits(other.getNmPerPixel()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getZ0()) == java.lang.Double.doubleToLongBits(other.getZ0()));
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + GAMMA_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getGamma()));
+			hash = (37 * hash) + D_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getD()));
+			hash = (37 * hash) + AX_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getAx()));
+			hash = (37 * hash) + BX_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getBx()));
+			hash = (37 * hash) + AY_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getAy()));
+			hash = (37 * hash) + BY_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getBy()));
+			hash = (37 * hash) + S0X_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getS0X()));
+			hash = (37 * hash) + S0Y_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getS0Y()));
+			hash = (37 * hash) + Z_DISTANCE_UNIT_FIELD_NUMBER;
+			hash = (53 * hash) + zDistanceUnit_;
+			hash = (37 * hash) + S_DISTANCE_UNIT_FIELD_NUMBER;
+			hash = (53 * hash) + sDistanceUnit_;
+			hash = (37 * hash) + NM_PER_PIXEL_FIELD_NUMBER;
+			hash = (53 * hash) +
+					com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getNmPerPixel()));
+			hash = (37 * hash) + Z0_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getZ0()));
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+				com.google.protobuf.CodedInputStream input) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel parseFrom(
+				com.google.protobuf.CodedInputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.AstigmatismModel prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the Gaussian 2D Astigmatism model. This maps a z-coordinate into a Gaussian width 
+		 * for the X and Y dimensions. 
+		 * Uses the model described by Smith, et al (2010) based on Holtzer, et al (2007).
+		 * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically 
+		 * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
+		 * Holtzer, L., Meckel, T. &amp; Schmidt, T. Nanometric three-dimensional tracking of individual 
+		 * quantum dots in cells. Applied Physics Letters 90, 1–3 (2007).
+		 * For X/Y dimension: z' = (z-/+gamma); s = s0 * sqrt(1 + (z'^2 + A * z'^3 + B * z'^4) / d^2).
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModel}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModel)
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModelOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.AstigmatismModel.class,
+								gdsc.smlm.data.config.PSFProtos.AstigmatismModel.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.AstigmatismModel.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				gamma_ = 0D;
+
+				d_ = 0D;
+
+				ax_ = 0D;
+
+				bx_ = 0D;
+
+				ay_ = 0D;
+
+				by_ = 0D;
+
+				s0X_ = 0D;
+
+				s0Y_ = 0D;
+
+				zDistanceUnit_ = 0;
+
+				sDistanceUnit_ = 0;
+
+				nmPerPixel_ = 0D;
+
+				z0_ = 0D;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModel build()
+			{
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModel result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModel buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModel result = new gdsc.smlm.data.config.PSFProtos.AstigmatismModel(
+						this);
+				result.gamma_ = gamma_;
+				result.d_ = d_;
+				result.ax_ = ax_;
+				result.bx_ = bx_;
+				result.ay_ = ay_;
+				result.by_ = by_;
+				result.s0X_ = s0X_;
+				result.s0Y_ = s0Y_;
+				result.zDistanceUnit_ = zDistanceUnit_;
+				result.sDistanceUnit_ = sDistanceUnit_;
+				result.nmPerPixel_ = nmPerPixel_;
+				result.z0_ = z0_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModel)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.AstigmatismModel) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.AstigmatismModel other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance())
+					return this;
+				if (other.getGamma() != 0D)
+				{
+					setGamma(other.getGamma());
+				}
+				if (other.getD() != 0D)
+				{
+					setD(other.getD());
+				}
+				if (other.getAx() != 0D)
+				{
+					setAx(other.getAx());
+				}
+				if (other.getBx() != 0D)
+				{
+					setBx(other.getBx());
+				}
+				if (other.getAy() != 0D)
+				{
+					setAy(other.getAy());
+				}
+				if (other.getBy() != 0D)
+				{
+					setBy(other.getBy());
+				}
+				if (other.getS0X() != 0D)
+				{
+					setS0X(other.getS0X());
+				}
+				if (other.getS0Y() != 0D)
+				{
+					setS0Y(other.getS0Y());
+				}
+				if (other.zDistanceUnit_ != 0)
+				{
+					setZDistanceUnitValue(other.getZDistanceUnitValue());
+				}
+				if (other.sDistanceUnit_ != 0)
+				{
+					setSDistanceUnitValue(other.getSDistanceUnitValue());
+				}
+				if (other.getNmPerPixel() != 0D)
+				{
+					setNmPerPixel(other.getNmPerPixel());
+				}
+				if (other.getZ0() != 0D)
+				{
+					setZ0(other.getZ0());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModel parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.AstigmatismModel) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private double gamma_;
+
+			/**
+			 * <pre>
+			 * The gamma parameter (half the distance between the focal planes). 
+			 * Note that a positive gamma puts the focal plane for the X-dimension above the 
+			 * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+			 * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+			 * and Y are reversed.
+			 * </pre>
+			 *
+			 * <code>double gamma = 1;</code>
+			 */
+			@Override
+			public double getGamma()
+			{
+				return gamma_;
+			}
+
+			/**
+			 * <pre>
+			 * The gamma parameter (half the distance between the focal planes). 
+			 * Note that a positive gamma puts the focal plane for the X-dimension above the 
+			 * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+			 * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+			 * and Y are reversed.
+			 * </pre>
+			 *
+			 * <code>double gamma = 1;</code>
+			 */
+			public Builder setGamma(double value)
+			{
+
+				gamma_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The gamma parameter (half the distance between the focal planes). 
+			 * Note that a positive gamma puts the focal plane for the X-dimension above the 
+			 * z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
+			 * (negative Z). If gamma is negative then the orientation of the focal planes of X 
+			 * and Y are reversed.
+			 * </pre>
+			 *
+			 * <code>double gamma = 1;</code>
+			 */
+			public Builder clearGamma()
+			{
+
+				gamma_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double d_;
+
+			/**
+			 * <pre>
+			 * Depth-of-focus. This is the z-distance where the width is enlarged by 
+			 * a factor of sqrt(2) compared to the width in the focal plane.
+			 * </pre>
+			 *
+			 * <code>double d = 2;</code>
+			 */
+			@Override
+			public double getD()
+			{
+				return d_;
+			}
+
+			/**
+			 * <pre>
+			 * Depth-of-focus. This is the z-distance where the width is enlarged by 
+			 * a factor of sqrt(2) compared to the width in the focal plane.
+			 * </pre>
+			 *
+			 * <code>double d = 2;</code>
+			 */
+			public Builder setD(double value)
+			{
+
+				d_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Depth-of-focus. This is the z-distance where the width is enlarged by 
+			 * a factor of sqrt(2) compared to the width in the focal plane.
+			 * </pre>
+			 *
+			 * <code>double d = 2;</code>
+			 */
+			public Builder clearD()
+			{
+
+				d_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double ax_;
+
+			/**
+			 * <pre>
+			 * Empirical constant A for the x-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double ax = 3;</code>
+			 */
+			@Override
+			public double getAx()
+			{
+				return ax_;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant A for the x-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double ax = 3;</code>
+			 */
+			public Builder setAx(double value)
+			{
+
+				ax_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant A for the x-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double ax = 3;</code>
+			 */
+			public Builder clearAx()
+			{
+
+				ax_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double bx_;
+
+			/**
+			 * <pre>
+			 * Empirical constant B for the x-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double bx = 4;</code>
+			 */
+			@Override
+			public double getBx()
+			{
+				return bx_;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant B for the x-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double bx = 4;</code>
+			 */
+			public Builder setBx(double value)
+			{
+
+				bx_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant B for the x-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double bx = 4;</code>
+			 */
+			public Builder clearBx()
+			{
+
+				bx_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double ay_;
+
+			/**
+			 * <pre>
+			 * Empirical constant A for the y-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double ay = 5;</code>
+			 */
+			@Override
+			public double getAy()
+			{
+				return ay_;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant A for the y-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double ay = 5;</code>
+			 */
+			public Builder setAy(double value)
+			{
+
+				ay_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant A for the y-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double ay = 5;</code>
+			 */
+			public Builder clearAy()
+			{
+
+				ay_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double by_;
+
+			/**
+			 * <pre>
+			 * Empirical constant B for the y-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double by = 6;</code>
+			 */
+			@Override
+			public double getBy()
+			{
+				return by_;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant B for the y-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double by = 6;</code>
+			 */
+			public Builder setBy(double value)
+			{
+
+				by_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Empirical constant B for the y-astigmatism of the PSF
+			 * </pre>
+			 *
+			 * <code>double by = 6;</code>
+			 */
+			public Builder clearBy()
+			{
+
+				by_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double s0X_;
+
+			/**
+			 * <pre>
+			 * The width (standard deviation) in the x-focal plane
+			 * </pre>
+			 *
+			 * <code>double s0x = 7;</code>
+			 */
+			@Override
+			public double getS0X()
+			{
+				return s0X_;
+			}
+
+			/**
+			 * <pre>
+			 * The width (standard deviation) in the x-focal plane
+			 * </pre>
+			 *
+			 * <code>double s0x = 7;</code>
+			 */
+			public Builder setS0X(double value)
+			{
+
+				s0X_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The width (standard deviation) in the x-focal plane
+			 * </pre>
+			 *
+			 * <code>double s0x = 7;</code>
+			 */
+			public Builder clearS0X()
+			{
+
+				s0X_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double s0Y_;
+
+			/**
+			 * <pre>
+			 * The width (standard deviation) in the y-focal plane
+			 * </pre>
+			 *
+			 * <code>double s0y = 8;</code>
+			 */
+			@Override
+			public double getS0Y()
+			{
+				return s0Y_;
+			}
+
+			/**
+			 * <pre>
+			 * The width (standard deviation) in the y-focal plane
+			 * </pre>
+			 *
+			 * <code>double s0y = 8;</code>
+			 */
+			public Builder setS0Y(double value)
+			{
+
+				s0Y_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The width (standard deviation) in the y-focal plane
+			 * </pre>
+			 *
+			 * <code>double s0y = 8;</code>
+			 */
+			public Builder clearS0Y()
+			{
+
+				s0Y_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private int zDistanceUnit_ = 0;
+
+			/**
+			 * <pre>
+			 * The input distance unit for z (μm, nm)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+			 */
+			@Override
+			public int getZDistanceUnitValue()
+			{
+				return zDistanceUnit_;
+			}
+
+			/**
+			 * <pre>
+			 * The input distance unit for z (μm, nm)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+			 */
+			public Builder setZDistanceUnitValue(int value)
+			{
+				zDistanceUnit_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The input distance unit for z (μm, nm)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+			 */
+			@Override
+			public gdsc.smlm.data.config.UnitProtos.DistanceUnit getZDistanceUnit()
+			{
+				gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit
+						.valueOf(zDistanceUnit_);
+				return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+			}
+
+			/**
+			 * <pre>
+			 * The input distance unit for z (μm, nm)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+			 */
+			public Builder setZDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				zDistanceUnit_ = value.getNumber();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The input distance unit for z (μm, nm)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit z_distance_unit = 9;</code>
+			 */
+			public Builder clearZDistanceUnit()
+			{
+
+				zDistanceUnit_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private int sDistanceUnit_ = 0;
+
+			/**
+			 * <pre>
+			 * The output distance unit for s (may be pixels)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+			 */
+			@Override
+			public int getSDistanceUnitValue()
+			{
+				return sDistanceUnit_;
+			}
+
+			/**
+			 * <pre>
+			 * The output distance unit for s (may be pixels)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+			 */
+			public Builder setSDistanceUnitValue(int value)
+			{
+				sDistanceUnit_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The output distance unit for s (may be pixels)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+			 */
+			@Override
+			public gdsc.smlm.data.config.UnitProtos.DistanceUnit getSDistanceUnit()
+			{
+				gdsc.smlm.data.config.UnitProtos.DistanceUnit result = gdsc.smlm.data.config.UnitProtos.DistanceUnit
+						.valueOf(sDistanceUnit_);
+				return result == null ? gdsc.smlm.data.config.UnitProtos.DistanceUnit.UNRECOGNIZED : result;
+			}
+
+			/**
+			 * <pre>
+			 * The output distance unit for s (may be pixels)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+			 */
+			public Builder setSDistanceUnit(gdsc.smlm.data.config.UnitProtos.DistanceUnit value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				sDistanceUnit_ = value.getNumber();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The output distance unit for s (may be pixels)
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.DistanceUnit s_distance_unit = 10;</code>
+			 */
+			public Builder clearSDistanceUnit()
+			{
+
+				sDistanceUnit_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private double nmPerPixel_;
+
+			/**
+			 * <pre>
+			 * The pixel size used to create the model. A model is only valid when used 
+			 * with the same light path (objective, magnification, camera sensor). The entire 
+			 * light path is not recorded but the pixel size is stored. This can be used as 
+			 * a quick validation of matching calibration, or to convert output width in pixels.
+			 * </pre>
+			 *
+			 * <code>double nm_per_pixel = 11;</code>
+			 */
+			@Override
+			public double getNmPerPixel()
+			{
+				return nmPerPixel_;
+			}
+
+			/**
+			 * <pre>
+			 * The pixel size used to create the model. A model is only valid when used 
+			 * with the same light path (objective, magnification, camera sensor). The entire 
+			 * light path is not recorded but the pixel size is stored. This can be used as 
+			 * a quick validation of matching calibration, or to convert output width in pixels.
+			 * </pre>
+			 *
+			 * <code>double nm_per_pixel = 11;</code>
+			 */
+			public Builder setNmPerPixel(double value)
+			{
+
+				nmPerPixel_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The pixel size used to create the model. A model is only valid when used 
+			 * with the same light path (objective, magnification, camera sensor). The entire 
+			 * light path is not recorded but the pixel size is stored. This can be used as 
+			 * a quick validation of matching calibration, or to convert output width in pixels.
+			 * </pre>
+			 *
+			 * <code>double nm_per_pixel = 11;</code>
+			 */
+			public Builder clearNmPerPixel()
+			{
+
+				nmPerPixel_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double z0_;
+
+			/**
+			 * <pre>
+			 * The z-centre. This is assumed to be zero but can be used to store the results
+			 * of curve fitting where the z-centre is a parameter.
+			 * </pre>
+			 *
+			 * <code>double z0 = 12;</code>
+			 */
+			@Override
+			public double getZ0()
+			{
+				return z0_;
+			}
+
+			/**
+			 * <pre>
+			 * The z-centre. This is assumed to be zero but can be used to store the results
+			 * of curve fitting where the z-centre is a parameter.
+			 * </pre>
+			 *
+			 * <code>double z0 = 12;</code>
+			 */
+			public Builder setZ0(double value)
+			{
+
+				z0_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The z-centre. This is assumed to be zero but can be used to store the results
+			 * of curve fitting where the z-centre is a parameter.
+			 * </pre>
+			 *
+			 * <code>double z0 = 12;</code>
+			 */
+			public Builder clearZ0()
+			{
+
+				z0_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModel)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModel)
+		private static final gdsc.smlm.data.config.PSFProtos.AstigmatismModel DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.AstigmatismModel();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<AstigmatismModel> PARSER = new com.google.protobuf.AbstractParser<AstigmatismModel>()
+		{
+			@Override
+			public AstigmatismModel parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new AstigmatismModel(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<AstigmatismModel> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<AstigmatismModel> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface AstigmatismModelSettingsOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.AstigmatismModelSettings)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+		int getAstigmatismModelResourcesCount();
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+		boolean containsAstigmatismModelResources(java.lang.String key);
+
+		/**
+		 * Use {@link #getAstigmatismModelResourcesMap()} instead.
+		 */
+		@java.lang.Deprecated
+		java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources();
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+		java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap();
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+
+		gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(java.lang.String key,
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue);
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+
+		gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(java.lang.String key);
+	}
+
+	/**
+	 * <pre>
+	 * Define the astigmatism model settings
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelSettings}
+	 */
+	public static final class AstigmatismModelSettings extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.AstigmatismModelSettings)
+			AstigmatismModelSettingsOrBuilder
+	{
+		// Use AstigmatismModelSettings.newBuilder() to construct.
+		private AstigmatismModelSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private AstigmatismModelSettings()
+		{
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private AstigmatismModelSettings(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 10:
+						{
+							if (!((mutable_bitField0_ & 0x00000001) == 0x00000001))
+							{
+								astigmatismModelResources_ = com.google.protobuf.MapField
+										.newMapField(AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+								mutable_bitField0_ |= 0x00000001;
+							}
+							com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources__ = input
+									.readMessage(
+											AstigmatismModelResourcesDefaultEntryHolder.defaultEntry.getParserForType(),
+											extensionRegistry);
+							astigmatismModelResources_.getMutableMap().put(astigmatismModelResources__.getKey(),
+									astigmatismModelResources__.getValue());
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+		}
+
+		@Override
+		@SuppressWarnings({ "rawtypes" })
+		protected com.google.protobuf.MapField internalGetMapField(int number)
+		{
+			switch (number)
+			{
+				case 1:
+					return internalGetAstigmatismModelResources();
+				default:
+					throw new RuntimeException("Invalid map field number: " + number);
+			}
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.class,
+							gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.Builder.class);
+		}
+
+		public static final int ASTIGMATISM_MODEL_RESOURCES_FIELD_NUMBER = 1;
+
+		private static final class AstigmatismModelResourcesDefaultEntryHolder
+		{
+			static final com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> defaultEntry = com.google.protobuf.MapEntry.<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> newDefaultInstance(
+					gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor,
+					com.google.protobuf.WireFormat.FieldType.STRING, "",
+					com.google.protobuf.WireFormat.FieldType.MESSAGE,
+					gdsc.smlm.data.config.PSFProtos.AstigmatismModel.getDefaultInstance());
+		}
+
+		private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources_;
+
+		private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> internalGetAstigmatismModelResources()
+		{
+			if (astigmatismModelResources_ == null)
+			{
+				return com.google.protobuf.MapField
+						.emptyMapField(AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+			}
+			return astigmatismModelResources_;
+		}
+
+		@Override
+		public int getAstigmatismModelResourcesCount()
+		{
+			return internalGetAstigmatismModelResources().getMap().size();
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+
+		@Override
+		public boolean containsAstigmatismModelResources(java.lang.String key)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			return internalGetAstigmatismModelResources().getMap().containsKey(key);
+		}
+
+		/**
+		 * Use {@link #getAstigmatismModelResourcesMap()} instead.
+		 */
+		@Override
+		@java.lang.Deprecated
+		public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources()
+		{
+			return getAstigmatismModelResourcesMap();
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+
+		@Override
+		public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap()
+		{
+			return internalGetAstigmatismModelResources().getMap();
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
+				java.lang.String key, gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map = internalGetAstigmatismModelResources()
+					.getMap();
+			return map.containsKey(key) ? map.get(key) : defaultValue;
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+		 */
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
+				java.lang.String key)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map = internalGetAstigmatismModelResources()
+					.getMap();
+			if (!map.containsKey(key))
+			{
+				throw new java.lang.IllegalArgumentException();
+			}
+			return map.get(key);
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			com.google.protobuf.GeneratedMessageV3.serializeStringMapTo(output, internalGetAstigmatismModelResources(),
+					AstigmatismModelResourcesDefaultEntryHolder.defaultEntry, 1);
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> entry : internalGetAstigmatismModelResources()
+					.getMap().entrySet())
+			{
+				com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources__ = AstigmatismModelResourcesDefaultEntryHolder.defaultEntry
+						.newBuilderForType().setKey(entry.getKey()).setValue(entry.getValue()).build();
+				size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, astigmatismModelResources__);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings other = (gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) obj;
+
+			boolean result = true;
+			result = result &&
+					internalGetAstigmatismModelResources().equals(other.internalGetAstigmatismModelResources());
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			if (!internalGetAstigmatismModelResources().getMap().isEmpty())
+			{
+				hash = (37 * hash) + ASTIGMATISM_MODEL_RESOURCES_FIELD_NUMBER;
+				hash = (53 * hash) + internalGetAstigmatismModelResources().hashCode();
+			}
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+				com.google.protobuf.ByteString data) throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+				com.google.protobuf.ByteString data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseDelimitedFrom(
+				java.io.InputStream input) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseDelimitedFrom(
+				java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+				com.google.protobuf.CodedInputStream input) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parseFrom(
+				com.google.protobuf.CodedInputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the astigmatism model settings
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.AstigmatismModelSettings}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.AstigmatismModelSettings)
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettingsOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+			}
+
+			@Override
+			@SuppressWarnings({ "rawtypes" })
+			protected com.google.protobuf.MapField internalGetMapField(int number)
+			{
+				switch (number)
+				{
+					case 1:
+						return internalGetAstigmatismModelResources();
+					default:
+						throw new RuntimeException("Invalid map field number: " + number);
+				}
+			}
+
+			@Override
+			@SuppressWarnings({ "rawtypes" })
+			protected com.google.protobuf.MapField internalGetMutableMapField(int number)
+			{
+				switch (number)
+				{
+					case 1:
+						return internalGetMutableAstigmatismModelResources();
+					default:
+						throw new RuntimeException("Invalid map field number: " + number);
+				}
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.class,
+								gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				internalGetMutableAstigmatismModelResources().clear();
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings build()
+			{
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings result = new gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings(
+						this);
+				int from_bitField0_ = bitField0_;
+				result.astigmatismModelResources_ = internalGetAstigmatismModelResources();
+				result.astigmatismModelResources_.makeImmutable();
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings.getDefaultInstance())
+					return this;
+				internalGetMutableAstigmatismModelResources().mergeFrom(other.internalGetAstigmatismModelResources());
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private int bitField0_;
+
+			private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> astigmatismModelResources_;
+
+			private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> internalGetAstigmatismModelResources()
+			{
+				if (astigmatismModelResources_ == null)
+				{
+					return com.google.protobuf.MapField
+							.emptyMapField(AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+				}
+				return astigmatismModelResources_;
+			}
+
+			private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> internalGetMutableAstigmatismModelResources()
+			{
+				onChanged();
+				;
+				if (astigmatismModelResources_ == null)
+				{
+					astigmatismModelResources_ = com.google.protobuf.MapField
+							.newMapField(AstigmatismModelResourcesDefaultEntryHolder.defaultEntry);
+				}
+				if (!astigmatismModelResources_.isMutable())
+				{
+					astigmatismModelResources_ = astigmatismModelResources_.copy();
+				}
+				return astigmatismModelResources_;
+			}
+
+			@Override
+			public int getAstigmatismModelResourcesCount()
+			{
+				return internalGetAstigmatismModelResources().getMap().size();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+
+			@Override
+			public boolean containsAstigmatismModelResources(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				return internalGetAstigmatismModelResources().getMap().containsKey(key);
+			}
+
+			/**
+			 * Use {@link #getAstigmatismModelResourcesMap()} instead.
+			 */
+			@Override
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResources()
+			{
+				return getAstigmatismModelResourcesMap();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+
+			@Override
+			public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getAstigmatismModelResourcesMap()
+			{
+				return internalGetAstigmatismModelResources().getMap();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrDefault(
+					java.lang.String key, gdsc.smlm.data.config.PSFProtos.AstigmatismModel defaultValue)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map = internalGetAstigmatismModelResources()
+						.getMap();
+				return map.containsKey(key) ? map.get(key) : defaultValue;
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.AstigmatismModel getAstigmatismModelResourcesOrThrow(
+					java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> map = internalGetAstigmatismModelResources()
+						.getMap();
+				if (!map.containsKey(key))
+				{
+					throw new java.lang.IllegalArgumentException();
+				}
+				return map.get(key);
+			}
+
+			public Builder clearAstigmatismModelResources()
+			{
+				internalGetMutableAstigmatismModelResources().getMutableMap().clear();
+				return this;
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+
+			public Builder removeAstigmatismModelResources(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableAstigmatismModelResources().getMutableMap().remove(key);
+				return this;
+			}
+
+			/**
+			 * Use alternate mutation accessors instead.
+			 */
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> getMutableAstigmatismModelResources()
+			{
+				return internalGetMutableAstigmatismModelResources().getMutableMap();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+			public Builder putAstigmatismModelResources(java.lang.String key,
+					gdsc.smlm.data.config.PSFProtos.AstigmatismModel value)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				if (value == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableAstigmatismModelResources().getMutableMap().put(key, value);
+				return this;
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.AstigmatismModel&gt; astigmatism_model_resources = 1;</code>
+			 */
+
+			public Builder putAllAstigmatismModelResources(
+					java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.AstigmatismModel> values)
+			{
+				internalGetMutableAstigmatismModelResources().getMutableMap().putAll(values);
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.AstigmatismModelSettings)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.AstigmatismModelSettings)
+		private static final gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<AstigmatismModelSettings> PARSER = new com.google.protobuf.AbstractParser<AstigmatismModelSettings>()
+		{
+			@Override
+			public AstigmatismModelSettings parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new AstigmatismModelSettings(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<AstigmatismModelSettings> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<AstigmatismModelSettings> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface PSFOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.PSF)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <pre>
+		 * The PSF type
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+		 */
+		int getPsfTypeValue();
+
+		/**
+		 * <pre>
+		 * The PSF type
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+		 */
+		gdsc.smlm.data.config.PSFProtos.PSFType getPsfType();
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> getParametersList();
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		gdsc.smlm.data.config.PSFProtos.PSFParameter getParameters(int index);
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		int getParametersCount();
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		java.util.List<? extends gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> getParametersOrBuilderList();
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(int index);
+
+		/**
+		 * <pre>
+		 * The PSF model name. This should contain all the information required to
+		 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+		 * </pre>
+		 *
+		 * <code>string model_name = 3;</code>
+		 */
+		java.lang.String getModelName();
+
+		/**
+		 * <pre>
+		 * The PSF model name. This should contain all the information required to
+		 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+		 * </pre>
+		 *
+		 * <code>string model_name = 3;</code>
+		 */
+		com.google.protobuf.ByteString getModelNameBytes();
+	}
+
+	/**
+	 * <pre>
+	 * Define the Point Spread Function (PSF)
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.PSF}
+	 */
+	public static final class PSF extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.PSF)
+			PSFOrBuilder
+	{
+		// Use PSF.newBuilder() to construct.
+		private PSF(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private PSF()
+		{
+			psfType_ = 0;
+			parameters_ = java.util.Collections.emptyList();
+			modelName_ = "";
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private PSF(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 8:
+						{
+							int rawValue = input.readEnum();
+
+							psfType_ = rawValue;
+							break;
+						}
+						case 18:
+						{
+							if (!((mutable_bitField0_ & 0x00000002) == 0x00000002))
+							{
+								parameters_ = new java.util.ArrayList<gdsc.smlm.data.config.PSFProtos.PSFParameter>();
+								mutable_bitField0_ |= 0x00000002;
+							}
+							parameters_.add(input.readMessage(gdsc.smlm.data.config.PSFProtos.PSFParameter.parser(),
+									extensionRegistry));
+							break;
+						}
+						case 26:
+						{
+							java.lang.String s = input.readStringRequireUtf8();
+
+							modelName_ = s;
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				if (((mutable_bitField0_ & 0x00000002) == 0x00000002))
+				{
+					parameters_ = java.util.Collections.unmodifiableList(parameters_);
+				}
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.PSF.class,
+							gdsc.smlm.data.config.PSFProtos.PSF.Builder.class);
+		}
+
+		private int bitField0_;
+		public static final int PSF_TYPE_FIELD_NUMBER = 1;
+		private int psfType_;
+
+		/**
+		 * <pre>
+		 * The PSF type
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+		 */
+		@Override
+		public int getPsfTypeValue()
+		{
+			return psfType_;
+		}
+
+		/**
+		 * <pre>
+		 * The PSF type
+		 * </pre>
+		 *
+		 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+		 */
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.PSFType getPsfType()
+		{
+			gdsc.smlm.data.config.PSFProtos.PSFType result = gdsc.smlm.data.config.PSFProtos.PSFType.valueOf(psfType_);
+			return result == null ? gdsc.smlm.data.config.PSFProtos.PSFType.UNRECOGNIZED : result;
+		}
+
+		public static final int PARAMETERS_FIELD_NUMBER = 2;
+		private java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> parameters_;
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		@Override
+		public java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> getParametersList()
+		{
+			return parameters_;
+		}
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		@Override
+		public java.util.List<? extends gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> getParametersOrBuilderList()
+		{
+			return parameters_;
+		}
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		@Override
+		public int getParametersCount()
+		{
+			return parameters_.size();
+		}
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.PSFParameter getParameters(int index)
+		{
+			return parameters_.get(index);
+		}
+
+		/**
+		 * <pre>
+		 * The names of the PSF parameters. The results are stored using the standard parameters of 
+		 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+		 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+		 * </pre>
+		 *
+		 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+		 */
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(int index)
+		{
+			return parameters_.get(index);
+		}
+
+		public static final int MODEL_NAME_FIELD_NUMBER = 3;
+		private volatile java.lang.Object modelName_;
+
+		/**
+		 * <pre>
+		 * The PSF model name. This should contain all the information required to
+		 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+		 * </pre>
+		 *
+		 * <code>string model_name = 3;</code>
+		 */
+		@Override
+		public java.lang.String getModelName()
+		{
+			java.lang.Object ref = modelName_;
+			if (ref instanceof java.lang.String)
+			{
+				return (java.lang.String) ref;
+			}
+			else
+			{
+				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				java.lang.String s = bs.toStringUtf8();
+				modelName_ = s;
+				return s;
+			}
+		}
+
+		/**
+		 * <pre>
+		 * The PSF model name. This should contain all the information required to
+		 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+		 * </pre>
+		 *
+		 * <code>string model_name = 3;</code>
+		 */
+		@Override
+		public com.google.protobuf.ByteString getModelNameBytes()
+		{
+			java.lang.Object ref = modelName_;
+			if (ref instanceof java.lang.String)
+			{
+				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				modelName_ = b;
+				return b;
+			}
+			else
+			{
+				return (com.google.protobuf.ByteString) ref;
+			}
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (psfType_ != gdsc.smlm.data.config.PSFProtos.PSFType.PSF_TYPE_NA.getNumber())
+			{
+				output.writeEnum(1, psfType_);
+			}
+			for (int i = 0; i < parameters_.size(); i++)
+			{
+				output.writeMessage(2, parameters_.get(i));
+			}
+			if (!getModelNameBytes().isEmpty())
+			{
+				com.google.protobuf.GeneratedMessageV3.writeString(output, 3, modelName_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (psfType_ != gdsc.smlm.data.config.PSFProtos.PSFType.PSF_TYPE_NA.getNumber())
+			{
+				size += com.google.protobuf.CodedOutputStream.computeEnumSize(1, psfType_);
+			}
+			for (int i = 0; i < parameters_.size(); i++)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeMessageSize(2, parameters_.get(i));
+			}
+			if (!getModelNameBytes().isEmpty())
+			{
+				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, modelName_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.PSF))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.PSF other = (gdsc.smlm.data.config.PSFProtos.PSF) obj;
+
+			boolean result = true;
+			result = result && psfType_ == other.psfType_;
+			result = result && getParametersList().equals(other.getParametersList());
+			result = result && getModelName().equals(other.getModelName());
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + PSF_TYPE_FIELD_NUMBER;
+			hash = (53 * hash) + psfType_;
+			if (getParametersCount() > 0)
+			{
+				hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
+				hash = (53 * hash) + getParametersList().hashCode();
+			}
+			hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
+			hash = (53 * hash) + getModelName().hashCode();
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.PSF prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the Point Spread Function (PSF)
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.PSF}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.PSF)
+				gdsc.smlm.data.config.PSFProtos.PSFOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.PSF.class,
+								gdsc.smlm.data.config.PSFProtos.PSF.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.PSF.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+					getParametersFieldBuilder();
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				psfType_ = 0;
+
+				if (parametersBuilder_ == null)
+				{
+					parameters_ = java.util.Collections.emptyList();
+					bitField0_ = (bitField0_ & ~0x00000002);
+				}
+				else
+				{
+					parametersBuilder_.clear();
+				}
+				modelName_ = "";
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_PSF_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSF getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSF build()
+			{
+				gdsc.smlm.data.config.PSFProtos.PSF result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSF buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.PSF result = new gdsc.smlm.data.config.PSFProtos.PSF(this);
+				int from_bitField0_ = bitField0_;
+				int to_bitField0_ = 0;
+				result.psfType_ = psfType_;
+				if (parametersBuilder_ == null)
+				{
+					if (((bitField0_ & 0x00000002) == 0x00000002))
+					{
+						parameters_ = java.util.Collections.unmodifiableList(parameters_);
+						bitField0_ = (bitField0_ & ~0x00000002);
+					}
+					result.parameters_ = parameters_;
+				}
+				else
+				{
+					result.parameters_ = parametersBuilder_.build();
+				}
+				result.modelName_ = modelName_;
+				result.bitField0_ = to_bitField0_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.PSF)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.PSF) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.PSF other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance())
+					return this;
+				if (other.psfType_ != 0)
+				{
+					setPsfTypeValue(other.getPsfTypeValue());
+				}
+				if (parametersBuilder_ == null)
+				{
+					if (!other.parameters_.isEmpty())
+					{
+						if (parameters_.isEmpty())
+						{
+							parameters_ = other.parameters_;
+							bitField0_ = (bitField0_ & ~0x00000002);
+						}
+						else
+						{
+							ensureParametersIsMutable();
+							parameters_.addAll(other.parameters_);
+						}
+						onChanged();
+					}
+				}
+				else
+				{
+					if (!other.parameters_.isEmpty())
+					{
+						if (parametersBuilder_.isEmpty())
+						{
+							parametersBuilder_.dispose();
+							parametersBuilder_ = null;
+							parameters_ = other.parameters_;
+							bitField0_ = (bitField0_ & ~0x00000002);
+							parametersBuilder_ = com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
+									? getParametersFieldBuilder() : null;
+						}
+						else
+						{
+							parametersBuilder_.addAllMessages(other.parameters_);
+						}
+					}
+				}
+				if (!other.getModelName().isEmpty())
+				{
+					modelName_ = other.modelName_;
+					onChanged();
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.PSF parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.PSF) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private int bitField0_;
+
+			private int psfType_ = 0;
+
+			/**
+			 * <pre>
+			 * The PSF type
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+			 */
+			@Override
+			public int getPsfTypeValue()
+			{
+				return psfType_;
+			}
+
+			/**
+			 * <pre>
+			 * The PSF type
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+			 */
+			public Builder setPsfTypeValue(int value)
+			{
+				psfType_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The PSF type
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+			 */
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFType getPsfType()
+			{
+				gdsc.smlm.data.config.PSFProtos.PSFType result = gdsc.smlm.data.config.PSFProtos.PSFType
+						.valueOf(psfType_);
+				return result == null ? gdsc.smlm.data.config.PSFProtos.PSFType.UNRECOGNIZED : result;
+			}
+
+			/**
+			 * <pre>
+			 * The PSF type
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+			 */
+			public Builder setPsfType(gdsc.smlm.data.config.PSFProtos.PSFType value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				psfType_ = value.getNumber();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The PSF type
+			 * </pre>
+			 *
+			 * <code>.gdsc.smlm.data.config.PSFType psf_type = 1;</code>
+			 */
+			public Builder clearPsfType()
+			{
+
+				psfType_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> parameters_ = java.util.Collections
+					.emptyList();
+
+			private void ensureParametersIsMutable()
+			{
+				if (!((bitField0_ & 0x00000002) == 0x00000002))
+				{
+					parameters_ = new java.util.ArrayList<gdsc.smlm.data.config.PSFProtos.PSFParameter>(parameters_);
+					bitField0_ |= 0x00000002;
+				}
+			}
+
+			private com.google.protobuf.RepeatedFieldBuilderV3<gdsc.smlm.data.config.PSFProtos.PSFParameter, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder, gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> parametersBuilder_;
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			@Override
+			public java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter> getParametersList()
+			{
+				if (parametersBuilder_ == null)
+				{
+					return java.util.Collections.unmodifiableList(parameters_);
+				}
+				else
+				{
+					return parametersBuilder_.getMessageList();
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			@Override
+			public int getParametersCount()
+			{
+				if (parametersBuilder_ == null)
+				{
+					return parameters_.size();
+				}
+				else
+				{
+					return parametersBuilder_.getCount();
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter getParameters(int index)
+			{
+				if (parametersBuilder_ == null)
+				{
+					return parameters_.get(index);
+				}
+				else
+				{
+					return parametersBuilder_.getMessage(index);
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder setParameters(int index, gdsc.smlm.data.config.PSFProtos.PSFParameter value)
+			{
+				if (parametersBuilder_ == null)
+				{
+					if (value == null)
+					{
+						throw new NullPointerException();
+					}
+					ensureParametersIsMutable();
+					parameters_.set(index, value);
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.setMessage(index, value);
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder setParameters(int index,
+					gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder builderForValue)
+			{
+				if (parametersBuilder_ == null)
+				{
+					ensureParametersIsMutable();
+					parameters_.set(index, builderForValue.build());
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.setMessage(index, builderForValue.build());
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder addParameters(gdsc.smlm.data.config.PSFProtos.PSFParameter value)
+			{
+				if (parametersBuilder_ == null)
+				{
+					if (value == null)
+					{
+						throw new NullPointerException();
+					}
+					ensureParametersIsMutable();
+					parameters_.add(value);
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.addMessage(value);
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder addParameters(int index, gdsc.smlm.data.config.PSFProtos.PSFParameter value)
+			{
+				if (parametersBuilder_ == null)
+				{
+					if (value == null)
+					{
+						throw new NullPointerException();
+					}
+					ensureParametersIsMutable();
+					parameters_.add(index, value);
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.addMessage(index, value);
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder addParameters(gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder builderForValue)
+			{
+				if (parametersBuilder_ == null)
+				{
+					ensureParametersIsMutable();
+					parameters_.add(builderForValue.build());
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.addMessage(builderForValue.build());
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder addParameters(int index,
+					gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder builderForValue)
+			{
+				if (parametersBuilder_ == null)
+				{
+					ensureParametersIsMutable();
+					parameters_.add(index, builderForValue.build());
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.addMessage(index, builderForValue.build());
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder addAllParameters(
+					java.lang.Iterable<? extends gdsc.smlm.data.config.PSFProtos.PSFParameter> values)
+			{
+				if (parametersBuilder_ == null)
+				{
+					ensureParametersIsMutable();
+					com.google.protobuf.AbstractMessageLite.Builder.addAll(values, parameters_);
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.addAllMessages(values);
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder clearParameters()
+			{
+				if (parametersBuilder_ == null)
+				{
+					parameters_ = java.util.Collections.emptyList();
+					bitField0_ = (bitField0_ & ~0x00000002);
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.clear();
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public Builder removeParameters(int index)
+			{
+				if (parametersBuilder_ == null)
+				{
+					ensureParametersIsMutable();
+					parameters_.remove(index);
+					onChanged();
+				}
+				else
+				{
+					parametersBuilder_.remove(index);
+				}
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder getParametersBuilder(int index)
+			{
+				return getParametersFieldBuilder().getBuilder(index);
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder getParametersOrBuilder(int index)
+			{
+				if (parametersBuilder_ == null)
+				{
+					return parameters_.get(index);
+				}
+				else
+				{
+					return parametersBuilder_.getMessageOrBuilder(index);
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			@Override
+			public java.util.List<? extends gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> getParametersOrBuilderList()
+			{
+				if (parametersBuilder_ != null)
+				{
+					return parametersBuilder_.getMessageOrBuilderList();
+				}
+				else
+				{
+					return java.util.Collections.unmodifiableList(parameters_);
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder addParametersBuilder()
+			{
+				return getParametersFieldBuilder()
+						.addBuilder(gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance());
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder addParametersBuilder(int index)
+			{
+				return getParametersFieldBuilder().addBuilder(index,
+						gdsc.smlm.data.config.PSFProtos.PSFParameter.getDefaultInstance());
+			}
+
+			/**
+			 * <pre>
+			 * The names of the PSF parameters. The results are stored using the standard parameters of 
+			 * [background, intensity, x, y, z]. Any additional parameters can be stored in the results
+			 * parameters array. The names of the non-standard parameters, in order, can be defined here.
+			 * </pre>
+			 *
+			 * <code>repeated .gdsc.smlm.data.config.PSFParameter parameters = 2;</code>
+			 */
+			public java.util.List<gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder> getParametersBuilderList()
+			{
+				return getParametersFieldBuilder().getBuilderList();
+			}
+
+			private com.google.protobuf.RepeatedFieldBuilderV3<gdsc.smlm.data.config.PSFProtos.PSFParameter, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder, gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder> getParametersFieldBuilder()
+			{
+				if (parametersBuilder_ == null)
+				{
+					parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<gdsc.smlm.data.config.PSFProtos.PSFParameter, gdsc.smlm.data.config.PSFProtos.PSFParameter.Builder, gdsc.smlm.data.config.PSFProtos.PSFParameterOrBuilder>(
+							parameters_, ((bitField0_ & 0x00000002) == 0x00000002), getParentForChildren(), isClean());
+					parameters_ = null;
+				}
+				return parametersBuilder_;
+			}
+
+			private java.lang.Object modelName_ = "";
+
+			/**
+			 * <pre>
+			 * The PSF model name. This should contain all the information required to
+			 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+			 * </pre>
+			 *
+			 * <code>string model_name = 3;</code>
+			 */
+			@Override
+			public java.lang.String getModelName()
+			{
+				java.lang.Object ref = modelName_;
+				if (!(ref instanceof java.lang.String))
+				{
+					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					java.lang.String s = bs.toStringUtf8();
+					modelName_ = s;
+					return s;
+				}
+				else
+				{
+					return (java.lang.String) ref;
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The PSF model name. This should contain all the information required to
+			 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+			 * </pre>
+			 *
+			 * <code>string model_name = 3;</code>
+			 */
+			@Override
+			public com.google.protobuf.ByteString getModelNameBytes()
+			{
+				java.lang.Object ref = modelName_;
+				if (ref instanceof String)
+				{
+					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+							.copyFromUtf8((java.lang.String) ref);
+					modelName_ = b;
+					return b;
+				}
+				else
+				{
+					return (com.google.protobuf.ByteString) ref;
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The PSF model name. This should contain all the information required to
+			 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+			 * </pre>
+			 *
+			 * <code>string model_name = 3;</code>
+			 */
+			public Builder setModelName(java.lang.String value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				modelName_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The PSF model name. This should contain all the information required to
+			 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+			 * </pre>
+			 *
+			 * <code>string model_name = 3;</code>
+			 */
+			public Builder clearModelName()
+			{
+
+				modelName_ = getDefaultInstance().getModelName();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The PSF model name. This should contain all the information required to
+			 * load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
+			 * </pre>
+			 *
+			 * <code>string model_name = 3;</code>
+			 */
+			public Builder setModelNameBytes(com.google.protobuf.ByteString value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+				checkByteStringIsUtf8(value);
+
+				modelName_ = value;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.PSF)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.PSF)
+		private static final gdsc.smlm.data.config.PSFProtos.PSF DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.PSF();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.PSF getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<PSF> PARSER = new com.google.protobuf.AbstractParser<PSF>()
+		{
+			@Override
+			public PSF parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new PSF(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<PSF> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<PSF> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.PSF getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface OffsetOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.Offset)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>double cx = 2;</code>
+		 */
+		double getCx();
+
+		/**
+		 * <code>double cy = 3;</code>
+		 */
+		double getCy();
+	}
+
+	/**
+	 * <pre>
+	 * Define the offset for slice alignment correction
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.Offset}
+	 */
+	public static final class Offset extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.Offset)
+			OffsetOrBuilder
+	{
+		// Use Offset.newBuilder() to construct.
+		private Offset(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private Offset()
+		{
+			cx_ = 0D;
+			cy_ = 0D;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private Offset(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 17:
+						{
+
+							cx_ = input.readDouble();
+							break;
+						}
+						case 25:
+						{
+
+							cy_ = input.readDouble();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.Offset.class,
+							gdsc.smlm.data.config.PSFProtos.Offset.Builder.class);
+		}
+
+		public static final int CX_FIELD_NUMBER = 2;
+		private double cx_;
+
+		/**
+		 * <code>double cx = 2;</code>
+		 */
+		@Override
+		public double getCx()
+		{
+			return cx_;
+		}
+
+		public static final int CY_FIELD_NUMBER = 3;
+		private double cy_;
+
+		/**
+		 * <code>double cy = 3;</code>
+		 */
+		@Override
+		public double getCy()
+		{
+			return cy_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (cx_ != 0D)
+			{
+				output.writeDouble(2, cx_);
+			}
+			if (cy_ != 0D)
+			{
+				output.writeDouble(3, cy_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (cx_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(2, cx_);
+			}
+			if (cy_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(3, cy_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.Offset))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.Offset other = (gdsc.smlm.data.config.PSFProtos.Offset) obj;
+
+			boolean result = true;
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getCx()) == java.lang.Double.doubleToLongBits(other.getCx()));
+			result = result &&
+					(java.lang.Double.doubleToLongBits(getCy()) == java.lang.Double.doubleToLongBits(other.getCy()));
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + CX_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getCx()));
+			hash = (37 * hash) + CY_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getCy()));
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.Offset prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the offset for slice alignment correction
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.Offset}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.Offset)
+				gdsc.smlm.data.config.PSFProtos.OffsetOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.Offset.class,
+								gdsc.smlm.data.config.PSFProtos.Offset.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.Offset.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				cx_ = 0D;
+
+				cy_ = 0D;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_Offset_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.Offset getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.Offset.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.Offset build()
+			{
+				gdsc.smlm.data.config.PSFProtos.Offset result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.Offset buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.Offset result = new gdsc.smlm.data.config.PSFProtos.Offset(this);
+				result.cx_ = cx_;
+				result.cy_ = cy_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.Offset)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.Offset) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.Offset other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.Offset.getDefaultInstance())
+					return this;
+				if (other.getCx() != 0D)
+				{
+					setCx(other.getCx());
+				}
+				if (other.getCy() != 0D)
+				{
+					setCy(other.getCy());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.Offset parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.Offset) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private double cx_;
+
+			/**
+			 * <code>double cx = 2;</code>
+			 */
+			@Override
+			public double getCx()
+			{
+				return cx_;
+			}
+
+			/**
+			 * <code>double cx = 2;</code>
+			 */
+			public Builder setCx(double value)
+			{
+
+				cx_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>double cx = 2;</code>
+			 */
+			public Builder clearCx()
+			{
+
+				cx_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double cy_;
+
+			/**
+			 * <code>double cy = 3;</code>
+			 */
+			@Override
+			public double getCy()
+			{
+				return cy_;
+			}
+
+			/**
+			 * <code>double cy = 3;</code>
+			 */
+			public Builder setCy(double value)
+			{
+
+				cy_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <code>double cy = 3;</code>
+			 */
+			public Builder clearCy()
+			{
+
+				cy_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.Offset)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.Offset)
+		private static final gdsc.smlm.data.config.PSFProtos.Offset DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.Offset();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.Offset getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<Offset> PARSER = new com.google.protobuf.AbstractParser<Offset>()
+		{
+			@Override
+			public Offset parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new Offset(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<Offset> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<Offset> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.Offset getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface ImagePSFOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.ImagePSF)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <pre>
+		 * The number of images in the PSF
+		 * </pre>
+		 *
+		 * <code>int32 image_count = 1;</code>
+		 */
+		int getImageCount();
+
+		/**
+		 * <pre>
+		 * The image containing the focal plane of the PSF. This is 1-indexed.
+		 * </pre>
+		 *
+		 * <code>int32 centre_image = 2;</code>
+		 */
+		int getCentreImage();
+
+		/**
+		 * <pre>
+		 * The size of the PSF pixel in nanometers
+		 * </pre>
+		 *
+		 * <code>double pixel_size = 3;</code>
+		 */
+		double getPixelSize();
+
+		/**
+		 * <pre>
+		 * The depth of the PSF pixel in nanometers
+		 * </pre>
+		 *
+		 * <code>double pixel_depth = 4;</code>
+		 */
+		double getPixelDepth();
+
+		/**
+		 * <pre>
+		 * The Full Width at Half Maxima (FWHM) in image pixels
+		 * </pre>
+		 *
+		 * <code>double fwhm = 5;</code>
+		 */
+		double getFwhm();
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+		int getNotesCount();
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+		boolean containsNotes(java.lang.String key);
+
+		/**
+		 * Use {@link #getNotesMap()} instead.
+		 */
+		@java.lang.Deprecated
+		java.util.Map<java.lang.String, java.lang.String> getNotes();
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+		java.util.Map<java.lang.String, java.lang.String> getNotesMap();
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+
+		java.lang.String getNotesOrDefault(java.lang.String key, java.lang.String defaultValue);
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+
+		java.lang.String getNotesOrThrow(java.lang.String key);
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+		int getOffsetsCount();
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+		boolean containsOffsets(int key);
+
+		/**
+		 * Use {@link #getOffsetsMap()} instead.
+		 */
+		@java.lang.Deprecated
+		java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsets();
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+		java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsetsMap();
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+
+		gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrDefault(int key,
+				gdsc.smlm.data.config.PSFProtos.Offset defaultValue);
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+
+		gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(int key);
+
+		/**
+		 * <pre>
+		 * X-centre. This can be used instead of the offsets. This is the distance
+		 * through the image width that is the x-centre.
+		 * </pre>
+		 *
+		 * <code>double x_centre = 8;</code>
+		 */
+		double getXCentre();
+
+		/**
+		 * <pre>
+		 * Y-centre. This can be used instead of the offsets. This is the distance
+		 * through the image width that is the y-centre.
+		 * </pre>
+		 *
+		 * <code>double y_centre = 9;</code>
+		 */
+		double getYCentre();
+
+		/**
+		 * <pre>
+		 * Z-centre. This can be used instead of the centre_image. This is the distance
+		 * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+		 * should use rounding to the nearest integer and then add 1.
+		 * </pre>
+		 *
+		 * <code>double z_centre = 10;</code>
+		 */
+		double getZCentre();
+	}
+
+	/**
+	 * <pre>
+	 * Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.ImagePSF}
+	 */
+	public static final class ImagePSF extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.ImagePSF)
+			ImagePSFOrBuilder
+	{
+		// Use ImagePSF.newBuilder() to construct.
+		private ImagePSF(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private ImagePSF()
+		{
+			imageCount_ = 0;
+			centreImage_ = 0;
+			pixelSize_ = 0D;
+			pixelDepth_ = 0D;
+			fwhm_ = 0D;
+			xCentre_ = 0D;
+			yCentre_ = 0D;
+			zCentre_ = 0D;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private ImagePSF(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 8:
+						{
+
+							imageCount_ = input.readInt32();
+							break;
+						}
+						case 16:
+						{
+
+							centreImage_ = input.readInt32();
+							break;
+						}
+						case 25:
+						{
+
+							pixelSize_ = input.readDouble();
+							break;
+						}
+						case 33:
+						{
+
+							pixelDepth_ = input.readDouble();
+							break;
+						}
+						case 41:
+						{
+
+							fwhm_ = input.readDouble();
+							break;
+						}
+						case 50:
+						{
+							if (!((mutable_bitField0_ & 0x00000020) == 0x00000020))
+							{
+								notes_ = com.google.protobuf.MapField.newMapField(NotesDefaultEntryHolder.defaultEntry);
+								mutable_bitField0_ |= 0x00000020;
+							}
+							com.google.protobuf.MapEntry<java.lang.String, java.lang.String> notes__ = input
+									.readMessage(NotesDefaultEntryHolder.defaultEntry.getParserForType(),
+											extensionRegistry);
+							notes_.getMutableMap().put(notes__.getKey(), notes__.getValue());
+							break;
+						}
+						case 58:
+						{
+							if (!((mutable_bitField0_ & 0x00000040) == 0x00000040))
+							{
+								offsets_ = com.google.protobuf.MapField
+										.newMapField(OffsetsDefaultEntryHolder.defaultEntry);
+								mutable_bitField0_ |= 0x00000040;
+							}
+							com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> offsets__ = input
+									.readMessage(OffsetsDefaultEntryHolder.defaultEntry.getParserForType(),
+											extensionRegistry);
+							offsets_.getMutableMap().put(offsets__.getKey(), offsets__.getValue());
+							break;
+						}
+						case 65:
+						{
+
+							xCentre_ = input.readDouble();
+							break;
+						}
+						case 73:
+						{
+
+							yCentre_ = input.readDouble();
+							break;
+						}
+						case 81:
+						{
+
+							zCentre_ = input.readDouble();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+		}
+
+		@Override
+		@SuppressWarnings({ "rawtypes" })
+		protected com.google.protobuf.MapField internalGetMapField(int number)
+		{
+			switch (number)
+			{
+				case 6:
+					return internalGetNotes();
+				case 7:
+					return internalGetOffsets();
+				default:
+					throw new RuntimeException("Invalid map field number: " + number);
+			}
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.ImagePSF.class,
+							gdsc.smlm.data.config.PSFProtos.ImagePSF.Builder.class);
+		}
+
+		private int bitField0_;
+		public static final int IMAGE_COUNT_FIELD_NUMBER = 1;
+		private int imageCount_;
+
+		/**
+		 * <pre>
+		 * The number of images in the PSF
+		 * </pre>
+		 *
+		 * <code>int32 image_count = 1;</code>
+		 */
+		@Override
+		public int getImageCount()
+		{
+			return imageCount_;
+		}
+
+		public static final int CENTRE_IMAGE_FIELD_NUMBER = 2;
+		private int centreImage_;
+
+		/**
+		 * <pre>
+		 * The image containing the focal plane of the PSF. This is 1-indexed.
+		 * </pre>
+		 *
+		 * <code>int32 centre_image = 2;</code>
+		 */
+		@Override
+		public int getCentreImage()
+		{
+			return centreImage_;
+		}
+
+		public static final int PIXEL_SIZE_FIELD_NUMBER = 3;
+		private double pixelSize_;
+
+		/**
+		 * <pre>
+		 * The size of the PSF pixel in nanometers
+		 * </pre>
+		 *
+		 * <code>double pixel_size = 3;</code>
+		 */
+		@Override
+		public double getPixelSize()
+		{
+			return pixelSize_;
+		}
+
+		public static final int PIXEL_DEPTH_FIELD_NUMBER = 4;
+		private double pixelDepth_;
+
+		/**
+		 * <pre>
+		 * The depth of the PSF pixel in nanometers
+		 * </pre>
+		 *
+		 * <code>double pixel_depth = 4;</code>
+		 */
+		@Override
+		public double getPixelDepth()
+		{
+			return pixelDepth_;
+		}
+
+		public static final int FWHM_FIELD_NUMBER = 5;
+		private double fwhm_;
+
+		/**
+		 * <pre>
+		 * The Full Width at Half Maxima (FWHM) in image pixels
+		 * </pre>
+		 *
+		 * <code>double fwhm = 5;</code>
+		 */
+		@Override
+		public double getFwhm()
+		{
+			return fwhm_;
+		}
+
+		public static final int NOTES_FIELD_NUMBER = 6;
+
+		private static final class NotesDefaultEntryHolder
+		{
+			static final com.google.protobuf.MapEntry<java.lang.String, java.lang.String> defaultEntry = com.google.protobuf.MapEntry.<java.lang.String, java.lang.String> newDefaultInstance(
+					gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor,
+					com.google.protobuf.WireFormat.FieldType.STRING, "",
+					com.google.protobuf.WireFormat.FieldType.STRING, "");
+		}
+
+		private com.google.protobuf.MapField<java.lang.String, java.lang.String> notes_;
+
+		private com.google.protobuf.MapField<java.lang.String, java.lang.String> internalGetNotes()
+		{
+			if (notes_ == null)
+			{
+				return com.google.protobuf.MapField.emptyMapField(NotesDefaultEntryHolder.defaultEntry);
+			}
+			return notes_;
+		}
+
+		@Override
+		public int getNotesCount()
+		{
+			return internalGetNotes().getMap().size();
+		}
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+
+		@Override
+		public boolean containsNotes(java.lang.String key)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			return internalGetNotes().getMap().containsKey(key);
+		}
+
+		/**
+		 * Use {@link #getNotesMap()} instead.
+		 */
+		@Override
+		@java.lang.Deprecated
+		public java.util.Map<java.lang.String, java.lang.String> getNotes()
+		{
+			return getNotesMap();
+		}
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+
+		@Override
+		public java.util.Map<java.lang.String, java.lang.String> getNotesMap()
+		{
+			return internalGetNotes().getMap();
+		}
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+
+		@Override
+		public java.lang.String getNotesOrDefault(java.lang.String key, java.lang.String defaultValue)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			java.util.Map<java.lang.String, java.lang.String> map = internalGetNotes().getMap();
+			return map.containsKey(key) ? map.get(key) : defaultValue;
+		}
+
+		/**
+		 * <pre>
+		 * Notes about the PSF, added as Key-Value pairs.
+		 * </pre>
+		 *
+		 * <code>map&lt;string, string&gt; notes = 6;</code>
+		 */
+
+		@Override
+		public java.lang.String getNotesOrThrow(java.lang.String key)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			java.util.Map<java.lang.String, java.lang.String> map = internalGetNotes().getMap();
+			if (!map.containsKey(key))
+			{
+				throw new java.lang.IllegalArgumentException();
+			}
+			return map.get(key);
+		}
+
+		public static final int OFFSETS_FIELD_NUMBER = 7;
+
+		private static final class OffsetsDefaultEntryHolder
+		{
+			static final com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> defaultEntry = com.google.protobuf.MapEntry.<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> newDefaultInstance(
+					gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor,
+					com.google.protobuf.WireFormat.FieldType.INT32, 0, com.google.protobuf.WireFormat.FieldType.MESSAGE,
+					gdsc.smlm.data.config.PSFProtos.Offset.getDefaultInstance());
+		}
+
+		private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> offsets_;
+
+		private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> internalGetOffsets()
+		{
+			if (offsets_ == null)
+			{
+				return com.google.protobuf.MapField.emptyMapField(OffsetsDefaultEntryHolder.defaultEntry);
+			}
+			return offsets_;
+		}
+
+		@Override
+		public int getOffsetsCount()
+		{
+			return internalGetOffsets().getMap().size();
+		}
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+
+		@Override
+		public boolean containsOffsets(int key)
+		{
+
+			return internalGetOffsets().getMap().containsKey(key);
+		}
+
+		/**
+		 * Use {@link #getOffsetsMap()} instead.
+		 */
+		@Override
+		@java.lang.Deprecated
+		public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsets()
+		{
+			return getOffsetsMap();
+		}
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+
+		@Override
+		public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsetsMap()
+		{
+			return internalGetOffsets().getMap();
+		}
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrDefault(int key,
+				gdsc.smlm.data.config.PSFProtos.Offset defaultValue)
+		{
+
+			java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map = internalGetOffsets()
+					.getMap();
+			return map.containsKey(key) ? map.get(key) : defaultValue;
+		}
+
+		/**
+		 * <pre>
+		 * The alignment correction for each slice in pixels. This is the shift required to 
+		 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+		 * determined by PSF fitting.
+		 * If missing then the alignment is assumed to be 0,0.
+		 * </pre>
+		 *
+		 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+		 */
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(int key)
+		{
+
+			java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map = internalGetOffsets()
+					.getMap();
+			if (!map.containsKey(key))
+			{
+				throw new java.lang.IllegalArgumentException();
+			}
+			return map.get(key);
+		}
+
+		public static final int X_CENTRE_FIELD_NUMBER = 8;
+		private double xCentre_;
+
+		/**
+		 * <pre>
+		 * X-centre. This can be used instead of the offsets. This is the distance
+		 * through the image width that is the x-centre.
+		 * </pre>
+		 *
+		 * <code>double x_centre = 8;</code>
+		 */
+		@Override
+		public double getXCentre()
+		{
+			return xCentre_;
+		}
+
+		public static final int Y_CENTRE_FIELD_NUMBER = 9;
+		private double yCentre_;
+
+		/**
+		 * <pre>
+		 * Y-centre. This can be used instead of the offsets. This is the distance
+		 * through the image width that is the y-centre.
+		 * </pre>
+		 *
+		 * <code>double y_centre = 9;</code>
+		 */
+		@Override
+		public double getYCentre()
+		{
+			return yCentre_;
+		}
+
+		public static final int Z_CENTRE_FIELD_NUMBER = 10;
+		private double zCentre_;
+
+		/**
+		 * <pre>
+		 * Z-centre. This can be used instead of the centre_image. This is the distance
+		 * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+		 * should use rounding to the nearest integer and then add 1.
+		 * </pre>
+		 *
+		 * <code>double z_centre = 10;</code>
+		 */
+		@Override
+		public double getZCentre()
+		{
+			return zCentre_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (imageCount_ != 0)
+			{
+				output.writeInt32(1, imageCount_);
+			}
+			if (centreImage_ != 0)
+			{
+				output.writeInt32(2, centreImage_);
+			}
+			if (pixelSize_ != 0D)
+			{
+				output.writeDouble(3, pixelSize_);
+			}
+			if (pixelDepth_ != 0D)
+			{
+				output.writeDouble(4, pixelDepth_);
+			}
+			if (fwhm_ != 0D)
+			{
+				output.writeDouble(5, fwhm_);
+			}
+			com.google.protobuf.GeneratedMessageV3.serializeStringMapTo(output, internalGetNotes(),
+					NotesDefaultEntryHolder.defaultEntry, 6);
+			com.google.protobuf.GeneratedMessageV3.serializeIntegerMapTo(output, internalGetOffsets(),
+					OffsetsDefaultEntryHolder.defaultEntry, 7);
+			if (xCentre_ != 0D)
+			{
+				output.writeDouble(8, xCentre_);
+			}
+			if (yCentre_ != 0D)
+			{
+				output.writeDouble(9, yCentre_);
+			}
+			if (zCentre_ != 0D)
+			{
+				output.writeDouble(10, zCentre_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (imageCount_ != 0)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeInt32Size(1, imageCount_);
+			}
+			if (centreImage_ != 0)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, centreImage_);
+			}
+			if (pixelSize_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(3, pixelSize_);
+			}
+			if (pixelDepth_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(4, pixelDepth_);
+			}
+			if (fwhm_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(5, fwhm_);
+			}
+			for (java.util.Map.Entry<java.lang.String, java.lang.String> entry : internalGetNotes().getMap().entrySet())
+			{
+				com.google.protobuf.MapEntry<java.lang.String, java.lang.String> notes__ = NotesDefaultEntryHolder.defaultEntry
+						.newBuilderForType().setKey(entry.getKey()).setValue(entry.getValue()).build();
+				size += com.google.protobuf.CodedOutputStream.computeMessageSize(6, notes__);
+			}
+			for (java.util.Map.Entry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> entry : internalGetOffsets()
+					.getMap().entrySet())
+			{
+				com.google.protobuf.MapEntry<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> offsets__ = OffsetsDefaultEntryHolder.defaultEntry
+						.newBuilderForType().setKey(entry.getKey()).setValue(entry.getValue()).build();
+				size += com.google.protobuf.CodedOutputStream.computeMessageSize(7, offsets__);
+			}
+			if (xCentre_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(8, xCentre_);
+			}
+			if (yCentre_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(9, yCentre_);
+			}
+			if (zCentre_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(10, zCentre_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.ImagePSF))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.ImagePSF other = (gdsc.smlm.data.config.PSFProtos.ImagePSF) obj;
+
+			boolean result = true;
+			result = result && (getImageCount() == other.getImageCount());
+			result = result && (getCentreImage() == other.getCentreImage());
+			result = result && (java.lang.Double.doubleToLongBits(getPixelSize()) == java.lang.Double
+					.doubleToLongBits(other.getPixelSize()));
+			result = result && (java.lang.Double.doubleToLongBits(getPixelDepth()) == java.lang.Double
+					.doubleToLongBits(other.getPixelDepth()));
+			result = result && (java.lang.Double.doubleToLongBits(getFwhm()) == java.lang.Double
+					.doubleToLongBits(other.getFwhm()));
+			result = result && internalGetNotes().equals(other.internalGetNotes());
+			result = result && internalGetOffsets().equals(other.internalGetOffsets());
+			result = result && (java.lang.Double.doubleToLongBits(getXCentre()) == java.lang.Double
+					.doubleToLongBits(other.getXCentre()));
+			result = result && (java.lang.Double.doubleToLongBits(getYCentre()) == java.lang.Double
+					.doubleToLongBits(other.getYCentre()));
+			result = result && (java.lang.Double.doubleToLongBits(getZCentre()) == java.lang.Double
+					.doubleToLongBits(other.getZCentre()));
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + IMAGE_COUNT_FIELD_NUMBER;
+			hash = (53 * hash) + getImageCount();
+			hash = (37 * hash) + CENTRE_IMAGE_FIELD_NUMBER;
+			hash = (53 * hash) + getCentreImage();
+			hash = (37 * hash) + PIXEL_SIZE_FIELD_NUMBER;
+			hash = (53 * hash) +
+					com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getPixelSize()));
+			hash = (37 * hash) + PIXEL_DEPTH_FIELD_NUMBER;
+			hash = (53 * hash) +
+					com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getPixelDepth()));
+			hash = (37 * hash) + FWHM_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getFwhm()));
+			if (!internalGetNotes().getMap().isEmpty())
+			{
+				hash = (37 * hash) + NOTES_FIELD_NUMBER;
+				hash = (53 * hash) + internalGetNotes().hashCode();
+			}
+			if (!internalGetOffsets().getMap().isEmpty())
+			{
+				hash = (37 * hash) + OFFSETS_FIELD_NUMBER;
+				hash = (53 * hash) + internalGetOffsets().hashCode();
+			}
+			hash = (37 * hash) + X_CENTRE_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getXCentre()));
+			hash = (37 * hash) + Y_CENTRE_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getYCentre()));
+			hash = (37 * hash) + Z_CENTRE_FIELD_NUMBER;
+			hash = (53 * hash) + com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getZCentre()));
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(com.google.protobuf.CodedInputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF parseFrom(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.ImagePSF prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the settings of an observed Point Spread Function (PSF) represented as an image stack.
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.ImagePSF}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.ImagePSF)
+				gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+			}
+
+			@Override
+			@SuppressWarnings({ "rawtypes" })
+			protected com.google.protobuf.MapField internalGetMapField(int number)
+			{
+				switch (number)
+				{
+					case 6:
+						return internalGetNotes();
+					case 7:
+						return internalGetOffsets();
+					default:
+						throw new RuntimeException("Invalid map field number: " + number);
+				}
+			}
+
+			@Override
+			@SuppressWarnings({ "rawtypes" })
+			protected com.google.protobuf.MapField internalGetMutableMapField(int number)
+			{
+				switch (number)
+				{
+					case 6:
+						return internalGetMutableNotes();
+					case 7:
+						return internalGetMutableOffsets();
+					default:
+						throw new RuntimeException("Invalid map field number: " + number);
+				}
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.ImagePSF.class,
+								gdsc.smlm.data.config.PSFProtos.ImagePSF.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.ImagePSF.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				imageCount_ = 0;
+
+				centreImage_ = 0;
+
+				pixelSize_ = 0D;
+
+				pixelDepth_ = 0D;
+
+				fwhm_ = 0D;
+
+				internalGetMutableNotes().clear();
+				internalGetMutableOffsets().clear();
+				xCentre_ = 0D;
+
+				yCentre_ = 0D;
+
+				zCentre_ = 0D;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.ImagePSF getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.ImagePSF.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.ImagePSF build()
+			{
+				gdsc.smlm.data.config.PSFProtos.ImagePSF result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.ImagePSF buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.ImagePSF result = new gdsc.smlm.data.config.PSFProtos.ImagePSF(this);
+				int from_bitField0_ = bitField0_;
+				int to_bitField0_ = 0;
+				result.imageCount_ = imageCount_;
+				result.centreImage_ = centreImage_;
+				result.pixelSize_ = pixelSize_;
+				result.pixelDepth_ = pixelDepth_;
+				result.fwhm_ = fwhm_;
+				result.notes_ = internalGetNotes();
+				result.notes_.makeImmutable();
+				result.offsets_ = internalGetOffsets();
+				result.offsets_.makeImmutable();
+				result.xCentre_ = xCentre_;
+				result.yCentre_ = yCentre_;
+				result.zCentre_ = zCentre_;
+				result.bitField0_ = to_bitField0_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.ImagePSF)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.ImagePSF) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.ImagePSF other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.ImagePSF.getDefaultInstance())
+					return this;
+				if (other.getImageCount() != 0)
+				{
+					setImageCount(other.getImageCount());
+				}
+				if (other.getCentreImage() != 0)
+				{
+					setCentreImage(other.getCentreImage());
+				}
+				if (other.getPixelSize() != 0D)
+				{
+					setPixelSize(other.getPixelSize());
+				}
+				if (other.getPixelDepth() != 0D)
+				{
+					setPixelDepth(other.getPixelDepth());
+				}
+				if (other.getFwhm() != 0D)
+				{
+					setFwhm(other.getFwhm());
+				}
+				internalGetMutableNotes().mergeFrom(other.internalGetNotes());
+				internalGetMutableOffsets().mergeFrom(other.internalGetOffsets());
+				if (other.getXCentre() != 0D)
+				{
+					setXCentre(other.getXCentre());
+				}
+				if (other.getYCentre() != 0D)
+				{
+					setYCentre(other.getYCentre());
+				}
+				if (other.getZCentre() != 0D)
+				{
+					setZCentre(other.getZCentre());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.ImagePSF parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.ImagePSF) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private int bitField0_;
+
+			private int imageCount_;
+
+			/**
+			 * <pre>
+			 * The number of images in the PSF
+			 * </pre>
+			 *
+			 * <code>int32 image_count = 1;</code>
+			 */
+			@Override
+			public int getImageCount()
+			{
+				return imageCount_;
+			}
+
+			/**
+			 * <pre>
+			 * The number of images in the PSF
+			 * </pre>
+			 *
+			 * <code>int32 image_count = 1;</code>
+			 */
+			public Builder setImageCount(int value)
+			{
+
+				imageCount_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The number of images in the PSF
+			 * </pre>
+			 *
+			 * <code>int32 image_count = 1;</code>
+			 */
+			public Builder clearImageCount()
+			{
+
+				imageCount_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private int centreImage_;
+
+			/**
+			 * <pre>
+			 * The image containing the focal plane of the PSF. This is 1-indexed.
+			 * </pre>
+			 *
+			 * <code>int32 centre_image = 2;</code>
+			 */
+			@Override
+			public int getCentreImage()
+			{
+				return centreImage_;
+			}
+
+			/**
+			 * <pre>
+			 * The image containing the focal plane of the PSF. This is 1-indexed.
+			 * </pre>
+			 *
+			 * <code>int32 centre_image = 2;</code>
+			 */
+			public Builder setCentreImage(int value)
+			{
+
+				centreImage_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The image containing the focal plane of the PSF. This is 1-indexed.
+			 * </pre>
+			 *
+			 * <code>int32 centre_image = 2;</code>
+			 */
+			public Builder clearCentreImage()
+			{
+
+				centreImage_ = 0;
+				onChanged();
+				return this;
+			}
+
+			private double pixelSize_;
+
+			/**
+			 * <pre>
+			 * The size of the PSF pixel in nanometers
+			 * </pre>
+			 *
+			 * <code>double pixel_size = 3;</code>
+			 */
+			@Override
+			public double getPixelSize()
+			{
+				return pixelSize_;
+			}
+
+			/**
+			 * <pre>
+			 * The size of the PSF pixel in nanometers
+			 * </pre>
+			 *
+			 * <code>double pixel_size = 3;</code>
+			 */
+			public Builder setPixelSize(double value)
+			{
+
+				pixelSize_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The size of the PSF pixel in nanometers
+			 * </pre>
+			 *
+			 * <code>double pixel_size = 3;</code>
+			 */
+			public Builder clearPixelSize()
+			{
+
+				pixelSize_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double pixelDepth_;
+
+			/**
+			 * <pre>
+			 * The depth of the PSF pixel in nanometers
+			 * </pre>
+			 *
+			 * <code>double pixel_depth = 4;</code>
+			 */
+			@Override
+			public double getPixelDepth()
+			{
+				return pixelDepth_;
+			}
+
+			/**
+			 * <pre>
+			 * The depth of the PSF pixel in nanometers
+			 * </pre>
+			 *
+			 * <code>double pixel_depth = 4;</code>
+			 */
+			public Builder setPixelDepth(double value)
+			{
+
+				pixelDepth_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The depth of the PSF pixel in nanometers
+			 * </pre>
+			 *
+			 * <code>double pixel_depth = 4;</code>
+			 */
+			public Builder clearPixelDepth()
+			{
+
+				pixelDepth_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double fwhm_;
+
+			/**
+			 * <pre>
+			 * The Full Width at Half Maxima (FWHM) in image pixels
+			 * </pre>
+			 *
+			 * <code>double fwhm = 5;</code>
+			 */
+			@Override
+			public double getFwhm()
+			{
+				return fwhm_;
+			}
+
+			/**
+			 * <pre>
+			 * The Full Width at Half Maxima (FWHM) in image pixels
+			 * </pre>
+			 *
+			 * <code>double fwhm = 5;</code>
+			 */
+			public Builder setFwhm(double value)
+			{
+
+				fwhm_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The Full Width at Half Maxima (FWHM) in image pixels
+			 * </pre>
+			 *
+			 * <code>double fwhm = 5;</code>
+			 */
+			public Builder clearFwhm()
+			{
+
+				fwhm_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private com.google.protobuf.MapField<java.lang.String, java.lang.String> notes_;
+
+			private com.google.protobuf.MapField<java.lang.String, java.lang.String> internalGetNotes()
+			{
+				if (notes_ == null)
+				{
+					return com.google.protobuf.MapField.emptyMapField(NotesDefaultEntryHolder.defaultEntry);
+				}
+				return notes_;
+			}
+
+			private com.google.protobuf.MapField<java.lang.String, java.lang.String> internalGetMutableNotes()
+			{
+				onChanged();
+				;
+				if (notes_ == null)
+				{
+					notes_ = com.google.protobuf.MapField.newMapField(NotesDefaultEntryHolder.defaultEntry);
+				}
+				if (!notes_.isMutable())
+				{
+					notes_ = notes_.copy();
+				}
+				return notes_;
+			}
+
+			@Override
+			public int getNotesCount()
+			{
+				return internalGetNotes().getMap().size();
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+
+			@Override
+			public boolean containsNotes(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				return internalGetNotes().getMap().containsKey(key);
+			}
+
+			/**
+			 * Use {@link #getNotesMap()} instead.
+			 */
+			@Override
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.String, java.lang.String> getNotes()
+			{
+				return getNotesMap();
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+
+			@Override
+			public java.util.Map<java.lang.String, java.lang.String> getNotesMap()
+			{
+				return internalGetNotes().getMap();
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+
+			@Override
+			public java.lang.String getNotesOrDefault(java.lang.String key, java.lang.String defaultValue)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				java.util.Map<java.lang.String, java.lang.String> map = internalGetNotes().getMap();
+				return map.containsKey(key) ? map.get(key) : defaultValue;
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+
+			@Override
+			public java.lang.String getNotesOrThrow(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				java.util.Map<java.lang.String, java.lang.String> map = internalGetNotes().getMap();
+				if (!map.containsKey(key))
+				{
+					throw new java.lang.IllegalArgumentException();
+				}
+				return map.get(key);
+			}
+
+			public Builder clearNotes()
+			{
+				internalGetMutableNotes().getMutableMap().clear();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+
+			public Builder removeNotes(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableNotes().getMutableMap().remove(key);
+				return this;
+			}
+
+			/**
+			 * Use alternate mutation accessors instead.
+			 */
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.String, java.lang.String> getMutableNotes()
+			{
+				return internalGetMutableNotes().getMutableMap();
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+			public Builder putNotes(java.lang.String key, java.lang.String value)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				if (value == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableNotes().getMutableMap().put(key, value);
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Notes about the PSF, added as Key-Value pairs.
+			 * </pre>
+			 *
+			 * <code>map&lt;string, string&gt; notes = 6;</code>
+			 */
+
+			public Builder putAllNotes(java.util.Map<java.lang.String, java.lang.String> values)
+			{
+				internalGetMutableNotes().getMutableMap().putAll(values);
+				return this;
+			}
+
+			private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> offsets_;
+
+			private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> internalGetOffsets()
+			{
+				if (offsets_ == null)
+				{
+					return com.google.protobuf.MapField.emptyMapField(OffsetsDefaultEntryHolder.defaultEntry);
+				}
+				return offsets_;
+			}
+
+			private com.google.protobuf.MapField<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> internalGetMutableOffsets()
+			{
+				onChanged();
+				;
+				if (offsets_ == null)
+				{
+					offsets_ = com.google.protobuf.MapField.newMapField(OffsetsDefaultEntryHolder.defaultEntry);
+				}
+				if (!offsets_.isMutable())
+				{
+					offsets_ = offsets_.copy();
+				}
+				return offsets_;
+			}
+
+			@Override
+			public int getOffsetsCount()
+			{
+				return internalGetOffsets().getMap().size();
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+
+			@Override
+			public boolean containsOffsets(int key)
+			{
+
+				return internalGetOffsets().getMap().containsKey(key);
+			}
+
+			/**
+			 * Use {@link #getOffsetsMap()} instead.
+			 */
+			@Override
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsets()
+			{
+				return getOffsetsMap();
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+
+			@Override
+			public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getOffsetsMap()
+			{
+				return internalGetOffsets().getMap();
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrDefault(int key,
+					gdsc.smlm.data.config.PSFProtos.Offset defaultValue)
+			{
+
+				java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map = internalGetOffsets()
+						.getMap();
+				return map.containsKey(key) ? map.get(key) : defaultValue;
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.Offset getOffsetsOrThrow(int key)
+			{
+
+				java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> map = internalGetOffsets()
+						.getMap();
+				if (!map.containsKey(key))
+				{
+					throw new java.lang.IllegalArgumentException();
+				}
+				return map.get(key);
+			}
+
+			public Builder clearOffsets()
+			{
+				internalGetMutableOffsets().getMutableMap().clear();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+
+			public Builder removeOffsets(int key)
+			{
+
+				internalGetMutableOffsets().getMutableMap().remove(key);
+				return this;
+			}
+
+			/**
+			 * Use alternate mutation accessors instead.
+			 */
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> getMutableOffsets()
+			{
+				return internalGetMutableOffsets().getMutableMap();
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+			public Builder putOffsets(int key, gdsc.smlm.data.config.PSFProtos.Offset value)
+			{
+
+				if (value == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableOffsets().getMutableMap().put(key, value);
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The alignment correction for each slice in pixels. This is the shift required to 
+			 * move the centre of the image to the centre of the PSF. The PSF centre may be 
+			 * determined by PSF fitting.
+			 * If missing then the alignment is assumed to be 0,0.
+			 * </pre>
+			 *
+			 * <code>map&lt;int32, .gdsc.smlm.data.config.Offset&gt; offsets = 7;</code>
+			 */
+
+			public Builder putAllOffsets(
+					java.util.Map<java.lang.Integer, gdsc.smlm.data.config.PSFProtos.Offset> values)
+			{
+				internalGetMutableOffsets().getMutableMap().putAll(values);
+				return this;
+			}
+
+			private double xCentre_;
+
+			/**
+			 * <pre>
+			 * X-centre. This can be used instead of the offsets. This is the distance
+			 * through the image width that is the x-centre.
+			 * </pre>
+			 *
+			 * <code>double x_centre = 8;</code>
+			 */
+			@Override
+			public double getXCentre()
+			{
+				return xCentre_;
+			}
+
+			/**
+			 * <pre>
+			 * X-centre. This can be used instead of the offsets. This is the distance
+			 * through the image width that is the x-centre.
+			 * </pre>
+			 *
+			 * <code>double x_centre = 8;</code>
+			 */
+			public Builder setXCentre(double value)
+			{
+
+				xCentre_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * X-centre. This can be used instead of the offsets. This is the distance
+			 * through the image width that is the x-centre.
+			 * </pre>
+			 *
+			 * <code>double x_centre = 8;</code>
+			 */
+			public Builder clearXCentre()
+			{
+
+				xCentre_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double yCentre_;
+
+			/**
+			 * <pre>
+			 * Y-centre. This can be used instead of the offsets. This is the distance
+			 * through the image width that is the y-centre.
+			 * </pre>
+			 *
+			 * <code>double y_centre = 9;</code>
+			 */
+			@Override
+			public double getYCentre()
+			{
+				return yCentre_;
+			}
+
+			/**
+			 * <pre>
+			 * Y-centre. This can be used instead of the offsets. This is the distance
+			 * through the image width that is the y-centre.
+			 * </pre>
+			 *
+			 * <code>double y_centre = 9;</code>
+			 */
+			public Builder setYCentre(double value)
+			{
+
+				yCentre_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Y-centre. This can be used instead of the offsets. This is the distance
+			 * through the image width that is the y-centre.
+			 * </pre>
+			 *
+			 * <code>double y_centre = 9;</code>
+			 */
+			public Builder clearYCentre()
+			{
+
+				yCentre_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			private double zCentre_;
+
+			/**
+			 * <pre>
+			 * Z-centre. This can be used instead of the centre_image. This is the distance
+			 * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+			 * should use rounding to the nearest integer and then add 1.
+			 * </pre>
+			 *
+			 * <code>double z_centre = 10;</code>
+			 */
+			@Override
+			public double getZCentre()
+			{
+				return zCentre_;
+			}
+
+			/**
+			 * <pre>
+			 * Z-centre. This can be used instead of the centre_image. This is the distance
+			 * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+			 * should use rounding to the nearest integer and then add 1.
+			 * </pre>
+			 *
+			 * <code>double z_centre = 10;</code>
+			 */
+			public Builder setZCentre(double value)
+			{
+
+				zCentre_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * Z-centre. This can be used instead of the centre_image. This is the distance
+			 * through the image stack that is the z-centre. Conversion to the 1-indexed centre_image 
+			 * should use rounding to the nearest integer and then add 1.
+			 * </pre>
+			 *
+			 * <code>double z_centre = 10;</code>
+			 */
+			public Builder clearZCentre()
+			{
+
+				zCentre_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.ImagePSF)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.ImagePSF)
+		private static final gdsc.smlm.data.config.PSFProtos.ImagePSF DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.ImagePSF();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.ImagePSF getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<ImagePSF> PARSER = new com.google.protobuf.AbstractParser<ImagePSF>()
+		{
+			@Override
+			public ImagePSF parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new ImagePSF(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<ImagePSF> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<ImagePSF> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.ImagePSF getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface CubicSplineResourceOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineResource)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <pre>
+		 * The filename where the spline data is stored
+		 * </pre>
+		 *
+		 * <code>string filename = 1;</code>
+		 */
+		java.lang.String getFilename();
+
+		/**
+		 * <pre>
+		 * The filename where the spline data is stored
+		 * </pre>
+		 *
+		 * <code>string filename = 1;</code>
+		 */
+		com.google.protobuf.ByteString getFilenameBytes();
+
+		/**
+		 * <pre>
+		 * The size of the spline scale in nanometers
+		 * </pre>
+		 *
+		 * <code>double spline_scale = 2;</code>
+		 */
+		double getSplineScale();
+	}
+
+	/**
+	 * <pre>
+	 * Define a cubic spline resource that can be loaded
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.CubicSplineResource}
+	 */
+	public static final class CubicSplineResource extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineResource)
+			CubicSplineResourceOrBuilder
+	{
+		// Use CubicSplineResource.newBuilder() to construct.
+		private CubicSplineResource(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private CubicSplineResource()
+		{
+			filename_ = "";
+			splineScale_ = 0D;
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private CubicSplineResource(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 10:
+						{
+							java.lang.String s = input.readStringRequireUtf8();
+
+							filename_ = s;
+							break;
+						}
+						case 17:
+						{
+
+							splineScale_ = input.readDouble();
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.CubicSplineResource.class,
+							gdsc.smlm.data.config.PSFProtos.CubicSplineResource.Builder.class);
+		}
+
+		public static final int FILENAME_FIELD_NUMBER = 1;
+		private volatile java.lang.Object filename_;
+
+		/**
+		 * <pre>
+		 * The filename where the spline data is stored
+		 * </pre>
+		 *
+		 * <code>string filename = 1;</code>
+		 */
+		@Override
+		public java.lang.String getFilename()
+		{
+			java.lang.Object ref = filename_;
+			if (ref instanceof java.lang.String)
+			{
+				return (java.lang.String) ref;
+			}
+			else
+			{
+				com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+				java.lang.String s = bs.toStringUtf8();
+				filename_ = s;
+				return s;
+			}
+		}
+
+		/**
+		 * <pre>
+		 * The filename where the spline data is stored
+		 * </pre>
+		 *
+		 * <code>string filename = 1;</code>
+		 */
+		@Override
+		public com.google.protobuf.ByteString getFilenameBytes()
+		{
+			java.lang.Object ref = filename_;
+			if (ref instanceof java.lang.String)
+			{
+				com.google.protobuf.ByteString b = com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
+				filename_ = b;
+				return b;
+			}
+			else
+			{
+				return (com.google.protobuf.ByteString) ref;
+			}
+		}
+
+		public static final int SPLINE_SCALE_FIELD_NUMBER = 2;
+		private double splineScale_;
+
+		/**
+		 * <pre>
+		 * The size of the spline scale in nanometers
+		 * </pre>
+		 *
+		 * <code>double spline_scale = 2;</code>
+		 */
+		@Override
+		public double getSplineScale()
+		{
+			return splineScale_;
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			if (!getFilenameBytes().isEmpty())
+			{
+				com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filename_);
+			}
+			if (splineScale_ != 0D)
+			{
+				output.writeDouble(2, splineScale_);
+			}
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			if (!getFilenameBytes().isEmpty())
+			{
+				size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filename_);
+			}
+			if (splineScale_ != 0D)
+			{
+				size += com.google.protobuf.CodedOutputStream.computeDoubleSize(2, splineScale_);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineResource))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.CubicSplineResource other = (gdsc.smlm.data.config.PSFProtos.CubicSplineResource) obj;
+
+			boolean result = true;
+			result = result && getFilename().equals(other.getFilename());
+			result = result && (java.lang.Double.doubleToLongBits(getSplineScale()) == java.lang.Double
+					.doubleToLongBits(other.getSplineScale()));
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+			hash = (53 * hash) + getFilename().hashCode();
+			hash = (37 * hash) + SPLINE_SCALE_FIELD_NUMBER;
+			hash = (53 * hash) +
+					com.google.protobuf.Internal.hashLong(java.lang.Double.doubleToLongBits(getSplineScale()));
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+				com.google.protobuf.CodedInputStream input) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource parseFrom(
+				com.google.protobuf.CodedInputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.CubicSplineResource prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define a cubic spline resource that can be loaded
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.CubicSplineResource}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineResource)
+				gdsc.smlm.data.config.PSFProtos.CubicSplineResourceOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.CubicSplineResource.class,
+								gdsc.smlm.data.config.PSFProtos.CubicSplineResource.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.CubicSplineResource.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				filename_ = "";
+
+				splineScale_ = 0D;
+
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineResource build()
+			{
+				gdsc.smlm.data.config.PSFProtos.CubicSplineResource result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineResource buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.CubicSplineResource result = new gdsc.smlm.data.config.PSFProtos.CubicSplineResource(
+						this);
+				result.filename_ = filename_;
+				result.splineScale_ = splineScale_;
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineResource)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.CubicSplineResource) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.CubicSplineResource other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance())
+					return this;
+				if (!other.getFilename().isEmpty())
+				{
+					filename_ = other.filename_;
+					onChanged();
+				}
+				if (other.getSplineScale() != 0D)
+				{
+					setSplineScale(other.getSplineScale());
+				}
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.CubicSplineResource parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.CubicSplineResource) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private java.lang.Object filename_ = "";
+
+			/**
+			 * <pre>
+			 * The filename where the spline data is stored
+			 * </pre>
+			 *
+			 * <code>string filename = 1;</code>
+			 */
+			@Override
+			public java.lang.String getFilename()
+			{
+				java.lang.Object ref = filename_;
+				if (!(ref instanceof java.lang.String))
+				{
+					com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+					java.lang.String s = bs.toStringUtf8();
+					filename_ = s;
+					return s;
+				}
+				else
+				{
+					return (java.lang.String) ref;
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The filename where the spline data is stored
+			 * </pre>
+			 *
+			 * <code>string filename = 1;</code>
+			 */
+			@Override
+			public com.google.protobuf.ByteString getFilenameBytes()
+			{
+				java.lang.Object ref = filename_;
+				if (ref instanceof String)
+				{
+					com.google.protobuf.ByteString b = com.google.protobuf.ByteString
+							.copyFromUtf8((java.lang.String) ref);
+					filename_ = b;
+					return b;
+				}
+				else
+				{
+					return (com.google.protobuf.ByteString) ref;
+				}
+			}
+
+			/**
+			 * <pre>
+			 * The filename where the spline data is stored
+			 * </pre>
+			 *
+			 * <code>string filename = 1;</code>
+			 */
+			public Builder setFilename(java.lang.String value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+
+				filename_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The filename where the spline data is stored
+			 * </pre>
+			 *
+			 * <code>string filename = 1;</code>
+			 */
+			public Builder clearFilename()
+			{
+
+				filename_ = getDefaultInstance().getFilename();
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The filename where the spline data is stored
+			 * </pre>
+			 *
+			 * <code>string filename = 1;</code>
+			 */
+			public Builder setFilenameBytes(com.google.protobuf.ByteString value)
+			{
+				if (value == null)
+				{
+					throw new NullPointerException();
+				}
+				checkByteStringIsUtf8(value);
+
+				filename_ = value;
+				onChanged();
+				return this;
+			}
+
+			private double splineScale_;
+
+			/**
+			 * <pre>
+			 * The size of the spline scale in nanometers
+			 * </pre>
+			 *
+			 * <code>double spline_scale = 2;</code>
+			 */
+			@Override
+			public double getSplineScale()
+			{
+				return splineScale_;
+			}
+
+			/**
+			 * <pre>
+			 * The size of the spline scale in nanometers
+			 * </pre>
+			 *
+			 * <code>double spline_scale = 2;</code>
+			 */
+			public Builder setSplineScale(double value)
+			{
+
+				splineScale_ = value;
+				onChanged();
+				return this;
+			}
+
+			/**
+			 * <pre>
+			 * The size of the spline scale in nanometers
+			 * </pre>
+			 *
+			 * <code>double spline_scale = 2;</code>
+			 */
+			public Builder clearSplineScale()
+			{
+
+				splineScale_ = 0D;
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineResource)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineResource)
+		private static final gdsc.smlm.data.config.PSFProtos.CubicSplineResource DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.CubicSplineResource();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<CubicSplineResource> PARSER = new com.google.protobuf.AbstractParser<CubicSplineResource>()
+		{
+			@Override
+			public CubicSplineResource parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new CubicSplineResource(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<CubicSplineResource> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<CubicSplineResource> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	public interface CubicSplineSettingsOrBuilder extends
+			// @@protoc_insertion_point(interface_extends:gdsc.smlm.data.config.CubicSplineSettings)
+			com.google.protobuf.MessageOrBuilder
+	{
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+		int getCubicSplineResourcesCount();
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+		boolean containsCubicSplineResources(java.lang.String key);
+
+		/**
+		 * Use {@link #getCubicSplineResourcesMap()} instead.
+		 */
+		@java.lang.Deprecated
+		java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources();
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+		java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap();
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+
+		gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(java.lang.String key,
+				gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue);
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+
+		gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(java.lang.String key);
+	}
+
+	/**
+	 * <pre>
+	 * Define the cubic spline settings
+	 * </pre>
+	 *
+	 * Protobuf type {@code gdsc.smlm.data.config.CubicSplineSettings}
+	 */
+	public static final class CubicSplineSettings extends com.google.protobuf.GeneratedMessageV3 implements
+			// @@protoc_insertion_point(message_implements:gdsc.smlm.data.config.CubicSplineSettings)
+			CubicSplineSettingsOrBuilder
+	{
+		// Use CubicSplineSettings.newBuilder() to construct.
+		private CubicSplineSettings(com.google.protobuf.GeneratedMessageV3.Builder<?> builder)
+		{
+			super(builder);
+		}
+
+		private CubicSplineSettings()
+		{
+		}
+
+		@java.lang.Override
+		public final com.google.protobuf.UnknownFieldSet getUnknownFields()
+		{
+			return com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+		}
+
+		private CubicSplineSettings(com.google.protobuf.CodedInputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			this();
+			int mutable_bitField0_ = 0;
+			try
+			{
+				boolean done = false;
+				while (!done)
+				{
+					int tag = input.readTag();
+					switch (tag)
+					{
+						case 0:
+							done = true;
+							break;
+						default:
+						{
+							if (!input.skipField(tag))
+							{
+								done = true;
+							}
+							break;
+						}
+						case 10:
+						{
+							if (!((mutable_bitField0_ & 0x00000001) == 0x00000001))
+							{
+								cubicSplineResources_ = com.google.protobuf.MapField
+										.newMapField(CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+								mutable_bitField0_ |= 0x00000001;
+							}
+							com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources__ = input
+									.readMessage(CubicSplineResourcesDefaultEntryHolder.defaultEntry.getParserForType(),
+											extensionRegistry);
+							cubicSplineResources_.getMutableMap().put(cubicSplineResources__.getKey(),
+									cubicSplineResources__.getValue());
+							break;
+						}
+					}
+				}
+			}
+			catch (com.google.protobuf.InvalidProtocolBufferException e)
+			{
+				throw e.setUnfinishedMessage(this);
+			}
+			catch (java.io.IOException e)
+			{
+				throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
+			}
+			finally
+			{
+				makeExtensionsImmutable();
+			}
+		}
+
+		public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+		}
+
+		@Override
+		@SuppressWarnings({ "rawtypes" })
+		protected com.google.protobuf.MapField internalGetMapField(int number)
+		{
+			switch (number)
+			{
+				case 1:
+					return internalGetCubicSplineResources();
+				default:
+					throw new RuntimeException("Invalid map field number: " + number);
+			}
+		}
+
+		@Override
+		protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+		{
+			return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable
+					.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.class,
+							gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.Builder.class);
+		}
+
+		public static final int CUBIC_SPLINE_RESOURCES_FIELD_NUMBER = 1;
+
+		private static final class CubicSplineResourcesDefaultEntryHolder
+		{
+			static final com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> defaultEntry = com.google.protobuf.MapEntry.<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> newDefaultInstance(
+					gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor,
+					com.google.protobuf.WireFormat.FieldType.STRING, "",
+					com.google.protobuf.WireFormat.FieldType.MESSAGE,
+					gdsc.smlm.data.config.PSFProtos.CubicSplineResource.getDefaultInstance());
+		}
+
+		private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources_;
+
+		private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> internalGetCubicSplineResources()
+		{
+			if (cubicSplineResources_ == null)
+			{
+				return com.google.protobuf.MapField.emptyMapField(CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+			}
+			return cubicSplineResources_;
+		}
+
+		@Override
+		public int getCubicSplineResourcesCount()
+		{
+			return internalGetCubicSplineResources().getMap().size();
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+
+		@Override
+		public boolean containsCubicSplineResources(java.lang.String key)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			return internalGetCubicSplineResources().getMap().containsKey(key);
+		}
+
+		/**
+		 * Use {@link #getCubicSplineResourcesMap()} instead.
+		 */
+		@Override
+		@java.lang.Deprecated
+		public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources()
+		{
+			return getCubicSplineResourcesMap();
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+
+		@Override
+		public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap()
+		{
+			return internalGetCubicSplineResources().getMap();
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
+				java.lang.String key, gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map = internalGetCubicSplineResources()
+					.getMap();
+			return map.containsKey(key) ? map.get(key) : defaultValue;
+		}
+
+		/**
+		 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+		 */
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(java.lang.String key)
+		{
+			if (key == null)
+			{
+				throw new java.lang.NullPointerException();
+			}
+			java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map = internalGetCubicSplineResources()
+					.getMap();
+			if (!map.containsKey(key))
+			{
+				throw new java.lang.IllegalArgumentException();
+			}
+			return map.get(key);
+		}
+
+		private byte memoizedIsInitialized = -1;
+
+		@Override
+		public final boolean isInitialized()
+		{
+			byte isInitialized = memoizedIsInitialized;
+			if (isInitialized == 1)
+				return true;
+			if (isInitialized == 0)
+				return false;
+
+			memoizedIsInitialized = 1;
+			return true;
+		}
+
+		@Override
+		public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException
+		{
+			com.google.protobuf.GeneratedMessageV3.serializeStringMapTo(output, internalGetCubicSplineResources(),
+					CubicSplineResourcesDefaultEntryHolder.defaultEntry, 1);
+		}
+
+		@Override
+		public int getSerializedSize()
+		{
+			int size = memoizedSize;
+			if (size != -1)
+				return size;
+
+			size = 0;
+			for (java.util.Map.Entry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> entry : internalGetCubicSplineResources()
+					.getMap().entrySet())
+			{
+				com.google.protobuf.MapEntry<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources__ = CubicSplineResourcesDefaultEntryHolder.defaultEntry
+						.newBuilderForType().setKey(entry.getKey()).setValue(entry.getValue()).build();
+				size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, cubicSplineResources__);
+			}
+			memoizedSize = size;
+			return size;
+		}
+
+		private static final long serialVersionUID = 0L;
+
+		@java.lang.Override
+		public boolean equals(final java.lang.Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			if (!(obj instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineSettings))
+			{
+				return super.equals(obj);
+			}
+			gdsc.smlm.data.config.PSFProtos.CubicSplineSettings other = (gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) obj;
+
+			boolean result = true;
+			result = result && internalGetCubicSplineResources().equals(other.internalGetCubicSplineResources());
+			return result;
+		}
+
+		@java.lang.Override
+		public int hashCode()
+		{
+			if (memoizedHashCode != 0)
+			{
+				return memoizedHashCode;
+			}
+			int hash = 41;
+			hash = (19 * hash) + getDescriptor().hashCode();
+			if (!internalGetCubicSplineResources().getMap().isEmpty())
+			{
+				hash = (37 * hash) + CUBIC_SPLINE_RESOURCES_FIELD_NUMBER;
+				hash = (53 * hash) + internalGetCubicSplineResources().hashCode();
+			}
+			hash = (29 * hash) + unknownFields.hashCode();
+			memoizedHashCode = hash;
+			return hash;
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(java.nio.ByteBuffer data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(java.nio.ByteBuffer data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(com.google.protobuf.ByteString data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(com.google.protobuf.ByteString data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(byte[] data)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(byte[] data,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws com.google.protobuf.InvalidProtocolBufferException
+		{
+			return PARSER.parseFrom(data, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseDelimitedFrom(java.io.InputStream input)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseDelimitedFrom(java.io.InputStream input,
+				com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input,
+					extensionRegistry);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+				com.google.protobuf.CodedInputStream input) throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parseFrom(
+				com.google.protobuf.CodedInputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+				throws java.io.IOException
+		{
+			return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input, extensionRegistry);
+		}
+
+		@Override
+		public Builder newBuilderForType()
+		{
+			return newBuilder();
+		}
+
+		public static Builder newBuilder()
+		{
+			return DEFAULT_INSTANCE.toBuilder();
+		}
+
+		public static Builder newBuilder(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings prototype)
+		{
+			return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+		}
+
+		@Override
+		public Builder toBuilder()
+		{
+			return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
+		}
+
+		@java.lang.Override
+		protected Builder newBuilderForType(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+		{
+			Builder builder = new Builder(parent);
+			return builder;
+		}
+
+		/**
+		 * <pre>
+		 * Define the cubic spline settings
+		 * </pre>
+		 *
+		 * Protobuf type {@code gdsc.smlm.data.config.CubicSplineSettings}
+		 */
+		public static final class Builder extends com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+				// @@protoc_insertion_point(builder_implements:gdsc.smlm.data.config.CubicSplineSettings)
+				gdsc.smlm.data.config.PSFProtos.CubicSplineSettingsOrBuilder
+		{
+			public static final com.google.protobuf.Descriptors.Descriptor getDescriptor()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+			}
+
+			@Override
+			@SuppressWarnings({ "rawtypes" })
+			protected com.google.protobuf.MapField internalGetMapField(int number)
+			{
+				switch (number)
+				{
+					case 1:
+						return internalGetCubicSplineResources();
+					default:
+						throw new RuntimeException("Invalid map field number: " + number);
+				}
+			}
+
+			@Override
+			@SuppressWarnings({ "rawtypes" })
+			protected com.google.protobuf.MapField internalGetMutableMapField(int number)
+			{
+				switch (number)
+				{
+					case 1:
+						return internalGetMutableCubicSplineResources();
+					default:
+						throw new RuntimeException("Invalid map field number: " + number);
+				}
+			}
+
+			@Override
+			protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internalGetFieldAccessorTable()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable
+						.ensureFieldAccessorsInitialized(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.class,
+								gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.Builder.class);
+			}
+
+			// Construct using gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.newBuilder()
+			private Builder()
+			{
+				maybeForceBuilderInitialization();
+			}
+
+			private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent)
+			{
+				super(parent);
+				maybeForceBuilderInitialization();
+			}
+
+			private void maybeForceBuilderInitialization()
+			{
+				if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders)
+				{
+				}
+			}
+
+			@Override
+			public Builder clear()
+			{
+				super.clear();
+				internalGetMutableCubicSplineResources().clear();
+				return this;
+			}
+
+			@Override
+			public com.google.protobuf.Descriptors.Descriptor getDescriptorForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstanceForType()
+			{
+				return gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.getDefaultInstance();
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings build()
+			{
+				gdsc.smlm.data.config.PSFProtos.CubicSplineSettings result = buildPartial();
+				if (!result.isInitialized())
+				{
+					throw newUninitializedMessageException(result);
+				}
+				return result;
+			}
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings buildPartial()
+			{
+				gdsc.smlm.data.config.PSFProtos.CubicSplineSettings result = new gdsc.smlm.data.config.PSFProtos.CubicSplineSettings(
+						this);
+				int from_bitField0_ = bitField0_;
+				result.cubicSplineResources_ = internalGetCubicSplineResources();
+				result.cubicSplineResources_.makeImmutable();
+				onBuilt();
+				return result;
+			}
+
+			@Override
+			public Builder clone()
+			{
+				return super.clone();
+			}
+
+			@Override
+			public Builder setField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.setField(field, value);
+			}
+
+			@Override
+			public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field)
+			{
+				return super.clearField(field);
+			}
+
+			@Override
+			public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof)
+			{
+				return super.clearOneof(oneof);
+			}
+
+			@Override
+			public Builder setRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, int index,
+					Object value)
+			{
+				return super.setRepeatedField(field, index, value);
+			}
+
+			@Override
+			public Builder addRepeatedField(com.google.protobuf.Descriptors.FieldDescriptor field, Object value)
+			{
+				return super.addRepeatedField(field, value);
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.Message other)
+			{
+				if (other instanceof gdsc.smlm.data.config.PSFProtos.CubicSplineSettings)
+				{
+					return mergeFrom((gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) other);
+				}
+				else
+				{
+					super.mergeFrom(other);
+					return this;
+				}
+			}
+
+			public Builder mergeFrom(gdsc.smlm.data.config.PSFProtos.CubicSplineSettings other)
+			{
+				if (other == gdsc.smlm.data.config.PSFProtos.CubicSplineSettings.getDefaultInstance())
+					return this;
+				internalGetMutableCubicSplineResources().mergeFrom(other.internalGetCubicSplineResources());
+				onChanged();
+				return this;
+			}
+
+			@Override
+			public final boolean isInitialized()
+			{
+				return true;
+			}
+
+			@Override
+			public Builder mergeFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry) throws java.io.IOException
+			{
+				gdsc.smlm.data.config.PSFProtos.CubicSplineSettings parsedMessage = null;
+				try
+				{
+					parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+				}
+				catch (com.google.protobuf.InvalidProtocolBufferException e)
+				{
+					parsedMessage = (gdsc.smlm.data.config.PSFProtos.CubicSplineSettings) e.getUnfinishedMessage();
+					throw e.unwrapIOException();
+				}
+				finally
+				{
+					if (parsedMessage != null)
+					{
+						mergeFrom(parsedMessage);
+					}
+				}
+				return this;
+			}
+
+			private int bitField0_;
+
+			private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> cubicSplineResources_;
+
+			private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> internalGetCubicSplineResources()
+			{
+				if (cubicSplineResources_ == null)
+				{
+					return com.google.protobuf.MapField
+							.emptyMapField(CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+				}
+				return cubicSplineResources_;
+			}
+
+			private com.google.protobuf.MapField<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> internalGetMutableCubicSplineResources()
+			{
+				onChanged();
+				;
+				if (cubicSplineResources_ == null)
+				{
+					cubicSplineResources_ = com.google.protobuf.MapField
+							.newMapField(CubicSplineResourcesDefaultEntryHolder.defaultEntry);
+				}
+				if (!cubicSplineResources_.isMutable())
+				{
+					cubicSplineResources_ = cubicSplineResources_.copy();
+				}
+				return cubicSplineResources_;
+			}
+
+			@Override
+			public int getCubicSplineResourcesCount()
+			{
+				return internalGetCubicSplineResources().getMap().size();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+
+			@Override
+			public boolean containsCubicSplineResources(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				return internalGetCubicSplineResources().getMap().containsKey(key);
+			}
+
+			/**
+			 * Use {@link #getCubicSplineResourcesMap()} instead.
+			 */
+			@Override
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResources()
+			{
+				return getCubicSplineResourcesMap();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+
+			@Override
+			public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getCubicSplineResourcesMap()
+			{
+				return internalGetCubicSplineResources().getMap();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrDefault(
+					java.lang.String key, gdsc.smlm.data.config.PSFProtos.CubicSplineResource defaultValue)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map = internalGetCubicSplineResources()
+						.getMap();
+				return map.containsKey(key) ? map.get(key) : defaultValue;
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+
+			@Override
+			public gdsc.smlm.data.config.PSFProtos.CubicSplineResource getCubicSplineResourcesOrThrow(
+					java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> map = internalGetCubicSplineResources()
+						.getMap();
+				if (!map.containsKey(key))
+				{
+					throw new java.lang.IllegalArgumentException();
+				}
+				return map.get(key);
+			}
+
+			public Builder clearCubicSplineResources()
+			{
+				internalGetMutableCubicSplineResources().getMutableMap().clear();
+				return this;
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+
+			public Builder removeCubicSplineResources(java.lang.String key)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableCubicSplineResources().getMutableMap().remove(key);
+				return this;
+			}
+
+			/**
+			 * Use alternate mutation accessors instead.
+			 */
+			@java.lang.Deprecated
+			public java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> getMutableCubicSplineResources()
+			{
+				return internalGetMutableCubicSplineResources().getMutableMap();
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+			public Builder putCubicSplineResources(java.lang.String key,
+					gdsc.smlm.data.config.PSFProtos.CubicSplineResource value)
+			{
+				if (key == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				if (value == null)
+				{
+					throw new java.lang.NullPointerException();
+				}
+				internalGetMutableCubicSplineResources().getMutableMap().put(key, value);
+				return this;
+			}
+
+			/**
+			 * <code>map&lt;string, .gdsc.smlm.data.config.CubicSplineResource&gt; cubic_spline_resources = 1;</code>
+			 */
+
+			public Builder putAllCubicSplineResources(
+					java.util.Map<java.lang.String, gdsc.smlm.data.config.PSFProtos.CubicSplineResource> values)
+			{
+				internalGetMutableCubicSplineResources().getMutableMap().putAll(values);
+				return this;
+			}
+
+			@Override
+			public final Builder setUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			@Override
+			public final Builder mergeUnknownFields(final com.google.protobuf.UnknownFieldSet unknownFields)
+			{
+				return this;
+			}
+
+			// @@protoc_insertion_point(builder_scope:gdsc.smlm.data.config.CubicSplineSettings)
+		}
+
+		// @@protoc_insertion_point(class_scope:gdsc.smlm.data.config.CubicSplineSettings)
+		private static final gdsc.smlm.data.config.PSFProtos.CubicSplineSettings DEFAULT_INSTANCE;
+		static
+		{
+			DEFAULT_INSTANCE = new gdsc.smlm.data.config.PSFProtos.CubicSplineSettings();
+		}
+
+		public static gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstance()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+		private static final com.google.protobuf.Parser<CubicSplineSettings> PARSER = new com.google.protobuf.AbstractParser<CubicSplineSettings>()
+		{
+			@Override
+			public CubicSplineSettings parsePartialFrom(com.google.protobuf.CodedInputStream input,
+					com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+					throws com.google.protobuf.InvalidProtocolBufferException
+			{
+				return new CubicSplineSettings(input, extensionRegistry);
+			}
+		};
+
+		public static com.google.protobuf.Parser<CubicSplineSettings> parser()
+		{
+			return PARSER;
+		}
+
+		@java.lang.Override
+		public com.google.protobuf.Parser<CubicSplineSettings> getParserForType()
+		{
+			return PARSER;
+		}
+
+		@Override
+		public gdsc.smlm.data.config.PSFProtos.CubicSplineSettings getDefaultInstanceForType()
+		{
+			return DEFAULT_INSTANCE;
+		}
+
+	}
+
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_PSFParameter_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_PSF_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_Offset_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_ImagePSF_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable;
+	private static final com.google.protobuf.Descriptors.Descriptor internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor;
+	private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_fieldAccessorTable;
+
+	public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor()
+	{
+		return descriptor;
+	}
+
+	private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+	static
+	{
+		java.lang.String[] descriptorData = {
+				"\n\tpsf.proto\022\025gdsc.smlm.data.config\032\nunit" +
+						".proto\"b\n\014PSFParameter\022\014\n\004name\030\001 \001(\t\0225\n\004" +
+						"unit\030\002 \001(\0162\'.gdsc.smlm.data.config.PSFPa" +
+						"rameterUnit\022\r\n\005value\030\003 \001(\001\"\224\002\n\020Astigmati" +
+						"smModel\022\r\n\005gamma\030\001 \001(\001\022\t\n\001d\030\002 \001(\001\022\n\n\002ax\030" +
+						"\003 \001(\001\022\n\n\002bx\030\004 \001(\001\022\n\n\002ay\030\005 \001(\001\022\n\n\002by\030\006 \001(" +
+						"\001\022\013\n\003s0x\030\007 \001(\001\022\013\n\003s0y\030\010 \001(\001\022<\n\017z_distanc" +
+						"e_unit\030\t \001(\0162#.gdsc.smlm.data.config.Dis" +
+						"tanceUnit\022<\n\017s_distance_unit\030\n \001(\0162#.gds" +
+						"c.smlm.data.config.DistanceUnit\022\024\n\014nm_pe",
+				"r_pixel\030\013 \001(\001\022\n\n\002z0\030\014 \001(\001\"\372\001\n\030Astigmatis" +
+						"mModelSettings\022s\n\033astigmatism_model_reso" +
+						"urces\030\001 \003(\0132N.gdsc.smlm.data.config.Asti" +
+						"gmatismModelSettings.AstigmatismModelRes" + "ourcesEntry\032i\n\036AstigmatismModelResources" +
+						"Entry\022\013\n\003key\030\001 \001(\t\0226\n\005value\030\002 \001(\0132\'.gdsc" +
+						".smlm.data.config.AstigmatismModel:\0028\001\"\204" +
+						"\001\n\003PSF\0220\n\010psf_type\030\001 \001(\0162\036.gdsc.smlm.dat" +
+						"a.config.PSFType\0227\n\nparameters\030\002 \003(\0132#.g" +
+						"dsc.smlm.data.config.PSFParameter\022\022\n\nmod",
+				"el_name\030\003 \001(\t\" \n\006Offset\022\n\n\002cx\030\002 \001(\001\022\n\n\002c" +
+						"y\030\003 \001(\001\"\231\003\n\010ImagePSF\022\023\n\013image_count\030\001 \001(" +
+						"\005\022\024\n\014centre_image\030\002 \001(\005\022\022\n\npixel_size\030\003 " +
+						"\001(\001\022\023\n\013pixel_depth\030\004 \001(\001\022\014\n\004fwhm\030\005 \001(\001\0229" +
+						"\n\005notes\030\006 \003(\0132*.gdsc.smlm.data.config.Im" +
+						"agePSF.NotesEntry\022=\n\007offsets\030\007 \003(\0132,.gds" +
+						"c.smlm.data.config.ImagePSF.OffsetsEntry" +
+						"\022\020\n\010x_centre\030\010 \001(\001\022\020\n\010y_centre\030\t \001(\001\022\020\n\010" +
+						"z_centre\030\n \001(\001\032,\n\nNotesEntry\022\013\n\003key\030\001 \001(" +
+						"\t\022\r\n\005value\030\002 \001(\t:\0028\001\032M\n\014OffsetsEntry\022\013\n\003",
+				"key\030\001 \001(\005\022,\n\005value\030\002 \001(\0132\035.gdsc.smlm.dat" +
+						"a.config.Offset:\0028\001\"=\n\023CubicSplineResour" +
+						"ce\022\020\n\010filename\030\001 \001(\t\022\024\n\014spline_scale\030\002 \001" +
+						"(\001\"\344\001\n\023CubicSplineSettings\022d\n\026cubic_spli" +
+						"ne_resources\030\001 \003(\0132D.gdsc.smlm.data.conf" +
+						"ig.CubicSplineSettings.CubicSplineResour" +
+						"cesEntry\032g\n\031CubicSplineResourcesEntry\022\013\n" +
+						"\003key\030\001 \001(\t\0229\n\005value\030\002 \001(\0132*.gdsc.smlm.da" +
+						"ta.config.CubicSplineResource:\0028\001*\232\001\n\007PS" +
+						"FType\022\017\n\013PSF_TYPE_NA\020\000\022\030\n\024ONE_AXIS_GAUSS",
+				"IAN_2D\020\001\022\030\n\024TWO_AXIS_GAUSSIAN_2D\020\002\022\"\n\036TW" +
+						"O_AXIS_AND_THETA_GAUSSIAN_2D\020\003\022\032\n\026ASTIGM" +
+						"ATIC_GAUSSIAN_2D\020\004\022\n\n\006CUSTOM\020\005*U\n\020PSFPar" +
+						"ameterUnit\022\031\n\025PSF_PARAMETER_UNIT_NA\020\000\022\014\n" +
+						"\010DISTANCE\020\001\022\r\n\tINTENSITY\020\002\022\t\n\005ANGLE\020\003B\013B" +
+						"\tPSFProtosb\006proto3" };
+		com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner = new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner()
+		{
+			@Override
+			public com.google.protobuf.ExtensionRegistry assignDescriptors(
+					com.google.protobuf.Descriptors.FileDescriptor root)
+			{
+				descriptor = root;
+				return null;
+			}
+		};
+		com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(descriptorData,
+				new com.google.protobuf.Descriptors.FileDescriptor[] {
+						gdsc.smlm.data.config.UnitProtos.getDescriptor(), },
+				assigner);
+		internal_static_gdsc_smlm_data_config_PSFParameter_descriptor = getDescriptor().getMessageTypes().get(0);
+		internal_static_gdsc_smlm_data_config_PSFParameter_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_PSFParameter_descriptor,
+				new java.lang.String[] { "Name", "Unit", "Value", });
+		internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor = getDescriptor().getMessageTypes().get(1);
+		internal_static_gdsc_smlm_data_config_AstigmatismModel_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_AstigmatismModel_descriptor,
+				new java.lang.String[] { "Gamma", "D", "Ax", "Bx", "Ay", "By", "S0X", "S0Y", "ZDistanceUnit",
+						"SDistanceUnit", "NmPerPixel", "Z0", });
+		internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor = getDescriptor().getMessageTypes()
+				.get(2);
+		internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor,
+				new java.lang.String[] { "AstigmatismModelResources", });
+		internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor = internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_descriptor
+				.getNestedTypes().get(0);
+		internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_AstigmatismModelSettings_AstigmatismModelResourcesEntry_descriptor,
+				new java.lang.String[] { "Key", "Value", });
+		internal_static_gdsc_smlm_data_config_PSF_descriptor = getDescriptor().getMessageTypes().get(3);
+		internal_static_gdsc_smlm_data_config_PSF_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_PSF_descriptor,
+				new java.lang.String[] { "PsfType", "Parameters", "ModelName", });
+		internal_static_gdsc_smlm_data_config_Offset_descriptor = getDescriptor().getMessageTypes().get(4);
+		internal_static_gdsc_smlm_data_config_Offset_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_Offset_descriptor, new java.lang.String[] { "Cx", "Cy", });
+		internal_static_gdsc_smlm_data_config_ImagePSF_descriptor = getDescriptor().getMessageTypes().get(5);
+		internal_static_gdsc_smlm_data_config_ImagePSF_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_ImagePSF_descriptor,
+				new java.lang.String[] { "ImageCount", "CentreImage", "PixelSize", "PixelDepth", "Fwhm", "Notes",
+						"Offsets", "XCentre", "YCentre", "ZCentre", });
+		internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor = internal_static_gdsc_smlm_data_config_ImagePSF_descriptor
+				.getNestedTypes().get(0);
+		internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_ImagePSF_NotesEntry_descriptor,
+				new java.lang.String[] { "Key", "Value", });
+		internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor = internal_static_gdsc_smlm_data_config_ImagePSF_descriptor
+				.getNestedTypes().get(1);
+		internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_ImagePSF_OffsetsEntry_descriptor,
+				new java.lang.String[] { "Key", "Value", });
+		internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor = getDescriptor().getMessageTypes().get(6);
+		internal_static_gdsc_smlm_data_config_CubicSplineResource_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_CubicSplineResource_descriptor,
+				new java.lang.String[] { "Filename", "SplineScale", });
+		internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor = getDescriptor().getMessageTypes().get(7);
+		internal_static_gdsc_smlm_data_config_CubicSplineSettings_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor,
+				new java.lang.String[] { "CubicSplineResources", });
+		internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor = internal_static_gdsc_smlm_data_config_CubicSplineSettings_descriptor
+				.getNestedTypes().get(0);
+		internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+				internal_static_gdsc_smlm_data_config_CubicSplineSettings_CubicSplineResourcesEntry_descriptor,
+				new java.lang.String[] { "Key", "Value", });
+		gdsc.smlm.data.config.UnitProtos.getDescriptor();
+	}
+
+	// @@protoc_insertion_point(outer_class_scope)
 }

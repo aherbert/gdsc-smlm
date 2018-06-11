@@ -59,7 +59,6 @@ import gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
 import gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
 import gdsc.smlm.function.PoissonLikelihoodWrapper;
 
-
 /**
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
@@ -106,6 +105,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] point)
 		{
 			return fun.likelihood(point);
@@ -135,6 +135,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] point)
 		{
 			return fun.likelihood(unmap(point));
@@ -180,6 +181,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 			return point;
 		}
 
+		@Override
 		public boolean isMapped()
 		{
 			return true;
@@ -198,6 +200,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] point)
 		{
 			double[] gradient = new double[point.length];
@@ -338,6 +341,7 @@ public class MaximumLikelihoodFitter extends MLEBaseFunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFit(double[], double[], double[], double[])
 	 */
+	@Override
 	public FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		final int n = y.length;

@@ -41,7 +41,6 @@ import org.apache.commons.math3.util.Precision;
 import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.plugins.pcpalm.Molecule;
 import gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;
@@ -51,6 +50,7 @@ import gdsc.smlm.results.TraceManager;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
@@ -95,6 +95,7 @@ public class BlinkEstimator implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -268,7 +269,7 @@ public class BlinkEstimator implements PlugIn
 			Utils.display(title, plot);
 
 			plot.setColor(Color.red);
-			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot2.CIRCLE);
+			plot.addPoints(blinkingModel.getX(), blinkingModel.value(parameters), Plot.CIRCLE);
 
 			// Add the rest that is not fitted
 			double[] xOther = new double[td.length - blinkingModel.size()];
@@ -280,7 +281,7 @@ public class BlinkEstimator implements PlugIn
 			}
 
 			plot.setColor(Color.blue);
-			plot.addPoints(xOther, yOther, Plot2.CROSS);
+			plot.addPoints(xOther, yOther, Plot.CROSS);
 			Utils.display(title, plot);
 		}
 
@@ -469,6 +470,7 @@ public class BlinkEstimator implements PlugIn
 					.target(obs)
 					.weight(new DiagonalMatrix(blinkingModel.getWeights()))
 					.model(blinkingModel, new MultivariateMatrixFunction() {
+						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return blinkingModel.jacobian(point);
@@ -614,6 +616,7 @@ public class BlinkEstimator implements PlugIn
 		 * 
 		 * @see gdsc.smlm.ij.plugins.OptimiserFunction#getWeights()
 		 */
+		@Override
 		public double[] getWeights()
 		{
 			// Bias the early values
@@ -722,6 +725,7 @@ public class BlinkEstimator implements PlugIn
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			increment();
@@ -742,6 +746,7 @@ public class BlinkEstimator implements PlugIn
 		{
 			return new MultivariateMatrixFunction()
 			{
+				@Override
 				public double[][] value(double[] variables)
 				{
 					return jacobian(variables);

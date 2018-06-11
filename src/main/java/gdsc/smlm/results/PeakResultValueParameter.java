@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Gets a parameter value from a result.
  */
@@ -48,6 +47,7 @@ public class PeakResultValueParameter implements PeakResultValue
 	 * 
 	 * @see gdsc.smlm.results.procedures.PeakResultValue#getValue(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public float getValue(PeakResult result)
 	{
 		return result.getParameter(index);

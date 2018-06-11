@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -71,6 +70,7 @@ public class SummariseResults implements PlugIn, MouseListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -284,6 +284,7 @@ public class SummariseResults implements PlugIn, MouseListener
 		sb.append("\n");
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getClickCount() > 1)
@@ -311,6 +312,7 @@ public class SummariseResults implements PlugIn, MouseListener
 		// Do this is a thread so the click-event does not block
 		new Thread(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				showStatistics(result);
@@ -381,6 +383,7 @@ public class SummariseResults implements PlugIn, MouseListener
 				final float[] noise = new float[result.size()];
 				result.forEach(new PeakResultProcedure()
 				{
+					@Override
 					public void execute(PeakResult peakResult)
 					{
 						int i = counter.getAndIncrement();
@@ -418,6 +421,7 @@ public class SummariseResults implements PlugIn, MouseListener
 		final StoredDataStatistics data = new StoredDataStatistics(result.size());
 		result.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peakResult)
 			{
 				data.add(peakResult.getParameter(index));
@@ -438,18 +442,22 @@ public class SummariseResults implements PlugIn, MouseListener
 			wo.add(id);
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}

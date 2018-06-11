@@ -57,9 +57,12 @@ public class About implements PlugIn, MacroExtension
 	enum ConfigureOption
 	{
 		//@formatter:off
-		INSTALL{ public String getName() { return "Install"; }}, 
-		REMOVE{ public String getName() { return "Remove"; }}, 
-		EDIT{ public String getName() { return "Edit & Install"; }};
+		INSTALL{ @Override
+		public String getName() { return "Install"; }}, 
+		REMOVE{ @Override
+		public String getName() { return "Remove"; }}, 
+		EDIT{ @Override
+		public String getName() { return "Edit & Install"; }};
 		//@formatter:on
 
 		@Override
@@ -76,6 +79,7 @@ public class About implements PlugIn, MacroExtension
 		abstract public String getName();
 	}
 
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -232,7 +236,7 @@ public class About implements PlugIn, MacroExtension
 		StringBuilder sb = new StringBuilder();
 		sb.append("Configure resource '").append(resourceTitle).append("' at:\n \n").append(filename);
 		if (notes != null)
-			sb.append("\n \n").append(XmlUtils.lineWrap(notes, 80, 0, null));
+			sb.append("\n \n").append(gdsc.core.utils.XmlUtils.lineWrap(notes, 80, 0, null));
 
 		gd.addMessage(sb.toString());
 
@@ -393,6 +397,7 @@ public class About implements PlugIn, MacroExtension
 	 * 
 	 * @see ij.macro.MacroExtension#handleExtension(java.lang.String, java.lang.Object[])
 	 */
+	@Override
 	public String handleExtension(String name, Object[] args)
 	{
 		if (name == null)
@@ -421,6 +426,7 @@ public class About implements PlugIn, MacroExtension
 	 * 
 	 * @see ij.macro.MacroExtension#getExtensionFunctions()
 	 */
+	@Override
 	public ExtensionDescriptor[] getExtensionFunctions()
 	{
 		ArrayList<ExtensionDescriptor> list = new ArrayList<ExtensionDescriptor>(3);

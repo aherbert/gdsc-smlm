@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.search;
 
-
 /**
  * Store the result of scoring a point within a search space. Allows the scores to be compared.
  */
@@ -47,6 +46,7 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(SearchResult<T> o)
 	{
 		if (o == null)

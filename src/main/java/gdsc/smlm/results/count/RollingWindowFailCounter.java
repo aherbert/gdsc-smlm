@@ -25,7 +25,6 @@ package gdsc.smlm.results.count;
 
 import gdsc.core.utils.BooleanRollingArray;
 
-
 /**
  * Stop evaluating when a number of failures occurs within a window.
  */
@@ -65,7 +64,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * @param window
 	 *            the window size
 	 * @throws IllegalArgumentException
-	 *             If the window is not strictly positive, or the window is smaller that the allowed failures 
+	 *             If the window is not strictly positive, or the window is smaller that the allowed failures
 	 */
 	public static RollingWindowFailCounter create(int allowedFailures, int window) throws IllegalArgumentException
 	{
@@ -81,6 +80,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass()
 	 */
+	@Override
 	public void pass()
 	{
 		rollingArray.add(false);
@@ -91,6 +91,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass(int)
 	 */
+	@Override
 	public void pass(int n)
 	{
 		if (n < 0)
@@ -103,6 +104,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail()
 	 */
+	@Override
 	public void fail()
 	{
 		rollingArray.add(true);
@@ -113,6 +115,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail(int)
 	 */
+	@Override
 	public void fail(int n)
 	{
 		if (n < 0)
@@ -125,6 +128,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#isOK()
 	 */
+	@Override
 	public boolean isOK()
 	{
 		return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
@@ -135,6 +139,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#newCounter()
 	 */
+	@Override
 	public FailCounter newCounter()
 	{
 		return new RollingWindowFailCounter(allowedFailures, getWindow());
@@ -145,6 +150,7 @@ public class RollingWindowFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#reset()
 	 */
+	@Override
 	public void reset()
 	{
 		rollingArray.clear();

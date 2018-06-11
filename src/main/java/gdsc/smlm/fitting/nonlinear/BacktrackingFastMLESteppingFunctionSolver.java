@@ -30,7 +30,6 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.nonlinear.gradient.PoissonGradientProcedure;
 import gdsc.smlm.function.Gradient2Function;
 
-
 /**
  * Uses the Fast MLE method to fit a gradient function with coefficients (a).
  * <p>
@@ -451,7 +450,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	{
 		this.maximumStepSize = (maximumStepSize >= 1) ? 0 : maximumStepSize;
 	}
-	
+
 	@Override
 	protected void initialiseAndRun(PoissonGradientProcedure p)
 	{
@@ -459,7 +458,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		// may not currently be initialised for gradients.
 		// If backtracking was done then initialisation has only been done for the value.
 		// Reinitialise using the current optimum.
-		
+
 		p.computeFisherInformation(aOld); // Use current optimum
 	}
 }

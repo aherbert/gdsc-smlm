@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Class to allow fast comparison of peak results arrays without storing the array. Comparison is done using a staged
  * digest.
@@ -238,6 +237,7 @@ public class PeakResultsDigest
 	{
 		return executorService.submit(new Callable<PeakResultsDigest>()
 		{
+			@Override
 			public PeakResultsDigest call() throws Exception
 			{
 				return new PeakResultsDigest(peakResults);

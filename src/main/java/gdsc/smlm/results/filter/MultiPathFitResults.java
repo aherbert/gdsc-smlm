@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Specifies a the result of fitting a frame using different fitting methods.
  * <p>
@@ -88,6 +87,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
 	 */
+	@Override
 	public int getFrame()
 	{
 		return frame;
@@ -98,6 +98,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
 	 */
+	@Override
 	public int getNumberOfResults()
 	{
 		return multiPathFitResults.length;
@@ -108,6 +109,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
 	 */
+	@Override
 	public MultiPathFitResult getResult(int index)
 	{
 		return multiPathFitResults[index];
@@ -118,6 +120,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
 	 */
+	@Override
 	public void complete(int index)
 	{
 		// Do nothing
@@ -128,6 +131,7 @@ public class MultiPathFitResults implements IMultiPathFitResults, Cloneable
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
 	 */
+	@Override
 	public int getTotalCandidates()
 	{
 		return totalCandidates;

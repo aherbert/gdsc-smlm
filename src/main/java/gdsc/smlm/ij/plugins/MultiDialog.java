@@ -26,7 +26,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
 import ij.Macro;
@@ -46,6 +45,7 @@ import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -123,6 +123,7 @@ public class MultiDialog extends Dialog
 		 * 
 		 * @see gdsc.smlm.ij.plugins.MultiDialog.Items#removeFormatting(java.lang.String)
 		 */
+		@Override
 		public String removeFormatting(String formattedName)
 		{
 			return formattedName;
@@ -146,6 +147,7 @@ public class MultiDialog extends Dialog
 
 	private static class NullMemoryResultsFilter implements MemoryResultsFilter
 	{
+		@Override
 		public boolean accept(MemoryPeakResults results)
 		{
 			return true;
@@ -177,16 +179,19 @@ public class MultiDialog extends Dialog
 					names[size++] = ResultsManager.getName(results);
 		}
 
+		@Override
 		public int size()
 		{
 			return size;
 		}
 
+		@Override
 		public String getFormattedName(int i)
 		{
 			return names[i];
 		}
 
+		@Override
 		public String removeFormatting(String formattedName)
 		{
 			return ResultsManager.removeFormatting(formattedName);
@@ -273,7 +278,7 @@ public class MultiDialog extends Dialog
 		list.addItemListener(this);
 		list.addKeyListener(this);
 
-		return (Component) list;
+		return list;
 	}
 
 	protected Panel buildButtonPanel()
@@ -309,6 +314,7 @@ public class MultiDialog extends Dialog
 	 * 
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		Object source = e.getSource();
@@ -334,10 +340,12 @@ public class MultiDialog extends Dialog
 	 * 
 	 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
 	 */
+	@Override
 	public void keyTyped(KeyEvent paramKeyEvent)
 	{
 	}
 
+	@Override
 	public void keyPressed(KeyEvent e)
 	{
 		int keyCode = e.getKeyCode();
@@ -380,6 +388,7 @@ public class MultiDialog extends Dialog
 	 * 
 	 * @see java.awt.event.KeyListener#keyReleased(java.awt.event.KeyEvent)
 	 */
+	@Override
 	public void keyReleased(KeyEvent paramKeyEvent)
 	{
 	}
@@ -459,6 +468,7 @@ public class MultiDialog extends Dialog
 	 * 
 	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
 	 */
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		wasCanceled = true;
@@ -466,42 +476,52 @@ public class MultiDialog extends Dialog
 	}
 
 	//@formatter:off
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
 
+	@Override
 	public void mousePressed(MouseEvent paramMouseEvent)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent paramMouseEvent)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent paramMouseEvent)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent paramMouseEvent)
 	{
 	}
@@ -517,6 +537,7 @@ public class MultiDialog extends Dialog
 	 * 
 	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
 	 */
+	@Override
 	public void mouseClicked(MouseEvent paramMouseEvent)
 	{
 		modifiers = paramMouseEvent.getModifiers();
@@ -527,13 +548,14 @@ public class MultiDialog extends Dialog
 	 * 
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
+	@Override
 	public void itemStateChanged(ItemEvent paramItemEvent)
 	{
 		int index = (Integer) paramItemEvent.getItem();
 		int event = paramItemEvent.getStateChange();
 
 		// If we have the shift key down, support multiple select/deselect
-		if (event == lastEvent && (modifiers & MouseEvent.SHIFT_MASK) != 0 &&
+		if (event == lastEvent && (modifiers & InputEvent.SHIFT_MASK) != 0 &&
 				(event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED))
 		{
 			if (lastIndex != index)

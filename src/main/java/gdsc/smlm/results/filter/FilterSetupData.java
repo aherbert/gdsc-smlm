@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Interface used to mark data passed in to the set-up routine of a filter
  */

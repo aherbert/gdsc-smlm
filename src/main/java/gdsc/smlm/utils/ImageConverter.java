@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.utils;
 
-
 import java.awt.Rectangle;
 
 /**

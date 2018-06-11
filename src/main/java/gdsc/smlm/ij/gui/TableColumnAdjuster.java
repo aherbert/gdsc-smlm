@@ -321,6 +321,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 	//
 	//  Implement the PropertyChangeListener
 	//
+	@Override
 	public void propertyChange(PropertyChangeEvent e)
 	{
 		//  When the TableModel changes we need to update the listeners
@@ -340,6 +341,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 	//
 	//  Implement the TableModelListener
 	//
+	@Override
 	public void tableChanged(final TableModelEvent e)
 	{
 		if (!isColumnDataIncluded)
@@ -349,6 +351,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				//  A cell has been updated
@@ -440,6 +443,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 			this.isAdjust = isAdjust;
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			//  Handle selected column(s) width change actions
@@ -482,6 +486,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 			this.isToggleLarger = isToggleLarger;
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			if (isToggleDynamic)

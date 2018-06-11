@@ -76,7 +76,6 @@ import ij.io.FileSaver;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 
-
 /**
  * Analyse the per pixel offset, variance and gain from a sCMOS camera.
  * <p>
@@ -110,6 +109,7 @@ public class CMOSAnalysis implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			// Avoid the status bar talking to the current image
@@ -226,6 +226,7 @@ public class CMOSAnalysis implements PlugIn
 			this.name = name;
 		}
 
+		@Override
 		public int compareTo(SubDir o)
 		{
 			return exposureTime - o.exposureTime;
@@ -253,6 +254,7 @@ public class CMOSAnalysis implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -399,6 +401,7 @@ public class CMOSAnalysis implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -464,7 +467,7 @@ public class CMOSAnalysis implements PlugIn
 
 			// Use the actual progress bar so we can show progress 
 			// when all other IJ commands cannot
-			double p = ((double) progress + 1.0) / totalProgress;
+			double p = (progress + 1.0) / totalProgress;
 			progressBar.show(p, true);
 		}
 		progress++;
@@ -493,7 +496,7 @@ public class CMOSAnalysis implements PlugIn
 			if (i % n == 0)
 				IJ.showProgress(i, n);
 			// Q. Should these be clipped to a sensible range?
-			pixelOffset[i] = (float) pd.sample();
+			pixelOffset[i] = pd.sample();
 			pixelVariance[i] = (float) ed.sample();
 			pixelGain[i] = (float) (gain + rg.nextGaussian() * gainSD);
 		}
@@ -628,6 +631,7 @@ public class CMOSAnalysis implements PlugIn
 		File dir = new File(directory);
 		File[] dirs = dir.listFiles(new FileFilter()
 		{
+			@Override
 			public boolean accept(File pathname)
 			{
 				return pathname.isDirectory();
@@ -715,46 +719,55 @@ public class CMOSAnalysis implements PlugIn
 
 		TrackProgress trackProgress = new TrackProgress()
 		{
+			@Override
 			public void progress(double fraction)
 			{
 				progressBar.show(fraction);
 			}
 
+			@Override
 			public void progress(long position, long total)
 			{
 				progressBar.show((double) position / total);
 			}
 
+			@Override
 			public void incrementProgress(double fraction)
 			{
 
 			}
 
+			@Override
 			public void log(String format, Object... args)
 			{
 
 			}
 
+			@Override
 			public void status(String format, Object... args)
 			{
 
 			}
 
+			@Override
 			public boolean isEnded()
 			{
 				return false;
 			}
 
+			@Override
 			public boolean isProgress()
 			{
 				return true;
 			}
 
+			@Override
 			public boolean isLog()
 			{
 				return false;
 			}
 
+			@Override
 			public boolean isStatus()
 			{
 				return false;

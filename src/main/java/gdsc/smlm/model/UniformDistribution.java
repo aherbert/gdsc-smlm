@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
@@ -62,6 +61,7 @@ public class UniformDistribution implements SpatialDistribution
 		/**
 		 * @return
 		 */
+		@Override
 		public double[] nextVector()
 		{
 			return new double[] { rng1.nextDouble(), rng2.nextDouble(), rng3.nextDouble() };
@@ -161,8 +161,8 @@ public class UniformDistribution implements SpatialDistribution
 		for (int i = 0; i < max.length; i++)
 		{
 			if (max[i] < this.min[i])
-				throw new IllegalArgumentException(String.format("Max %f must be greater than min %f", max[i],
-						this.min[i]));
+				throw new IllegalArgumentException(
+						String.format("Max %f must be greater than min %f", max[i], this.min[i]));
 			this.max[i] = max[i];
 		}
 
@@ -180,6 +180,7 @@ public class UniformDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
+	@Override
 	public double[] next()
 	{
 		double[] d = vectorGenerator.nextVector();
@@ -203,6 +204,7 @@ public class UniformDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
+	@Override
 	public boolean isWithin(double[] xyz)
 	{
 		for (int i = 0; i < xyz.length; i++)
@@ -216,6 +218,7 @@ public class UniformDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
+	@Override
 	public boolean isWithinXY(double[] xyz)
 	{
 		for (int i = 0; i < 2; i++)
@@ -229,6 +232,7 @@ public class UniformDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] xyz)
 	{
 		// Ignore		

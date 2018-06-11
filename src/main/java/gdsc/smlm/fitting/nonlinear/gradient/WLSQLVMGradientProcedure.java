@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
@@ -57,10 +56,10 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 		super(y, func);
 		final int n = y.length;
 		w = new double[n];
-		
+
 		// From Ruisheng, et al (2017):
 		// Total noise = variance + max(di, 0) + 1 
-		
+
 		if (var != null && var.length == n)
 		{
 			// Include the variance in the weight. Assume variance is positive.
@@ -79,6 +78,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		final double dy = y[++yi] - value;
@@ -107,6 +107,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
+	@Override
 	public void execute(double value)
 	{
 		// Produce a sum-of-squares

@@ -23,6 +23,6 @@
  */
 
 /**
- * Contains code for a simple genetic algorithm to evolve a fixed parameter space 
+ * Contains code for a simple genetic algorithm to evolve a fixed parameter space
  */
 package gdsc.smlm.ga;

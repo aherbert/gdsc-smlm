@@ -49,36 +49,42 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2ProcedureTest
 {
 	// Skip super-class tests ...
+	@Override
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
 		Assume.assumeTrue(false);
 	}
 
+	@Override
 	@Test
 	public void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator()
 	{
 		Assume.assumeTrue(false);
 	}
 
+	@Override
 	@Test
 	public void gradientProcedureIsNotSlowerThanGradientCalculator()
 	{
 		Assume.assumeTrue(false);
 	}
 
+	@Override
 	@Test
 	public void gradientProcedureComputesSameWithPrecomputed()
 	{
 		Assume.assumeTrue(false);
 	}
 
+	@Override
 	@Test
 	public void gradientProcedureUnrolledComputesSameAsGradientProcedure()
 	{
 		Assume.assumeTrue(false);
 	}
 
+	@Override
 	@Test
 	public void gradientProcedureIsFasterUnrolledThanGradientProcedure()
 	{
@@ -119,6 +125,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		}
 	}
 
+	@Override
 	@Test
 	public void gradientCalculatorComputesGradient()
 	{
@@ -163,7 +170,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
 			FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y,
-					(ExtendedGradient2Function) func);
+					func);
 			//double ll = p.computeLogLikelihood(a);
 			p.computeJacobian(a);
 			double[] d1 = p.d1.clone();

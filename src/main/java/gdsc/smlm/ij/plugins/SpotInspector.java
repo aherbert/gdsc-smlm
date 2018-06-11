@@ -96,6 +96,7 @@ public class SpotInspector implements PlugIn, MouseListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -186,6 +187,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		final Counter c = new Counter();
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult r)
 			{
 				float[] score = getScore(r, c.getAndIncrement(), pp, sp, wp, hp, stdDevMax);
@@ -203,7 +205,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		// TODO - Add to settings
 		table.setShowFittingData(true);
 		table.setShowNoiseData(true);
-		
+
 		if (showCalibratedValues)
 		{
 			table.setDistanceUnit(DistanceUnit.NM);
@@ -285,6 +287,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		// frame caching. Then set the appropriate slice in the result stack
 		Collections.sort(rankedResults, new Comparator<PeakResultRank>()
 		{
+			@Override
 			public int compare(PeakResultRank o1, PeakResultRank o2)
 			{
 				if (o1.peakResult.getFrame() < o2.peakResult.getFrame())
@@ -414,14 +417,14 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			case 5: // Original value
-				score = (float) r.getOrigValue();
+				score = r.getOrigValue();
 				break;
 			case 4: // Error
 				score = (float) r.getError();
 				negative = true;
 				break;
 			case 3: // Signal
-				score = (float) (r.getSignal());
+				score = (r.getSignal());
 				break;
 			case 2: // Amplitude
 				score = hp.h[i];
@@ -491,6 +494,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			originalScore = original;
 		}
 
+		@Override
 		public int compareTo(PeakResultRank o)
 		{
 			// High is better
@@ -546,6 +550,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		return true;
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (id != currentId)
@@ -579,6 +584,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				final ArrayList<float[]> spots = new ArrayList<float[]>();
 				results.forEach(DistanceUnit.PIXEL, new XYResultProcedure()
 				{
+					@Override
 					public void executeXY(float x, float y)
 					{
 						if (x > minX && x < maxX && y > minY && y < maxY)
@@ -613,24 +619,28 @@ public class SpotInspector implements PlugIn, MouseListener
 		return false;
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 		// TODO Auto-generated method stub

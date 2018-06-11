@@ -25,11 +25,10 @@ package gdsc.smlm.model;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-
 /**
  * Contains a model for a moving molecule.
  */
-public class MoleculeModel 
+public class MoleculeModel
 {
 	private int id;
 	protected double[] xyz;
@@ -155,6 +154,7 @@ public class MoleculeModel
 
 	/**
 	 * Package level set method to allow renumbering
+	 * 
 	 * @param id
 	 */
 	void setId(int id)
@@ -169,7 +169,7 @@ public class MoleculeModel
 	{
 		return mass;
 	}
-	
+
 	/**
 	 * @return The coordinates (x,y,z)
 	 */
@@ -177,14 +177,16 @@ public class MoleculeModel
 	{
 		return xyz;
 	}
-	
+
 	/**
 	 * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion rate.
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param diffusionRate Diffusion rate for each dimension
-	 * @param random Random generator
+	 * @param diffusionRate
+	 *            Diffusion rate for each dimension
+	 * @param random
+	 *            Random generator
 	 * @return The new coordinates
 	 */
 	public double[] move(double diffusionRate, RandomGenerator random)
@@ -206,14 +208,16 @@ public class MoleculeModel
 		}
 		return xyz;
 	}
-	
+
 	/**
 	 * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion rate.
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param diffusionRate Diffusion rate for each dimension
-	 * @param random Random generator (one per dimension)
+	 * @param diffusionRate
+	 *            Diffusion rate for each dimension
+	 * @param random
+	 *            Random generator (one per dimension)
 	 * @return The new coordinates
 	 */
 	public double[] move(double diffusionRate, RandomGenerator[] random)
@@ -241,8 +245,10 @@ public class MoleculeModel
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param stepSize Step size for each dimension
-	 * @param random Random generator
+	 * @param stepSize
+	 *            Step size for each dimension
+	 * @param random
+	 *            Random generator
 	 * @return The new coordinates
 	 */
 	public double[] walk(double stepSize, RandomGenerator random)
@@ -266,8 +272,10 @@ public class MoleculeModel
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param stepSize Step size for each dimension
-	 * @param random Random generator (one per dimension)
+	 * @param stepSize
+	 *            Step size for each dimension
+	 * @param random
+	 *            Random generator (one per dimension)
 	 * @return The new coordinates
 	 */
 	public double[] walk(double stepSize, RandomGenerator[] random)
@@ -285,15 +293,19 @@ public class MoleculeModel
 		}
 		return xyz;
 	}
-	
+
 	/**
-	 * Slide the molecule along a unit vector using a random Gaussian shift with standard deviation of the given diffusion rate.
+	 * Slide the molecule along a unit vector using a random Gaussian shift with standard deviation of the given
+	 * diffusion rate.
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
 	 * 
-	 * @param diffusionRate Diffusion rate for 3D diffusion
-	 * @param axis The linear axis to move along (must be a unit vector)
-	 * @param random Random number generator
+	 * @param diffusionRate
+	 *            Diffusion rate for 3D diffusion
+	 * @param axis
+	 *            The linear axis to move along (must be a unit vector)
+	 * @param random
+	 *            Random number generator
 	 * @return The new coordinates
 	 */
 	public double[] slide(double diffusionRate, double[] axis, RandomGenerator random)
@@ -304,12 +316,12 @@ public class MoleculeModel
 			final double shift;
 			// Sample from a Gaussian - This may only be relevant for 1D diffusion
 			shift = random.nextGaussian() * diffusionRate;
-			
+
 			// Sample from the cumulative probability distribution for the MSD. 
 			// Then get a square root to find the shift and assign a direction
 			//RandomDataGenerator r = new RandomDataGenerator(random);
 			//shift = ((random.nextDouble() < 0.5) ? 1 : -1) * Math.sqrt(r.nextExponential(diffusionRate*diffusionRate));			
-			
+
 			// Clip the movement
 			//if (shift > 5*diffusionRate)
 			//	shift = 5*diffusionRate;

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -56,6 +55,7 @@ public class NeighbourAnalysis implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);

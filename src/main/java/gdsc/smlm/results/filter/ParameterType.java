@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.data.NamedObject;
 
-
 /**
  * Define the type of parameter
  */
@@ -90,6 +89,7 @@ public enum ParameterType implements NamedObject
 	 * 
 	 * @see gdsc.smlm.data.NamedObject#getName()
 	 */
+	@Override
 	public String getName()
 	{
 		return name;
@@ -100,6 +100,7 @@ public enum ParameterType implements NamedObject
 	 * 
 	 * @see gdsc.smlm.data.NamedObject#getShortName()
 	 */
+	@Override
 	public String getShortName()
 	{
 		return shortName;

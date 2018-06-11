@@ -38,7 +38,6 @@ import ij.io.FileInfo;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 
-
 /**
  * Represent an ImageJ image as a results source. Supports all greyscale images. Only processes channel 0 of 32-bit
  * colour images.

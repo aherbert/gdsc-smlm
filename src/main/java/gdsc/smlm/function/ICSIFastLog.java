@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Implementation of the ICSILog algorithm
  * as described in O. Vinyals, G. Friedland, N. Mirghafori
@@ -199,13 +198,13 @@ public class ICSIFastLog extends FastLog
 	{
 		return 23 - q;
 	}
-	
+
 	@Override
 	public double getScale()
 	{
 		return LN2;
 	}
-	
+
 	@Override
 	public double getBase()
 	{
@@ -329,6 +328,7 @@ public class ICSIFastLog extends FastLog
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
 	 */
+	@Override
 	public float fastLog(float x)
 	{
 		final int bits = Float.floatToRawIntBits(x);
@@ -454,6 +454,7 @@ public class ICSIFastLog extends FastLog
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
 	 */
+	@Override
 	public float fastLog(double x)
 	{
 		final long bits = Double.doubleToRawLongBits(x);

@@ -25,7 +25,6 @@ package gdsc.smlm.search;
 
 import gdsc.core.utils.Maths;
 
-
 /**
  * Specify the dimensions for a search
  */
@@ -128,6 +127,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#create(double, double)
 	 */
+	@Override
 	public FixedDimension create(double lower, double upper)
 	{
 		if (!active)
@@ -168,6 +168,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 *            the value
 	 * @return the rounded value
 	 */
+	@Override
 	public double round(double value)
 	{
 		if (canRound())
@@ -180,16 +181,18 @@ public class FixedDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#canRound()
 	 */
+	@Override
 	public boolean canRound()
 	{
 		return (active && minIncrement != 0);
 	}
-	
+
 	/**
 	 * Gets the centre of the range in the dimension
 	 *
 	 * @return the centre of the range in the dimension
 	 */
+	@Override
 	public double getCentre()
 	{
 		return round((upper + lower) / 2);
@@ -200,6 +203,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 *
 	 * @return the current lower bound of the range
 	 */
+	@Override
 	public double getLower()
 	{
 		return lower;
@@ -210,6 +214,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 *
 	 * @return the current upper bound of the range
 	 */
+	@Override
 	public double getUpper()
 	{
 		return upper;
@@ -220,6 +225,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#isAtBounds(double)
 	 */
+	@Override
 	public boolean isAtBounds(double v)
 	{
 		return (v <= lower || v >= upper);
@@ -249,6 +255,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#getMin()
 	 */
+	@Override
 	public double getMin()
 	{
 		return min;
@@ -259,6 +266,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#getMax()
 	 */
+	@Override
 	public double getMax()
 	{
 		return max;
@@ -269,6 +277,7 @@ public class FixedDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return active;

@@ -1,3 +1,4 @@
+
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
@@ -52,6 +53,7 @@ public class SMLM_Plugins implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		// Create the SMLM Tools plugin.

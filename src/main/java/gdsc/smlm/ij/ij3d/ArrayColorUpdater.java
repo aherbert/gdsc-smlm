@@ -141,6 +141,7 @@ public abstract class ArrayColorUpdater
 			return 4;
 		}
 
+		@Override
 		public float[] getColors(Color4f color)
 		{
 			pointColor[0] = color.x;
@@ -150,6 +151,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color, float alpha)
 		{
 			pointColor[0] = color.x;
@@ -159,6 +161,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color)
 		{
 			pointColor[0] = color.x;
@@ -167,6 +170,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(float alpha)
 		{
 			pointColor[3] = alpha;
@@ -199,6 +203,7 @@ public abstract class ArrayColorUpdater
 			return 4;
 		}
 
+		@Override
 		public float[] getColors(Color4f color)
 		{
 			for (int i = 0; i < pointColor.length;)
@@ -211,6 +216,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color, float alpha)
 		{
 			for (int i = 0; i < pointColor.length;)
@@ -223,6 +229,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color)
 		{
 			for (int i = 0; i < pointColor.length;)
@@ -235,6 +242,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(float alpha)
 		{
 			for (int i = 3; i < pointColor.length; i += 4)
@@ -270,6 +278,7 @@ public abstract class ArrayColorUpdater
 			return 3;
 		}
 
+		@Override
 		public float[] getColors(Color4f color)
 		{
 			pointColor[0] = color.x;
@@ -279,6 +288,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color, float alpha)
 		{
 			pointColor[0] = color.x;
@@ -288,6 +298,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color)
 		{
 			pointColor[0] = color.x;
@@ -296,6 +307,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(float alpha)
 		{
 			// Ignore alpha
@@ -328,6 +340,7 @@ public abstract class ArrayColorUpdater
 			return 3;
 		}
 
+		@Override
 		public float[] getColors(Color4f color)
 		{
 			for (int i = 0; i < pointColor.length;)
@@ -340,6 +353,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color, float alpha)
 		{
 			for (int i = 0; i < pointColor.length;)
@@ -352,6 +366,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(Color3f color)
 		{
 			for (int i = 0; i < pointColor.length;)
@@ -364,6 +379,7 @@ public abstract class ArrayColorUpdater
 			return pointColor;
 		}
 
+		@Override
 		public float[] getColors(float alpha)
 		{
 			// Ignore alpha

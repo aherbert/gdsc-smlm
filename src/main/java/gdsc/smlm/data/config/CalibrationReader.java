@@ -38,7 +38,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
-
 /**
  * Contains helper functions for reading the Calibration class.
  */
@@ -329,7 +328,8 @@ public class CalibrationReader
 	public int getCameraTypeValue()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraTypeValue() : CameraType.CAMERA_TYPE_NA_VALUE;
+		return (c.hasCameraCalibration()) ? c.getCameraCalibration().getCameraTypeValue()
+				: CameraType.CAMERA_TYPE_NA_VALUE;
 	}
 
 	/**
@@ -507,7 +507,7 @@ public class CalibrationReader
 		return (c.hasDistanceCalibration()) ? c.getDistanceCalibration().getDistanceUnitValue()
 				: DistanceUnit.DISTANCE_UNIT_NA_VALUE;
 	}
-	
+
 	/**
 	 * Checks for distance unit.
 	 *
@@ -573,7 +573,7 @@ public class CalibrationReader
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
 		return (c.hasAngleCalibration()) ? c.getAngleCalibration().getAngleUnitValue() : AngleUnit.ANGLE_UNIT_NA_VALUE;
 	}
-	
+
 	/**
 	 * Checks for angle unit.
 	 *
@@ -583,7 +583,7 @@ public class CalibrationReader
 	{
 		return getAngleUnit().getNumber() > 0;
 	}
-	
+
 	/**
 	 * Get the precision method used for the results.
 	 *
@@ -592,7 +592,8 @@ public class CalibrationReader
 	public PrecisionMethod getPrecisionMethod()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethod() : PrecisionMethod.PRECISION_METHOD_NA;
+		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethod()
+				: PrecisionMethod.PRECISION_METHOD_NA;
 	}
 
 	/**
@@ -603,9 +604,10 @@ public class CalibrationReader
 	public int getPrecisionMethodValue()
 	{
 		CalibrationOrBuilder c = getCalibrationOrBuilder();
-		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethodValue() : PrecisionMethod.PRECISION_METHOD_NA_VALUE;
+		return (c.hasResultDataCalibration()) ? c.getResultDataCalibration().getPrecisionMethodValue()
+				: PrecisionMethod.PRECISION_METHOD_NA_VALUE;
 	}
-	
+
 	/**
 	 * Checks for precision method.
 	 *

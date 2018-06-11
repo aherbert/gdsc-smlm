@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine;
 
-
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows listing neighbours of a given
  * position.
@@ -38,7 +37,7 @@ class CandidateGridManager
 	private int fittedCandidateCacheX = -1, fittedCandidateCacheY = -1;
 	private CandidateList neighbourCache = null;
 	private Candidate neighbourCacheCandidate = null;
-	
+
 	private CandidateList fitted = new CandidateList();
 
 	/**
@@ -126,7 +125,7 @@ class CandidateGridManager
 		fittedCandidateGrid[xBlock][yBlock].add(candidate);
 		fitted.add(candidate);
 	}
-	
+
 	/**
 	 * Gets the fitted candidates.
 	 *
@@ -136,7 +135,7 @@ class CandidateGridManager
 	{
 		return fitted;
 	}
-	
+
 	/**
 	 * Gets the fitted candidates size.
 	 *

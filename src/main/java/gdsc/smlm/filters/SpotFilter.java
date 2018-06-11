@@ -26,7 +26,6 @@ package gdsc.smlm.filters;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image.
  */
@@ -133,6 +132,7 @@ public abstract class SpotFilter implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public SpotFilter clone()
 	{
 		try

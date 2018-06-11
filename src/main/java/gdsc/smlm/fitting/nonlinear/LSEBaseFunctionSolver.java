@@ -29,7 +29,6 @@ import gdsc.smlm.fitting.LSEFunctionSolver;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.GradientFunction;
 
-
 /**
  * Abstract class with utility methods for the LSEFunctionSolver interface.
  */
@@ -110,6 +109,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getTotalSumOfSquares()
 	 */
+	@Override
 	public double getTotalSumOfSquares()
 	{
 		if (Double.isNaN(totalSumOfSquares) && lastY != null)
@@ -124,6 +124,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getResidualSumOfSquares()
 	 */
+	@Override
 	public double getResidualSumOfSquares()
 	{
 		return value;
@@ -134,6 +135,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getCoefficientOfDetermination()
 	 */
+	@Override
 	public double getCoefficientOfDetermination()
 	{
 		return 1.0 - (value / getTotalSumOfSquares());
@@ -144,6 +146,7 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getAdjustedCoefficientOfDetermination()
 	 */
+	@Override
 	public double getAdjustedCoefficientOfDetermination()
 	{
 		return Maths.getAdjustedCoefficientOfDetermination(getResidualSumOfSquares(), getTotalSumOfSquares(),
@@ -155,17 +158,20 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getMeanSquaredError()
 	 */
+	@Override
 	public double getMeanSquaredError()
 	{
 		return getResidualSumOfSquares() / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
 	}
 
 	/**
-	 * Compute the covariance matrix of the parameters of the function assuming a least squares fit of a Poisson process.
+	 * Compute the covariance matrix of the parameters of the function assuming a least squares fit of a Poisson
+	 * process.
 	 * <p>
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
+	 * 
 	 * <pre>
 	 * I = sum_i { Ei,a * Ei,b }
 	 * E = sum_i { Ei * Ei,a * Ei,b }
@@ -213,12 +219,14 @@ public abstract class LSEBaseFunctionSolver extends BaseFunctionSolver implement
 
 		return covar;
 	}
+
 	/**
 	 * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
 	 * <p>
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
+	 * 
 	 * <pre>
 	 * I = sum_i { Ei,a * Ei,b }
 	 * E = sum_i { Ei * Ei,a * Ei,b }

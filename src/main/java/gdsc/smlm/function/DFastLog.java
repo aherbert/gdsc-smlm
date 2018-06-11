@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Implementation of the ICSILog algorithm
  * as described in O. Vinyals, G. Friedland, N. Mirghafori
@@ -284,28 +283,28 @@ public class DFastLog extends FastLog
 	}
 
 	// Don't bother with float versions. Use FFastLog instead.
-	
+
 	@Override
 	public float log2(float x)
 	{
-		return (float)log2((double)x);
+		return log2((double) x);
 	}
 
 	@Override
 	public float fastLog2(float x)
 	{
-		return (float)fastLog2((double)x);
+		return fastLog2((double) x);
 	}
 
 	@Override
 	public float log(float x)
 	{
-		return (float)log((double)x);
+		return log((double) x);
 	}
 
 	@Override
 	public float fastLog(float x)
 	{
-		return (float)fastLog((double)x);
+		return fastLog((double) x);
 	}
 }

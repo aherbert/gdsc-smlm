@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine;
 
-
 /**
  * Define the type of queue used within the fit engine
  */
@@ -33,15 +32,18 @@ public enum FitQueue
 	/**
 	 * Block additions if there is a backlog
 	 */
-	BLOCKING{ public String getName() { return "Blocking"; }},
+	BLOCKING{ @Override
+	public String getName() { return "Blocking"; }},
 	/**
 	 * Allow all additions if there is a backlog
 	 */
-	NON_BLOCKING{ public String getName() { return "Non-blocking"; }},
+	NON_BLOCKING{ @Override
+	public String getName() { return "Non-blocking"; }},
 	/**
 	 * Ignore additions if there is a backlog
 	 */
-	IGNORE{ public String getName() { return "Ignore"; }};
+	IGNORE{ @Override
+	public String getName() { return "Ignore"; }};
 	//@formatter:on
 
 	@Override

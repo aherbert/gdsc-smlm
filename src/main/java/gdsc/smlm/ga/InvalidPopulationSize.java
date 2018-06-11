@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ga;
 
-
 /**
  * Exception to throw if the population size is invalid (<2 individuals)
  */

@@ -37,7 +37,6 @@ import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.OffsetExtendedGradient2Function;
 import gdsc.smlm.function.OffsetGradient2Function;
 
-
 /**
  * Uses the Fast MLE method to fit a gradient function with coefficients (a).
  * <p>
@@ -147,6 +146,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 	 *            the y
 	 * @return the newton raphson gradient 2 procedure
 	 */
+	@Override
 	protected FastMLEGradient2Procedure createGradientProcedure(double[] y)
 	{
 		// We can handle per-observation variances as detailed in
@@ -156,8 +156,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 		{
 			if (w != null)
 			{
-				f2 = OffsetExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) f,
-						w);
+				f2 = OffsetExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) f, w);
 			}
 			jacobian = new double[f2.size()];
 			return jacobianGradientProcedure = new FastMLEJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2);
@@ -178,6 +177,7 @@ public class ExtendedFastMLESteppingFunctionSolver extends FastMLESteppingFuncti
 	 * @param a
 	 *            the funtion parameters
 	 */
+	@Override
 	protected void computeGradients(double[] a)
 	{
 		if (solver != null)

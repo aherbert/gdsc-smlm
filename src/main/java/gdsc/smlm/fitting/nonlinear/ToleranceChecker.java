@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting.nonlinear;
 
-
 /**
  * Check if converged using a tolerance on the value, parameters, and/or the number of iterations
  */

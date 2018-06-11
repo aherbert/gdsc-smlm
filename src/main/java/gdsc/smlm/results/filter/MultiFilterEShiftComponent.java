@@ -23,14 +23,13 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using Euclidian Shift
  */
 public class MultiFilterEShiftComponent extends MultiFilterComponent
 {
 	final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
-	
+
 	final float eoffset;
 
 	public MultiFilterEShiftComponent(double eshift)
@@ -43,6 +42,7 @@ public class MultiFilterEShiftComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		return (peak.getXRelativeShift2() + peak.getYRelativeShift2() > eoffset);
@@ -53,6 +53,7 @@ public class MultiFilterEShiftComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return type;

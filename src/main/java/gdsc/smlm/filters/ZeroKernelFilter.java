@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes a convolution in the spatial domain for each point within the array. Pixels outside the array are assumed to
  * be zero.
@@ -129,6 +128,7 @@ public class ZeroKernelFilter extends KernelFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public ZeroKernelFilter clone()
 	{
 		ZeroKernelFilter o = (ZeroKernelFilter) super.clone();

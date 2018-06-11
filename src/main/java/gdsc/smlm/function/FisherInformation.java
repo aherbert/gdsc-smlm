@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Calculate the Fisher information: the amount of information that an observable random variable X carries about an
  * unknown parameter θ of a distribution that models X.

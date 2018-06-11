@@ -25,7 +25,6 @@ package gdsc.smlm.ga;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Check if converged using a tolerance on the fitness and/or sequence change, and the number of iterations
  */
@@ -72,7 +71,8 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
 	 * @param checkSequence
 	 *            Set to true to check the sequence
 	 * @param maxIterations
-	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome<T>, Chromosome<T>)} is
+	 *            Set above zero to check the iterations (number of time {@link #converged(Chromosome<T>,
+	 *            Chromosome<T>)} is
 	 *            called)
 	 * @throws IllegalArgumentException
 	 *             if none of the convergence criteria are valid
@@ -138,6 +138,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
 		return true;
 	}
 
+	@Override
 	public boolean converged(Chromosome<T> previous, Chromosome<T> current)
 	{
 		iterations++;

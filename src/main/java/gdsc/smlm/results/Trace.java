@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import gnu.trove.list.linked.TIntLinkedList;
 
-
 /**
  * Define a cluster of localisations from different frames that represent a single molecule trace
  */
@@ -38,7 +37,7 @@ public class Trace extends Cluster
 	{
 		super();
 	}
-	
+
 	public Trace(PeakResult peakResult)
 	{
 		super(peakResult);
@@ -91,7 +90,7 @@ public class Trace extends Cluster
 				t1 = t2;
 			}
 			on.add(t1 - onStart + 1);
-			
+
 			onTimes = on.toArray();
 			offTimes = off.toArray();
 		}
@@ -154,6 +153,7 @@ public class Trace extends Cluster
 		return offTimes;
 	}
 
+	@Override
 	public void removeEnds()
 	{
 		super.removeEnds();

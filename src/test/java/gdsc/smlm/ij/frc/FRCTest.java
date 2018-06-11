@@ -124,10 +124,10 @@ public class FRCTest
 		Assert.assertArrayEquals("absFFT2", absFFT2E, absFFT2A, 0);
 
 		FRC.computeMirroredFast(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
-		
+
 		// Check this.
-		for (int y=1; y<size; y++)
-			for (int x=1, i=y*size+1; x<size; x++, i++)
+		for (int y = 1; y < size; y++)
+			for (int x = 1, i = y * size + 1; x < size; x++, i++)
 			{
 				Assert.assertEquals("numerator", numeratorE[i], numeratorA[i], 0);
 				Assert.assertEquals("absFFT1", absFFT1E[i], absFFT1A[i], 0);
@@ -150,11 +150,13 @@ public class FRCTest
 			super(name);
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
@@ -177,6 +179,7 @@ public class FRCTest
 		TimingService ts = new TimingService(100);
 		ts.execute(new MyTimingTask("sin")
 		{
+			@Override
 			public Object run(Object data)
 			{
 				double d = 0;
@@ -187,6 +190,7 @@ public class FRCTest
 		});
 		ts.execute(new MyTimingTask("FastMath.sin")
 		{
+			@Override
 			public Object run(Object data)
 			{
 				double d = 0;
@@ -197,6 +201,7 @@ public class FRCTest
 		});
 		ts.execute(new MyTimingTask("getSine")
 		{
+			@Override
 			public Object run(Object data)
 			{
 				double d = 0;
@@ -209,7 +214,7 @@ public class FRCTest
 		ts.repeat(ts.getSize());
 		ts.report();
 	}
-	
+
 	@Test
 	public void computeMirroredIsFaster()
 	{
@@ -244,19 +249,20 @@ public class FRCTest
 		FloatProcessor[] fft1, fft2;
 		fft1 = frc.getComplexFFT(ip1);
 		fft2 = frc.getComplexFFT(ip2);
-		
+
 		final float[] dataA1 = (float[]) fft1[0].getPixels();
 		final float[] dataB1 = (float[]) fft1[1].getPixels();
 		final float[] dataA2 = (float[]) fft2[0].getPixels();
 		final float[] dataB2 = (float[]) fft2[1].getPixels();
-		
+
 		final float[] numerator = new float[dataA1.length];
 		final float[] absFFT1 = new float[dataA1.length];
 		final float[] absFFT2 = new float[dataA1.length];
-		
+
 		TimingService ts = new TimingService(10);
 		ts.execute(new MyTimingTask("compute")
 		{
+			@Override
 			public Object run(Object data)
 			{
 				FRC.compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
@@ -265,6 +271,7 @@ public class FRCTest
 		});
 		ts.execute(new MyTimingTask("computeMirrored")
 		{
+			@Override
 			public Object run(Object data)
 			{
 				FRC.computeMirrored(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
@@ -273,6 +280,7 @@ public class FRCTest
 		});
 		ts.execute(new MyTimingTask("computeMirroredFast")
 		{
+			@Override
 			public Object run(Object data)
 			{
 				FRC.computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
@@ -282,5 +290,5 @@ public class FRCTest
 
 		ts.repeat(ts.getSize());
 		ts.report();
-	}	
+	}
 }

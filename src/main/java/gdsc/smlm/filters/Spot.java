@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Identify a candidate spot (local maximum).
  */
@@ -99,6 +98,7 @@ public class Spot implements Comparable<Spot>, Cloneable
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(Spot o)
 	{
 		if (score > o.score)
@@ -113,6 +113,7 @@ public class Spot implements Comparable<Spot>, Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Spot clone()
 	{
 		try

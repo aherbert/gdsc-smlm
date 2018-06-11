@@ -121,6 +121,7 @@ public class PoissonCalculatorTest
 			this.mu = mu;
 		}
 
+		@Override
 		public double value(double x)
 		{
 			double v;
@@ -167,15 +168,18 @@ public class PoissonCalculatorTest
 			{
 				//@formatter:off
 				case 2:
-					f = new PoissonFunction(mu) { double likelihood(double mu, double x) {
+					f = new PoissonFunction(mu) { @Override
+					double likelihood(double mu, double x) {
 							return PoissonCalculator.fastLikelihood(mu, x, FastLogFactory.getFastLog());	} };
 					break;
 				case 1:
-					f = new PoissonFunction(mu) { double likelihood(double mu, double x) {
+					f = new PoissonFunction(mu) { @Override
+					double likelihood(double mu, double x) {
 							return PoissonCalculator.fastLikelihood(mu, x);	} };
 					break;
 				case 0:
-					f = new PoissonFunction(mu) { double likelihood(double mu, double x) {
+					f = new PoissonFunction(mu) { @Override
+					double likelihood(double mu, double x) {
 							return PoissonCalculator.likelihood(mu, x);	} };
 					break;
 				default:
@@ -221,36 +225,43 @@ public class PoissonCalculatorTest
 			this.name = name;
 		}
 
+		@Override
 		public void initialise(double[] a)
 		{
 			this.a = a;
 		}
 
+		@Override
 		public int[] gradientIndices()
 		{
 			return new int[1];
 		}
 
+		@Override
 		public double eval(int x, double[] dyda, double[] w)
 		{
 			return 0;
 		}
 
+		@Override
 		public double eval(int x, double[] dyda)
 		{
 			return 0;
 		}
 
+		@Override
 		public boolean canComputeWeights()
 		{
 			return false;
 		}
 
+		@Override
 		public double evalw(int x, double[] w)
 		{
 			return 0;
 		}
 
+		@Override
 		public int getNumberOfGradients()
 		{
 			return 1;
@@ -265,10 +276,12 @@ public class PoissonCalculatorTest
 		//@formatter:off
 		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Quadratic")
 		{
+			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
 		});		
 		canComputeLogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
+			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
 		});		
 		//@formatter:on
@@ -371,10 +384,12 @@ public class PoissonCalculatorTest
 		//@formatter:off
 		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Quadratic")
 		{
+			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
 		});		
 		canComputeFastLog_LogLikelihoodRatio(new BaseNonLinearFunction("Gaussian")
 		{
+			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
 		});		
 		//@formatter:on
@@ -420,27 +435,33 @@ public class PoissonCalculatorTest
 		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(
 		new BaseNonLinearFunction("Quadratic")
 		{
+			@Override
 			public double eval(int x) {	return 0.1 + a[0] * (x-n2) * (x-n2); }
 		},
 		new BaseNonLinearFunction("Quadratic")
 		{
+			@Override
 			public double eval(int x) {	return 0.2 + 0.5 * a[0] * (x-n3) * (x-n3); }
 		},
 		new BaseNonLinearFunction("Quadratic")
 		{
+			@Override
 			public double eval(int x) {	return 0.3 + 0.75 * a[0] * (x-n4) * (x-n4); }
 		});		
 		cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(
 		new BaseNonLinearFunction("Gaussian")
 		{
+			@Override
 			public double eval(int x) {	return 0.1 + 100 * FastMath.exp(-0.5 * Maths.pow2(x - n2) / (a[0] * a[0])); }
 		},
 		new BaseNonLinearFunction("Gaussian")
 		{
+			@Override
 			public double eval(int x) {	return 0.2 + 50 * FastMath.exp(-0.5 * Maths.pow2(x - n3) / (a[0] * a[0])); }
 		},
 		new BaseNonLinearFunction("Gaussian")
 		{
+			@Override
 			public double eval(int x) {	return 0.3 + 75 * FastMath.exp(-0.5 * Maths.pow2(x - n4) / (a[0] * a[0])); }
 		});		
 		//@formatter:on
@@ -692,11 +713,13 @@ public class PoissonCalculatorTest
 			this.llr = llr;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
@@ -710,6 +733,7 @@ public class PoissonCalculatorTest
 			super("static", x, u, ll, llr);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double value = 0;
@@ -728,6 +752,7 @@ public class PoissonCalculatorTest
 			super("fast", x, u, ll, llr);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double value = 0;
@@ -748,6 +773,7 @@ public class PoissonCalculatorTest
 			super("fastLog", x, u, ll, llr);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double value = 0;
@@ -769,6 +795,7 @@ public class PoissonCalculatorTest
 			max = Math.max(llr, ll);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			PoissonCalculator pc = new PoissonCalculator(x);

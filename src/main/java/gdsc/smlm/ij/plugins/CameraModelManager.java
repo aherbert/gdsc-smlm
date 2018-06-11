@@ -269,6 +269,7 @@ public class CameraModelManager implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -429,6 +430,7 @@ public class CameraModelManager implements PlugIn
 
 		File[] fileList = (new File(directory)).listFiles(new FileFilter()
 		{
+			@Override
 			public boolean accept(File pathname)
 			{
 				return pathname.isFile();
@@ -556,8 +558,8 @@ public class CameraModelManager implements PlugIn
 
 	private static void logStats(String name, Statistics stats, double min, double max)
 	{
-		Utils.log("%s : %s += %s : [%s to %s]", name, Utils.rounded(stats.getMean()), Utils.rounded(stats.getStandardDeviation()),
-				Utils.rounded(min), Utils.rounded(max));
+		Utils.log("%s : %s += %s : [%s to %s]", name, Utils.rounded(stats.getMean()),
+				Utils.rounded(stats.getStandardDeviation()), Utils.rounded(min), Utils.rounded(max));
 	}
 
 	private void printCameraModels()

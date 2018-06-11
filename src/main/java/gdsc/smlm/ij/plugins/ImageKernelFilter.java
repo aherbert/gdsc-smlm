@@ -44,14 +44,14 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-
 /**
  * Convolve an image with a kernel from another image.
  */
 public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 {
 	private static final String TITLE = "Image Kernel Filter";
-	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS | CONVERT_TO_FLOAT | FINAL_PROCESSING;
+	private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS | CONVERT_TO_FLOAT |
+			FINAL_PROCESSING;
 
 	private static final String[] METHODS = { "Spatial domain", "FHT" };
 	private static final int METHOD_SPATIAL = 0;
@@ -84,6 +84,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		if ("final".equals(arg))
@@ -92,7 +93,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			imp.updateAndDraw();
 			return DONE;
 		}
-		
+
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		if (imp == null)
@@ -103,6 +104,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		return FLAGS;
 	}
 
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		float[] data = (float[]) ip.getPixels();
@@ -123,6 +125,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		ticker.tick();
 	}
 
+	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		// Get available kernels
@@ -132,8 +135,8 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 			IJ.error(TITLE, "No suitable kernel images");
 			return DONE;
 		}
-		
-		this.dataImp=imp;
+
+		this.dataImp = imp;
 
 		ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
@@ -162,6 +165,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		title = gd.getNextChoice();
@@ -177,6 +181,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener
 		return true;
 	}
 
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Create the kernel from the image

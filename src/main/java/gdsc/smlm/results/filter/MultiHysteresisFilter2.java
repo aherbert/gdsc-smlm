@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -110,7 +109,7 @@ public class MultiHysteresisFilter2 extends MultiHysteresisFilter
 		}
 		else
 		{
-			return  calculator.getLSEVariance(result.getParameters(), result.getNoise());
+			return calculator.getLSEVariance(result.getParameters(), result.getNoise());
 		}
 	}
 

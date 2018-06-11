@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
 
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextArea;
@@ -596,6 +595,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		 * 
 		 * @see java.lang.Object#clone()
 		 */
+		@Override
 		public FilterCandidates clone()
 		{
 			try
@@ -620,6 +620,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			this.index = index;
 		}
 
+		@Override
 		public int compareTo(Ranking that)
 		{
 			return Double.compare(this.value, that.value);
@@ -668,6 +669,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -962,6 +964,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1471,6 +1474,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final int[] nX = new int[2];
 		filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
+			@Override
 			public boolean execute(int frame, FilterResult r)
 			{
 				// Determine the number of positives to find. This score may be fractional.
@@ -1648,6 +1652,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final int[] counter = new int[1];
 		filterCandidates.forEachEntry(new TIntObjectProcedure<FilterCandidates>()
 		{
+			@Override
 			public boolean execute(int a, FilterCandidates b)
 			{
 				frames[counter[0]] = a;
@@ -1758,6 +1763,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		final TIntHashSet set = new TIntHashSet(nUniqueIDs);
 		FractionScoreStore scoreStore = new FractionScoreStore()
 		{
+			@Override
 			public void add(int uniqueId)
 			{
 				set.add(uniqueId);
@@ -1808,6 +1814,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		// Add the rest
 		set.forEach(new CustomTIntProcedure(count)
 		{
+			@Override
 			public boolean execute(int uniqueId)
 			{
 				// This should not be null or something has gone wrong
@@ -1971,7 +1978,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		ArrayList<Ranking> pc2 = new ArrayList<Ranking>();
 		for (int ci2 : indices)
 		{
-			fastCorrelator.add((long) Math.round(i1[ci2]), (long) Math.round(i2[ci2]));
+			fastCorrelator.add(Math.round(i1[ci2]), Math.round(i2[ci2]));
 			pc1.add(new Ranking(i1[ci2], ci));
 			pc2.add(new Ranking(i2[ci2], ci));
 			if (showCorrelation)
@@ -2367,6 +2374,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 			// Jaccard score verses the range of the metric
 			Arrays.sort(matchScores, new Comparator<double[]>()
 			{
+				@Override
 				public int compare(double[] o1, double[] o2)
 				{
 					if (o1[i] < o2[i])
@@ -2817,6 +2825,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 		return true;
 	}
 
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getSource() instanceof Checkbox)

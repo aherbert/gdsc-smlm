@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import java.util.Arrays;
 
-
 /**
  * Helper for the spot filter
  */

@@ -76,7 +76,7 @@ public class GaussianFilterTest
 	private class IJFilter extends GFilter
 	{
 		GaussianBlur gf = new GaussianBlur();
-		
+
 		IJFilter(boolean internal)
 		{
 			super(GaussianBlur.class.getSimpleName(), internal);
@@ -106,8 +106,8 @@ public class GaussianFilterTest
 		{
 			// Ignored
 		}
-	}	
-	
+	}
+
 	private class FloatFilter extends GFilter
 	{
 		GaussianFilter gf = new GaussianFilter();
@@ -209,7 +209,7 @@ public class GaussianFilterTest
 	{
 		filter1IsSameAsFilter2(new FloatFilter(true), new IJFilter(true), false, 1e-2);
 	}
-	
+
 	@Test
 	public void floatFilterIsSameAsDoubleFilter()
 	{
@@ -289,16 +289,19 @@ public class GaussianFilterTest
 			this.sigma = sigma;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return data.length;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return data[i].clone();
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			float[] d = (float[]) data;

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Class to count per frame.
  */
@@ -68,7 +67,7 @@ public class FrameCounter extends Counter
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Advance the frame.
 	 *

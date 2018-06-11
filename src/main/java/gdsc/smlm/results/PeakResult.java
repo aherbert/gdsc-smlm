@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import java.util.Arrays;
 
-
 /**
  * Specifies a peak fitting result
  */
@@ -184,6 +183,7 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending
@@ -850,6 +850,7 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public PeakResult clone()
 	{
 		try

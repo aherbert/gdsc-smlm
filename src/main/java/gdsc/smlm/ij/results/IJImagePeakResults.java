@@ -45,7 +45,6 @@ import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
 import ij.process.InfinityMappedFloatProcessor;
 
-
 /**
  * Saves the fit results to an ImageJ image
  */
@@ -201,6 +200,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#begin()
 	 */
+	@Override
 	public void begin()
 	{
 		imageActive = false;
@@ -562,6 +562,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
+	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
 			float[] params, float[] paramsDev)
 	{
@@ -1105,6 +1106,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public void add(PeakResult result)
 	{
 		add(result.getFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
@@ -1116,6 +1118,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		if (!imageActive)
@@ -1269,6 +1272,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
+	@Override
 	public int size()
 	{
 		return size;
@@ -1279,6 +1283,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
+	@Override
 	public void end()
 	{
 		// Wait for previous image to finish rendering
@@ -1380,6 +1385,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return imageActive;
@@ -1412,6 +1418,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	 * 
 	 * @see gdsc.smlm.results.AbstractPeakResults#setBounds(java.awt.Rectangle)
 	 */
+	@Override
 	public void setBounds(Rectangle bounds)
 	{
 		// Ignore. Bounds are only valid when the image is created

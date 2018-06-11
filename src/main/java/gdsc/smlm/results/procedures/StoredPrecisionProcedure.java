@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.procedures;
 
-
 /**
  * Interface for accessing the stored localisation precision of fitting results.
  */

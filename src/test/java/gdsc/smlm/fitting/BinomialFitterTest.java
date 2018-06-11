@@ -186,7 +186,7 @@ public class BinomialFitterTest
 	private void fitBinomial(int n, double p, boolean zeroTruncated, boolean maximumLikelihood, int minN, int maxN)
 	{
 		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
-		
+
 		BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 		bf.setMaximumLikelihood(maximumLikelihood);

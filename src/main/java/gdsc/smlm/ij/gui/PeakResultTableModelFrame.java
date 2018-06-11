@@ -61,7 +61,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.ij.settings.SettingsManager;
 
-
 import gdsc.smlm.results.ArrayPeakResultStore;
 import gdsc.smlm.results.FramePeakResultComparator;
 import gdsc.smlm.results.ImageSource;
@@ -163,12 +162,14 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 		addWindowListener(new WindowAdapter()
 		{
+			@Override
 			public void windowOpened(WindowEvent e)
 			{
 				model.setLive(true);
 				WindowManager.addWindow(PeakResultTableModelFrame.this);
 			}
 
+			@Override
 			public void windowClosed(WindowEvent e)
 			{
 				model.setLive(false);
@@ -226,6 +227,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		editDeleteAll.setEnabled(false);
 		editReadOnly.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				boolean allowDelete = !isReadOnly();
@@ -270,6 +272,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 	 * 
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		final Object src = e.getSource();
@@ -598,6 +601,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 		// the same selection model. Each JList updates using the same selection.
 		selectionModel.addListSelectionListener(new ListSelectionListener()
 		{
+			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				if (e.getValueIsAdjusting())
@@ -610,6 +614,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				try

@@ -76,6 +76,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
@@ -92,9 +93,12 @@ public class TraceMolecules implements PlugIn
 	public enum OptimiserPlot
 	{
 		//@formatter:off
-		NONE{ public String getName() { return "None"; }}, 
-		NEAREST_NEIGHBOUR{ public String getName() { return "Nearest neighbour"; }}, 
-		BILINEAR{ public String getName() { return "Bi-linear"; }};
+		NONE{ @Override
+		public String getName() { return "None"; }}, 
+		NEAREST_NEIGHBOUR{ @Override
+		public String getName() { return "Nearest neighbour"; }}, 
+		BILINEAR{ @Override
+		public String getName() { return "Bi-linear"; }};
 		//@formatter:on
 
 		@Override
@@ -205,6 +209,7 @@ public class TraceMolecules implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -374,6 +379,7 @@ public class TraceMolecules implements PlugIn
 		final Counter counter = new Counter();
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult p)
 			{
 				points.add(ClusterPoint.newTimeClusterPoint(counter.getAndIncrement(), p.getXPosition(),
@@ -424,6 +430,7 @@ public class TraceMolecules implements PlugIn
 			t.sort();
 		Arrays.sort(traces, new Comparator<Trace>()
 		{
+			@Override
 			public int compare(Trace o1, Trace o2)
 			{
 				return o1.getHead().getFrame() - o2.getHead().getFrame();
@@ -1419,6 +1426,7 @@ public class TraceMolecules implements PlugIn
 		// Sort by x coord, then y
 		Collections.sort(zeroCrossingPoints, new Comparator<double[]>()
 		{
+			@Override
 			public int compare(double[] o1, double[] o2)
 			{
 				if (o1[0] < o2[0])
@@ -1537,7 +1545,7 @@ public class TraceMolecules implements PlugIn
 			xPoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
 			yPoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
 		}
-		roi = new PolygonRoi(xPoints, yPoints, nPoints, PolygonRoi.POLYLINE);
+		roi = new PolygonRoi(xPoints, yPoints, nPoints, Roi.POLYLINE);
 		imp.setRoi(roi);
 	}
 
@@ -2095,7 +2103,7 @@ public class TraceMolecules implements PlugIn
 		double noise = 0;
 		for (int i = 0; i < trace.size(); i++)
 		{
-			PeakResult result  = trace.get(i);
+			PeakResult result = trace.get(i);
 			noise += result.getNoise() * result.getNoise();
 
 			float[] sourceData = source.get(result.getFrame(), bounds);
@@ -2132,7 +2140,7 @@ public class TraceMolecules implements PlugIn
 		double noise = 0;
 		for (int i = 0; i < trace.size(); i++)
 		{
-			PeakResult result  = trace.get(i);
+			PeakResult result = trace.get(i);
 			noise += result.getNoise() * result.getNoise();
 		}
 		// Combined noise is the sqrt of the sum-of-squares

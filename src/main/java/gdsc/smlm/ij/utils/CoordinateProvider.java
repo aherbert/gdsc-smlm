@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.utils;
 
-
 /**
  * Provide methods to retrieve the coordinates from a text line
  */
@@ -31,6 +30,7 @@ public interface CoordinateProvider
 {
 	/**
 	 * Get the coordinates from the line
+	 * 
 	 * @param line
 	 * @return The coordinates (or null)
 	 */

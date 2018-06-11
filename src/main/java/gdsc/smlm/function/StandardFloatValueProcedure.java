@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Class for evaluating a function
  */
@@ -78,6 +77,7 @@ public class StandardFloatValueProcedure implements ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueProcedure#execute(float)
 	 */
+	@Override
 	public void execute(double value)
 	{
 		values[i++] = (float) value;

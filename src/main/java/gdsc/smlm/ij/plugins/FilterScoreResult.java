@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.smlm.results.filter.DirectFilter;
 
 /**

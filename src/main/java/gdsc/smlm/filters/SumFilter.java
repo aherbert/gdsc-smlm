@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -2483,6 +2482,7 @@ public class SumFilter extends BaseFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public SumFilter clone()
 	{
 		SumFilter o = (SumFilter) super.clone();

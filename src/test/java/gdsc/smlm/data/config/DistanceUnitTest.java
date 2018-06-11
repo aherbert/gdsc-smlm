@@ -38,7 +38,7 @@ public class DistanceUnitTest
 		double nmPerPixel = 104.5;
 		for (int pixel = 1; pixel < 10; pixel++)
 		{
-    		//@formatter:off
+			//@formatter:off
     		check(nmPerPixel, 
     			new ExpectedUnit<DistanceUnit>(DistanceUnit.PIXEL, pixel), 
     			new ExpectedUnit<DistanceUnit>(DistanceUnit.UM, pixel * nmPerPixel / 1e3),
@@ -59,7 +59,7 @@ public class DistanceUnitTest
 			for (int j = 0; j < n; j++)
 			{
 				DistanceUnit u2 = expectedUnits[j].u;
-				c =  UnitConverterFactory.createConverter(u1, u2, nmPerPixel);
+				c = UnitConverterFactory.createConverter(u1, u2, nmPerPixel);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}

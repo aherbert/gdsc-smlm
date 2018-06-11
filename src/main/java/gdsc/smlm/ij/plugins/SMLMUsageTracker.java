@@ -104,7 +104,7 @@ public class SMLMUsageTracker implements PlugIn
 				return;
 
 			trackerInitialised = true;
-			
+
 			// Initialise analytics
 			ImageJAnalyticsTracker.initialise();
 			// Record the version of the GDSC SMLM plugins
@@ -140,6 +140,7 @@ public class SMLMUsageTracker implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		recordPlugin(this.getClass(), arg);

@@ -33,7 +33,6 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.utils.ImageConverter;
 
-
 /**
  * Returns a simple estimate of local background and noise for fitting a Gaussian 2D function.
  * The estimate is valid as long as the centre is within the data range.

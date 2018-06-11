@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Returns the settings of the filter for multiple thresholds: Signal, SNR, width, coordinate shift, precision and
  * z-depth.

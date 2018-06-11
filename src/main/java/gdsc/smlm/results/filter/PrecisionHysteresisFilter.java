@@ -29,7 +29,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -260,6 +259,7 @@ public class PrecisionHysteresisFilter extends HysteresisFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { getDefaultSearchRange(), getDefaultTimeRange(), PrecisionFilter.DEFAULT_RANGE,

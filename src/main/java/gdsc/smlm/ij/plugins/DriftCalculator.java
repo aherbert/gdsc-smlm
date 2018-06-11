@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.core.ij.AlignImagesFFT;
 import gdsc.core.ij.IJTrackProgress;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -51,6 +50,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ExtendedGenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.gui.Roi;
@@ -178,6 +178,7 @@ public class DriftCalculator implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			for (int i = from; i < to && i < ip.length; i++)
@@ -219,6 +220,7 @@ public class DriftCalculator implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			for (int i = from; i < to && i < ip.length; i++)
@@ -263,6 +265,7 @@ public class DriftCalculator implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			incrementProgress();
@@ -302,6 +305,7 @@ public class DriftCalculator implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			for (int i = from; i < to && i < images.length; i++)
@@ -319,6 +323,7 @@ public class DriftCalculator implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -593,6 +598,7 @@ public class DriftCalculator implements PlugIn
 			Utils.log("Applying drift correction to the results set: " + results.getName());
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult r)
 				{
 					r.setXPosition((float) (r.getXPosition() + dx[r.getFrame()]));
@@ -612,6 +618,7 @@ public class DriftCalculator implements PlugIn
 					(truncate) ? "truncated " : "");
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult r)
 				{
 					if (truncate)
@@ -890,6 +897,7 @@ public class DriftCalculator implements PlugIn
 		// Find spots within the ROI
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float x, float y, PeakResult r)
 			{
 				if (x > minx && x < maxx)
@@ -1135,9 +1143,9 @@ public class DriftCalculator implements PlugIn
 		Plot2 plot = new Plot2(name, "Frame", "Drift (px)", (float[]) null, (float[]) null);
 		plot.setLimits(a[0], a[1], b[0], b[1]);
 		plot.setColor(new Color(0, 0, 155)); // De-saturated blue
-		plot.addPoints(original[0], original[index], Plot2.CROSS);
+		plot.addPoints(original[0], original[index], Plot.CROSS);
 		plot.setColor(java.awt.Color.RED);
-		plot.addPoints(interpolated[0], interpolated[index], Plot2.LINE);
+		plot.addPoints(interpolated[0], interpolated[index], Plot.LINE);
 		src = Utils.display(name, plot);
 
 		if (Utils.isNewWindow() && parent != null)
@@ -1321,6 +1329,7 @@ public class DriftCalculator implements PlugIn
 		ArrayList<Localisation> nextBlock = null;
 		final Counter counter = new Counter();
 
+		@Override
 		public void execute(PeakResult r)
 		{
 			if (r.getFrame() > counter.getCount())
@@ -1826,6 +1835,7 @@ public class DriftCalculator implements PlugIn
 			this.s = s;
 		}
 
+		@Override
 		public int compareTo(Spot that)
 		{
 			// Sort in time order

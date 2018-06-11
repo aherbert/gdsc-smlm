@@ -23,14 +23,13 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using Shift
  */
 public class MultiFilterShiftComponent extends MultiFilterComponent
 {
 	final static int type = IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
-	
+
 	final float offset;
 
 	public MultiFilterShiftComponent(double shift)
@@ -43,6 +42,7 @@ public class MultiFilterShiftComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		if (peak.getXRelativeShift2() > offset)
@@ -55,6 +55,7 @@ public class MultiFilterShiftComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return type;

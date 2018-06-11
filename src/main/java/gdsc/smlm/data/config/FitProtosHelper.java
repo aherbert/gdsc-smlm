@@ -41,7 +41,6 @@ import gdsc.smlm.data.config.FitProtos.SearchMethod;
 import gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver;
 import gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 
-
 /**
  * Contains helper functions for the FitProtos class.
  */
@@ -55,7 +54,7 @@ public class FitProtosHelper
 		builder.setFixedPsf(false);
 		builder.setDisableBackgroundFitting(false);
 		builder.setDisableSignalFitting(false);
-		
+
 		builder.setFitSolver(FitSolver.LVM_LSE);
 		builder.setFixedIterations(false);
 		builder.setMaxIterations(20);
@@ -63,14 +62,14 @@ public class FitProtosHelper
 		builder.setAbsoluteThreshold(1e-16);
 		builder.setParameterRelativeThreshold(1e-3);
 		builder.setParameterAbsoluteThreshold(1e-6);
-		
+
 		builder.setLambda(10);
-		
+
 		builder.setSearchMethod(SearchMethod.POWELL_BOUNDED);
 		builder.setGradientLineMinimisation(false);
 		builder.setModelCamera(false);
 		builder.setMaxFunctionEvaluations(2000);
-		
+
 		builder.setUseClamping(false);
 		builder.setUseDynamicClamping(false);
 		// Add defaults for a two-axis and theta Gaussian 2D function.
@@ -84,9 +83,9 @@ public class FitProtosHelper
 		builder.addClampValues(3); // Sx
 		builder.addClampValues(3); // Sy
 		builder.addClampValues(Math.PI); // A
-		
+
 		builder.setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
-		
+
 		defaultFitSolverSettings = builder.build();
 	}
 
@@ -136,27 +135,26 @@ public class FitProtosHelper
 
 		FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();
 		builder.setFitSettings(defaultFitSettings);
-		
+
 		builder.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 
-		
-		RelativeParameter.Builder rp =  RelativeParameter.newBuilder();
-		
+		RelativeParameter.Builder rp = RelativeParameter.newBuilder();
+
 		DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
 		dfs.setDataFilterType(DataFilterType.SINGLE);
-		DataFilter.Builder dfb =  dfs.addDataFiltersBuilder();
+		DataFilter.Builder dfb = dfs.addDataFiltersBuilder();
 		dfb.setDataFilterMethod(DataFilterMethod.MEAN);
 		rp.setAbsolute(false);
 		rp.setValue(1.2);
 		dfb.addParameters(rp.build());
-		
+
 		rp.setAbsolute(false);
 		rp.setValue(1);
 		builder.setSearch(rp.build());
 		builder.setBorder(rp.build());
 		rp.setValue(3);
 		builder.setFitting(rp.build());
-		
+
 		builder.setIncludeNeighbours(true);
 		builder.setNeighbourHeightThreshold(0.3);
 		builder.setResidualsThreshold(1);
@@ -170,7 +168,7 @@ public class FitProtosHelper
 		//builder.setFailuresLimit(-1);
 		builder.setFailuresLimit(3);
 		builder.setPassRate(0.5);
-		
+
 		defaultFitEngineSettings = builder.build();
 	}
 
@@ -240,6 +238,7 @@ public class FitProtosHelper
 				throw new IllegalStateException("Unknown name: " + value);
 		}
 	}
+
 	public static String getName(DataFilterMethod value)
 	{
 		switch (value)
@@ -305,7 +304,8 @@ public class FitProtosHelper
 			default:
 				throw new IllegalStateException("Unknown name: " + value);
 		}
-	}	
+	}
+
 	public static Method convertNoiseEstimatorMethod(NoiseEstimatorMethod method)
 	{
 		switch (method)
@@ -333,8 +333,9 @@ public class FitProtosHelper
 		}
 		throw new IllegalStateException("Unknown method: " + method);
 	}
-	
-	public static gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod(SearchMethod searchMethod)
+
+	public static gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter.SearchMethod convertSearchMethod(
+			SearchMethod searchMethod)
 	{
 		switch (searchMethod)
 		{
@@ -359,8 +360,9 @@ public class FitProtosHelper
 				throw new IllegalStateException("Unknown method: " + searchMethod);
 		}
 	}
-	
-	public static gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(LineSearchMethod lineSearchMethod)
+
+	public static gdsc.smlm.fitting.nonlinear.FastMLESteppingFunctionSolver.LineSearchMethod convertLineSearchMethod(
+			LineSearchMethod lineSearchMethod)
 	{
 		switch (lineSearchMethod)
 		{

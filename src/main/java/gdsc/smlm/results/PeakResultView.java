@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Provides access methods for a read-only view of peak results.
  */

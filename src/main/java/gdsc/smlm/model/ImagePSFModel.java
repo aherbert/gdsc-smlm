@@ -375,7 +375,7 @@ public class ImagePSFModel extends PSFModel
 
 			for (int i = 0; i < n; i++)
 			{
-				mean += (s[i] - mean) / ((double) (i + 1));
+				mean += (s[i] - mean) / (i + 1);
 			}
 
 			c[0] = 0;
@@ -466,6 +466,7 @@ public class ImagePSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
 	 */
+	@Override
 	public double create3D(float[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -484,6 +485,7 @@ public class ImagePSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
 	 */
+	@Override
 	public double create3D(double[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -854,6 +856,7 @@ public class ImagePSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
+	@Override
 	public ImagePSFModel copy()
 	{
 		ImagePSFModel model = new ImagePSFModel();
@@ -1208,7 +1211,7 @@ public class ImagePSFModel extends PSFModel
 	{
 		final int slice = getSlice(x2);
 		if (slice < 0 || slice >= sumImage.length)
-			return false;	
+			return false;
 		double delta = 1e-2;
 		double[] dx = new double[] { delta, delta, unitsPerSlice };
 		return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);

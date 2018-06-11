@@ -26,7 +26,6 @@ package gdsc.smlm.results.procedures;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Contains core functionality to for result procedures.
  */

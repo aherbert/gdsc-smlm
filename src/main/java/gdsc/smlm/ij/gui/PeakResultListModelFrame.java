@@ -60,6 +60,7 @@ public class PeakResultListModelFrame extends JFrame
 		// We just reconfigure the JLabel each time we're called.
 		private static final long serialVersionUID = 1998620838894273028L;
 
+		@Override
 		public Component getListCellRendererComponent(JList<? extends PeakResult> list, // the list
 				PeakResult value, // value to display
 				int index, // cell index
@@ -141,6 +142,7 @@ public class PeakResultListModelFrame extends JFrame
 		// the same selection model. Each JList updates using the same selection.
 		selectionModel.addListSelectionListener(new ListSelectionListener()
 		{
+			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				if (e.getValueIsAdjusting())
@@ -153,6 +155,7 @@ public class PeakResultListModelFrame extends JFrame
 
 		EventQueue.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				try

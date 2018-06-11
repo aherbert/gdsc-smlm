@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.engine.filter;
 
-
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
 
@@ -37,8 +36,10 @@ import java.util.TreeSet;
  * Fitted peaks are selected first and in the event of multiple results the peak with the strongest signal is
  * selected. Otherwise failed starting positions are selected and in the event of multiple results the closest
  * position will be chosen.
+ * 
  * @deprecated Filtering of the results is no longer supported
  */
+@Deprecated
 public class OptimumDistanceResultFilter extends ResultFilter
 {
 	private FitResult[] bestFitResults;

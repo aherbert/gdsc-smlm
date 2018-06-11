@@ -39,7 +39,6 @@ import gdsc.smlm.results.count.Counter;
 import gdsc.smlm.results.count.FrameCounter;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
-
 /**
  * Filter a set of peak results into accepted/rejected.
  */
@@ -85,6 +84,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		setup(results);
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				if (accept(peak))
@@ -114,6 +114,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		setup(results);
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				counter.advanceAndReset(peak.getFrame());
@@ -168,6 +169,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		setup(results);
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				counter.advanceAndReset(peak.getFrame());
@@ -231,6 +233,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		final Counter p = new Counter();
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				counter.advanceAndReset(peak.getFrame());
@@ -309,6 +312,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		final Counter p = new Counter();
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				counter.advanceAndReset(peak.getFrame());
@@ -386,6 +390,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		final double[] s = new double[4];
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				counter.advanceAndReset(peak.getFrame());
@@ -473,6 +478,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 		final double[] s = new double[4];
 		results.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peak)
 			{
 				counter.advanceAndReset(peak.getFrame());
@@ -548,6 +554,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			setup(peakResults);
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					final boolean isTrue = peak.getOrigValue() != 0;
@@ -598,6 +605,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			setup(peakResults);
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					final boolean isTrue = peak.getOrigValue() != 0;
@@ -649,6 +657,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					counter.advanceAndReset(peak.getFrame());
@@ -733,6 +742,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					counter.advanceAndReset(peak.getFrame());
@@ -813,6 +823,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					counter.advanceAndReset(peak.getFrame());
@@ -892,6 +903,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					counter.advanceAndReset(peak.getFrame());
@@ -982,6 +994,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 			final FrameCounter counter = new FrameCounter();
 			peakResults.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					counter.advanceAndReset(peak.getFrame());
@@ -1151,6 +1164,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(Filter o)
 	{
 		// Null to end of list
@@ -1531,6 +1545,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
+	@Override
 	public int length()
 	{
 		// Assume all the parameters are included in the Chromosome
@@ -1542,6 +1557,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
+	@Override
 	public double[] sequence()
 	{
 		// Assume all the parameters are included in the Chromosome
@@ -1553,6 +1569,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#newChromosome(double[])
 	 */
+	@Override
 	public Chromosome<FilterScore> newChromosome(double[] sequence)
 	{
 		return create(sequence);
@@ -1563,6 +1580,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#lowerLimit()
 	 */
+	@Override
 	public double[] lowerLimit()
 	{
 		// Set zero as the lower limit
@@ -1574,6 +1592,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#upperLimit()
 	 */
+	@Override
 	public double[] upperLimit()
 	{
 		// No need for upper limits on filters
@@ -1585,6 +1604,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#setFitness(double)
 	 */
+	@Override
 	public void setFitness(FilterScore fitness)
 	{
 		this.fitness = fitness;
@@ -1595,6 +1615,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#getFitness()
 	 */
+	@Override
 	public FilterScore getFitness()
 	{
 		return fitness;
@@ -1606,6 +1627,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#distance(gdsc.smlm.ga.Chromosome)
 	 */
+	@Override
 	public double distance(Chromosome<FilterScore> other)
 	{
 		// NOTE: If the distance is required for a certain type of analysis then this could be done
@@ -1625,6 +1647,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#equals(gdsc.smlm.ga.Chromosome)
 	 */
+	@Override
 	public boolean equals(Chromosome<FilterScore> other)
 	{
 		if (length() != other.length())

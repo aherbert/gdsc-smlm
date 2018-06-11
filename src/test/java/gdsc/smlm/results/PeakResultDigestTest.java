@@ -146,7 +146,7 @@ public class PeakResultDigestTest
 		Assert.assertTrue(digest.matches(r1));
 		Assert.assertFalse(digest.matches(r0));
 	}
-	
+
 	@Test
 	public void digestHandlesEmptyArray()
 	{
@@ -156,7 +156,7 @@ public class PeakResultDigestTest
 		Assert.assertTrue(digest.matches(r0));
 		Assert.assertFalse(digest.matches(r1));
 	}
-	
+
 	@Test
 	public void timeDigest()
 	{

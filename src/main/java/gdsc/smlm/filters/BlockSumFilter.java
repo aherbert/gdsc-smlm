@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes the sum using a square block mask.
  */
@@ -70,6 +69,7 @@ public class BlockSumFilter extends BlockFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public BlockSumFilter clone()
 	{
 		BlockSumFilter o = (BlockSumFilter) super.clone();

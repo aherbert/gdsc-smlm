@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Specifies the fitting configuration for Gaussian 2D fitting.
  */

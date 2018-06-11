@@ -51,11 +51,11 @@ import ij.io.FastTiffDecoder.IndexMap;
 import ij.io.FastTiffDecoder.NumberOfImages;
 import ij.io.FastTiffDecoderBE;
 import ij.io.FastTiffDecoderLE;
+import ij.io.FileInfo;
 import ij.io.FileSeekableStream;
 import ij.io.FastImageReader;
 import ij.io.Opener;
 import ij.io.SeekableStream;
-
 
 /**
  * Represent a series of TIFF image files as a results source. Supports all greyscale images. Only processes channel 0
@@ -292,15 +292,15 @@ public class SeriesImageSource extends ImageSource
 			switch (fileType)
 			{
 				// Greyscale images as we just want the raw pixels with no color model
-				case ExtendedFileInfo.GRAY8:
-				case ExtendedFileInfo.GRAY16_SIGNED:
-				case ExtendedFileInfo.GRAY16_UNSIGNED:
-				case ExtendedFileInfo.GRAY12_UNSIGNED:
-				case ExtendedFileInfo.GRAY32_INT:
-				case ExtendedFileInfo.GRAY32_UNSIGNED:
-				case ExtendedFileInfo.GRAY32_FLOAT:
-				case ExtendedFileInfo.GRAY24_UNSIGNED:
-				case ExtendedFileInfo.GRAY64_FLOAT:
+				case FileInfo.GRAY8:
+				case FileInfo.GRAY16_SIGNED:
+				case FileInfo.GRAY16_UNSIGNED:
+				case FileInfo.GRAY12_UNSIGNED:
+				case FileInfo.GRAY32_INT:
+				case FileInfo.GRAY32_UNSIGNED:
+				case FileInfo.GRAY32_FLOAT:
+				case FileInfo.GRAY24_UNSIGNED:
+				case FileInfo.GRAY64_FLOAT:
 					return true;
 				default:
 					return false;
@@ -311,20 +311,20 @@ public class SeriesImageSource extends ImageSource
 		{
 			switch (fileType)
 			{
-				case ExtendedFileInfo.GRAY8:
+				case FileInfo.GRAY8:
 					return width * height;
-				case ExtendedFileInfo.GRAY16_SIGNED:
-				case ExtendedFileInfo.GRAY16_UNSIGNED:
+				case FileInfo.GRAY16_SIGNED:
+				case FileInfo.GRAY16_UNSIGNED:
 					return 2 * width * height;
-				case ExtendedFileInfo.GRAY32_INT:
-				case ExtendedFileInfo.GRAY32_UNSIGNED:
-				case ExtendedFileInfo.GRAY32_FLOAT:
+				case FileInfo.GRAY32_INT:
+				case FileInfo.GRAY32_UNSIGNED:
+				case FileInfo.GRAY32_FLOAT:
 					return 4 * width * height;
-				case ExtendedFileInfo.GRAY64_FLOAT:
+				case FileInfo.GRAY64_FLOAT:
 					return 8 * width * height;
-				case ExtendedFileInfo.GRAY24_UNSIGNED:
+				case FileInfo.GRAY24_UNSIGNED:
 					return 3 * width * height;
-				case ExtendedFileInfo.GRAY12_UNSIGNED:
+				case FileInfo.GRAY12_UNSIGNED:
 					return (int) (width * height * 1.5);
 				default:
 					return 0;
@@ -622,7 +622,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				return false;
 			}
-			if (fi.fileType == ExtendedFileInfo.BITMAP || fi.compression != ExtendedFileInfo.COMPRESSION_NONE)
+			if (fi.fileType == FileInfo.BITMAP || fi.compression != FileInfo.COMPRESSION_NONE)
 				return true;
 			length = f.length();
 			long size = fi.width * fi.height * fi.getBytesPerPixel();
@@ -704,6 +704,7 @@ public class SeriesImageSource extends ImageSource
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			SeekableStream ss = null;
@@ -863,6 +864,7 @@ public class SeriesImageSource extends ImageSource
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			FileSeekableStream fs = null;
@@ -937,6 +939,7 @@ public class SeriesImageSource extends ImageSource
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -1046,6 +1049,7 @@ public class SeriesImageSource extends ImageSource
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -1811,6 +1815,7 @@ public class SeriesImageSource extends ImageSource
 	 * 
 	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
+	@Override
 	protected void closeSource()
 	{
 		if (threads != null)

@@ -30,7 +30,6 @@ import gdsc.smlm.function.FisherInformation;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient1Procedure;
 
-
 /**
  * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount of information that
  * an observable random variable X carries about an unknown parameter θ of a distribution that models X.
@@ -111,6 +110,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 	 * @see gdsc.smlm.fitting.FisherInformationCalculator#compute(double[])
 	 * @see #setIgnoreBadFunctionValues(boolean)
 	 */
+	@Override
 	public FisherInformationMatrix compute(double[] parameters) throws DataException
 	{
 		final int n = gf.getNumberOfGradients();
@@ -120,6 +120,7 @@ public class UnivariateLikelihoodFisherInformationCalculator implements FisherIn
 		{
 			int k = -1;
 
+			@Override
 			public void execute(double v, double[] dv_dt)
 			{
 				k++;

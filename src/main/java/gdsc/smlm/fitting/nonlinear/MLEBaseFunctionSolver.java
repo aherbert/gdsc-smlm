@@ -28,7 +28,6 @@ import gdsc.smlm.fitting.MLEFunctionSolver;
 import gdsc.smlm.function.ChiSquaredDistributionTable;
 import gdsc.smlm.function.GradientFunction;
 
-
 /**
  * Abstract class with utility methods for the MLEFunctionSolver interface.
  */
@@ -58,6 +57,7 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
+	@Override
 	public double getLogLikelihood()
 	{
 		return value;
@@ -68,6 +68,7 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
+	@Override
 	public double getLogLikelihoodRatio()
 	{
 		if (Double.isNaN(llr) && lastY != null)
@@ -106,6 +107,7 @@ public abstract class MLEBaseFunctionSolver extends BaseFunctionSolver implement
 	 * 
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
+	@Override
 	public double getQ()
 	{
 		return ChiSquaredDistributionTable.computeQValue(getLogLikelihoodRatio(),

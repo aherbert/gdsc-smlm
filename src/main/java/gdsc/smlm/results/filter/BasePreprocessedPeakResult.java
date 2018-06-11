@@ -27,7 +27,6 @@ import gdsc.core.match.FractionalAssignment;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
-
 /**
  * Specifies a peak fitting result for use in filtering.
  */
@@ -154,132 +153,157 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 		return (float) (f * f);
 	}
 
+	@Override
 	public int getFrame()
 	{
 		return frame;
 	}
 
+	@Override
 	public int getUniqueId()
 	{
 		return uniqueId;
 	}
 
+	@Override
 	public int getId()
 	{
 		return id;
 	}
 
+	@Override
 	public int getCandidateId()
 	{
 		return candidateId;
 	}
 
+	@Override
 	public float getSignal()
 	{
 		return signal;
 	}
 
+	@Override
 	public float getMeanSignal()
 	{
 		return meanSignal;
 	}
-	
+
 	@Override
 	public float getSNR()
 	{
 		return snr;
 	}
 
+	@Override
 	public float getNoise()
 	{
 		return noise;
 	}
 
+	@Override
 	public double getLocationVariance()
 	{
 		return variance;
 	}
 
+	@Override
 	public double getLocationVariance2()
 	{
 		return variance2;
 	}
 
+	@Override
 	public double getLocationVarianceCRLB()
 	{
 		return varianceCRLB;
 	}
 
+	@Override
 	public float getSD()
 	{
 		return sd;
 	}
 
+	@Override
 	public float getBackground()
 	{
 		return b;
 	}
 
+	@Override
 	public float getAmplitude()
 	{
 		return amp;
 	}
 
+	@Override
 	public float getAngle()
 	{
 		return angle;
 	}
 
+	@Override
 	public float getX()
 	{
 		return x;
 	}
 
+	@Override
 	public float getY()
 	{
 		return y;
 	}
 
+	@Override
 	public float getZ()
 	{
 		return z;
 	}
 
+	@Override
 	public float getXRelativeShift2()
 	{
 		return xshift2;
 	}
 
+	@Override
 	public float getYRelativeShift2()
 	{
 		return yshift2;
 	}
 
+	@Override
 	public float getXSD()
 	{
 		return xsd;
 	}
 
+	@Override
 	public float getYSD()
 	{
 		return ysd;
 	}
 
+	@Override
 	public float getXSDFactor()
 	{
 		return xwf;
 	}
 
+	@Override
 	public float getYSDFactor()
 	{
 		return ywf;
 	}
 
+	@Override
 	public boolean isExistingResult()
 	{
 		return existingResult;
 	}
 
+	@Override
 	public boolean isNewResult()
 	{
 		return newResult;
@@ -291,6 +315,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
 	 */
+	@Override
 	public FractionalAssignment[] getAssignments(final int predictedId)
 	{
 		if (assignments == null || assignments.length == 0)
@@ -318,6 +343,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * @see gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setAssignments(gdsc.smlm.results.filter.
 	 * ResultAssignment[])
 	 */
+	@Override
 	public void setAssignments(ResultAssignment[] assignments)
 	{
 		this.assignments = assignments;
@@ -328,6 +354,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
 	 */
+	@Override
 	public boolean ignore()
 	{
 		return ignore;
@@ -338,6 +365,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @see gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setIgnore(boolean)
 	 */
+	@Override
 	public void setIgnore(boolean ignore)
 	{
 		this.ignore = ignore;
@@ -348,6 +376,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @return the parameters
 	 */
+	@Override
 	public double[] toGaussian2DParameters()
 	{
 		final double[] p = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -367,6 +396,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
 	 */
+	@Override
 	public int getValidationResult()
 	{
 		return validationResult;
@@ -377,6 +407,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
 	 */
+	@Override
 	public void setValidationResult(int validationResult)
 	{
 		this.validationResult = validationResult;
@@ -387,6 +418,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	 * 
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
 	 */
+	@Override
 	public boolean isNotDuplicate()
 	{
 		return notDuplicate;

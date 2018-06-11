@@ -29,7 +29,6 @@ import ij.ImageStack;
 import ij.process.FHT2;
 import pl.edu.icm.jlargearrays.LargeArray;
 
-
 /**
  * Wrapper to compute the discrete Hartley transform on 3D data. This uses the JTransforms library.
  */
@@ -522,8 +521,8 @@ public class FloatDHT3D extends FloatImage3D
 				{
 					// This is a copy of the divide operation in ij.process.FHT
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
-					double h2i = (double) h2[i];
-					double h2j = (double) h2[j];
+					double h2i = h2[i];
+					double h2j = h2[j];
 					double mag = h2i * h2i + h2j * h2j;
 					if (mag < 1e-20)
 						mag = 1e-20;

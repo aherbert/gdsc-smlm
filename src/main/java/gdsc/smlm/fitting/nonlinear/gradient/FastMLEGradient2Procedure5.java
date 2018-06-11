@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient2Function;
 
-
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second partial derivatives.
  * <p>
@@ -84,6 +83,7 @@ public class FastMLEGradient2Procedure5 extends FastMLEGradient2Procedure
 	/**
 	 * Reset the first derivative vector
 	 */
+	@Override
 	protected void reset1()
 	{
 		d1[0] = 0;

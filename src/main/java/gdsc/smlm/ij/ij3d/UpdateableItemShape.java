@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.ij3d;
 
-
 /**
  * Interface allowing shape objects that represent a set of items to be updated
  */

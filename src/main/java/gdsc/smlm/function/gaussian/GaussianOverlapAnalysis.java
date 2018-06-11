@@ -28,7 +28,6 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.utils.Sort;
 import gdsc.smlm.function.Erf;
 
-
 /**
  * Compute the overlap between 2D Gaussian functions.
  * <p>

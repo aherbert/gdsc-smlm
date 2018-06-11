@@ -31,7 +31,6 @@ import gdsc.core.data.TrivalueProvider;
 import gdsc.core.math.interpolation.CubicSplinePosition;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 
-
 /**
  * Computes the cubic spline coefficients for a 3D cubic spline from interpolated points
  */

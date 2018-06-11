@@ -26,7 +26,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Create a gradient procedure for use in the Levenberg–Marquardt (LVM) algorithm
  */
@@ -36,9 +35,11 @@ public class LVMGradientProcedureFactory
 	{
 		//@formatter:off
 		LSQ, 
-		MLE { public boolean isMLE()	{return true;} },
+		MLE { @Override
+		public boolean isMLE()	{return true;} },
 		WLSQ, 
-		FastLogMLE { public boolean isMLE()	{return true;} };
+		FastLogMLE { @Override
+		public boolean isMLE()	{return true;} };
 		//@formatter:on
 
 		public boolean isMLE()

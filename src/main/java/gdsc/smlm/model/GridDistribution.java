@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
@@ -52,7 +51,7 @@ public class GridDistribution implements SpatialDistribution
 	private double[] previous = null;
 
 	/**
-	 * Create a distribution with the binary spots placed from 0 - distance  
+	 * Create a distribution with the binary spots placed from 0 - distance
 	 * 
 	 * @param size
 	 * @param depth
@@ -66,7 +65,7 @@ public class GridDistribution implements SpatialDistribution
 	}
 
 	/**
-	 * Create a distribution with the binary spots placed from min - max distance  
+	 * Create a distribution with the binary spots placed from min - max distance
 	 * 
 	 * @param size
 	 * @param depth
@@ -75,13 +74,14 @@ public class GridDistribution implements SpatialDistribution
 	 * @param minBinaryDistance
 	 * @param maxBinaryDistance
 	 */
-	public GridDistribution(int size, double depth, int cellSize, double pBinary, double minBinaryDistance, double maxBinaryDistance)
+	public GridDistribution(int size, double depth, int cellSize, double pBinary, double minBinaryDistance,
+			double maxBinaryDistance)
 	{
 		this(size, depth, cellSize, pBinary, minBinaryDistance, maxBinaryDistance, null);
 	}
 
 	/**
-	 * Create a distribution with the binary spots placed from min - max distance  
+	 * Create a distribution with the binary spots placed from min - max distance
 	 * 
 	 * @param size
 	 * @param depth
@@ -91,8 +91,8 @@ public class GridDistribution implements SpatialDistribution
 	 * @param maxBinaryDistance
 	 * @param randomGenerator
 	 */
-	public GridDistribution(int size, double depth, int cellSize, double pBinary, double minBinaryDistance, double maxBinaryDistance,
-			RandomGenerator randomGenerator)
+	public GridDistribution(int size, double depth, int cellSize, double pBinary, double minBinaryDistance,
+			double maxBinaryDistance, RandomGenerator randomGenerator)
 	{
 		if (size < 1)
 			throw new IllegalArgumentException("Size must be above zero");
@@ -126,6 +126,7 @@ public class GridDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
+	@Override
 	public double[] next()
 	{
 		if (previous != null)
@@ -143,8 +144,8 @@ public class GridDistribution implements SpatialDistribution
 				if (length != 0)
 				{
 					// Shift by a random distance
-					final double distance = (maxBinaryDistance == minBinaryDistance) ? maxBinaryDistance : 
-							dataGenerator.nextUniform(minBinaryDistance, maxBinaryDistance, true);
+					final double distance = (maxBinaryDistance == minBinaryDistance) ? maxBinaryDistance
+							: dataGenerator.nextUniform(minBinaryDistance, maxBinaryDistance, true);
 					final double d = distance / length;
 					x *= d;
 					y *= d;
@@ -178,6 +179,7 @@ public class GridDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
+	@Override
 	public boolean isWithin(double[] xyz)
 	{
 		for (int i = 0; i < xyz.length; i++)
@@ -191,6 +193,7 @@ public class GridDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
+	@Override
 	public boolean isWithinXY(double[] xyz)
 	{
 		for (int i = 0; i < 2; i++)
@@ -204,6 +207,7 @@ public class GridDistribution implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] xyz)
 	{
 		// Ignore		

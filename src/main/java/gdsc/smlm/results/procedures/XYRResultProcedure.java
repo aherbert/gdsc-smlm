@@ -25,7 +25,6 @@ package gdsc.smlm.results.procedures;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Interface for accessing the results
  */

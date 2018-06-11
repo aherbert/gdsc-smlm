@@ -30,7 +30,6 @@ import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -77,7 +76,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public void setup(int flags)
 	{
-		if (areSet(flags, DirectFilter.NO_WIDTH))
+		if (areSet(flags, IDirectFilter.NO_WIDTH))
 			widthEnabled = false;
 		else
 			setup(width);
@@ -98,7 +97,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public int getFilterSetupFlags() throws IllegalStateException
 	{
-		return (widthEnabled) ? 0 : DirectFilter.NO_WIDTH;
+		return (widthEnabled) ? 0 : IDirectFilter.NO_WIDTH;
 	}
 
 	@Override
@@ -107,6 +106,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 		return calculator.getStandardDeviation(peak.getParameters()) <= upperSigmaThreshold;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_X_SD_FACTOR;
@@ -241,56 +241,67 @@ public class WidthFilter extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { DEFAULT_RANGE };
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return width;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return 0;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.NONE;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return 0;

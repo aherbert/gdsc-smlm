@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.FloatProcessor;
@@ -36,16 +35,19 @@ public class BinaryDisplay implements PlugInFilter
 {
 	private ImagePlus imp;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 			return DONE;
-		
+
 		if (arg.equals("reset"))
 		{
 			ImageProcessor ip = imp.getProcessor();
@@ -55,38 +57,41 @@ public class BinaryDisplay implements PlugInFilter
 			imp.updateAndDraw();
 			return DONE;
 		}
-		
+
 		this.imp = imp;
 		return DOES_ALL;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
-//		float min = Float.POSITIVE_INFINITY;
-//		for (int i=0; i<ip.getPixelCount(); i++)
-//		{
-//			final float value = ip.getf(i);
-//			if (value == 0)
-//				continue;
-//			if (value < min)
-//				min = value; 
-//		}
-//		ip.setMinAndMax(0, min);
-//		imp.updateAndDraw();
+		//		float min = Float.POSITIVE_INFINITY;
+		//		for (int i=0; i<ip.getPixelCount(); i++)
+		//		{
+		//			final float value = ip.getf(i);
+		//			if (value == 0)
+		//				continue;
+		//			if (value < min)
+		//				min = value; 
+		//		}
+		//		ip.setMinAndMax(0, min);
+		//		imp.updateAndDraw();
 
 		FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
-		float[] data = (float[])fp.getPixels();
-		for (int i=0; i<ip.getPixelCount(); i++)
+		float[] data = (float[]) fp.getPixels();
+		for (int i = 0; i < ip.getPixelCount(); i++)
 		{
 			final float value = ip.getf(i);
 			if (value == 0)
 				continue;
 			data[i] = 1;
 		}
-		
+
 		ip.snapshot();
 		ip.setPixels(0, fp);
 		ip.setMinAndMax(0, 1);

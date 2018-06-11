@@ -99,6 +99,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GUI;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
@@ -141,6 +142,7 @@ public class SpotAnalysis extends PlugInFrame
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(Spot o)
 		{
 			if (o == null)
@@ -213,6 +215,7 @@ public class SpotAnalysis extends PlugInFrame
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			GaussianBlur gb = new GaussianBlur();
@@ -297,6 +300,7 @@ public class SpotAnalysis extends PlugInFrame
 		super(TITLE);
 	}
 
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -420,6 +424,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	public synchronized void actionPerformed(ActionEvent e)
 	{
 		Object actioner = e.getSource();
@@ -467,6 +472,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 	}
@@ -476,6 +482,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see ij.plugin.frame.PlugInFrame#windowClosing(java.awt.event.WindowEvent)
 	 */
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		Prefs.saveLocation(OPT_LOCATION, getLocation());
@@ -487,6 +494,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see ij.plugin.frame.PlugInFrame#close()
 	 */
+	@Override
 	public void close()
 	{
 		instance = null;
@@ -498,6 +506,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see ij.plugin.frame.PlugInFrame#windowActivated(java.awt.event.WindowEvent)
 	 */
+	@Override
 	public void windowActivated(WindowEvent e)
 	{
 		fillImagesList();
@@ -511,6 +520,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run()
 	{
 		synchronized (runLock)
@@ -819,6 +829,7 @@ public class SpotAnalysis extends PlugInFrame
 
 				r.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 				{
+					@Override
 					public void executeXYR(float x, float y, PeakResult p)
 					{
 						if (p.getXPosition() >= minx && p.getXPosition() <= maxx && p.getYPosition() >= miny &&
@@ -909,7 +920,7 @@ public class SpotAnalysis extends PlugInFrame
 		plot.draw();
 
 		plot.setColor(Color.red);
-		plot.addPoints(xValues, yValues2, Plot2.LINE);
+		plot.addPoints(xValues, yValues2, Plot.LINE);
 
 		plot.setColor(Color.magenta);
 
@@ -925,7 +936,7 @@ public class SpotAnalysis extends PlugInFrame
 				ony[c] = yValues[s.frame - 1];
 				c++;
 			}
-			plot.addPoints(onx, ony, Plot2.CIRCLE);
+			plot.addPoints(onx, ony, Plot.CIRCLE);
 		}
 
 		// Add the candidate frames
@@ -942,12 +953,12 @@ public class SpotAnalysis extends PlugInFrame
 				ony[c] = yValues[frame - 1];
 				c++;
 			}
-			plot.addPoints(onx, ony, Plot2.BOX);
+			plot.addPoints(onx, ony, Plot.BOX);
 			plot.setColor(Color.magenta);
 		}
 
 		// Overlay current position
-		plot.addPoints(new double[] { rawImp.getCurrentSlice(), rawImp.getCurrentSlice() }, limits, Plot2.LINE);
+		plot.addPoints(new double[] { rawImp.getCurrentSlice(), rawImp.getCurrentSlice() }, limits, Plot.LINE);
 
 		plot.setColor(Color.blue);
 		Utils.display(title, plot);
@@ -1357,6 +1368,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see ij.ImageListener#imageOpened(ij.ImagePlus)
 	 */
+	@Override
 	public void imageOpened(ImagePlus imp)
 	{
 	}
@@ -1366,6 +1378,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see ij.ImageListener#imageClosed(ij.ImagePlus)
 	 */
+	@Override
 	public void imageClosed(ImagePlus imp)
 	{
 	}
@@ -1375,6 +1388,7 @@ public class SpotAnalysis extends PlugInFrame
 	 * 
 	 * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
 	 */
+	@Override
 	public void imageUpdated(ImagePlus imp)
 	{
 		ImagePlus from = null, to = null;
@@ -1485,6 +1499,7 @@ public class SpotAnalysis extends PlugInFrame
 		}
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!e.getValueIsAdjusting())
@@ -1500,6 +1515,7 @@ public class SpotAnalysis extends PlugInFrame
 		}
 	}
 
+	@Override
 	public void keyTyped(KeyEvent e)
 	{
 		System.out.println("keyTyped");
@@ -1517,11 +1533,13 @@ public class SpotAnalysis extends PlugInFrame
 		}
 	}
 
+	@Override
 	public void keyPressed(KeyEvent e)
 	{
 		System.out.println("keyPressed");
 	}
 
+	@Override
 	public void keyReleased(KeyEvent e)
 	{
 		System.out.println("keyReleased");

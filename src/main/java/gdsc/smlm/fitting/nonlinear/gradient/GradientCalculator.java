@@ -26,7 +26,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 import gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver;
 import gdsc.smlm.function.NonLinearFunction;
 
-
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.

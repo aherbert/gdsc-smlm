@@ -38,7 +38,6 @@ import java.util.Scanner;
 
 import gdsc.core.data.utils.ConversionException;
 
-
 import gdsc.core.data.utils.Converter;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
@@ -186,6 +185,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	/**
 	 * @return The names of the fields in each record. Will be the last comment of the header
 	 */
+	@Override
 	protected String[] getFieldNames()
 	{
 		String[] unitNames = helper.getUnitNames();
@@ -231,6 +231,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
+	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
 			float[] params, float[] paramsStdDev)
 	{
@@ -317,6 +318,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			sb.append('*');
 	}
 
+	@Override
 	public void add(PeakResult result)
 	{
 		if (fos == null)
@@ -377,6 +379,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		sb.append('\n');
 	}
 
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		if (fos == null)
@@ -437,6 +440,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			final ArrayPeakResultStore results2 = new ArrayPeakResultStore(cluster.size());
 			cluster.getPoints().forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult result)
 				{
 					if (result.getId() == id)
@@ -497,6 +501,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		writeResult(0, text);
 	}
 
+	@Override
 	protected synchronized void writeResult(int count, String result)
 	{
 		// In case another thread caused the output to close
@@ -518,6 +523,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 	 * 
 	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
+	@Override
 	protected void sort() throws IOException
 	{
 		try
@@ -611,6 +617,7 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 			}
 		}
 
+		@Override
 		public int compareTo(Result o)
 		{
 			// Sort by slice number

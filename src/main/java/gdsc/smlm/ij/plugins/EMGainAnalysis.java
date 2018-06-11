@@ -66,7 +66,6 @@ import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
-
 /**
  * Analysis a white light image from an EM-CCD camera, construct a histogram of pixel intensity and fit the histogram to
  * obtain the bias, EM-gain, read noise and photons per pixel.
@@ -98,6 +97,7 @@ public class EMGainAnalysis implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -119,6 +119,7 @@ public class EMGainAnalysis implements PlugInFilter
 		return showDialog();
 	}
 
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		// Calculate the histogram
@@ -359,7 +360,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double yMax = Maths.max(y);
 		plot.setLimits(limits[0], limits[1], 0, yMax);
 		plot.setColor(Color.black);
-		plot.addPoints(x, y, Plot2.DOT);
+		plot.addPoints(x, y, Plot.DOT);
 		Utils.display(TITLE, plot);
 
 		// Estimate remaining parameters. 
@@ -386,7 +387,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double[] g = pdf(max, photons, gain, noise, (int) bias);
 
 		plot.setColor(Color.blue);
-		plot.addPoints(x, g, Plot2.LINE);
+		plot.addPoints(x, g, Plot.LINE);
 		Utils.display(TITLE, plot);
 
 		// Perform a fit
@@ -507,16 +508,16 @@ public class EMGainAnalysis implements PlugInFilter
 		plot = new Plot2(TITLE, "ADU", "Frequency");
 		plot.setLimits(limits[0], limits[1], 0, yMax * 1.05);
 		plot.setColor(Color.black);
-		plot.addPoints(x, y, Plot2.DOT);
+		plot.addPoints(x, y, Plot.DOT);
 		plot.setColor(Color.red);
-		plot.addPoints(x, g, Plot2.LINE);
+		plot.addPoints(x, g, Plot.LINE);
 
 		plot.addLabel(0, 0, label);
 
 		if (showApproximation)
 		{
 			plot.setColor(Color.blue);
-			plot.addPoints(x, f, Plot2.LINE);
+			plot.addPoints(x, f, Plot.LINE);
 		}
 
 		Utils.display(TITLE, plot);
@@ -535,6 +536,7 @@ public class EMGainAnalysis implements PlugInFilter
 		{
 			int eval = 0;
 
+			@Override
 			public double value(double[] point)
 			{
 				IJ.showProgress(++eval, maxEval);
@@ -994,11 +996,11 @@ public class EMGainAnalysis implements PlugInFilter
 		Plot2 plot = new Plot2("PMF", "ADUs", "p");
 		plot.setLimits(x[0], x[x.length - 1], 0, yMax);
 		plot.setColor(Color.red);
-		plot.addPoints(x, pmf, Plot2.LINE);
+		plot.addPoints(x, pmf, Plot.LINE);
 		if (showApproximation)
 		{
 			plot.setColor(Color.blue);
-			plot.addPoints(x, f, Plot2.LINE);
+			plot.addPoints(x, f, Plot.LINE);
 		}
 
 		plot.setColor(Color.magenta);
@@ -1023,7 +1025,7 @@ public class EMGainAnalysis implements PlugInFilter
 		double[] limits = Maths.limits(delta);
 		plot2.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
 		plot2.setColor(Color.red);
-		plot2.addPoints(x, delta, Plot2.LINE);
+		plot2.addPoints(x, delta, Plot.LINE);
 		plot2.setColor(Color.magenta);
 		plot2.drawLine(_photons * _gain, limits[0], _photons * _gain, limits[1]);
 		plot2.setColor(Color.black);
@@ -1059,9 +1061,9 @@ public class EMGainAnalysis implements PlugInFilter
 		yMax = 1.05;
 		plot3.setLimits(x[0], x[x.length - 1], 0, yMax);
 		plot3.setColor(Color.red);
-		plot3.addPoints(x, cdf1, Plot2.LINE);
+		plot3.addPoints(x, cdf1, Plot.LINE);
 		plot3.setColor(Color.blue);
-		plot3.addPoints(x, cdf2, Plot2.LINE);
+		plot3.addPoints(x, cdf2, Plot.LINE);
 
 		plot3.setColor(Color.magenta);
 		plot3.drawLine(_photons * _gain, 0, _photons * _gain, yMax);

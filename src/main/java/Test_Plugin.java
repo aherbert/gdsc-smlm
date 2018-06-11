@@ -1,3 +1,4 @@
+
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
@@ -41,6 +42,7 @@ public class Test_Plugin implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		// The parameters that have options must be available statically for the OptionListener
@@ -53,6 +55,7 @@ public class Test_Plugin implements PlugIn
 		final Choice c2 = gd.addAndGetChoice("Select2", new String[] { "Three", "Four" }, optionFields[1]);
 		gd.addAndGetButton("Options", new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null); // This makes it model
@@ -64,12 +67,14 @@ public class Test_Plugin implements PlugIn
 		gd.addStringField("Another", textFields[0]);
 		gd.addStringField("Testing", textFields[1], 15, new OptionListener<String>()
 		{
+			@Override
 			public boolean collectOptions(String field)
 			{
 				IJ.log(field);
 				return true;
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				IJ.log(textFields[1]);
@@ -80,70 +85,88 @@ public class Test_Plugin implements PlugIn
 		gd.addDirectoryField("Dir", "", 30);
 		gd.addChoice("Select3", new String[] { "Five", "Six" }, optionFields[2], new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer field)
 			{
 				IJ.log(Integer.toString(field));
 				return true;
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				IJ.log(optionFields[2]);
 				return true;
 			}
 		});
-		gd.addSlider("Slider1", 0.5, 4.5, numberFields[0], new OptionListener<Double>(){
+		gd.addSlider("Slider1", 0.5, 4.5, numberFields[0], new OptionListener<Double>()
+		{
 
+			@Override
 			public boolean collectOptions(Double field)
 			{
 				IJ.log(field.toString());
 				return true;
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				IJ.log(Double.toString(numberFields[0]));
 				return true;
-			}});
-		gd.addSlider("Slider2", 0, 10, numberFields[1], new OptionListener<Double>(){
+			}
+		});
+		gd.addSlider("Slider2", 0, 10, numberFields[1], new OptionListener<Double>()
+		{
 
+			@Override
 			public boolean collectOptions(Double field)
 			{
 				IJ.log(field.toString());
 				return true;
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				IJ.log(Double.toString(numberFields[1]));
 				return true;
-			}});
-		gd.addNumericField("Number1", numberFields[2], 2, new OptionListener<Double>(){
+			}
+		});
+		gd.addNumericField("Number1", numberFields[2], 2, new OptionListener<Double>()
+		{
 
+			@Override
 			public boolean collectOptions(Double field)
 			{
 				IJ.log(field.toString());
 				return true;
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				IJ.log(Double.toString(numberFields[2]));
 				return true;
-			}});
-		gd.addNumericField("Number2", numberFields[3], 2, 6, "px", new OptionListener<Double>(){
+			}
+		});
+		gd.addNumericField("Number2", numberFields[3], 2, 6, "px", new OptionListener<Double>()
+		{
 
+			@Override
 			public boolean collectOptions(Double field)
 			{
 				IJ.log(field.toString());
 				return true;
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				IJ.log(Double.toString(numberFields[3]));
 				return true;
-			}});
+			}
+		});
 		gd.setMaxUnscrolledSize(0, 300);
 		gd.showDialog();
 		optionFields[0] = gd.getNextChoice();

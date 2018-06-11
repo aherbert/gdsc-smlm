@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient2Function;
 
-
 /**
  * Create a Fast MLE gradient procedure
  */

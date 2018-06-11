@@ -33,7 +33,6 @@ import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.ValueFunction;
 import gdsc.smlm.function.ValueProcedure;
 
-
 /**
  * Abstract class for FunctionSolvers that use update steps to the current parameters.
  */
@@ -52,6 +51,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 			this.yFit = yFit;
 		};
 
+		@Override
 		public void execute(double value)
 		{
 			yFit[i++] = value;
@@ -121,6 +121,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 *            the aDev
 	 * @return the fit status
 	 */
+	@Override
 	protected FitStatus computeFit(double[] y, double[] yFit, double[] a, double[] aDev)
 	{
 		// Lay out a simple iteration loop for a stepping solver.
@@ -342,6 +343,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
+	@Override
 	protected boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
 		// If the yFit array is not null then wrap the gradient function. 
@@ -434,6 +436,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#isBounded()
 	 */
+	@Override
 	public boolean isBounded()
 	{
 		// Bounds are tighter than constraints and we support those
@@ -445,6 +448,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * 
 	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
+	@Override
 	public void setBounds(double[] lower, double[] upper)
 	{
 		bounds.setBounds(lower, upper);

@@ -25,7 +25,6 @@ package gdsc.smlm.ga;
 
 import java.util.List;
 
-
 /**
  * Calculate the fitness of a chromosome
  */
@@ -35,7 +34,8 @@ public interface FitnessFunction<T extends Comparable<T>>
 	 * Initialise the fitness function using a population of individuals. This can be used to pre-process the population
 	 * before the {@link #fitness(Chromosome)} method is run on each individual.
 	 * 
-	 * @param individuals The population of individuals that will be assessed
+	 * @param individuals
+	 *            The population of individuals that will be assessed
 	 */
 	void initialise(List<? extends Chromosome<T>> individuals);
 
@@ -46,7 +46,7 @@ public interface FitnessFunction<T extends Comparable<T>>
 	 * @return the fitness
 	 */
 	T fitness(Chromosome<T> chromosome);
-	
+
 	/**
 	 * Shutdown the fitness function. This can be used to post-process the population
 	 * after the {@link #fitness(Chromosome)} method is run on each individual.

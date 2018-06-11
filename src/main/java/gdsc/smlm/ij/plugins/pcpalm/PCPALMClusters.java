@@ -55,7 +55,6 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.data.config.CalibrationHelper;
 
-
 import gdsc.smlm.fitting.BinomialFitter;
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
@@ -67,6 +66,7 @@ import ij.IJ;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
@@ -150,6 +150,7 @@ public class PCPALMClusters implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -269,8 +270,8 @@ public class PCPALMClusters implements PlugIn
 			plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
 					Maths.maxDefault(yMax, y) * 1.05);
 			plot.setColor(Color.magenta);
-			plot.addPoints(x, y, Plot2.LINE);
-			plot.addPoints(x, y, Plot2.CIRCLE);
+			plot.addPoints(x, y, Plot.LINE);
+			plot.addPoints(x, y, Plot.CIRCLE);
 			plot.setColor(Color.black);
 			Utils.display(title, plot);
 		}
@@ -853,7 +854,7 @@ public class PCPALMClusters implements PlugIn
 			double[] values = SimpleArrayUtils.newArray(histogram.length, 0.0, 1.0);
 			plot = new Plot2(title, "N", "Cumulative Probability", values, cumulativeHistogram);
 			plot.setLimits(0, histogram.length - 1, 0, 1.05);
-			plot.addPoints(values, cumulativeHistogram, Plot2.CIRCLE);
+			plot.addPoints(values, cumulativeHistogram, Plot.CIRCLE);
 			Utils.display(title, plot);
 		}
 
@@ -932,7 +933,7 @@ public class PCPALMClusters implements PlugIn
 		}
 
 		plot.setColor(color);
-		plot.addPoints(x, y, Plot2.LINE);
+		plot.addPoints(x, y, Plot.LINE);
 		//plot.addPoints(x, y, Plot2.CIRCLE);
 		Utils.display(title, plot);
 	}

@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
 
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextArea;
@@ -154,6 +153,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
@@ -447,6 +447,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -730,6 +731,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1703,6 +1705,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			progress = 0;
 			BenchmarkSpotFit.fitResults.forEachEntry(new TIntObjectProcedure<FilterCandidates>()
 			{
+				@Override
 				public boolean execute(int a, FilterCandidates b)
 				{
 					put(jobs, new Job(a, b));
@@ -1758,6 +1761,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 			Arrays.sort(resultsList, new Comparator<MultiPathFitResults>()
 			{
+				@Override
 				public int compare(MultiPathFitResults o1, MultiPathFitResults o2)
 				{
 					return o1.frame - o2.frame;
@@ -1790,6 +1794,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Add the results to the lists
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult p)
 				{
 					if (counter.advanceAndReset(p.getFrame()))
@@ -2240,7 +2245,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			gd.addSlider("Residuals_threshold", 0.01, 1, scoreResidualsThreshold);
 		gd.addNumericField("Duplicate_distance", scoreDuplicateDistance, 2);
 
-		gd.addTextAreas(XmlUtils.convertQuotes(scoreFilter.toXML()), null, 6, 60);
+		gd.addTextAreas(gdsc.core.utils.XmlUtils.convertQuotes(scoreFilter.toXML()), null, 6, 60);
 
 		gd.addCheckbox("Reset_filter", false);
 		//gd.addCheckbox("Show_table", showResultsTable);
@@ -2268,6 +2273,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			final TextArea ta = gd.getTextArea1();
 			cb.addItemListener(new ItemListener()
 			{
+				@Override
 				public void itemStateChanged(ItemEvent e)
 				{
 					if (cb.getState())
@@ -2279,7 +2285,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						if (BenchmarkSpotFit.computeDoublets)
 							v.get(i++).setText(Double.toString(scoreResidualsThreshold));
 						v.get(i++).setText(Double.toString(scoreDuplicateDistance));
-						ta.setText(XmlUtils.convertQuotes(scoreFilter.toXML()));
+						ta.setText(gdsc.core.utils.XmlUtils.convertQuotes(scoreFilter.toXML()));
 					}
 				}
 			});
@@ -2298,7 +2304,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		String xml = gd.getNextText();
 		try
 		{
-			scoreFilter = (DirectFilter) DirectFilter.fromXML(xml);
+			scoreFilter = (DirectFilter) Filter.fromXML(xml);
 		}
 		catch (Exception e)
 		{
@@ -2626,7 +2632,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				final double slope = regression.getSlope();
 
 				sb.append('\t');
-				sb.append(Utils.rounded((double) tp / np)).append('\t');
+				sb.append(Utils.rounded(tp / np)).append('\t');
 				sb.append(Utils.rounded(d / scored)).append('\t');
 				sb.append(Utils.rounded(sf / scored)).append('\t');
 				sb.append(Utils.rounded(Math.sqrt(rmsd / scored))).append('\t');
@@ -2806,7 +2812,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			plot.setColor(Color.RED);
 			plot.draw();
 			plot.setColor(Color.BLUE);
-			plot.addPoints(p.xValues, p.yValues, Plot2.CROSS);
+			plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
 			PlotWindow plotWindow = Utils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}
@@ -5109,7 +5115,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			FileOutputStream fos = new FileOutputStream(filename);
 			out = new OutputStreamWriter(fos, "UTF-8");
 			// Use the instance so we can catch the exception
-			out.write(XmlUtils.prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
+			out.write(gdsc.core.utils.XmlUtils.prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
 		}
 		catch (Exception e)
 		{
@@ -5264,14 +5270,17 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 				ImageListener listener = new ImageListener()
 				{
+					@Override
 					public void imageOpened(ImagePlus imp)
 					{
 					}
 
+					@Override
 					public void imageClosed(ImagePlus imp)
 					{
 					}
 
+					@Override
 					public void imageUpdated(ImagePlus imp)
 					{
 						if (imp != null && imp == outImp[0])
@@ -5299,6 +5308,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 				gd.addSlider(keyHigh, 0, 10, nHigh);
 				gd.addDialogListener(new DialogListener()
 				{
+					@Override
 					public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 					{
 						// If the event is null then this is the final call when the 
@@ -5553,9 +5563,9 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		plot2.setColor(Color.black);
 		plot2.addLabel(0, 0, "Blue = Fitted; Red = Filtered");
 		plot2.setColor(Color.blue);
-		plot2.addPoints(points, v2, Plot2.LINE);
+		plot2.addPoints(points, v2, Plot.LINE);
 		plot2.setColor(Color.red);
-		plot2.addPoints(points, v3, Plot2.LINE);
+		plot2.addPoints(points, v3, Plot.LINE);
 		plot2.setColor(Color.magenta);
 		if (-halfSummaryDepth - halfBinWidth >= limits[0])
 		{
@@ -5993,6 +6003,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore#add(int)
 	 */
+	@Override
 	public void add(int uniqueId)
 	{
 		// Store the Id of each result
@@ -6008,6 +6019,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private static class FilterScoreCompararor implements Comparator<ComplexFilterScore>
 	{
+		@Override
 		public int compare(ComplexFilterScore o1, ComplexFilterScore o2)
 		{
 			// Sort by size, smallest first
@@ -6142,6 +6154,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			this.score = getMaximum(yValues);
 		}
 
+		@Override
 		public int compareTo(NamedPlot o)
 		{
 			if (score > o.score)
@@ -6509,6 +6522,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -6577,6 +6591,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -7012,6 +7027,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#initialise(java.util.List)
 	 */
+	@Override
 	public void initialise(List<? extends Chromosome<FilterScore>> individuals)
 	{
 		ga_iteration++;
@@ -7040,7 +7056,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			filters.add(f);
 		if (searchSpace != null)
 			for (int i = 0; i < searchSpace.length; i++)
-				filters.add((DirectFilter) ss_filter.create(searchSpace[i]));
+				filters.add(ss_filter.create(searchSpace[i]));
 		return filters;
 	}
 
@@ -7049,6 +7065,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#fitness(gdsc.smlm.ga.Chromosome)
 	 */
+	@Override
 	public FilterScore fitness(Chromosome<FilterScore> chromosome)
 	{
 		// In case the user aborted with Escape
@@ -7070,6 +7087,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.smlm.ga.FitnessFunction#shutdown()
 	 */
+	@Override
 	public void shutdown()
 	{
 		// Report the score for the best filter
@@ -7103,6 +7121,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 	private class ParameterScoreFunction implements FullScoreFunction<FilterScore>
 	{
+		@Override
 		public SearchResult<FilterScore> findOptimum(double[][] points)
 		{
 			ga_iteration++;
@@ -7111,6 +7130,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Sort points to allow the CoordinateStore to be reused with the same duplicate distance
 			Arrays.sort(points, new Comparator<double[]>()
 			{
+				@Override
 				public int compare(double[] o1, double[] o2)
 				{
 					return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
@@ -7171,6 +7191,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return new SearchResult<FilterScore>(parameters, max);
 		}
 
+		@Override
 		public SearchResult<FilterScore>[] score(double[][] points)
 		{
 			ga_iteration++;
@@ -7179,6 +7200,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Sort points to allow the CoordinateStore to be reused with the same duplicate distance
 			Arrays.sort(points, new Comparator<double[]>()
 			{
+				@Override
 				public int compare(double[] o1, double[] o2)
 				{
 					return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
@@ -7239,6 +7261,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			return scores;
 		}
 
+		@Override
 		public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size)
 		{
 			return ScoreFunctionHelper.cut(scores, size);
@@ -7254,6 +7277,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return 0;
 	}
 
+	@Override
 	public SearchResult<FilterScore> findOptimum(double[][] points)
 	{
 		ga_iteration++;
@@ -7290,6 +7314,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		return new SearchResult<FilterScore>(filter.getParameters(), max);
 	}
 
+	@Override
 	public SearchResult<FilterScore>[] score(double[][] points)
 	{
 		ga_iteration++;
@@ -7334,6 +7359,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.smlm.search.FullScoreFunction#cut(gdsc.smlm.search.SearchResult[], int)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size)
 	{
@@ -7391,6 +7417,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#progress(double)
 	 */
+	@Override
 	public void progress(double fraction)
 	{
 		if (fraction == 1)
@@ -7414,6 +7441,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#progress(long, long)
 	 */
+	@Override
 	public void progress(long position, long total)
 	{
 		progress((double) position / total);
@@ -7424,6 +7452,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#incrementProgress(double)
 	 */
+	@Override
 	public void incrementProgress(double fraction)
 	{
 		// Ignore		
@@ -7434,6 +7463,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#log(java.lang.String, java.lang.Object[])
 	 */
+	@Override
 	public void log(String format, Object... args)
 	{
 		// Ignore		
@@ -7444,6 +7474,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#status(java.lang.String, java.lang.Object[])
 	 */
+	@Override
 	public void status(String format, Object... args)
 	{
 		IJ.showStatus(ga_statusPrefix + String.format(format, args));
@@ -7454,6 +7485,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#isEnded()
 	 */
+	@Override
 	public boolean isEnded()
 	{
 		// Ignore		
@@ -7465,6 +7497,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#isProgress()
 	 */
+	@Override
 	public boolean isProgress()
 	{
 		return true;
@@ -7475,6 +7508,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#isLogging()
 	 */
+	@Override
 	public boolean isLog()
 	{
 		return false;
@@ -7485,6 +7519,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 	 * 
 	 * @see gdsc.core.logging.TrackProgress#isStatus()
 	 */
+	@Override
 	public boolean isStatus()
 	{
 		return true;
@@ -7589,6 +7624,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			ArrayList<FilterResult> scores2 = (ArrayList<FilterResult>) scores.clone();
 			Collections.sort(scores2, new Comparator<FilterResult>()
 			{
+				@Override
 				public int compare(FilterResult o1, FilterResult o2)
 				{
 					return o1.failCount - o2.failCount;
@@ -7771,6 +7807,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 			// Add the results to the lists
 			actualCoordinates.forEachEntry(new CustomTIntObjectProcedure(x, y, x2, y2)
 			{
+				@Override
 				public boolean execute(int frame, IdPeakResult[] results)
 				{
 					int c = 0, c2 = 0;

@@ -26,7 +26,6 @@ package gdsc.smlm.results.data;
 import gdsc.core.data.utils.Converter;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Gets a parameter data value from a result.
  */
@@ -54,6 +53,7 @@ public class PeakResultDataParameterConverter extends PeakResultDataFloatConvert
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValue(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public Float getValue(PeakResult result)
 	{
 		return converter.convert(result.getParameter(index));
@@ -64,6 +64,7 @@ public class PeakResultDataParameterConverter extends PeakResultDataFloatConvert
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
+	@Override
 	public String getValueName()
 	{
 		return PeakResult.getParameterName(index);

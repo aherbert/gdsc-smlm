@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a set of function values to implement the forEach procedure
  */
@@ -51,16 +50,19 @@ public class PrecomputedValueFunction implements ValueFunction
 		return values;
 	}
 
+	@Override
 	public int size()
 	{
 		return values.length;
 	}
 
+	@Override
 	public void initialise0(double[] a)
 	{
 		// Ignore
 	}
 
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		for (int i = 0; i < values.length; i++)

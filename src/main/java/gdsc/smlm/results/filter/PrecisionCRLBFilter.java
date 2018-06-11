@@ -28,7 +28,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 import gdsc.smlm.results.PeakResult;
 
 /**
@@ -70,6 +69,7 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 		return true;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_LOCATION_VARIANCE_CRLB;
@@ -212,56 +212,67 @@ public class PrecisionCRLBFilter extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { PrecisionFilter.DEFAULT_RANGE };
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return precision;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.CRLB;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return 0;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return 0;

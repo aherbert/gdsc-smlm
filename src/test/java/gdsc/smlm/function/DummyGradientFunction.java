@@ -38,45 +38,55 @@ public class DummyGradientFunction implements Gradient1Function, Gradient2Functi
 		this.n = n;
 	}
 
+	@Override
 	public int size()
 	{
 		return 0;
 	}
 
+	@Override
 	public void initialise0(double[] a)
 	{
 	}
 
+	@Override
 	public void initialise1(double[] a)
 	{
 	}
 
+	@Override
 	public void initialise2(double[] a)
 	{
 	}
 
+	@Override
 	public int[] gradientIndices()
 	{
 		return null;
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return n;
 	}
 
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 	}
 
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 	}
 
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 	}
 
+	@Override
 	public void initialise(double[] a)
 	{
 	}

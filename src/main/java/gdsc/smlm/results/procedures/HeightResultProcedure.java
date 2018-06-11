@@ -27,7 +27,6 @@ import gdsc.core.data.DataException;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 /**
  * Contains functionality to obtain the standard calibrated data for results.
  */
@@ -73,6 +72,7 @@ public class HeightResultProcedure extends UnitResultProcedure implements HResul
 		results.forEach(getIntensityUnit(), this);
 	}
 
+	@Override
 	public void executeH(float a)
 	{
 		this.h[i++] = a;

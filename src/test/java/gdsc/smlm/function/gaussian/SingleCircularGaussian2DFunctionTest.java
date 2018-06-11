@@ -28,9 +28,10 @@ import gdsc.smlm.function.gaussian.SingleCircularGaussian2DFunction;
 
 public class SingleCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
-		flags = GaussianFunctionFactory.FIT_SIMPLE_CIRCLE; 
+		flags = GaussianFunctionFactory.FIT_SIMPLE_CIRCLE;
 		f1 = new SingleCircularGaussian2DFunction(maxx, maxx);
 	}
 }

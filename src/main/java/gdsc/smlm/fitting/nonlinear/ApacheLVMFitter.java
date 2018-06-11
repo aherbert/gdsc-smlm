@@ -49,7 +49,6 @@ import gdsc.smlm.function.NonLinearFunction;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Uses Apache Commons Math Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
@@ -64,6 +63,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 		super(gf);
 	}
 
+	@Override
 	public FitStatus computeFit(double[] y, final double[] yFit, double[] a, double[] aDev)
 	{
 		int n = y.length;
@@ -111,6 +111,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 				{
 					final ExtendedNonLinearFunction fun = (ExtendedNonLinearFunction) f;
 
+					@Override
 					public Pair<RealVector, RealMatrix> value(RealVector point)
 					{
 						final double[] p = point.toArray();
@@ -119,11 +120,13 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 								new Array2DRowRealMatrix(result.b, false));
 					}
 
+					@Override
 					public RealVector computeValue(double[] params)
 					{
 						return new ArrayRealVector(fun.computeValues(params), false);
 					}
 
+					@Override
 					public RealMatrix computeJacobian(double[] params)
 					{
 						return new Array2DRowRealMatrix(fun.computeJacobian(params), false);
@@ -167,6 +170,7 @@ public class ApacheLVMFitter extends LSEBaseFunctionSolver
 				{
 					int i = 0;
 
+					@Override
 					public void execute(double value)
 					{
 						yFit[i] = value;

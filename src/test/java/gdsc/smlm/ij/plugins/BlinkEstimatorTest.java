@@ -184,6 +184,7 @@ public class BlinkEstimatorTest
 								timeAtLowerBound, false);
 						ok.forEach(new TIntProcedure()
 						{
+							@Override
 							public boolean execute(int value)
 							{
 								count[value]++;

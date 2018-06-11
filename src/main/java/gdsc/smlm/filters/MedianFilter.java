@@ -29,7 +29,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.MedianWindowDLLFloat;
 
-
 /**
  * Computes the block median for each point within the array.
  * <p>
@@ -861,6 +860,7 @@ public class MedianFilter extends BaseFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public MedianFilter clone()
 	{
 		MedianFilter o = (MedianFilter) super.clone();

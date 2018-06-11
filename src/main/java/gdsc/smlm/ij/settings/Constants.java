@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.settings;
 
-
 /**
  * Define property constants. Enables plugins to share their properties using the ImageJ Prefs class.
  */
@@ -64,12 +63,12 @@ public class Constants
 	public static final String algorithm = "gdsc.smlm.algorithm";
 
 	public static final String inputFilename = "gdsc.smlm.inputFilename";
-	
+
 	public static final String inputNmPerPixel = "gdsc.smlm.nmPerPixel";
 	public static final String inputGain = "gdsc.smlm.gain";
 	public static final String inputExposureTime = "gdsc.smlm.exposureTime";
 	public static final String inputNoise = "gdsc.smlm.noise";
-	
+
 	public static final String tiffSeriesMode = "gdsc.smlm.tiffSeriesMode";
 	public static final String tiffSeriesDirectory = "gdsc.smlm.tiffSeriesDirectory";
 	public static final String tiffSeriesFile = "gdsc.smlm.tiffSeriesFile";
@@ -77,6 +76,6 @@ public class Constants
 	public static final String tiffSeriesOutputMode = "gdsc.smlm.tiffSeriesOutputMode";
 	public static final String tiffSeriesOutputNImages = "gdsc.smlm.tiffSeriesOutputNImages";
 	public static final String tiffSeriesOutputDirectory = "gdsc.smlm.tiffSeriesOutputDirectory";
-	
+
 	public static final String sCMOSAnalysisDirectory = "gdsc.smlm.sCMOSAnalysisDirectory";
 }

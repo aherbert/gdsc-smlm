@@ -28,7 +28,6 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Defines the stopping criteria for the {@link gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
  * <p>

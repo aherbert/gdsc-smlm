@@ -42,7 +42,6 @@ import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.FloatCustomTricubicFunction;
 
-
 /**
  * Stores a cubic spline data.
  */
@@ -95,11 +94,12 @@ public class CubicSplineData
 	}
 
 	/**
-	 * Instantiates a new cubic spline data by copying the nodes from the function. 
+	 * Instantiates a new cubic spline data by copying the nodes from the function.
 	 * <p>
 	 * Warning: Any information about the scale of each axis is ignored.
 	 *
-	 * @param function the function
+	 * @param function
+	 *            the function
 	 */
 	public CubicSplineData(CustomTricubicInterpolatingFunction function)
 	{
@@ -133,6 +133,7 @@ public class CubicSplineData
 
 	private static class FloatSplineWriter implements SplineWriter
 	{
+		@Override
 		public void write(DataOutput out, CustomTricubicFunction f) throws IOException
 		{
 			for (int i = 0; i < 64; i++)
@@ -142,6 +143,7 @@ public class CubicSplineData
 
 	private static class DoubleSplineWriter implements SplineWriter
 	{
+		@Override
 		public void write(DataOutput out, CustomTricubicFunction f) throws IOException
 		{
 			for (int i = 0; i < 64; i++)
@@ -158,6 +160,7 @@ public class CubicSplineData
 	{
 		float[] splines = new float[64];
 
+		@Override
 		public CustomTricubicFunction read(DataInput in) throws IOException
 		{
 			for (int i = 0; i < 64; i++)
@@ -170,6 +173,7 @@ public class CubicSplineData
 	{
 		double[] splines = new double[64];
 
+		@Override
 		public CustomTricubicFunction read(DataInput in) throws IOException
 		{
 			for (int i = 0; i < 64; i++)

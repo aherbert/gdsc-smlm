@@ -28,7 +28,6 @@ import java.util.Arrays;
 import gdsc.core.data.DataException;
 import gdsc.core.utils.Maths;
 
-
 /**
  * Utility class for functions.
  */
@@ -79,7 +78,8 @@ public class FunctionHelper
 	}
 
 	/**
-	 * Gets the x-value corresponding to a fraction of the cumulative value, when values are sorted in descending order. All
+	 * Gets the x-value corresponding to a fraction of the cumulative value, when values are sorted in descending order.
+	 * All
 	 * values must be positive. The input values are modified by sorting.
 	 * <p>
 	 * If fraction is <=0 then zero is returned. If fraction is >=1 then data.length is returned.

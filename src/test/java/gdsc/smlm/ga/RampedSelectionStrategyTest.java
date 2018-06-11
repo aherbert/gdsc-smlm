@@ -129,11 +129,13 @@ public class RampedSelectionStrategyTest
 
 		ts.execute(new TimingTask()
 		{
+			@Override
 			public Object getData(int i)
 			{
 				return sum;
 			}
 
+			@Override
 			public Object run(Object data)
 			{
 				for (int key = (int) sum[sum.length - 1]; key-- > 0;)
@@ -141,15 +143,18 @@ public class RampedSelectionStrategyTest
 				return null;
 			}
 
+			@Override
 			public void check(int i, Object result)
 			{
 			}
 
+			@Override
 			public int getSize()
 			{
 				return 1;
 			}
 
+			@Override
 			public String getName()
 			{
 				return "search" + size;
@@ -158,11 +163,13 @@ public class RampedSelectionStrategyTest
 
 		ts.execute(new TimingTask()
 		{
+			@Override
 			public Object getData(int i)
 			{
 				return sum[i];
 			}
 
+			@Override
 			public Object run(Object data)
 			{
 				for (int key = (int) sum[sum.length - 1]; key-- > 0;)
@@ -170,15 +177,18 @@ public class RampedSelectionStrategyTest
 				return null;
 			}
 
+			@Override
 			public void check(int i, Object result)
 			{
 			}
 
+			@Override
 			public int getSize()
 			{
 				return 1;
 			}
 
+			@Override
 			public String getName()
 			{
 				return "binarySearch" + size;

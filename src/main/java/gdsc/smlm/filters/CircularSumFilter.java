@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes the sum using a circular mask.
  * <p>
@@ -58,6 +57,7 @@ public class CircularSumFilter extends CircularFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public CircularSumFilter clone()
 	{
 		CircularSumFilter o = (CircularSumFilter) super.clone();

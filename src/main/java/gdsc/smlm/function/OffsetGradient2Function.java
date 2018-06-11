@@ -23,12 +23,10 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class OffsetGradient2Function extends OffsetGradient1Function
-		implements Gradient2Function, Gradient2Procedure
+public class OffsetGradient2Function extends OffsetGradient1Function implements Gradient2Function, Gradient2Procedure
 {
 	protected final Gradient2Function f2;
 	protected Gradient2Procedure procedure;
@@ -48,23 +46,25 @@ public class OffsetGradient2Function extends OffsetGradient1Function
 		super(f, values);
 		f2 = f;
 	}
-	
+
 	protected OffsetGradient2Function(OffsetGradient2Function pre, double[] values2)
 	{
 		super(pre, values2);
 		f2 = (Gradient2Function) f;
 	}
-	
+
 	public Gradient2Function getGradient2Function()
 	{
 		return f2;
 	}
 
+	@Override
 	public void initialise2(double[] a)
 	{
 		f2.initialise2(a);
 	}
 
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		this.procedure = procedure;
@@ -72,6 +72,7 @@ public class OffsetGradient2Function extends OffsetGradient1Function
 		f2.forEach((Gradient2Procedure) this);
 	}
 
+	@Override
 	public void execute(double value, double[] dy_da, double[] d2y_da2)
 	{
 		procedure.execute(value + values[i++], dy_da, d2y_da2);
@@ -93,7 +94,7 @@ public class OffsetGradient2Function extends OffsetGradient1Function
 			// Avoid multiple wrapping
 			if (func instanceof OffsetGradient2Function)
 			{
-				return new OffsetGradient2Function((OffsetGradient2Function)func, b);
+				return new OffsetGradient2Function((OffsetGradient2Function) func, b);
 			}
 			return new OffsetGradient2Function(func, b);
 		}

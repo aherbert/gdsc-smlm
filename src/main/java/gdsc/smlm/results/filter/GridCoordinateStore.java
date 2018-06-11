@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.core.utils.Maths;
 
-
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows checking for duplicates.
  */
@@ -211,6 +210,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * @return the grid coordinate store
 	 * @see gdsc.smlm.results.filter.CoordinateStore#newInstance()
 	 */
+	@Override
 	public GridCoordinateStore newInstance()
 	{
 		return newInstance(minx, miny, width, height);
@@ -239,6 +239,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
 	 */
+	@Override
 	public GridCoordinateStore resize(int minx, int miny, int width, int height)
 	{
 		if (width < 0)
@@ -297,6 +298,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getXYResolution()
 	 */
+	@Override
 	public double getXYResolution()
 	{
 		return xyResolution;
@@ -307,6 +309,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getZResolution()
 	 */
+	@Override
 	public double getZResolution()
 	{
 		return zResolution;
@@ -317,6 +320,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
 	 */
+	@Override
 	public void addToQueue(double x, double y, double z)
 	{
 		if (isActive)
@@ -330,6 +334,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#flush()
 	 */
+	@Override
 	public void flush()
 	{
 		for (int i = 0; i < queue.size; i += 3)
@@ -344,6 +349,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
 	 */
+	@Override
 	public void add(final double x, final double y, final double z)
 	{
 		if (isActive)
@@ -406,6 +412,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#clear()
 	 */
+	@Override
 	public void clear()
 	{
 		// Clearing each item in the grid is a big overhead when the grid is large and the number of additions to the grid is small.
@@ -432,6 +439,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
 	 */
+	@Override
 	public boolean contains(final double x, final double y, final double z)
 	{
 		// If not active then nothing could have been added
@@ -511,6 +519,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
 	 */
+	@Override
 	public double[] find(final double x, final double y, final double z)
 	{
 		if (!isActive)
@@ -571,6 +580,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinX()
 	 */
+	@Override
 	public int getMinX()
 	{
 		return minx;
@@ -581,6 +591,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinY()
 	 */
+	@Override
 	public int getMinY()
 	{
 		return miny;
@@ -591,6 +602,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getWidth()
 	 */
+	@Override
 	public int getWidth()
 	{
 		return width;
@@ -601,6 +613,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getHeight()
 	 */
+	@Override
 	public int getHeight()
 	{
 		return height;

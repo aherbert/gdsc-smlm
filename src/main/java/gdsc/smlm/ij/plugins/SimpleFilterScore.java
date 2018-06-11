@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.FilterScore;
 
-
 /**
  * Store the filter score used in benchmarking
  */

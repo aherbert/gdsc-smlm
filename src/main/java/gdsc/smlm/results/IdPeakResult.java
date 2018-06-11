@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Specifies a peak fitting result with an Id
  */
@@ -129,6 +128,7 @@ public class IdPeakResult extends PeakResult
 	 * 
 	 * @see gdsc.smlm.results.PeakResult#compareTo(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public int compareTo(PeakResult o)
 	{
 		// Sort by peak number: Ascending

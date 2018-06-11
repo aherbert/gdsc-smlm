@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import ij.process.FloatProcessor;
 
-
 /**
  * Computes a convolution in the spatial domain for each point within the array. Pixels outside the array are set to the
  * value of the appropriate edge pixel.
@@ -295,6 +294,7 @@ public class KernelFilter extends BaseWeightedFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public KernelFilter clone()
 	{
 		KernelFilter o = (KernelFilter) super.clone();

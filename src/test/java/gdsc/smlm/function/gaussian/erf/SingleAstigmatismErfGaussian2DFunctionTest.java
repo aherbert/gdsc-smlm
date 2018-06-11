@@ -28,6 +28,7 @@ import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
 public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
@@ -44,6 +45,7 @@ public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFun
 		f1 = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
 	}
 
+	@Override
 	protected void postInit()
 	{
 		// Even though the function does not evaluate the widths it can use them

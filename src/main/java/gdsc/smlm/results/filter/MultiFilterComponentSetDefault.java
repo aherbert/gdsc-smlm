@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Contains a set of components of the multi filter.
  */
@@ -60,7 +59,7 @@ public class MultiFilterComponentSetDefault extends MultiFilterComponentSet
 		if (components.length > 0)
 			components[0] = c;
 	}
-	
+
 	@Override
 	public MultiFilterComponentSet clone()
 	{

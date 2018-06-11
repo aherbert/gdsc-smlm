@@ -39,7 +39,6 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;
@@ -94,6 +93,7 @@ public class DensityImage implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -226,6 +226,7 @@ public class DensityImage implements PlugIn
 			this.results = results;
 		}
 
+		@Override
 		public float[] calculate(int[] density)
 		{
 			float[] score = new float[density.length];
@@ -238,7 +239,7 @@ public class DensityImage implements PlugIn
 		{
 			Rectangle bounds = results.getBounds();
 			float area = bounds.width * bounds.height;
-			return (float) results.size() / area;
+			return results.size() / area;
 		}
 
 		protected float getRegionArea()
@@ -246,6 +247,7 @@ public class DensityImage implements PlugIn
 			return radius * radius * ((useSquareApproximation) ? 4 : (float) Math.PI);
 		}
 
+		@Override
 		public float getThreshold()
 		{
 			float expected = getAverageDensity() * getRegionArea();
@@ -263,6 +265,7 @@ public class DensityImage implements PlugIn
 			this.mode = mode;
 		}
 
+		@Override
 		public float[] calculate(int[] density)
 		{
 			float[] score = new float[density.length];
@@ -273,11 +276,12 @@ public class DensityImage implements PlugIn
 				regionDivisor *= getRegionArea();
 			for (int i = 0; i < score.length; i++)
 			{
-				score[i] = (float) density[i] / regionDivisor;
+				score[i] = density[i] / regionDivisor;
 			}
 			return score;
 		}
 
+		@Override
 		public float getThreshold()
 		{
 			// Note: K(r) ~ Area
@@ -298,6 +302,7 @@ public class DensityImage implements PlugIn
 			super(results, mode);
 		}
 
+		@Override
 		public float[] calculate(int[] density)
 		{
 			// Compute a normalised variance stabilised per particle L-score.
@@ -334,6 +339,7 @@ public class DensityImage implements PlugIn
 			return score;
 		}
 
+		@Override
 		public float getThreshold()
 		{
 			// Note:
@@ -403,6 +409,7 @@ public class DensityImage implements PlugIn
 		newResults.begin();
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float x, float y, PeakResult result)
 			{
 				if (x >= minX && x <= maxX && y >= minY && y <= maxY)
@@ -519,9 +526,10 @@ public class DensityImage implements PlugIn
 		}
 
 		// Draw an image - Use error so that a floating point value can be used on a single pixel
-		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, false,
-				false, results.getName() + " Density", results.getBounds(), results.getNmPerPixel(), results.getGain(),
-				imageScale, 0, (cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
+		IJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY,
+				false, false, results.getName() + " Density", results.getBounds(), results.getNmPerPixel(),
+				results.getGain(), imageScale, 0,
+				(cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
 		image.setDisplayFlags(image.getDisplayFlags() | IJImagePeakResults.DISPLAY_NEGATIVES);
 		image.setLutName("grays");
 		image.begin();

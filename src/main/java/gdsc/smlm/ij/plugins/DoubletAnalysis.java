@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.Checkbox;
 import java.awt.Choice;
 
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextField;
@@ -300,6 +299,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(DoubletBonus that)
 		{
 			if (this.residuals < that.residuals)
@@ -333,6 +333,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(ResultCoordinate that)
 		{
 			//if (this.result.spot.intensity > that.result.spot.intensity)
@@ -430,6 +431,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(DoubletResult that)
 		{
 			// Makes the resutls easy to find in the table
@@ -518,6 +520,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -1006,6 +1009,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				// Rank singles by the Candidate spot
 				Collections.sort(frameResults, new Comparator<DoubletResult>()
 				{
+					@Override
 					public int compare(DoubletResult o1, DoubletResult o2)
 					{
 						return o1.spotIndex - o2.spotIndex;
@@ -1051,6 +1055,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				// The other can match anything else...
 				Collections.sort(frameResults, new Comparator<DoubletResult>()
 				{
+					@Override
 					public int compare(DoubletResult o1, DoubletResult o2)
 					{
 						if (o1.getMaxScore() > o2.getMaxScore())
@@ -1544,6 +1549,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1651,8 +1657,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
-			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			Vector<TextField> numerics = gd.getNumericFields();
+			Vector<Choice> choices = gd.getChoices();
 			int n = 0;
 			int ch = 0;
 
@@ -1851,6 +1857,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final long[] sumCount = new long[1];
 		actualCoordinates.forEachValue(new TObjectProcedure<ArrayList<Coordinate>>()
 		{
+			@Override
 			public boolean execute(ArrayList<Coordinate> list)
 			{
 				sumCount[0] += list.size();
@@ -1882,6 +1889,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		progress = 0;
 		actualCoordinates.forEachKey(new TIntProcedure()
 		{
+			@Override
 			public boolean execute(int frame)
 			{
 				put(jobs, frame);
@@ -3129,9 +3137,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
-			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
-			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			Vector<TextField> numerics = gd.getNumericFields();
+			Vector<Checkbox> checkboxes = gd.getCheckboxes();
+			Vector<Choice> choices = gd.getChoices();
 			int n = 0;
 			choices.get(1).addItemListener(this);
 			checkboxes.get(0).addItemListener(this);
@@ -3142,7 +3150,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			textMinWidthFactor = numerics.get(n++);
 			textWidthFactor = numerics.get(n++);
 			textPrecisionThreshold = numerics.get(n++);
-			textPrecisionMethod = choices.get(2);;
+			textPrecisionMethod = choices.get(2);
+			;
 		}
 
 		gd.showDialog();
@@ -3226,6 +3235,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	 * 
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getSource() instanceof Choice)

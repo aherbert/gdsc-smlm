@@ -30,7 +30,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.filters.NonMaximumSuppression;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image using non-maximum suppression.
  */
@@ -69,6 +68,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	 * 
 	 * @see gdsc.smlm.filters.SpotFilter#find(float[], int, int)
 	 */
+	@Override
 	protected Spot[] find(final float[] data, final int width, final int height)
 	{
 		data2 = preprocessData(data, width, height);
@@ -159,6 +159,7 @@ public abstract class MaximaSpotFilter extends SpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public MaximaSpotFilter clone()
 	{
 		MaximaSpotFilter f = (MaximaSpotFilter) super.clone();

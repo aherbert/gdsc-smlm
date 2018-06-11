@@ -28,7 +28,6 @@ import java.util.Arrays;
 import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 
-
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second partial derivatives.
  * <p>
@@ -75,7 +74,7 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 		resetExtended2();
 		func.initialiseExtended2(a);
 		func.forEach((ExtendedGradient2Procedure) this);
-		for (int i = 0, index = 0; i < n; i++, index += i+1)
+		for (int i = 0, index = 0; i < n; i++, index += i + 1)
 			d2[i] = J[index];
 	}
 
@@ -85,6 +84,7 @@ public class FastMLEJacobianGradient2Procedure extends FastMLEGradient2Procedure
 		Arrays.fill(J, 0);
 	}
 
+	@Override
 	public void executeExtended(double uk, double[] duk_dt, double[] d2uk_dtds)
 	{
 		u[k] = uk;

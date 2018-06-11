@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
@@ -61,6 +60,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		final double dy = y[++yi] - value;
@@ -83,6 +83,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
 		this.value += dy * dy;
 	}
 
+	@Override
 	protected void initialiseGradient()
 	{
 		for (int i = 0; i < n; i++)
@@ -93,6 +94,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
 		}
 	}
 
+	@Override
 	protected void finishGradient()
 	{
 		// Generate symmetric matrix
@@ -101,6 +103,7 @@ public class LSQLVMGradientProcedureMatrix extends BaseLSQLVMGradientProcedure
 				alpha[i][j] = alpha[j][i];
 	}
 
+	@Override
 	protected boolean checkGradients()
 	{
 		for (int i = 0; i < n; i++)

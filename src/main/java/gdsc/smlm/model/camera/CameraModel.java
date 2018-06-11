@@ -25,7 +25,6 @@ package gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
 
-
 /**
  * Define the methods for manipulating camera pixel data.
  *

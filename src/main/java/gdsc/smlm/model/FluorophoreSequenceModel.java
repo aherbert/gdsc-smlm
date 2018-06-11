@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -135,6 +134,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 * @return -1,0,1
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(FluorophoreSequenceModel o)
 	{
 		final double s1 = getStartTime();

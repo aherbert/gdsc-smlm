@@ -27,7 +27,6 @@ import gdsc.core.data.DataException;
 import gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 /**
  * Contains functionality to obtain the localisation precision for results.
  */
@@ -117,6 +116,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	 * 
 	 * @see gdsc.smlm.results.procedures.StoredPrecisionProcedure#executeStoredPrecision(double)
 	 */
+	@Override
 	public void executeStoredPrecision(double precision)
 	{
 		this.precision[i++] = precision;
@@ -140,6 +140,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	 * 
 	 * @see gdsc.smlm.results.procedures.LSEPrecisionProcedure#executeLSEPrecision(double)
 	 */
+	@Override
 	public void executeLSEPrecision(double precision)
 	{
 		this.precision[i++] = precision;
@@ -163,6 +164,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	 * 
 	 * @see gdsc.smlm.results.procedures.LSEPrecisionBProcedure#executeLSEPrecisionB(double)
 	 */
+	@Override
 	public void executeLSEPrecisionB(double precision)
 	{
 		this.precision[i++] = precision;
@@ -186,6 +188,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	 * 
 	 * @see gdsc.smlm.results.procedures.MLEPrecisionProcedure#executeMLEPrecision(double)
 	 */
+	@Override
 	public void executeMLEPrecision(double precision)
 	{
 		this.precision[i++] = precision;
@@ -209,6 +212,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 	 * 
 	 * @see gdsc.smlm.results.procedures.MLEPrecisionBProcedure#executeMLEPrecisionB(double)
 	 */
+	@Override
 	public void executeMLEPrecisionB(double precision)
 	{
 		this.precision[i++] = precision;

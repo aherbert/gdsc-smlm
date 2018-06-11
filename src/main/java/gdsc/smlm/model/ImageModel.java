@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.StoredDataStatistics;
 
@@ -460,6 +459,7 @@ public abstract class ImageModel
 		// fluorophores.
 		Collections.sort(localisations, new Comparator<LocalisationModel>()
 		{
+			@Override
 			public int compare(LocalisationModel o1, LocalisationModel o2)
 			{
 				if (o1.getTime() < o2.getTime())

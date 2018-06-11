@@ -50,7 +50,6 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.engine.FitConfiguration.PeakResultValidationData;
 
-
 import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
@@ -189,7 +188,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 */
 	private final float totalGain;
 	private final CameraModel cameraModel;
-	
+
 	/** Flag if this is an EM-CCD camera. This is used during local noise estimation. */
 	private final boolean isEMCCD;
 
@@ -358,11 +357,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			this.failCounter = failCounter;
 		}
 
+		@Override
 		public String getDescription()
 		{
 			return failCounter.getDescription();
 		}
 
+		@Override
 		public void pass()
 		{
 			// We record that this candidate generated new fit results
@@ -370,31 +371,37 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			failCounter.pass();
 		}
 
+		@Override
 		public void pass(int n)
 		{
 			throw new IllegalStateException("Cannot record multiple passes");
 		}
 
+		@Override
 		public void fail()
 		{
 			failCounter.fail();
 		}
 
+		@Override
 		public void fail(int n)
 		{
 			throw new IllegalStateException("Cannot record multiple fails");
 		}
 
+		@Override
 		public boolean isOK()
 		{
 			return failCounter.isOK();
 		}
 
+		@Override
 		public FailCounter newCounter()
 		{
 			throw new IllegalStateException("Cannot record to a new instance");
 		}
 
+		@Override
 		public void reset()
 		{
 			failCounter.reset();
@@ -609,7 +616,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				int y = candidate.y;
 				final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
-				final float b = (float) FastGaussian2DFitter.getBackground(region, regionBounds.width,
+				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width,
 						regionBounds.height, 1);
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
@@ -1151,6 +1158,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			super(offsetx, offsety);
 		}
 
+		@Override
 		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
 				double[] paramVariances, PeakResultValidationData peakResultValidationData, ResultType resultType)
 		{
@@ -1169,6 +1177,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			super(offsetx, offsety);
 		}
 
+		@Override
 		PreprocessedPeakResult createResult(int candidateId, int n, double[] initialParams, double[] params,
 				double[] paramVariances, PeakResultValidationData peakResultValidationData, ResultType resultType)
 		{
@@ -1350,7 +1359,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 		{
 			// Use the minimum in the data.
 			// This is what is done in the fitter if the background is zero.
-			return limitBackground(FastGaussian2DFitter.getBackground(region, width, height, 2));
+			return limitBackground(Gaussian2DFitter.getBackground(region, width, height, 2));
 		}
 
 		private double limitBackground(double b)
@@ -2123,13 +2132,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			nx -= r2.x - r1.x;
 			ny -= r2.y - r1.y;
 			// Put the spot in the centre of the region
-			spotParams[Gaussian2DFunction.X_POSITION] += nx  - x;
-			spotParams[Gaussian2DFunction.Y_POSITION] += ny  - y;
+			spotParams[Gaussian2DFunction.X_POSITION] += nx - x;
+			spotParams[Gaussian2DFunction.Y_POSITION] += ny - y;
 			Gaussian2DFunction f = fitConfig.createGaussianFunction(1, r2.width, r2.height);
 			result[0] = (stats[AreaSum.SUM] - f.integral(spotParams)) / stats[AreaSum.N];
 			if (result[0] < 0)
 				result[0] = params[Gaussian2DFunction.BACKGROUND];
-			
+
 			result[1] = noiseEstimateFromBackground(result[0], r2);
 
 			return result;
@@ -2142,22 +2151,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				if (totalGain == 0)
 					// Unknown calibration so use the global noise estimate
 					return fitConfig.getNoise();
-				
+
 				// Convert the local background to photons
 				b /= totalGain;
 			}
-			
+
 			// Apply the EM-CCD noise factor of 2 to the photon shot noise
 			if (isEMCCD)
 				b *= 2;
-			
+
 			// Using the mean variance allows an estimate for a per-pixel camera model.
 			// Use the normalised variance (i.e. the variance in photo-electrons).
-			double noise = Math.sqrt(b + cameraModel.getMeanNormalisedVariance(bounds)); 
-			
+			double noise = Math.sqrt(b + cameraModel.getMeanNormalisedVariance(bounds));
+
 			if (isFitCameraCounts)
 				noise *= totalGain;
-			
+
 			return noise;
 		}
 
@@ -2386,6 +2395,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 			// Exclude the fitted candidate neighbours from the candidate neighbours
 			neighbours.removeIf(new CandidateList.Predicate()
 			{
+				@Override
 				public boolean test(Candidate candidate)
 				{
 					final int otherId = candidate.index;
@@ -3142,9 +3152,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				{
 					PreprocessedPeakResult r = results[i];
 					results[i] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
-							initialParams, params, paramDevs, validationData,
-							(r.isExistingResult()) ? ResultType.EXISTING
-									: (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
+							initialParams, params, paramDevs, validationData, (r.isExistingResult())
+									? ResultType.EXISTING : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
 				}
 			}
 
@@ -4123,6 +4132,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run()
 	{
 		try
@@ -4224,6 +4234,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getFrame()
 	 */
+	@Override
 	public int getFrame()
 	{
 		return slice;
@@ -4234,6 +4245,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getNumberOfResults()
 	 */
+	@Override
 	public int getNumberOfResults()
 	{
 		// This is the total number of results we produce. 
@@ -4450,6 +4462,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getResult(int)
 	 */
+	@Override
 	public MultiPathFitResult getResult(int index)
 	{
 		dynamicMultiPathFitResult.reset(index);
@@ -4461,6 +4474,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#complete(int)
 	 */
+	@Override
 	public void complete(int index)
 	{
 		if (benchmarking)
@@ -4507,6 +4521,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.IMultiPathFitResults#getTotalCandidates()
 	 */
+	@Override
 	public int getTotalCandidates()
 	{
 		// This is the total number of candidates Ids we may produce		
@@ -4524,6 +4539,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
 	 * SelectedResult)
 	 */
+	@Override
 	public void add(SelectedResult selectedResult)
 	{
 		// TODO - Print the current state of the dynamicMultiPathFitResult to file.
@@ -4688,6 +4704,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
 	 */
+	@Override
 	public boolean isFit(int candidateId)
 	{
 		// Return if we already have a fit result for this candidate
@@ -4699,6 +4716,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
 	 */
+	@Override
 	public boolean isValid(int candidateId)
 	{
 		// If we have an estimate then this is a valid candidate for fitting.
@@ -4714,6 +4732,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
 	 * PreprocessedPeakResult)
 	 */
+	@Override
 	public void pass(PreprocessedPeakResult result)
 	{
 		// Do not ignore these. They may be from a fit result that is eventually not selected so we cannot 
@@ -4731,6 +4750,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 	 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
 	 * PreprocessedPeakResult)
 	 */
+	@Override
 	public void passMin(PreprocessedPeakResult result)
 	{
 		// This is a candidate that passed validation. Store the estimate as passing the minimal filter.

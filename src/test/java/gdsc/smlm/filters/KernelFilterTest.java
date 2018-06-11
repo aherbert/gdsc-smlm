@@ -257,16 +257,19 @@ public class KernelFilterTest
 			this.border = border;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return data.length;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return data[i].clone();
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			float[] d = (float[]) data;

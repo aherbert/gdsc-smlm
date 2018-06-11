@@ -32,7 +32,6 @@ import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -179,9 +178,9 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	{
 		filterSetupFlags = flags;
 		this.filterSetupData = null;
-		setup(!areSet(flags, DirectFilter.NO_WIDTH), !areSet(flags, DirectFilter.NO_SHIFT),
+		setup(!areSet(flags, IDirectFilter.NO_WIDTH), !areSet(flags, IDirectFilter.NO_SHIFT),
 				// Pass through the flags that are recognised
-				flags & (DirectFilter.XY_WIDTH | DirectFilter.NO_Z));
+				flags & (IDirectFilter.XY_WIDTH | IDirectFilter.NO_Z));
 	}
 
 	private void setup(final boolean widthEnabled, final boolean shiftEnabled, final int flags)
@@ -189,7 +188,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		// Note: The filter caches the combinations that are likely to be turned on/off:
 		// width filtering and shift filtering
 		// Other filters related to the PSF (XY widths, z-depth) are assumed to be constant.
-		
+
 		if (components_Width_Shift == null || this.flags != flags)
 		{
 			// Store this in case the filter is setup with different flags 
@@ -210,7 +209,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			if ((maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY) || (minWidth > 0 && minWidth < 1))
 			{
 				// Handle the width being 1/2 axis variable.
-				if (areSet(flags, DirectFilter.XY_WIDTH))
+				if (areSet(flags, IDirectFilter.XY_WIDTH))
 					components1[s1++] = new MultiFilterXYWidthComponent(minWidth, maxWidth);
 				else
 					components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
@@ -233,7 +232,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 			{
 				components1[s1++] = new MultiFilterEShiftComponent(eshift);
 			}
-			if (isZEnabled() && !areSet(flags, DirectFilter.NO_Z))
+			if (isZEnabled() && !areSet(flags, IDirectFilter.NO_Z))
 			{
 				components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
 			}
@@ -374,6 +373,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		return calculator.getLSEVariance(peak.getParameters(), peak.getNoise());
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		if (components == null)
@@ -673,56 +673,67 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return defaultRange;
 	}
 
+	@Override
 	public double getSignal()
 	{
 		return signal;
 	}
 
+	@Override
 	public double getSNR()
 	{
 		return snr;
 	}
 
+	@Override
 	public double getMinWidth()
 	{
 		return minWidth;
 	}
 
+	@Override
 	public double getMaxWidth()
 	{
 		return maxWidth;
 	}
 
+	@Override
 	public double getShift()
 	{
 		return shift;
 	}
 
+	@Override
 	public double getEShift()
 	{
 		return eshift;
 	}
 
+	@Override
 	public double getPrecision()
 	{
 		return precision;
 	}
 
+	@Override
 	public PrecisionType getPrecisionType()
 	{
 		return PrecisionType.ESTIMATE;
 	}
 
+	@Override
 	public double getMinZ()
 	{
 		return minZ;
 	}
 
+	@Override
 	public double getMaxZ()
 	{
 		return maxZ;

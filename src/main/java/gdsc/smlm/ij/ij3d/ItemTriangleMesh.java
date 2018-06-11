@@ -37,7 +37,6 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
 
-
 import customnode.CustomTriangleMesh;
 import gdsc.core.logging.NullTrackProgress;
 import gdsc.core.logging.Ticker;
@@ -504,6 +503,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
 	 */
+	@Override
 	public void reorder(int[] indices) throws IllegalArgumentException
 	{
 		if (dirty)
@@ -518,6 +518,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		if (dirty)
@@ -569,6 +570,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 
 		ga.updateData(new GeometryUpdater()
 		{
+			@Override
 			public void updateData(Geometry geometry)
 			{
 				GeometryArray ga = (GeometryArray) geometry;
@@ -595,6 +597,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
 	 */
+	@Override
 	public int size()
 	{
 		return points.length;
@@ -605,6 +608,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
 	 */
+	@Override
 	public Point3f getCoordinate(int i)
 	{
 		return points[i];
@@ -628,6 +632,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		super.setColor(color);
@@ -638,6 +643,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
@@ -665,7 +671,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
 	{
 		CustomContentHelper.calculateMinMaxCenterPoint(min, max, center, points);
 	}
-	
+
 	@Override
 	public float getVolume()
 	{

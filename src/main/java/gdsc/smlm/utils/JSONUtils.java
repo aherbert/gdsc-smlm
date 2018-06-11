@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.utils;
 
-
 /**
  * Provides utilities for working with JSON
  */

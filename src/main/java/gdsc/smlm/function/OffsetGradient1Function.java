@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
@@ -70,6 +69,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		 * 
 		 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 		 */
+		@Override
 		public void execute(double value, double[] dy_da)
 		{
 			values[i] = value;
@@ -110,6 +110,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		return f1;
 	}
 
+	@Override
 	public void initialise(double[] a)
 	{
 		store = null;
@@ -117,21 +118,25 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		i = 0;
 	}
 
+	@Override
 	public int[] gradientIndices()
 	{
 		return f1.gradientIndices();
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return f1.getNumberOfGradients();
 	}
 
+	@Override
 	public void initialise1(double[] a)
 	{
 		f1.initialise1(a);
 	}
 
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		this.procedure = procedure;
@@ -139,6 +144,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		f1.forEach((Gradient1Procedure) this);
 	}
 
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		procedure.execute(value + values[i++], dy_da);
@@ -167,6 +173,7 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		return func;
 	}
 
+	@Override
 	public double eval(int x, double[] dyda)
 	{
 		createStore();
@@ -186,24 +193,28 @@ public class OffsetGradient1Function extends OffsetValueFunction
 		}
 	}
 
+	@Override
 	public double eval(int x)
 	{
 		createStore();
 		return store.values[x];
 	}
 
+	@Override
 	public double eval(int x, double[] dyda, double[] w)
 	{
 		w[0] = 1;
 		return eval(x, dyda);
 	}
 
+	@Override
 	public double evalw(int x, double[] w)
 	{
 		w[0] = 1;
 		return eval(x);
 	}
 
+	@Override
 	public boolean canComputeWeights()
 	{
 		return false;

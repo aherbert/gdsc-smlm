@@ -32,7 +32,6 @@ import org.apache.commons.math3.random.RandomVectorGenerator;
 
 import gdsc.core.logging.TrackProgress;
 
-
 /**
  * Search a range of parameter space using a window divided into increments.
  */

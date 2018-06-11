@@ -27,7 +27,6 @@ import gdsc.core.utils.Maths;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-
 /**
  * Store a 2D image in a single array
  */

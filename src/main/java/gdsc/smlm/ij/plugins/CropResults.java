@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
@@ -83,6 +82,7 @@ public class CropResults implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -246,12 +246,14 @@ public class CropResults implements PlugIn
 
 		gd.addChoice("Name_option", NAME_OPTIONS, settings.getNameOption(), new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				settings.setNameOption(value);
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -419,6 +421,7 @@ public class CropResults implements PlugIn
 		{
 			results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 			{
+				@Override
 				public void executeXYR(float x, float y, PeakResult result)
 				{
 					if (bounds.contains(x, y) && testZ.test(result))
@@ -523,6 +526,7 @@ public class CropResults implements PlugIn
 
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float x, float y, PeakResult result)
 			{
 				if (roiTest.contains(x * xscale, y * yscale) && testZ.test(result))

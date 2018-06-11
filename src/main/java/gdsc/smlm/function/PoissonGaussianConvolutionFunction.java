@@ -27,7 +27,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.Maths;
 
-
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is assumed to have mean of
  * zero. If no mean (zero or below) is provided for the Poisson distribution then the probability density function
@@ -140,6 +139,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 * @see #isComputePMF()
 	 */
+	@Override
 	public double likelihood(double o, double e)
 	{
 		if (e <= 0)
@@ -275,6 +275,7 @@ public class PoissonGaussianConvolutionFunction implements LikelihoodFunction, L
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 * @see #isComputePMF()
 	 */
+	@Override
 	public double logLikelihood(double o, double e)
 	{
 		// As above but return the log

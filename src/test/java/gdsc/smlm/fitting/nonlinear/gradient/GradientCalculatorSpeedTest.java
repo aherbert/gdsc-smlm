@@ -451,15 +451,23 @@ public class GradientCalculatorSpeedTest
 		//@formatter:off
 		NonLinearFunction func = new NonLinearFunction(){
 			double u;
+			@Override
 			public void initialise(double[] a) { u = a[0]; }
+			@Override
 			public int[] gradientIndices() { return null; }
+			@Override
 			public double eval(int x, double[] dyda)  { return 0; }
+			@Override
 			public double eval(int x) {
 				return u;
 			}
+			@Override
 			public double eval(int x, double[] dyda, double[] w) { return 0; }
+			@Override
 			public double evalw(int x, double[] w) { return 0; }
+			@Override
 			public boolean canComputeWeights() { return false; }
+			@Override
 			public int getNumberOfGradients() {	return 0; }
 		};
 		//@formatter:on

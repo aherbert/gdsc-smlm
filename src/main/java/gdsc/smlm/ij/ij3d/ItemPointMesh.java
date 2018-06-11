@@ -35,7 +35,6 @@ import org.scijava.java3d.PointAttributes;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 
-
 import customnode.CustomPointMesh;
 
 /**
@@ -113,6 +112,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
 	 */
+	@Override
 	public void reorder(int[] indices) throws IllegalArgumentException
 	{
 		checkIndices(indices, mesh.size());
@@ -124,6 +124,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		changed = true;
@@ -159,6 +160,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 
 		ga.updateData(new GeometryUpdater()
 		{
+			@Override
 			public void updateData(Geometry geometry)
 			{
 				GeometryArray ga = (GeometryArray) geometry;
@@ -199,6 +201,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
 	 */
+	@Override
 	public int size()
 	{
 		return mesh.size();
@@ -209,11 +212,12 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
 	 */
+	@Override
 	public Point3f getCoordinate(int i)
 	{
 		return mesh.get(i);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -232,6 +236,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		super.setColor(color);
@@ -242,6 +247,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;

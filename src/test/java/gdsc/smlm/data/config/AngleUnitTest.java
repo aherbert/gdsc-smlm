@@ -58,7 +58,7 @@ public class AngleUnitTest
 			for (int j = 0; j < n; j++)
 			{
 				AngleUnit u2 = expectedUnits[j].u;
-				c =  UnitConverterFactory.createConverter(u1, u2);
+				c = UnitConverterFactory.createConverter(u1, u2);
 				double o = c.convert(v1);
 				Assert.assertEquals(u1 + " to " + u2, expectedUnits[j].value, o, 1e-5);
 			}

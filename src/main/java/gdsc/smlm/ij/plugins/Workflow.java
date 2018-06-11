@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -125,6 +124,7 @@ public class Workflow<S, R>
 			this.worker = worker;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public void run()
 		{
@@ -355,7 +355,7 @@ public class Workflow<S, R>
 			threads = null;
 		}
 	}
-	
+
 	public boolean isRunning()
 	{
 		return threads != null;

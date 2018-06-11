@@ -27,7 +27,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.NotImplementedException;
 
-
 /**
  * Evaluates an 2-dimensional Gaussian function for a single peak.
  * <p>
@@ -80,6 +79,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		x0pos = a[X_POSITION];
@@ -101,8 +101,10 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	 * Not implemented.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x, final double[] dyda)
 	{
 		throw new NotImplementedException();
@@ -112,8 +114,10 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	 * Evaluates an 2-dimensional circular Gaussian function for a single peak.
 	 * <p>
 	 * {@inheritDoc}
+	 * 
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int x)
 	{
 		// Unpack the predictor into the dimensions
@@ -179,6 +183,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return gradientIndices;

@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.CoordinateProvider;
 import gdsc.smlm.ij.utils.ImageROIPainter;
@@ -80,6 +79,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -317,6 +317,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		final Counter i = new Counter();
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float x, float y, PeakResult p)
 			{
 				pulses[i.getAndIncrement()] = new Pulse(x, y, p.getFrame(), p.getEndFrame());
@@ -449,6 +450,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 	 * 
 	 * @see gdsc.smlm.ij.utils.CoordinateProvider#getCoordinates(java.lang.String)
 	 */
+	@Override
 	public double[] getCoordinates(String line)
 	{
 		// Extract the startT and x,y coordinates from the first pulse in the line
@@ -557,6 +559,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(TimeComparablePointPair o)
 		{
 			// Significance of points are: p1, p2, p3
@@ -665,6 +668,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(TimeComparableTriple o)
 		{
 			// Significance of points are: p1, p2, p3
@@ -745,6 +749,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(ScoreComparableTriple o)
 		{
 			if (score > o.score)

@@ -105,6 +105,7 @@ public class ReferenceItemMesh extends ItemMesh
 		super(points, ga, appearance, sizes, color, transparency);
 	}
 
+	@Override
 	protected GeometryArray createGeometry(float[] coords, GeometryArray sourceGA)
 	{
 		final GeometryArray ga = createGeometryArray(sourceGA, GeometryArray.BY_REFERENCE);
@@ -146,7 +147,7 @@ public class ReferenceItemMesh extends ItemMesh
 				}
 			}
 		}
-		
+
 		// Handle normals
 		if (hasNormals())
 		{
@@ -156,13 +157,13 @@ public class ReferenceItemMesh extends ItemMesh
 			duplicate(objectNormals, 0, objectNormals.length, points.length, allNormals, 0);
 			ga.setNormalRefFloat(allNormals);
 		}
-		
+
 		// Handle colors
 		if (hasColor())
 		{
 			colorUpdater = ArrayColorUpdater.create(vertexCount, hasColor4());
 			ga.setColorRefFloat(new float[colorUpdater.size() * size()]);
-		}		
+		}
 
 		return ga;
 	}
@@ -172,6 +173,7 @@ public class ReferenceItemMesh extends ItemMesh
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		changed = true;
@@ -233,6 +235,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 		ga.updateData(new GeometryUpdater()
 		{
+			@Override
 			public void updateData(Geometry geometry)
 			{
 				GeometryArray ga = (GeometryArray) geometry;
@@ -272,12 +275,13 @@ public class ReferenceItemMesh extends ItemMesh
 			}
 		});
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		if (color == null)
@@ -322,6 +326,7 @@ public class ReferenceItemMesh extends ItemMesh
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		if (!hasColor())
@@ -366,6 +371,7 @@ public class ReferenceItemMesh extends ItemMesh
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
+	@Override
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		if (!hasColor4())
@@ -393,6 +399,7 @@ public class ReferenceItemMesh extends ItemMesh
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
 	 */
+	@Override
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		if (!hasColor4())
@@ -422,6 +429,7 @@ public class ReferenceItemMesh extends ItemMesh
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
 	 */
+	@Override
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
 		if (!hasColor4())
@@ -449,6 +457,7 @@ public class ReferenceItemMesh extends ItemMesh
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
 	 */
+	@Override
 	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		if (!hasColor4())

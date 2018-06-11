@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Null implementation of the CoordinateStore interface.
  */
@@ -31,7 +30,7 @@ public class NullCoordinateStore implements CoordinateStore
 {
 	/** An instance to ignore calls to the CoordinateStore interface */
 	public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
-	
+
 	/**
 	 * Instantiates a new null coordinate store.
 	 */
@@ -50,12 +49,13 @@ public class NullCoordinateStore implements CoordinateStore
 	{
 		return (coordinateStore == null) ? INSTANCE : coordinateStore;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getResolution()
 	 */
+	@Override
 	public double getXYResolution()
 	{
 		return 0;
@@ -66,6 +66,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getZResolution()
 	 */
+	@Override
 	public double getZResolution()
 	{
 		return 0;
@@ -76,6 +77,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
 	 */
+	@Override
 	public void addToQueue(double x, double y, double z)
 	{
 	}
@@ -85,6 +87,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#flush()
 	 */
+	@Override
 	public void flush()
 	{
 	}
@@ -94,6 +97,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
 	 */
+	@Override
 	public void add(double x, double y, double z)
 	{
 	}
@@ -103,6 +107,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#clear()
 	 */
+	@Override
 	public void clear()
 	{
 	}
@@ -112,6 +117,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
 	 */
+	@Override
 	public boolean contains(double x, double y, double z)
 	{
 		return false;
@@ -122,6 +128,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
 	 */
+	@Override
 	public double[] find(double x, double y, double z)
 	{
 		return null;
@@ -132,6 +139,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#newInstance()
 	 */
+	@Override
 	public CoordinateStore newInstance()
 	{
 		return this;
@@ -142,6 +150,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
 	 */
+	@Override
 	public CoordinateStore resize(int minx, int miny, int maxx, int maxy)
 	{
 		return this;
@@ -152,6 +161,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinX()
 	 */
+	@Override
 	public int getMinX()
 	{
 		return 0;
@@ -162,6 +172,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinY()
 	 */
+	@Override
 	public int getMinY()
 	{
 		return 0;
@@ -172,6 +183,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getWidth()
 	 */
+	@Override
 	public int getWidth()
 	{
 		return 0;
@@ -182,6 +194,7 @@ public class NullCoordinateStore implements CoordinateStore
 	 * 
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getHeight()
 	 */
+	@Override
 	public int getHeight()
 	{
 		return 0;

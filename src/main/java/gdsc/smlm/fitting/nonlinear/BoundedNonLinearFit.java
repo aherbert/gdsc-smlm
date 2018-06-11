@@ -27,7 +27,6 @@ import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.function.GradientFunction;
 import gdsc.smlm.function.NonLinearFunction;
 
-
 /**
  * Uses Levenberg-Marquardt method to fit a nonlinear model with coefficients (a) for a
  * set of data points (x, y).
@@ -96,6 +95,7 @@ public class BoundedNonLinearFit extends NonLinearFit
 	 * 
 	 * @see gdsc.smlm.fitting.nonlinear.NonLinearFit#solve(double[], int)
 	 */
+	@Override
 	protected boolean solve(double[] a, final int m)
 	{
 		if (super.solve(a, m))

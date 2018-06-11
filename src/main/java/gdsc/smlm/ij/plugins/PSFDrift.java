@@ -57,7 +57,6 @@ import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.engine.FitConfiguration;
 
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;
@@ -197,6 +196,7 @@ public class PSFDrift implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -407,6 +407,7 @@ public class PSFDrift implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -528,7 +529,7 @@ public class PSFDrift implements PlugIn
 		centrePixel = w / 2;
 
 		// Check region size using the image PSF
-		double newPsfWidth = (double) imp.getWidth() / scale;
+		double newPsfWidth = imp.getWidth() / scale;
 		if (Math.ceil(newPsfWidth) > w)
 			Utils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
 
@@ -802,6 +803,7 @@ public class PSFDrift implements PlugIn
 				offset.add(new double[] { slice, cx2, cy2 });
 			Collections.sort(offset, new Comparator<double[]>()
 			{
+				@Override
 				public int compare(double[] arg0, double[] arg1)
 				{
 					if (arg0[0] < arg1[0])
@@ -1252,6 +1254,7 @@ public class PSFDrift implements PlugIn
 		gd2.addMessage("");
 		gd2.addAndGetButton("Reset", new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				tf.setText(Integer.toString(newCentre));
@@ -1341,6 +1344,7 @@ public class PSFDrift implements PlugIn
 			return 2 * cy[centre - offset];
 		}
 
+		@Override
 		public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 		{
 			centre = (int) gd.getNextNumber();

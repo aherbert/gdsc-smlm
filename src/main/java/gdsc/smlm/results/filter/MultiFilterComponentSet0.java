@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Contains a set of components of the multi filter.
  */
@@ -38,13 +37,13 @@ public class MultiFilterComponentSet0 extends MultiFilterComponentSet
 	{
 		return 0;
 	}
-	
+
 	@Override
 	public int validate(final PreprocessedPeakResult peak)
 	{
 		return 0;
 	}
-	
+
 	@Override
 	void replace0(MultiFilterComponent c)
 	{

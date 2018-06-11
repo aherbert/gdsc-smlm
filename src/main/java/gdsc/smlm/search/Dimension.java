@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.search;
 
-
 /**
  * Specify the dimensions for a search
  */
@@ -79,7 +78,7 @@ public interface Dimension
 	 * @return true, if is at bounds
 	 */
 	public boolean isAtBounds(double v);
-	
+
 	/**
 	 * Creates a new dimension with the given bounds. The current min/max and other settings should be respected.
 	 *
@@ -100,7 +99,7 @@ public interface Dimension
 	 * @return the rounded value
 	 */
 	public double round(double value);
-	
+
 	/**
 	 * True if the dimension can round values.
 	 *

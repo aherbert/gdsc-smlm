@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Contains methods for specifying the illumination photons of a spatial position.
  */
@@ -48,8 +47,7 @@ public interface SpatialIllumination
 	 * @return The photons [before,during]
 	 */
 	double[] getPulsedPhotons(double[] xyz, int t);
-	
-	
+
 	/**
 	 * @return An estimate of the average photons per time frame
 	 */

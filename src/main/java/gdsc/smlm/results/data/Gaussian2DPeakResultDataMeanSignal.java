@@ -26,7 +26,6 @@ package gdsc.smlm.results.data;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Gets the mean signal from the PeakResult assuming a Gaussian 2D PSF. The result must have the standard deviation for
  * each dimension in the first two additional parameters of the PeakResult parameter array.
@@ -44,6 +43,7 @@ public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValue(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public Float getValue(PeakResult result)
 	{
 		return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getSignal(), result.getParameter(i),
@@ -55,6 +55,7 @@ public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat
 	 * 
 	 * @see gdsc.smlm.results.PeakResultData#getValueName()
 	 */
+	@Override
 	public String getValueName()
 	{
 		return "Gaussian2D mean signal";

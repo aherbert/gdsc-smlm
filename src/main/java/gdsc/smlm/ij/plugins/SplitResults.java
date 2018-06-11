@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.ObjectAnalyzer;
 import gdsc.core.ij.Utils;
@@ -59,6 +58,7 @@ public class SplitResults implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -151,6 +151,7 @@ public class SplitResults implements PlugIn
 		final int step = Utils.getProgressInterval(size);
 		results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
 		{
+			@Override
 			public void executeXYR(float xx, float yy, PeakResult result)
 			{
 				if (i.incrementAndGet() % step == 0)
@@ -190,7 +191,7 @@ public class SplitResults implements PlugIn
 			}
 		}
 
-		IJ.showStatus(
-				"Split " + TextUtils.pleural(results.size(), "result") + " into " + TextUtils.pleural(i.getCount(), "set"));
+		IJ.showStatus("Split " + TextUtils.pleural(results.size(), "result") + " into " +
+				TextUtils.pleural(i.getCount(), "set"));
 	}
 }

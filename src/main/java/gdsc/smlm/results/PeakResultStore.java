@@ -28,7 +28,6 @@ import java.util.Collection;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 
-
 /**
  * Stores peak results.
  */
@@ -138,7 +137,8 @@ public interface PeakResultStore
 	 *            the results
 	 * @return true if the store is changed
 	 */
-	public boolean retainStore(PeakResultStore results);	
+	public boolean retainStore(PeakResultStore results);
+
 	/**
 	 * Clear the results.
 	 */

@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-
 /**
  * Support direct filtering of PreprocessedPeakResult objects.
  * <p>
@@ -44,6 +43,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup()
 	 */
+	@Override
 	public void setup()
 	{
 	}
@@ -53,6 +53,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int)
 	 */
+	@Override
 	public void setup(final int flags)
 	{
 	}
@@ -62,6 +63,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int, gdsc.smlm.results.filter.FilterSetupData[])
 	 */
+	@Override
 	public void setup(int flags, FilterSetupData... filterSetupData)
 	{
 	}
@@ -71,6 +73,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFlags()
 	 */
+	@Override
 	public int getFilterSetupFlags() throws IllegalStateException
 	{
 		return 0;
@@ -81,6 +84,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
 	 */
+	@Override
 	public FilterSetupData[] getFilterSetupData() throws IllegalStateException
 	{
 		return null;
@@ -127,6 +131,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#accept(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	final public boolean accept(final PreprocessedPeakResult peak)
 	{
 		return (result = validate(peak)) == 0;
@@ -137,6 +142,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public abstract int validate(final PreprocessedPeakResult peak);
 
 	/*
@@ -144,6 +150,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getFilterType()
 	 */
+	@Override
 	public FilterType getFilterType()
 	{
 		return FilterType.DIRECT;
@@ -154,6 +161,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getResult()
 	 */
+	@Override
 	public int getResult()
 	{
 		return result;
@@ -164,6 +172,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.IDirectFilter#copy()
 	 */
+	@Override
 	public IDirectFilter copy()
 	{
 		return (IDirectFilter) clone();

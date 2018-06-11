@@ -36,7 +36,6 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-
 import gdsc.core.ij.SeriesOpener;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
@@ -84,6 +83,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -91,12 +91,14 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 		gd.addChoice("Mode", MODE, inputMode, new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				inputMode = value;
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -152,6 +154,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			final Choice choice = gd.getLastChoice();
 			choice.addItemListener(new ItemListener()
 			{
+				@Override
 				public void itemStateChanged(ItemEvent e)
 				{
 					inputMode = choice.getSelectedIndex();
@@ -163,12 +166,14 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		gd.addCheckbox("Log_progress", logProgress);
 		gd.addChoice("Output_mode", OUTPUT_MODE, outputMode, new OptionListener<Integer>()
 		{
+			@Override
 			public boolean collectOptions(Integer value)
 			{
 				outputMode = value;
 				return collectOptions(false);
 			}
 
+			@Override
 			public boolean collectOptions()
 			{
 				return collectOptions(true);
@@ -192,7 +197,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 						return false;
 					nImages = (int) egd.getNextNumber();
 					outputDirectory = egd.getNextString();
-					updateLabel2();				
+					updateLabel2();
 					return true;
 				}
 			}
@@ -204,6 +209,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			final Choice choice = gd.getLastChoice();
 			choice.addItemListener(new ItemListener()
 			{
+				@Override
 				public void itemStateChanged(ItemEvent e)
 				{
 					outputMode = choice.getSelectedIndex();
@@ -212,7 +218,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 			});
 			updateLabel2();
 		}
-		
+
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -370,7 +376,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		else
 			label2.setText(String.format("Slices per image = %d : %s", nImages, outputDirectory));
 	}
-	
+
 	/**
 	 * Override methods in the ij.VirtualStack class to provide the pixels from a TIFF series. The stack cannot be
 	 * modified.
@@ -586,48 +592,57 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress
 		}
 	}
 
+	@Override
 	public void progress(double fraction)
 	{
 		IJ.showProgress(fraction);
 	}
 
+	@Override
 	public void progress(long position, long total)
 	{
 		IJ.showProgress((double) position / total);
 	}
 
+	@Override
 	public void incrementProgress(double fraction)
 	{
 		// Ignore
 	}
 
+	@Override
 	public void log(String format, Object... args)
 	{
 		if (logProgress)
 			Utils.log(format, args);
 	}
 
+	@Override
 	public void status(String format, Object... args)
 	{
 		IJ.showStatus(String.format(format, args));
 	}
 
+	@Override
 	public boolean isEnded()
 	{
 		// Ignore
 		return false;
 	}
 
+	@Override
 	public boolean isProgress()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean isLog()
 	{
 		return logProgress;
 	}
 
+	@Override
 	public boolean isStatus()
 	{
 		return true;

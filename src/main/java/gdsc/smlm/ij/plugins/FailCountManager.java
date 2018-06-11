@@ -50,7 +50,6 @@ import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
 
-
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
@@ -94,13 +93,19 @@ public class FailCountManager implements PlugIn
 	//@formatter:off
 	private enum FailCountOption implements NamedObject 
 	{
-		CREATE_DATA { public String getName() { return "Create Data"; } },
-		LOAD_DATA { public String getName() { return "Load Data"; } },
-		SAVE_DATA { public String getName() { return "Save Data"; } },
-		PLOT_DATA { public String getName() { return "Plot Data"; } },
-		ANALYSE_DATA { public String getName() { return "Analyse Data"; } },
+		CREATE_DATA { @Override
+		public String getName() { return "Create Data"; } },
+		LOAD_DATA { @Override
+		public String getName() { return "Load Data"; } },
+		SAVE_DATA { @Override
+		public String getName() { return "Save Data"; } },
+		PLOT_DATA { @Override
+		public String getName() { return "Plot Data"; } },
+		ANALYSE_DATA { @Override
+		public String getName() { return "Analyse Data"; } },
 		;
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -261,7 +266,7 @@ public class FailCountManager implements PlugIn
 		public void initialiseAnalysis(double targetPassFraction)
 		{
 			initialiseData();
-			targetPassCount = (float) Math.round(passCount[passCount.length - 1] * targetPassFraction);
+			targetPassCount = Math.round(passCount[passCount.length - 1] * targetPassFraction);
 			int size = results.length;
 			target = 1;
 			while (target <= size)
@@ -344,6 +349,7 @@ public class FailCountManager implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -777,6 +783,7 @@ public class FailCountManager implements PlugIn
 			}
 		}
 
+		@Override
 		public void run()
 		{
 			//while (!Thread.interrupted())
@@ -881,6 +888,7 @@ public class FailCountManager implements PlugIn
 		gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
 		gd.addDialogListener(new DialogListener()
 		{
+			@Override
 			public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 			{
 				int item = (int) gd.getNextNumber();
@@ -1075,6 +1083,7 @@ public class FailCountManager implements PlugIn
 			final FailCountData data = failCountData.getf(i);
 			futures.add(executor.submit(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					if (IJ.escapePressed())
@@ -1177,7 +1186,7 @@ public class FailCountManager implements PlugIn
 	{
 		int n = counters.size() - type.size();
 		Utils.log("Type %d = %d", b, n);
-		type.fill(type.size(), counters.size(), (byte)b);
+		type.fill(type.size(), counters.size(), (byte) b);
 	}
 
 	private enum CounterStatus

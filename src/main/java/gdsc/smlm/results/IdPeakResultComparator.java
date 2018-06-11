@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import java.util.Comparator;
 
-
 /**
  * Compares the results by Id
  */
@@ -39,6 +38,7 @@ public class IdPeakResultComparator implements Comparator<PeakResult>
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public int compare(PeakResult o1, PeakResult o2)
 	{
 		int id1 = o1.getId();

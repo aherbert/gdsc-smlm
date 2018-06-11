@@ -57,13 +57,13 @@ public class CubicSplineCalculatorTest
 				for (int i = 0; i < 4; i++)
 				{
 					value[i][j][k] = f.value(s[i], s[j], s[k]);
-					b[c++] = value[i][j][k]; 
+					b[c++] = value[i][j][k];
 				}
 
 		CubicSplineCalculator calc = new CubicSplineCalculator();
 		double[] o = calc.compute(value);
 		Assert.assertArrayEquals(e, o, 1e-6);
-		
+
 		o = calc.compute(b);
 		Assert.assertArrayEquals(e, o, 1e-6);
 	}
@@ -80,7 +80,7 @@ public class CubicSplineCalculatorTest
 		CustomTricubicInterpolatingFunction f1 = new CustomTricubicInterpolator().interpolate(xval, yval, zval, fval);
 
 		double[] e = f1.getCoefficients(1, 1, 1);
-		
+
 		CustomTricubicFunction f = CustomTricubicFunction.create(e);
 		CubicSplinePosition[] s = new CubicSplinePosition[4];
 		for (int i = 0; i < 4; i++)
@@ -93,13 +93,13 @@ public class CubicSplineCalculatorTest
 				for (int i = 0; i < 4; i++)
 				{
 					value[i][j][k] = f.value(s[i], s[j], s[k]);
-					b[c++] = value[i][j][k]; 
+					b[c++] = value[i][j][k];
 				}
-		
+
 		CubicSplineCalculator calc = new CubicSplineCalculator();
 		double[] o = calc.compute(value);
 		Assert.assertArrayEquals(e, o, 1e-6);
-		
+
 		o = calc.compute(b);
 		Assert.assertArrayEquals(e, o, 1e-6);
 	}

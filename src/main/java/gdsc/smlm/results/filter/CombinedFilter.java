@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 import java.util.Arrays;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -132,6 +131,7 @@ public abstract class CombinedFilter extends DirectFilter
 		return filter1.requiresParameterDeviations() || filter2.requiresParameterDeviations();
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		int flags = 0;
@@ -444,6 +444,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
+	@Override
 	public int length()
 	{
 		return filter1.length() + filter2.length();
@@ -504,6 +505,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
+	@Override
 	public double[] sequence()
 	{
 		return combine(filter1.sequence(), filter2.sequence());
@@ -514,6 +516,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return combine(filter1.mutationStepRange(), filter2.mutationStepRange());
@@ -532,6 +535,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.results.filter.Filter#getChromosomeParameters()
 	 */
+	@Override
 	public int[] getChromosomeParameters()
 	{
 		int[] s1 = filter1.getChromosomeParameters();

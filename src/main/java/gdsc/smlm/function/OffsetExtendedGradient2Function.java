@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
@@ -60,11 +59,13 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
 		return ef2;
 	}
 
+	@Override
 	public void initialiseExtended2(double[] a)
 	{
 		ef2.initialiseExtended2(a);
 	}
 
+	@Override
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		this.procedure = procedure;
@@ -72,6 +73,7 @@ public class OffsetExtendedGradient2Function extends OffsetGradient2Function
 		ef2.forEach((ExtendedGradient2Procedure) this);
 	}
 
+	@Override
 	public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 	{
 		procedure.executeExtended(value + values[i++], dy_da, d2y_dadb);

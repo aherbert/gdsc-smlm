@@ -27,7 +27,6 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -63,6 +62,7 @@ public class SBRFilter extends DirectFilter
 		return peak.getSNR() >= this.sbr;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_PHOTONS | V_BACKGROUND | V_SNR;
@@ -181,6 +181,7 @@ public class SBRFilter extends DirectFilter
 	 * 
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
+	@Override
 	public double[] mutationStepRange()
 	{
 		return new double[] { SNRFilter.DEFAULT_RANGE };

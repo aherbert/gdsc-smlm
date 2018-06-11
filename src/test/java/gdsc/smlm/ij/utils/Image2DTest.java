@@ -298,7 +298,7 @@ public abstract class Image2DTest
 			Image2D image = createEmptyData(x + w + pad, y + h + pad);
 			image.fill(1);
 			image.fill(x, y, w, h, 2);
-			
+
 			Image2D image2 = createEmptyData(x + w + pad, y + h + pad);
 			image2.fill(1);
 			Image2D blank = createEmptyData(w, h);
@@ -343,7 +343,8 @@ public abstract class Image2DTest
 
 			assertEquals(image, image2);
 		}
-	}	
+	}
+
 	private static void assertEquals(Image2D a, Image2D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)

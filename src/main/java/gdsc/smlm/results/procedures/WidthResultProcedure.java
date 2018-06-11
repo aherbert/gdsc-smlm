@@ -27,7 +27,6 @@ import gdsc.core.data.DataException;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 /**
  * Contains functionality to obtain the standard calibrated data for results.
  */
@@ -80,6 +79,7 @@ public class WidthResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (WResultProcedure) this);
 	}
 
+	@Override
 	public void executeW(float w)
 	{
 		this.wx[i++] = w;
@@ -99,6 +99,7 @@ public class WidthResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (WxWyResultProcedure) this);
 	}
 
+	@Override
 	public void executeWxWy(float wx, float wy)
 	{
 		this.wx[i] = wx;

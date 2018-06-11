@@ -153,6 +153,7 @@ public class PoissonGammaFunctionTest
 					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
+				@Override
 				public double value(double x)
 				{
 					//return f.likelihood(x, e);
@@ -315,23 +316,21 @@ public class PoissonGammaFunctionTest
 		}
 		double[] p = list.toArray();
 		Arrays.sort(p);
-		
+
 		double m = 5;
-		
+
 		for (double x : p)
 		{
 			double dirac = PoissonGammaFunction.dirac(x);
 			double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
 			double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
-			
-			System.out.printf("p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, 
-					dirac, p0, 
-					dirac / p0, 
+
+			System.out.printf("p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, dirac, p0,
+					dirac / p0,
 					//gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
-					p01,
-					p0/p01
-					//gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
-					);
+					p01, p0 / p01
+			//gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
+			);
 		}
 	}
 }

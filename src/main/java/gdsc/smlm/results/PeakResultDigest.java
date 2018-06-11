@@ -28,7 +28,6 @@ import java.security.MessageDigest;
 
 import gdsc.core.utils.Digest;
 
-
 /**
  * Provide digest functionality for ImageJ images to digest the pixels array
  */

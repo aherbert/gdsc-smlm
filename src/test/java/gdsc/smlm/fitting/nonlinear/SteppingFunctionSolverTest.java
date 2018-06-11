@@ -172,8 +172,8 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	public void canFitSingleGaussianEMCCD_B_DC_FastLogMLELVM()
 	{
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastLogMLELVM, NoiseModel.EMCCD);
-	}	
-	
+	}
+
 	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianEMCCD_x_x__FastMLE()
 	{
@@ -394,8 +394,8 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	public void canFitSingleGaussianSCMOS_B_DC_FastLogMLELVM()
 	{
 		fitSingleGaussian(BOUNDED, DYNAMIC_CLAMP, FastLogMLELVM, NoiseModel.SCMOS);
-	}	
-	
+	}
+
 	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianSCMOS_x_x__FastMLE()
 	{
@@ -553,20 +553,20 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 
 	// Note: The FastLogMLELVM converges too fast when there is still some 
 	// optimisation to do. The following tests have far fewer iterations with the fastLog version.
-	
+
 	@Test
 	public void fitSingleGaussianEMCCD_x_x__LSELVMBetterThanFastLogMLELVM()
 	{
 		// This is actually a tie with the current fixed random number generator (50/50 for each)
 		fitSingleGaussianBetter(NO_BOUND, NO_CLAMP, LSELVM, NO_BOUND, NO_CLAMP, FastLogMLELVM, NoiseModel.EMCCD);
 	}
-	
+
 	@Test
 	public void fitSingleGaussianEMCCD_x_x__MLELVMBetterThanFastLogMLELVM()
 	{
 		fitSingleGaussianBetter(NO_BOUND, NO_CLAMP, MLELVM, NO_BOUND, NO_CLAMP, FastLogMLELVM, NoiseModel.EMCCD);
 	}
-	
+
 	private void fitSingleGaussianBetter(boolean bounded2, SteppingFunctionSolverClamp clamp2,
 			SteppingFunctionSolverType type2, boolean bounded, SteppingFunctionSolverClamp clamp,
 			SteppingFunctionSolverType type, NoiseModel noiseModel)
@@ -662,8 +662,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		canFitAndComputeDeviations(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, true);
 	}
 
-	private void canFitAndComputeDeviations(SteppingFunctionSolverType type, NoiseModel noiseModel,
-			boolean useWeights)
+	private void canFitAndComputeDeviations(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
 		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
@@ -754,8 +753,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		canFitAndComputeValue(SteppingFunctionSolverType.BTFastMLE, NoiseModel.SCMOS, true);
 	}
 
-	private void canFitAndComputeValue(SteppingFunctionSolverType type, NoiseModel noiseModel,
-			boolean useWeights)
+	private void canFitAndComputeValue(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
 		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);

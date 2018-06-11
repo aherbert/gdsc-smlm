@@ -66,7 +66,6 @@ import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.plugin.WindowOrganiser;
 
-
 /**
  * Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera.
  */
@@ -82,15 +81,24 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	//@formatter:off
 	public enum CameraType implements NamedObject
 	{
-		POISSON { public String getName() { return "Poisson"; } },
-		CCD { public String getName() { return "CCD"; } 
-			  public boolean isFast() { return false; }
-			  public boolean isLowerFixedI() { return true; } },
-		CCD_APPROXIMATION { public String getName() { return "CCD Approximation"; }
+		POISSON { @Override
+		public String getName() { return "Poisson"; } },
+		CCD { @Override
+		public String getName() { return "CCD"; } 
+			  @Override
+			public boolean isFast() { return false; }
+			  @Override
+			public boolean isLowerFixedI() { return true; } },
+		CCD_APPROXIMATION { @Override
+		public String getName() { return "CCD Approximation"; }
+							@Override
 							public String getShortName() { return "CCD Approx"; }},
-		EM_CCD { public String getName() { return "EM-CCD"; } 
-		         public boolean isFast() { return false; } };
+		EM_CCD { @Override
+		public String getName() { return "EM-CCD"; } 
+		         @Override
+				public boolean isFast() { return false; } };
 
+		@Override
 		public abstract String getName();
 		
 		/**
@@ -107,6 +115,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 		 */
 		public boolean isLowerFixedI() { return false; }
 
+		@Override
 		public String getShortName()
 		{
 			return getName();
@@ -317,6 +326,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 				// Sort by age
 				list.sort(new Comparator<FIKey>()
 				{
+					@Override
 					public int compare(FIKey o1, FIKey o2)
 					{
 						// Youngest first
@@ -486,6 +496,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -908,6 +919,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn
 					final int end = Math.min(index.length, i + nPerThread);
 					futures.add(es.submit(new Runnable()
 					{
+						@Override
 						public void run()
 						{
 							BasePoissonFisherInformation fi2 = fi.clone();

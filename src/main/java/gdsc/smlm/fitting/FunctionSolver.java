@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Defines methods to fit a function with coefficients (a).
  */

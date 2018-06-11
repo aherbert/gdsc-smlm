@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wrap a function and store the values from the procedure
  */
@@ -66,6 +65,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#size()
 	 */
+	@Override
 	public int size()
 	{
 		return f.size();
@@ -76,6 +76,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
+	@Override
 	public void initialise0(double[] a)
 	{
 		f.initialise0(a);
@@ -86,6 +87,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#forEach(gdsc.smlm.function.ValueProcedure)
 	 */
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		i = 0;
@@ -105,6 +107,7 @@ public class ValueFunctionStore implements ValueFunction, ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
+	@Override
 	public void execute(double value)
 	{
 		values[i++] = value;

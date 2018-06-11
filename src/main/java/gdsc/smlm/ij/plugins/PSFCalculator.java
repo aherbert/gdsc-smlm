@@ -37,12 +37,12 @@ import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.PlugIn;
 
@@ -71,6 +71,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 	// Used for the PSF profile plot
 	private double[] x = null, y, y2;
 
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -365,6 +366,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		return lock = true;
 	}
 
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		if (e == null)
@@ -465,7 +467,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		Plot2 p = new Plot2(title, "px", "", x2, y);
 		p.addLabel(0, 0, "Blue = Airy; Red = Gaussian");
 		p.setColor(Color.RED);
-		p.addPoints(x2, y2, Plot2.LINE);
+		p.addPoints(x2, y2, Plot.LINE);
 		final double sd = airyWidth * AIRY_TO_GAUSSIAN * factor;
 		final double sdHeight = 0.606530659; //intensityGaussian(1);
 		p.drawLine(-sd, 0, -sd, sdHeight);

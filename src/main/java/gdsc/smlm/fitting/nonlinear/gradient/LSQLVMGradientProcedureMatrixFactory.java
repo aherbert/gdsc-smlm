@@ -25,7 +25,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Create a gradient procedure.
  */
@@ -59,6 +58,7 @@ public class LSQLVMGradientProcedureMatrixFactory extends BaseLSQLVMGradientProc
 	}
 
 	// Instance method for testing
+	@Override
 	BaseLSQLVMGradientProcedure createProcedure(final double[] y, final double[] b, final Gradient1Function func)
 	{
 		return create(y, b, func);

@@ -28,7 +28,6 @@ import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Function;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Abstract base class for an 2-dimensional Gaussian function for a configured number of peaks.
  * <p>
@@ -78,6 +77,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	private static class FastErrorFunction implements ErrorFunction
 	{
+		@Override
 		public double erf(double x)
 		{
 			return gdsc.smlm.function.Erf.erf(x);
@@ -86,6 +86,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	private static class CommontsMathErrorFunction implements ErrorFunction
 	{
+		@Override
 		public double erf(double x)
 		{
 			return org.apache.commons.math3.special.Erf.erf(x);
@@ -178,6 +179,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	 *            Partial second gradient of function with respect to each coefficient
 	 * @return The predicted value
 	 */
+	@Override
 	public abstract double eval(final int i, final double[] duda, final double[] d2uda2);
 
 	// Force new implementation from the base Gaussian2DFunction
@@ -189,6 +191,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 	 * 
 	 * @see gdsc.smlm.function.NonLinearFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		// The base Gaussian2DFunction does all the work in NonLinearFunction#initialise(double[]).
@@ -272,26 +275,32 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		this.erfFunction = erfFunction;
 	}
 
-	  /**
-     * Returns the error function.
-     *
-     * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt </p>
-     *
-     * <p>Uses the configured implementation (see {@link #getErfFunction()}).</p>
-     *
-     * <p>The value returned is always between -1 and 1 (inclusive).
-     * If {@code abs(x) > 40}, then {@code erf(x)} is indistinguishable from
-     * either 1 or -1 as a double, so the appropriate extreme value is returned.
-     * </p>
-     *
-     * @param x the value.
-     * @return the error function erf(x)
-     */
-    public double erf(double x)
+	/**
+	 * Returns the error function.
+	 *
+	 * <p>
+	 * erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t<sup>2</sup></sup>dt
+	 * </p>
+	 *
+	 * <p>
+	 * Uses the configured implementation (see {@link #getErfFunction()}).
+	 * </p>
+	 *
+	 * <p>
+	 * The value returned is always between -1 and 1 (inclusive).
+	 * If {@code abs(x) > 40}, then {@code erf(x)} is indistinguishable from
+	 * either 1 or -1 as a double, so the appropriate extreme value is returned.
+	 * </p>
+	 *
+	 * @param x
+	 *            the value.
+	 * @return the error function erf(x)
+	 */
+	public double erf(double x)
 	{
 		return errorFunction.erf(x);
 	}
-    
+
 	/**
 	 * Compute the 1D integral from 0 to n. This is the sum of the Gaussian function using the error function for all of
 	 * the pixels from 0 to n.

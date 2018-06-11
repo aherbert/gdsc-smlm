@@ -106,13 +106,17 @@ public class FastLogTest
 	private class TestLog extends BaseTestLog
 	{
 		TestLog(FastLog fl) { super(fl); }
+		@Override
 		float log(float x) { return fl.log(x); }
+		@Override
 		double log(double x) { return fl.logD(x); }
 	}
 	private class TestFastLog extends BaseTestLog
 	{
 		TestFastLog(FastLog fl) { super(fl); }
+		@Override
 		float log(float x) { return fl.fastLog(x); }
+		@Override
 		double log(double x) { return fl.fastLogD(x); }
 	}
 	// To test Math.log(1+x).
@@ -120,19 +124,25 @@ public class FastLogTest
 	private class Test1PLog extends BaseTestLog
 	{
 		Test1PLog(FastLog fl) { super(fl); }
+		@Override
 		float log(float x) { return (float) Math.log(1+x); }
+		@Override
 		double log(double x) { return Math.log(1+x); }
 	}
 	private class TestLog1P extends BaseTestLog
 	{
 		TestLog1P(FastLog fl) { super(fl); }
+		@Override
 		float log(float x) { return (float) Math.log1p(x); }
+		@Override
 		double log(double x) { return Math.log1p(x); }
 	}
 	private class TestLog1PApache extends BaseTestLog
 	{
 		TestLog1PApache(FastLog fl) { super(fl); }
+		@Override
 		float log(float x) { return (float) FastMath.log1p(x); }
+		@Override
 		double log(double x) { return FastMath.log1p(x); }
 	}
 	//@formatter:on
@@ -474,7 +484,7 @@ public class FastLogTest
 
 		double getSD()
 		{
-			double sd = ss - ((double) s * s) / n;
+			double sd = ss - (s * s) / n;
 			if (sd > 0.0)
 				return Math.sqrt(sd / (n - 1));
 			else
@@ -726,11 +736,13 @@ public class FastLogTest
 			this.q = q;
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
@@ -747,6 +759,7 @@ public class FastLogTest
 			this.x = x;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			float[] r = new float[x.length];
@@ -809,6 +822,7 @@ public class FastLogTest
 			this.x = x;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double[] r = new double[x.length];
@@ -830,6 +844,7 @@ public class FastLogTest
 			this.xf = xf;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double[] r = new double[x.length];

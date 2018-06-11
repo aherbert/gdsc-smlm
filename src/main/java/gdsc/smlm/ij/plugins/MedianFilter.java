@@ -43,7 +43,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Filters each pixel using a sliding median through the time stack. Medians are computed at set intervals and the
  * values interpolated.
@@ -67,10 +66,11 @@ public class MedianFilter implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -80,6 +80,7 @@ public class MedianFilter implements PlugInFilter
 		return showDialog();
 	}
 
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		long start = System.currentTimeMillis();
@@ -155,7 +156,8 @@ public class MedianFilter implements PlugInFilter
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("Compute the median using a rolling window at set intervals.\nBlocks of pixels are processed on separate threads.");
+		gd.addMessage(
+				"Compute the median using a rolling window at set intervals.\nBlocks of pixels are processed on separate threads.");
 
 		gd.addSlider("Radius", 10, 100, radius);
 		gd.addSlider("Interval", 10, 30, interval);
@@ -227,6 +229,7 @@ public class MedianFilter implements PlugInFilter
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			showProgressSingle();
@@ -267,6 +270,7 @@ public class MedianFilter implements PlugInFilter
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			if (IJ.escapePressed())
@@ -496,6 +500,7 @@ public class MedianFilter implements PlugInFilter
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			showProgressSingle();

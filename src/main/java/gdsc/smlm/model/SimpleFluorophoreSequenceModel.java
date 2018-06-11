@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Contains a single-time model for a non-blinking fluorophore
  */

@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import gdsc.core.utils.Maths;
 
-
 /**
  * Specify the dimensions for a search
  */
@@ -148,6 +147,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 *            the current upper bound of the range
 	 * @return the search dimension
 	 */
+	@Override
 	public SearchDimension create(double lower, double upper)
 	{
 		if (!active)
@@ -183,6 +183,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 *            the value
 	 * @return the rounded value
 	 */
+	@Override
 	public double round(double value)
 	{
 		if (canRound())
@@ -195,6 +196,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#canRound()
 	 */
+	@Override
 	public boolean canRound()
 	{
 		return (active && minIncrement != 0);
@@ -219,6 +221,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 *
 	 * @return the centre of the range in the dimension
 	 */
+	@Override
 	public double getCentre()
 	{
 		return centre;
@@ -253,6 +256,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 *
 	 * @return the current lower bound of the range
 	 */
+	@Override
 	public double getLower()
 	{
 		return values()[0];
@@ -263,6 +267,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 *
 	 * @return the current upper bound of the range
 	 */
+	@Override
 	public double getUpper()
 	{
 		values();
@@ -274,6 +279,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#isAtBounds(double)
 	 */
+	@Override
 	public boolean isAtBounds(double v)
 	{
 		values();
@@ -565,6 +571,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#getMin()
 	 */
+	@Override
 	public double getMin()
 	{
 		return min;
@@ -575,6 +582,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#getMax()
 	 */
+	@Override
 	public double getMax()
 	{
 		return max;
@@ -585,6 +593,7 @@ public class SearchDimension implements Cloneable, Dimension
 	 * 
 	 * @see gdsc.smlm.search.Dimension#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return active;

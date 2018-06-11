@@ -41,7 +41,6 @@ import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 import gdsc.smlm.tsf.TSFProtos.CameraType;
 import gdsc.smlm.tsf.TSFProtos.FitMode;
 import gdsc.smlm.tsf.TSFProtos.FluorophoreType;
@@ -94,6 +93,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * 
 	 * @see gdsc.smlm.results.AbstractPeakResults#begin()
 	 */
+	@Override
 	public void begin()
 	{
 		out = null;
@@ -172,6 +172,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return out != null;
@@ -182,6 +183,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * 
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
+	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity,
 			float[] params, float[] paramsStdDev)
 	{
@@ -210,6 +212,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		writeResult(1, spot);
 	}
 
+	@Override
 	public void add(PeakResult result)
 	{
 		final float[] params = result.getParameters();
@@ -301,6 +304,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 			builder.addParamStdDevs(paramStdDev[i]);
 	}
 
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		if (out == null)
@@ -415,6 +419,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
+	@Override
 	public int size()
 	{
 		return size;
@@ -448,6 +453,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
+	@Override
 	public void end()
 	{
 		// Get the offset to the SpotList message

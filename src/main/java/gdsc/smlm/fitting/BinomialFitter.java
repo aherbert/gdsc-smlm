@@ -53,7 +53,6 @@ import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
 
-
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.Logger;
 import gdsc.core.utils.Maths;
@@ -194,7 +193,7 @@ public class BinomialFitter
 		double bestSS = initialSS;
 		double[] parameters = null;
 		int worse = 0;
-		int N = (int) histogram.length - 1;
+		int N = histogram.length - 1;
 		if (minN < 1)
 			minN = 1;
 		if (maxN > 0)
@@ -437,6 +436,7 @@ public class BinomialFitter
 							.target(gradientFunction.p)
 							.weight(new DiagonalMatrix(gradientFunction.getWeights()))
 							.model(gradientFunction, new MultivariateMatrixFunction() {
+								@Override
 								public double[][] value(double[] point) throws IllegalArgumentException
 								{
 									return gradientFunction.jacobian(point);
@@ -584,6 +584,7 @@ public class BinomialFitter
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double value(double[] parameters)
 		{
 			double[] p2 = getP(parameters[0]);
@@ -652,6 +653,7 @@ public class BinomialFitter
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] point) throws IllegalArgumentException
 		{
 			return getP(point[0]);

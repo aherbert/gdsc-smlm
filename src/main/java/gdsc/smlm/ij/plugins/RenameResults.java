@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
 import ij.gui.GenericDialog;
@@ -50,10 +49,11 @@ public class RenameResults implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (MemoryPeakResults.isMemoryEmpty())
 		{
 			IJ.error(TITLE, "There are no fitting results in memory");
@@ -71,8 +71,8 @@ public class RenameResults implements PlugIn
 		GenericDialog gd = new GenericDialog(TITLE);
 		gd.addHelp(About.HELP_URL);
 
-		gd.addMessage("To rename the results in memory update the second name field as desired.\n"
-				+ "(Note the semi-colon at the end of the line is needed for macro recording.)");
+		gd.addMessage("To rename the results in memory update the second name field as desired.\n" +
+				"(Note the semi-colon at the end of the line is needed for macro recording.)");
 
 		StringBuilder sb = new StringBuilder();
 		for (String name : MemoryPeakResults.getResultNames())
@@ -97,7 +97,7 @@ public class RenameResults implements PlugIn
 		HashMap<String, String> mappedNames = new HashMap<String, String>();
 		for (String name : MemoryPeakResults.getResultNames())
 			mappedNames.put(name, name);
-		
+
 		// Get the new names
 		String[] lines = renameText.split("[;\n]");
 		for (String line : lines)
@@ -117,7 +117,7 @@ public class RenameResults implements PlugIn
 				if (oldName.equals(newName))
 					// No update required
 					continue;
-				
+
 				mappedNames.put(oldName, newName);
 			}
 		}
@@ -133,7 +133,7 @@ public class RenameResults implements PlugIn
 			}
 			newNames.add(newName);
 		}
-		
+
 		// Rename
 		List<MemoryPeakResults> renamedResults = new LinkedList<MemoryPeakResults>();
 		for (Entry<String, String> entry : mappedNames.entrySet())
@@ -148,11 +148,11 @@ public class RenameResults implements PlugIn
 				renamedResults.add(results);
 			}
 		}
-		
+
 		// Add back to memory
 		for (MemoryPeakResults results : renamedResults)
 			MemoryPeakResults.addResults(results);
-		
+
 		return renamedResults.size();
 	}
 }

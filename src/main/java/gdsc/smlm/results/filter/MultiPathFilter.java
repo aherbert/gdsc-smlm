@@ -40,7 +40,6 @@ import gdsc.smlm.results.count.ConsecutiveFailCounter;
 import gdsc.smlm.results.count.FailCounter;
 import gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
 
-
 /**
  * Filter a multi-path set of peak results into accepted/rejected.
  */
@@ -163,6 +162,7 @@ public class MultiPathFilter implements Cloneable
 		 * gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
 		 * SelectedResult)
 		 */
+		@Override
 		public void add(SelectedResult selectedResult)
 		{
 			final PreprocessedPeakResult[] results = selectedResult.results;
@@ -180,6 +180,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
 		 */
+		@Override
 		public boolean isFit(int candidateId)
 		{
 			return isFit[candidateId];
@@ -190,6 +191,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
 		 */
+		@Override
 		public boolean isValid(int candidateId)
 		{
 			return isValid[candidateId];
@@ -201,6 +203,7 @@ public class MultiPathFilter implements Cloneable
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
+		@Override
 		public void pass(PreprocessedPeakResult result)
 		{
 			//// If we are debugging
@@ -219,6 +222,7 @@ public class MultiPathFilter implements Cloneable
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
+		@Override
 		public void passMin(PreprocessedPeakResult result)
 		{
 			// Passing the minimal filter does not mean it is valid. This would be used to store
@@ -261,6 +265,7 @@ public class MultiPathFilter implements Cloneable
 		 * gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#add(gdsc.smlm.results.filter.MultiPathFilter.
 		 * SelectedResult)
 		 */
+		@Override
 		public void add(SelectedResult selectedResult)
 		{
 
@@ -271,6 +276,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isFit(int)
 		 */
+		@Override
 		public boolean isFit(int candidateId)
 		{
 			// Make sure non-candidate fits are ignored.
@@ -282,6 +288,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#isValid(int)
 		 */
+		@Override
 		public boolean isValid(int candidateId)
 		{
 			return false;
@@ -293,6 +300,7 @@ public class MultiPathFilter implements Cloneable
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#pass(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
+		@Override
 		public void pass(PreprocessedPeakResult result)
 		{
 
@@ -304,6 +312,7 @@ public class MultiPathFilter implements Cloneable
 		 * @see gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore#passMin(gdsc.smlm.results.filter.
 		 * PreprocessedPeakResult)
 		 */
+		@Override
 		public void passMin(PreprocessedPeakResult result)
 		{
 
@@ -332,6 +341,7 @@ public class MultiPathFilter implements Cloneable
 	 */
 	private static class NullFractionScoreStore implements FractionScoreStore
 	{
+		@Override
 		public void add(int uniqueId)
 		{
 		}
@@ -771,7 +781,7 @@ public class MultiPathFilter implements Cloneable
 		if (doDoublet)
 		{
 			// We must validate the spot without shift filtering. Doublets may drift further than single spot candidates.
-			setupFilter(DirectFilter.NO_SHIFT);
+			setupFilter(IDirectFilter.NO_SHIFT);
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
 					store, precomputed);
 			restoreFilterState();
@@ -841,6 +851,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(ResultRank o)
 		{
 			final int result = o.count - count;
@@ -1001,7 +1012,7 @@ public class MultiPathFilter implements Cloneable
 		if (doDoublet)
 		{
 			// We must validate the spot without shift filtering. Doublets may drift further than single spot candidates.
-			setupFilter(DirectFilter.NO_SHIFT);
+			setupFilter(IDirectFilter.NO_SHIFT);
 			singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates,
 					store);
 			restoreFilterState();
@@ -1062,7 +1073,7 @@ public class MultiPathFilter implements Cloneable
 		}
 
 		// Check if it failed due to width
-		if (!DirectFilter.anySet(validationResults[0], DirectFilter.V_X_SD_FACTOR | DirectFilter.V_X_SD_FACTOR))
+		if (!DirectFilter.anySet(validationResults[0], IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_X_SD_FACTOR))
 			return false;
 
 		// Get the first spot
@@ -1083,7 +1094,7 @@ public class MultiPathFilter implements Cloneable
 			return false;
 
 		// We must validate the spot without width filtering. Do not change the min filter.
-		setupFilter(DirectFilter.NO_WIDTH);
+		setupFilter(IDirectFilter.NO_WIDTH);
 
 		try
 		{
@@ -1702,7 +1713,7 @@ public class MultiPathFilter implements Cloneable
 		final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
 		final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
 
-		setupFilter(DirectFilter.NO_SHIFT);
+		setupFilter(IDirectFilter.NO_SHIFT);
 
 		validationResults = new int[results.length];
 		for (int i = 0; i < nDoublets; i++)
@@ -2184,7 +2195,7 @@ public class MultiPathFilter implements Cloneable
 				// is removed that could be used.
 				checkIsValid(multiPathResult.getSingleFitResult(), store);
 				checkIsValid(multiPathResult.getMultiFitResult(), store);
-				setupFilter(DirectFilter.NO_SHIFT);
+				setupFilter(IDirectFilter.NO_SHIFT);
 				checkIsValid(multiPathResult.getDoubletFitResult(), store);
 
 				// Fix to only disable shift filtering for the doublet results...
@@ -2706,6 +2717,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#size()
 		 */
+		@Override
 		public int size()
 		{
 			return a.length;
@@ -2716,6 +2728,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#isEmpty()
 		 */
+		@Override
 		public boolean isEmpty()
 		{
 			return size() == 0;
@@ -2726,6 +2739,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#contains(java.lang.Object)
 		 */
+		@Override
 		public boolean contains(Object o)
 		{
 			throw new NotImplementedException();
@@ -2736,6 +2750,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#iterator()
 		 */
+		@Override
 		public Iterator<FractionalAssignment> iterator()
 		{
 			throw new NotImplementedException();
@@ -2746,6 +2761,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#toArray()
 		 */
+		@Override
 		public Object[] toArray()
 		{
 			return a;
@@ -2756,6 +2772,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#toArray(java.lang.Object[])
 		 */
+		@Override
 		public <T> T[] toArray(T[] a)
 		{
 			return a;
@@ -2766,6 +2783,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#add(java.lang.Object)
 		 */
+		@Override
 		public boolean add(FractionalAssignment e)
 		{
 			throw new NotImplementedException();
@@ -2776,6 +2794,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#remove(java.lang.Object)
 		 */
+		@Override
 		public boolean remove(Object o)
 		{
 			throw new NotImplementedException();
@@ -2786,6 +2805,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#containsAll(java.util.Collection)
 		 */
+		@Override
 		public boolean containsAll(Collection<?> c)
 		{
 			throw new NotImplementedException();
@@ -2796,6 +2816,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#addAll(java.util.Collection)
 		 */
+		@Override
 		public boolean addAll(Collection<? extends FractionalAssignment> c)
 		{
 			throw new NotImplementedException();
@@ -2806,6 +2827,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#removeAll(java.util.Collection)
 		 */
+		@Override
 		public boolean removeAll(Collection<?> c)
 		{
 			throw new NotImplementedException();
@@ -2816,6 +2838,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#retainAll(java.util.Collection)
 		 */
+		@Override
 		public boolean retainAll(Collection<?> c)
 		{
 			throw new NotImplementedException();
@@ -2826,6 +2849,7 @@ public class MultiPathFilter implements Cloneable
 		 * 
 		 * @see java.util.Collection#clear()
 		 */
+		@Override
 		public void clear()
 		{
 			throw new NotImplementedException();

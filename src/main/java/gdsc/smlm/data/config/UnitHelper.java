@@ -28,7 +28,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
-
 /**
  * Contains helper functions for the units. Adds functionality to the protocol buffer unit enums.
  */

@@ -33,7 +33,6 @@ import javax.swing.table.TableModel;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Stores peak results and allows event propagation to listeners of the model.
  */
@@ -79,6 +78,7 @@ public class PeakResultTableModelJTable extends JTable
 			// The whole thing changed so resize the columns
 			SwingUtilities.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					// This is null when the table is first created

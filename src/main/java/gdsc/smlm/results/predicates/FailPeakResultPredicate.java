@@ -25,7 +25,6 @@ package gdsc.smlm.results.predicates;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Always fail a result
  */
@@ -43,6 +42,7 @@ public class FailPeakResultPredicate implements PeakResultPredicate
 	 * 
 	 * @see gdsc.smlm.results.procedures.PeakResultPredicate#test(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public boolean test(PeakResult t)
 	{
 		return false;

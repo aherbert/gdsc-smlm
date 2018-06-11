@@ -23,11 +23,11 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
-public class OffsetValueFunction extends PrecomputedValueFunction implements ValueFunction, ValueProcedure, NamedFunction
+public class OffsetValueFunction extends PrecomputedValueFunction
+		implements ValueFunction, ValueProcedure, NamedFunction
 {
 	protected final ValueFunction f;
 	protected int i;
@@ -76,11 +76,13 @@ public class OffsetValueFunction extends PrecomputedValueFunction implements Val
 		return f;
 	}
 
+	@Override
 	public void initialise0(double[] a)
 	{
 		f.initialise0(a);
 	}
 
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		this.procedure = procedure;
@@ -88,6 +90,7 @@ public class OffsetValueFunction extends PrecomputedValueFunction implements Val
 		f.forEach(this);
 	}
 
+	@Override
 	public void execute(double value)
 	{
 		procedure.execute(value + values[i++]);
@@ -121,6 +124,7 @@ public class OffsetValueFunction extends PrecomputedValueFunction implements Val
 	 * 
 	 * @see gdsc.smlm.function.NamedFunction#getParameterName(int)
 	 */
+	@Override
 	public String getParameterName(int i)
 	{
 		if (f instanceof NamedFunction)

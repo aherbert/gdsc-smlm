@@ -32,7 +32,6 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 
-
 import gdsc.smlm.ij.settings.ImagePSFHelper;
 import gdsc.smlm.ij.utils.IJImageConverter;
 import ij.IJ;
@@ -64,6 +63,7 @@ public class PSFCombiner implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -78,11 +78,13 @@ public class PSFCombiner implements PlugIn
 
 		MultiDialog md = new MultiDialog("Select PSFs", new MultiDialog.BaseItems()
 		{
+			@Override
 			public int size()
 			{
 				return titles.size();
 			}
 
+			@Override
 			public String getFormattedName(int i)
 			{
 				return titles.get(i);
@@ -103,7 +105,7 @@ public class PSFCombiner implements PlugIn
 		}
 
 		PSFCombiner.selected = selected;
-		
+
 		for (String title : selected)
 			input.add(new PSF(title));
 
@@ -217,13 +219,13 @@ public class PSFCombiner implements PlugIn
 				gd.showDialog();
 				if (gd.wasCanceled())
 					return;
-				crop = gd.wasOKed(); 
+				crop = gd.wasOKed();
 			}
-			
+
 			if (crop)
 			{
 				Recorder.recordOption("crop");
-				
+
 				for (PSF psf : input)
 					psf.crop(maxStart, minEnd, minSize);
 

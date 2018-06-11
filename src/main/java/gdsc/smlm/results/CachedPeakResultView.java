@@ -28,7 +28,6 @@ import gdsc.smlm.results.predicates.IdPeakResultPredicate;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-
 /**
  * Provides a cache of the view of the results
  */
@@ -57,6 +56,7 @@ public class CachedPeakResultView implements PeakResultView
 	 *            the frame
 	 * @return the results
 	 */
+	@Override
 	public PeakResult[] getResultsByFrame(int frame)
 	{
 		if (frameMap == null)
@@ -80,6 +80,7 @@ public class CachedPeakResultView implements PeakResultView
 	 *            the id
 	 * @return the results
 	 */
+	@Override
 	public PeakResult[] getResultsById(int id)
 	{
 		if (idMap == null)

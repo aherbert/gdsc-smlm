@@ -36,7 +36,6 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleNBCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleNBFreeCircularErfGaussian2DFunction;
 
-
 /**
  * Creates the appropriate Gaussian function.
  * <p>

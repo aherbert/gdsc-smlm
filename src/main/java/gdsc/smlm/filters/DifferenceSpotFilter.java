@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with two filters and the second
  * subtracted from the first.
@@ -68,6 +67,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
 	 */
+	@Override
 	public boolean isAbsoluteIntensity()
 	{
 		return false;
@@ -106,7 +106,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	{
 		return processor1.hasWeights() || processor2.hasWeights();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -129,6 +129,7 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public DifferenceSpotFilter clone()
 	{
 		DifferenceSpotFilter f = (DifferenceSpotFilter) super.clone();
@@ -138,7 +139,9 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 		return f;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.filters.SpotFilter#getName()
 	 */
 	@Override
@@ -147,7 +150,9 @@ public class DifferenceSpotFilter extends MaximaSpotFilter
 		return "Difference";
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see gdsc.smlm.filters.MaximaSpotFilter#getParameters()
 	 */
 	@Override

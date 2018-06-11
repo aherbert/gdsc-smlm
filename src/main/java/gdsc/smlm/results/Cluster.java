@@ -29,7 +29,6 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-
 /**
  * Define a cluster of localisations
  */
@@ -322,6 +321,7 @@ public class Cluster implements Comparable<Cluster>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(Cluster that)
 	{
 		// Sort by ID ascending

@@ -28,7 +28,6 @@ import gdsc.core.ij.Utils;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with a circular mean filter.
  */
@@ -111,7 +110,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 		{
 			// Smoothing destructively modifies the data so create a copy
 			smoothData = Arrays.copyOf(data, width * height);
-			if (CircularMeanFilter.getBorder(radius) <= getBorder())
+			if (CircularFilter.getBorder(radius) <= getBorder())
 				filter.convolveInternal(smoothData, width, height, radius);
 			else
 				filter.convolve(smoothData, width, height, radius);
@@ -132,6 +131,7 @@ public class CircularMeanDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public CircularMeanDataProcessor clone()
 	{
 		CircularMeanDataProcessor f = (CircularMeanDataProcessor) super.clone();
@@ -172,6 +172,6 @@ public class CircularMeanDataProcessor extends DataProcessor
 	@Override
 	public double getSpread()
 	{
-		return CircularMeanFilter.getPixelRadius(radius) * 2;
+		return CircularFilter.getPixelRadius(radius) * 2;
 	}
 }

@@ -56,11 +56,13 @@ public class CustomPoissonDistributionTest
 			}
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			r.setSeed(30051977);
@@ -79,6 +81,7 @@ public class CustomPoissonDistributionTest
 			rdg = new RandomDataGenerator(r);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			long[] e = new long[n * m];
@@ -104,6 +107,7 @@ public class CustomPoissonDistributionTest
 			dist = new CustomPoissonDistribution(r, 1);
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			long[] e = new long[n * m];
@@ -119,18 +123,18 @@ public class CustomPoissonDistributionTest
 			return e;
 		}
 	}
-	
+
 	@Test
 	public void canCreateSamples()
 	{
 		StaticTimingTask t1 = new StaticTimingTask(0.5, 60);
 		t1.getData(0);
 		long[] e = (long[]) t1.run(null);
-		
+
 		InstanceTimingTask t2 = new InstanceTimingTask(0.5, 60);
 		t2.getData(0);
 		long[] o = (long[]) t2.run(null);
-		
+
 		Assert.assertArrayEquals(e, o);
 	}
 
@@ -144,7 +148,7 @@ public class CustomPoissonDistributionTest
 		int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
-		
+
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
 
@@ -158,7 +162,7 @@ public class CustomPoissonDistributionTest
 		int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
-		
+
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
 
@@ -170,7 +174,7 @@ public class CustomPoissonDistributionTest
 		// the instance class is negligible. However test it is still faster. If this fails
 		// then Apache commons may have changed their implementation and the custom
 		// class should be updated.
-		
+
 		TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask(40.5, 60));
 		ts.execute(new InstanceTimingTask(40.5, 60));
@@ -178,7 +182,7 @@ public class CustomPoissonDistributionTest
 		int size = ts.getSize();
 		ts.repeat(size);
 		ts.report(size);
-		
+
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
 }

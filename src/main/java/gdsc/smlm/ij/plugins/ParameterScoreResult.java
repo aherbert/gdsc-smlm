@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 /**
  * Store the score from analysis of the non-filter parameters during direct filter analysis
  */

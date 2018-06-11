@@ -25,6 +25,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
 import java.awt.Choice;
+import java.awt.Color;
 import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
@@ -95,6 +96,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -170,9 +172,9 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 		// Add a mouse listener to the config file field
 		if (Utils.isShowGenericDialog())
 		{
-			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
-			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();
-			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
+			Vector<TextField> numerics = gd.getNumericFields();
+			Vector<Checkbox> checkboxes = gd.getCheckboxes();
+			Vector<Choice> choices = gd.getChoices();
 
 			int n = 0;
 			int b = 0;
@@ -354,6 +356,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	 * 
 	 * @see gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider#getFitEngineConfiguration()
 	 */
+	@Override
 	public FitEngineConfiguration getFitEngineConfiguration()
 	{
 		return config;
@@ -364,6 +367,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	 * 
 	 * @see gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
 	 */
+	@Override
 	public FitConfiguration getFitConfiguration()
 	{
 		return config.getFitConfiguration();
@@ -374,6 +378,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	 * 
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
+	@Override
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getSource() instanceof Choice)
@@ -460,7 +465,7 @@ public class Configuration implements PlugIn, ItemListener, FitConfigurationProv
 	private void enableEditing(TextField textField)
 	{
 		textField.setEditable(true);
-		textField.setBackground(SystemColor.white);
+		textField.setBackground(Color.white);
 	}
 
 	private void refreshSettings(Calibration cal)

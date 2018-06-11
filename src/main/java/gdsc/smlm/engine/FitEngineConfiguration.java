@@ -408,8 +408,8 @@ public class FitEngineConfiguration implements Cloneable
 		failCounter = null;
 		fitEngineSettings.setFailuresLimit(-1);
 		fitEngineSettings.setPassRate(0);
-	}	
-	
+	}
+
 	private FailCounter failCounter;
 
 	/**
@@ -569,6 +569,7 @@ public class FitEngineConfiguration implements Cloneable
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public FitEngineConfiguration clone()
 	{
 		// Manual copy using the current proto objects
@@ -1231,11 +1232,11 @@ public class FitEngineConfiguration implements Cloneable
 		IntensityUnit intensityUnit = IntensityUnit.PHOTON;
 
 		if (//calibration.getCountPerPhoton() == 0 || 
-			fitConfig.isFitCameraCounts())
+		fitConfig.isFitCameraCounts())
 			intensityUnit = IntensityUnit.COUNT;
 
 		calibration.setIntensityUnit(intensityUnit);
-		
+
 		// This initialises the calibration precision method
 		fitConfig.getFilterPrecisionMethod();
 	}

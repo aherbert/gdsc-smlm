@@ -26,7 +26,6 @@ package gdsc.smlm.function;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a Poisson distribution:<br/>
  * f(x) = l(x) - k * ln(l(x)) + log(k!)<br/>
@@ -131,6 +130,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood()
 	 */
+	@Override
 	public double computeLikelihood()
 	{
 		// Compute the negative log-likelihood to be minimised
@@ -162,6 +162,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[])
 	 */
+	@Override
 	public double computeLikelihood(double[] gradient)
 	{
 		// Compute the negative log-likelihood to be minimised
@@ -214,6 +215,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(int)
 	 */
+	@Override
 	public double computeLikelihood(int i)
 	{
 		// Function now computes expected poisson mean without gain
@@ -239,6 +241,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodWrapper#computeLikelihood(double[], int)
 	 */
+	@Override
 	public double computeLikelihood(double[] gradient, int i)
 	{
 		for (int j = 0; j < nVariables; j++)

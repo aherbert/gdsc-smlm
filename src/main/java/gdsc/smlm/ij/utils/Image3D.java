@@ -28,7 +28,6 @@ import ij.ImageStack;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-
 /**
  * Store a 3D image in a single array
  */
@@ -1288,7 +1287,7 @@ public abstract class Image3D
 	{
 		fill(0, getDataLength(), value);
 	}
-	
+
 	/**
 	 * Fill the region.
 	 *
@@ -1382,7 +1381,7 @@ public abstract class Image3D
 		// After
 		if (z + d < ns)
 			fill((z + d) * nr_by_nc, (ns - z - d) * nr_by_nc, value);
-		
+
 		int y_p_h = y + h;
 		int fillYBefore = y * nc;
 		int yAfter = y_p_h * nc;
@@ -1395,7 +1394,7 @@ public abstract class Image3D
 		for (int s = 0; s < d; s++, z++)
 		{
 			int base = z * nr_by_nc;
-			
+
 			if (fillYBefore != 0)
 				fill(base, fillYBefore, value);
 			if (fillYAfter != 0)

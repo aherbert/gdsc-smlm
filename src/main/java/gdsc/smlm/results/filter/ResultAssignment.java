@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.core.match.FractionalAssignment;
 
-
 /**
  * Stores a base assignment between two identified points, the distance between them and the score for the match.
  * <p>
@@ -83,6 +82,7 @@ public class ResultAssignment implements Comparable<ResultAssignment>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(ResultAssignment that)
 	{
 		if (this.distance < that.distance)

@@ -28,7 +28,6 @@ import gdsc.core.ij.Utils;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter. When the box
  * size is large then the smoothing switches to using an interpolation between two block sizes. This is an approximation
@@ -245,6 +244,7 @@ public class AverageDataProcessor extends DataProcessor
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public AverageDataProcessor clone()
 	{
 		AverageDataProcessor f = (AverageDataProcessor) super.clone();

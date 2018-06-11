@@ -28,7 +28,6 @@ import java.util.Arrays;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson process.
  * <p>

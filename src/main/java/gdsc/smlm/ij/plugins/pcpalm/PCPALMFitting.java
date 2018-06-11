@@ -70,7 +70,6 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.UnicodeReader;
 
-
 import gdsc.smlm.ij.plugins.About;
 import gdsc.smlm.ij.plugins.Parameters;
 import gdsc.smlm.ij.plugins.SMLMUsageTracker;
@@ -145,6 +144,7 @@ public class PCPALMFitting implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -934,6 +934,7 @@ public class PCPALMFitting implements PlugIn
 					.target(function.getY())
 					.weight(new DiagonalMatrix(function.getWeights()))
 					.model(function, new MultivariateMatrixFunction() {
+						@Override
 						public double[][] value(double[] point) throws IllegalArgumentException
 						{
 							return function.jacobian(point);
@@ -1109,6 +1110,7 @@ public class PCPALMFitting implements PlugIn
 						.target(function.getY())
 						.weight(new DiagonalMatrix(function.getWeights()))
 						.model(function, new MultivariateMatrixFunction() {
+							@Override
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return function.jacobian(point);
@@ -1417,6 +1419,7 @@ public class PCPALMFitting implements PlugIn
 						.target(function.getY())
 						.weight(new DiagonalMatrix(function.getWeights()))
 						.model(function, new MultivariateMatrixFunction() {
+							@Override
 							public double[][] value(double[] point) throws IllegalArgumentException
 							{
 								return function.jacobian(point);
@@ -1588,6 +1591,7 @@ public class PCPALMFitting implements PlugIn
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
 
+		@Override
 		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation
@@ -1683,6 +1687,7 @@ public class PCPALMFitting implements PlugIn
 		 *            The parameters
 		 * @return
 		 */
+		@Override
 		public double evaluate(double r, final double[] parameters)
 		{
 			return evaluate(r, parameters[0], parameters[1]);
@@ -1693,6 +1698,7 @@ public class PCPALMFitting implements PlugIn
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			increment();
@@ -1747,6 +1753,7 @@ public class PCPALMFitting implements PlugIn
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
 
+		@Override
 		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation
@@ -1870,6 +1877,7 @@ public class PCPALMFitting implements PlugIn
 		 *            The parameters
 		 * @return
 		 */
+		@Override
 		public double evaluate(double r, final double[] parameters)
 		{
 			return evaluate(r, parameters[0], parameters[1], parameters[2], parameters[3]);
@@ -1889,6 +1897,7 @@ public class PCPALMFitting implements PlugIn
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			increment();
@@ -2004,6 +2013,7 @@ public class PCPALMFitting implements PlugIn
 			this.f = f;
 		}
 
+		@Override
 		public double value(double[] point)
 		{
 			return f.evaluate(point);
@@ -2019,6 +2029,7 @@ public class PCPALMFitting implements PlugIn
 			this.f = f;
 		}
 
+		@Override
 		public double[] value(double[] point) throws IllegalArgumentException
 		{
 			return f.gradient(point);
@@ -2064,6 +2075,7 @@ public class PCPALMFitting implements PlugIn
 		// Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
 		// Use the deprecated API since the new one is not yet documented.
 
+		@Override
 		public double[][] jacobian(double[] variables)
 		{
 			// Compute the gradients using calculus differentiation
@@ -2201,6 +2213,7 @@ public class PCPALMFitting implements PlugIn
 		 *            The parameters
 		 * @return
 		 */
+		@Override
 		public double evaluate(double r, final double[] parameters)
 		{
 			return evaluate(r, parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
@@ -2217,6 +2230,7 @@ public class PCPALMFitting implements PlugIn
 		 * 
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
+		@Override
 		public double[] value(double[] variables)
 		{
 			increment();

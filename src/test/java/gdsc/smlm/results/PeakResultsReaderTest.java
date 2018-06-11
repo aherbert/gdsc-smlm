@@ -548,6 +548,7 @@ public class PeakResultsReaderTest
 		final int ia = PSFHelper.getGaussian2DAngleIndex(out.getPSF());
 		out.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peakResult)
 			{
 				peakResult.getParameters()[ia] = 0;
@@ -565,6 +566,7 @@ public class PeakResultsReaderTest
 		final int twoAxisLength = PSFHelper.getParameterCount(out.getPSF()) + PeakResult.STANDARD_PARAMETERS;
 		out.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peakResult)
 			{
 				peakResult.resizeParameters(twoAxisLength);
@@ -579,6 +581,7 @@ public class PeakResultsReaderTest
 		final int isy = indices[1];
 		out.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peakResult)
 			{
 				float[] p = peakResult.getParameters();
@@ -595,6 +598,7 @@ public class PeakResultsReaderTest
 		final int oneAxisLength = PSFHelper.getParameterCount(out.getPSF()) + PeakResult.STANDARD_PARAMETERS;
 		out.forEach(new PeakResultProcedure()
 		{
+			@Override
 			public void execute(PeakResult peakResult)
 			{
 				peakResult.resizeParameters(oneAxisLength);
@@ -747,6 +751,7 @@ public class PeakResultsReaderTest
 			// Results should be sorted by time
 			Arrays.sort(expected, new Comparator<PeakResult>()
 			{
+				@Override
 				public int compare(PeakResult o1, PeakResult o2)
 				{
 					return o1.getFrame() - o2.getFrame();
@@ -971,6 +976,7 @@ public class PeakResultsReaderTest
 		{
 			results.forEach(new PeakResultProcedure()
 			{
+				@Override
 				public void execute(PeakResult peak)
 				{
 					out.add(peak.getFrame(), peak.getOrigX(), peak.getOrigY(), peak.getOrigValue(), peak.getError(),

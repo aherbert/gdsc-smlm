@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Class for evaluating a function
  */
@@ -60,6 +59,7 @@ public class StandardGradient1Procedure implements Gradient1Procedure
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		values[i] = value;

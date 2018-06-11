@@ -388,16 +388,19 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			d2yda2 = new double[f.getNumberOfGradients()];
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			double s = 0;
@@ -535,6 +538,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									{
 										int i = 0;
 
+										@Override
 										public void execute(double value)
 										{
 											Assert.assertEquals("Value ValueProcedure", values[i], value, 1e-10);
@@ -546,6 +550,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									{
 										int i = 0;
 
+										@Override
 										public void execute(double value, double[] dy_da)
 										{
 											Assert.assertEquals("Value Gradient1Procedure", values[i], value, 1e-10);
@@ -559,6 +564,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									{
 										int i = 0;
 
+										@Override
 										public void execute(double value, double[] dy_da, double[] d2y_da2)
 										{
 											Assert.assertEquals("Value Gradient2Procedure", values[i], value, 1e-10);
@@ -574,6 +580,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									{
 										int i = 0;
 
+										@Override
 										public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 										{
 											Assert.assertEquals("Value ExtendedGradient2Procedure", values[i], value,
@@ -648,6 +655,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 									{
 										int i = -1;
 
+										@Override
 										public void executeExtended(double value, double[] dy_da, double[] d2y_dadb)
 										{
 											i++;
@@ -731,6 +739,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															{
 																int i = 0;
 
+																@Override
 																public void execute(double value)
 																{
 																	Assert.assertEquals("Value ValueProcedure",
@@ -743,6 +752,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															{
 																int i = 0;
 
+																@Override
 																public void execute(double value, double[] dy_da)
 																{
 																	Assert.assertEquals("Value Gradient1Procedure",
@@ -757,6 +767,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															{
 																int i = 0;
 
+																@Override
 																public void execute(double value, double[] dy_da,
 																		double[] d2y_da2)
 																{
@@ -775,6 +786,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															{
 																int i = 0;
 
+																@Override
 																public void executeExtended(double value,
 																		double[] dy_da, double[] d2y_dadb)
 																{
@@ -864,6 +876,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															{
 																int i = -1;
 
+																@Override
 																public void executeExtended(double value,
 																		double[] dy_da, double[] d2y_dadb)
 																{
@@ -947,6 +960,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			f.forEach(this);
 		}
 
+		@Override
 		public void execute(double value)
 		{
 			s += value;
@@ -972,6 +986,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			f.forEach(this);
 		}
 
+		@Override
 		public void execute(double value, double[] dy_da)
 		{
 			s += value;
@@ -997,6 +1012,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			f.forEach(this);
 		}
 
+		@Override
 		public void execute(double value, double[] dy_da, double[] d2y_da2)
 		{
 			s += value;
@@ -1026,16 +1042,19 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			}
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			return null;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			p.reset();

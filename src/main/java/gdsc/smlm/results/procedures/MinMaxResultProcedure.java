@@ -27,7 +27,6 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultValue;
 
-
 /**
  * Class to get min/max value in a set of results
  */
@@ -58,6 +57,7 @@ public class MinMaxResultProcedure implements PeakResultProcedure
 	 * 
 	 * @see gdsc.smlm.results.procedures.PeakResultProcedure#execute(gdsc.smlm.results.PeakResult)
 	 */
+	@Override
 	public void execute(PeakResult peakResult)
 	{
 		float v = value.getValue(peakResult);

@@ -30,7 +30,6 @@ import gdsc.smlm.results.filter.MultiPathFitResult;
 import java.awt.Rectangle;
 import java.util.List;
 
-
 /**
  * Specifies a job for peak fitting.
  */
@@ -76,6 +75,7 @@ public class ParameterisedFitJob extends FitJob
 	 * 
 	 * @see gdsc.smlm.engine.FitJob#getFitParameters()
 	 */
+	@Override
 	public FitParameters getFitParameters()
 	{
 		return parameters;
@@ -86,6 +86,7 @@ public class ParameterisedFitJob extends FitJob
 	 * 
 	 * @see gdsc.smlm.engine.FitJob#setResults(java.util.List)
 	 */
+	@Override
 	public void setResults(List<PeakResult> results)
 	{
 		this.peakResults = results;

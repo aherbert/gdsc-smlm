@@ -34,7 +34,6 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 
-
 /**
  * Create an object to represent a set of points
  */
@@ -102,6 +101,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		changed = true;
@@ -137,6 +137,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 
 		ga.updateData(new GeometryUpdater()
 		{
+			@Override
 			public void updateData(Geometry geometry)
 			{
 				GeometryArray ga = (GeometryArray) geometry;
@@ -150,12 +151,12 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		//this.setGeometry(ga);
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		if (color == null)
@@ -178,12 +179,13 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		ga.setColors(0, colors);
 		changed = true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
@@ -212,6 +214,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
+	@Override
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
@@ -230,6 +233,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemAlpha(float[])
 	 */
+	@Override
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		final int size = size();
@@ -254,6 +258,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemAlpha(float)
 	 */
+	@Override
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
 		final int size = size();
@@ -270,12 +275,13 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 		ga.setColors(0, colors);
 		changed = true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#getItemAlpha(float[])
 	 */
+	@Override
 	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		final int size = size();

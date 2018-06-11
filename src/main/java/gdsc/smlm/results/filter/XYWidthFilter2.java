@@ -26,7 +26,6 @@ package gdsc.smlm.results.filter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
@@ -76,8 +75,8 @@ public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
 			lowerSigmaThreshold = (float) (minWidth * minWidth);
 		}
 		else
-			lowerSigmaThreshold = 0f;		
-		
+			lowerSigmaThreshold = 0f;
+
 	}
 
 	@Override
@@ -87,6 +86,7 @@ public class XYWidthFilter2 extends WidthFilter2 implements IMultiFilter
 		return sd2 <= upperSigmaThreshold && sd2 >= lowerSigmaThreshold;
 	}
 
+	@Override
 	public int getValidationFlags()
 	{
 		return V_X_SD_FACTOR | V_Y_SD_FACTOR;

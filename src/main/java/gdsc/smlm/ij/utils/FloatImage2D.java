@@ -25,7 +25,6 @@ package gdsc.smlm.ij.utils;
 
 import ij.process.ImageProcessor;
 
-
 /**
  * Store a 2D image in a single float array. Forms a base for 2D DHT transform using the JTransforms library.
  */
@@ -117,6 +116,7 @@ public class FloatImage2D extends Image2D
 	 * 
 	 * @see gdsc.smlm.ij.utils.Image2D#copy()
 	 */
+	@Override
 	public FloatImage2D copy()
 	{
 		return new FloatImage2D(nc, nr, data.clone(), false);

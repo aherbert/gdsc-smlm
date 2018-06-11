@@ -26,7 +26,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.Gradient1Function;
 
-
 /**
  * Calculates the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the scaled gradient vector of the function's partial first derivatives with respect to the parameters.
@@ -39,13 +38,16 @@ import gdsc.smlm.function.Gradient1Function;
  */
 public class FastLogMLELVMGradientProcedure5 extends FastLogMLELVMGradientProcedure
 {
-	
+
 	/**
 	 * Instantiates a new fast log MLELVM gradient procedure 5.
 	 *
-	 * @param y            Data to fit (must be positive)
-	 * @param func            Gradient function
-	 * @param fastLog the fast log
+	 * @param y
+	 *            Data to fit (must be positive)
+	 * @param func
+	 *            Gradient function
+	 * @param fastLog
+	 *            the fast log
 	 */
 	public FastLogMLELVMGradientProcedure5(final double[] y, final Gradient1Function func, FastLog fastLog)
 	{
@@ -59,6 +61,7 @@ public class FastLogMLELVMGradientProcedure5 extends FastLogMLELVMGradientProced
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double fi, double[] dfi_da)
 	{
 		++yi;

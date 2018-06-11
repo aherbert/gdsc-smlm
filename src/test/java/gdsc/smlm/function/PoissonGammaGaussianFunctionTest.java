@@ -135,6 +135,7 @@ public class PoissonGammaGaussianFunctionTest
 		SimpsonIntegrator in = new SimpsonIntegrator(1e-4, 1e-8, 3, 32);
 		UnivariateFunction uf = new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				return f.gaussianPDF(x);
@@ -540,7 +541,7 @@ public class PoissonGammaGaussianFunctionTest
 
 	// Speed order is roughly: Approx, Simpson, Discrete PDF, Legendre, Discrete PMF
 	// The most accurate over most settings p<<1e-5, p=1, p>>10 is the Simpson.
-	
+
 	@Test
 	public void approximationFasterThanSimpsonIntegration()
 	{
@@ -552,7 +553,7 @@ public class PoissonGammaGaussianFunctionTest
 	{
 		fasterThan(ConvolutionMode.DISCRETE_PDF, ConvolutionMode.SIMPSON_PDF);
 	}
-	
+
 	@Test
 	public void simpsonIntegrationFasterThanLegendreGaussIntegration()
 	{
@@ -645,6 +646,7 @@ public class PoissonGammaGaussianFunctionTest
 					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 			double pp = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
+				@Override
 				public double value(double x)
 				{
 					return f.likelihood(x, mu);

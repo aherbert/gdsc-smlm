@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Specifies a the result of fitting a position using different fitting methods.
  * <p>

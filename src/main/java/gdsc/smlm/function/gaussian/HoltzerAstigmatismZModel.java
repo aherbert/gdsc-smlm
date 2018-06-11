@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Implements a astigmatism model of a 2D Gaussian function, where z-depth determines the x and y width.
  * <p>
@@ -216,6 +215,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double)
 	 */
+	@Override
 	public double getSx(double z)
 	{
 		return getS(s0x, z - gamma, one_d2, Ax, Bx);
@@ -226,6 +226,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSx(double, double[])
 	 */
+	@Override
 	public double getSx(double z, double[] ds_dz)
 	{
 		return getS1(s0x, z - gamma, one_d2, Ax, Bx, ds_dz);
@@ -236,6 +237,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSx2(double, double[])
 	 */
+	@Override
 	public double getSx2(double z, double[] ds_dz)
 	{
 		return getS2(s0x, z - gamma, one_d2, Ax, Bx, ds_dz);
@@ -246,6 +248,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double)
 	 */
+	@Override
 	public double getSy(double z)
 	{
 		return getS(s0y, z + gamma, one_d2, Ay, By);
@@ -256,6 +259,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSy(double, double[])
 	 */
+	@Override
 	public double getSy(double z, double[] ds_dz)
 	{
 		return getS1(s0y, z + gamma, one_d2, Ay, By, ds_dz);
@@ -266,6 +270,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel
 	 * 
 	 * @see gdsc.smlm.function.gaussian.AstimatismZModel#getSy2(double, double[])
 	 */
+	@Override
 	public double getSy2(double z, double[] ds_dz)
 	{
 		return getS2(s0y, z + gamma, one_d2, Ay, By, ds_dz);

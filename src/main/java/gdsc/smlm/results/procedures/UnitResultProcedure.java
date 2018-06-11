@@ -27,7 +27,6 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 /**
  * Contains core functionality to for result procedures.
  */

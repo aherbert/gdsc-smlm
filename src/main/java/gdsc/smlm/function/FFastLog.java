@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Implementation of the ICSILog algorithm
  * as described in O. Vinyals, G. Friedland, N. Mirghafori
@@ -319,8 +318,7 @@ public class FFastLog extends FastLog
 		// However -150 has been pre-subtracted in the table.
 		// and the mantissa has 29 more digits of significance.
 		// So take away 1075-150-29 = 896.
-		return (e == 0 ? data[(int) (m >>> qd_minus_1)] - 896
-				: e - 896 + data[(int) ((m | 0x10000000000000L) >>> qd)]);
+		return (e == 0 ? data[(int) (m >>> qd_minus_1)] - 896 : e - 896 + data[(int) ((m | 0x10000000000000L) >>> qd)]);
 	}
 
 	/**

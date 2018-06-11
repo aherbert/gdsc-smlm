@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Defines the expected variance of a signal recorded on a CCD or EM-CCD Camera. The model assumes a Gaussian read
  * noise, photon shot noise and an EM-gain noise factor.
@@ -78,6 +77,7 @@ public abstract class CameraNoiseModel implements NoiseModel
 	 * 
 	 * @see gdsc.smlm.function.NoiseModel#variance(double)
 	 */
+	@Override
 	public abstract double variance(final double value);
 
 	/**
@@ -102,7 +102,7 @@ public abstract class CameraNoiseModel implements NoiseModel
 	 */
 	public double getReadNoise()
 	{
-		return (double) Math.sqrt(readNoise2);
+		return Math.sqrt(readNoise2);
 	}
 
 	/**

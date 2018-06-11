@@ -25,7 +25,6 @@ package gdsc.smlm.results.data;
 
 import gdsc.core.data.utils.Converter;
 
-
 /**
  * Gets a float data value from a result.
  */

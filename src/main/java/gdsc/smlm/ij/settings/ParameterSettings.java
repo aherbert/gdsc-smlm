@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.settings;
 
-
 /**
  * Contain the settings for a parameter for the batch fitting plugin
  */
@@ -31,7 +30,7 @@ public class ParameterSettings
 {
 	public String name = "";
 	public String value = "";
-	
+
 	public ParameterSettings(String name, String value)
 	{
 		this.name = name;

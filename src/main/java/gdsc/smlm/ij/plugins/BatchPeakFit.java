@@ -63,7 +63,6 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.engine.FitConfiguration;
 
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.settings.BatchRun;
 import gdsc.smlm.ij.settings.BatchSettings;
@@ -106,6 +105,7 @@ public class BatchPeakFit implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -435,6 +435,7 @@ public class BatchPeakFit implements PlugIn
 			// Add a button to create a configuration file
 			gd.addAndGetButton("Create config file", new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent e)
 				{
 					Document doc = getDefaultSettingsXmlDocument();

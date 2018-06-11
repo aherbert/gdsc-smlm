@@ -160,6 +160,7 @@ public class PoissonGaussianFunction2Test
 		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
+			@Override
 			public double value(double x)
 			{
 				return f.likelihood(x, e);
@@ -172,8 +173,7 @@ public class PoissonGaussianFunction2Test
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, final double s,
-			final boolean usePicard)
+	private void probabilityMatchesLogProbability(final double gain, double mu, final double s, final boolean usePicard)
 	{
 		// Note: The input s parameter is pre-gain.
 		PoissonGaussianFunction2 f = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / gain, s * gain);

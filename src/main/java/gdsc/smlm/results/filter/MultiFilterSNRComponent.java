@@ -23,24 +23,24 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using SNR
  */
 public class MultiFilterSNRComponent extends MultiFilterComponent
 {
 	final float snr;
-	
+
 	public MultiFilterSNRComponent(float snr)
 	{
 		this.snr = snr;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		return peak.getSNR() < this.snr;
@@ -51,6 +51,7 @@ public class MultiFilterSNRComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return IDirectFilter.V_SNR;

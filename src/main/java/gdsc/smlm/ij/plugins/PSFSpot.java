@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.core.match.BasePoint;
 import gdsc.smlm.results.PeakResult;
 
@@ -45,7 +44,7 @@ public class PSFSpot extends BasePoint
 	 * higher is this spot due to other PSFs.
 	 */
 	public float backgroundOffset = 0;
-	
+
 	/** The amplitude. */
 	public double amplitude = 0;
 

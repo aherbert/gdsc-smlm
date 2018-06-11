@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
@@ -54,7 +53,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 
 		// Note: Even if the Gaussian is z fitting there will be an initial estimate for
 		// the width (i.e. at z=0).
-		
+
 		// Cache the estimate for the Gaussian
 		if (fitConfiguration.getInitialXSD() > 0)
 			sx = fitConfiguration.getInitialXSD();
@@ -99,6 +98,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 		}
 	}
 
+	@Override
 	protected boolean checkParameters(final int maxx, final int maxy, final int npeaks, double[] params,
 			final boolean[] amplitudeEstimate, final int ySize, final double[] y, final int paramsPerPeak,
 			double background, double[] initialParams)
@@ -110,7 +110,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 			// ----
 			// Check all input parameters and uses the default values if necessary
 			// ----
-			
+
 			// Get the parameters
 			double signal = params[j + Gaussian2DFunction.SIGNAL];
 			double xpos = params[j + Gaussian2DFunction.X_POSITION];
@@ -170,8 +170,8 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 				// SD = (sx+sy)/2 => Range = sx+sy
 				final int range = Math.max(1, (int) Math.ceil(sx + sy));
 				final double[] com = findCentreOfMass(y, dim, range, position);
-				xpos = (double) com[0];
-				ypos = (double) com[1];
+				xpos = com[0];
+				ypos = com[1];
 			}
 
 			// Convert amplitudes to signal

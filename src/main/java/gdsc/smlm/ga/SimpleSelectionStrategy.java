@@ -30,7 +30,6 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 import gdsc.core.logging.TrackProgress;
 
-
 /**
  * Selects the top individuals
  */
@@ -69,6 +68,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	 * @return the subset
 	 * @see gdsc.smlm.ga.SelectionStrategy#select(java.util.List)
 	 */
+	@Override
 	public List<? extends Chromosome<T>> select(List<? extends Chromosome<T>> individuals)
 	{
 		if (individuals == null || individuals.size() < 2)
@@ -87,7 +87,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 		if (tracker != null)
 			tracker.progress(0.5);
 		ChromosomeComparator.sort(subset, 0, size);
-		
+
 		// Get the fraction relative to the input list size
 		//size = getSize(size);
 		size = Math.min(size, getSize(individuals.size()));
@@ -121,6 +121,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#initialiseBreeding(java.util.List)
 	 */
+	@Override
 	public void initialiseBreeding(List<? extends Chromosome<T>> individuals)
 	{
 		if (individuals != null && individuals.size() < 2)
@@ -133,6 +134,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#next()
 	 */
+	@Override
 	public ChromosomePair<T> next()
 	{
 		if (individuals == null)
@@ -161,6 +163,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#finishBreeding()
 	 */
+	@Override
 	public void finishBreeding()
 	{
 		// Free memory
@@ -172,6 +175,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
 	 * 
 	 * @see gdsc.smlm.ga.SelectionStrategy#setTracker(gdsc.core.logging.TrackProgress)
 	 */
+	@Override
 	public void setTracker(TrackProgress tracker)
 	{
 		this.tracker = tracker;

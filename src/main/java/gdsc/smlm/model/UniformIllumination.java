@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Specifies the same illumination for any position
  */
@@ -62,6 +61,7 @@ public class UniformIllumination implements SpatialIllumination
 	 * 
 	 * @see gdsc.smlm.model.SpatialIllumination#getPhotons(double[])
 	 */
+	@Override
 	public double getPhotons(double[] xyz)
 	{
 		return photons;
@@ -72,6 +72,7 @@ public class UniformIllumination implements SpatialIllumination
 	 * 
 	 * @see gdsc.smlm.model.SpatialIllumination#getPulsedPhotons(double[], int)
 	 */
+	@Override
 	public double[] getPulsedPhotons(double[] xyz, int t)
 	{
 
@@ -87,6 +88,7 @@ public class UniformIllumination implements SpatialIllumination
 	 * 
 	 * @see gdsc.smlm.model.SpatialIllumination#getAveragePhotons()
 	 */
+	@Override
 	public double getAveragePhotons()
 	{
 		if (pulseInterval > 1)

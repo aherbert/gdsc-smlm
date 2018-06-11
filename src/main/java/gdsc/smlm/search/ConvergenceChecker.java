@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.search;
 
-
 /**
  * Defines convergence of a point in space
  */

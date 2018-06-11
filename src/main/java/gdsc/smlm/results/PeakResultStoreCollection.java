@@ -25,7 +25,6 @@ package gdsc.smlm.results;
 
 import java.util.Collection;
 
-
 /**
  * Marker interface for PeakResultStore objects that use a collection.
  */
@@ -37,7 +36,7 @@ public interface PeakResultStoreCollection
 	 * @return the collection
 	 */
 	public Collection<PeakResult> getCollection();
-	
+
 	/**
 	 * Gets the collection by reference.
 	 *

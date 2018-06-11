@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a set of function values to implement the forEach procedure
  */
@@ -55,11 +54,13 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function i
 		return g2;
 	}
 
+	@Override
 	public void initialise2(double[] a)
 	{
 		// Ignore
 	}
 
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		for (int i = 0; i < values.length; i++)

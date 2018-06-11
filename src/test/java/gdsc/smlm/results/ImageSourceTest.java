@@ -615,14 +615,14 @@ public class ImageSourceTest
 		int start = 4;
 		int size = 2;
 		int skip = 1;
-		ImageSource source = new AggregatedImageSource(new InterlacedImageSource(new MemoryImageSource(w, h, data),
-				start, size, skip), aggregate);
+		ImageSource source = new AggregatedImageSource(
+				new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip), aggregate);
 
 		Assert.assertTrue(source.open());
 
 		// Set the expected frames returned by the interlacing
 		int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
-		
+
 		int i = 0, ii = 0;
 		float[] d = null;
 		while ((d = source.next()) != null)
@@ -662,12 +662,12 @@ public class ImageSourceTest
 		int start = 4;
 		int size = 2;
 		int skip = 1;
-		ImageSource source = new AggregatedImageSource(new InterlacedImageSource(new MemoryImageSource(w, h, data),
-				start, size, skip), aggregate);
+		ImageSource source = new AggregatedImageSource(
+				new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip), aggregate);
 
 		// Set the expected frames returned by the interlacing
 		int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
-		
+
 		// Randomly pick points from the positions used by next()
 		int[] frames = new int[source.getFrames()];
 		for (int i = 0, ii = 0; ii < expected.length; i++, ii += 3)
@@ -683,14 +683,14 @@ public class ImageSourceTest
 			int endE = FastMath.min(e + 2, expected.length - 1);
 			int startFrame = expected[e];
 			int endFrame = expected[endE];
-			
+
 			// Get the data
 			float[] d = source.get(startFrame);
-			
+
 			// Check the correct range is returned
 			Assert.assertEquals(startFrame, source.getStartFrameNumber());
 			Assert.assertEquals(endFrame, source.getEndFrameNumber());
-			
+
 			// Check the data is collated correctly
 			float[] all = new float[data[0].length];
 			for (; e <= endE; e++)
@@ -701,11 +701,11 @@ public class ImageSourceTest
 			}
 			Assert.assertArrayEquals(all, d, 0);
 		}
-		
+
 		// Check all the data is valid but skipped interlaced points return null 
 		for (int i = 0; i < data.length; i++)
 		{
-			int frame = i+1;
+			int frame = i + 1;
 			Assert.assertTrue(source.isValid(frame));
 			if (!isExpected(frame, expected))
 				Assert.assertNull(source.get(frame));
@@ -722,24 +722,24 @@ public class ImageSourceTest
 		int h = 3;
 		int n = 15;
 		String name = "canSerialiseMemoryImageSource";
-		
+
 		MemoryImageSource source = new MemoryImageSource(w, h, createData(w, h, n));
 		source.setName(name);
 		source.setFreeMemoryOnClose(true);
-		
+
 		String xml = source.toXML();
 		//System.out.println(xml);
-		
+
 		MemoryImageSource source2 = (MemoryImageSource) ImageSource.fromXML(xml);
-		
+
 		Assert.assertEquals(w, source2.getWidth());
 		Assert.assertEquals(h, source2.getHeight());
 		Assert.assertEquals(n, source2.getFrames());
 		Assert.assertEquals(name, source2.getName());
 		Assert.assertEquals(true, source2.isFreeMemoryOnClose());
-		
+
 		float[] data;
-		while ((data = source.next()) != null) 
+		while ((data = source.next()) != null)
 		{
 			float[] data2 = source2.next();
 			Assert.assertArrayEquals(data, data2, 1e-6f);

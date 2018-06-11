@@ -28,7 +28,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.smlm.function.NonLinearFunction;
 
-
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a function)
  * and the gradient vector of the function's partial first derivatives with respect to the parameters.
@@ -62,6 +61,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[],
 	 *      double[][], double[], gdsc.smlm.function.NonLinearFunction)
 	 */
+	@Override
 	public double findLinearised(final int[] x, final double[] y, final double[] a, final double[][] alpha,
 			final double[] beta, final NonLinearFunction func)
 	{
@@ -127,6 +127,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[],
 	 *      double[][], double[], gdsc.smlm.function.NonLinearFunction, boolean[])
 	 */
+	@Override
 	public double findLinearised(final int[] x, final double[] y, final double[] a, final double[][] alpha,
 			final double[] beta, final NonLinearFunction func, boolean[] ignore)
 	{
@@ -195,6 +196,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[], double[],
 	 *      gdsc.smlm.function.NonLinearFunction)
 	 */
+	@Override
 	public double findLinearised(final int[] x, final double[] y, double[] yFit, final double[] a,
 			final NonLinearFunction func)
 	{
@@ -280,6 +282,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[][],
 	 *      double[], gdsc.smlm.function.NonLinearFunction)
 	 */
+	@Override
 	public double findLinearised(final int n, final double[] y, final double[] a, final double[][] alpha,
 			final double[] beta, final NonLinearFunction func)
 	{
@@ -351,6 +354,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[][],
 	 *      double[], gdsc.smlm.function.NonLinearFunction, boolean[])
 	 */
+	@Override
 	public double findLinearised(final int n, final double[] y, final double[] a, final double[][] alpha,
 			final double[] beta, final NonLinearFunction func, boolean[] ignore)
 	{
@@ -437,6 +441,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[],
 	 *      gdsc.smlm.function.NonLinearFunction)
 	 */
+	@Override
 	public double findLinearised(final int n, final double[] y, double[] yFit, final double[] a,
 			final NonLinearFunction func)
 	{
@@ -670,6 +675,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 *            Non-linear fitting function
 	 * @return The MLE chi-squared value
 	 */
+	@Override
 	public double evaluate(final int[] x, final double[] y, final double[] a, final double[] df_da,
 			final NonLinearFunction func)
 	{

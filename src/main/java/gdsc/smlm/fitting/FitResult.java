@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Contains the fitting result
  */

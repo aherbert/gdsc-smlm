@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,8 +93,8 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * @param randomGenerator
 	 *            Used to pick random pixels in the mask
 	 */
-	public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth, double scaleX,
-			double scaleY, RandomGenerator randomGenerator)
+	public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth, double scaleX, double scaleY,
+			RandomGenerator randomGenerator)
 	{
 		this(masks, width, height, sliceDepth, scaleX, scaleY, randomGenerator, null);
 	}
@@ -119,8 +118,8 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * @param uniformDistribution
 	 *            Used for sub-pixel location and slice z-depth
 	 */
-	public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth, double scaleX,
-			double scaleY, RandomGenerator randomGenerator, UniformDistribution uniformDistribution)
+	public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth, double scaleX, double scaleY,
+			RandomGenerator randomGenerator, UniformDistribution uniformDistribution)
 	{
 		if (width < 1 || height < 1)
 			throw new IllegalArgumentException("Dimensions must be above zero");
@@ -182,6 +181,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
+	@Override
 	public double[] next()
 	{
 		final int randomPosition = randomGenerator.nextInt(indices.length);
@@ -212,6 +212,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
+	@Override
 	public boolean isWithin(double[] xyz)
 	{
 		int index = getIndex(xyz);
@@ -232,6 +233,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
+	@Override
 	public boolean isWithinXY(double[] xyz)
 	{
 		createProjection();
@@ -261,6 +263,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	 * 
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] xyz)
 	{
 		findParticles();

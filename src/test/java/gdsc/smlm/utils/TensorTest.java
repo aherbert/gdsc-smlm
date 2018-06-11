@@ -111,9 +111,9 @@ public class TensorTest
 					// Swap vector direction
 					if (Math.signum(vv2[k][kk]) != Math.signum(vv3[k + 1][kk]))
 					{
-						vv2[k][0] = -vv2[k][0]; 
+						vv2[k][0] = -vv2[k][0];
 						vv2[k][1] = -vv2[k][1];
-					}					
+					}
 					Assert.assertEquals(vv2[k][kk], vv3[k + 1][kk], Math.abs(vv2[k][kk] * 1e-6));
 				}
 			}

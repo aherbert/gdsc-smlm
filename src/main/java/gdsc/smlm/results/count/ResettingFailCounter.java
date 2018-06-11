@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Stop evaluating when a number of cumulative failures occurs. The failures count is reset to a fraction of the current
  * value for each pass.
@@ -80,6 +79,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass()
 	 */
+	@Override
 	public void pass()
 	{
 		failCount = (int) (failCount * resetFraction);
@@ -90,6 +90,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass(int)
 	 */
+	@Override
 	public void pass(int n)
 	{
 		if (n < 0)
@@ -107,6 +108,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail()
 	 */
+	@Override
 	public void fail()
 	{
 		if (failCount == Integer.MAX_VALUE)
@@ -119,6 +121,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail(int)
 	 */
+	@Override
 	public void fail(int n)
 	{
 		if (n < 0)
@@ -133,6 +136,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#isOK()
 	 */
+	@Override
 	public boolean isOK()
 	{
 		return failCount <= allowedFailures;
@@ -143,6 +147,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#newCounter()
 	 */
+	@Override
 	public FailCounter newCounter()
 	{
 		return new ResettingFailCounter(allowedFailures, resetFraction);
@@ -153,6 +158,7 @@ public class ResettingFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#reset()
 	 */
+	@Override
 	public void reset()
 	{
 		failCount = 0;

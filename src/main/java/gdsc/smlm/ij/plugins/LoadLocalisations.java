@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 
 import gdsc.core.data.utils.TypeConverter;
 
-
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.TextUtils;
@@ -65,7 +64,7 @@ public class LoadLocalisations implements PlugIn
 {
 	// TODO - Add support for noise and mean signal. 
 	// Q. Is this required?
-	
+
 	// Time units for the exposure time cannot be in frames as this makes no sense
 	private static EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
 	private static String[] tUnits;
@@ -149,9 +148,9 @@ public class LoadLocalisations implements PlugIn
 				{
 					l = get(i);
 					float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
-					float x = (float) (l.x);
-					float y = (float) (l.y);
-					float z = (float) (l.z);
+					float x = (l.x);
+					float y = (l.y);
+					float z = (l.z);
 
 					float[] params;
 					switch (psfType)
@@ -161,11 +160,11 @@ public class LoadLocalisations implements PlugIn
 							break;
 						case ONE_AXIS_GAUSSIAN_2D:
 							params = Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z,
-									(float) l.sx);
+									l.sx);
 							break;
 						case TWO_AXIS_GAUSSIAN_2D:
-							params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, (float) l.sx,
-									(float) l.sy);
+							params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, l.sx,
+									l.sy);
 							break;
 						default:
 							throw new NotImplementedException("Unsupported PSF type: " + psfType);
@@ -202,6 +201,7 @@ public class LoadLocalisations implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);

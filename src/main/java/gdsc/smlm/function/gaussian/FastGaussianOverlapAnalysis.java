@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-
 /**
  * Compute the overlap between 2D Gaussian functions.
  * <p>

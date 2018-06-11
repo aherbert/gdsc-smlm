@@ -36,7 +36,6 @@ import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedure;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2FunctionValueStore;
 
-
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using least squares estimation.
  */
@@ -216,6 +215,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getTotalSumOfSquares()
 	 */
+	@Override
 	public double getTotalSumOfSquares()
 	{
 		if (Double.isNaN(totalSumOfSquares) && lastY != null)
@@ -230,6 +230,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getResidualSumOfSquares()
 	 */
+	@Override
 	public double getResidualSumOfSquares()
 	{
 		return value;
@@ -240,6 +241,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getCoefficientOfDetermination()
 	 */
+	@Override
 	public double getCoefficientOfDetermination()
 	{
 		return 1.0 - (value / getTotalSumOfSquares());
@@ -250,6 +252,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getAdjustedCoefficientOfDetermination()
 	 */
+	@Override
 	public double getAdjustedCoefficientOfDetermination()
 	{
 		return Maths.getAdjustedCoefficientOfDetermination(value, getTotalSumOfSquares(), getNumberOfFittedPoints(),
@@ -261,6 +264,7 @@ public class LSELVMSteppingFunctionSolver extends LVMSteppingFunctionSolver impl
 	 * 
 	 * @see gdsc.smlm.fitting.LSEFunctionSolver#getMeanSquaredError()
 	 */
+	@Override
 	public double getMeanSquaredError()
 	{
 		return value / (getNumberOfFittedPoints() - getNumberOfFittedParameters());

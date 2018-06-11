@@ -30,7 +30,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.utils.CommonUtils;
 
-
 /**
  * Simple class to perform convolution
  */

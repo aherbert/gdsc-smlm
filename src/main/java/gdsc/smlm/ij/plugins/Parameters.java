@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.util.EnumSet;
 
-
 /**
  * Utility methods for checking parameters
  */
@@ -45,9 +44,10 @@ public class Parameters
 		 */
 		POSITIVE
 	}
-	
+
 	/**
 	 * Check if the named parameter value greater than zero
+	 * 
 	 * @param name
 	 * @param value
 	 * @throws IllegalArgumentException
@@ -57,62 +57,66 @@ public class Parameters
 		if (value <= 0)
 			throw new IllegalArgumentException(name + " should be above zero");
 	}
-	
+
 	/**
 	 * Check if the named parameter value greater than the given limit
+	 * 
 	 * @param name
 	 * @param value
 	 * @param limit
 	 * @throws IllegalArgumentException
 	 */
-	public static void isAbove(String name, double value,  double limit)
+	public static void isAbove(String name, double value, double limit)
 	{
 		if (value <= limit)
 			throw new IllegalArgumentException(name + " should be > " + limit);
 	}
-	
+
 	/**
 	 * Check if the named parameter value greater than or equal to the given limit
+	 * 
 	 * @param name
 	 * @param value
 	 * @param limit
 	 * @throws IllegalArgumentException
 	 */
-	public static void isEqualOrAbove(String name, double value,  double limit)
+	public static void isEqualOrAbove(String name, double value, double limit)
 	{
 		if (value < limit)
 			throw new IllegalArgumentException(name + " should be >= " + limit);
 	}
 
-	
 	/**
 	 * Check if the named parameter value is less than the given limit
+	 * 
 	 * @param name
 	 * @param value
 	 * @param limit
 	 * @throws IllegalArgumentException
 	 */
-	public static void isBelow(String name, double value,  double limit)
+	public static void isBelow(String name, double value, double limit)
 	{
 		if (value >= limit)
 			throw new IllegalArgumentException(name + " should be < " + limit);
 	}
-	
+
 	/**
 	 * Check if the named parameter value is less then or equal to the given limit
+	 * 
 	 * @param name
 	 * @param value
 	 * @param limit
 	 * @throws IllegalArgumentException
 	 */
-	public static void isEqualOrBelow(String name, double value,  double limit)
+	public static void isEqualOrBelow(String name, double value, double limit)
 	{
 		if (value > limit)
 			throw new IllegalArgumentException(name + " should be <= " + limit);
 	}
-	
+
 	/**
 	 * Check if the named parameter value is zero or greater
+	 * 
 	 * @param name
 	 * @param value
 	 * @throws IllegalArgumentException
@@ -122,9 +126,10 @@ public class Parameters
 		if (value < 0)
 			throw new IllegalArgumentException(name + " should be positive");
 	}
-	
+
 	/**
 	 * Check if the named parameter meets the requirements
+	 * 
 	 * @param name
 	 * @param requirements
 	 */

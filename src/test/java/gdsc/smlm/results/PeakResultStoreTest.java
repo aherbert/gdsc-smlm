@@ -96,6 +96,7 @@ public class PeakResultStoreTest
 
 			Comparator<PeakResult> c = new Comparator<PeakResult>()
 			{
+				@Override
 				public int compare(PeakResult o1, PeakResult o2)
 				{
 					return o1.getOrigX() - o2.getOrigX();
@@ -128,6 +129,7 @@ public class PeakResultStoreTest
 		Assert.assertNotEquals(size, store.size());
 		store.removeIf(new PeakResultPredicate()
 		{
+			@Override
 			public boolean test(PeakResult t)
 			{
 				return t == null;

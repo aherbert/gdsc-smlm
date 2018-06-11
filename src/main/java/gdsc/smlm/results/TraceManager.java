@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -55,17 +54,20 @@ public class TraceManager
 		 * Search the latest localisations first. This is equivalent to a downwards search. When a localisation is found
 		 * no more time points will be searched.
 		 */
-		LATEST_FORERUNNER{ public String getName() { return "Latest forerunner"; }},
+		LATEST_FORERUNNER{ @Override
+		public String getName() { return "Latest forerunner"; }},
 		/**
 		 * Search the earliest localisations first. This is equivalent to a depth first search. When a localisation is
 		 * found no more time points will be searched.
 		 */
-		EARLIEST_FORERUNNER{ public String getName() { return "Earliest forerunner"; }},
+		EARLIEST_FORERUNNER{ @Override
+		public String getName() { return "Earliest forerunner"; }},
 		/**
 		 * Search all time points within the distance threshold. This is slower as all time points are searched. It is
 		 * equivalent to single-linkage clustering with a time constraint on joined localisations.
 		 */
-		SINGLE_LINKAGE{ public String getName() { return "Single linkage"; }};
+		SINGLE_LINKAGE{ @Override
+		public String getName() { return "Single linkage"; }};
 		//@formatter:on
 
 		@Override
@@ -159,6 +161,7 @@ public class TraceManager
 	{
 		int id = 0;
 
+		@Override
 		public void execute(PeakResult result)
 		{
 			localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(), result.getXPosition(),
@@ -182,6 +185,7 @@ public class TraceManager
 		// Sort by start time
 		Arrays.sort(localisations, new Comparator<Localisation>()
 		{
+			@Override
 			public int compare(Localisation o1, Localisation o2)
 			{
 				return o1.t - o2.t;
@@ -196,6 +200,7 @@ public class TraceManager
 		endLocalisations = Arrays.copyOf(localisations, totalTraces);
 		Arrays.sort(endLocalisations, new Comparator<Localisation>()
 		{
+			@Override
 			public int compare(Localisation o1, Localisation o2)
 			{
 				return o1.endT - o2.endT;
@@ -350,6 +355,7 @@ public class TraceManager
 						reSort = false;
 						Arrays.sort(assigned, i, assignedToTrace, new Comparator<Assignment>()
 						{
+							@Override
 							public int compare(Assignment o1, Assignment o2)
 							{
 								if (o1.distance < o2.distance)
@@ -705,6 +711,7 @@ public class TraceManager
 				final int traceId = (newId) ? ++id : trace.getId();
 				trace.getPoints().forEach(new PeakResultProcedure()
 				{
+					@Override
 					public void execute(PeakResult result)
 					{
 						results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),

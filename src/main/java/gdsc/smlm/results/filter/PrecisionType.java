@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.data.NamedObject;
 
-
 /**
  * Define the type of localisation precision value.
  */
@@ -121,6 +120,7 @@ public enum PrecisionType implements NamedObject
 	 * 
 	 * @see gdsc.smlm.data.NamedObject#getName()
 	 */
+	@Override
 	public String getName()
 	{
 		return name;
@@ -131,6 +131,7 @@ public enum PrecisionType implements NamedObject
 	 * 
 	 * @see gdsc.smlm.data.NamedObject#getShortName()
 	 */
+	@Override
 	public String getShortName()
 	{
 		return shortName;

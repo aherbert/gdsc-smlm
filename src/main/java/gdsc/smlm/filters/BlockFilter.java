@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Computes the block filter for each point within the array.
  * <p>
@@ -2426,8 +2425,8 @@ public abstract class BlockFilter extends BaseWeightedFilter
 				// Sweep neighbourhood
 				if (isInnerXY)
 				{
-					double sum = wdata[index0 - 1] + wdata[index0] + wdata[index0 + 1] + wdata[index1 - 1] + wdata[index1] +
-							wdata[index1 + 1] + wdata[index2 - 1] + wdata[index2] + wdata[index2 + 1];
+					double sum = wdata[index0 - 1] + wdata[index0] + wdata[index0 + 1] + wdata[index1 - 1] +
+							wdata[index1] + wdata[index1 + 1] + wdata[index2 - 1] + wdata[index2] + wdata[index2 + 1];
 					buffer[index1] = (float) sum;
 				}
 				else
@@ -2566,6 +2565,7 @@ public abstract class BlockFilter extends BaseWeightedFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public BlockFilter clone()
 	{
 		BlockFilter o = (BlockFilter) super.clone();

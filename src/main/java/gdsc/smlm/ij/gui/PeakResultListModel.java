@@ -31,7 +31,6 @@ import gdsc.smlm.results.ArrayPeakResultStore;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResultStoreList;
 
-
 /**
  * Stores peak results and allows event propagation to listeners of the model.
  */
@@ -80,6 +79,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 	 * 
 	 * @see javax.swing.ListModel#getSize()
 	 */
+	@Override
 	public int getSize()
 	{
 		return delegate.size();
@@ -90,6 +90,7 @@ public class PeakResultListModel extends AbstractListModel<PeakResult>
 	 * 
 	 * @see javax.swing.ListModel#getElementAt(int)
 	 */
+	@Override
 	public PeakResult getElementAt(int index)
 	{
 		return delegate.get(index);

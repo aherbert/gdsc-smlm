@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-
 /**
  * Create a gradient calculator.
  */

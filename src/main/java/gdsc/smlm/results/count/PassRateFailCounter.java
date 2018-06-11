@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.count;
 
-
 /**
  * Stop evaluating when the pass rate falls below a set fraction. A minimum number of pass/fail counts can be specified.
  */
@@ -82,6 +81,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass()
 	 */
+	@Override
 	public void pass()
 	{
 		passCount++;
@@ -94,6 +94,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#pass(int)
 	 */
+	@Override
 	public void pass(int n)
 	{
 		if (n < 0)
@@ -108,6 +109,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail()
 	 */
+	@Override
 	public void fail()
 	{
 		failCount++;
@@ -120,6 +122,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#fail(int)
 	 */
+	@Override
 	public void fail(int n)
 	{
 		if (n < 0)
@@ -134,6 +137,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#isOK()
 	 */
+	@Override
 	public boolean isOK()
 	{
 		double total = failCount + passCount;
@@ -145,6 +149,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#newCounter()
 	 */
+	@Override
 	public FailCounter newCounter()
 	{
 		return new PassRateFailCounter(allowedCounts, passRate);
@@ -155,6 +160,7 @@ public class PassRateFailCounter extends BaseFailCounter
 	 * 
 	 * @see gdsc.smlm.results.FailCounter#reset()
 	 */
+	@Override
 	public void reset()
 	{
 		passCount = 0;

@@ -28,6 +28,7 @@ import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
 public class MultiAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
+	@Override
 	protected void init()
 	{
 		flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;
@@ -40,11 +41,12 @@ public class MultiAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunc
 		double Bx = -0.073;
 		double Ay = 0.164;
 		double By = 0.0417;
-		zModel = HoltzerAstigmatismZModel.create(sx,sy,gamma, d, Ax, Bx, Ay, By);
+		zModel = HoltzerAstigmatismZModel.create(sx, sy, gamma, d, Ax, Bx, Ay, By);
 		f1 = new MultiAstigmatismErfGaussian2DFunction(1, maxx, maxy, zModel);
 		f2 = new MultiAstigmatismErfGaussian2DFunction(2, maxx, maxy, zModel);
 	}
 
+	@Override
 	protected void postInit()
 	{
 		// Even though the function does not evaluate the widths it can use them

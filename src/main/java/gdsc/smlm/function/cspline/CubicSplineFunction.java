@@ -26,7 +26,6 @@ package gdsc.smlm.function.cspline;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.smlm.function.Gradient2Function;
 
-
 /**
  * Represent a cubic spline function. N splines are drawn into a target region.
  * <p>
@@ -1039,6 +1038,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#size()
 	 */
+	@Override
 	public int size()
 	{
 		return maxx * maxy;
@@ -1049,6 +1049,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		initialise(a, 0);
@@ -1059,6 +1060,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 * 
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
+	@Override
 	public void initialise0(double[] a)
 	{
 		initialise(a, 0);
@@ -1069,6 +1071,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		initialise(a, 1);
@@ -1079,6 +1082,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 	 * 
 	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
 	 */
+	@Override
 	public void initialise2(double[] a)
 	{
 		initialise(a, 2);

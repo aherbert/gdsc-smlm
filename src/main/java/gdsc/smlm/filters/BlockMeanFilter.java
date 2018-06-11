@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes the mean using a square block mask.
  */
@@ -75,6 +74,7 @@ public class BlockMeanFilter extends BlockFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public BlockMeanFilter clone()
 	{
 		BlockMeanFilter o = (BlockMeanFilter) super.clone();

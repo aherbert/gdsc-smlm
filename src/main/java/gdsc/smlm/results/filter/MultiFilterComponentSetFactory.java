@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import java.util.Arrays;
 
-
 /**
  * Contains a set of components of the multi filter.
  */

@@ -26,7 +26,6 @@ package gdsc.smlm.results;
 import gdsc.smlm.results.predicates.FramePeakResultPredicate;
 import gdsc.smlm.results.predicates.IdPeakResultPredicate;
 
-
 /**
  * Provides a dynamic view of the results. Changes to the underlying results store will be reflected in the view.
  */
@@ -52,6 +51,7 @@ public class DynamicPeakResultView implements PeakResultView
 	 *            the frame
 	 * @return the results
 	 */
+	@Override
 	public PeakResult[] getResultsByFrame(int frame)
 	{
 		return store.subset(new FramePeakResultPredicate(frame));
@@ -64,6 +64,7 @@ public class DynamicPeakResultView implements PeakResultView
 	 *            the id
 	 * @return the results
 	 */
+	@Override
 	public PeakResult[] getResultsById(int id)
 	{
 		return store.subset(new IdPeakResultPredicate(id));

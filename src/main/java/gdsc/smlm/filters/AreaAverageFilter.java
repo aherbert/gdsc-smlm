@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-
 /**
  * Computes the area average for each point within the array.
  * <p>
@@ -340,6 +339,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public AreaAverageFilter clone()
 	{
 		AreaAverageFilter o = (AreaAverageFilter) super.clone();

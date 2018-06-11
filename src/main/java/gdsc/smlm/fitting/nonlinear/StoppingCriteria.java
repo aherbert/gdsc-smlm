@@ -27,7 +27,6 @@ import java.util.Arrays;
 
 import gdsc.core.logging.Logger;
 
-
 /**
  * Defines the stopping criteria for the {@link gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
  * 
@@ -116,8 +115,10 @@ public abstract class StoppingCriteria
 	 * <p>
 	 * Sets the notSatisfied flag to false if the maximum number of iterations is reached.
 	 * 
-	 * @param a The parameters
-	 * @param improved Flag to indicate if the parameters have improved the fit
+	 * @param a
+	 *            The parameters
+	 * @param improved
+	 *            Flag to indicate if the parameters have improved the fit
 	 */
 	protected void increment(double[] a, boolean improved)
 	{

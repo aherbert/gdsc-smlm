@@ -23,16 +23,18 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Define the type of function solver
  */
 public enum FunctionSolverType
 {
 	//@formatter:off
-	LSE{ public String getName() { return "Least Squares Estimator"; }},
-	WLSE{ public String getName() { return "Weighted Least Squares Estimator"; }},
-	MLE{ public String getName() { return "Maximum Likelihood Estimator"; }};
+	LSE{ @Override
+	public String getName() { return "Least Squares Estimator"; }},
+	WLSE{ @Override
+	public String getName() { return "Weighted Least Squares Estimator"; }},
+	MLE{ @Override
+	public String getName() { return "Maximum Likelihood Estimator"; }};
 	//@formatter:on
 
 	@Override

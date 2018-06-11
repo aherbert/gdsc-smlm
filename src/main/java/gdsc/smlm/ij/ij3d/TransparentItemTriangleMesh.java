@@ -168,6 +168,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
+	@Override
 	public void reorderFast(int[] indices) throws IllegalArgumentException
 	{
 		if (dirty)
@@ -219,6 +220,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
 		ga.updateData(new GeometryUpdater()
 		{
+			@Override
 			public void updateData(Geometry geometry)
 			{
 				GeometryArray ga = (GeometryArray) geometry;
@@ -237,6 +239,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
+	@Override
 	public void setItemColor(Color3f color)
 	{
 		if (color == null)
@@ -267,6 +270,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
+	@Override
 	public void setItemColor(Color3f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
@@ -300,6 +304,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
+	@Override
 	public void setItemColor4(Color4f[] color) throws IllegalArgumentException
 	{
 		this.color = null;
@@ -327,6 +332,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemAlpha(float[])
 	 */
+	@Override
 	public void setItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		int size = size();
@@ -357,6 +363,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#setItemAlpha(float)
 	 */
+	@Override
 	public void setItemAlpha(float alpha) throws IllegalArgumentException
 	{
 		int size = size();
@@ -385,6 +392,7 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 	 * 
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemMesh#getItemAlpha(float[])
 	 */
+	@Override
 	public void getItemAlpha(float[] alpha) throws IllegalArgumentException
 	{
 		int size = size();

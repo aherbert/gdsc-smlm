@@ -52,13 +52,13 @@ import ij.ImageStack;
 import ij.gui.DialogListener;
 import ij.gui.ExtendedGenericDialog;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.gui.Plot2;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import ij.util.Tools;
-
 
 /**
  * Contains methods to find the noise in the provided image data.
@@ -85,6 +85,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		if (arg.equalsIgnoreCase("final"))
@@ -110,6 +111,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
+	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 		// Select a camera model
@@ -205,6 +207,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		algorithm = gd.getNextChoiceIndex();
@@ -288,14 +291,14 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 			range = 1;
 		plot.setLimits(a[0], a[1], b1[0] - 0.05 * range, b1[1] + 0.05 * range);
 		plot.setColor(Color.blue);
-		plot.addPoints(xValues, yValues1, Plot2.LINE);
+		plot.addPoints(xValues, yValues1, Plot.LINE);
 		//plot.draw();
 		String label = String.format("%s (Blue) = %s", trim(method1.getName()),
 				Utils.rounded(new Statistics(yValues1).getMean()));
 		if (twoMethods)
 		{
 			plot.setColor(Color.red);
-			plot.addPoints(xValues, yValues2, Plot2.LINE);
+			plot.addPoints(xValues, yValues2, Plot.LINE);
 			label += String.format(", %s (Red) = %s", trim(method2.getName()),
 					Utils.rounded(new Statistics(yValues2).getMean()));
 		}
@@ -317,6 +320,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		// Perform all methods and add to the results
@@ -340,6 +344,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	 * 
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
+	@Override
 	public void setNPasses(int nPasses)
 	{
 		// Do nothing
@@ -349,6 +354,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 	{
 		Collections.sort(results, new Comparator<double[]>()
 		{
+			@Override
 			public int compare(double[] o1, double[] o2)
 			{
 				// Sort on slice number

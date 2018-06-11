@@ -26,7 +26,6 @@ package gdsc.smlm.results.filter;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -85,11 +84,13 @@ public class FilterTest
 
 		ts.execute(new TimingTask()
 		{
+			@Override
 			public Object getData(int i)
 			{
 				return new MultiFilter[] { (MultiFilter) f1.create(data[i][0]), (MultiFilter) f1.create(data[i][1]) };
 			}
 
+			@Override
 			public Object run(Object data)
 			{
 				MultiFilter f1 = ((MultiFilter[]) data)[0];
@@ -98,15 +99,18 @@ public class FilterTest
 				return null;
 			}
 
+			@Override
 			public void check(int i, Object result)
 			{
 			}
 
+			@Override
 			public int getSize()
 			{
 				return data.length;
 			}
 
+			@Override
 			public String getName()
 			{
 				return "MultiFilter";
@@ -115,11 +119,13 @@ public class FilterTest
 
 		ts.execute(new TimingTask()
 		{
+			@Override
 			public Object getData(int i)
 			{
 				return new MultiFilter[] { (MultiFilter) f1.create(data[i][0]), (MultiFilter) f1.create(data[i][1]) };
 			}
 
+			@Override
 			public Object run(Object data)
 			{
 				MultiFilter f1 = ((MultiFilter[]) data)[0];
@@ -128,15 +134,18 @@ public class FilterTest
 				return null;
 			}
 
+			@Override
 			public void check(int i, Object result)
 			{
 			}
 
+			@Override
 			public int getSize()
 			{
 				return data.length;
 			}
 
+			@Override
 			public String getName()
 			{
 				return "MultiFilter direct";
@@ -145,12 +154,14 @@ public class FilterTest
 
 		ts.execute(new TimingTask()
 		{
+			@Override
 			public Object getData(int i)
 			{
 				return new MultiFilter2[] { (MultiFilter2) f2.create(data[i][0]),
 						(MultiFilter2) f2.create(data[i][1]) };
 			}
 
+			@Override
 			public Object run(Object data)
 			{
 				MultiFilter2 f1 = ((MultiFilter2[]) data)[0];
@@ -159,15 +170,18 @@ public class FilterTest
 				return null;
 			}
 
+			@Override
 			public void check(int i, Object result)
 			{
 			}
 
+			@Override
 			public int getSize()
 			{
 				return data.length;
 			}
 
+			@Override
 			public String getName()
 			{
 				return "MultiFilter2";
@@ -176,12 +190,14 @@ public class FilterTest
 
 		ts.execute(new TimingTask()
 		{
+			@Override
 			public Object getData(int i)
 			{
 				return new MultiFilter2[] { (MultiFilter2) f2.create(data[i][0]),
 						(MultiFilter2) f2.create(data[i][1]) };
 			}
 
+			@Override
 			public Object run(Object data)
 			{
 				MultiFilter2 f1 = ((MultiFilter2[]) data)[0];
@@ -190,15 +206,18 @@ public class FilterTest
 				return null;
 			}
 
+			@Override
 			public void check(int i, Object result)
 			{
 			}
 
+			@Override
 			public int getSize()
 			{
 				return data.length;
 			}
 
+			@Override
 			public String getName()
 			{
 				return "MultiFilter2 direct";
@@ -227,7 +246,7 @@ public class FilterTest
 			p[n] = r.nextInt(3);
 		return p;
 	}
-	
+
 	@Test
 	public void canSerialiseMultiFilter()
 	{

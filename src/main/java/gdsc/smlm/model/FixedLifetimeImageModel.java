@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 /**
  * Contains a model for an image of fixed lifetime fluorophores. All fluorphores will have the same on time. The
  * activation time will be the incremented by the on-time plus the dark time between fluorophores.

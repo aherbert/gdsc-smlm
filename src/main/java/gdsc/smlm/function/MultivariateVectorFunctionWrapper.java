@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 
-
 /**
  * Wrap the NonLinearFunction to allow use with the Apache Commons Math library
  */
@@ -41,6 +40,7 @@ public class MultivariateVectorFunctionWrapper extends NonLinearFunctionWrapper 
 	 * 
 	 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 	 */
+	@Override
 	public double[] value(double[] point)
 	{
 		return computeValues(point);

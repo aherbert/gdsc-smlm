@@ -25,7 +25,6 @@ package gdsc.smlm.ij.ij3d;
 
 import org.scijava.vecmath.Color4f;
 
-
 /**
  * Interface for shape objects that represent a set of items to have transparent colours.
  */

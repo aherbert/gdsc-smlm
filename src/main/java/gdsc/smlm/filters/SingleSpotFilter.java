@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import java.util.List;
 
-
 /**
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with a single filter.
  */
@@ -58,6 +57,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see gdsc.smlm.filters.SpotFilter#isAbsoluteIntensity()
 	 */
+	@Override
 	public boolean isAbsoluteIntensity()
 	{
 		return true;
@@ -112,6 +112,7 @@ public class SingleSpotFilter extends MaximaSpotFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public SingleSpotFilter clone()
 	{
 		SingleSpotFilter f = (SingleSpotFilter) super.clone();

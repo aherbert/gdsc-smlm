@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
-
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array.
  * <p>
@@ -392,14 +391,14 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 		for (int i = 0; i <= unitLength / 2; i++)
 		{
 			final double x = i / (double) unitLength;
-			final double v = (double) ((0.75 - x * x) / unitLength);
+			final double v = (0.75 - x * x) / unitLength;
 			kernel[mid - i] = v;
 			kernel[mid + i] = v;
 		}
 		for (int i = unitLength / 2 + 1; i < (unitLength * 3 + 1) / 2; i++)
 		{
 			final double x = i / (double) unitLength;
-			final double v = (double) ((0.125 + 0.5 * (x - 1) * (x - 2)) / unitLength);
+			final double v = (0.125 + 0.5 * (x - 1) * (x - 2)) / unitLength;
 			kernel[mid - i] = v;
 			kernel[mid + i] = v;
 		}
@@ -441,14 +440,14 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 		for (int i = 0; i < unitLength; i++)
 		{
 			final double x = i / (double) unitLength;
-			final double v = (double) ((2. / 3. - x * x * (1 - 0.5 * x)));
+			final double v = ((2. / 3. - x * x * (1 - 0.5 * x)));
 			kernel[mid + i] = v;
 			kernel[mid - i] = v;
 		}
 		for (int i = unitLength; i < 2 * unitLength; i++)
 		{
 			final double x = i / (double) unitLength;
-			final double v = (double) ((2. - x) * (2. - x) * (2. - x) / 6.);
+			final double v = (2. - x) * (2. - x) * (2. - x) / 6.;
 			kernel[mid + i] = v;
 			kernel[mid - i] = v;
 		}
@@ -586,7 +585,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 
 		for (int i = 0; i < kRadius; i++)
 			// Gaussian function
-			kernel[0][i] = (double) (Math.exp(-0.5 * i * i / sigma / sigma));
+			kernel[0][i] = (Math.exp(-0.5 * i * i / sigma / sigma));
 		if (kRadius < maxRadius && kRadius > 3)
 		{ // edge correction
 			double sqrtSlope = Double.MAX_VALUE;
@@ -602,7 +601,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 			}
 			//System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma, kRadius, r, sqrtSlope);
 			for (int r1 = r + 2; r1 < kRadius; r1++)
-				kernel[0][r1] = (double) ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
+				kernel[0][r1] = (kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope;
 		}
 		double sum; // sum over all kernel elements for normalization
 		if (kRadius < maxRadius)
@@ -618,9 +617,9 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 		for (int i = 0; i < kRadius; i++)
 		{
 			double v = (kernel[0][i] / sum);
-			kernel[0][i] = (double) v;
+			kernel[0][i] = v;
 			rsum -= v;
-			kernel[1][i] = (double) rsum;
+			kernel[1][i] = rsum;
 		}
 		return kernel;
 	}
@@ -630,6 +629,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public DoubleGaussianFilter clone()
 	{
 		DoubleGaussianFilter o = (DoubleGaussianFilter) super.clone();

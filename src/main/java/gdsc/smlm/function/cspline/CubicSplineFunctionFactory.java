@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function.cspline;
 
-
 /**
  * Create a cubic spline function.
  */

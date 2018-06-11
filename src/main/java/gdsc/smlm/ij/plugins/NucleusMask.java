@@ -29,7 +29,6 @@ import java.awt.event.MouseListener;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 
-
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
@@ -66,6 +65,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -100,7 +100,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		settings.setFieldWidth((int) gd.getNextNumber());
 		settings.setNmPerPixel(gd.getNextNumber());
 		settings.setNmPerSlice(gd.getNextNumber());
-		
+
 		// Check arguments
 		try
 		{
@@ -112,7 +112,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		{
 			IJ.error(TITLE, e.getMessage());
 			return false;
-		}		
+		}
 
 		if (settings.getMode() == 0)
 		{
@@ -133,7 +133,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			settings.setYDither(gd.getNextNumber());
 			settings.setZDither(gd.getNextNumber());
 			settings.setDiameter(gd.getNextNumber());
-			
+
 			try
 			{
 				Parameters.isAboveZero("Diameter", settings.getDiameter());
@@ -142,7 +142,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 			{
 				IJ.error(TITLE, e.getMessage());
 				return false;
-			}		
+			}
 		}
 
 		SettingsManager.writeSettings(settings);
@@ -320,6 +320,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		return s;
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e == null)
@@ -351,18 +352,22 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 		imp.updateAndDraw();
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e)
 	{
 	}
@@ -372,6 +377,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener
 	 * 
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
+	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
 	{
 		double old = diameter;

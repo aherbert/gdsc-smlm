@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure
  */
@@ -45,8 +44,8 @@ public class OffsetFunctionFactory
 			// Wrap appropriately
 			if (func instanceof ExtendedGradient2Function)
 			{
-				return OffsetExtendedGradient2Function
-						.wrapExtendedGradient2Function((ExtendedGradient2Function) func, b);
+				return OffsetExtendedGradient2Function.wrapExtendedGradient2Function((ExtendedGradient2Function) func,
+						b);
 			}
 			if (func instanceof Gradient2Function)
 			{

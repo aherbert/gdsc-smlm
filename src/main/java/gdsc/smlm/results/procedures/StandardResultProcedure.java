@@ -29,7 +29,6 @@ import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Contains functionality to obtain the standard calibrated data for results.
  */
@@ -151,6 +150,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), (BResultProcedure) this);
 	}
 
+	@Override
 	public void executeB(float background)
 	{
 		this.background[i++] = background;
@@ -172,6 +172,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), getDistanceUnit(), (BIXYResultProcedure) this);
 	}
 
+	@Override
 	public void executeBIXY(float background, float intensity, float x, float y)
 	{
 		this.background[i] = background;
@@ -198,6 +199,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), getDistanceUnit(), (BIXYZResultProcedure) this);
 	}
 
+	@Override
 	public void executeBIXYZ(float background, float intensity, float x, float y, float z)
 	{
 		this.background[i] = background;
@@ -221,6 +223,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), (IResultProcedure) this);
 	}
 
+	@Override
 	public void executeI(float intensity)
 	{
 		this.intensity[i] = intensity;
@@ -242,6 +245,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYResultProcedure) this);
 	}
 
+	@Override
 	public void executeIXY(float intensity, float x, float y)
 	{
 		this.intensity[i] = intensity;
@@ -266,6 +270,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYRResultProcedure) this);
 	}
 
+	@Override
 	public void executeIXYR(float intensity, float x, float y, PeakResult result)
 	{
 		this.intensity[i] = intensity;
@@ -291,6 +296,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getIntensityUnit(), getDistanceUnit(), (IXYZResultProcedure) this);
 	}
 
+	@Override
 	public void executeIXYZ(float intensity, float x, float y, float z)
 	{
 		this.intensity[i] = intensity;
@@ -307,9 +313,10 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	{
 		i = 0;
 		allocateT();
-		results.forEach((TResultProcedure) this);
+		results.forEach(this);
 	}
 
+	@Override
 	public void executeT(int frame)
 	{
 		this.frame[i++] = frame;
@@ -330,6 +337,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (TXYResultProcedure) this);
 	}
 
+	@Override
 	public void executeTXY(int frame, float x, float y)
 	{
 		this.frame[i] = frame;
@@ -352,6 +360,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (XYResultProcedure) this);
 	}
 
+	@Override
 	public void executeXY(float x, float y)
 	{
 		this.x[i] = x;
@@ -374,6 +383,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (XYRResultProcedure) this);
 	}
 
+	@Override
 	public void executeXYR(float x, float y, PeakResult result)
 	{
 		this.x[i] = x;
@@ -397,6 +407,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (XYZResultProcedure) this);
 	}
 
+	@Override
 	public void executeXYZ(float x, float y, float z)
 	{
 		this.x[i] = x;
@@ -418,6 +429,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 		results.forEach(getDistanceUnit(), (ZResultProcedure) this);
 	}
 
+	@Override
 	public void executeZ(float z)
 	{
 		this.z[i++] = z;
@@ -427,7 +439,7 @@ public class StandardResultProcedure extends UnitResultProcedure implements
 	{
 		this.frame = allocate(this.frame);
 	}
-	
+
 	private void allocateB()
 	{
 		this.background = allocate(this.background);

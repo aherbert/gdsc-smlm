@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-
 /**
  * Wrap a function solver to scale the function value. Parameters that are scaled must be provided in the constructor.
  * It is assumed that a linear scale can be applied to all these parameters with the effect that the output function
@@ -58,6 +57,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		this.indices = indices;
 	}
 
+	@Override
 	public FitStatus fit(double[] y, double[] f, double[] a, double[] aDev)
 	{
 		// Do not break the view that the solver has on the data
@@ -71,6 +71,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		return result;
 	}
 
+	@Override
 	public void setBounds(double[] lower, double[] upper)
 	{
 		if (lower != null)
@@ -80,6 +81,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		solver.setBounds(lower, upper);
 	}
 
+	@Override
 	public void setConstraints(double[] lower, double[] upper)
 	{
 		if (lower != null)
@@ -89,6 +91,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		solver.setConstraints(lower, upper);
 	}
 
+	@Override
 	public boolean evaluate(double[] y, double[] f, double[] a)
 	{
 		// Do not break the view that the solver has on the data
@@ -103,6 +106,7 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver
 		return result;
 	}
 
+	@Override
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
 		// Do not break the view that the solver has on the data

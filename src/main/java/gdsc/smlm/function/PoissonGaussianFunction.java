@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.util.FastMath;
 
-
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is assumed to have mean of
  * zero. If no mean (zero or below) is provided for the Poisson distribution then the probability density function
@@ -45,7 +44,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * The inverse of the on-chip gain multiplication factor
 	 */
 	final double alpha;
-	
+
 	final double logAlpha;
 
 	private static final double EPSILON = 1e-4; // 1e-6
@@ -79,7 +78,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 			throw new IllegalArgumentException("Gaussian variance must be strictly positive");
 		alpha = Math.abs(alpha);
 		noPoisson = (mu <= 0);
-		
+
 		// Apply gain to the mean and readout standard deviation. 
 		// This compresses the probability distribution by alpha. Thus we can compute the
 		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
@@ -484,6 +483,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
+	@Override
 	public double likelihood(double o, double e)
 	{
 		return probability(o, e);
@@ -494,6 +494,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * 
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
+	@Override
 	public double logLikelihood(double o, double e)
 	{
 		return logProbability(o, e);

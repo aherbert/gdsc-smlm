@@ -27,7 +27,6 @@ import java.awt.Rectangle;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 
-
 public class ImagePeakResultsFactory
 {
 	/**

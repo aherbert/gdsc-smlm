@@ -349,11 +349,13 @@ public class EJMLLinearSolverTest
 			solver.setEqual(null);
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			// Clone
@@ -368,6 +370,7 @@ public class EJMLLinearSolverTest
 			return new Object[] { a, b };
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			DenseMatrix64F[] a = (DenseMatrix64F[]) ((Object[]) data)[0];
@@ -389,6 +392,7 @@ public class EJMLLinearSolverTest
 			super("Linear Solver", a, b);
 		}
 
+		@Override
 		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveLinear(a, b);
@@ -402,6 +406,7 @@ public class EJMLLinearSolverTest
 			super("Cholesky Solver", a, b);
 		}
 
+		@Override
 		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveCholesky(a, b);
@@ -415,6 +420,7 @@ public class EJMLLinearSolverTest
 			super("CholeskyLDLT Solver", a, b);
 		}
 
+		@Override
 		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveCholeskyLDLT(a, b);
@@ -428,6 +434,7 @@ public class EJMLLinearSolverTest
 			super("PseudoInverse Solver", a, b);
 		}
 
+		@Override
 		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solvePseudoInverse(a, b);
@@ -441,6 +448,7 @@ public class EJMLLinearSolverTest
 			super("DirectInversion Solver", a, b);
 		}
 
+		@Override
 		boolean solve(DenseMatrix64F a, DenseMatrix64F b)
 		{
 			return solver.solveDirectInversion(a, b);
@@ -453,7 +461,7 @@ public class EJMLLinearSolverTest
 	{
 		runSolverSpeedTest(GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
 	}
-	
+
 	@Test
 	public void runSolverSpeedTest5()
 	{
@@ -507,6 +515,7 @@ public class EJMLLinearSolverTest
 							{
 								int i = 0;
 
+								@Override
 								public void execute(double value)
 								{
 									// Poisson data 
@@ -602,11 +611,13 @@ public class EJMLLinearSolverTest
 			}
 		}
 
+		@Override
 		public int getSize()
 		{
 			return 1;
 		}
 
+		@Override
 		public Object getData(int i)
 		{
 			// Clone
@@ -620,6 +631,7 @@ public class EJMLLinearSolverTest
 			return a;
 		}
 
+		@Override
 		public Object run(Object data)
 		{
 			DenseMatrix64F[] a = (DenseMatrix64F[]) data;
@@ -650,6 +662,7 @@ public class EJMLLinearSolverTest
 			super("Linear Inversion", a, ignore, answer);
 		}
 
+		@Override
 		double[] invert(DenseMatrix64F a)
 		{
 			if (solver.invertLinear(a))
@@ -665,6 +678,7 @@ public class EJMLLinearSolverTest
 			super("Cholesky Inversion", a, ignore, answer);
 		}
 
+		@Override
 		double[] invert(DenseMatrix64F a)
 		{
 			if (solver.invertCholesky(a))
@@ -680,6 +694,7 @@ public class EJMLLinearSolverTest
 			super("CholeskyLDLT Inversion", a, ignore, answer);
 		}
 
+		@Override
 		double[] invert(DenseMatrix64F a)
 		{
 			if (solver.invertCholeskyLDLT(a))
@@ -695,6 +710,7 @@ public class EJMLLinearSolverTest
 			super("PseudoInverse Inversion", a, ignore, answer);
 		}
 
+		@Override
 		double[] invert(DenseMatrix64F a)
 		{
 			if (solver.invertPseudoInverse(a))
@@ -710,6 +726,7 @@ public class EJMLLinearSolverTest
 			super("DirectInversion Inversion", a, ignore, answer);
 		}
 
+		@Override
 		double[] invert(DenseMatrix64F a)
 		{
 			if (solver.invertDirectInversion(a))
@@ -725,6 +742,7 @@ public class EJMLLinearSolverTest
 			super("DiagonalDirectInversion Inversion", a, ignore, answer);
 		}
 
+		@Override
 		double[] invert(DenseMatrix64F a)
 		{
 			return solver.invertDiagonalDirectInversion(a);
@@ -790,6 +808,7 @@ public class EJMLLinearSolverTest
 							{
 								int i = 0;
 
+								@Override
 								public void execute(double value)
 								{
 									// Poisson data 

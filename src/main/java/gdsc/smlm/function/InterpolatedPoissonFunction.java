@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 
-
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 
@@ -79,6 +78,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	 * 
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
+	@Override
 	public double likelihood(double o, double e)
 	{
 		if (o < 0 || e <= 0)
@@ -133,6 +133,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	 * 
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
+	@Override
 	public double logLikelihood(double o, double e)
 	{
 		if (o < 0 || e <= 0)
@@ -164,6 +165,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	 * 
 	 * @see gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
 	 */
+	@Override
 	public double likelihood(double o, double e, double[] dp_dt)
 	{
 		if (o < 0 || e <= 0)

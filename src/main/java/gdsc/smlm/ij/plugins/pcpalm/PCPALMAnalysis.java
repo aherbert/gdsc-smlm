@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins.pcpalm;
 
-
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Rectangle;
@@ -117,6 +116,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -247,6 +247,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		{
 			File[] fileList = (new File(resultsDirectory)).listFiles(new FilenameFilter()
 			{
+				@Override
 				public boolean accept(File arg0, String arg1)
 				{
 					return arg1.endsWith("xml");
@@ -336,6 +337,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		// Nothing to do
@@ -908,7 +910,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		double density = PCPALMMolecules.densityPeaks * 1e6;
 
 		// Alternatively use the density in the sample
-		double sampleDensity = (double) noOfMolecules / area;
+		double sampleDensity = noOfMolecules / area;
 
 		// Actually count the density in the image
 		uniquePoints = 0;
@@ -917,7 +919,7 @@ public class PCPALMAnalysis implements PlugInFilter
 			// The image may not be binary so use the number
 			uniquePoints += im.getf(i);
 		}
-		double imageDensity = (double) uniquePoints / weightedArea;
+		double imageDensity = uniquePoints / weightedArea;
 
 		log("  %d molecules plotted as %.1f unique points", noOfMolecules, uniquePoints);
 		log("  Total Density = %g um^-2, Sample density = %g (%.2fx), Image density = %g (%.2fx)", density,
@@ -925,7 +927,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		// This is the method used by the PC-PALM MATLAB code. 
 		// The sum of the image divided by the sum of the normalisation window function
-		return (double) uniquePoints / weightedAreaInPx;
+		return uniquePoints / weightedAreaInPx;
 	}
 
 	/**
@@ -1072,7 +1074,7 @@ public class PCPALMAnalysis implements PlugInFilter
 
 		for (int i = 0; i < data.length; i++)
 		{
-			data[i] = (float) ((double) dataIm[i] / (density * dataW[i]));
+			data[i] = (float) (dataIm[i] / (density * dataW[i]));
 		}
 		FloatProcessor correlation = new FloatProcessor(corrIm.getWidth(), corrIm.getHeight(), data, null);
 		return correlation;

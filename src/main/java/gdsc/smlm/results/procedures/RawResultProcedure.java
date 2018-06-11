@@ -26,7 +26,6 @@ package gdsc.smlm.results.procedures;
 import gdsc.core.data.DataException;
 import gdsc.smlm.results.MemoryPeakResults;
 
-
 /**
  * Contains functionality to obtain the standard data for results.
  */
@@ -80,6 +79,7 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 		results.forEachNative((BIXYZResultProcedure) this);
 	}
 
+	@Override
 	public void executeBIXYZ(float background, float intensity, float x, float y, float z)
 	{
 		this.background[i] = background;
@@ -103,6 +103,7 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 		results.forEachNative((IResultProcedure) this);
 	}
 
+	@Override
 	public void executeI(float intensity)
 	{
 		this.intensity[i] = intensity;
@@ -143,6 +144,7 @@ public class RawResultProcedure extends AbstractResultProcedure implements
 		results.forEachNative((XYZResultProcedure) this);
 	}
 
+	@Override
 	public void executeXYZ(float x, float y, float z)
 	{
 		this.x[i] = x;

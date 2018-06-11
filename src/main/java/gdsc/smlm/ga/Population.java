@@ -28,7 +28,6 @@ import java.util.List;
 
 import gdsc.core.logging.TrackProgress;
 
-
 /**
  * Contains a population of individuals that may crossover and mutate to evolve.
  * <p>

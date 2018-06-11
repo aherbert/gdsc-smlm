@@ -146,7 +146,6 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		}
 	}
 
-
 	/**
 	 * Specify the maximum number of restarts in the event of roundoff error.
 	 */
@@ -163,7 +162,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			super(restarts);
 		}
 	}
-	
+
 	/**
 	 * Constructor
 	 */
@@ -303,7 +302,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		int iteration = 0;
 
 		PointValuePair result = bfgs(checker, p, lineSearch);
-		
+
 		// Allow restarts in the case of roundoff convergence
 		while (converged == ROUNDOFF_ERROR && iteration < roundoffRestarts)
 		{
@@ -311,14 +310,14 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			p = result.getPointRef();
 			result = bfgs(checker, p, lineSearch);
 		}
-		
+
 		// If restarts did not work then this is a failure
 		if (converged == ROUNDOFF_ERROR)
 			throw new LineSearchRoundoffException();
-		
+
 		//if (iteration > 0)
 		//	System.out.printf("Restarts for roundoff error = %d\n", iteration);
-		
+
 		return result;
 	}
 
@@ -364,7 +363,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			}
 
 			incrementIterationCount();
-			
+
 			// Move along the search direction.
 			final double[] pnew;
 			try
@@ -773,11 +772,13 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		{
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public String getSourceString()
 			{
 				return message;
 			}
 
+			@Override
 			public String getLocalizedString(Locale locale)
 			{
 				return message;

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Defines function that can produce second order gradients
  */
@@ -37,7 +36,7 @@ public interface ExtendedGradient2Function extends Gradient2Function
 	 *            An array of coefficients
 	 */
 	void initialiseExtended2(final double[] a);
-	
+
 	/**
 	 * Applies the procedure for the valid range of the function.
 	 *

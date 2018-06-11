@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Implementation of the ICSILog algorithm
  * as described in O. Vinyals, G. Friedland, N. Mirghafori
@@ -229,6 +228,7 @@ public class TurboLog2 extends TurboLog
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
 	 */
+	@Override
 	public float fastLog(float x)
 	{
 		// As above but no checks for NaN or infinity		
@@ -312,6 +312,7 @@ public class TurboLog2 extends TurboLog
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
 	 */
+	@Override
 	public float fastLog(double x)
 	{
 		// As above but no checks for NaN or infinity		
@@ -397,6 +398,7 @@ public class TurboLog2 extends TurboLog
 	 *            the argument (must be strictly positive)
 	 * @return log(x)
 	 */
+	@Override
 	public double fastLogD(double x)
 	{
 		// As above but no checks for NaN or infinity		

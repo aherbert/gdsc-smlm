@@ -38,11 +38,13 @@ public class CustomSimpsonIntegratorTest
 
 	private class LinearTestUnivariateFunction implements TestUnivariateFunction
 	{
+		@Override
 		public double value(double x)
 		{
 			return x;
 		}
 
+		@Override
 		public double sum(double a, double b)
 		{
 			// y=x => x^2/2
@@ -52,11 +54,13 @@ public class CustomSimpsonIntegratorTest
 
 	private class QuadraticTestUnivariateFunction implements TestUnivariateFunction
 	{
+		@Override
 		public double value(double x)
 		{
 			return x * x - x;
 		}
 
+		@Override
 		public double sum(double a, double b)
 		{
 			// y=x^2 - x => x^3/3 - x^2 / 2
@@ -68,11 +72,13 @@ public class CustomSimpsonIntegratorTest
 
 	private class CubicTestUnivariateFunction implements TestUnivariateFunction
 	{
+		@Override
 		public double value(double x)
 		{
 			return x * x * x - x * x;
 		}
 
+		@Override
 		public double sum(double a, double b)
 		{
 			// y=x^3 - x^2 => x^4/4 - x^3 / 3
@@ -84,11 +90,13 @@ public class CustomSimpsonIntegratorTest
 
 	private class ReciprocalTestUnivariateFunction implements TestUnivariateFunction
 	{
+		@Override
 		public double value(double x)
 		{
 			return 1.0 / x;
 		}
 
+		@Override
 		public double sum(double a, double b)
 		{
 			// y=1/x => log(x)

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ga;
 
-
 /**
  * Defines the fitness of a chromosome
  */
@@ -51,6 +50,7 @@ public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(Fitness<T> o)
 	{
 		if (t == null)

@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.results.filter.DirectFilter;
 import gdsc.smlm.results.filter.FilterScore;
 
-
 /**
  * Store the filter score used in benchmarking
  */
@@ -44,19 +43,19 @@ public class SimpleParameterScore extends FilterScore
 	protected int compareParameters(FilterScore that)
 	{
 		// Compare the parameters and return the strongest, those most likely to restrict the output
-		
+
 		// 0 = failCount
 		// 1 = residudalsThreshold
 		// 2 = duplicateDistance
 		double[] p1 = this.r.parameters;
-		double[] p2 = ((SimpleParameterScore)that).r.parameters;
-		
+		double[] p2 = ((SimpleParameterScore) that).r.parameters;
+
 		// Lowest fail count
 		if (p1[0] < p2[0])
 			return -1;
 		if (p1[0] > p2[0])
 			return 1;
-		
+
 		// Lowest duplicate distance 
 		if (p1[2] < p2[2])
 			return -1;
@@ -68,7 +67,7 @@ public class SimpleParameterScore extends FilterScore
 			return -1;
 		if (p1[2] < p2[2])
 			return 1;
-		
+
 		return 0;
 	}
 }

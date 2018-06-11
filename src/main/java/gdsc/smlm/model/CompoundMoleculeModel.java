@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -520,6 +519,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * 
 	 * @return The mass of all the molecules
 	 */
+	@Override
 	public double getMass()
 	{
 		return mass;
@@ -582,6 +582,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 *
 	 * @return the label
 	 */
+	@Override
 	public int getLabel()
 	{
 		return label;
@@ -593,6 +594,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * @param label
 	 *            the new label
 	 */
+	@Override
 	public void setLabel(int label)
 	{
 		this.label = label;

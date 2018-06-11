@@ -25,7 +25,6 @@ package gdsc.smlm.model;
 
 import java.util.Arrays;
 
-
 /**
  * Contains a discrete-time model for the position and intensity of a localisation.
  */
@@ -202,6 +201,7 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
+	@Override
 	public int compareTo(LocalisationModel o)
 	{
 		if (time == o.time)

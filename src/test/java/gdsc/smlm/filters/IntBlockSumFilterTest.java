@@ -186,14 +186,16 @@ public class IntBlockSumFilterTest
 	{
 		BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false)
 		{
+			@Override
 			public void filter(int[] data, int width, int height, int boxSize)
 			{
-				f.rollingBlockFilter(data, width, height, (int) boxSize);
+				f.rollingBlockFilter(data, width, height, boxSize);
 			}
 
+			@Override
 			public void filterInternal(int[] data, int width, int height, int boxSize)
 			{
-				f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+				f.rollingBlockFilterInternal(data, width, height, boxSize);
 			}
 		};
 		checkIsCorrect(filter);

@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-
 import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -56,10 +55,11 @@ public class ImageBackground implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
+	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-		
+
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -108,6 +108,7 @@ public class ImageBackground implements PlugInFilter
 	 * 
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
+	@Override
 	public void run(ImageProcessor ip)
 	{
 		ImageProcessor median = getProjection();
@@ -117,12 +118,12 @@ public class ImageBackground implements PlugInFilter
 		subtractBias(background);
 
 		Utils.display("Background", background);
-		
+
 		// Q. Is there a better way to do the thresholding for foreground pixels. 
 		// Ideally we want to outline cell shapes. 
 		ImageProcessor mask = median.convertToByte(true);
 		mask.autoThreshold();
-		
+
 		Utils.display("Mask", mask);
 	}
 
@@ -152,7 +153,7 @@ public class ImageBackground implements PlugInFilter
 	{
 		float[] data = (float[]) background.getPixels();
 		for (int i = 0; i < data.length; i++)
-			data[i] = (float) FastMath.max(0f, data[i] - bias);
+			data[i] = FastMath.max(0f, data[i] - bias);
 		background.resetMinAndMax();
 	}
 }

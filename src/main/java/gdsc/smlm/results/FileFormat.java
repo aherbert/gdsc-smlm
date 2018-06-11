@@ -23,21 +23,30 @@
  */
 package gdsc.smlm.results;
 
-
 /**
  * Specify the file format when reading results from file
  */
 public enum FileFormat
 {
 	//@formatter:off
-	SMLM_TEXT{ public String getName() { return "SMLM Text"; } public boolean isSMLM(){return true;}}, 
-	SMLM_BINARY{ public String getName() { return "SMLM Binary"; } public boolean isSMLM(){return true;}},
-	RAPID_STORM{ public String getName() { return "RapidSTORM"; }}, 
-	NSTORM{ public String getName() { return "NSTORM"; }},
-	SMLM_TABLE{ public String getName() { return "SMLM Table"; }}, 
-	MALK{ public String getName() { return "MALK"; }}, 
-	TSF_BINARY{ public String getName() { return "TSF Binary"; }}, 
-	UNKNOWN{ public String getName() { return "Unknown"; }};
+	SMLM_TEXT{ @Override
+	public String getName() { return "SMLM Text"; } @Override
+	public boolean isSMLM(){return true;}}, 
+	SMLM_BINARY{ @Override
+	public String getName() { return "SMLM Binary"; } @Override
+	public boolean isSMLM(){return true;}},
+	RAPID_STORM{ @Override
+	public String getName() { return "RapidSTORM"; }}, 
+	NSTORM{ @Override
+	public String getName() { return "NSTORM"; }},
+	SMLM_TABLE{ @Override
+	public String getName() { return "SMLM Table"; }}, 
+	MALK{ @Override
+	public String getName() { return "MALK"; }}, 
+	TSF_BINARY{ @Override
+	public String getName() { return "TSF Binary"; }}, 
+	UNKNOWN{ @Override
+	public String getName() { return "Unknown"; }};
 	//@formatter:on
 
 	@Override

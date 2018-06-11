@@ -33,7 +33,6 @@ import gdsc.core.threshold.Histogram;
 import gdsc.core.utils.NoiseEstimator;
 import gdsc.core.utils.Statistics;
 
-
 /**
  * Provide methods to estimate parameters of the data. Data is partitioned into foreground and background using
  * thresholding. The background region must be a minimum fraction of the total data. If this is not achieved then the
@@ -210,7 +209,7 @@ public class DataEstimator
 			percentile = Double.MIN_NORMAL;
 		if (percentile > 100)
 			percentile = 100;
-		
+
 		// The data should not have NaN so we ignore them for speed.
 		final Percentile p = new Percentile(percentile).withNaNStrategy(NaNStrategy.FIXED);
 		final int size = width * height;

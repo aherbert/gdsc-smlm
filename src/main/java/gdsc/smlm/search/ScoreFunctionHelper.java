@@ -25,7 +25,6 @@ package gdsc.smlm.search;
 
 import java.util.Arrays;
 
-
 /**
  * Calculate the score of points within a search space
  */

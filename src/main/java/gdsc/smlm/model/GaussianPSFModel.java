@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.model;
 
-
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.special.Erf;
@@ -142,6 +141,7 @@ public class GaussianPSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
 	 */
+	@Override
 	public double create3D(float[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -169,6 +169,7 @@ public class GaussianPSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
 	 */
+	@Override
 	public double create3D(double[] data, final int width, final int height, final double sum, double x0, double x1,
 			double x2, boolean poissonNoise)
 	{
@@ -457,6 +458,7 @@ public class GaussianPSFModel extends PSFModel
 	 * 
 	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
+	@Override
 	public GaussianPSFModel copy()
 	{
 		GaussianPSFModel model = new GaussianPSFModel();

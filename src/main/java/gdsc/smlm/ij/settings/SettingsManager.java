@@ -98,7 +98,6 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import ij.IJ;
 import ij.Prefs;
 
-
 /**
  * Manage the settings for ImageJ plugins
  */
@@ -1145,8 +1144,7 @@ public class SettingsManager
 	 */
 	public static SpotFitSettings readSpotFitSettings(int flags)
 	{
-		return new ConfigurationReader<SpotFitSettings>(
-				GUIProtosHelper.defaultSpotFitSettings).read(flags);
+		return new ConfigurationReader<SpotFitSettings>(GUIProtosHelper.defaultSpotFitSettings).read(flags);
 	}
 
 	/**

@@ -648,7 +648,7 @@ public class LVMGradientProcedureTest
 	public void gradientProcedureFastLogMLECannotComputeGradientWithHighPrecision()
 	{
 		// Try different precision
-		for (int n = TurboLog2.N; n < 23; n++)
+		for (int n = FastLog.N; n < 23; n++)
 		{
 			try
 			{
@@ -739,8 +739,8 @@ public class LVMGradientProcedureTest
 				{
 					b[j] = y[j] * 0.5;
 				}
-				p = LVMGradientProcedureFactory.create(y, OffsetGradient1Function.wrapGradient1Function(func, b),
-						type, fastLog);
+				p = LVMGradientProcedureFactory.create(y, OffsetGradient1Function.wrapGradient1Function(func, b), type,
+						fastLog);
 			}
 			else
 				p = LVMGradientProcedureFactory.create(y, func, type, fastLog);
@@ -866,6 +866,7 @@ public class LVMGradientProcedureTest
 			{
 				int k = 0;
 
+				@Override
 				public void execute(double value)
 				{
 					b[k] = value;

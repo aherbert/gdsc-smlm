@@ -133,7 +133,7 @@ public class DoubleDHT3DTest
 		DoubleDHT3D dht = createData();
 		double[] pixels = dht.getData().clone();
 		dht.transform();
-		
+
 		DoubleDHT3D copy = dht.copy();
 		copy.initialiseFastMultiply();
 

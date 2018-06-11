@@ -29,7 +29,6 @@ import java.util.Collection;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 
-
 /**
  * Wraps a peak results with synchronized methods.
  */
@@ -94,112 +93,134 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults
 
 	//@formatter:off
 	
+	@Override
 	public void begin()
 	{
 		synchronized (lock)	{ r.begin(); }
 	}
 
+	@Override
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float meanIntensity, float[] params,
 			float[] paramsStdDev)
 	{
 		synchronized (lock)	{ r.add(peak, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev); }
 	}
 
+	@Override
 	public void add(PeakResult result)
 	{
 		synchronized (lock)	{ r.add(result); }
 	}
 	
+	@Override
 	public void addAll(Collection<PeakResult> results)
 	{
 		synchronized (lock)	{ r.addAll(results); }
 	}
 	
+	@Override
 	public void addAll(PeakResult[] results)
 	{
 		synchronized (lock)	{ r.addAll(results); }
 	}
 	
+	@Override
 	public void addAll(PeakResultStore results)
 	{
 		synchronized (lock)	{ r.addAll(results); }
 	}
 
+	@Override
 	public int size()
 	{
 		synchronized (lock)	{ return r.size(); }
 	}
 
+	@Override
 	public void end()
 	{
 		synchronized (lock)	{ r.end(); }
 	}
 
+	@Override
 	public boolean isActive()
 	{
 		synchronized (lock)	{ return r.isActive(); }
 	}
 
+	@Override
 	public void setSource(ImageSource source)
 	{
 		synchronized (lock)	{ r.setSource(source); }
 	}
 
+	@Override
 	public ImageSource getSource()
 	{
 		synchronized (lock)	{ return r.getSource(); }
 	}
 
+	@Override
 	public void setBounds(Rectangle bounds)
 	{
 		synchronized (lock)	{ r.setBounds(bounds); }
 	}
 
+	@Override
 	public Rectangle getBounds()
 	{
 		synchronized (lock)	{ return r.getBounds(); }
 	}
 
+	@Override
 	public void setCalibration(Calibration calibration)
 	{
 		synchronized (lock)	{ r.setCalibration(calibration); }
 	}
 
+	@Override
 	public Calibration getCalibration()
 	{
 		synchronized (lock)	{ return r.getCalibration(); }
 	}
 
+	@Override
 	public void setPSF(PSF psf)
 	{
 		synchronized (lock)	{ r.setPSF(psf); }
 	}
 
+	@Override
 	public PSF getPSF()
 	{
 		synchronized (lock)	{ return r.getPSF(); }
 	}
 
+	@Override
 	public void setConfiguration(String configuration)
 	{
 		synchronized (lock)	{ r.setConfiguration(configuration); }
 	}
 
+	@Override
 	public String getConfiguration()
 	{
 		synchronized (lock)	{ return r.getConfiguration(); }
 	}
 
+	@Override
 	public String getName()
 	{
 		synchronized (lock)	{ return r.getName(); }
 	}
 
+	@Override
 	public void setName(String name)
 	{
 		synchronized (lock)	{ r.setName(name); }
 	}
 
+	@Override
 	public void copySettings(PeakResults peakResults)
 	{
 		synchronized (lock)	{ r.copySettings(peakResults); }

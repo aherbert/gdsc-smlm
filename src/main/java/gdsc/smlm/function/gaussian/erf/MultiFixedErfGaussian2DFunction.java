@@ -30,7 +30,6 @@ import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
@@ -87,6 +86,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		create1Arrays();
@@ -115,6 +115,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise2(double[])
 	 */
+	@Override
 	public void initialise2(double[] a)
 	{
 		create2Arrays();
@@ -146,6 +147,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction#initialiseExtended2(double[])
 	 */
+	@Override
 	public void initialiseExtended2(double[] a)
 	{
 		initialise2(a);
@@ -246,6 +248,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda)
 	{
 		// Unpack the predictor into the dimensions
@@ -271,6 +274,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
 	 */
+	@Override
 	public double eval(final int i, final double[] duda, final double[] d2uda2)
 	{
 		// Unpack the predictor into the dimensions
@@ -342,6 +346,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -368,6 +373,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient2Procedure)
 	 */
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] duda = new double[getNumberOfGradients()];
@@ -397,6 +403,7 @@ public class MultiFixedErfGaussian2DFunction extends MultiCircularErfGaussian2DF
 	 * 
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
+	@Override
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		final int ng = getNumberOfGradients();

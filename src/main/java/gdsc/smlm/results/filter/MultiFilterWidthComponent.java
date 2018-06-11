@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.results.filter;
 
-
 /**
  * Filter results using Width. Assumes XY width are the same.
  */
@@ -45,6 +44,7 @@ public class MultiFilterWidthComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#fail(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
+	@Override
 	public boolean fail(final PreprocessedPeakResult peak)
 	{
 		final float xsdf = peak.getXSDFactor();
@@ -56,6 +56,7 @@ public class MultiFilterWidthComponent extends MultiFilterComponent
 	 * 
 	 * @see gdsc.smlm.results.filter.MultiFilterComponent#getType()
 	 */
+	@Override
 	public int getType()
 	{
 		return IDirectFilter.V_X_SD_FACTOR;

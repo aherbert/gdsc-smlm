@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Class for evaluating the integral (sum) of a function
  */
@@ -54,6 +53,7 @@ public class IntegralValueProcedure implements ValueProcedure
 	 * 
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
+	@Override
 	public void execute(double value)
 	{
 		integral += value;

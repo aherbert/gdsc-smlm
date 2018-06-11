@@ -27,7 +27,6 @@ import java.awt.Rectangle;
 
 import gdsc.core.utils.SimpleArrayUtils;
 
-
 /**
  * Define the methods for manipulating camera pixel data.
  *
@@ -257,6 +256,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBounds()
 	 */
+	@Override
 	public Rectangle getBounds()
 	{
 		return new Rectangle(cameraBounds);
@@ -267,6 +267,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#setOrigin(int, int)
 	 */
+	@Override
 	public void setOrigin(int x, int y)
 	{
 		cameraBounds.x = x;
@@ -327,6 +328,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#isPerPixelModel()
 	 */
+	@Override
 	public boolean isPerPixelModel()
 	{
 		return true;
@@ -377,6 +379,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getBias(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getBias(Rectangle bounds)
 	{
 		return getData(bounds, bias);
@@ -387,6 +390,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getGain(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getGain(Rectangle bounds)
 	{
 		return getData(bounds, gain);
@@ -397,6 +401,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getVariance(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getVariance(Rectangle bounds)
 	{
 		return getData(bounds, variance);
@@ -407,6 +412,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedVariance(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getNormalisedVariance(Rectangle bounds)
 	{
 		return getData(bounds, getNormalisedVarianceInternal());
@@ -485,6 +491,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getWeights(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getWeights(Rectangle bounds)
 	{
 		return toWeights(getVariance(bounds));
@@ -495,6 +502,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#getNormalisedWeights(java.awt.Rectangle)
 	 */
+	@Override
 	public float[] getNormalisedWeights(Rectangle bounds)
 	{
 		return toWeights(getNormalisedVariance(bounds));
@@ -672,6 +680,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeBias(Rectangle bounds, float[] data)
 	{
 		if (data == null)
@@ -689,6 +698,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeGain(Rectangle bounds, float[] data)
 	{
 		if (data == null)
@@ -706,6 +716,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void removeBiasAndGain(Rectangle bounds, float[] data)
 	{
 		if (data == null)
@@ -724,6 +735,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyBias(Rectangle bounds, float[] data)
 	{
 		if (data == null)
@@ -741,6 +753,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyGain(Rectangle bounds, float[] data)
 	{
 		if (data == null)
@@ -758,6 +771,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(java.awt.Rectangle, float[])
 	 */
+	@Override
 	public void applyGainAndBias(Rectangle bounds, float[] data)
 	{
 		if (data == null)
@@ -776,6 +790,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBias(float[])
 	 */
+	@Override
 	public void removeBias(float[] data)
 	{
 		if (data == null)
@@ -791,6 +806,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeGain(float[])
 	 */
+	@Override
 	public void removeGain(float[] data)
 	{
 		if (data == null)
@@ -806,6 +822,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#removeBiasAndRemoveGain(float[])
 	 */
+	@Override
 	public void removeBiasAndGain(float[] data)
 	{
 		if (data == null)
@@ -821,6 +838,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyBias(float[])
 	 */
+	@Override
 	public void applyBias(float[] data)
 	{
 		if (data == null)
@@ -836,6 +854,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGain(float[])
 	 */
+	@Override
 	public void applyGain(float[] data)
 	{
 		if (data == null)
@@ -851,6 +870,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#applyGainAndBias(float[])
 	 */
+	@Override
 	public void applyGainAndBias(float[] data)
 	{
 		if (data == null)
@@ -866,6 +886,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#crop(java.awt.Rectangle, boolean)
 	 */
+	@Override
 	public CameraModel crop(Rectangle bounds, boolean resetOrigin)
 	{
 		if (bounds == null)
@@ -893,6 +914,7 @@ public class PerPixelCameraModel extends BaseCameraModel
 	 * 
 	 * @see gdsc.smlm.model.camera.CameraModel#copy()
 	 */
+	@Override
 	public PerPixelCameraModel copy()
 	{
 		// Deep copy

@@ -339,7 +339,6 @@ public abstract class Image3DTest
 		}
 	}
 
-
 	@Test
 	public void canFillOutside()
 	{
@@ -369,7 +368,8 @@ public abstract class Image3DTest
 
 			assertEquals(image, image2);
 		}
-	}	
+	}
+
 	private static void assertEquals(Image3D a, Image3D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)

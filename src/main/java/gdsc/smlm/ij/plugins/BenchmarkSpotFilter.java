@@ -55,7 +55,6 @@ import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.ConfigurationException;
 
-
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.data.config.FitProtos.RelativeParameter;
@@ -400,6 +399,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		 * 
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(ScoredSpot o)
 		{
 			if (spot.intensity > o.spot.intensity)
@@ -461,6 +461,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -646,6 +647,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run()
 		{
 			try
@@ -1074,6 +1076,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	 * 
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1781,6 +1784,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			progress = 0;
 			coordinates.forEachKey(new TIntProcedure()
 			{
+				@Override
 				public boolean execute(int value)
 				{
 					put(jobs, value);
@@ -1941,6 +1945,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		results.setName(TITLE + " TP " + id++);
 		filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
+			@Override
 			public boolean execute(int peak, FilterResult filterResult)
 			{
 				for (ScoredSpot spot : filterResult.spots)
@@ -1970,6 +1975,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		final StoredData data = new StoredData();
 		filterResult.filterResults.forEachEntry(new TIntObjectProcedure<FilterResult>()
 		{
+			@Override
 			public boolean execute(int peak, FilterResult filterResult)
 			{
 				for (ScoredSpot spot : filterResult.spots)
@@ -2056,6 +2062,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		final ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
 		filterResults.forEachValue(new TObjectProcedure<FilterResult>()
 		{
+			@Override
 			public boolean execute(FilterResult result)
 			{
 				total[0] += result.result.getTP();
@@ -2160,8 +2167,8 @@ public class BenchmarkSpotFilter implements PlugIn
 				fp += s.antiScore();
 				// Just use a rounded intensity for now
 				final double spotIntensity = s.getIntensity();
-				final long v1 = (long) Math.round(spotIntensity);
-				final long v2 = (long) Math.round(s.intensity);
+				final long v1 = Math.round(spotIntensity);
+				final long v2 = Math.round(s.intensity);
 				regression.addData(spotIntensity, s.intensity);
 				i1[ci] = spotIntensity;
 				i2[ci] = s.intensity;
@@ -2171,9 +2178,9 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 			else
 				fp++;
-			r[i] = (double) tp / n;
-			p[i] = (double) tp / (tp + fp);
-			j[i] = (double) tp / (fp + n); // (tp+fp+fn) == (fp+n) since tp+fn=n;
+			r[i] = tp / n;
+			p[i] = tp / (tp + fp);
+			j[i] = tp / (fp + n); // (tp+fp+fn) == (fp+n) since tp+fn=n;
 			c[i] = lastC;
 			truePositives[i] = tp;
 			falsePositives[i] = fp;
@@ -2276,6 +2283,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		//int tp = 0, fp = 0, fn = 0, nn = 0;
 		filterResult.filterResults.forEachValue(new TObjectProcedure<FilterResult>()
 		{
+			@Override
 			public boolean execute(FilterResult result)
 			{
 				final int size = result.spots.length;
@@ -2376,15 +2384,15 @@ public class BenchmarkSpotFilter implements PlugIn
 		double[] limits = Maths.limits(rank);
 		plot.setLimits(limits[0], limits[1], 0, 1.05);
 		plot.setColor(Color.blue);
-		plot.addPoints(rank, p, Plot2.LINE);
+		plot.addPoints(rank, p, Plot.LINE);
 		//plot.addPoints(rank, maxp, Plot2.DOT);
 		plot.setColor(Color.red);
-		plot.addPoints(rank, r, Plot2.LINE);
+		plot.addPoints(rank, r, Plot.LINE);
 		plot.setColor(Color.black);
-		plot.addPoints(rank, j, Plot2.LINE);
+		plot.addPoints(rank, j, Plot.LINE);
 		// Plot correlation - update the scale to be 0-1?
 		plot.setColor(Color.yellow);
-		plot.addPoints(rank, c, Plot2.LINE);
+		plot.addPoints(rank, c, Plot.LINE);
 		plot.setColor(Color.magenta);
 		plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
 				Maths.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
@@ -2401,7 +2409,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot = new Plot2(title, "Recall", "Precision");
 		plot.setLimits(0, 1, 0, 1.05);
 		plot.setColor(Color.red);
-		plot.addPoints(r, p, Plot2.LINE);
+		plot.addPoints(r, p, Plot.LINE);
 		//plot.setColor(Color.magenta);
 		//plot.addPoints(r, maxp, Plot2.LINE);
 		plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);

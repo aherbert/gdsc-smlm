@@ -123,6 +123,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 * 
 	 * @see ij.plugin.frame.PlugInFrame#windowClosing(java.awt.event.WindowEvent)
 	 */
+	@Override
 	public void windowClosing(WindowEvent e)
 	{
 		Prefs.saveLocation(OPT_LOCATION, getLocation());
@@ -156,6 +157,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 	 * 
 	 * @see ij.plugin.frame.PlugInFrame#run(java.lang.String)
 	 */
+	@Override
 	public void run(String arg)
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
@@ -261,7 +263,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		pack();
 		Dimension d = mainPanel.getPreferredSize();
 		remove(0); // Assume this is the only component
-		
+
 		ScrollPane scroll = new ScrollPane();
 		scroll.getHAdjustable().setUnitIncrement(16);
 		scroll.getVAdjustable().setUnitIncrement(16);
@@ -287,7 +289,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 
 		scroll.setPreferredSize(d);
 		scroll.setSize(d);
-		
+
 		return true;
 	}
 
@@ -408,6 +410,7 @@ public class SMLMTools extends PlugInFrame implements ActionListener
 		return row;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		// Get the plugin from the button label and run it

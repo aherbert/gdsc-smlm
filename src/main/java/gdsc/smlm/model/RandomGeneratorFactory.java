@@ -25,7 +25,6 @@ package gdsc.smlm.model;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-
 /**
  * Specify methods for building RandomGenerators.
  */

@@ -32,7 +32,6 @@ import gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Contains helper functions for the PSF class.
  */
@@ -178,7 +177,6 @@ public class PSFHelper
 		return defaultValue;
 	}
 
-
 	/**
 	 * Gets the Gaussian 2D x-width for the PSF parameters.
 	 *
@@ -208,7 +206,7 @@ public class PSFHelper
 		}
 		throw new ConfigurationException("psf is not Gaussian2D");
 	}
-	
+
 	/**
 	 * Gets the Gaussian 2D angle index for the PeakResult parameters.
 	 * <p>

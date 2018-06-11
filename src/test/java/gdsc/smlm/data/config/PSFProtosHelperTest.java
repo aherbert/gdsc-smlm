@@ -48,7 +48,7 @@ public class PSFProtosHelperTest
 
 		//Ax = Ay = 0;
 		//Bx = By = 0;
-		
+
 		DistanceUnit zDistanceUnit = DistanceUnit.UM;
 		DistanceUnit sDistanceUnit = DistanceUnit.PIXEL;
 
@@ -64,7 +64,7 @@ public class PSFProtosHelperTest
 		builder.setZDistanceUnit(zDistanceUnit);
 		builder.setSDistanceUnit(sDistanceUnit);
 		builder.setNmPerPixel(nmPerPixel);
-		
+
 		AstigmatismModel model1 = builder.build();
 		PSF psf = PSFProtosHelper.createPSF(model1, zDistanceUnit, sDistanceUnit);
 		//System.out.println(psf);

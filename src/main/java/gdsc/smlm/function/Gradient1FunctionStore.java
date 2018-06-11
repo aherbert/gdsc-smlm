@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.function;
 
-
 /**
  * Wrap a function and store the values from the procedure.
  */
@@ -70,6 +69,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#initialise(double[])
 	 */
+	@Override
 	public void initialise(double[] a)
 	{
 		f.initialise(a);
@@ -80,6 +80,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
+	@Override
 	public void initialise1(double[] a)
 	{
 		f.initialise(a);
@@ -90,6 +91,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#gradientIndices()
 	 */
+	@Override
 	public int[] gradientIndices()
 	{
 		return f.gradientIndices();
@@ -100,6 +102,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	 * 
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
+	@Override
 	public int getNumberOfGradients()
 	{
 		return f.getNumberOfGradients();
@@ -110,6 +113,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Function#forEach(gdsc.smlm.function.Gradient1Procedure)
 	 */
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		i = 0;
@@ -121,7 +125,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 
 	protected void createDYDA()
 	{
-		if (dyda==null || dyda.length != f.size())
+		if (dyda == null || dyda.length != f.size())
 			dyda = new double[values.length][length];
 	}
 
@@ -130,6 +134,7 @@ public class Gradient1FunctionStore extends ValueFunctionStore implements Gradie
 	 * 
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
+	@Override
 	public void execute(double value, double[] dy_da)
 	{
 		values[i] = value;

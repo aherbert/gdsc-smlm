@@ -57,11 +57,13 @@ public class FakeGradientFunction
 		this.dy_da = new double[nparams];
 	}
 
+	@Override
 	public int size()
 	{
 		return n;
 	}
 
+	@Override
 	public void initialise(double[] a)
 	{
 		int seed = 0;
@@ -71,21 +73,25 @@ public class FakeGradientFunction
 		r.setSeed(seed);
 	}
 
+	@Override
 	public void initialise0(double[] a)
 	{
 		initialise(a);
 	}
 
+	@Override
 	public void initialise1(double[] a)
 	{
 		initialise(a);
 	}
 
+	@Override
 	public void initialise2(double[] a)
 	{
 		initialise(a);
 	}
 
+	@Override
 	public void initialiseExtended2(double[] a)
 	{
 		initialise(a);
@@ -97,16 +103,19 @@ public class FakeGradientFunction
 		return (int) (bits ^ (bits >>> 32));
 	}
 
+	@Override
 	public int[] gradientIndices()
 	{
 		return SimpleArrayUtils.newArray(nparams, 0, 1);
 	}
 
+	@Override
 	public int getNumberOfGradients()
 	{
 		return nparams;
 	}
 
+	@Override
 	public void forEach(ValueProcedure procedure)
 	{
 		// Simulate a 2D forEach
@@ -115,6 +124,7 @@ public class FakeGradientFunction
 				procedure.execute(r.nextDouble());
 	}
 
+	@Override
 	public void forEach(Gradient1Procedure procedure)
 	{
 		// Simulate a 2D forEach
@@ -130,6 +140,7 @@ public class FakeGradientFunction
 		}
 	}
 
+	@Override
 	public void forEach(Gradient2Procedure procedure)
 	{
 		final double[] d2y_da2 = new double[nparams];
@@ -150,6 +161,7 @@ public class FakeGradientFunction
 		}
 	}
 
+	@Override
 	public void forEach(ExtendedGradient2Procedure procedure)
 	{
 		final double[] d2y_dadb = new double[nparams * nparams];
@@ -170,6 +182,7 @@ public class FakeGradientFunction
 		}
 	}
 
+	@Override
 	public double eval(int i, double[] dy_da)
 	{
 		// Unpack the predictor to the 2D coordinates
@@ -181,21 +194,25 @@ public class FakeGradientFunction
 		return r.nextDouble();
 	}
 
+	@Override
 	public double eval(int x)
 	{
 		return r.nextDouble();
 	}
 
+	@Override
 	public double eval(int x, double[] dyda, double[] w)
 	{
 		throw new NotImplementedException();
 	}
 
+	@Override
 	public double evalw(int x, double[] w)
 	{
 		throw new NotImplementedException();
 	}
 
+	@Override
 	public boolean canComputeWeights()
 	{
 		return false;

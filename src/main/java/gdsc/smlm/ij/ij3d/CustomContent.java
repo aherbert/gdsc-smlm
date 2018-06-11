@@ -23,7 +23,6 @@
  */
 package gdsc.smlm.ij.ij3d;
 
-
 import ij3d.Content;
 
 /**

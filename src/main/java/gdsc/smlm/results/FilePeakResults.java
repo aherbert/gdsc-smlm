@@ -34,7 +34,6 @@ import com.google.protobuf.util.JsonFormat.Printer;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.TextUtils;
 
-
 /**
  * Saves the fit results to file
  */
@@ -58,6 +57,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#begin()
 	 */
+	@Override
 	public void begin()
 	{
 		fos = null;
@@ -123,7 +123,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 		if (getSource() != null)
 			sb.append(String.format("#Source %s\n", singleLine(getSource().toXML())));
 		if (getBounds() != null)
-			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", getBounds().x, getBounds().y, getBounds().width, getBounds().height));
+			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", getBounds().x, getBounds().y, getBounds().width,
+					getBounds().height));
 		if (getCalibration() != null)
 			printer = addMessage(sb, printer, "Calibration", getCalibration());
 		if (!TextUtils.isNullOrEmpty(getConfiguration()))
@@ -245,6 +246,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
+	@Override
 	public int size()
 	{
 		return size;
@@ -255,6 +257,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 * 
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
+	@Override
 	public void end()
 	{
 		if (fos == null)
@@ -310,6 +313,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 	 * 
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
+	@Override
 	public boolean isActive()
 	{
 		return fos != null;

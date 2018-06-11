@@ -564,6 +564,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer
 			{
 				final double[] x = new double[n];
 
+				@Override
 				public double value(double alpha)
 				{
 					for (int i = 0; i < n; i++)

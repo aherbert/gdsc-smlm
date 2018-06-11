@@ -25,7 +25,6 @@ package gdsc.smlm.results.predicates;
 
 import gdsc.smlm.results.PeakResult;
 
-
 /**
  * Represents a predicate (boolean-valued function) of one argument.
  */
