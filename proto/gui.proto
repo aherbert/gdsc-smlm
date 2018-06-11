@@ -651,4 +651,5 @@ message SpotFitSettings {
 	bool attach_to_slice = 5;
 	bool log_progress = 6;
 	bool show_fit_roi = 7;
+	double snr_threshold = 8;
 }

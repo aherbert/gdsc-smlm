@@ -42982,6 +42982,11 @@ public final class GUIProtos {
      * <code>bool show_fit_roi = 7;</code>
      */
     boolean getShowFitRoi();
+
+    /**
+     * <code>double snr_threshold = 8;</code>
+     */
+    double getSnrThreshold();
   }
   /**
    * <pre>
@@ -43006,6 +43011,7 @@ public final class GUIProtos {
       attachToSlice_ = false;
       logProgress_ = false;
       showFitRoi_ = false;
+      snrThreshold_ = 0D;
     }
 
     @java.lang.Override
@@ -43066,6 +43072,11 @@ public final class GUIProtos {
             case 56: {
 
               showFitRoi_ = input.readBool();
+              break;
+            }
+            case 65: {
+
+              snrThreshold_ = input.readDouble();
               break;
             }
           }
@@ -43154,6 +43165,15 @@ public final class GUIProtos {
       return showFitRoi_;
     }
 
+    public static final int SNR_THRESHOLD_FIELD_NUMBER = 8;
+    private double snrThreshold_;
+    /**
+     * <code>double snr_threshold = 8;</code>
+     */
+    public double getSnrThreshold() {
+      return snrThreshold_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -43186,6 +43206,9 @@ public final class GUIProtos {
       }
       if (showFitRoi_ != false) {
         output.writeBool(7, showFitRoi_);
+      }
+      if (snrThreshold_ != 0D) {
+        output.writeDouble(8, snrThreshold_);
       }
     }
 
@@ -43222,6 +43245,10 @@ public final class GUIProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, showFitRoi_);
       }
+      if (snrThreshold_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(8, snrThreshold_);
+      }
       memoizedSize = size;
       return size;
     }
@@ -43252,6 +43279,10 @@ public final class GUIProtos {
           == other.getLogProgress());
       result = result && (getShowFitRoi()
           == other.getShowFitRoi());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getSnrThreshold())
+          == java.lang.Double.doubleToLongBits(
+              other.getSnrThreshold()));
       return result;
     }
 
@@ -43280,6 +43311,9 @@ public final class GUIProtos {
       hash = (37 * hash) + SHOW_FIT_ROI_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getShowFitRoi());
+      hash = (37 * hash) + SNR_THRESHOLD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getSnrThreshold()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -43427,6 +43461,8 @@ public final class GUIProtos {
 
         showFitRoi_ = false;
 
+        snrThreshold_ = 0D;
+
         return this;
       }
 
@@ -43456,6 +43492,7 @@ public final class GUIProtos {
         result.attachToSlice_ = attachToSlice_;
         result.logProgress_ = logProgress_;
         result.showFitRoi_ = showFitRoi_;
+        result.snrThreshold_ = snrThreshold_;
         onBuilt();
         return result;
       }
@@ -43517,6 +43554,9 @@ public final class GUIProtos {
         }
         if (other.getShowFitRoi() != false) {
           setShowFitRoi(other.getShowFitRoi());
+        }
+        if (other.getSnrThreshold() != 0D) {
+          setSnrThreshold(other.getSnrThreshold());
         }
         onChanged();
         return this;
@@ -43722,6 +43762,32 @@ public final class GUIProtos {
       public Builder clearShowFitRoi() {
         
         showFitRoi_ = false;
+        onChanged();
+        return this;
+      }
+
+      private double snrThreshold_ ;
+      /**
+       * <code>double snr_threshold = 8;</code>
+       */
+      public double getSnrThreshold() {
+        return snrThreshold_;
+      }
+      /**
+       * <code>double snr_threshold = 8;</code>
+       */
+      public Builder setSnrThreshold(double value) {
+        
+        snrThreshold_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double snr_threshold = 8;</code>
+       */
+      public Builder clearSnrThreshold() {
+        
+        snrThreshold_ = 0D;
         onChanged();
         return this;
       }
@@ -44180,14 +44246,14 @@ public final class GUIProtos {
       "nslateResultsSettings\022\024\n\014input_option\030\001 " +
       "\001(\t\022\n\n\002dx\030\002 \001(\001\022\n\n\002dy\030\003 \001(\001\022\n\n\002dz\030\004 \001(\001\022" +
       ":\n\rdistance_unit\030\005 \001(\0162#.gdsc.smlm.data." +
-      "config.DistanceUnit\"\250\001\n\017SpotFitSettings\022" +
+      "config.DistanceUnit\"\277\001\n\017SpotFitSettings\022" +
       "\017\n\007channel\030\001 \001(\005\022\025\n\rsearch_radius\030\002 \001(\005\022" +
       "\022\n\nfit_radius\030\003 \001(\005\022\024\n\014show_overlay\030\004 \001(",
       "\010\022\027\n\017attach_to_slice\030\005 \001(\010\022\024\n\014log_progre" +
-      "ss\030\006 \001(\010\022\024\n\014show_fit_roi\030\007 \001(\010*O\n\014Templa" +
-      "teType\022\023\n\017INLINE_TEMPLATE\020\000\022\025\n\021RESOURCE_" +
-      "TEMPLATE\020\001\022\023\n\017CUSTOM_TEMPLATE\020\002B\013B\tGUIPr" +
-      "otosb\006proto3"
+      "ss\030\006 \001(\010\022\024\n\014show_fit_roi\030\007 \001(\010\022\025\n\rsnr_th" +
+      "reshold\030\010 \001(\001*O\n\014TemplateType\022\023\n\017INLINE_" +
+      "TEMPLATE\020\000\022\025\n\021RESOURCE_TEMPLATE\020\001\022\023\n\017CUS" +
+      "TOM_TEMPLATE\020\002B\013B\tGUIProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -44349,7 +44415,7 @@ public final class GUIProtos {
     internal_static_gdsc_smlm_data_config_SpotFitSettings_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gdsc_smlm_data_config_SpotFitSettings_descriptor,
-        new java.lang.String[] { "Channel", "SearchRadius", "FitRadius", "ShowOverlay", "AttachToSlice", "LogProgress", "ShowFitRoi", });
+        new java.lang.String[] { "Channel", "SearchRadius", "FitRadius", "ShowOverlay", "AttachToSlice", "LogProgress", "ShowFitRoi", "SnrThreshold", });
     gdsc.smlm.data.config.UnitProtos.getDescriptor();
     gdsc.smlm.data.config.CalibrationProtos.getDescriptor();
     gdsc.smlm.data.config.FitProtos.getDescriptor();

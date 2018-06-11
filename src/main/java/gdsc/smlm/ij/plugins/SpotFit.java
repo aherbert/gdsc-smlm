@@ -20,18 +20,22 @@ import java.util.regex.Pattern;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.ImageExtractor;
+import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.FitProtos.FitSolver;
 import gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.engine.FitConfiguration;
+import gdsc.smlm.engine.SimplePeakResultValidationData;
 import gdsc.smlm.filters.BlockMeanFilter;
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.ij.settings.SettingsManager;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.utils.ImageConverter;
 import ij.IJ;
 import ij.ImageJ;
@@ -71,6 +75,7 @@ public class SpotFit implements PlugIn
 
 		private BlockMeanFilter f = new BlockMeanFilter();
 		private FitConfiguration config;
+		private SimplePeakResultValidationData validationData;
 		private Gaussian2DFitter gf;
 
 		private double[] lower, upper;
@@ -121,6 +126,7 @@ public class SpotFit implements PlugIn
 			gd.addNumericField("Channel", settings.getChannel(), 0);
 			gd.addSlider("Search_range", 1, 10, settings.getSearchRadius());
 			gd.addSlider("Fit_radius", 3, 10, settings.getFitRadius());
+			gd.addNumericField("SNR_threshold", settings.getSnrThreshold(), 0);
 			gd.addCheckbox("Show_fit_ROI", settings.getShowFitRoi());
 			gd.addCheckbox("Show_overlay", settings.getShowOverlay());
 			gd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
@@ -134,10 +140,12 @@ public class SpotFit implements PlugIn
 				settings.setChannel((int) gd.getNextNumber());
 				settings.setSearchRadius((int) gd.getNextNumber());
 				settings.setFitRadius((int) gd.getNextNumber());
+				settings.setSnrThreshold(gd.getNextNumber());
 				settings.setShowFitRoi(gd.getNextBoolean());
 				settings.setShowOverlay(gd.getNextBoolean());
 				settings.setAttachToSlice(gd.getNextBoolean());
-				settings.setLogProgress(gd.getNextBoolean());
+				logging = gd.getNextBoolean();
+				settings.setLogProgress(logging);
 				// Only active if the settings are valid
 				active = (settings.getFitRadius() > 1);
 				if (!active)
@@ -211,7 +219,16 @@ public class SpotFit implements PlugIn
 				if (logging)
 					Utils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
 				if (logging)
-					Utils.log("Fit status = %s", fitResult.getStatus());
+				{
+					String msg = "Fit status = " + fitResult.getStatus();
+					Object data = fitResult.getStatusData();
+					if (data != null)
+					{
+						msg += " : " + SimpleArrayUtils.toString(data);
+					}
+					Utils.log(msg);
+				}
+
 				if (fitResult.getStatus() != FitStatus.OK)
 				{
 					// Q. Do something?
@@ -258,11 +275,11 @@ public class SpotFit implements PlugIn
 		{
 			config.setInitialPeakStdDev(0);
 
-			setupPeakFiltering(config, bounds);
-
 			// Get a region
 			double[] data = new ImageConverter().getDoubleData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds,
 					null);
+
+			setupPeakFiltering(config, bounds, ip);
 
 			//Utils.display(TITLE + " fit data", data, bounds.width, bounds.height, 0);
 
@@ -315,12 +332,17 @@ public class SpotFit implements PlugIn
 			return config;
 		}
 
-		protected void setupPeakFiltering(FitConfiguration config, Rectangle bounds)
+		protected void setupPeakFiltering(FitConfiguration config, Rectangle bounds, ImageProcessor ip)
 		{
 			config.setCoordinateShift(settings.getSearchRadius());
-			config.setSignalStrength(0);
+			config.setSignalStrength(settings.getSnrThreshold());
 			config.setMinWidthFactor(0.5);
 			//config.setWidthFactor(3);
+
+			validationData = new SimplePeakResultValidationData(
+					new GaussianFunctionFactory(config.getFunctionFlags(), config.getAstigmatismZModel()), bounds.x,
+					bounds.y, ip.getPixels(), ip.getWidth(), ip.getHeight());
+			config.setPeakResultValidationData(validationData);
 		}
 
 		/**
@@ -346,7 +368,9 @@ public class SpotFit implements PlugIn
 			sb.append("Intensity\t");
 			sb.append("X\t");
 			sb.append("Y\t");
-			sb.append("S");
+			sb.append("S\t");
+			sb.append("Noise\t");
+			sb.append("SNR");
 			return sb.toString();
 		}
 
@@ -365,10 +389,16 @@ public class SpotFit implements PlugIn
 			sb.append(bounds.height);
 			double[] params = fitResult.getParameters();
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.BACKGROUND]));
-			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.SIGNAL]));
+			double signal = params[Gaussian2DFunction.SIGNAL];
+			sb.append('\t').append(Utils.rounded(signal));
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.X_POSITION]));
 			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.Y_POSITION]));
-			sb.append('\t').append(Utils.rounded(params[Gaussian2DFunction.X_SD]));
+			double xsd = params[Gaussian2DFunction.X_SD];
+			sb.append('\t').append(Utils.rounded(xsd));
+			final double noise = validationData.getNoise();
+			final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, xsd) / noise;
+			sb.append('\t').append(Utils.rounded(noise));
+			sb.append('\t').append(Utils.rounded(snr));
 			resultsWindow.append(sb.toString());
 		}
 
