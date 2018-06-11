@@ -149,7 +149,7 @@ public class GaussianFunctionFactory
 	 * An 2D Gaussian (full integration per pixel) with gradients for signal, x/y position, width
 	 */
 	public static final int FIT_ERF_NB_CIRCLE = FIT_X_WIDTH | FIT_SIGNAL | FIT_ERF;
-	
+
 	/**
 	 * An elliptical 2D Gaussian (single exponential per pixel) with gradients for signal, rotation angle,
 	 * x/y position, x/y width
@@ -177,6 +177,44 @@ public class GaussianFunctionFactory
 	 * A 2D Gaussian (single exponential per pixel) with gradients for x/y position
 	 */
 	public static final int FIT_SIMPLE_NS_NB_FIXED = FIT_SIMPLE;
+
+	private final int flags;
+	private final AstigmatismZModel zModel;
+
+	/**
+	 * Instantiates a new gaussian function factory.
+	 * <p>
+	 * This is a simple instance that calls {@link #create2D(int, int, int, int, AstigmatismZModel)} with a fixed set of
+	 * flags and z-model.
+	 *
+	 * @param flags
+	 *            the flags
+	 * @param zModel
+	 *            the z model
+	 */
+	public GaussianFunctionFactory(int flags, AstigmatismZModel zModel)
+	{
+		this.flags = flags;
+		this.zModel = zModel;
+	}
+
+	/**
+	 * Create the correct 2D Gaussian function for the specified parameters.
+	 * <p>
+	 * Defaults to using the ERF Gaussian functions if the user has not requested a simple Gaussian or angle fitting.
+	 *
+	 * @param nPeaks
+	 *            The number of peaks (N)
+	 * @param maxx
+	 *            The maximum X-dimension
+	 * @param maxy
+	 *            The maximum Y-dimension
+	 * @return The function
+	 */
+	public Gaussian2DFunction create2D(int nPeaks, int maxx, int maxy)
+	{
+		return create2D(nPeaks, maxx, maxy, flags, zModel);
+	}
 
 	/**
 	 * Create the correct 2D Gaussian function for the specified parameters.
