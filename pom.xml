@@ -16,6 +16,14 @@
 
 	<name>SMLM</name>
 	<url>http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins</url>
+	<organization>
+		<name>Genome Damage and Stability Centre</name>
+		<url>http://www.sussex.ac.uk/gdsc/</url>
+	</organization>
+	<description>Genome Damage and Stability Centre SMLM ImageJ Plugins
+
+Software for single molecule localisation microscopy (SMLM)
+</description>
 
 	<licenses>
 		<license>
@@ -25,12 +33,7 @@
 		</license>
 	</licenses>
 
-	<inceptionYear>2013</inceptionYear>
-	<contributors>
-		<contributor>
-			<name>Alex Herbert</name>
-		</contributor>
-	</contributors>
+	<inceptionYear>2011</inceptionYear>
 	<mailingLists>
 		<mailingList>
 			<name>ImageJ Forum</name>
@@ -58,11 +61,15 @@
 			</roles>
 		</developer>
 	</developers>
+	<contributors>
+		<contributor>
+			<name>Alex Herbert</name>
+		</contributor>
+	</contributors>
 
 	<properties>
 		<license.licenseName>gpl_v3</license.licenseName>
-		<license.copyrightOwners>N/A</license.copyrightOwners>
-		<allowedDuplicateClasses></allowedDuplicateClasses>
+		<license.copyrightOwners>Alex Herbert</license.copyrightOwners>
 	</properties>
 
 	<build>
@@ -215,23 +222,4 @@
 		</repository>
 	</repositories>
 
-	<organization>
-		<name>Genome Damage and Stability Centre</name>
-		<url>http://www.sussex.ac.uk/gdsc/</url>
-	</organization>
-	<description>Single Molecule Localisation Microscopy (SMLM) software.
-
-Software for use in single molecule localisation microscopy, e.g. STORM, PALM.
-
-Uses a 2D Gaussian to approximate the Point Spread Function (PSF) of single fluorophores.
-
-Contains routines for:
-
-- PSF calculation using image acquisition details
-- PSF estimation from image data
-- Spot localisation using PSF fitting
-- Drift correction using labelled regions
-- Clustering using distance and time thresholds
-- Super-resolution image reconstruction
-</description>
 </project>
