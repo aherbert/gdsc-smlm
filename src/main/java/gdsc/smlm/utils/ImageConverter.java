@@ -18,7 +18,7 @@ import java.awt.Rectangle;
 /**
  * Contains methods for converting an image to float data.
  * <p>
- * Handles unsigned byte, unsigned short, float and RGB int array data.
+ * Handles unsigned byte, unsigned short, float, double and RGB int array data.
  */
 public class ImageConverter
 {
@@ -171,6 +171,29 @@ public class ImageConverter
 				return pixels2;
 			}
 		}
+		else if (oPixels instanceof double[])
+		{
+			double[] pixels = (double[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
+			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
+			{
+				float[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
+				{
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
+						pixels2[offset1++] = (float) pixels[offset2++];
+				}
+				return pixels2;
+			}
+			else
+			{
+				float[] pixels2 = allocate(buffer, pixels.length);
+				for (int i = 0; i < pixels.length; i++)
+					pixels2[i] = (float) pixels[i];
+				return pixels2;
+			}
+		}
 		else if (oPixels instanceof int[])
 		{
 			// The default processing assumes RGB
@@ -303,6 +326,28 @@ public class ImageConverter
 				return pixels2;
 			}
 		}
+		if (oPixels instanceof double[])
+		{
+			double[] pixels = (double[]) oPixels;
+			if (incorrectSize(pixels.length, width, height))
+				return null;
+			if (bounds != null && (bounds.x != 0 || bounds.y != 0 || bounds.width != width || bounds.height != height))
+			{
+				double[] pixels2 = allocate(buffer, bounds.width * bounds.height);
+				for (int ys = 0, offset1 = 0; ys < bounds.height; ys++)
+				{
+					for (int xs = 0, offset2 = (ys + bounds.y) * width + bounds.x; xs < bounds.width; xs++)
+						pixels2[offset1++] = pixels[offset2++];
+				}
+				return pixels2;
+			}
+			else
+			{
+				double[] pixels2 = allocate(buffer, pixels.length);
+				System.arraycopy(pixels, 0, pixels2, 0, pixels.length);
+				return pixels2;
+			}
+		}
 		else if (oPixels instanceof int[])
 		{
 			// The default processing assumes RGB
@@ -380,6 +425,14 @@ public class ImageConverter
 				pixels2[i] = pixels[i] & 0xff;
 			return pixels2;
 		}
+		else if (oPixels instanceof double[])
+		{
+			double[] pixels = (double[]) oPixels;
+			float[] pixels2 = allocate(buffer, pixels.length);
+			for (int i = 0; i < pixels.length; i++)
+				pixels2[i] = (float) pixels[i];
+			return pixels2;
+		}
 		else if (oPixels instanceof int[])
 		{
 			// The default processing
@@ -390,5 +443,27 @@ public class ImageConverter
 			return pixels2;
 		}
 		return null;
+	}
+
+	/**
+	 * Checks if the primitive array type is supported.
+	 *
+	 * @param oPixels
+	 *            the pixels
+	 * @return true, if is supported
+	 */
+	public boolean isSupported(Object oPixels)
+	{
+		if (oPixels instanceof float[])
+			return true;
+		if (oPixels instanceof short[])
+			return true;
+		if (oPixels instanceof byte[])
+			return true;
+		if (oPixels instanceof double[])
+			return true;
+		if (oPixels instanceof int[])
+			return true;
+		return false;
 	}
 }
