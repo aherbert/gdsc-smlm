@@ -34,7 +34,6 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.function.ExtendedGradient2Function;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
@@ -169,8 +168,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
-			FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y,
-					func);
+			FastMLEJacobianGradient2Procedure p = new FastMLEJacobianGradient2Procedure(y, func);
 			//double ll = p.computeLogLikelihood(a);
 			p.computeJacobian(a);
 			double[] d1 = p.d1.clone();

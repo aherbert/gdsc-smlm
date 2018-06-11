@@ -23,16 +23,15 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.core.utils.FloatEquality;
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.filters.AverageFilter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
+
+import gdsc.core.utils.FloatEquality;
+import gdsc.smlm.TestSettings;
 
 @SuppressWarnings("deprecation")
 public class AverageFilterTest

@@ -26,14 +26,14 @@ package gdsc.smlm.model;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
-import gdsc.smlm.ij.results.IJImagePeakResults;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.smlm.ij.results.IJImagePeakResults;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 public class SphericalDistributionTest
 {

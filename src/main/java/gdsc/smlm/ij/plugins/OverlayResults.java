@@ -36,7 +36,6 @@ import gdsc.core.data.utils.TypeConverter;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;

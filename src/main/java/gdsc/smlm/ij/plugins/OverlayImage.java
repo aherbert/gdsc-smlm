@@ -23,6 +23,9 @@
  */
 package gdsc.smlm.ij.plugins;
 
+import java.awt.Rectangle;
+import java.util.Arrays;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Undo;
@@ -32,9 +35,6 @@ import ij.gui.ImageRoi;
 import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
-
-import java.awt.Rectangle;
-import java.util.Arrays;
 
 /**
  * This plugin is extracted from ij.plugins.OverlayCommands to allow an image to be added with a transparent

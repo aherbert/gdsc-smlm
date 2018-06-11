@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 

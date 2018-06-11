@@ -23,18 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.ij.utils.IJImageConverter;
-import gdsc.core.ij.Utils;
-import gdsc.core.utils.MedianWindowDLLFloat;
-import gdsc.core.utils.MedianWindowFloat;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.gui.GenericDialog;
-import ij.plugin.filter.PlugInFilter;
-import ij.process.ImageProcessor;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +30,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.utils.MedianWindowDLLFloat;
+import gdsc.core.utils.MedianWindowFloat;
+import gdsc.smlm.ij.utils.IJImageConverter;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.gui.GenericDialog;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
 
 /**
  * Filters each pixel using a sliding median through the time stack. Medians are computed at set intervals and the

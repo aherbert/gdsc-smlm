@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Checkbox;
 import java.awt.Choice;
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextField;

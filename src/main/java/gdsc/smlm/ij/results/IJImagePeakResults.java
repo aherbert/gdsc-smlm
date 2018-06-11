@@ -41,9 +41,9 @@ import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import ij.process.InfinityMappedFloatProcessor;
 import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
-import ij.process.InfinityMappedFloatProcessor;
 
 /**
  * Saves the fit results to an ImageJ image

@@ -23,10 +23,10 @@
  */
 package gdsc.smlm.ij.utils;
 
+import java.util.Arrays;
+
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
-import java.util.Arrays;
 
 /**
  * Find objects defined by contiguous pixels of the same value

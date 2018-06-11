@@ -25,8 +25,6 @@ package gdsc.smlm.fitting.linear;
 
 import java.util.Arrays;
 
-import gdsc.smlm.fitting.linear.GaussJordan;
-
 import org.junit.Assert;
 import org.junit.Test;
 

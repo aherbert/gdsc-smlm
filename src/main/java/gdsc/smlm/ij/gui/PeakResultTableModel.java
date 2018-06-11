@@ -43,7 +43,6 @@ import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFProtos.PSF;
-
 import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.ResultsProtosHelper;
 import gdsc.smlm.results.ArrayPeakResultStore;

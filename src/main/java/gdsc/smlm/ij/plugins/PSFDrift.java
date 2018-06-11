@@ -56,7 +56,6 @@ import gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import gdsc.smlm.data.config.PSFProtos.Offset;
 import gdsc.smlm.data.config.PSFProtosHelper;
 import gdsc.smlm.engine.FitConfiguration;
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitStatus;
 import gdsc.smlm.fitting.FunctionSolver;

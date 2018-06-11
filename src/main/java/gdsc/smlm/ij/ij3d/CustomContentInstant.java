@@ -49,7 +49,6 @@ import ij.ImageStack;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
 import ij3d.Content;
-
 import ij3d.ContentInstant;
 import ij3d.ContentNode;
 import ij3d.UniverseSettings;

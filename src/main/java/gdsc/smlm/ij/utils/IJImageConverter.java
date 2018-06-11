@@ -23,11 +23,10 @@
  */
 package gdsc.smlm.ij.utils;
 
-import ij.process.ImageProcessor;
-
 import java.awt.Rectangle;
 
 import gdsc.smlm.utils.ImageConverter;
+import ij.process.ImageProcessor;
 
 /**
  * Contains methods for converting an image to float data. Simple wrapper around gdsc.smlm.utils.ImageConverter;

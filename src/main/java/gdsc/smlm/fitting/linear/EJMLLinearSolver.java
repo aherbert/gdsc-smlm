@@ -23,16 +23,15 @@
  */
 package gdsc.smlm.fitting.linear;
 
+import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
+import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
+import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
-
-import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
-import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
-import org.ejml.data.DenseMatrix64F;
 
 /**
  * Solves (one) linear equation, a x = b.

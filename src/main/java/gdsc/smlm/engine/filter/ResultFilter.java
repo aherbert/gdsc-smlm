@@ -23,10 +23,10 @@
  */
 package gdsc.smlm.engine.filter;
 
+import java.util.List;
+
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
-
-import java.util.List;
 
 /**
  * Provides a system for filtering the fitted results using distance to a set of target coordinates.

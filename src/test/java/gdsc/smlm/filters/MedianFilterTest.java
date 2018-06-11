@@ -23,15 +23,14 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.filters.MedianFilter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
+
+import gdsc.smlm.TestSettings;
 
 public class MedianFilterTest
 {

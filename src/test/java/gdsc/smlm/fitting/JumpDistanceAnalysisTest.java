@@ -23,13 +23,6 @@
  */
 package gdsc.smlm.fitting;
 
-import gdsc.core.logging.Logger;
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
-import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
-import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
-import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -43,6 +36,13 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
+
+import gdsc.core.logging.Logger;
+import gdsc.smlm.TestSettings;
+import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
+import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
+import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
+import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
 
 public class JumpDistanceAnalysisTest
 {

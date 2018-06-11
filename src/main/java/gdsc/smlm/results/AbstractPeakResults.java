@@ -26,12 +26,12 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Collection;
 
+import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.CalibrationWriter;
-import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-import gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
  * Abstract base class for peak results.

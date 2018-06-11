@@ -60,7 +60,6 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.ij.settings.SettingsManager;
-
 import gdsc.smlm.results.ArrayPeakResultStore;
 import gdsc.smlm.results.FramePeakResultComparator;
 import gdsc.smlm.results.ImageSource;

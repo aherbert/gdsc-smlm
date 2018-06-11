@@ -54,7 +54,6 @@ import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredData;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.data.config.ConfigurationException;
-
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import gdsc.smlm.data.config.FitProtos.DataFilterType;
 import gdsc.smlm.data.config.FitProtos.RelativeParameter;

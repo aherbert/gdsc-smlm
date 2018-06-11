@@ -23,7 +23,6 @@
  */
 package org.apache.commons.math3.distribution;
 
-import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;

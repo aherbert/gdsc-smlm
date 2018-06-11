@@ -31,7 +31,6 @@ import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import gdsc.core.data.utils.TypeConverter;
-
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.TextUtils;
@@ -159,12 +158,10 @@ public class LoadLocalisations implements PlugIn
 							params = PeakResult.createParams(0, intensity, x, y, z);
 							break;
 						case ONE_AXIS_GAUSSIAN_2D:
-							params = Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z,
-									l.sx);
+							params = Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z, l.sx);
 							break;
 						case TWO_AXIS_GAUSSIAN_2D:
-							params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, l.sx,
-									l.sy);
+							params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, l.sx, l.sy);
 							break;
 						default:
 							throw new NotImplementedException("Unsupported PSF type: " + psfType);

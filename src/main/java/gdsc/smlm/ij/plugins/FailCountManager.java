@@ -49,7 +49,6 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;
-
 import gdsc.smlm.data.NamedObject;
 import gdsc.smlm.data.config.GUIProtos.FailCountManagerSettings;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;

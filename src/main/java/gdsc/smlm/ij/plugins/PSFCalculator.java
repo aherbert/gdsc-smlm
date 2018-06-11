@@ -36,7 +36,6 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.AiryPattern;
 import ij.IJ;

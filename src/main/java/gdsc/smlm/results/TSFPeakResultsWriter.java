@@ -40,7 +40,6 @@ import gdsc.smlm.data.config.CalibrationReader;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
 import gdsc.smlm.tsf.TSFProtos.CameraType;
 import gdsc.smlm.tsf.TSFProtos.FitMode;
 import gdsc.smlm.tsf.TSFProtos.FluorophoreType;

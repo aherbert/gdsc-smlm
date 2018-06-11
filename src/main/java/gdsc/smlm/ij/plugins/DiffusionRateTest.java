@@ -48,9 +48,8 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.data.config.CalibrationHelper;
 import gdsc.smlm.data.config.CreateDataSettingsHelper;
 import gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
-import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.data.config.PSFHelper;
-
+import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.DiffusionType;

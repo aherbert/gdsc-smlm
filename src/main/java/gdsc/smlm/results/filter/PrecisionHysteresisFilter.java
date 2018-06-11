@@ -28,7 +28,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
-
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 

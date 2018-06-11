@@ -62,7 +62,6 @@ import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import gdsc.smlm.engine.FitConfiguration;
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.settings.BatchRun;
 import gdsc.smlm.ij.settings.BatchSettings;

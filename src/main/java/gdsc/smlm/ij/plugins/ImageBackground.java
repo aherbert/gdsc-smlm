@@ -23,6 +23,8 @@
  */
 package gdsc.smlm.ij.plugins;
 
+import org.apache.commons.math3.util.FastMath;
+
 import gdsc.core.ij.Utils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -31,8 +33,6 @@ import ij.plugin.ZProjector;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Produces a background intensity image and a mask from a sample image.

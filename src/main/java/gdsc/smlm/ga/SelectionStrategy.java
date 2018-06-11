@@ -23,9 +23,9 @@
  */
 package gdsc.smlm.ga;
 
-import gdsc.core.logging.TrackProgress;
-
 import java.util.List;
+
+import gdsc.core.logging.TrackProgress;
 
 /**
  * Defines a selection strategy of a population of individuals

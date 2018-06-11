@@ -28,8 +28,8 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 

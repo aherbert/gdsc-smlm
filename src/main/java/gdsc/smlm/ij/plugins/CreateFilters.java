@@ -53,7 +53,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
-
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.filter.AndFilter;
@@ -62,7 +61,6 @@ import gdsc.smlm.results.filter.OrFilter;
 import gdsc.smlm.results.filter.PrecisionFilter;
 import gdsc.smlm.results.filter.SNRFilter;
 import gdsc.smlm.results.filter.WidthFilter;
-import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;

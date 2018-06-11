@@ -23,14 +23,13 @@
  */
 package gdsc.smlm.function;
 
-import gdsc.core.utils.Maths;
-import gdsc.smlm.function.PoissonGaussianFunction;
-
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.core.utils.Maths;
 
 public class PoissonGaussianFunctionTest
 {

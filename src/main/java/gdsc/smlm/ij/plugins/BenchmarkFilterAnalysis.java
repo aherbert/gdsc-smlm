@@ -25,7 +25,6 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
-
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextArea;
@@ -137,7 +136,6 @@ import gdsc.smlm.search.ScoreFunctionHelper;
 import gdsc.smlm.search.SearchDimension;
 import gdsc.smlm.search.SearchResult;
 import gdsc.smlm.search.SearchSpace;
-import gdsc.smlm.utils.XmlUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;

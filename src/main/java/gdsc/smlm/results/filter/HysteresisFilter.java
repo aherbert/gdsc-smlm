@@ -32,7 +32,6 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.core.utils.NotImplementedException;
 import gdsc.smlm.data.config.CalibrationReader;
-
 import gdsc.smlm.ga.Chromosome;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;

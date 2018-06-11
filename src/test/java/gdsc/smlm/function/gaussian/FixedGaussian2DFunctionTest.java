@@ -23,9 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-import gdsc.smlm.function.gaussian.FixedGaussian2DFunction;
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-
 public class FixedGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
 	@Override

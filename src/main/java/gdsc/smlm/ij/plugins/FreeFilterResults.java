@@ -56,7 +56,6 @@ import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
 import gdsc.smlm.results.filter.XYWidthFilter;
 import gdsc.smlm.results.filter.XYWidthFilter2;
-import gdsc.smlm.utils.XmlUtils;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;

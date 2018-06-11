@@ -26,8 +26,8 @@ package gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.util.Collection;
 
-import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
  * Wraps a peak results with synchronized methods.

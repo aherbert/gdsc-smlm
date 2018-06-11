@@ -23,15 +23,13 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.filters.BlockMeanFilter;
-import gdsc.smlm.filters.BlockSumFilter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.smlm.TestSettings;
 
 public class FilterTest
 {

@@ -53,7 +53,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.logging.Logger;
 import gdsc.core.logging.NullLogger;
-
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Sort;
 import gdsc.core.utils.TextUtils;

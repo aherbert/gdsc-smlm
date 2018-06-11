@@ -26,10 +26,10 @@ package gdsc.smlm.results.filter;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
 
 /**
  * Filter results using an amplitude-to-noise ratio (ANR) threshold

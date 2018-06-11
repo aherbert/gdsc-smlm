@@ -24,11 +24,11 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.IJTrackProgress;
+import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.core.ij.Utils;
-import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.TextFilePeakResults;
 import gdsc.smlm.results.Trace;
 import gdsc.smlm.results.TraceManager;
 import ij.IJ;

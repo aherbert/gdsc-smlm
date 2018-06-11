@@ -40,7 +40,6 @@ import org.apache.commons.math3.util.Precision;
 
 import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.plugins.pcpalm.Molecule;
 import gdsc.smlm.ij.plugins.pcpalm.PCPALMMolecules;

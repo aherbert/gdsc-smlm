@@ -46,6 +46,7 @@ import gdsc.smlm.results.ImageSource;
 import ij.ImagePlus;
 import ij.io.ByteArraySeekableStream;
 import ij.io.ExtendedFileInfo;
+import ij.io.FastImageReader;
 import ij.io.FastTiffDecoder;
 import ij.io.FastTiffDecoder.IndexMap;
 import ij.io.FastTiffDecoder.NumberOfImages;
@@ -53,7 +54,6 @@ import ij.io.FastTiffDecoderBE;
 import ij.io.FastTiffDecoderLE;
 import ij.io.FileInfo;
 import ij.io.FileSeekableStream;
-import ij.io.FastImageReader;
 import ij.io.Opener;
 import ij.io.SeekableStream;
 

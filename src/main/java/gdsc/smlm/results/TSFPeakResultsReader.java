@@ -38,7 +38,6 @@ import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
-
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.tsf.TSFProtos.CameraType;
 import gdsc.smlm.tsf.TSFProtos.FitMode;

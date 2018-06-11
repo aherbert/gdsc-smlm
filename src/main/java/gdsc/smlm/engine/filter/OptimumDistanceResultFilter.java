@@ -23,13 +23,13 @@
  */
 package gdsc.smlm.engine.filter;
 
-import gdsc.smlm.fitting.FitResult;
-import gdsc.smlm.results.PeakResult;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
+
+import gdsc.smlm.fitting.FitResult;
+import gdsc.smlm.results.PeakResult;
 
 /**
  * Filter the results using the distance to a set of coordinates. Positions must be within the distance threshold.

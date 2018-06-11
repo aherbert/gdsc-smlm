@@ -23,11 +23,6 @@
  */
 package gdsc.smlm.fitting.linear;
 
-import gdsc.smlm.TestSettings;
-import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
-import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -35,6 +30,11 @@ import java.util.Random;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.smlm.TestSettings;
+import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 
 public class SolverSpeedTest
 {

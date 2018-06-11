@@ -25,6 +25,8 @@ package gdsc.smlm.search;
 
 import org.apache.commons.math3.util.FastMath;
 
+import gdsc.smlm.ga.Chromosome;
+
 /**
  * Check if converged using a tolerance on the score and/or position change, and the number of iterations
  */

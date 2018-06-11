@@ -26,7 +26,6 @@ package gdsc.smlm.ij.plugins;
 import java.awt.AWTEvent;
 import java.awt.Choice;
 import java.awt.Point;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;

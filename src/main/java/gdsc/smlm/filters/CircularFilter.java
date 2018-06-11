@@ -23,9 +23,9 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.core.utils.StoredData;
-
 import java.awt.Rectangle;
+
+import gdsc.core.utils.StoredData;
 
 /**
  * Computes the filter using a circular mask.

@@ -40,7 +40,6 @@ import gdsc.core.utils.StoredData;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.IdPeakResultComparator;
 import gdsc.smlm.results.MemoryPeakResults;

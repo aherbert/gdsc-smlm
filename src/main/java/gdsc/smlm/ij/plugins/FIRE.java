@@ -89,7 +89,6 @@ import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.UnitHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.function.Erf;
-
 import gdsc.smlm.ij.frc.FRC;
 import gdsc.smlm.ij.frc.FRC.FIREResult;
 import gdsc.smlm.ij.frc.FRC.FRCCurve;

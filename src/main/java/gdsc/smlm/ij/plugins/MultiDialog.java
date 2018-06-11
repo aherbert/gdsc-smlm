@@ -26,14 +26,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.results.MemoryPeakResults;
-import ij.IJ;
-import ij.Macro;
-import ij.WindowManager;
-import ij.gui.GUI;
-import ij.macro.Interpreter;
-import ij.plugin.frame.Recorder;
-
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Component;
@@ -57,6 +49,14 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
+
+import gdsc.smlm.results.MemoryPeakResults;
+import ij.IJ;
+import ij.Macro;
+import ij.WindowManager;
+import ij.gui.GUI;
+import ij.macro.Interpreter;
+import ij.plugin.frame.Recorder;
 
 /**
  * Shows a list of all the results sets held in memory, allowing multiple results to be selected

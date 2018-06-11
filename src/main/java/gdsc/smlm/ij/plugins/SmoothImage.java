@@ -27,7 +27,6 @@ import java.awt.AWTEvent;
 import java.awt.Rectangle;
 
 import gdsc.smlm.data.config.FitProtos.DataFilterMethod;
-
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.filters.DataProcessor;
 import gdsc.smlm.filters.DifferenceSpotFilter;

@@ -23,9 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.function.gaussian.SingleNBFreeCircularGaussian2DFunction;
-
 public class SingleNBFreeCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
 	@Override

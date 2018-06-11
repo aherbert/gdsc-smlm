@@ -37,7 +37,6 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import gdsc.core.data.utils.ConversionException;
-
 import gdsc.core.data.utils.Converter;
 import gdsc.core.utils.TextUtils;
 import gdsc.core.utils.TurboList;

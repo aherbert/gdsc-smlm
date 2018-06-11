@@ -57,7 +57,6 @@ import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.ConfigurationException;
 import gdsc.smlm.data.config.GUIProtos.ClusteringSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.CurveLogger;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;

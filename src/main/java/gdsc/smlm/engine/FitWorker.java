@@ -49,7 +49,6 @@ import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.engine.FitConfiguration.PeakResultValidationData;
-
 import gdsc.smlm.engine.FitParameters.FitTask;
 import gdsc.smlm.filters.BlockAverageDataProcessor;
 import gdsc.smlm.filters.MaximaSpotFilter;
@@ -616,8 +615,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 				int y = candidate.y;
 				final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, fitting);
 				region = ie.crop(regionBounds, region);
-				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width,
-						regionBounds.height, 1);
+				final float b = (float) Gaussian2DFitter.getBackground(region, regionBounds.width, regionBounds.height,
+						1);
 
 				// Offset the coords to the centre of the pixel. Note the bounds will be added later.
 				// Subtract the background to get the amplitude estimate then convert to signal.

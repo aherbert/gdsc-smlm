@@ -23,16 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-import gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.utils.XmlUtils;
-import gdsc.smlm.Version;
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.macro.ExtensionDescriptor;
-import ij.macro.Functions;
-import ij.macro.MacroExtension;
-import ij.plugin.PlugIn;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -44,6 +34,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
+
+import gdsc.core.utils.UnicodeReader;
+import gdsc.smlm.Version;
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.macro.ExtensionDescriptor;
+import ij.macro.Functions;
+import ij.macro.MacroExtension;
+import ij.plugin.PlugIn;
 
 /**
  * Contains help dialogs for the GDSC ImageJ plugins

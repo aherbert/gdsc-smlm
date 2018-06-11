@@ -32,7 +32,6 @@ import gdsc.core.utils.Maths;
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.data.config.GUIProtosHelper;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.model.MaskDistribution;

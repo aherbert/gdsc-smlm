@@ -27,7 +27,6 @@ import gdsc.core.data.DataException;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;

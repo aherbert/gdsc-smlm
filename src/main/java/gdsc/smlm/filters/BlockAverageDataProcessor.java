@@ -23,12 +23,12 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.core.ij.Utils;
-
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with an average box filter.

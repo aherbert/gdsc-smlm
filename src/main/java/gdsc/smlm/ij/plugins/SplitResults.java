@@ -23,12 +23,11 @@
  */
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
-import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.utils.ObjectAnalyzer;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.TextUtils;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.utils.ObjectAnalyzer;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.count.Counter;

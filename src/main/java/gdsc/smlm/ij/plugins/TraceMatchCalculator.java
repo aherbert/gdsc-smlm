@@ -23,26 +23,6 @@
  */
 package gdsc.smlm.ij.plugins;
 
-import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
-import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.ij.utils.CoordinateProvider;
-import gdsc.smlm.ij.utils.ImageROIPainter;
-import gdsc.core.ij.Utils;
-import gdsc.core.match.Coordinate;
-import gdsc.core.match.MatchCalculator;
-import gdsc.core.match.MatchResult;
-import gdsc.core.match.PointPair;
-import gdsc.core.match.Pulse;
-import gdsc.smlm.results.MemoryPeakResults;
-import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.results.count.Counter;
-import gdsc.smlm.results.procedures.XYRResultProcedure;
-import ij.IJ;
-import ij.gui.ExtendedGenericDialog;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +31,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.ij.Utils;
+import gdsc.core.match.Coordinate;
+import gdsc.core.match.MatchCalculator;
+import gdsc.core.match.MatchResult;
+import gdsc.core.match.PointPair;
+import gdsc.core.match.Pulse;
+import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
+import gdsc.smlm.ij.utils.CoordinateProvider;
+import gdsc.smlm.ij.utils.ImageROIPainter;
+import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.smlm.results.PeakResult;
+import gdsc.smlm.results.count.Counter;
+import gdsc.smlm.results.procedures.XYRResultProcedure;
+import ij.IJ;
+import ij.gui.ExtendedGenericDialog;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
 
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.

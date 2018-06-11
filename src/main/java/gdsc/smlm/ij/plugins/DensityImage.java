@@ -38,7 +38,6 @@ import gdsc.core.ij.Utils;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.ij.results.ImagePeakResultsFactory;

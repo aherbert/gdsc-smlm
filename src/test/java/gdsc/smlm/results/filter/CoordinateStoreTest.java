@@ -23,9 +23,8 @@
  */
 package gdsc.smlm.results.filter;
 
-import org.junit.Test;
-
 import org.junit.Assert;
+import org.junit.Test;
 
 public class CoordinateStoreTest
 {

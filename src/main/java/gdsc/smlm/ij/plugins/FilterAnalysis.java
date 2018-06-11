@@ -40,7 +40,6 @@ import java.util.List;
 import gdsc.core.ij.Utils;
 import gdsc.core.match.ClassificationResult;
 import gdsc.core.utils.UnicodeReader;
-
 import gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.MemoryPeakResults;

@@ -24,11 +24,11 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.core.ij.IJTrackProgress;
+import gdsc.core.logging.TrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
-import gdsc.core.logging.TrackProgress;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
 import ij.plugin.PlugIn;

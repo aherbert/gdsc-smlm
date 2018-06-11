@@ -27,7 +27,6 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import gdsc.smlm.results.MemoryPeakResults;
-
 import gdsc.smlm.results.PeakResult;
 
 /**

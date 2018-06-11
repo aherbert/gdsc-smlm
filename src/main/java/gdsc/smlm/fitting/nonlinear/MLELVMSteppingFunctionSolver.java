@@ -36,9 +36,8 @@ import gdsc.smlm.function.FastLog;
 import gdsc.smlm.function.FastLogFactory;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.Gradient2FunctionValueStore;
-import gdsc.smlm.function.PoissonCalculator;
 import gdsc.smlm.function.OffsetGradient1Function;
-import gdsc.smlm.function.OffsetGradient2Function;
+import gdsc.smlm.function.PoissonCalculator;
 
 /**
  * Uses the Levenberg-Marquardt method to fit a gradient function with coefficients (a) using maximum likelihood

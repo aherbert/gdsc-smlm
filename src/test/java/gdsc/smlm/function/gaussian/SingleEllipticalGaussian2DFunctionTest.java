@@ -23,9 +23,6 @@
  */
 package gdsc.smlm.function.gaussian;
 
-import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
-
 public class SingleEllipticalGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
 	@Override

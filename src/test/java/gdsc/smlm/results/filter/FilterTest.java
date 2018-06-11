@@ -25,7 +25,6 @@ package gdsc.smlm.results.filter;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
-
 import org.junit.Assert;
 import org.junit.Test;
 

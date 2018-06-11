@@ -23,12 +23,12 @@
  */
 package gdsc.smlm.engine;
 
+import java.awt.Rectangle;
+import java.util.List;
+
 import gdsc.smlm.fitting.FitResult;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.filter.MultiPathFitResult;
-
-import java.awt.Rectangle;
-import java.util.List;
 
 /**
  * Specifies a job for peak fitting.

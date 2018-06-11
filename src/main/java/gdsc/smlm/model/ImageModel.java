@@ -23,9 +23,6 @@
  */
 package gdsc.smlm.model;
 
-import gdsc.core.utils.Maths;
-import gdsc.core.utils.StoredDataStatistics;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +33,9 @@ import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+
+import gdsc.core.utils.Maths;
+import gdsc.core.utils.StoredDataStatistics;
 
 /**
  * Contains a model for an image of blinking fluorophores.

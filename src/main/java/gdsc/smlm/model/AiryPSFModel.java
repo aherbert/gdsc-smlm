@@ -23,9 +23,6 @@
  */
 package gdsc.smlm.model;
 
-import gdsc.core.utils.DoubleEquality;
-import gdsc.core.utils.Maths;
-
 import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -37,6 +34,9 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.util.FastMath;
+
+import gdsc.core.utils.DoubleEquality;
+import gdsc.core.utils.Maths;
 
 /**
  * Contains methods for generating models of a Point Spread Function using a Airy pattern.

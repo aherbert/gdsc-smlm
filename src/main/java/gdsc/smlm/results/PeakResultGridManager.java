@@ -24,7 +24,6 @@
 package gdsc.smlm.results;
 
 import gdsc.core.utils.Maths;
-import gdsc.smlm.results.PeakResult;
 
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows listing neighbours of a given

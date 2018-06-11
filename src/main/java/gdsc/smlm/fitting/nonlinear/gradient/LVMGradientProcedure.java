@@ -23,8 +23,8 @@
  */
 package gdsc.smlm.fitting.nonlinear.gradient;
 
-import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.ValueProcedure;
 
 /**

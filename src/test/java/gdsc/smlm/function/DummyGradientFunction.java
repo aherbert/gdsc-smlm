@@ -23,12 +23,6 @@
  */
 package gdsc.smlm.function;
 
-import gdsc.smlm.function.Gradient1Procedure;
-import gdsc.smlm.function.Gradient2Function;
-import gdsc.smlm.function.Gradient2Procedure;
-import gdsc.smlm.function.Gradient1Function;
-import gdsc.smlm.function.ValueProcedure;
-
 public class DummyGradientFunction implements Gradient1Function, Gradient2Function
 {
 	int n;

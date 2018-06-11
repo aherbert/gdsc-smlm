@@ -23,10 +23,10 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.core.ij.Utils;
-
 import java.util.Arrays;
 import java.util.List;
+
+import gdsc.core.ij.Utils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with a circular mean filter.

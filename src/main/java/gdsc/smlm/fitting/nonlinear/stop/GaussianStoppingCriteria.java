@@ -23,10 +23,10 @@
  */
 package gdsc.smlm.fitting.nonlinear.stop;
 
+import java.util.Arrays;
+
 import gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
-import java.util.Arrays;
 
 /**
  * Defines the stopping criteria for the {@link gdsc.smlm.fitting.nonlinear.NonLinearFit } class.

@@ -23,12 +23,12 @@
  */
 package gdsc.smlm.filters;
 
-import gdsc.smlm.TestSettings;
-
 import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.smlm.TestSettings;
 
 @SuppressWarnings("deprecation")
 public class AreaAverageFilterTest
