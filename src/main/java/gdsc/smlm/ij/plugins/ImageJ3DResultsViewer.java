@@ -2123,7 +2123,10 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 				// It doesn't have anything of use for localisations anyway. 
 				canvas.removeMouseListener(l[i]);
 				canvas.addMouseListener(mouseListener);
-				canvas.addMouseListener(new MouseListenerWrapper(l[i], MouseListenerWrapper.MOUSE_CLICKED));
+				canvas.addMouseListener(new MouseListenerWrapper(l[i], 
+						MouseListenerWrapper.MOUSE_CLICKED
+						//|MouseListenerWrapper.MOUSE_PRESSED|MouseListenerWrapper.MOUSE_RELEASED
+						));
 			}
 		}
 
@@ -2528,6 +2531,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 		menubar.add(add);
 		// Add back so it is redrawn
 		univ.setMenubar(menubar);
+		// 4.0.3 method
+		//univ.refreshShortcuts();
 	}
 
 	private interface ContentAction

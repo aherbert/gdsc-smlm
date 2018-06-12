@@ -38,7 +38,8 @@ Build the project.
 Optional:
 
 To debug the ImageJ 3D Viewer from Eclipse relies on being able to find the native 
-runtime libraries for Open GL.
+runtime libraries for Open GL. These should now be included by Maven. If this fails 
+then do a manual install:
 
 1. Download JOGL
    http://jogamp.org/wiki/index.php/Downloading_and_installing_JOGL

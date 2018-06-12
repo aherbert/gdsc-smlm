@@ -100,7 +100,27 @@ Software for single molecule localisation microscopy (SMLM)
 						</descriptorRefs>
 					</configuration>
 				</plugin>
+
+				<!-- This is added purely for testing against the latest 3D_Viewer SNAPSHOT 
+				<plugin>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.4.1</version>
+					<executions>
+						<execution>
+							<id>enforce-rules</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<skip>true</skip>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				-->
+
 			</plugins>
+
 		</pluginManagement>
 		<resources>
 			<resource>
@@ -204,6 +224,21 @@ Software for single molecule localisation microscopy (SMLM)
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
+			<!-- For testing 
+			<version>4.0.3-SNAPSHOT</version>
+			-->
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt-main</artifactId>
+			<optional>true</optional>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-main</artifactId>
+			<optional>true</optional>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
