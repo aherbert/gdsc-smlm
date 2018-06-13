@@ -657,7 +657,7 @@ public class PoissonCalculatorTest
 		double[] u = new double[n];
 		double[] x = new double[n];
 		double e, o;
-		for (double testx : new double[] { Math.nextAfter(PoissonCalculator.APPROXIMATION_X, -1),
+		for (double testx : new double[] { Math.nextDown(PoissonCalculator.APPROXIMATION_X),
 				PoissonCalculator.APPROXIMATION_X, Math.nextUp(PoissonCalculator.APPROXIMATION_X),
 				PoissonCalculator.APPROXIMATION_X * 1.1, PoissonCalculator.APPROXIMATION_X * 2,
 				PoissonCalculator.APPROXIMATION_X * 10 })

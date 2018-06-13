@@ -35,7 +35,7 @@ public class PoissonGaussianFisherInformationTest
 
 		//double u;
 		////u = Math.pow(10, -300);
-		////u = 1.0 / Math.nextAfter(Double.MAX_VALUE, -1); // Smallest p with a non-infinite Fisher information
+		////u = 1.0 / Math.nextDown(Double.MAX_VALUE); // Smallest p with a non-infinite Fisher information
 		//u = 1e-100;
 		//PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(0.20);
 		//f.setMeanThreshold(Double.MAX_VALUE);
@@ -125,7 +125,7 @@ public class PoissonGaussianFisherInformationTest
 		}
 
 		Assert.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
-		Assert.assertTrue(1.0 / Math.nextAfter(u, -1) == Double.POSITIVE_INFINITY);
+		Assert.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
 
 		for (int i = 0; i < 4; i++)
 		{

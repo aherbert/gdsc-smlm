@@ -198,7 +198,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		}
 
 		Assert.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
-		Assert.assertTrue(1.0 / Math.nextAfter(u, -1) == Double.POSITIVE_INFINITY);
+		Assert.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
 
 		computeFisherInformationWithMean(u);
 	}
