@@ -319,8 +319,8 @@ public class ImageJ3DResultsViewer implements PlugIn, ActionListener, UniverseLi
 	static
 	{
 		// Try setting -Dj3d.sortShape3DBounds for faster centroid computation
-		// See MasterControl.sortShape3DBounds. This only works if The VirtualUniverse
-		// has not been created.
+		// See org.scijava.java3d.MasterControl.sortShape3DBounds. 
+		// This only works if The VirtualUniverse has not been created.
 		java.security.AccessController.doPrivileged(new java.security.PrivilegedAction<String>()
 		{
 			@Override
