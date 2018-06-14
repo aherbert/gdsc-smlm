@@ -15,7 +15,7 @@
 	<version>0.7.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>SMLM</name>
+	<name>GDSC SMLM plugins for ImageJ</name>
 	<url>http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins</url>
 	<organization>
 		<name>Genome Damage and Stability Centre</name>
