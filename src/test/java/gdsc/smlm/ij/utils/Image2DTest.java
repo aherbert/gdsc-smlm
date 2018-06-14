@@ -348,7 +348,7 @@ public abstract class Image2DTest
 	private static void assertEquals(Image2D a, Image2D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)
-			Assert.assertEquals(a.get(i), b.get(i), 0);
+			Assert.assertTrue(null, a.get(i) == b.get(i));
 	}
 
 	private static int findMinIndex(Image2D image)

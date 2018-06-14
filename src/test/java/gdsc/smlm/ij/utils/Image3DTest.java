@@ -373,7 +373,7 @@ public abstract class Image3DTest
 	private static void assertEquals(Image3D a, Image3D b)
 	{
 		for (int i = a.getDataLength(); i-- > 0;)
-			Assert.assertEquals(a.get(i), b.get(i), 0);
+			Assert.assertTrue(null, a.get(i) == b.get(i));
 	}
 
 	private static int findMinIndex(Image3D image)

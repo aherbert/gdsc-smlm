@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -86,7 +87,7 @@ public abstract class WeightedFilterTest
 							float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
 							try
 							{
-								assertArrayEquals(e, o, 1e-4f);
+								TestSettings.assertArrayEquals(e, o, 1e-4f);
 							}
 							catch (AssertionError ex)
 							{
@@ -96,13 +97,6 @@ public abstract class WeightedFilterTest
 							}
 						}
 			}
-	}
-
-	private void assertArrayEquals(float[] e, float[] o, float f)
-	{
-		// TODO Auto-generated method stub
-		for (int i = 0; i < e.length; i++)
-			Assert.assertEquals(e[i], o[i], Math.abs(e[i]) * f);
 	}
 
 	private float[] getOffsets(DataFilter filter1)

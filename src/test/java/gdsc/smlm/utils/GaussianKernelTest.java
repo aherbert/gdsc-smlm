@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Maths;
+import gdsc.test.TestSettings;
 
 public class GaussianKernelTest
 {
@@ -171,7 +172,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestSettings.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
@@ -196,7 +197,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestSettings.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
@@ -221,7 +222,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestSettings.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
@@ -246,26 +247,9 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestSettings.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
-	}
-
-	private void assertArrayEquals(double[] e, double[] o, double delta)
-	{
-		// This is used because the downscaling can use non-power of 2 scales
-
-		if (e == o)
-			return;
-		if (e == null)
-		{
-			Assert.assertNull(o);
-			return;
-		}
-		Assert.assertNotNull(o);
-		Assert.assertEquals(e.length, o.length);
-		for (int i = 0; i < e.length; i++)
-			Assert.assertEquals(e[i], o[i], e[i] * delta);
 	}
 }
