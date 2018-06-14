@@ -34,8 +34,6 @@ import gdsc.core.data.DoubleStackTrivalueProvider;
 import gdsc.core.ij.Utils;
 import gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import gdsc.core.math.interpolation.CustomTricubicInterpolator;
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
@@ -51,6 +49,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 public abstract class CubicSplineFunctionTest
 {

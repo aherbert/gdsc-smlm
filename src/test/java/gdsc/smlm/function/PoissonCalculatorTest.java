@@ -40,12 +40,12 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.TestSettings;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 public class PoissonCalculatorTest
 {

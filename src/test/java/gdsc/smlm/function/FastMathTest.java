@@ -27,8 +27,8 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 public class FastMathTest
 {

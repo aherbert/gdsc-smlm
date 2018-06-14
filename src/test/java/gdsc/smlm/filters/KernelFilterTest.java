@@ -28,11 +28,11 @@ import java.awt.Rectangle;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
 

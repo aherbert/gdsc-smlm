@@ -30,9 +30,9 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 public class ErfTest
 {

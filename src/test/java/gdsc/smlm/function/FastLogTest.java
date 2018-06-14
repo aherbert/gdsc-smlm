@@ -30,14 +30,14 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.function.ICSIFastLog.DataType;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 @SuppressWarnings("unused")
 public class FastLogTest

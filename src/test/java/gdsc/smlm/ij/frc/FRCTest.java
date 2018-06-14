@@ -32,11 +32,11 @@ import org.apache.commons.math3.util.MathArrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.ij.results.IJImagePeakResults;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 

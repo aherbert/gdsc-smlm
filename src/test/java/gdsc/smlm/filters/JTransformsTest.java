@@ -32,9 +32,9 @@ import org.jtransforms.utils.CommonUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.smlm.filters.FHTFilter.Operation;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT;

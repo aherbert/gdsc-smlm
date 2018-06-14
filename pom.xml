@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -102,22 +103,10 @@ Software for single molecule localisation microscopy (SMLM)
 				</plugin>
 
 				<!-- This is added purely for testing against the latest 3D_Viewer SNAPSHOT 
-				<plugin>
-					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4.1</version>
-					<executions>
-						<execution>
-							<id>enforce-rules</id>
-							<goals>
-								<goal>enforce</goal>
-							</goals>
-							<configuration>
-								<skip>true</skip>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				-->
+					<plugin> <artifactId>maven-enforcer-plugin</artifactId> <version>1.4.1</version> 
+					<executions> <execution> <id>enforce-rules</id> <goals> <goal>enforce</goal> 
+					</goals> <configuration> <skip>true</skip> </configuration> </execution> 
+					</executions> </plugin> -->
 
 			</plugins>
 
@@ -163,6 +152,12 @@ Software for single molecule localisation microscopy (SMLM)
 			<groupId>gdsc</groupId>
 			<artifactId>gdsc-core</artifactId>
 			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>gdsc</groupId>
+			<artifactId>gdsc-test</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
@@ -224,9 +219,7 @@ Software for single molecule localisation microscopy (SMLM)
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
-			<!-- For testing 
-			<version>4.0.3-SNAPSHOT</version>
-			-->
+			<!-- For testing <version>4.0.3-SNAPSHOT</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>

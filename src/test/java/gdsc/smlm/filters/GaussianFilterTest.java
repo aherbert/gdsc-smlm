@@ -29,10 +29,10 @@ import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Random;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
 

@@ -30,8 +30,6 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
@@ -45,6 +43,8 @@ import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {

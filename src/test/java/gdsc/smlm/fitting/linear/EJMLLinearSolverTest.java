@@ -31,8 +31,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.BaseTimingTask;
-import gdsc.core.test.TimingService;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
@@ -40,6 +38,8 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorFactory;
 import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.BaseTimingTask;
+import gdsc.test.TimingService;
 
 public class EJMLLinearSolverTest
 {

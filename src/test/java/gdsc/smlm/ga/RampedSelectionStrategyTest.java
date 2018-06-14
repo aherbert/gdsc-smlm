@@ -26,9 +26,9 @@ package gdsc.smlm.ga;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.core.test.TimingResult;
-import gdsc.core.test.TimingService;
-import gdsc.core.test.TimingTask;
+import gdsc.test.TimingResult;
+import gdsc.test.TimingService;
+import gdsc.test.TimingTask;
 
 public class RampedSelectionStrategyTest
 {
