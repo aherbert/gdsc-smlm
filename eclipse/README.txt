@@ -10,13 +10,10 @@ Java developers has these.
 Set-up the project
 ------------------
 
-To open the project in Eclipse you can copy the .project and 
-.classpath files from this directory to the top level directory.
+Import the project into Eclipse (File>Import)
+Select: Maven > Existing Maven projects
 
-Then import the project into Eclipse (File>Import)
-Select: General > Existing projects into workspace
-
-This will import the project but will not link it to the source Git repository.
+This will import the project but may not link it to the source Git repository.
 Right-click on the project name and select 'Team > Share'. If you share it back to 
 the same location it will attach to the source Git repository.
 
