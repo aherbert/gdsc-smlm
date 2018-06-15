@@ -34,7 +34,7 @@ import gdsc.core.utils.Digest;
 public class PeakResultDigest
 {
 	/** The expected data bytes without the parameters */
-	private static final int EXPECTED_DATA_BYTES = 44;
+	private static final int EXPECTED_DATA_BYTES = 48;
 
 	private MessageDigest digest;
 	// Allocate assuming 8 parameters and deviations
@@ -94,14 +94,15 @@ public class PeakResultDigest
 		buffer.putFloat(peakResult.getOrigValue()); // 16
 		buffer.putDouble(peakResult.getError()); // 24
 		buffer.putFloat(peakResult.getNoise()); // 28
+		buffer.putFloat(peakResult.getMeanIntensity()); // 32
 
 		// Optional data
 		if (peakResult.hasId())
-			buffer.putInt(peakResult.getId()); // 32
+			buffer.putInt(peakResult.getId()); // 36
 		if (peakResult.hasEndFrame())
-			buffer.putInt(peakResult.getEndFrame()); // 36
+			buffer.putInt(peakResult.getEndFrame()); // 40
 		if (peakResult.hasPrecision())
-			buffer.putDouble(peakResult.getPrecision()); // 44
+			buffer.putDouble(peakResult.getPrecision()); // 48
 
 		for (int i = 0; i < n; i++)
 		{
