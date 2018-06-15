@@ -24,17 +24,18 @@
 package gdsc.smlm.results;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
+
+import gdsc.test.TestSettings;
 
 public class PeakResultDigestTest
 {
 	@Test
 	public void sameResultsAreEqual()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -44,7 +45,7 @@ public class PeakResultDigestTest
 	@Test
 	public void sameSize1ResultsAreEqual()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -54,7 +55,7 @@ public class PeakResultDigestTest
 	@Test
 	public void sameEmptyResultsAreEqual()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -64,7 +65,7 @@ public class PeakResultDigestTest
 	@Test
 	public void sameResultsAreEqualWithDeviation()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -74,7 +75,7 @@ public class PeakResultDigestTest
 	@Test
 	public void sameResultsAreEqualWithId()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -84,7 +85,7 @@ public class PeakResultDigestTest
 	@Test
 	public void sameResultsAreEqualWithEndFrame()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -94,7 +95,7 @@ public class PeakResultDigestTest
 	@Test
 	public void sameResultsAreEqualWithPrecision()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		Assert.assertTrue(digest.matches(r1));
@@ -104,7 +105,7 @@ public class PeakResultDigestTest
 	@Test
 	public void differentResultsAreNotEqual()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
 		PeakResultsDigest digest = new PeakResultsDigest(r1);
 		for (int size : new int[] { 10, 1, 0 })
@@ -118,7 +119,7 @@ public class PeakResultDigestTest
 	@Test
 	public void digestMatchesPeakResultDigest()
 	{
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int size = 1; size < 5; size++)
 		{
 			PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
@@ -162,7 +163,7 @@ public class PeakResultDigestTest
 	{
 		Assume.assumeTrue(false);
 
-		final RandomGenerator r = new Well19937c();
+		final RandomGenerator r = TestSettings.getRandomGenerator();
 		PeakResultsDigest digest = new PeakResultsDigest();
 		int N = 5;
 		for (int size = 1000; size < 2000000; size *= 2)
