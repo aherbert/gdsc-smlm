@@ -592,12 +592,12 @@ public class ResultsImageSampler
 	}
 
 	/**
-	 * Set the random for use during sampling
+	 * Set the random generator for use during sampling
 	 * 
 	 * @param r
-	 *            the random to set (ignored if null)
+	 *            the random generator to set (ignored if null)
 	 */
-	public void setRandom(Random r)
+	public void setRandom(RandomGenerator r)
 	{
 		if (r != null)
 			this.r = r;

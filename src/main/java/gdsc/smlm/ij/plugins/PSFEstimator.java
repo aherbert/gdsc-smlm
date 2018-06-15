@@ -27,6 +27,7 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -648,8 +649,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults
 		int[] slices = new int[stack.getSize()];
 		for (int i = 0; i < slices.length; i++)
 			slices[i] = i + 1;
-		Random rand = new Random();
-		rand.shuffle(slices);
+		Random.shuffle(slices, new Well19937c());
 
 		IJ.showStatus("Fitting ...");
 
