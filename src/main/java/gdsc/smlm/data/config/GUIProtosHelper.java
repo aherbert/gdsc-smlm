@@ -406,7 +406,7 @@ public class GUIProtosHelper
 		fb.setSmartFilter(false);
 		fb.setDisableSimpleFilter(false);
 		fb.setShiftFactor(2);
-		fb.setSignalStrength(0);
+		fb.setSignalStrength(5);
 		fb.setMinPhotons(50);
 		fb.setMinWidthFactor(0.5);
 		fb.setMaxWidthFactor(5);

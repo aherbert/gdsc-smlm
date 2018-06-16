@@ -95,7 +95,7 @@ public class FitProtosHelper
 	{
 		FilterSettings.Builder builder = FilterSettings.newBuilder();
 		builder.setShiftFactor(1);
-		builder.setSignalStrength(30);
+		builder.setSignalStrength(5);
 		builder.setMinPhotons(30);
 		builder.setPrecisionThreshold(40);
 		builder.setPrecisionMethod(PrecisionMethod.MORTENSEN);

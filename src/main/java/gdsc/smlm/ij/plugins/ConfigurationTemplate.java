@@ -306,7 +306,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		fitConfig.setFitSolver(FitSolver.LVM_LSE);
 		config.setDataFilter(DataFilterMethod.MEAN, 1.2, false, 0);
 		fitConfig.setCoordinateShiftFactor(1.2);
-		fitConfig.setSignalStrength(35);
+		fitConfig.setSignalStrength(5);
 		fitConfig.setMinPhotons(30);
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
@@ -324,7 +324,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		fitConfig.setFitSolver(FitSolver.MLE);
 		config.setDataFilter(DataFilterMethod.GAUSSIAN, 1.2, false, 0);
 		fitConfig.setCoordinateShiftFactor(1.2);
-		fitConfig.setSignalStrength(32);
+		fitConfig.setSignalStrength(4.5);
 		fitConfig.setMinPhotons(30);
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
@@ -340,7 +340,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		fitConfig.setModelCamera(true);
 		fitConfig.setCoordinateShiftFactor(1.5);
-		fitConfig.setSignalStrength(30);
+		fitConfig.setSignalStrength(4.5);
 		fitConfig.setMinPhotons(30);
 		fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
 		fitConfig.setWidthFactor(1.8);
