@@ -23,14 +23,16 @@
  */
 package gdsc.smlm.model;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 public class PSFModelGradient1FunctionTest
 {
@@ -56,7 +58,8 @@ public class PSFModelGradient1FunctionTest
 		final double[][] go = new double[maxx * maxy][];
 
 		PSFModelGradient1Function psf = new PSFModelGradient1Function(new GaussianPSFModel(zModel), maxx, maxy);
-		Gaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
+		ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
+		f.setErfFunction(ErfFunction.COMMONS_MATH);
 		double[] a2 = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 
 		double c = maxx * 0.5;
@@ -107,11 +110,8 @@ public class PSFModelGradient1FunctionTest
 
 						for (int ii = 0; ii < ve.length; ii++)
 						{
-							Assert.assertEquals(ve[ii], vo[ii], ve[ii] * 1e-8);
-							for (int l = 0; l < 5; l++)
-							{
-								Assert.assertEquals(ge[ii][l], go[ii][l], Math.abs(ge[ii][l] * 1e-8));
-							}
+							TestSettings.assertEquals(ve[ii], vo[ii], 1e-8);
+							TestSettings.assertArrayEquals(ge[ii], go[ii], 1e-8);
 						}
 					}
 				}
