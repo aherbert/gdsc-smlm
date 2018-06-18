@@ -135,9 +135,9 @@ public class CustomSimpsonIntegratorTest
 		// So it stops at the min iterations
 		final double absoluteAccuracy = Double.POSITIVE_INFINITY;
 
-		SimpsonIntegrator in = new CustomSimpsonIntegrator(
+		CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(
 				//new SimpsonIntegrator(
-				relativeAccuracy, absoluteAccuracy, c, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+				relativeAccuracy, absoluteAccuracy, c, CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 
 		double e = f.sum(a, b);
 		double ee = simpson(f, a, b, c);
