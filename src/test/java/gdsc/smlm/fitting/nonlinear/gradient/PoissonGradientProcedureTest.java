@@ -60,8 +60,6 @@ public class PoissonGradientProcedureTest
 	double Xwidth = 1.2;
 	double Ywidth = 1.2;
 
-	RandomDataGenerator rdg;
-
 	@Test
 	public void gradientProcedureFactoryCreatesOptimisedProcedures()
 	{
@@ -98,11 +96,9 @@ public class PoissonGradientProcedureTest
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
 		int n = blockWidth * blockWidth;
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -115,13 +111,14 @@ public class PoissonGradientProcedureTest
 			PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
 			p.computeFisherInformation(paramsList.get(i));
 			double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
-			// Exactly the same ...
+			// Not exactly the same ...
 			double[] al = p.getLinear();
-			Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al, new DenseMatrix64F(m).data, 0);
+			TestSettings.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al,
+					new DenseMatrix64F(m).data, 1e-10);
 
 			double[][] am = p.getMatrix();
 			for (int j = 0; j < nparams; j++)
-				Assert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], m[j], 0);
+				TestSettings.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], m[j], 1e-10);
 		}
 	}
 
@@ -171,11 +168,9 @@ public class PoissonGradientProcedureTest
 		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
 		final int n = blockWidth * blockWidth;
 		final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -248,11 +243,9 @@ public class PoissonGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
 		if (precomputed)
@@ -299,16 +292,15 @@ public class PoissonGradientProcedureTest
 		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
-
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
-		createFakeParams(nparams, iter, paramsList);
+		createFakeParams(TestSettings.getRandomGenerator(), nparams, iter, paramsList);
 
 		// Remove the timing of the function call by creating a dummy function
 		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
-				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3)) : f;
+				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
+				: f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
@@ -367,7 +359,7 @@ public class PoissonGradientProcedureTest
 	public void crlbIsHigherWithPrecomputed()
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -459,7 +451,8 @@ public class PoissonGradientProcedureTest
 		}
 	}
 
-	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	protected int[] createFakeData(RandomGenerator r, int nparams, int iter, ArrayList<double[]> paramsList,
+			ArrayList<double[]> yList)
 	{
 		int[] x = new int[blockWidth * blockWidth];
 		for (int i = 0; i < x.length; i++)
@@ -467,17 +460,16 @@ public class PoissonGradientProcedureTest
 		for (int i = 0; i < iter; i++)
 		{
 			double[] params = new double[nparams];
-			double[] y = createFakeData(params);
+			double[] y = createFakeData(r, params);
 			paramsList.add(params);
 			yList.add(y);
 		}
 		return x;
 	}
 
-	private double[] createFakeData(double[] params)
+	private double[] createFakeData(RandomGenerator r, double[] params)
 	{
 		int n = blockWidth * blockWidth;
-		RandomGenerator r = rdg.getRandomGenerator();
 
 		for (int i = 0; i < params.length; i++)
 		{
@@ -493,19 +485,18 @@ public class PoissonGradientProcedureTest
 		return y;
 	}
 
-	protected void createFakeParams(int nparams, int iter, ArrayList<double[]> paramsList)
+	protected void createFakeParams(RandomGenerator r, int nparams, int iter, ArrayList<double[]> paramsList)
 	{
 		for (int i = 0; i < iter; i++)
 		{
 			double[] params = new double[nparams];
-			createFakeParams(params);
+			createFakeParams(r, params);
 			paramsList.add(params);
 		}
 	}
 
-	private void createFakeParams(double[] params)
+	private void createFakeParams(RandomGenerator r, double[] params)
 	{
-		RandomGenerator r = rdg.getRandomGenerator();
 		for (int i = 0; i < params.length; i++)
 		{
 			params[i] = r.nextDouble();
