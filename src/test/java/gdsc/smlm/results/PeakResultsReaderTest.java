@@ -504,6 +504,11 @@ public class PeakResultsReaderTest
 		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(DistanceUnit.NM);
 		cal.setIntensityUnit(IntensityUnit.COUNT);
+		if (fileFormat == ResultsFileFormat.TSF)
+		{
+			// For now just support using the native float TSF value
+			cal.setNmPerPixel((float) cal.getNmPerPixel());
+		}
 		out.setCalibration(cal.getCalibration());
 
 		String filename = createFile();
@@ -546,6 +551,11 @@ public class PeakResultsReaderTest
 		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
 		cal.setIntensityUnit(MemoryPeakResults.PREFERRED_INTENSITY_UNIT);
 		cal.setAngleUnit(MemoryPeakResults.PREFERRED_ANGLE_UNIT);
+		if (fileFormat == ResultsFileFormat.TSF)
+		{
+			// For now just support using the native float TSF value
+			cal.setNmPerPixel((float) cal.getNmPerPixel());
+		}
 		out.setCalibration(cal.getCalibration());
 
 		// Remove angle
@@ -648,6 +658,13 @@ public class PeakResultsReaderTest
 			cal.setIntensityUnit(IntensityUnit.PHOTON);
 			out.setCalibration(cal.getCalibration());
 			out.setPSF(PSFHelper.create(PSFType.CUSTOM));
+		}
+		if (fileFormat == ResultsFileFormat.TSF)
+		{
+			CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
+			// For now just support using the native float TSF datatype
+			cal.setNmPerPixel((float) cal.getNmPerPixel());
+			out.setCalibration(cal.getCalibration());
 		}
 
 		//		System.out.println(out.getCalibration());
@@ -840,18 +857,18 @@ public class PeakResultsReaderTest
 
 		Calibration c1 = expectedResults.getCalibration();
 		Calibration c2 = actualResults.getCalibration();
-		//		try
-		//		{
-		//			Printer printer = JsonFormat.printer().omittingInsignificantWhitespace()
-		//			//.includingDefaultValueFields()
-		//			;
-		//			System.out.println(printer.print(c1));
-		//			System.out.println(printer.print(c2));
-		//		}
-		//		catch (InvalidProtocolBufferException e)
-		//		{
-		//			// This shouldn't happen so throw it
-		//		}
+		//try
+		//{
+		//	Printer printer = JsonFormat.printer().omittingInsignificantWhitespace()
+		//	//.includingDefaultValueFields()
+		//	;
+		//	System.out.println(printer.print(c1));
+		//	System.out.println(printer.print(c2));
+		//}
+		//catch (InvalidProtocolBufferException e)
+		//{
+		//	// This shouldn't happen so throw it
+		//}
 
 		if (c1 != null)
 		{
