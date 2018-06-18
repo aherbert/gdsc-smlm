@@ -134,17 +134,17 @@ public class TraceManagerTest
 	@Test
 	public void canTraceMultipleFluorophoresWithMovingCoords()
 	{
-		// This test can fail if the moving fluorophores paths intersect
-		// so we use a known seed that is ok
-		simulate(TestSettings.getRandomGenerator(3), 1000, 1, 5, 2, 0.5f);
+		// This test can fail if the moving fluorophores paths intersect:
+		// Possibly change to use a fixed seed that is ok
+		simulate(TestSettings.getRandomGenerator(), 1000, 1, 5, 2, 0.5f);
 	}
 
 	@Test
 	public void canTraceMultiplePulsingFluorophoresWithMovingCoords()
 	{
-		// This test can fail if the moving fluorophores paths intersect
-		// so we use a known seed that is ok
-		simulate(TestSettings.getRandomGenerator(3005), 100, 5, 5, 10, 0.5f);
+		// This test can fail if the moving fluorophores paths intersect:
+		// Possibly change to use a fixed seed that is ok
+		simulate(TestSettings.getRandomGenerator(), 100, 5, 5, 10, 0.5f);
 	}
 
 	private void simulate(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime, int maxOffTime,
