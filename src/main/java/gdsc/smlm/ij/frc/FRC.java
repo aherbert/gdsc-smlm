@@ -1092,7 +1092,8 @@ public class FRC
 	 */
 	public static double getSine(double angle, double cosA)
 	{
-		return Math.sqrt(1 - (cosA * cosA)) * ((angle > Math.PI) ? -1 : 1); // Place in correct domain
+		final double sine = Math.sqrt(1 - (cosA * cosA)); 
+		return ((angle > Math.PI) ? -sine : sine); // Place in correct domain
 	}
 
 	/**
