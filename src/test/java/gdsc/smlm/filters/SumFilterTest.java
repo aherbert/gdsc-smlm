@@ -24,8 +24,8 @@
 package gdsc.smlm.filters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
@@ -33,24 +33,16 @@ import org.junit.internal.ArrayComparisonFailure;
 import gdsc.test.TestSettings;
 
 @SuppressWarnings("deprecation")
-public class SumFilterTest
+public class SumFilterTest extends AbstractFilterTest
 {
-	private gdsc.core.utils.Random rand;
-
-	private boolean debug = false;
 	private int InternalITER3 = 500;
 	private int InternalITER = 50;
 	private int ITER3 = 200;
 	private int ITER = 20;
 
-	// TODO - The test data should be representative of the final use case
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	//int[] primes = new int[] { 1024 };
-	int[] boxSizes = new int[] { 15, 9, 5, 3, 2 };
-
 	private void floatArrayEquals(String message, float[] data1, float[] data2, int boxSize)
 	{
-		Assert.assertArrayEquals(message, data1, data2, boxSize * boxSize * 1e-3f);
+		TestSettings.assertArrayEquals(message, data1, data2, 1e-5);
 	}
 
 	private void intArrayEquals(String message, int[] data1, int[] data2, int boxSize)
@@ -58,28 +50,43 @@ public class SumFilterTest
 		Assert.assertArrayEquals(message, data1, data2);
 	}
 
-	private double speedUpFactor(long slowTotal, long fastTotal)
+	private float[] floatCreateData(RandomGenerator rg, int width, int height)
 	{
-		return (1.0 * slowTotal) / fastTotal;
+		return createData(rg, width, height);
+	}
+
+	private int[] intCreateData(RandomGenerator rg, int width, int height)
+	{
+		return createIntData(rg, width, height);
+	}
+
+	private ArrayList<float[]> floatCreateSpeedData(int iter)
+	{
+		return getSpeedData(iter);
+	}
+
+	private ArrayList<int[]> intCreateSpeedData(int iter)
+	{
+		return getIntSpeedData(iter);
 	}
 
 	// COPY CODE FROM HERE...
 	@Test
 	public void floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(filter, width, height, boxSize);
+					floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
@@ -92,19 +99,19 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(filter, width, height, boxSize);
+					floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
@@ -116,18 +123,18 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
+				floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
@@ -139,20 +146,20 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(filter, width, height,
-							boxSize);
+					floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(rg, filter, width,
+							height, boxSize);
 	}
 
-	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(SumFilter filter,
-			int width, int height, int boxSize) throws ArrayComparisonFailure
+	private void floatCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
+			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.rollingBlockSumNxNInternal(data1, width, height, boxSize);
@@ -162,18 +169,10 @@ public class SumFilterTest
 				boxSize);
 	}
 
-	private float[] floatClone(float[] data1)
-	{
-		float[] data2 = Arrays.copyOf(data1, data1.length);
-		return data2;
-	}
-
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -242,22 +241,10 @@ public class SumFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private ArrayList<float[]> floatCreateSpeedData(int iter)
-	{
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
-		return dataSet;
-	}
-
 	@Test
 	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -331,8 +318,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
@@ -403,18 +388,18 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(filter, width, height);
+				floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
@@ -427,8 +412,6 @@ public class SumFilterTest
 	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -492,8 +475,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
@@ -555,8 +536,6 @@ public class SumFilterTest
 	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -620,8 +599,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
@@ -683,18 +660,18 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
+				floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void floatCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg,
+			SumFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.rollingBlockSum3x3Internal(data1, width, height);
@@ -707,8 +684,6 @@ public class SumFilterTest
 	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -773,8 +748,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
@@ -837,8 +810,6 @@ public class SumFilterTest
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -907,33 +878,22 @@ public class SumFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private float[] floatCreateData(int width, int height)
-	{
-		float[] data = new float[width * height];
-		for (int i = data.length; i-- > 0;)
-			data[i] = i;
-
-		rand.shuffle(data);
-
-		return data;
-	}
-
 	@Test
 	public void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareBlockSumNxNAndStripedBlockSumNxN(filter, width, height, boxSize);
+					floatCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
@@ -945,19 +905,19 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareBlockSumNxNAndRollingBlockSumNxN(filter, width, height, boxSize);
+					floatCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
@@ -970,8 +930,6 @@ public class SumFilterTest
 	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1044,8 +1002,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
@@ -1116,8 +1072,6 @@ public class SumFilterTest
 	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1191,8 +1145,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
@@ -1264,8 +1216,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
@@ -1336,18 +1286,18 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSum3x3AndBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareBlockSum3x3AndBlockSumNxN(filter, width, height);
+				floatCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockSum3x3AndBlockSumNxN(SumFilter filter, int width, int height)
+	private void floatCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockSum3x3(data1, width, height);
@@ -1360,8 +1310,6 @@ public class SumFilterTest
 	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1423,18 +1371,18 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(filter, width, height);
+				floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.stripedBlockSum3x3(data1, width, height);
@@ -1447,8 +1395,6 @@ public class SumFilterTest
 	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1510,18 +1456,18 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(filter, width, height);
+				floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = floatCreateData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.rollingBlockSum3x3(data1, width, height);
@@ -1534,8 +1480,6 @@ public class SumFilterTest
 	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1599,8 +1543,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
@@ -1662,8 +1604,6 @@ public class SumFilterTest
 	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -1727,8 +1667,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
@@ -1787,21 +1725,21 @@ public class SumFilterTest
 	}
 
 	@Test
-	public void intBlockSumNxNInternalAndRollingBlockSumNxNReturnSameResult()
+	public void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(filter, width, height, boxSize);
+					intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNInternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
@@ -1812,21 +1750,21 @@ public class SumFilterTest
 	}
 
 	@Test
-	public void intBlockSumNxNInternalAndStripedBlockSumNxNReturnSameResult()
+	public void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(filter, width, height, boxSize);
+					intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(SumFilter filter, int width, int height,
-			int boxSize) throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNInternalAndStripedBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
@@ -1836,20 +1774,20 @@ public class SumFilterTest
 	}
 
 	@Test
-	public void intBlockSum3x3InternalAndRollingBlockSumNxNReturnSameResult()
+	public void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
+				intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void intCompareBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
@@ -1861,20 +1799,20 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(filter, width, height,
-							boxSize);
+					intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(rg, filter, width,
+							height, boxSize);
 	}
 
-	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(SumFilter filter,
-			int width, int height, int boxSize) throws ArrayComparisonFailure
+	private void intCompareRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposed(RandomGenerator rg,
+			SumFilter filter, int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.rollingBlockSumNxNInternal(data1, width, height, boxSize);
@@ -1884,18 +1822,10 @@ public class SumFilterTest
 				boxSize);
 	}
 
-	private int[] intClone(int[] data1)
-	{
-		int[] data2 = Arrays.copyOf(data1, data1.length);
-		return data2;
-	}
-
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -1964,22 +1894,10 @@ public class SumFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private ArrayList<int[]> intCreateSpeedData(int iter)
-	{
-		ArrayList<int[]> dataSet = new ArrayList<int[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(intCreateData(primes[0], primes[0]));
-		}
-		return dataSet;
-	}
-
 	@Test
 	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2053,8 +1971,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
@@ -2125,18 +2041,18 @@ public class SumFilterTest
 	@Test
 	public void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				intCompareBlockSum3x3InternalAndBlockSumNxNInternal(filter, width, height);
+				intCompareBlockSum3x3InternalAndBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void intCompareBlockSum3x3InternalAndBlockSumNxNInternal(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSum3x3Internal(data1, width, height);
@@ -2149,8 +2065,6 @@ public class SumFilterTest
 	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2214,8 +2128,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
@@ -2277,8 +2189,6 @@ public class SumFilterTest
 	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2342,8 +2252,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
@@ -2405,18 +2313,18 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(filter, width, height);
+				intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(rg, filter, width, height);
 	}
 
-	private void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(SumFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void intCompareRollingBlockSum3x3InternalAndRollingBlockSumNxNInternal(RandomGenerator rg, SumFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.rollingBlockSum3x3Internal(data1, width, height);
@@ -2429,8 +2337,6 @@ public class SumFilterTest
 	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -2495,8 +2401,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
@@ -2559,8 +2463,6 @@ public class SumFilterTest
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2629,33 +2531,22 @@ public class SumFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private int[] intCreateData(int width, int height)
-	{
-		int[] data = new int[width * height];
-		for (int i = data.length; i-- > 0;)
-			data[i] = i;
-
-		rand.shuffle(data);
-
-		return data;
-	}
-
 	@Test
 	public void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					intCompareBlockSumNxNAndStripedBlockSumNxN(filter, width, height, boxSize);
+					intCompareBlockSumNxNAndStripedBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNAndStripedBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
-			throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNAndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height,
+			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
@@ -2667,19 +2558,19 @@ public class SumFilterTest
 	@Test
 	public void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					intCompareBlockSumNxNAndRollingBlockSumNxN(filter, width, height, boxSize);
+					intCompareBlockSumNxNAndRollingBlockSumNxN(rg, filter, width, height, boxSize);
 	}
 
-	private void intCompareBlockSumNxNAndRollingBlockSumNxN(SumFilter filter, int width, int height, int boxSize)
-			throws ArrayComparisonFailure
+	private void intCompareBlockSumNxNAndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height,
+			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSumNxN(data1, width, height, boxSize);
@@ -2692,8 +2583,6 @@ public class SumFilterTest
 	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2766,8 +2655,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
@@ -2838,8 +2725,6 @@ public class SumFilterTest
 	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		SumFilter filter = new SumFilter();
 
@@ -2913,8 +2798,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
@@ -2986,8 +2869,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
@@ -3058,18 +2939,18 @@ public class SumFilterTest
 	@Test
 	public void intBlockSum3x3AndBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				intCompareBlockSum3x3AndBlockSumNxN(filter, width, height);
+				intCompareBlockSum3x3AndBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void intCompareBlockSum3x3AndBlockSumNxN(SumFilter filter, int width, int height)
+	private void intCompareBlockSum3x3AndBlockSumNxN(RandomGenerator rg, SumFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.blockSum3x3(data1, width, height);
@@ -3082,8 +2963,6 @@ public class SumFilterTest
 	public void intBlockSum3x3IsFasterThanBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3145,18 +3024,18 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				intCompareStripedBlockSum3x3AndStripedBlockSumNxN(filter, width, height);
+				intCompareStripedBlockSum3x3AndStripedBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void intCompareStripedBlockSum3x3AndStripedBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.stripedBlockSum3x3(data1, width, height);
@@ -3169,8 +3048,6 @@ public class SumFilterTest
 	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3232,18 +3109,18 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SumFilter filter = new SumFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				intCompareRollingBlockSum3x3AndRollingBlockSumNxN(filter, width, height);
+				intCompareRollingBlockSum3x3AndRollingBlockSumNxN(rg, filter, width, height);
 	}
 
-	private void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(SumFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void intCompareRollingBlockSum3x3AndRollingBlockSumNxN(RandomGenerator rg, SumFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		int[] data1 = intCreateData(width, height);
+		int[] data1 = intCreateData(rg, width, height);
 		int[] data2 = intClone(data1);
 
 		filter.rollingBlockSum3x3(data1, width, height);
@@ -3256,8 +3133,6 @@ public class SumFilterTest
 	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 
@@ -3321,8 +3196,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
@@ -3385,8 +3258,6 @@ public class SumFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		SumFilter filter = new SumFilter();
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
@@ -3448,8 +3319,6 @@ public class SumFilterTest
 	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-30051977);
 
 		SumFilter filter = new SumFilter();
 

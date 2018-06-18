@@ -24,86 +24,25 @@
 package gdsc.smlm.filters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
 
-public class FilterTest
+public class FilterSpeedTest extends AbstractFilterTest
 {
-	private gdsc.core.utils.Random rand;
-
-	private boolean debug = false;
-
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	int[] boxSizes = new int[] { 15, 9, 5, 3, 2, 1 };
-
-	private float[] floatClone(int[] data1)
-	{
-		float[] data2 = new float[data1.length];
-		for (int i = data2.length; i-- > 0;)
-			data2[i] = data1[i];
-		return data2;
-	}
-
-	private float[] floatClone(float[] data1)
-	{
-		float[] data2 = Arrays.copyOf(data1, data1.length);
-		return data2;
-	}
-
-	private float[] floatCreateData(int width, int height)
-	{
-		float[] data = new float[width * height];
-		for (int i = data.length; i-- > 0;)
-			//data[i] = i;
-			data[i] = rand.next();
-		//rand.shuffle(data);
-
-		return data;
-	}
-
-	private int[] intClone(int[] data1)
-	{
-		int[] data2 = Arrays.copyOf(data1, data1.length);
-		return data2;
-	}
-
-	private int[] intCreateData(int width, int height)
-	{
-		int[] data = new int[width * height];
-		for (int i = data.length; i-- > 0;)
-			data[i] = i;
-
-		rand.shuffle(data);
-
-		return data;
-	}
-
-	private double speedUpFactor(long slowTotal, long fastTotal)
-	{
-		return (1.0 * slowTotal) / fastTotal;
-	}
 
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		BlockSumFilter filter = new BlockSumFilter();
 		BlockMeanFilter filter2 = new BlockMeanFilter();
 
 		int iter = 50;
-
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
+		ArrayList<float[]> dataSet = getSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -172,18 +111,11 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		MedianFilter filter2 = new MedianFilter();
 
 		int iter = 10;
-
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
+		ArrayList<float[]> dataSet = getSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -252,18 +184,11 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		MedianFilter filter2 = new MedianFilter();
 
 		int iter = 10;
-
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
+		ArrayList<float[]> dataSet = getSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -332,18 +257,11 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		GaussianFilter filter2 = new GaussianFilter();
 
 		int iter = 10;
-
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
+		ArrayList<float[]> dataSet = getSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -412,18 +330,11 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		AreaAverageFilter filter2 = new AreaAverageFilter();
 
 		int iter = 10;
-
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
+		ArrayList<float[]> dataSet = getSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -498,18 +409,11 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		AreaAverageFilter filter2 = new AreaAverageFilter();
 
 		int iter = 10;
-
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
+		ArrayList<float[]> dataSet = getSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -586,18 +490,11 @@ public class FilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		SumFilter filter = new SumFilter();
 		BlockSumFilter filter2 = new BlockSumFilter();
 
 		int iter = 50;
-
-		ArrayList<int[]> dataSet = new ArrayList<int[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(intCreateData(primes[0], primes[0]));
-		}
+		ArrayList<int[]> dataSet = getIntSpeedData(iter);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 

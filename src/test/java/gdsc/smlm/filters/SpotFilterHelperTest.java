@@ -25,14 +25,16 @@ package gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.Random;
+import gdsc.test.TestSettings;
+
 public class SpotFilterHelperTest
 {
-	private gdsc.core.utils.Random rand;
-
-	private Spot[] createData(int width, int height, int n)
+	private Spot[] createData(RandomGenerator rg, int width, int height, int n)
 	{
 		if (n == 0)
 			return new Spot[0];
@@ -41,7 +43,7 @@ public class SpotFilterHelperTest
 		for (int i = n; i-- > 0;)
 			data[i] = 1;
 
-		rand.shuffle(data);
+		Random.shuffle(data, rg);
 
 		Spot[] spots = new Spot[n];
 		for (int i = 0, j = 0; i < data.length; i++)
@@ -60,7 +62,7 @@ public class SpotFilterHelperTest
 	@Test
 	public void canCountNeighbours()
 	{
-		rand = new gdsc.core.utils.Random(30051977);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int width = 64, height = 64;
 		int size = width * height;
@@ -71,7 +73,7 @@ public class SpotFilterHelperTest
 			n *= 2;
 			for (int loop = 0; loop < 5; loop++)
 			{
-				Spot[] spots = createData(width, height, n);
+				Spot[] spots = createData(rg, width, height, n);
 				for (int box : new int[] { 1, 2, 3, 4, 5 })
 				{
 					int[] e = countNeighbours(spots, width, height, box);

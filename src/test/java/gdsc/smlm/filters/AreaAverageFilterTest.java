@@ -25,60 +25,37 @@ package gdsc.smlm.filters;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
 
 @SuppressWarnings("deprecation")
-public class AreaAverageFilterTest
+public class AreaAverageFilterTest extends AbstractFilterTest
 {
-	private gdsc.core.utils.Random rand;
-
-	private boolean debug = false;
 	private int ITER = 100;
 	private int InternalITER = 300;
-
-	// TODO - The test data should be representative of the final use case
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	//int[] primes = new int[] { 1024 };
-	float[] boxSizes = new float[] { 15.5f, 9.5f, 5.5f, 3.5f, 2.5f, 1.5f, 0.5f };
-
-	private float[] createData(int width, int height)
-	{
-		float[] data = new float[width * height];
-		for (int i = data.length; i-- > 0;)
-			data[i] = rand.next();
-
-		return data;
-	}
-
-	private double speedUpFactor(long slowTotal, long fastTotal)
-	{
-		return (1.0 * slowTotal) / fastTotal;
-	}
 
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		AreaAverageFilter filter = new AreaAverageFilter();
 
-		ArrayList<float[]> dataSet = createSpeedData(InternalITER);
+		ArrayList<float[]> dataSet = getSpeedData(InternalITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 		{
 			filter.areaAverageUsingAveragesInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			filter.areaAverageUsingSumsInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 			for (int width : primes)
 				for (int height : primes)
 				{
@@ -95,7 +72,7 @@ public class AreaAverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
 			for (int width : primes)
@@ -140,23 +117,21 @@ public class AreaAverageFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
 
-		ArrayList<float[]> dataSet = createSpeedData(ITER);
+		ArrayList<float[]> dataSet = getSpeedData(ITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 		{
 			filter.areaAverageUsingAverages(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			filter2.stripedBlockAverage(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 			for (int width : primes)
 				for (int height : primes)
 				{
@@ -173,7 +148,7 @@ public class AreaAverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
 			for (int width : primes)
@@ -218,23 +193,21 @@ public class AreaAverageFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
 
-		ArrayList<float[]> dataSet = createSpeedData(InternalITER);
+		ArrayList<float[]> dataSet = getSpeedData(InternalITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 		{
 			filter.areaAverageUsingAveragesInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 			filter2.stripedBlockAverageInternal(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
 		}
 
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 			for (int width : primes)
 				for (int height : primes)
 				{
@@ -251,7 +224,7 @@ public class AreaAverageFilterTest
 
 		long slowTotal = 0, fastTotal = 0;
 		int index = 0;
-		for (float boxSize : boxSizes)
+		for (float boxSize : fBoxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
 			for (int width : primes)
@@ -292,22 +265,12 @@ public class AreaAverageFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private ArrayList<float[]> createSpeedData(int iter)
-	{
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(createData(primes[0], primes[0]));
-		}
-		return dataSet;
-	}
-
 	@Test
 	public void areaAverageCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		int max = 50;
-		float[] data = createData(max, max);
+		float[] data = createData(rg, max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
 		int n = 30;
 		float[][] results = new float[n + 1][];
@@ -370,9 +333,9 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		int max = 50;
-		float[] data = createData(max, max);
+		float[] data = createData(rg, max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
 		int n = 30;
 		float[][] results = new float[n + 1][];
@@ -392,9 +355,9 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		int max = 50;
-		float[] data = createData(max, max);
+		float[] data = createData(rg, max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
 		filter.setSimpleInterpolation(false);
 		int n = 30;
@@ -415,9 +378,9 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks()
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		int max = 50;
-		float[] data = createData(max, max);
+		float[] data = createData(rg, max, max);
 		AreaAverageFilter filter = new AreaAverageFilter();
 		filter.setSimpleInterpolation(false);
 		int n = 30;

@@ -24,55 +24,41 @@
 package gdsc.smlm.filters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.test.TestSettings;
 
-public class MedianFilterTest
+public class MedianFilterTest extends AbstractFilterTest
 {
-	private gdsc.core.utils.Random rand;
-
-	private boolean debug = false;
 	private int InternalITER3 = 200;
 	private int InternalITER = 20;
 	private int ITER3 = 100;
 	private int ITER = 10;
-
-	// TODO - The test data should be representative of the final use case
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	//int[] primes = new int[] { 1024 };
-	int[] boxSizes = new int[] { 15, 9, 5, 3, 2 };
 
 	private void floatArrayEquals(String message, float[] data1, float[] data2, int boxSize)
 	{
 		Assert.assertArrayEquals(message, data1, data2, boxSize * boxSize * 1e-3f);
 	}
 
-	private double speedUpFactor(long slowTotal, long fastTotal)
-	{
-		return (1.0 * slowTotal) / fastTotal;
-	}
-
 	@Test
 	public void floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
-
 		for (int width : primes)
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(filter, width, height, boxSize);
+					floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(rg, filter, width, height, boxSize);
 	}
 
-	private void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(MedianFilter filter, int width,
-			int height, int boxSize) throws ArrayComparisonFailure
+	private void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
+			int width, int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockMedianNxNInternal(data1, width, height, boxSize);
@@ -85,18 +71,17 @@ public class MedianFilterTest
 	@Test
 	public void floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
-
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(filter, width, height);
+				floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(MedianFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockMedian3x3Internal(data1, width, height);
@@ -105,22 +90,14 @@ public class MedianFilterTest
 		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
 	}
 
-	private float[] floatClone(float[] data1)
-	{
-		float[] data2 = Arrays.copyOf(data1, data1.length);
-		return data2;
-	}
-
 	@Test
 	public void floatRollingMedianNxNInternalIsFasterThanBlockMedianNxNInternal()
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
+		ArrayList<float[]> dataSet = getSpeedData(InternalITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -185,31 +162,20 @@ public class MedianFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private ArrayList<float[]> floatCreateSpeedData(int iter)
-	{
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(floatCreateData(primes[0], primes[0]));
-		}
-		return dataSet;
-	}
-
 	@Test
 	public void floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
-
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(filter, width, height);
+				floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(MedianFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(RandomGenerator rg, MedianFilter filter,
+			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockMedian3x3Internal(data1, width, height);
@@ -223,11 +189,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -287,11 +251,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -350,18 +312,17 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
-
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(filter, width, height);
+				floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(MedianFilter filter, int width,
-			int height) throws ArrayComparisonFailure
+	private void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(RandomGenerator rg,
+			MedianFilter filter, int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.rollingMedian3x3Internal(data1, width, height);
@@ -375,11 +336,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
+		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -435,36 +394,23 @@ public class MedianFilterTest
 			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
-	private float[] floatCreateData(int width, int height)
-	{
-		float[] data = new float[width * height];
-		for (int i = data.length; i-- > 0;)
-			//data[i] = i;
-			data[i] = rand.next();
-
-		//rand.shuffle(data);
-
-		return data;
-	}
-
 	@Test
 	public void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
-
 		for (int width : primes)
 		{
 			for (int height : primes)
 				for (int boxSize : boxSizes)
-					floatCompareBlockMedianNxNAndRollingMedianNxN(filter, width, height, boxSize);
+					floatCompareBlockMedianNxNAndRollingMedianNxN(rg, filter, width, height, boxSize);
 		}
 	}
 
-	private void floatCompareBlockMedianNxNAndRollingMedianNxN(MedianFilter filter, int width, int height, int boxSize)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockMedianNxNAndRollingMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockMedianNxN(data1, width, height, boxSize);
@@ -478,11 +424,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		ArrayList<float[]> dataSet = getSpeedData(ITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -552,11 +496,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		ArrayList<float[]> dataSet = getSpeedData(ITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -625,11 +567,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-300519);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
+		ArrayList<float[]> dataSet = getSpeedData(ITER);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -697,18 +637,17 @@ public class MedianFilterTest
 	@Test
 	public void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
-
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareBlockMedian3x3AndBlockMedianNxN(filter, width, height);
+				floatCompareBlockMedian3x3AndBlockMedianNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareBlockMedian3x3AndBlockMedianNxN(MedianFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareBlockMedian3x3AndBlockMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.blockMedian3x3(data1, width, height);
@@ -722,11 +661,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -784,18 +721,18 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult()
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MedianFilter filter = new MedianFilter();
 
 		for (int width : primes)
 			for (int height : primes)
-				floatCompareRollingMedian3x3AndRollingMedianNxN(filter, width, height);
+				floatCompareRollingMedian3x3AndRollingMedianNxN(rg, filter, width, height);
 	}
 
-	private void floatCompareRollingMedian3x3AndRollingMedianNxN(MedianFilter filter, int width, int height)
-			throws ArrayComparisonFailure
+	private void floatCompareRollingMedian3x3AndRollingMedianNxN(RandomGenerator rg, MedianFilter filter, int width,
+			int height) throws ArrayComparisonFailure
 	{
-		rand = new gdsc.core.utils.Random(-30051977);
-		float[] data1 = floatCreateData(width, height);
+		float[] data1 = createData(rg, width, height);
 		float[] data2 = floatClone(data1);
 
 		filter.rollingMedian3x3(data1, width, height);
@@ -809,11 +746,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
@@ -873,11 +808,9 @@ public class MedianFilterTest
 	{
 		TestSettings.assumeMediumComplexity();
 
-		rand = new gdsc.core.utils.Random(-30051977);
-
 		MedianFilter filter = new MedianFilter();
 
-		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
+		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 

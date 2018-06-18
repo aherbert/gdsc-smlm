@@ -23,19 +23,15 @@
  */
 package gdsc.smlm.filters;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-public class IntBlockSumFilterTest
+import gdsc.test.TestSettings;
+
+public class IntBlockSumFilterTest extends AbstractFilterTest
 {
-	private gdsc.core.utils.Random rand;
-
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	//int[] primes = new int[] { 1024 };
-	int[] boxSizes = new int[] { 15, 9, 5, 3, 2, 1 };
-	boolean[] checkInternal = new boolean[] { true, false };
-
 	/**
 	 * Do a simple and stupid sum filter.
 	 *
@@ -166,12 +162,12 @@ public class IntBlockSumFilterTest
 
 	private void checkIsCorrect(BlockSumDataFilter filter)
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		for (int width : primes)
 			for (int height : primes)
 			{
-				int[] data = createData(width, height);
+				int[] data = createIntData(rg, width, height);
 
 				for (int boxSize : boxSizes)
 					for (boolean internal : checkInternal)
@@ -201,14 +197,4 @@ public class IntBlockSumFilterTest
 		checkIsCorrect(filter);
 	}
 
-	private int[] createData(int width, int height)
-	{
-		int[] data = new int[width * height];
-		for (int i = data.length; i-- > 0;)
-			data[i] = i;
-
-		rand.shuffle(data);
-
-		return data;
-	}
 }

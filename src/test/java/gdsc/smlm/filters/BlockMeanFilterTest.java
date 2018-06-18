@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
@@ -34,21 +35,15 @@ import org.junit.internal.ArrayComparisonFailure;
 import gdsc.core.utils.FloatEquality;
 import gdsc.test.TestSettings;
 
-public class BlockMeanFilterTest
+public class BlockMeanFilterTest extends AbstractFilterTest
 {
-	private gdsc.core.utils.Random rand;
+	
 
-	private boolean debug = false;
 	private int InternalITER3 = 500;
 	private int InternalITER = 50;
 	private int ITER3 = 200;
 	private int ITER = 20;
 
-	// TODO - The test data should be representative of the final use case
-	int[] primes = new int[] { 113, 97, 53, 29 };
-	//int[] primes = new int[] { 1024 };
-	int[] boxSizes = new int[] { 15, 9, 5, 3, 2, 1 };
-	boolean[] checkInternal = new boolean[] { true, false };
 
 	/**
 	 * Do a simple and stupid mean filter.
@@ -263,14 +258,14 @@ public class BlockMeanFilterTest
 
 	private void checkIsCorrect(BlockMeanDataFilter filter)
 	{
-		rand = new gdsc.core.utils.Random(-30051976);
-		ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		ExponentialDistribution ed = new ExponentialDistribution(rg, 57,
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
 		for (int width : primes)
 			for (int height : primes)
 			{
-				float[] data = createData(width, height);
+				float[] data = createData(rg, width, height);
 
 				filter.f.setWeights(null, 0, 0);
 				for (float boxSize : boxSizes)
@@ -379,52 +374,6 @@ public class BlockMeanFilterTest
 		checkIsCorrect(filter);
 	}
 
-	private double speedUpFactor(long slowTotal, long fastTotal)
-	{
-		return (1.0 * slowTotal) / fastTotal;
-	}
-
-	private float[] floatClone(float[] data1)
-	{
-		float[] data2 = Arrays.copyOf(data1, data1.length);
-		return data2;
-	}
-
-	private float[] createData(int width, int height)
-	{
-		float[] data = new float[width * height];
-		for (int i = data.length; i-- > 0;)
-			data[i] = i;
-
-		rand.shuffle(data);
-
-		return data;
-	}
-
-	private ArrayList<float[]> floatCreateSpeedData(int iter)
-	{
-		ArrayList<float[]> dataSet = new ArrayList<float[]>(iter);
-		for (int i = iter; i-- > 0;)
-		{
-			dataSet.add(createData(primes[0], primes[0]));
-		}
-		return dataSet;
-	}
-
-	static ArrayList<float[]> dataSet = null;
-
-	private ArrayList<float[]> getSpeedData(int iter)
-	{
-		if (dataSet == null || dataSet.size() < iter)
-		{
-			dataSet = floatCreateSpeedData(iter);
-		}
-		ArrayList<float[]> dataSet2 = new ArrayList<float[]>(iter);
-		for (int i = 0; i < iter; i++)
-			dataSet2.add(dataSet.get(i).clone());
-		return dataSet2;
-	}
-
 	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow)
 	{
 		speedTest(fast, slow, boxSizes);
@@ -433,8 +382,6 @@ public class BlockMeanFilterTest
 	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -515,8 +462,6 @@ public class BlockMeanFilterTest
 	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
 		TestSettings.assumeMediumComplexity();
-
-		rand = new gdsc.core.utils.Random(-300519);
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 
