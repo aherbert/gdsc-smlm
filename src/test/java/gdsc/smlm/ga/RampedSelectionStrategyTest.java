@@ -26,9 +26,11 @@ package gdsc.smlm.ga;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestSettings;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 import gdsc.test.TimingTask;
+import gdsc.test.TestSettings.LogLevel;
 
 public class RampedSelectionStrategyTest
 {
@@ -99,25 +101,29 @@ public class RampedSelectionStrategyTest
 	@Test
 	public void speedTest50()
 	{
+		TestSettings.assumeLowComplexity();
 		speedTest(50, false, 10);
 	}
 
 	@Test
 	public void speedTest200()
 	{
+		TestSettings.assumeMediumComplexity();
 		speedTest(200, true, 5);
 	}
 
 	@Test
 	public void speedTest1000()
 	{
+		TestSettings.assumeMediumComplexity();
 		speedTest(1000, true, 2);
 	}
 
 	// Too slow for common use
-	//@Test
+	@Test
 	public void speedTest5000()
 	{
+		TestSettings.assumeHighComplexity();
 		speedTest(5000, true, 1);
 	}
 
@@ -197,8 +203,8 @@ public class RampedSelectionStrategyTest
 
 		int n = ts.repeat();
 		ts.repeat(n);
-
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report();
 
 		TimingResult slow = ts.get((faster) ? ts.getSize() - 2 : ts.getSize() - 1);
 		TimingResult fast = ts.get((faster) ? ts.getSize() - 1 : ts.getSize() - 2);

@@ -32,6 +32,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
 public class ErfTest
@@ -364,6 +365,8 @@ public class ErfTest
 	@Test
 	public void erfApproxIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+
 		int range = 5;
 		int steps = 10000;
 		final double[] x = new double[steps];
@@ -380,7 +383,10 @@ public class ErfTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
+
+		Assert.assertTrue(ts.get(-3).getMean() < ts.get(-4).getMean());
 	}
 
 	@Test
@@ -600,6 +606,8 @@ public class ErfTest
 	@Test
 	public void powerApproxIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+
 		int range = 5000;
 		int steps = 100000;
 		final double[] x = new double[steps];
@@ -617,7 +625,8 @@ public class ErfTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report();
 
 		for (int i = 0; i < 2; i++)
 		{

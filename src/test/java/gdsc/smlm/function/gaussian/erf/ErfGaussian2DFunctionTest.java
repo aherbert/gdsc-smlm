@@ -45,6 +45,8 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
@@ -440,6 +442,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterThanEquivalentGaussian2DFunction()
 	{
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+
 		int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
 		final Gaussian2DFunction gf = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
 
@@ -482,16 +486,16 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report();
 
-		// Sometimes this fails, probably due to JVM optimisations, so skip for now
-		if (!TestSettings.ASSERT_SPEED_TESTS)
-			return;
+		for (int i = 1; i <= 2; i++)
+		{
+			TestSettings.logSpeedTestResult(ts.get(-i).getMean() < ts.get(-i - 3).getMean(),
+					"ERF function %d order not faster than equivalent Gaussian2DFunction: %g !< %g", i - 1,
+					ts.get(-i).getMean(), ts.get(-i - 3).getMean());
 
-		int n = ts.getSize() - 1;
-		Assert.assertTrue("0 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
-		n--;
-		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
+		}
 	}
 
 	@Test
@@ -1070,6 +1074,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void functionIsFasterUsingForEach()
 	{
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+
 		final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
 		final TurboList<double[]> params = new TurboList<double[]>();
@@ -1101,17 +1107,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		ts.repeat(size);
 		ts.report();
 
-		// Sometimes this fails when running all the tests, probably due to JVM optimisations
-		// in the more used eval(...) functions, so skip for now
-		if (!TestSettings.ASSERT_SPEED_TESTS)
-			return;
+		for (int i = 1; i <= 3; i++)
+		{
+			TestSettings.logSpeedTestResult(ts.get(-i).getMean() < ts.get(-i - 3).getMean(),
+					"forEach %d order not faster than eval(int): %g !< %g", i - 1, ts.get(-i).getMean(),
+					ts.get(-i - 3).getMean());
 
-		int n = ts.getSize() - 1;
-		Assert.assertTrue("0 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
-		n--;
-		Assert.assertTrue("1 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
-		n--;
-		Assert.assertTrue("2 order", ts.get(n).getMean() < ts.get(n - 3).getMean());
+		}
 	}
 
 	@Test

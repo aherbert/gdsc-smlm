@@ -50,7 +50,10 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public abstract class CubicSplineFunctionTest
 {
@@ -848,6 +851,9 @@ public abstract class CubicSplineFunctionTest
 
 	private void speedTest(int n, int order)
 	{
+		// No assertions, this is just a report
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+
 		CubicSplineFunction cf = (n == 2) ? f2 : f1;
 		Assume.assumeNotNull(cf);
 		CubicSplineFunction cff = (n == 2) ? f2f : f1f;

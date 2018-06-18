@@ -44,6 +44,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
 public class PoissonCalculatorTest
@@ -811,6 +812,8 @@ public class PoissonCalculatorTest
 	@Test
 	public void instanceMethodIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+
 		int n = 1000;
 		int m = 10;
 		double[] x = new double[n * m];
@@ -847,7 +850,8 @@ public class PoissonCalculatorTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 
 		int index = ts.getSize() - 1;
 		Assert.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());

@@ -28,7 +28,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
 
 public class FastMathTest
 {
@@ -84,6 +86,8 @@ public class FastMathTest
 	@Test
 	public void cbrtIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+		
 		// Q. What is a suitable range for this test? 
 		int range = 5;
 		int steps = 10000;
@@ -100,7 +104,8 @@ public class FastMathTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report();
 
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());

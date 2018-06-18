@@ -26,12 +26,15 @@ package gdsc.smlm.filters;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Random;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
@@ -312,11 +315,13 @@ public class GaussianFilterTest
 	@Test
 	public void floatFilterIsFasterThanDoubleFilter()
 	{
-		Random rand = new Random(-30051976);
+		TestSettings.assumeMediumComplexity();
+
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
-			data[i] = createData(rand, size, size);
+			data[i] = createData(rg, size, size);
 
 		TimingService ts = new TimingService();
 		for (double sigma : sigmas)
@@ -327,7 +332,8 @@ public class GaussianFilterTest
 		}
 		int size = ts.getSize();
 		ts.repeat();
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 		int n = size / sigmas.length;
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
 		{
@@ -336,14 +342,16 @@ public class GaussianFilterTest
 		}
 	}
 
-	//@Test
+	@Test
 	public void floatFilterInternalIsFasterThanDoubleFilterInternal()
 	{
-		Random rand = new Random(-30051976);
+		TestSettings.assumeHighComplexity();
+
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
-			data[i] = createData(rand, size, size);
+			data[i] = createData(rg, size, size);
 
 		TimingService ts = new TimingService();
 		for (double sigma : sigmas)
@@ -354,7 +362,8 @@ public class GaussianFilterTest
 		}
 		int size = ts.getSize();
 		ts.repeat();
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 		int n = size / sigmas.length;
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
 		{
@@ -363,13 +372,13 @@ public class GaussianFilterTest
 		}
 	}
 
-	private static float[] createData(Random rand, int width, int height)
+	private static float[] createData(RandomGenerator rg, int width, int height)
 	{
 		float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = i;
 
-		rand.shuffle(data);
+		Random.shuffle(data, rg);
 
 		return data;
 	}

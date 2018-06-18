@@ -489,7 +489,6 @@ public class EJMLLinearSolverTest
 
 	private void runSolverSpeedTest(int flags)
 	{
-		// TODO - These should assert something
 		TestSettings.assumeMediumComplexity();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
@@ -543,6 +542,7 @@ public class EJMLLinearSolverTest
 		int runs = 100000 / a.length;
 		TimingService ts = new TimingService(runs);
 		TurboList<SolverTimingTask> tasks = new TurboList<SolverTimingTask>();
+		// Added in descending speed order
 		tasks.add(new PseudoInverseSolverTimingTask(a, b));
 		tasks.add(new LinearSolverTimingTask(a, b));
 		tasks.add(new CholeskySolverTimingTask(a, b));
@@ -551,8 +551,18 @@ public class EJMLLinearSolverTest
 		for (SolverTimingTask task : tasks)
 			if (!task.badSolver)
 				ts.execute(task);
+		int size = ts.getSize();
 		ts.repeat();
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
+
+		// Since the speed is very similar at sizes 2-5 there is nothing to reliably assert
+		// about the fastest of Cholesky/CholeskyLDLT/Direct
+		for (int i = 1; i < size; i++)
+			Assert.assertTrue("PseudoInverse is not slowest", ts.get(-size).getMean() > ts.get(-i).getMean());
+		if (np > 2)
+			for (int i = 1; i < size - 1; i++)
+				Assert.assertTrue("Linear is not 2nd slowest", ts.get(-(size - 1)).getMean() > ts.get(-i).getMean());
 	}
 
 	private abstract class InversionTimingTask extends BaseTimingTask
@@ -838,6 +848,7 @@ public class EJMLLinearSolverTest
 		int runs = 100000 / a.length;
 		TimingService ts = new TimingService(runs);
 		TurboList<InversionTimingTask> tasks = new TurboList<InversionTimingTask>();
+		// Added in descending speed order
 		tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
 		tasks.add(new LinearInversionTimingTask(a, ignore, answer));
 		tasks.add(new CholeskyLDLTInversionTimingTask(a, ignore, answer));
@@ -853,12 +864,12 @@ public class EJMLLinearSolverTest
 			ts.report(size);
 
 		// When it is present the DiagonalDirect is fastest (n<=5)
-		if (n <= 5)
+		if (np <= 5)
 		{
 			for (int i = 2; i <= size; i++)
 				Assert.assertTrue("DiagonalDirect is not fastest", ts.get(-1).getMean() < ts.get(-i).getMean());
 
-			if (n < 5)
+			if (np < 5)
 			{
 				// n < 5 Direct is fastest
 				for (int i = 3; i <= size; i++)

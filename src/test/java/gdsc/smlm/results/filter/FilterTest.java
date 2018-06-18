@@ -32,6 +32,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 import gdsc.test.TimingTask;
+import gdsc.test.TestSettings.LogLevel;
 
 public class FilterTest
 {
@@ -68,6 +69,8 @@ public class FilterTest
 	@Test
 	public void directCompareMultiFilterIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+		
 		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -227,13 +230,13 @@ public class FilterTest
 
 		int size = ts.repeat();
 		ts.repeat(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 
-		ts.report();
-
-		for (int i = 0; i < ts.getSize(); i += 2)
+		for (int i = 0; i < size; i += 2)
 		{
-			TimingResult slow = ts.get(i);
-			TimingResult fast = ts.get(i + 1);
+			TimingResult slow = ts.get(-(i + 2));
+			TimingResult fast = ts.get(-(i + 1));
 			Assert.assertTrue(slow.getMin() > fast.getMin());
 		}
 	}
@@ -262,7 +265,7 @@ public class FilterTest
 		{
 			MultiFilter f1 = (MultiFilter) f.create(random(f.getNumberOfParameters(), randomGenerator));
 			String xml = f1.toXML();
-			System.out.println(XmlUtils.prettyPrintXml(xml));
+			TestSettings.debugln(XmlUtils.prettyPrintXml(xml));
 			MultiFilter f2 = (MultiFilter) Filter.fromXML(xml);
 			Assert.assertTrue(f1.getClass().equals(f2.getClass()));
 			Assert.assertEquals(f1, f2);

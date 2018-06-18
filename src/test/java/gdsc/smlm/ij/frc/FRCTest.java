@@ -37,6 +37,7 @@ import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -166,6 +167,8 @@ public class FRCTest
 	@Test
 	public void computeSineIsFaster()
 	{
+		TestSettings.assumeHighComplexity();
+
 		int steps = 100000;
 		double delta = 2 * Math.PI / steps;
 		final double[] a = new double[steps + 1];
@@ -211,24 +214,31 @@ public class FRCTest
 			}
 		});
 
-		ts.repeat(ts.getSize());
-		ts.report();
+		int size = ts.getSize();
+		ts.repeat(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
+
+		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
 	}
 
 	@Test
 	public void computeMirroredIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+		
 		// Sample lines through an image to create a structure.
-		final int size = 2048;
-		double[][] data = new double[size * 2][];
+		final int N = 2048;
+		double[][] data = new double[N * 2][];
 		RandomGenerator r = TestSettings.getRandomGenerator();
-		for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--)
+		for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--)
 		{
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y + r.nextGaussian() * 5 };
 			data[i++] = new double[] { x + r.nextGaussian() * 5, y2 + r.nextGaussian() * 5 };
 		}
 		// Create 2 images
-		Rectangle bounds = new Rectangle(0, 0, size, size);
+		Rectangle bounds = new Rectangle(0, 0, N, N);
 		IJImagePeakResults i1 = createImage(bounds);
 		IJImagePeakResults i2 = createImage(bounds);
 		int[] indices = SimpleArrayUtils.newArray(data.length, 0, 1);
@@ -274,7 +284,7 @@ public class FRCTest
 			@Override
 			public Object run(Object data)
 			{
-				FRC.computeMirrored(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+				FRC.computeMirrored(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 				return null;
 			}
 		});
@@ -283,12 +293,17 @@ public class FRCTest
 			@Override
 			public Object run(Object data)
 			{
-				FRC.computeMirroredFast(size, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+				FRC.computeMirroredFast(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
 				return null;
 			}
 		});
 
-		ts.repeat(ts.getSize());
-		ts.report();
+		int size = ts.getSize();
+		ts.repeat(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
+
+		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
 	}
 }

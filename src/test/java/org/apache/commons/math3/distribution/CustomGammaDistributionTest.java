@@ -31,6 +31,7 @@ import org.junit.Test;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
 
 public class CustomGammaDistributionTest
 {
@@ -132,13 +133,16 @@ public class CustomGammaDistributionTest
 	@Test
 	public void customDistributionIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+
 		TimingService ts = new TimingService(5);
 		ts.execute(new StaticTimingTask());
 		ts.execute(new InstanceTimingTask());
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}

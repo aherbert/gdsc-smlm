@@ -38,6 +38,8 @@ import gdsc.smlm.function.ICSIFastLog.DataType;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("unused")
 public class FastLogTest
@@ -772,6 +774,9 @@ public class FastLogTest
 	@Test
 	public void canTestFloatSpeed()
 	{
+		// No assertions, this is just a report
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		float[] x = new float[1000000];
 		for (int i = 0; i < x.length; i++)
@@ -858,6 +863,9 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleSpeed()
 	{
+		// No assertions, this is just a report
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
@@ -906,6 +914,9 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleSpeedLog1P()
 	{
+		// No assertions, this is just a report
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
@@ -933,6 +944,9 @@ public class FastLogTest
 	@Test
 	public void canTestFloatVsDoubleSpeed()
 	{
+		// No assertions, this is just a report
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
+		
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double[] x = new double[1000000];
 		float[] xf = new float[x.length];
@@ -993,7 +1007,6 @@ public class FastLogTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		//ts.report();
 		ts.report(size);
 	}
 }

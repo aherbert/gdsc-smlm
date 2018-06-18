@@ -25,6 +25,7 @@ package gdsc.smlm.filters;
 
 import java.awt.Rectangle;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,7 +33,9 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
 
@@ -286,11 +289,11 @@ public class KernelFilterTest
 
 	private void floatFilterIsFasterThanIJFilter(int k)
 	{
-		Random rand = new Random(-30051976);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		float[][] data = new float[10][];
 		for (int i = 0; i < data.length; i++)
-			data[i] = createData(rand, size, size);
+			data[i] = createData(rg, size, size);
 
 		float[] kernel = createKernel(k, k);
 		for (int border : borders)
@@ -301,18 +304,19 @@ public class KernelFilterTest
 			ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, k, k), data, border));
 			int size = ts.getSize();
 			ts.repeat();
-			ts.report(size);
+			if (TestSettings.allow(LogLevel.INFO))
+				ts.report(size);
 			Assert.assertTrue(ts.get(-2).getMean() < ts.get(-1).getMean() * 1.1);
 		}
 	}
 
-	private static float[] createData(Random rand, int width, int height)
+	private static float[] createData(RandomGenerator rg, int width, int height)
 	{
 		float[] data = new float[width * height];
 		for (int i = data.length; i-- > 0;)
 			data[i] = i;
 
-		rand.shuffle(data);
+		Random.shuffle(data, rg);
 
 		return data;
 	}
