@@ -180,8 +180,6 @@ public class TraceManagerTest
 				1);
 	}
 
-	static RandomGenerator r;
-
 	private MemoryPeakResults toPeakResults(Trace... traces)
 	{
 		PeakResultStoreList results = new ArrayPeakResultStore(traces.length);
