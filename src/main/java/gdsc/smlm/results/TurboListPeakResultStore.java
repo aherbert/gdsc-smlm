@@ -129,9 +129,9 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
 	@Override
 	public boolean addStore(PeakResultStore results)
 	{
-		if (results instanceof PeakResultStoreCollection)
+		if (results instanceof TurboListPeakResultStore)
 		{
-			return this.results.addAll(((PeakResultStoreCollection) results).getCollectionReference());
+			return this.results.addAll(((TurboListPeakResultStore) results).results);
 		}
 		else
 		{

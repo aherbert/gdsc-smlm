@@ -166,9 +166,16 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (results == null)
 			return false;
-		checkCapacity(results.length);
-		System.arraycopy(results, 0, this.results, size, results.length);
-		size += results.length;
+		return addArray(results, results.length);
+	}
+
+	private boolean addArray(PeakResult[] results, int length)
+	{
+		if (results == null || length == 0)
+			return false;
+		checkCapacity(length);
+		System.arraycopy(results, 0, this.results, size, length);
+		size += length;
 		return true;
 	}
 
@@ -182,7 +189,8 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	{
 		if (results instanceof ArrayPeakResultStore)
 		{
-			return addArray(((ArrayPeakResultStore) results).results);
+			ArrayPeakResultStore store = (ArrayPeakResultStore) results;
+			return addArray(store.results, store.size);
 		}
 		else
 		{
