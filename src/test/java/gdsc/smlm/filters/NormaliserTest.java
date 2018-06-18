@@ -42,6 +42,9 @@ public class NormaliserTest extends AbstractFilterTest
 				float[] data = createData(rg,width, height);
 				for (int boxSize : boxSizes)
 				{
+					String msg = null; //String.format("%dx%d : border=%d", width, height, boxSize);
+					//System.out.println(msg);
+					
 					// Assume fixed normaliser works
 					FixedNormaliser n = new FixedNormaliser(1);
 					NonNormaliser nn = new NonNormaliser();
@@ -49,7 +52,7 @@ public class NormaliserTest extends AbstractFilterTest
 					float[] o = new float[data.length];
 					n.normalise(data, e, width, height, boxSize);
 					nn.normalise(data, o, width, height, boxSize);
-					Assert.assertArrayEquals(o, e, 0);
+					Assert.assertArrayEquals(msg, o, e, 0);
 				}
 			}
 	}

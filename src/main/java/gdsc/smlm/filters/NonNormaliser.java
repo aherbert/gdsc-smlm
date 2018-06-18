@@ -101,6 +101,8 @@ public class NonNormaliser implements Normaliser
 	public void normalise(float[] data, float[] out, int maxx, int maxy, int border)
 	{
 		int width = maxx - 2 * border;
+		if (width <= 0)
+			return;
 		int max = (maxy - border) * maxx;
 		for (int i = border * maxx + border; i < max; i += maxx)
 		{
