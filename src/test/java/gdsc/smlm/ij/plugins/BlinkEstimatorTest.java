@@ -57,7 +57,8 @@ import gnu.trove.set.hash.TIntHashSet;
 
 public class BlinkEstimatorTest
 {
-	private RandomGenerator rand = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
+	private RandomGenerator rand = TestSettings
+			.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Set to sensible simulation parameters
 	double diffusionRate = 0.25; // pixels^2/sec

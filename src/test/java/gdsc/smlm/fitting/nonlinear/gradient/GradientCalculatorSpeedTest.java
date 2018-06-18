@@ -46,6 +46,8 @@ import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -300,7 +302,7 @@ public class GradientCalculatorSpeedTest
 
 	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
@@ -334,16 +336,15 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		log("%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "", start1,
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"%sLinearised GradientCalculator = %d : GradientCalculator%d = %d : %fx\n", (mle) ? "MLE " : "", start1,
 				nparams, start2, (1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
 	}
 
 	@Test
 	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		int iter = 10000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -377,10 +378,9 @@ public class GradientCalculatorSpeedTest
 			calc2.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
 		start2 = System.nanoTime() - start2;
 
-		log("GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n", start1, start2,
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GradientCalculator = %d : GradientCalculatorAssumed = %d : %fx\n", start1, start2,
 				(1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
 	}
 
 	@Test

@@ -39,12 +39,12 @@ public class NormaliserTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				float[] data = createData(rg,width, height);
+				float[] data = createData(rg, width, height);
 				for (int boxSize : boxSizes)
 				{
 					String msg = null; //String.format("%dx%d : border=%d", width, height, boxSize);
 					//System.out.println(msg);
-					
+
 					// Assume fixed normaliser works
 					FixedNormaliser n = new FixedNormaliser(1);
 					NonNormaliser nn = new NonNormaliser();

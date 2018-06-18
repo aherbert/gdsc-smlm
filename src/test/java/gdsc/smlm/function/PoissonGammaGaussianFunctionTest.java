@@ -728,7 +728,7 @@ public class PoissonGammaGaussianFunctionTest
 		f2.setConvolutionMode(fast);
 
 		RandomGenerator rg = TestSettings.getRandomGenerator();
-		
+
 		// Generate realistic data from the probability mass function
 		double[][] samples = new double[photons.length][];
 		for (int j = 0; j < photons.length; j++)

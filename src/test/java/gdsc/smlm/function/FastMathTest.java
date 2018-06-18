@@ -29,8 +29,8 @@ import org.junit.Test;
 
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
-import gdsc.test.TimingService;
 import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TimingService;
 
 public class FastMathTest
 {
@@ -87,7 +87,7 @@ public class FastMathTest
 	public void cbrtIsFaster()
 	{
 		TestSettings.assumeMediumComplexity();
-		
+
 		// Q. What is a suitable range for this test? 
 		int range = 5;
 		int steps = 10000;

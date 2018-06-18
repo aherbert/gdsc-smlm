@@ -210,7 +210,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		f2.setComputePMF(false);
 
 		RandomGenerator rg = TestSettings.getRandomGenerator();
-		
+
 		// Generate realistic data from the probability mass function
 		double[][] samples = new double[photons.length][];
 		for (int j = 0; j < photons.length; j++)

@@ -176,7 +176,7 @@ public class PeakResultStoreTest
 		store2.remove(list[--size]);
 		store.addStore(store2);
 		assertEquals(list, size, store);
-		
+
 		// Can copy
 		PeakResultStore copy = store.copy();
 		Assert.assertNotEquals(copy, store);

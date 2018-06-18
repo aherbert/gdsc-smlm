@@ -50,6 +50,8 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -302,7 +304,7 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams, final Type type)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -363,13 +365,9 @@ public class LVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n", time1, nparams, type, time2,
+		TestSettings.logSpeedTestResult(time2 < time1,
+				"GradientCalculator = %d : LVMGradientProcedure %d %s = %d : %fx\n", time1, nparams, type, time2,
 				(1.0 * time1) / time2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-		{
-			// Add contingency
-			Assert.assertTrue(time2 < time1 * 1.5);
-		}
 	}
 
 	@Test

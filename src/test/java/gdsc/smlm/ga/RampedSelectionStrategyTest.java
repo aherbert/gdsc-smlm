@@ -27,10 +27,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 import gdsc.test.TimingTask;
-import gdsc.test.TestSettings.LogLevel;
 
 public class RampedSelectionStrategyTest
 {

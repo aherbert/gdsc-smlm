@@ -44,9 +44,9 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
-import gdsc.test.TimingService;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
+import gdsc.test.TimingService;
 
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {

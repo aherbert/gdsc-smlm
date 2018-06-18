@@ -34,8 +34,8 @@ import org.junit.Test;
 import gdsc.smlm.filters.FHTFilter.Operation;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
-import gdsc.test.TimingService;
 import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TimingService;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT;
@@ -336,7 +336,7 @@ public class JTransformsTest
 		ts.execute(new JTransformsDHTSpeedTask(size, data));
 		ts.repeat();
 		if (TestSettings.allow(LogLevel.INFO))
-		ts.report();
+			ts.report();
 
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}

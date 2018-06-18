@@ -34,8 +34,8 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
-import gdsc.test.TimingService;
 import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TimingService;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
 

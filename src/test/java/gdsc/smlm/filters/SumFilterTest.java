@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class SumFilterTest extends AbstractFilterTest
@@ -172,7 +174,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -229,22 +231,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float blockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -301,22 +300,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float blockSumNxNInternal %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSumNxNInternal %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -373,16 +369,13 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("float stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -411,7 +404,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -464,16 +457,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -526,16 +518,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -588,16 +579,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSum3x3Internal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSum3x3Internal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -651,10 +641,9 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -683,7 +672,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -737,16 +726,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -800,16 +788,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -872,10 +859,9 @@ public class SumFilterTest extends AbstractFilterTest
 			//			if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -929,7 +915,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -985,22 +971,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float blockSumNxN %d => blockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSumNxN %d => blockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1056,22 +1039,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
-					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("float blockSumNxN %d => stripedBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSumNxN %d => stripedBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1128,22 +1108,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float stripedBlockSumNxN %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float stripedBlockSumNxN %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1199,22 +1176,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
-					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("float blockSumNxN %d => rollingBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSumNxN %d => rollingBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1271,16 +1245,13 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float rollingBlockSumNxN %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float rollingBlockSumNxN %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -1309,7 +1280,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1362,10 +1333,8 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSumNxN %d => blockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "float blockSumNxN %d => blockSum3x3 %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -1394,7 +1363,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1447,10 +1416,9 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		stripedBlockTime, time), stripedBlockTime < time);
 			}
-		System.out.printf("float stripedBlockSumNxN %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float stripedBlockSumNxN %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
@@ -1479,7 +1447,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1532,16 +1500,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
-		System.out.printf("float rollingBlockSumNxN %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float rollingBlockSumNxN %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1594,16 +1561,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1656,16 +1622,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1718,10 +1683,9 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("float stripedBlockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float stripedBlockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
@@ -1825,7 +1789,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1882,22 +1846,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int blockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int blockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -1954,22 +1915,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int blockSumNxNInternal %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int blockSumNxNInternal %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2026,16 +1984,13 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int stripedBlockSumNxNInternal %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -2064,7 +2019,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2117,16 +2072,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int blockSumNxNInternal %d => blockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2179,16 +2133,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int blockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2241,16 +2194,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSum3x3Internal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int blockSum3x3Internal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2304,10 +2256,9 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int stripedBlockSum3x3Internal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -2336,7 +2287,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2390,16 +2341,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int rollingBlockSumNxNInternal %d => rollingBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2453,16 +2403,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int stripedBlockSumNxNInternal %d => stripedBlockSum3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2525,10 +2474,9 @@ public class SumFilterTest extends AbstractFilterTest
 			//			if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
 			//					boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("int rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int rollingBlockSumNxNInternalTransposed %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -2582,7 +2530,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2638,22 +2586,18 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
-					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int blockSumNxN %d => blockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => blockSumNxNInternal %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2709,22 +2653,18 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
-					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int blockSumNxN %d => stripedBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => stripedBlockSumNxN %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2781,22 +2721,19 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int stripedBlockSumNxN %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int stripedBlockSumNxN %d => stripedBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2852,22 +2789,18 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal,
-					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int blockSumNxN %d => rollingBlockSumNxN %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => rollingBlockSumNxN %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -2924,16 +2857,13 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("int rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
-					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"int rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("int rollingBlockSumNxN %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int rollingBlockSumNxN %d => rollingBlockSumNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
@@ -2962,7 +2892,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -3015,10 +2945,8 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSumNxN %d => blockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "int blockSumNxN %d => blockSum3x3 %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
@@ -3047,7 +2975,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -3100,10 +3028,9 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		stripedBlockTime, time), stripedBlockTime < time);
 			}
-		System.out.printf("int stripedBlockSumNxN %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int stripedBlockSumNxN %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
@@ -3132,7 +3059,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -3185,16 +3112,15 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
-		System.out.printf("int rollingBlockSumNxN %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int rollingBlockSumNxN %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -3247,16 +3173,14 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "int blockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -3309,16 +3233,14 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
-				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "int blockSum3x3 %d => stripedBlockSum3x3 %d = %.2fx\n",
+				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		SumFilter filter = new SumFilter();
 
@@ -3371,9 +3293,8 @@ public class SumFilterTest extends AbstractFilterTest
 				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
-		System.out.printf("int stripedBlockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"int stripedBlockSum3x3 %d => rollingBlockSum3x3 %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 }

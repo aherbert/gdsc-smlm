@@ -35,6 +35,8 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public class SolverSpeedTest
 {
@@ -59,7 +61,8 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearAndGaussJordanReturnSameSolutionAndInversionResult()
 	{
-		int ITER = 100; ensureData(ITER);
+		int ITER = 100;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -91,7 +94,8 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearAndGaussJordanReturnSameSolutionResult()
 	{
-		int ITER = 100; ensureData(ITER);
+		int ITER = 100;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -117,7 +121,8 @@ public class SolverSpeedTest
 	@Test
 	public void gaussJordanFloatAndDoubleReturnSameSolutionAndInversionResult()
 	{
-		int ITER = 100; ensureData(ITER);
+		int ITER = 100;
+		ensureData(ITER);
 		ArrayList<float[][]> A = copyAfloat(SolverSpeedTest.Adata, ITER);
 		ArrayList<float[]> B = copyBfloat(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -147,9 +152,10 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsFasterThanGaussJordanFloat()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<float[][]> A = copyAfloat(SolverSpeedTest.Adata, ITER);
 		ArrayList<float[]> B = copyBfloat(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -159,7 +165,8 @@ public class SolverSpeedTest
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
 		runFloat(copyAfloat(SolverSpeedTest.Adata, ITER), copyBfloat(SolverSpeedTest.Bdata, ITER), ITER, solver);
-		solveLinearWithInversion(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver2);
+		solveLinearWithInversion(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER),
+				ITER, solver2);
 
 		long start1 = System.nanoTime();
 		runFloat(A, B, ITER, solver);
@@ -169,18 +176,18 @@ public class SolverSpeedTest
 		solveLinearWithInversion(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanFloat = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", start1, start2,
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GaussJordanFloat = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", start1, start2,
 				(1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
 	}
 
 	@Test
 	public void solveLinearIsFasterThanGaussJordanFloat()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<float[][]> A = copyAfloat(SolverSpeedTest.Adata, ITER);
 		ArrayList<float[]> B = copyBfloat(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -200,9 +207,9 @@ public class SolverSpeedTest
 		solveLinear(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", start1, start2, (1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GaussJordanFloat = %d : LinearSolver.solveLinear = %d : %fx\n", start1, start2,
+				(1.0 * start1) / start2);
 	}
 
 	protected void runFloat(ArrayList<float[][]> A, ArrayList<float[]> B, int ITER, GaussJordan solver)
@@ -216,9 +223,10 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -227,8 +235,10 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver);
-		solveLinearWithInversion(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver2);
+		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver);
+		solveLinearWithInversion(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER),
+				ITER, solver2);
 
 		long start1 = System.nanoTime();
 		solveGaussJordan(A, B, ITER, solver);
@@ -238,18 +248,18 @@ public class SolverSpeedTest
 		solveLinearWithInversion(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", start1, start2,
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GaussJordanDouble = %d : LinearSolver.solveLinearWithInversion = %d : %fx\n", start1, start2,
 				(1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
 	}
 
 	@Test
 	public void solveLinearIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -258,7 +268,8 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver);
+		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver);
 		solveLinear(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver2);
 
 		long start1 = System.nanoTime();
@@ -269,17 +280,18 @@ public class SolverSpeedTest
 		solveLinear(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", start1, start2, (1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GaussJordanDouble = %d : LinearSolver.solveLinear = %d : %fx\n", start1, start2,
+				(1.0 * start1) / start2);
 	}
 
 	@Test
 	public void solveCholeskyIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -288,8 +300,10 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver);
-		solveCholesky(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver2);
+		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver);
+		solveCholesky(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver2);
 
 		long start1 = System.nanoTime();
 		solveGaussJordan(A, B, ITER, solver);
@@ -299,18 +313,18 @@ public class SolverSpeedTest
 		solveCholesky(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", start1, start2,
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GaussJordanDouble = %d : LinearSolver.solveCholesky = %d : %fx\n", start1, start2,
 				(1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
 	}
 
 	@Test
 	public void solveCholeskyLDLTIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -319,8 +333,10 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver);
-		solveCholeskyLDLT(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver2);
+		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver);
+		solveCholeskyLDLT(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver2);
 
 		long start1 = System.nanoTime();
 		solveGaussJordan(A, B, ITER, solver);
@@ -330,18 +346,18 @@ public class SolverSpeedTest
 		solveCholeskyLDLT(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", start1, start2,
+		TestSettings.logSpeedTestResult(start2 < start1,
+				"GaussJordanDouble = %d : LinearSolver.solveCholeskyLDLT = %d : %fx\n", start1, start2,
 				(1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
 	}
 
 	@Test
 	public void solveIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
-		int ITER = 10000; ensureData(ITER);
+		int ITER = 10000;
+		ensureData(ITER);
 		ArrayList<double[][]> A = copyAdouble(SolverSpeedTest.Adata, ITER);
 		ArrayList<double[]> B = copyBdouble(SolverSpeedTest.Bdata, ITER);
 		ArrayList<double[][]> A2 = copyAdouble(SolverSpeedTest.Adata, ITER);
@@ -350,7 +366,8 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
-		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver);
+		solveGaussJordan(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER,
+				solver);
 		solve(copyAdouble(SolverSpeedTest.Adata, ITER), copyBdouble(SolverSpeedTest.Bdata, ITER), ITER, solver2);
 
 		long start1 = System.nanoTime();
@@ -361,9 +378,8 @@ public class SolverSpeedTest
 		solve(A2, B2, ITER, solver2);
 		start2 = System.nanoTime() - start2;
 
-		log("GaussJordanDouble = %d : LinearSolver.solve = %d : %fx\n", start1, start2, (1.0 * start1) / start2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 < start1);
+		TestSettings.logSpeedTestResult(start2 < start1, "GaussJordanDouble = %d : LinearSolver.solve = %d : %fx\n",
+				start1, start2, (1.0 * start1) / start2);
 	}
 
 	private static boolean createData(RandomGenerator rand, float[][] alpha, float[] beta, boolean positiveDifinite)

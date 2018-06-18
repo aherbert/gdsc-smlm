@@ -74,7 +74,8 @@ public class JumpDistanceAnalysisTest
 	// For proteins with mass 823 and 347 kDa the  
 	// difference using predicted diffusion coefficients is 3:1
 	double[] D = new double[] { 3, 1 };
-	RandomGenerator random = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
+	RandomGenerator random = TestSettings
+			.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Commented out as this test always passes
 	//@Test

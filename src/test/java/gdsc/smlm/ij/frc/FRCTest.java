@@ -36,8 +36,8 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
-import gdsc.test.TimingService;
 import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TimingService;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -227,7 +227,7 @@ public class FRCTest
 	public void computeMirroredIsFaster()
 	{
 		TestSettings.assumeMediumComplexity();
-		
+
 		// Sample lines through an image to create a structure.
 		final int N = 2048;
 		double[][] data = new double[N * 2][];

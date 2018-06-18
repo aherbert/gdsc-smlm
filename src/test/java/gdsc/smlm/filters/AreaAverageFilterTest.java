@@ -30,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class AreaAverageFilterTest extends AbstractFilterTest
@@ -40,7 +42,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 
@@ -100,22 +102,19 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float areaAverageInternal %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n",
-					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float areaAverageInternal %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n", boxSize,
+					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		System.out.printf("float areaAverageInternal %d => areaAverageUsingSumsInternal %d = %.2fx\n", slowTotal,
-				fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float areaAverageInternal %d => areaAverageUsingSumsInternal %d = %.2fx\n", slowTotal, fastTotal,
+				speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test
 	public void stripedBlockAverageIsFasterThanAreaAverage()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
@@ -176,22 +175,19 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf("float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx\n", boxSize,
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+					"float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float areaAverageUsingAverages %d => stripedBlockAverage %d = %.2fx\n", slowTotal, fastTotal,
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float areaAverageUsingAverages %d => stripedBlockAverage %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
 	}
 
 	@Test
 	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
@@ -252,17 +248,13 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			System.out.printf(
+			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageUsingAveragesInternal %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
-			if (TestSettings.ASSERT_SPEED_TESTS)
-				Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
-						boxFastTotal < boxSlowTotal);
 		}
-		System.out.printf("float areaAverageUsingAveragesInternal %d => stripedBlockAverageInternal %d = %.2fx\n",
-				slowTotal, fastTotal, speedUpFactor(slowTotal, fastTotal));
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(String.format("Not faster: %d > %d", fastTotal, slowTotal), fastTotal < slowTotal);
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
+				"float areaAverageUsingAveragesInternal %d => stripedBlockAverageInternal %d = %.2fx\n", slowTotal,
+				fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test

@@ -43,6 +43,8 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public class PoissonGradientProcedureTest
 {
@@ -166,7 +168,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -222,13 +224,9 @@ public class PoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("GradientCalculator = %d : PoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
+		TestSettings.logSpeedTestResult(time2 < time1,
+				"GradientCalculator = %d : PoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
 				(1.0 * time1) / time2);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-		{
-			// Add contingency
-			Assert.assertTrue(time2 < time1 * 1.5);
-		}
 	}
 
 	@Test

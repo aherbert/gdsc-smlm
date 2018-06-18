@@ -32,6 +32,8 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -296,7 +298,7 @@ public class SpeedTest
 
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
-		//TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		int iter = 10000;
 		ArrayList<double[]> paramsList2;
@@ -349,10 +351,8 @@ public class SpeedTest
 		}
 		start2 = System.nanoTime() - start2;
 
-		log("%s = %d : %s = %d : %fx\n", f1.getClass().getName(), start1, f2.getClass().getName(), start2,
-				(1.0 * start2) / start1);
-		if (TestSettings.ASSERT_SPEED_TESTS)
-			Assert.assertTrue(start2 > start1);
+		TestSettings.logSpeedTestResult(start2 > start1, "%s = %d : %s = %d : %fx\n", f1.getClass().getName(), start1,
+				f2.getClass().getName(), start2, (1.0 * start2) / start1);
 	}
 
 	/**
