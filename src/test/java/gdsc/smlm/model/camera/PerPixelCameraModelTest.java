@@ -27,13 +27,13 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.test.TestSettings;
 import ij.process.FloatProcessor;
 
 public class PerPixelCameraModelTest
@@ -43,7 +43,7 @@ public class PerPixelCameraModelTest
 	final static int w = 200, h = 300, size;
 	static
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		size = w * h;
 		bias = new float[size];
 		gain = new float[size];
@@ -85,7 +85,7 @@ public class PerPixelCameraModelTest
 	private void canGetCropData(boolean initialise)
 	{
 		PerPixelCameraModel model = createModel(initialise);
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
@@ -124,7 +124,7 @@ public class PerPixelCameraModelTest
 	private void canCropAndGetData(boolean initialise)
 	{
 		PerPixelCameraModel model = createModel(initialise);
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
@@ -179,7 +179,7 @@ public class PerPixelCameraModelTest
 	public void canConvertDataWithCropBounds()
 	{
 		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int j = 0; j < 10; j++)
 		{
@@ -193,7 +193,7 @@ public class PerPixelCameraModelTest
 	public void canCropAndConvertDataWithCropBounds()
 	{
 		PerPixelCameraModel model = new PerPixelCameraModel(w, h, bias, gain, variance);
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int j = 0; j < 10; j++)
 		{
@@ -260,7 +260,7 @@ public class PerPixelCameraModelTest
 	private void canGetMeanVariance(boolean initialise, boolean normalised)
 	{
 		PerPixelCameraModel model = createModel(initialise);
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{

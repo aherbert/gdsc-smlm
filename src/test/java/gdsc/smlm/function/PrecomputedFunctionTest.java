@@ -24,18 +24,18 @@
 package gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.PseudoRandomGenerator;
+import gdsc.test.TestSettings;
 
 public class PrecomputedFunctionTest
 {
 	@Test
 	public void precomputedValueFunctionWrapsPrecomputedValues()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		int size = 100;
 		double[] v = new PseudoRandomGenerator(size, r).getSequence();
 		ValueFunction f = new PrecomputedValueFunction(v);
@@ -64,7 +64,7 @@ public class PrecomputedFunctionTest
 	public void precomputedGradient1FunctionWrapsPrecomputedValues()
 	{
 		int n = 3;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		int size = 100;
 		double[] v = new PseudoRandomGenerator(size, r).getSequence();
 		double[][] g1 = new double[size][];
@@ -105,7 +105,7 @@ public class PrecomputedFunctionTest
 	public void precomputedGradient2FunctionWrapsPrecomputedValues()
 	{
 		int n = 3;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		int size = 100;
 		double[] v = new PseudoRandomGenerator(size, r).getSequence();
 		double[][] g1 = new double[size][];

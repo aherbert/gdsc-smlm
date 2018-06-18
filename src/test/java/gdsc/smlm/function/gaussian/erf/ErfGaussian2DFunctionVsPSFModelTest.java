@@ -24,7 +24,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,6 +32,7 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.model.GaussianPSFModel;
+import gdsc.test.TestSettings;
 
 public class ErfGaussian2DFunctionVsPSFModelTest
 {
@@ -42,7 +42,7 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 	@Test
 	public void computesSameAsPSFModel()
 	{
-		RandomDataGenerator r = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator r = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		for (int i = 0; i < 10; i++)
 		{
 			//@formatter:off

@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 public class BlockMeanFilterTest
 {
@@ -432,7 +432,7 @@ public class BlockMeanFilterTest
 
 	private void speedTest(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -514,7 +514,7 @@ public class BlockMeanFilterTest
 
 	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow, int[] testBoxSizes)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 

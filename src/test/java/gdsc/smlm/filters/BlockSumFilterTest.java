@@ -33,7 +33,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 public class BlockSumFilterTest
 {
@@ -430,7 +430,7 @@ public class BlockSumFilterTest
 
 	private void speedTest(BlockSumDataFilter fast, BlockSumDataFilter slow, int[] testBoxSizes)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -512,7 +512,7 @@ public class BlockSumFilterTest
 
 	private void speedTestInternal(BlockSumDataFilter fast, BlockSumDataFilter slow, int[] testBoxSizes)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 

@@ -30,13 +30,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Random;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.results.ImageSource.ReadHint;
+import gdsc.test.TestSettings;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.io.FileInfo;
@@ -143,7 +143,7 @@ public class SeriesImageSourceTest
 			}
 		}
 
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int i = 0; i < 3; i++)
 		{
 			int[] random = Random.sample(pixels.length / 2, pixels.length, r);

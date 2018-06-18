@@ -31,13 +31,13 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
+import gdsc.test.TestSettings;
 
 public class PoissonGammaGaussianFunctionTest
 {
@@ -727,6 +727,8 @@ public class PoissonGammaGaussianFunctionTest
 		PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1 / g, s);
 		f2.setConvolutionMode(fast);
 
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		
 		// Generate realistic data from the probability mass function
 		double[][] samples = new double[photons.length][];
 		for (int j = 0; j < photons.length; j++)
@@ -749,11 +751,10 @@ public class PoissonGammaGaussianFunctionTest
 				data[i] += data[i - 1];
 
 			// Sample
-			RandomGenerator rand = new Well19937c();
 			double[] sample = new double[1000];
 			for (int i = 0; i < sample.length; i++)
 			{
-				final double p = rand.nextDouble();
+				final double p = rg.nextDouble();
 				int x = 0;
 				while (x < data.length && data[x] < p)
 					x++;

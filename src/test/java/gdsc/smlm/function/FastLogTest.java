@@ -24,7 +24,6 @@
 package gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -37,6 +36,7 @@ import gdsc.core.utils.Maths;
 import gdsc.core.utils.TurboList;
 import gdsc.smlm.function.ICSIFastLog.DataType;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 @SuppressWarnings("unused")
@@ -356,7 +356,7 @@ public class FastLogTest
 
 	private float[] generateRandomFloats(int n)
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		float[] d = new float[n];
 		for (int i = 0; i < d.length; i++)
 			d[i] = nextUniformFloat(r);
@@ -548,7 +548,7 @@ public class FastLogTest
 	public void canTestDoubleError()
 	{
 		// All float values is a lot so we do a representative set
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
 		double[] d = new double[10000000];
 		double[] logD = new double[d.length];
@@ -585,7 +585,7 @@ public class FastLogTest
 	public void canTestDoubleErrorLog1P()
 	{
 		// All float values is a lot so we do a representative set
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
 		double[] d = new double[100000];
 		double[] logD = new double[d.length];
@@ -614,7 +614,7 @@ public class FastLogTest
 	{
 		Assume.assumeTrue(true);
 
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 
 		TurboList<TestFastLog> test = new TurboList<TestFastLog>();
 		int n = 13;
@@ -772,7 +772,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatSpeed()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		float[] x = new float[1000000];
 		for (int i = 0; i < x.length; i++)
 		{
@@ -858,7 +858,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleSpeed()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
 		{
@@ -906,7 +906,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleSpeedLog1P()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		double[] x = new double[1000000];
 		for (int i = 0; i < x.length; i++)
 		{
@@ -933,7 +933,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatVsDoubleSpeed()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		double[] x = new double[1000000];
 		float[] xf = new float[x.length];
 		for (int i = 0; i < x.length; i++)

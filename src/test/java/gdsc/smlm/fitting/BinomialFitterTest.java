@@ -25,12 +25,11 @@ package gdsc.smlm.fitting;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.TestComplexity;
 
 public class BinomialFitterTest
 {
@@ -38,12 +37,21 @@ public class BinomialFitterTest
 	double[] P = new double[] { 0.3, 0.5, 0.7 };
 	int TRIALS = 10;
 	int FAILURES = (int) (0.3 * TRIALS);
-	RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+	RandomGenerator randomGenerator = TestSettings
+			.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 	RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
+
+	// Note: This test is slow so only one test is run by default.
+
+	// This is the level for the tests for standard parameters
+	TestComplexity optionalTestComplexity = TestComplexity.HIGH;
+	// This is the default level for all the tests
+	TestComplexity nonEssentialTestComplexity = TestComplexity.VERY_HIGH;
 
 	@Test
 	public void canFitBinomialWithKnownNUsingLeastSquaresEstimator()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = false;
 		for (int n : N)
@@ -60,18 +68,29 @@ public class BinomialFitterTest
 	{
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = true;
-		for (int n : N)
+		if (TestSettings.allow(optionalTestComplexity))
 		{
-			for (double p : P)
+			for (int n : N)
 			{
-				fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
+				for (double p : P)
+				{
+					fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
+				}
 			}
+		}
+		else
+		{
+			// This is the default test
+			int n = 2;
+			double p = 0.5;
+			fitBinomial(n, p, zeroTruncated, maximumLikelihood, n, n);
 		}
 	}
 
 	@Test
 	public void canFitBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = false;
 		for (int n : N)
@@ -86,6 +105,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitBinomialWithUnknownNUsingMaximumLikelihood()
 	{
+		TestSettings.assume(optionalTestComplexity);
 		boolean zeroTruncated = false;
 		boolean maximumLikelihood = true;
 
@@ -104,6 +124,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithKnownNUsingLeastSquaresEstimator()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = false;
 		for (int n : N)
@@ -118,6 +139,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithKnownNUsingMaximumLikelihood()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = true;
 		for (int n : N)
@@ -132,6 +154,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithUnknownNUsingLeastSquaresEstimator()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = false;
 		for (int n : N)
@@ -146,6 +169,7 @@ public class BinomialFitterTest
 	@Test
 	public void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = true;
 		boolean maximumLikelihood = false;
 		for (int n : N)
@@ -160,6 +184,7 @@ public class BinomialFitterTest
 	@Test
 	public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = false;
 		for (int n : N)
 		{
@@ -173,6 +198,7 @@ public class BinomialFitterTest
 	@Test
 	public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE()
 	{
+		TestSettings.assume(nonEssentialTestComplexity);
 		boolean zeroTruncated = true;
 		for (int n : N)
 		{
@@ -185,8 +211,6 @@ public class BinomialFitterTest
 
 	private void fitBinomial(int n, double p, boolean zeroTruncated, boolean maximumLikelihood, int minN, int maxN)
 	{
-		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
-
 		BinomialFitter bf = new BinomialFitter(null);
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 		bf.setMaximumLikelihood(maximumLikelihood);
@@ -214,7 +238,7 @@ public class BinomialFitterTest
 		if (fail > FAILURES)
 		{
 			String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
-			Assert.assertTrue(msg, fail <= FAILURES);
+			Assert.fail(msg);
 		}
 	}
 
@@ -258,7 +282,7 @@ public class BinomialFitterTest
 		if (fail > FAILURES)
 		{
 			String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
-			Assert.assertTrue(msg, fail <= FAILURES);
+			Assert.fail(msg);
 		}
 	}
 
@@ -291,6 +315,6 @@ public class BinomialFitterTest
 
 	void log(String format, Object... args)
 	{
-		System.out.printf(format, args);
+		TestSettings.info(format, args);
 	}
 }

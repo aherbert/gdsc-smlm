@@ -25,7 +25,6 @@ package gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.jtransforms.dht.FloatDHT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 import org.jtransforms.utils.CommonUtils;
@@ -34,6 +33,7 @@ import org.junit.Test;
 
 import gdsc.smlm.filters.FHTFilter.Operation;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -296,7 +296,7 @@ public class JTransformsTest
 
 		int size = 256;
 		int w = size / 4;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		RandomDataGenerator rdg = new RandomDataGenerator(r);
 
 		// Blob in the centre

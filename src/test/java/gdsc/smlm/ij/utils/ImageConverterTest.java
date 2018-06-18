@@ -26,12 +26,12 @@ package gdsc.smlm.ij.utils;
 import java.awt.Rectangle;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.ImageExtractor;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.test.TestSettings;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
@@ -43,7 +43,7 @@ public class ImageConverterTest
 	final static int w = 200, h = 300;
 	static
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		ByteProcessor bp = new ByteProcessor(w, h);
 		bdata = (byte[]) bp.getPixels();
 		sdata = new short[bdata.length];
@@ -89,7 +89,7 @@ public class ImageConverterTest
 	@Test
 	public void canGetCropData()
 	{
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		ImageExtractor ie = new ImageExtractor(fdata, w, h);
 		for (int i = 0; i < 10; i++)
 		{

@@ -23,10 +23,12 @@
  */
 package gdsc.smlm.fitting.nonlinear;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.test.TestSettings;
 
 /**
  * Test that an LVM stepping solver can return the same results with and without bounds.
@@ -95,7 +97,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 		String name = getLVMName(applyBounds, clamping, false);
 
 		int LOOPS = 5;
-		randomGenerator.setSeed(seed);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
 		for (double s : signal)
@@ -119,7 +121,7 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 
 			for (int loop = LOOPS; loop-- > 0;)
 			{
-				double[] data = drawGaussian(expected);
+				double[] data = drawGaussian(expected, rg);
 				double[] data2 = data.clone();
 				for (int i = 0; i < data.length; i++)
 					data2[i] += bias;

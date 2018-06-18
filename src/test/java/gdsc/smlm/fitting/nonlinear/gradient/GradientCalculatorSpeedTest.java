@@ -27,7 +27,6 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +34,6 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.core.utils.Statistics;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.CameraNoiseModel;
 import gdsc.smlm.function.NonLinearFunction;
@@ -47,6 +45,7 @@ import gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -54,7 +53,6 @@ import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
  */
 public class GradientCalculatorSpeedTest
 {
-	boolean speedTests = false;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -233,7 +231,7 @@ public class GradientCalculatorSpeedTest
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
@@ -302,13 +300,13 @@ public class GradientCalculatorSpeedTest
 
 	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
 		int iter = 10000;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
 
@@ -345,10 +343,10 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator()
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int iter = 10000;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -406,7 +404,7 @@ public class GradientCalculatorSpeedTest
 		Assert.assertEquals(nparams, indices.length);
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		double[] beta = new double[nparams];
 		double[] beta2 = new double[nparams];
@@ -507,7 +505,7 @@ public class GradientCalculatorSpeedTest
 		int n = func.size();
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -613,7 +611,7 @@ public class GradientCalculatorSpeedTest
 		EllipticalGaussian2DFunction func = new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
 		int n = blockWidth * blockWidth;
 		double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		for (int run = 5; run-- > 0;)
 		{
 			a[Gaussian2DFunction.BACKGROUND] = random(Background);

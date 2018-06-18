@@ -34,7 +34,6 @@ import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
@@ -44,6 +43,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestSettings;
 
 public class SCMOSLikelihoodWrapperTest
 {
@@ -98,7 +98,7 @@ public class SCMOSLikelihoodWrapperTest
 		g = new float[n];
 		o = new float[n];
 		sd = new float[n];
-		RandomGenerator rg = new Well19937c(30051977);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		PoissonDistribution pd = new PoissonDistribution(rg, O, PoissonDistribution.DEFAULT_EPSILON,
 				PoissonDistribution.DEFAULT_MAX_ITERATIONS);
 		ExponentialDistribution ed = new ExponentialDistribution(rg, VAR,
@@ -240,7 +240,7 @@ public class SCMOSLikelihoodWrapperTest
 		int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		for (double background : testbackground)
 			for (double signal1 : testsignal1)
@@ -444,7 +444,7 @@ public class SCMOSLikelihoodWrapperTest
 		int n = maxx * maxx;
 		int count = 0, total = 0;
 
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		for (double background : testbackground)
 			for (double signal1 : testsignal1)
@@ -823,7 +823,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		// Simulate sCMOS camera
 		nlf.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
 		for (int i = 0; i < n; i++)
 		{

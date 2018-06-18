@@ -27,18 +27,18 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import gdsc.test.TestSettings;
 
 public class SettingsManagerTest
 {
 	@Test
 	public void canReadWriteConfiguration() throws IOException
 	{
-		RandomGenerator rand = new Well19937c(30051977);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 
 		Calibration.Builder builder = Calibration.newBuilder();
 		builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());

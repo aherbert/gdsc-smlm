@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 @SuppressWarnings("deprecation")
 public class AreaAverageFilterTest
@@ -61,7 +61,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -138,7 +138,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void stripedBlockAverageIsFasterThanAreaAverage()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -216,7 +216,7 @@ public class AreaAverageFilterTest
 	@Test
 	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 

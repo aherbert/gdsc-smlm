@@ -23,13 +23,10 @@
  */
 package gdsc.smlm.function;
 
-//import java.util.Arrays;
-
-import org.apache.commons.math3.random.Well19937c;
-
 import gdsc.core.utils.NotImplementedException;
 import gdsc.core.utils.PseudoRandomSequence;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.test.TestSettings;
 
 public class FakeGradientFunction
 		implements ExtendedGradient2Function, Gradient2Function, Gradient1Function, NonLinearFunction
@@ -53,7 +50,7 @@ public class FakeGradientFunction
 		this.maxx = maxx;
 		this.n = maxx * maxx;
 		this.nparams = nparams;
-		this.r = new PseudoRandomSequence(randomSize, new Well19937c(randomSeed), scale);
+		this.r = new PseudoRandomSequence(randomSize, TestSettings.getRandomGenerator(randomSeed), scale);
 		this.dy_da = new double[nparams];
 	}
 

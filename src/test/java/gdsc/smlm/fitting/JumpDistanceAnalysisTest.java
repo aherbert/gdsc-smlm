@@ -32,17 +32,16 @@ import java.util.Arrays;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.logging.Logger;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
+import gdsc.test.TestSettings;
 
 public class JumpDistanceAnalysisTest
 {
@@ -75,7 +74,7 @@ public class JumpDistanceAnalysisTest
 	// For proteins with mass 823 and 347 kDa the  
 	// difference using predicted diffusion coefficients is 3:1
 	double[] D = new double[] { 3, 1 };
-	RandomGenerator random = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+	RandomGenerator random = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Commented out as this test always passes
 	//@Test
@@ -220,7 +219,7 @@ public class JumpDistanceAnalysisTest
 
 	private void fitDualPopulation(boolean mle, double fraction)
 	{
-		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
+		TestSettings.assumeMaximumComplexity();
 
 		String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
 		AssertionError error = null;
@@ -384,11 +383,8 @@ public class JumpDistanceAnalysisTest
 		try
 		{
 			Assert.assertEquals("Failed to fit n", d.length, fitD.length);
-			for (int i = 0; i < d.length; i++)
-			{
-				Assert.assertEquals("Failed to fit d", d[i], fitD[i], deltaD * d[i]);
-				Assert.assertEquals("Failed to fit f", f[i], fitF[i], deltaF * f[i]);
-			}
+			TestSettings.assertArrayEquals("Failed to fit d", d, fitD, deltaD);
+			TestSettings.assertArrayEquals("Failed to fit f", f, fitF, deltaF);
 		}
 		catch (AssertionError e)
 		{
@@ -725,6 +721,6 @@ public class JumpDistanceAnalysisTest
 
 	void log(String format, Object... args)
 	{
-		System.out.printf(format, args);
+		TestSettings.info(format, args);
 	}
 }

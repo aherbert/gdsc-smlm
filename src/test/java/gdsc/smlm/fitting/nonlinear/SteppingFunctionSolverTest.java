@@ -23,7 +23,10 @@
  */
 package gdsc.smlm.fitting.nonlinear;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
+
+import gdsc.test.TestSettings;
 
 /**
  * Test that a stepping solver can fit a function.
@@ -664,9 +667,10 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 
 	private void canFitAndComputeDeviations(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
-		fitAndComputeDeviationsMatch(solver1, solver2, noiseModel, useWeights);
+		fitAndComputeDeviationsMatch(rg, solver1, solver2, noiseModel, useWeights);
 	}
 
 	@Test
@@ -755,8 +759,9 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 
 	private void canFitAndComputeValue(SteppingFunctionSolverType type, NoiseModel noiseModel, boolean useWeights)
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		SteppingFunctionSolver solver1 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
 		SteppingFunctionSolver solver2 = getSolver(SteppingFunctionSolverClamp.NO_CLAMP, type, noToleranceChecker);
-		fitAndComputeValueMatch(solver1, solver2, noiseModel, useWeights);
+		fitAndComputeValueMatch(rg, solver1, solver2, noiseModel, useWeights);
 	}
 }

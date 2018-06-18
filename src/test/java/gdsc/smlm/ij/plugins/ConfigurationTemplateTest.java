@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,6 +41,7 @@ import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.ij.plugins.ConfigurationTemplate.TemplateResource;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.filter.MultiFilter2;
+import gdsc.test.TestSettings;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.FloatProcessor;
@@ -138,7 +138,7 @@ public class ConfigurationTemplateTest
 		// Create a dummy image
 		int size = 20;
 		float[] pixels = new float[size * size];
-		RandomGenerator r = new Well19937c();
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int i = pixels.length; i-- > 0;)
 			pixels[i] = r.nextFloat();
 		ImagePlus imp = new ImagePlus("test", new FloatProcessor(size, size, pixels));

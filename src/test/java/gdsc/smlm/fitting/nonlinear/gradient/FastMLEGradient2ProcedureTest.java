@@ -28,13 +28,11 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient2Function;
@@ -46,6 +44,7 @@ import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -53,7 +52,6 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
  */
 public class FastMLEGradient2ProcedureTest
 {
-	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -106,7 +104,7 @@ public class FastMLEGradient2ProcedureTest
 	private void gradientProcedureComputesSameLogLikelihoodAsMLEGradientCalculator(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -132,7 +130,7 @@ public class FastMLEGradient2ProcedureTest
 	public void gradientProcedureComputesSameWithPrecomputed()
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -264,10 +262,10 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -341,7 +339,7 @@ public class FastMLEGradient2ProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -388,10 +386,10 @@ public class FastMLEGradient2ProcedureTest
 
 	private void gradientProcedureLinearIsFasterThanGradientProcedure(final int nparams)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -479,7 +477,7 @@ public class FastMLEGradient2ProcedureTest
 		int[] indices = func.gradientIndices();
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);

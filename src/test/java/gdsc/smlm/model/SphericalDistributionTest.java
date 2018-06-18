@@ -27,23 +27,22 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.test.TestSettings;
 
 public class SphericalDistributionTest
 {
-	private RandomGenerator rand = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-
 	@Test
 	public void canSampleUsingTransformationMethod()
 	{
-		double radius = 10 + rand.nextDouble() * 10;
-		SphericalDistribution dist = new SphericalDistribution(radius, rand);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		double radius = 10 + rg.nextDouble() * 10;
+		SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(false);
 		for (int i = 100; i-- > 0;)
 			dist.next();
@@ -52,8 +51,9 @@ public class SphericalDistributionTest
 	@Test
 	public void canSampleUsingRejectionMethod()
 	{
-		double radius = 10 + rand.nextDouble() * 10;
-		SphericalDistribution dist = new SphericalDistribution(radius, rand);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		double radius = 10 + rg.nextDouble() * 10;
+		SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(true);
 		for (int i = 100; i-- > 0;)
 			dist.next();
@@ -62,8 +62,9 @@ public class SphericalDistributionTest
 	@Test
 	public void rejectionMethodIsFasterThanTransformationMethod()
 	{
-		double radius = 10 + rand.nextDouble() * 10;
-		SphericalDistribution dist = new SphericalDistribution(radius, rand);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		double radius = 10 + rg.nextDouble() * 10;
+		SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(false);
 		for (int i = 100; i-- > 0;)
 			dist.next();
@@ -105,11 +106,12 @@ public class SphericalDistributionTest
 
 	private void drawImage(boolean useRejctionMethod)
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		MemoryPeakResults results = new MemoryPeakResults();
 		results.setSortAfterEnd(true);
 		int radius = 10;
 		Rectangle bounds = new Rectangle(0, 0, radius * 2, radius * 2);
-		SphericalDistribution dist = new SphericalDistribution(radius, rand);
+		SphericalDistribution dist = new SphericalDistribution(radius, rg);
 		dist.setUseRejectionMethod(useRejctionMethod);
 		float scale = 10;
 		results.begin();

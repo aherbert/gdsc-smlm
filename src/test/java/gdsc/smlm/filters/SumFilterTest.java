@@ -30,7 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 @SuppressWarnings("deprecation")
 public class SumFilterTest
@@ -171,7 +171,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -255,7 +255,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -329,7 +329,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -426,7 +426,7 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -490,7 +490,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -554,7 +554,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -618,7 +618,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -706,7 +706,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -771,7 +771,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -836,7 +836,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -969,7 +969,7 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -1042,7 +1042,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -1115,7 +1115,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -1189,7 +1189,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -1262,7 +1262,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -1359,7 +1359,7 @@ public class SumFilterTest
 	@Test
 	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -1446,7 +1446,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -1533,7 +1533,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -1597,7 +1597,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -1661,7 +1661,7 @@ public class SumFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -1725,7 +1725,7 @@ public class SumFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -1893,7 +1893,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -1977,7 +1977,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2051,7 +2051,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2148,7 +2148,7 @@ public class SumFilterTest
 	@Test
 	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -2212,7 +2212,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -2276,7 +2276,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -2340,7 +2340,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -2428,7 +2428,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -2493,7 +2493,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -2558,7 +2558,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2691,7 +2691,7 @@ public class SumFilterTest
 	@Test
 	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2764,7 +2764,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2837,7 +2837,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2911,7 +2911,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -2984,7 +2984,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -3081,7 +3081,7 @@ public class SumFilterTest
 	@Test
 	public void intBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -3168,7 +3168,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -3255,7 +3255,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -3319,7 +3319,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -3383,7 +3383,7 @@ public class SumFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -3447,7 +3447,7 @@ public class SumFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 

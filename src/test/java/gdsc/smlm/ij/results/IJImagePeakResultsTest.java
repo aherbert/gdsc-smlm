@@ -27,7 +27,6 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,6 +40,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.PeakResult;
+import gdsc.test.TestSettings;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
@@ -49,8 +49,7 @@ import ij.process.ImageProcessor;
  */
 public class IJImagePeakResultsTest
 {
-	//private RandomGenerator rand = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-	private RandomGenerator rand = new Well19937c(30051977);
+	//private RandomGenerator rand = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 	static Calibration calibration;
 	static PSF psf;
 	static
@@ -445,6 +444,7 @@ public class IJImagePeakResultsTest
 
 	private void canAddUsingDifferentMethods(int displayFlags)
 	{
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		displayFlags |= IJImagePeakResults.DISPLAY_SIGNAL;
 
 		IJImagePeakResults[] r = new IJImagePeakResults[8];

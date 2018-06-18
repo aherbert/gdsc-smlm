@@ -24,13 +24,13 @@
 package gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.filters.FHTFilter.Operation;
+import gdsc.test.TestSettings;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
 import ij.process.FHT;
@@ -61,7 +61,7 @@ public class FHTFilterTest
 		int size = 16;
 		int ex = 5, ey = 7;
 		int ox = 1, oy = 2;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
 		// This is offset from the centre
 		FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);

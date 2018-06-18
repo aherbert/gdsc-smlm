@@ -27,12 +27,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Random;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.test.TestSettings;
 
 public class PeakResultStoreTest
 {
@@ -67,7 +67,7 @@ public class PeakResultStoreTest
 		final boolean isList = store instanceof PeakResultStoreList;
 		PeakResultStoreList storeList = (isList) ? (PeakResultStoreList) store : null;
 		PeakResult result;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 
 		PeakResult[] list = new PeakResult[20];
 		int size = 0;

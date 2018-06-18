@@ -33,7 +33,6 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -43,8 +42,8 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.smlm.TestSettings;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 public class PoissonCalculatorTest
@@ -297,7 +296,7 @@ public class PoissonCalculatorTest
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		double[] x = new double[n];
 		double[] u = new double[n];
 		for (int i = 0; i < n; i++)
@@ -405,7 +404,7 @@ public class PoissonCalculatorTest
 
 		// Simulate Poisson process
 		nlf.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		double[] x = new double[n];
 		double[] u = new double[n];
 		for (int i = 0; i < n; i++)
@@ -480,7 +479,7 @@ public class PoissonCalculatorTest
 		nlf1.initialise(a);
 		nlf2.initialise(a);
 		nlf3.initialise(a);
-		RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
 		double[] u = new double[x.length];
 		double[] b1 = new double[x.length];
@@ -651,7 +650,7 @@ public class PoissonCalculatorTest
 	public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod()
 	{
 		DoubleEquality eq = new DoubleEquality(3e-4, 0);
-		RandomGenerator rg = new Well19937c(30051977);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		// Test for different x. The calculator approximation begins
 		int n = 100;
 		double[] u = new double[n];

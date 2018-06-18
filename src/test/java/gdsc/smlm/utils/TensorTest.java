@@ -24,9 +24,10 @@
 package gdsc.smlm.utils;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.test.TestSettings;
 
 public class TensorTest
 {
@@ -85,7 +86,7 @@ public class TensorTest
 	@Test
 	public void canComputeSameTensor()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		int w = 3, h = 4;
 		float[] data = new float[w * h];
 		for (int i = 0; i < 10; i++)

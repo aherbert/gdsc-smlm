@@ -24,7 +24,6 @@
 package gdsc.smlm.utils;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -32,6 +31,7 @@ import org.junit.Test;
 
 import gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
+import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 
@@ -49,7 +49,7 @@ public class ConvolutionTest
 	@Test
 	public void canComputeConvolution()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
@@ -83,7 +83,7 @@ public class ConvolutionTest
 	@Test
 	public void canComputeDoubleConvolution()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
@@ -123,6 +123,7 @@ public class ConvolutionTest
 	public void doSpeedTest()
 	{
 		Assume.assumeTrue(false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
@@ -130,19 +131,18 @@ public class ConvolutionTest
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				speedTest(size, s);
+				speedTest(rg, size, s);
 				s *= 2;
 			}
 			size *= 2;
 		}
 	}
 
-	private void speedTest(int size, double s)
+	private void speedTest(RandomGenerator rg, int size, double s)
 	{
-		RandomGenerator random = new Well19937c(30051977);
 		final int RUNS = 1000;
 
-		double[] data = randomData(random, size);
+		double[] data = randomData(rg, size);
 		double[] kernel = createKernel(s);
 
 		// Warm up
@@ -169,6 +169,7 @@ public class ConvolutionTest
 	public void doDoubleSpeedTest()
 	{
 		Assume.assumeTrue(false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
@@ -176,20 +177,19 @@ public class ConvolutionTest
 			double s = 0.5;
 			for (int j = 0; j < sLoops; j++)
 			{
-				doubleSpeedTest(size, s);
+				doubleSpeedTest(rg, size, s);
 				s *= 2;
 			}
 			size *= 2;
 		}
 	}
 
-	private void doubleSpeedTest(int size, double s)
+	private void doubleSpeedTest(RandomGenerator rg, int size, double s)
 	{
-		RandomGenerator random = new Well19937c(30051977);
 		final int RUNS = 1000;
 
-		double[] data1 = randomData(random, size);
-		double[] data2 = randomData(random, size);
+		double[] data1 = randomData(rg, size);
+		double[] data2 = randomData(rg, size);
 		double[] kernel = createKernel(s);
 
 		// Warm up
@@ -232,7 +232,7 @@ public class ConvolutionTest
 
 	private void singleVsDoubleSpeedTest(int size, double s)
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 1000;
 
 		double[] data1 = randomData(random, size);
@@ -284,7 +284,7 @@ public class ConvolutionTest
 
 	private void singleVsDoubleFFTSpeedTest(int size, double s)
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 1000;
 
 		double[] data1 = randomData(random, size);
@@ -349,7 +349,7 @@ public class ConvolutionTest
 	@Test
 	public void canComputeScaledConvolution()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		TDoubleArrayList list = new TDoubleArrayList();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
@@ -390,7 +390,7 @@ public class ConvolutionTest
 	@Test
 	public void canComputeDoubleScaledConvolution()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		TDoubleArrayList list = new TDoubleArrayList();
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -456,7 +456,7 @@ public class ConvolutionTest
 	@Test
 	public void canComputeScaledConvolutionWithEarlyExit()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
@@ -499,7 +499,7 @@ public class ConvolutionTest
 	@Test
 	public void canComputeDoubleScaledConvolutionWithEarlyExit()
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
 		for (int i = 0; i < sizeLoops; i++)
 		{
@@ -572,7 +572,7 @@ public class ConvolutionTest
 
 	private void doScaledSpeedTest(int size, double s, int scale)
 	{
-		RandomGenerator random = new Well19937c(30051977);
+		RandomGenerator random = TestSettings.getRandomGenerator();
 		final int RUNS = 100;
 
 		double[] data1 = randomData(random, size);

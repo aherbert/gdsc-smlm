@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.fitting.nonlinear;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,6 +31,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.fitting.nonlinear.stop.ErrorStoppingCriteria;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestSettings;
 
 /**
  * Test that a bounded fitter can return the same results with and without bounds.
@@ -90,7 +92,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 		String name = getLVMName(applyBounds, clamping, false);
 
 		int LOOPS = 5;
-		randomGenerator.setSeed(seed);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
 		for (double s : signal)
@@ -114,7 +116,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 			for (int loop = LOOPS; loop-- > 0;)
 			{
-				double[] data = drawGaussian(expected);
+				double[] data = drawGaussian(expected, rg);
 				double[] data2 = data.clone();
 				for (int i = 0; i < data.length; i++)
 					data2[i] += bias;
@@ -393,9 +395,10 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 
 	private void canFitAndComputeDeviationsLVM(boolean mle)
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		NonLinearFit solver1 = getLVM(0, 0, mle);
 		NonLinearFit solver2 = getLVM(0, 0, mle);
 		solver1.setStoppingCriteria(new CheatingStoppingCriteria());
-		fitAndComputeDeviationsMatch(solver1, solver2, NoiseModel.EMCCD, false);
+		fitAndComputeDeviationsMatch(rg, solver1, solver2, NoiseModel.EMCCD, false);
 	}
 }

@@ -25,7 +25,6 @@ package gdsc.smlm.function;
 
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -33,6 +32,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.test.TestSettings;
 
 public class ChiSquaredDistributionTableTest
 {
@@ -118,12 +118,12 @@ public class ChiSquaredDistributionTableTest
 	@Test
 	public void canPerformChiSquaredTest()
 	{
+		RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		ChiSquareTest test = new ChiSquareTest();
 		for (int n : new int[] { 10, 50, 100 })
 		{
 			double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
 			long[] l = new long[x.length];
-			RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
 			for (int i = 0; i < x.length; i++)
 				l[i] = rdg.nextPoisson(x[i]);
 			double chi2 = test.chiSquare(x, l);

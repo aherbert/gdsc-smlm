@@ -28,11 +28,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.math.interpolation.CustomTricubicFunction;
+import gdsc.test.TestSettings;
 
 public class CubicSplineDataTest
 {
@@ -50,7 +50,7 @@ public class CubicSplineDataTest
 
 	private void canExternaliseFunction(boolean singlePrecision) throws IOException
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		int x = 6, y = 5, z = 4;
 
 		int size = x * y;

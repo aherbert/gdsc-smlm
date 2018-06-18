@@ -24,12 +24,12 @@
 package gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.SimpleArrayUtils;
+import gdsc.test.TestSettings;
 
 public class OffsetFunctionTest
 {
@@ -37,7 +37,7 @@ public class OffsetFunctionTest
 	public void offsetValueFunctionWrapsPrecomputedValues()
 	{
 		int n = 3;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		ValueFunction f0 = new FakeGradientFunction(3, n);
 		int size = f0.size();
 		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
@@ -81,7 +81,7 @@ public class OffsetFunctionTest
 	public void offsetGradient1FunctionWrapsPrecomputedValues()
 	{
 		int n = 3;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		Gradient1Function f0 = new FakeGradientFunction(3, n);
 		int size = f0.size();
 		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();
@@ -132,7 +132,7 @@ public class OffsetFunctionTest
 	public void offsetGradient2FunctionWrapsPrecomputedValues()
 	{
 		int n = 3;
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		Gradient2Function f0 = new FakeGradientFunction(3, n);
 		int size = f0.size();
 		double[] b1 = new PseudoRandomGenerator(size, r).getSequence();

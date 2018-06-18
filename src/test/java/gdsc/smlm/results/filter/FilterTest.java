@@ -24,11 +24,11 @@
 package gdsc.smlm.results.filter;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.XmlUtils;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 import gdsc.test.TimingTask;
@@ -38,7 +38,7 @@ public class FilterTest
 	@Test
 	public void canCompareMultiFilter()
 	{
-		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
@@ -53,7 +53,7 @@ public class FilterTest
 	@Test
 	public void canCompareMultiFilter2()
 	{
-		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		for (int i = 1000; i-- > 0;)
 		{
@@ -68,7 +68,7 @@ public class FilterTest
 	@Test
 	public void directCompareMultiFilterIsFaster()
 	{
-		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
 		final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -250,7 +250,7 @@ public class FilterTest
 	public void canSerialiseMultiFilter()
 	{
 		// Check the XStream serialisation supports inheritance
-		RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+		RandomGenerator randomGenerator = TestSettings.getRandomGenerator();
 		testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
 		testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);
 		testSerialisation(new MultiFilterCRLB(0, 0, 0, 0, 0, 0, 0, 0, 0), randomGenerator);

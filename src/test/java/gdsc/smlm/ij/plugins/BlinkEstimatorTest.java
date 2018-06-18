@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -36,7 +35,6 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.data.config.CalibrationWriter;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -53,12 +51,13 @@ import gdsc.smlm.model.UniformDistribution;
 import gdsc.smlm.model.UniformIllumination;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.smlm.results.MemoryPeakResults;
+import gdsc.test.TestSettings;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
 public class BlinkEstimatorTest
 {
-	private RandomGenerator rand = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+	private RandomGenerator rand = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));
 
 	// Set to sensible simulation parameters
 	double diffusionRate = 0.25; // pixels^2/sec
@@ -208,7 +207,7 @@ public class BlinkEstimatorTest
 	private TIntHashSet estimateBlinking(double nBlinks, double tOn, double tOff, int particles, double fixedFraction,
 			boolean timeAtLowerBound, boolean doAssert)
 	{
-		Assume.assumeTrue("Skipped", TestSettings.RUN_FITTING_TESTS);
+		TestSettings.assumeMaximumComplexity();
 
 		SpatialIllumination activationIllumination = new UniformIllumination(100);
 		int totalSteps = 100;

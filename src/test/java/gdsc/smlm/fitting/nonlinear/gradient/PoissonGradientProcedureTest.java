@@ -27,14 +27,12 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.FisherInformationMatrix;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
@@ -44,10 +42,10 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.test.TestSettings;
 
 public class PoissonGradientProcedureTest
 {
-	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -98,7 +96,7 @@ public class PoissonGradientProcedureTest
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
@@ -168,10 +166,10 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
@@ -252,7 +250,7 @@ public class PoissonGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
@@ -300,10 +298,10 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
@@ -371,7 +369,7 @@ public class PoissonGradientProcedureTest
 	public void crlbIsHigherWithPrecomputed()
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10, 10,
 				GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);

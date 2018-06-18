@@ -28,9 +28,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.distribution.CustomGammaDistribution;
 import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.junit.Assert;
 
@@ -50,17 +48,13 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 /**
  * Base class for testing the function solvers
  */
 public abstract class BaseFunctionSolverTest
 {
-	long seed = 30051977; //System.currentTimeMillis() + System.identityHashCode(this);
-	//long seed = System.currentTimeMillis() + System.identityHashCode(this);
-	RandomGenerator randomGenerator = new Well19937c(seed);
-	RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
-
 	// Basic Gaussian
 	static double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 	static double[] base = { 0.8, 1, 1.2 }; // Applied (*) to the background
@@ -199,14 +193,15 @@ public abstract class BaseFunctionSolverTest
 
 	private static void computeSCMOSWeights(double[] weights, double[] noise)
 	{
-		// Per observation read noise.
-		RandomGenerator randomGenerator = new Well19937c(42);
-		ExponentialDistribution ed = new ExponentialDistribution(randomGenerator, variance,
+		// Per observation read noise. 
+		// This is generated once so create the randon generator here.
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
 				ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 		for (int i = 0; i < weights.length; i++)
 		{
 			double pixelVariance = ed.sample();
-			double pixelGain = Math.max(0.1, gain + randomGenerator.nextGaussian() * gainSD);
+			double pixelGain = Math.max(0.1, gain + rg.nextGaussian() * gainSD);
 			// weights = var / g^2
 			weights[i] = pixelVariance / (pixelGain * pixelGain);
 		}
@@ -238,7 +233,8 @@ public abstract class BaseFunctionSolverTest
 		if (solver.isWeighted())
 			solver.setWeights(getWeights(noiseModel));
 
-		randomGenerator.setSeed(seed);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+
 		for (double s : signal)
 		{
 			double[] expected = createParams(1, s, 0, 0, 1);
@@ -261,7 +257,7 @@ public abstract class BaseFunctionSolverTest
 				// parameters and variable noise.
 				m = new SimpleArrayMoment();
 			}
-			double[] data = drawGaussian(expected, noise, noiseModel);
+			double[] data = drawGaussian(expected, noise, noiseModel, rg);
 			for (double db : base)
 				for (double dx : shift)
 					for (double dy : shift)
@@ -311,7 +307,7 @@ public abstract class BaseFunctionSolverTest
 			solver.setWeights(getWeights(noiseModel));
 
 		int LOOPS = 5;
-		randomGenerator.setSeed(seed);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		StoredDataStatistics[] stats = new StoredDataStatistics[6];
 		String[] statName = { "Signal", "X", "Y" };
 
@@ -337,7 +333,7 @@ public abstract class BaseFunctionSolverTest
 
 			for (int loop = LOOPS; loop-- > 0;)
 			{
-				double[] data = drawGaussian(expected, noise, noiseModel);
+				double[] data = drawGaussian(expected, noise, noiseModel, rg);
 
 				for (int i = 0; i < stats.length; i++)
 					stats[i] = new StoredDataStatistics();
@@ -524,33 +520,17 @@ public abstract class BaseFunctionSolverTest
 		return params;
 	}
 
-	/**
-	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
-	 *
-	 * @param params
-	 *            The Gaussian parameters
-	 * @return The data
-	 */
-	double[] drawGaussian(double[] params)
+	static double[] drawGaussian(double[] params, RandomGenerator rg)
 	{
-		return drawGaussian(params, null, NoiseModel.NONE);
+		return drawGaussian(params, null, NoiseModel.NONE, rg);
 	}
 
-	/**
-	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
-	 *
-	 * @param params
-	 *            The Gaussian parameters
-	 * @param noise
-	 *            The read noise
-	 * @return The data
-	 */
-	double[] drawGaussian(double[] params, double[] noise)
+	static double[] drawGaussian(double[] params, double[] noise, RandomGenerator rg)
 	{
-		return drawGaussian(params, noise, NoiseModel.NONE);
+		return drawGaussian(params, noise, NoiseModel.NONE, rg);
 	}
 
-	static int flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
+	static final int flags = GaussianFunctionFactory.FIT_ERF_CIRCLE;
 
 	/**
 	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
@@ -561,28 +541,11 @@ public abstract class BaseFunctionSolverTest
 	 *            The read noise
 	 * @param noiseModel
 	 *            the noise model
-	 * @return The data
-	 */
-	double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel)
-	{
-		return drawGaussian(params, noise, noiseModel, randomGenerator);
-	}
-
-	/**
-	 * Draw a Gaussian with Poisson shot noise and Gaussian read noise.
-	 *
-	 * @param params
-	 *            The Gaussian parameters
-	 * @param noise
-	 *            The read noise
-	 * @param noiseModel
-	 *            the noise model
-	 * @param randomGenerator
+	 * @param rg
 	 *            the random generator
 	 * @return The data
 	 */
-	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel,
-			RandomGenerator randomGenerator)
+	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel, RandomGenerator rg)
 	{
 		double[] data = new double[size * size];
 		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
@@ -592,7 +555,7 @@ public abstract class BaseFunctionSolverTest
 		// Poisson noise
 		for (int i = 0; i < data.length; i++)
 		{
-			CustomPoissonDistribution dist = new CustomPoissonDistribution(randomGenerator, 1);
+			CustomPoissonDistribution dist = new CustomPoissonDistribution(rg, 1);
 			double e = f.eval(i);
 			if (e > 0)
 			{
@@ -608,7 +571,7 @@ public abstract class BaseFunctionSolverTest
 			// Since the call random.nextGamma(...) creates a Gamma distribution 
 			// which pre-calculates factors only using the scale parameter we 
 			// create a custom gamma distribution where the shape can be set as a property.
-			CustomGammaDistribution dist = new CustomGammaDistribution(randomGenerator, 1, emGain);
+			CustomGammaDistribution dist = new CustomGammaDistribution(rg, 1, emGain);
 
 			for (int i = 0; i < data.length; i++)
 			{
@@ -626,7 +589,7 @@ public abstract class BaseFunctionSolverTest
 		{
 			for (int i = 0; i < data.length; i++)
 			{
-				data[i] += randomGenerator.nextGaussian() * noise[i];
+				data[i] += rg.nextGaussian() * noise[i];
 			}
 		}
 
@@ -672,8 +635,8 @@ public abstract class BaseFunctionSolverTest
 	 * @param useWeights
 	 *            the use weights
 	 */
-	void fitAndComputeDeviationsMatch(BaseFunctionSolver solver1, BaseFunctionSolver solver2, NoiseModel noiseModel,
-			boolean useWeights)
+	void fitAndComputeDeviationsMatch(RandomGenerator rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
+			NoiseModel noiseModel, boolean useWeights)
 	{
 		double[] noise = getNoise(noiseModel);
 		if (solver1.isWeighted() && useWeights)
@@ -683,7 +646,7 @@ public abstract class BaseFunctionSolverTest
 		}
 
 		// Draw target data
-		double[] data = drawGaussian(p12, noise, noiseModel);
+		double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
 		// fit with 2 peaks using the known params.
 		// compare to 2 peak deviation computation.
@@ -784,8 +747,8 @@ public abstract class BaseFunctionSolverTest
 	 * @param useWeights
 	 *            the use weights
 	 */
-	void fitAndComputeValueMatch(BaseFunctionSolver solver1, BaseFunctionSolver solver2, NoiseModel noiseModel,
-			boolean useWeights)
+	void fitAndComputeValueMatch(RandomGenerator rg, BaseFunctionSolver solver1, BaseFunctionSolver solver2,
+			NoiseModel noiseModel, boolean useWeights)
 	{
 		double[] noise = getNoise(noiseModel);
 		if (solver1.isWeighted() && useWeights)
@@ -795,7 +758,7 @@ public abstract class BaseFunctionSolverTest
 		}
 
 		// Draw target data
-		double[] data = drawGaussian(p12, noise, noiseModel);
+		double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
 		// fit with 2 peaks using the known params.
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(2, size, size, flags, null);

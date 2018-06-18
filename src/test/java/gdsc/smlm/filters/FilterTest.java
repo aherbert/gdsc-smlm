@@ -29,7 +29,7 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 public class FilterTest
 {
@@ -90,7 +90,7 @@ public class FilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -170,7 +170,7 @@ public class FilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -250,7 +250,7 @@ public class FilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -330,7 +330,7 @@ public class FilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -410,7 +410,7 @@ public class FilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -496,7 +496,7 @@ public class FilterTest
 	@Test
 	public void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -584,7 +584,7 @@ public class FilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 

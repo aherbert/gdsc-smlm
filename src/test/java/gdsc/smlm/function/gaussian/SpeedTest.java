@@ -31,7 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -281,7 +281,7 @@ public class SpeedTest
 
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		ArrayList<double[]> paramsList2 = (npeaks == 1) ? paramsListSinglePeak : paramsListDoublePeak;
 

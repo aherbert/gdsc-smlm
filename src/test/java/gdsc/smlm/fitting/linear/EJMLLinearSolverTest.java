@@ -26,7 +26,6 @@ package gdsc.smlm.fitting.linear;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,6 +38,7 @@ import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 public class EJMLLinearSolverTest
@@ -488,6 +488,9 @@ public class EJMLLinearSolverTest
 
 	private void runSolverSpeedTest(int flags)
 	{
+		// TODO - These should assert something
+		TestSettings.assumeMediumComplexity();
+		
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
 		final double[] y = new double[n];
@@ -500,7 +503,7 @@ public class EJMLLinearSolverTest
 		double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
 		int np = f0.getNumberOfGradients();
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
-		final RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		//double lambda = 10;
 		for (double background : testbackground)
 			// Peak 1
@@ -526,7 +529,7 @@ public class EJMLLinearSolverTest
 							double[] beta = new double[np];
 							//double ss = 
 							calc.findLinearised(n, y, p, alpha, beta, f0);
-							//System.out.printf("SS = %f\n", ss);
+							//TestSettings.debug("SS = %f\n", ss);
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
@@ -782,6 +785,9 @@ public class EJMLLinearSolverTest
 
 	private void runInversionSpeedTest(int flags)
 	{
+		// TODO - These should assert something
+		TestSettings.assumeMediumComplexity();
+		
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
 		final double[] y = new double[n];
@@ -793,7 +799,7 @@ public class EJMLLinearSolverTest
 		double[] testw1 = new double[] { 1.1, 1.2, 1.5 };
 		int np = f0.getNumberOfGradients();
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(np);
-		final RandomDataGenerator rdg = new RandomDataGenerator(new Well19937c(30051977));
+		final RandomDataGenerator rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		//double lambda = 10;
 		for (double background : testbackground)
 			// Peak 1
@@ -819,7 +825,7 @@ public class EJMLLinearSolverTest
 							double[] beta = new double[np];
 							//double ss = 
 							calc.findLinearised(n, y, p, alpha, beta, f0);
-							//System.out.printf("SS = %f\n", ss);
+							//TestSettings.debug("SS = %f\n", ss);
 							// As per the LVM algorithm
 							//for (int i = 0; i < np; i++)
 							//	alpha[i][i] *= lambda;
@@ -847,6 +853,6 @@ public class EJMLLinearSolverTest
 
 	void log(String format, Object... args)
 	{
-		System.out.printf(format, args);
+		TestSettings.info(format, args);
 	}
 }

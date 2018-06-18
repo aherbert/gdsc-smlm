@@ -24,7 +24,6 @@
 package gdsc.smlm.results;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.junit.Assert;
 import org.junit.Test;
@@ -235,7 +234,7 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void canComputeMeanSignalUsingR()
 	{
-		RandomGenerator rg = new Well19937c();
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		for (int i = 0; i < 10; i++)
 		{
@@ -262,7 +261,7 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void canComputeMeanSignalUsingP()
 	{
-		RandomGenerator rg = new Well19937c();
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		for (int i = 0; i < 10; i++)
 		{

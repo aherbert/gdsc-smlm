@@ -26,7 +26,6 @@ package gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
@@ -40,6 +39,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -104,7 +104,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 	private void gradientProcedureComputesSameAsBaseGradientProcedure(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -153,7 +153,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 		int[] indices = func.gradientIndices();
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);

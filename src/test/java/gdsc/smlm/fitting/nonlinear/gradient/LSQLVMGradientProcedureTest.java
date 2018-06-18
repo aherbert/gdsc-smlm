@@ -27,7 +27,6 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
@@ -35,7 +34,6 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.linear.EJMLLinearSolver;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
@@ -43,6 +41,7 @@ import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
@@ -53,7 +52,6 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
  */
 public class LSQLVMGradientProcedureTest
 {
-	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -153,7 +151,7 @@ public class LSQLVMGradientProcedureTest
 			BaseLSQLVMGradientProcedureFactory factory)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
@@ -232,10 +230,10 @@ public class LSQLVMGradientProcedureTest
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams,
 			final BaseLSQLVMGradientProcedureFactory factory)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
@@ -313,7 +311,7 @@ public class LSQLVMGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -373,10 +371,10 @@ public class LSQLVMGradientProcedureTest
 			final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
 			boolean doAssert)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -453,7 +451,7 @@ public class LSQLVMGradientProcedureTest
 		int[] indices = func.gradientIndices();
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -503,7 +501,7 @@ public class LSQLVMGradientProcedureTest
 		int nparams = func.getNumberOfGradients();
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);

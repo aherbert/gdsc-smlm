@@ -30,7 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 public class MedianFilterTest
 {
@@ -114,7 +114,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedianNxNInternalIsFasterThanBlockMedianNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -221,7 +221,7 @@ public class MedianFilterTest
 	@Test
 	public void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -285,7 +285,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedian3x3InternalIsFasterThanBlockMedian3x3Internal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -373,7 +373,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -476,7 +476,7 @@ public class MedianFilterTest
 	@Test
 	public void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -550,7 +550,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedianNxNIsFasterThanBlockMedianNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -623,7 +623,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -720,7 +720,7 @@ public class MedianFilterTest
 	@Test
 	public void floatBlockMedian3x3IsFasterThanBlockMedianNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -807,7 +807,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedian3x3IsFasterThanRollingMedianNxN()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 
@@ -871,7 +871,7 @@ public class MedianFilterTest
 	@Test
 	public void floatRollingMedian3x3IsFasterThanBlockMedian3x3()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-30051977);
 

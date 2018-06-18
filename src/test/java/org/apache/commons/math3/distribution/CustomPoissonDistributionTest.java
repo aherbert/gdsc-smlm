@@ -25,11 +25,11 @@ package org.apache.commons.math3.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 public class CustomPoissonDistributionTest
@@ -44,7 +44,7 @@ public class CustomPoissonDistributionTest
 		public MyTimingTask(String name, double min, double max)
 		{
 			super(String.format("%s %.1f - %.1f", name, min, max));
-			r = new Well19937c();
+			r = TestSettings.getRandomGenerator();
 			this.min = min;
 			mean = min;
 			n = 0;
@@ -64,7 +64,7 @@ public class CustomPoissonDistributionTest
 		@Override
 		public Object getData(int i)
 		{
-			r.setSeed(30051977);
+			r.setSeed(TestSettings.getSeed());
 			mean = min;
 			return null;
 		}

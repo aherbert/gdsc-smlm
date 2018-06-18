@@ -26,10 +26,11 @@ package gdsc.smlm.ij.plugins;
 import java.util.Iterator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import gdsc.test.TestSettings;
 
 /**
  * Test the PulseActivationAnalysis unmixing functions
@@ -39,14 +40,14 @@ public class PulseActivationAnalysisTest
 	@Test
 	public void canLinearlyUnmix2Channels()
 	{
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 0; n <= 2; n++)
 			for (int m = 0; m <= 2; m++)
-				canLinearlyUnmix2Channels(n, m);
+				canLinearlyUnmix2Channels(r, n, m);
 	}
 
-	private void canLinearlyUnmix2Channels(int n, int m)
+	private void canLinearlyUnmix2Channels(RandomGenerator r, int n, int m)
 	{
-		RandomGenerator r = new Well19937c(30051977);
 		try
 		{
 			for (int loop = 0; loop < 10; loop++)
@@ -121,14 +122,14 @@ public class PulseActivationAnalysisTest
 	@Test
 	public void canLinearlyUnmix3Channels()
 	{
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 0; n <= 3; n++)
 			for (int m = 0; m <= 6; m++)
-				canLinearlyUnmix3Channels(n, m);
+				canLinearlyUnmix3Channels(r, n, m);
 	}
 
-	private void canLinearlyUnmix3Channels(int n, int m)
+	private void canLinearlyUnmix3Channels(RandomGenerator r, int n, int m)
 	{
-		RandomGenerator r = new Well19937c(30051977);
 		try
 		{
 			for (int loop = 0; loop < 10; loop++)

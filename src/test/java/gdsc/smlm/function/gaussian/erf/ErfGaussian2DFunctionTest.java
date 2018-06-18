@@ -34,7 +34,6 @@ import gdsc.core.utils.BitFlags;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.core.utils.TurboList;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.ExtendedGradient2Procedure;
 import gdsc.smlm.function.Gradient1Procedure;
 import gdsc.smlm.function.Gradient2Procedure;
@@ -44,6 +43,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
@@ -1137,7 +1137,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void computeIntegralIsFaster()
 	{
-		Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		TurboList<double[]> p = new TurboList<double[]>();
 		for (double background : testbackground)
@@ -1204,7 +1204,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 	@Test
 	public void computeIntegralIsFasterWith2Peaks()
 	{
-		Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 		Assume.assumeNotNull(f2);
 
 		TurboList<double[]> p = new TurboList<double[]>();

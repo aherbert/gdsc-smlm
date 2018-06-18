@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
-import gdsc.smlm.TestSettings;
+import gdsc.test.TestSettings;
 
 @SuppressWarnings("deprecation")
 public class AverageFilterTest
@@ -302,7 +302,7 @@ public class AverageFilterTest
 
 	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 
@@ -384,7 +384,7 @@ public class AverageFilterTest
 
 	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		rand = new gdsc.core.utils.Random(-300519);
 

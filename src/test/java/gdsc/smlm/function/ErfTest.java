@@ -24,7 +24,6 @@
 package gdsc.smlm.function;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
@@ -32,6 +31,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 public class ErfTest
@@ -98,7 +98,7 @@ public class ErfTest
 
 	private void erfxHasLowError(BaseErf erf, double expected)
 	{
-		RandomGenerator rg = new Well19937c(30051977);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		int range = 8;
 		double max = 0;
 
@@ -186,7 +186,7 @@ public class ErfTest
 
 	private void erfxxHasLowError(BaseErf erf, double expected)
 	{
-		RandomGenerator rg = new Well19937c(30051977);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int range = 3;
 		double max = 0;

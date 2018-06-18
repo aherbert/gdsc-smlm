@@ -25,11 +25,11 @@ package org.apache.commons.math3.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
 
 public class CustomGammaDistributionTest
@@ -44,7 +44,7 @@ public class CustomGammaDistributionTest
 		public MyTimingTask(String name)
 		{
 			super(name);
-			r = new Well19937c();
+			r = TestSettings.getRandomGenerator();
 		}
 
 		@Override
@@ -56,7 +56,7 @@ public class CustomGammaDistributionTest
 		@Override
 		public Object getData(int i)
 		{
-			r.setSeed(30051977);
+			r.setSeed(TestSettings.getSeed());
 			shape = 0.5;
 			return null;
 		}

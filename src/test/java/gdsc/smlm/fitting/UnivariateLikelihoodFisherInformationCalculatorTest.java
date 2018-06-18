@@ -25,7 +25,6 @@ package gdsc.smlm.fitting;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,6 +40,7 @@ import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.test.TestSettings;
 
 public class UnivariateLikelihoodFisherInformationCalculatorTest
 {
@@ -52,7 +52,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePoissonFisherInformation()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
 		{
 			canComputePoissonFisherInformation(r, Model.POISSON);
@@ -62,7 +62,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputeHalfPoissonFisherInformation()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
 		{
 			canComputePoissonFisherInformation(r, Model.HALF_POISSON);
@@ -72,7 +72,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePoissonGaussianApproximationFisherInformation()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
 		{
 			canComputePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
@@ -160,7 +160,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 	@Test
 	public void canComputePerPixelPoissonGaussianApproximationFisherInformation()
 	{
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int n = 1; n < 10; n++)
 		{
 			canComputePerPixelPoissonGaussianApproximationFisherInformation(r);

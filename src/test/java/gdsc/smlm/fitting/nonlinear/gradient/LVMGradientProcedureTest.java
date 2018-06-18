@@ -28,7 +28,6 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
@@ -37,7 +36,6 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.LVMGradientProcedureFactory.Type;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
@@ -51,6 +49,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
@@ -58,7 +57,6 @@ import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
  */
 public class LVMGradientProcedureTest
 {
-	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 	static FastLog fastLog = null;
 
@@ -220,7 +218,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureComputesSameAsGradientCalculator(int nparams, Type type, double error)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
@@ -304,10 +302,10 @@ public class LVMGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams, final Type type)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 1000;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 		final double[][] alpha = new double[nparams][nparams];
 		final double[] beta = new double[nparams];
 
@@ -432,7 +430,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, Type type, boolean precomputed)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -544,10 +542,10 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final Type type,
 			final boolean precomputed)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -712,7 +710,7 @@ public class LVMGradientProcedureTest
 		int[] indices = func.gradientIndices();
 
 		int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -809,7 +807,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureSupportsPrecomputed(final Type type, boolean checkGradients)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		ArrayList<double[]> yList = new ArrayList<double[]>(iter);

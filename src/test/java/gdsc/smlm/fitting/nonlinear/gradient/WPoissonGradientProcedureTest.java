@@ -27,20 +27,18 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.function.DummyGradientFunction;
 import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
+import gdsc.test.TestSettings;
 
 public class WPoissonGradientProcedureTest
 {
-	boolean speedTests = true;
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 
 	int MAX_ITER = 20000;
@@ -60,7 +58,7 @@ public class WPoissonGradientProcedureTest
 	{
 		int n = blockWidth * blockWidth;
 		var = new double[n];
-		RandomGenerator r = new Well19937c(30051977);
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		while (n-- > 0)
 		{
 			// Range 0.9 to 1.1
@@ -93,7 +91,7 @@ public class WPoissonGradientProcedureTest
 	private void poissonGradientProcedureComputesSameAsWLSQGradientProcedure(int nparams)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
@@ -177,7 +175,7 @@ public class WPoissonGradientProcedureTest
 	private void gradientProcedureUnrolledComputesSameAsGradientProcedure(int nparams, boolean precomputed)
 	{
 		int iter = 10;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 
@@ -219,10 +217,10 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
@@ -296,10 +294,10 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterThanWLSEGradientProcedure(final int nparams)
 	{
-		org.junit.Assume.assumeTrue(speedTests || TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		final int iter = 100;
-		rdg = new RandomDataGenerator(new Well19937c(30051977));
+		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
 		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);

@@ -24,7 +24,6 @@
 package gdsc.smlm.data.config;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,13 +31,14 @@ import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import gdsc.test.TestSettings;
 
 public class CalibrationWriterTest
 {
 	@Test
 	public void canWrite()
 	{
-		RandomGenerator r = new Well19937c();
+		RandomGenerator r = TestSettings.getRandomGenerator();
 		for (int i = 0; i < 100; i++)
 			canWrite(r);
 	}

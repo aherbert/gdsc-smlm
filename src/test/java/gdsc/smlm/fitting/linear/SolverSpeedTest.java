@@ -31,10 +31,10 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import gdsc.smlm.TestSettings;
 import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
+import gdsc.test.TestSettings;
 
 public class SolverSpeedTest
 {
@@ -152,7 +152,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsFasterThanGaussJordanFloat()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<float[][]> A = copyAfloat(this.Adata, ITER);
@@ -183,7 +183,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanFloat()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<float[][]> A = copyAfloat(this.Adata, ITER);
@@ -221,7 +221,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsFasterThanGaussJordanDouble()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
@@ -252,7 +252,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanDouble()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
@@ -282,7 +282,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveCholeskyIsFasterThanGaussJordanDouble()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
@@ -313,7 +313,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveCholeskyLDLTIsFasterThanGaussJordanDouble()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
@@ -344,7 +344,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveIsFasterThanGaussJordanDouble()
 	{
-		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
+		TestSettings.assumeMediumComplexity();
 
 		int ITER = 10000;
 		ArrayList<double[][]> A = copyAdouble(this.Adata, ITER);
