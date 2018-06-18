@@ -28,11 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Random;
+import gdsc.test.TestSettings;
 
 public class ImageSourceTest
 {
@@ -156,8 +158,8 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		Assert.assertTrue(source.open());
 		for (int i = 0; i < data.length; i++)
@@ -202,8 +204,8 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		Assert.assertTrue(source.open());
 		for (int i = 0; i < data.length; i++)
@@ -336,8 +338,8 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
 		Assert.assertTrue(source.open());
@@ -400,8 +402,8 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
 		Assert.assertTrue(source.open());
@@ -492,8 +494,8 @@ public class ImageSourceTest
 		int[] frames = new int[data.length / 3];
 		for (int i = 0, frame = 1; i < frames.length; i++, frame += 3)
 			frames[i] = frame;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		Assert.assertTrue(source.open());
 		for (int i = 0; i < frames.length; i++)
@@ -550,8 +552,8 @@ public class ImageSourceTest
 		int[] frames = new int[data.length / 3];
 		for (int i = 0, frame = 1; i < frames.length; i++, frame += 3)
 			frames[i] = frame;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		Assert.assertTrue(source.open());
 		for (int i = 0; i < frames.length; i++)
@@ -672,8 +674,8 @@ public class ImageSourceTest
 		int[] frames = new int[source.getFrames()];
 		for (int i = 0, ii = 0; ii < expected.length; i++, ii += 3)
 			frames[i] = ii;
-		Random rand = new Random();
-		rand.shuffle(frames);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		Random.shuffle(frames, rg);
 
 		Assert.assertTrue(source.open());
 		for (int i = 0; i < frames.length; i++)

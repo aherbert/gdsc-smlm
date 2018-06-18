@@ -200,7 +200,7 @@ public class KernelFilterTest
 
 	private void filter1IsSameAsFilter2(FilterWrapper f1, FilterWrapper f2, boolean internal, double tolerance)
 	{
-		Random rand = new Random(-30051976);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		float[] data = createData(rand, size, size);
 
 		int testBorder = (internal) ? f1.kw / 2 : 0;

@@ -29,11 +29,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
-import gdsc.core.utils.Random;
 import gdsc.smlm.data.config.PSFHelper;
 import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -47,6 +47,7 @@ import gdsc.smlm.tsf.TSFProtos.IntensityUnits;
 import gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import gdsc.smlm.tsf.TSFProtos.Spot;
 import gdsc.smlm.tsf.TSFProtos.SpotList;
+import gdsc.test.TestSettings;
 import ij.Macro;
 
 /**
@@ -54,41 +55,47 @@ import ij.Macro;
  */
 public class ResultsManagerTest
 {
-	private gdsc.core.utils.Random rand = new Random();
-
 	@Test
 	public void writeTSFMatchesRead()
 	{
+		// This is redundant
+		TestSettings.assumeLowComplexity();
 		writeTSFMatchesRead(1, 1, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithChannels()
 	{
-		writeTSFMatchesRead(3, 1, 1, 1);
+		//TestSettings.assumeLowComplexity();
+		writeTSFMatchesRead(2, 1, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithSlices()
 	{
-		writeTSFMatchesRead(1, 3, 1, 1);
+		//TestSettings.assumeLowComplexity();
+		writeTSFMatchesRead(1, 2, 1, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithPositions()
 	{
-		writeTSFMatchesRead(1, 1, 3, 1);
+		//TestSettings.assumeLowComplexity();
+		writeTSFMatchesRead(1, 1, 2, 1);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithTypes()
 	{
-		writeTSFMatchesRead(1, 1, 1, 3);
+		//TestSettings.assumeLowComplexity();
+		writeTSFMatchesRead(1, 1, 1, 2);
 	}
 
 	@Test
 	public void writeTSFMatchesReadWithCombinations()
 	{
+		// This takes longer
+		TestSettings.assumeMediumComplexity();
 		writeTSFMatchesRead(2, 2, 2, 2);
 	}
 
@@ -122,27 +129,28 @@ public class ResultsManagerTest
 		}
 
 		// Generate random spots
-		int size = 1000;
+		RandomGenerator rand = TestSettings.getRandomGenerator();
+		int size = 100;
 		Spot[] spots = new Spot[size];
 		for (int i = 1; i <= size; i++)
 		{
 			Spot.Builder builder = Spot.newBuilder();
-			builder.setChannel(1 + rand.nextInt(channels));
-			builder.setSlice(1 + rand.nextInt(slices));
-			builder.setPos(1 + rand.nextInt(positions));
-			builder.setFluorophoreType(rand.nextInt(1, types));
+			builder.setChannel(nextInt(rand, channels));
+			builder.setSlice(nextInt(rand, slices));
+			builder.setPos(nextInt(rand, positions));
+			builder.setFluorophoreType(nextInt(rand, types));
 
 			builder.setMolecule(i); // This is a required field but is ignored when reading
 			builder.setCluster(rand.nextInt(10));
-			builder.setFrame(rand.nextInt(1, 100));
+			builder.setFrame(nextInt(rand, 100));
 			builder.setXPosition(rand.nextInt(50));
 			builder.setYPosition(rand.nextInt(50));
-			builder.setBackground(rand.next());
-			builder.setIntensity(rand.next());
-			builder.setX(rand.next());
-			builder.setY(rand.next());
-			builder.setZ(rand.next());
-			builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR * rand.next()));
+			builder.setBackground(rand.nextFloat());
+			builder.setIntensity(rand.nextFloat());
+			builder.setX(rand.nextFloat());
+			builder.setY(rand.nextFloat());
+			builder.setZ(rand.nextFloat());
+			builder.setWidth((float) (Gaussian2DFunction.SD_TO_FWHM_FACTOR * rand.nextDouble()));
 
 			Spot spot = builder.build();
 			spots[i - 1] = spot;
@@ -192,7 +200,7 @@ public class ResultsManagerTest
 			FluorophoreType.Builder typeBuilder = FluorophoreType.newBuilder();
 			typeBuilder.setId(type);
 			typeBuilder.setDescription("Type " + type);
-			typeBuilder.setIsFiducial(rand.next() < 0.5f);
+			typeBuilder.setIsFiducial(rand.nextDouble() < 0.5);
 			builder.addFluorophoreTypes(typeBuilder.build());
 		}
 
@@ -260,6 +268,11 @@ public class ResultsManagerTest
 								null);
 						checkEqual(spots, channel, slice, position, type, in);
 					}
+	}
+
+	private int nextInt(RandomGenerator rand, int n)
+	{
+		return (n == 1) ? 1 : 1 + rand.nextInt(n);
 	}
 
 	private void closeOutput(FileOutputStream out)

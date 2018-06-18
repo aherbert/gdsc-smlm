@@ -29,12 +29,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.NotImplementedException;
-import gdsc.core.utils.Random;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import gdsc.smlm.data.config.CalibrationWriter;
@@ -46,10 +46,10 @@ import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
+import gdsc.test.TestSettings;
 
 public class PeakResultsReaderTest
 {
-	private gdsc.core.utils.Random rand = new Random();
 	static final boolean[] onOff = new boolean[] { true, false };
 
 	// TODO - Add tests to compare writing to a IJTablePeakResults, saving the TextPanel contents to file and then reading.
@@ -428,7 +428,8 @@ public class PeakResultsReaderTest
 	@Test
 	public void canConvertMalkToNMAndPhotons()
 	{
-		MemoryPeakResults out = createResults(200, false, false, false, false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
 		// Output in pixel and count
 		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -453,7 +454,8 @@ public class PeakResultsReaderTest
 	public void writeTextWithComputedPrecisionMatchesRead()
 	{
 		// Create without precision
-		MemoryPeakResults results = createResults(200, false, false, false, false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		MemoryPeakResults results = createResults(rg, 200, false, false, false, false);
 		// Ensure units are OK for computing precision
 		CalibrationWriter cw = results.getCalibrationWriter();
 		cw.setIntensityUnit(IntensityUnit.PHOTON);
@@ -495,7 +497,8 @@ public class PeakResultsReaderTest
 
 	private void canReadIntoPreferredUnits(ResultsFileFormat fileFormat)
 	{
-		MemoryPeakResults out = createResults(200, false, false, false, false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
 		// Output in nm and count
 		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -536,7 +539,8 @@ public class PeakResultsReaderTest
 
 	private void canReadAndSimplifyGaussian2DPSF(ResultsFileFormat fileFormat)
 	{
-		MemoryPeakResults out = createResults(1, false, false, false, false);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
 
 		CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
 		cal.setDistanceUnit(MemoryPeakResults.PREFERRED_DISTANCE_UNIT);
@@ -612,7 +616,8 @@ public class PeakResultsReaderTest
 			boolean showPrecision, ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2,
 			int loops)
 	{
-		MemoryPeakResults out = createResults(20000, showDeviations, showEndFrame, showId, showPrecision);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		MemoryPeakResults out = createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);
 		String filename = createFile();
 
 		writeFile(false, f1, showDeviations, showEndFrame, showId, showPrecision, false, out, filename);
@@ -634,7 +639,8 @@ public class PeakResultsReaderTest
 	private void writeMatchesRead(boolean sequential, ResultsFileFormat fileFormat, boolean showDeviations,
 			boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort)
 	{
-		MemoryPeakResults out = createResults(200, showDeviations, showEndFrame, showId, showPrecision);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		MemoryPeakResults out = createResults(rg, 200, showDeviations, showEndFrame, showId, showPrecision);
 		if (fileFormat == ResultsFileFormat.MALK)
 		{
 			CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -704,7 +710,14 @@ public class PeakResultsReaderTest
 	private void readWithScannerMatchesNonScanner(boolean showDeviations, boolean showEndFrame, boolean showId,
 			boolean showPrecision, boolean sort)
 	{
-		MemoryPeakResults out = createResults(1000, showDeviations, showEndFrame, showId, showPrecision);
+		RandomGenerator rg = TestSettings.getRandomGenerator();
+		readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
+	}
+
+	private void readWithScannerMatchesNonScanner(RandomGenerator rg, boolean showDeviations, boolean showEndFrame,
+			boolean showId, boolean showPrecision, boolean sort)
+	{
+		MemoryPeakResults out = createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision);
 		String filename = createFile();
 
 		ResultsFileFormat fileFormat = ResultsFileFormat.TEXT;
@@ -718,6 +731,7 @@ public class PeakResultsReaderTest
 
 	private void readWithScannerMatchesNonScannerWithCombinations(boolean sort)
 	{
+		RandomGenerator rg = TestSettings.getRandomGenerator();
 		for (boolean showDeviations : onOff)
 		{
 			for (boolean showEndFrame : onOff)
@@ -728,7 +742,7 @@ public class PeakResultsReaderTest
 					{
 						if (count(showDeviations, showEndFrame, showId, showPrecision) < 2)
 							continue;
-						readWithScannerMatchesNonScanner(showDeviations, showEndFrame, showId, showPrecision, sort);
+						readWithScannerMatchesNonScanner(rg, showDeviations, showEndFrame, showId, showPrecision, sort);
 					}
 				}
 			}
@@ -862,64 +876,63 @@ public class PeakResultsReaderTest
 		}
 	}
 
-	private MemoryPeakResults createResults(int i, boolean showDeviations, boolean showEndFrame, boolean showId,
-			boolean showPrecision)
+	private MemoryPeakResults createResults(RandomGenerator rg, int i, boolean showDeviations, boolean showEndFrame,
+			boolean showId, boolean showPrecision)
 	{
-		double bias = rand.next();
+		double bias = rg.nextDouble();
 
 		boolean extended = showEndFrame || showId || showPrecision;
 
 		MemoryPeakResults results = new MemoryPeakResults(PSFHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
 		while (i-- > 0)
 		{
-			int startFrame = (int) (i * rand.next());
-			int origX = (int) (i * rand.next());
-			int origY = (int) (i * rand.next());
-			float origValue = rand.next();
-			double error = rand.next();
-			float noise = rand.next();
-			float meanIntensity = rand.next();
-			float[] params = createData();
-			float[] paramsStdDev = (showDeviations) ? createData() : null;
+			int startFrame = rg.nextInt(i + 1);
+			int origX = rg.nextInt(256);
+			int origY = rg.nextInt(256);
+			float origValue = rg.nextFloat();
+			double error = rg.nextDouble();
+			float noise = rg.nextFloat();
+			float meanIntensity = rg.nextFloat();
+			float[] params = createData(rg);
+			float[] paramsStdDev = (showDeviations) ? createData(rg) : null;
 			if (extended)
 			{
 				AttributePeakResult r = new AttributePeakResult(startFrame, origX, origY, origValue, error, noise,
 						meanIntensity, params, paramsStdDev);
 				if (showEndFrame)
-					r.setEndFrame(startFrame + (int) (10 * rand.next()));
+					r.setEndFrame(startFrame + rg.nextInt(10));
 				if (showId)
 					r.setId(i + 1);
 				if (showPrecision)
-					r.setPrecision(rand.next());
+					r.setPrecision(rg.nextDouble());
 				results.add(r);
 			}
 			else
 				results.add(startFrame, origX, origY, origValue, error, noise, meanIntensity, params, paramsStdDev);
 		}
-		results.setName(Float.toString(rand.next()) + Float.toString(rand.next()));
-		results.setConfiguration(Float.toString(rand.next()) + Float.toString(rand.next()));
-		results.setBounds(new Rectangle((int) (10 * rand.next()), (int) (10 * rand.next()), (int) (100 * rand.next()),
-				(int) (100 * rand.next())));
+		results.setName(Long.toString(rg.nextLong()));
+		results.setConfiguration(Long.toString(rg.nextLong()));
+		results.setBounds(new Rectangle(rg.nextInt(10), rg.nextInt(10), rg.nextInt(100), rg.nextInt(100)));
 		CalibrationWriter cal = new CalibrationWriter();
-		cal.setNmPerPixel(rand.next());
-		cal.setCountPerPhoton(rand.next());
-		cal.setExposureTime(rand.next());
-		cal.setReadNoise(rand.next());
+		cal.setNmPerPixel(rg.nextDouble());
+		cal.setCountPerPhoton(rg.nextDouble());
+		cal.setExposureTime(rg.nextDouble());
+		cal.setReadNoise(rg.nextDouble());
 		cal.setBias(bias);
-		cal.setQuantumEfficiency(rand.next());
+		cal.setQuantumEfficiency(rg.nextDouble());
 		// Subtract 1 to avoid the additional UNRECOGNISED enum value
-		cal.setCameraType(CameraType.values()[rand.nextInt(CameraType.values().length - 1)]);
-		cal.setDistanceUnit(DistanceUnit.values()[rand.nextInt(DistanceUnit.values().length - 1)]);
-		cal.setIntensityUnit(IntensityUnit.values()[rand.nextInt(IntensityUnit.values().length - 1)]);
-		cal.setAngleUnit(AngleUnit.values()[rand.nextInt(AngleUnit.values().length - 1)]);
+		cal.setCameraType(CameraType.values()[rg.nextInt(CameraType.values().length - 1)]);
+		cal.setDistanceUnit(DistanceUnit.values()[rg.nextInt(DistanceUnit.values().length - 1)]);
+		cal.setIntensityUnit(IntensityUnit.values()[rg.nextInt(IntensityUnit.values().length - 1)]);
+		cal.setAngleUnit(AngleUnit.values()[rg.nextInt(AngleUnit.values().length - 1)]);
 		results.setCalibration(cal.getCalibration());
 		return results;
 	}
 
-	private float[] createData()
+	private float[] createData(RandomGenerator rg)
 	{
-		return Gaussian2DPeakResultHelper.createTwoAxisAndAngleParams(rand.next(), rand.next(), rand.next(),
-				rand.next(), rand.next(), rand.next(), rand.next(), rand.next());
+		return Gaussian2DPeakResultHelper.createTwoAxisAndAngleParams(rg.nextFloat(), rg.nextFloat(), rg.nextFloat(),
+				rg.nextFloat(), rg.nextFloat(), rg.nextFloat(), rg.nextFloat(), rg.nextFloat());
 	}
 
 	private String createFile()

@@ -24,8 +24,8 @@
 package gdsc.smlm.function.gaussian;
 
 import java.util.ArrayList;
-import java.util.Random;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,42 +35,48 @@ import gdsc.test.TestSettings;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
- * for use in NonLinearFit
+ * from a Gaussian 2D Function
  */
 public class SpeedTest
 {
-	int Single = 1;
-	int Double = 2;
+	private final int Single = 1;
+	private final int Multi = 2;
 
-	private int MAX_ITER = 20000;
-	private int blockWidth = 10;
-	private double Background = 20;
-	private double Amplitude = 10;
-	private double Xpos = 5;
-	private double Ypos = 5;
-	private double Xwidth = 5;
-	private Random rand;
-	private static ArrayList<double[]> paramsListSinglePeak = null;
-	private static ArrayList<double[]> yListSinglePeak;
+	private static int blockWidth = 10;
+	private static double Background = 20;
+	private static double Amplitude = 10;
+	private static double Xpos = 5;
+	private static double Ypos = 5;
+	private static double Xwidth = 5;
+
+	private static RandomGenerator rand = TestSettings.getRandomGenerator();
+
+	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<double[]>();
+	private static ArrayList<double[]> yListSinglePeak = new ArrayList<double[]>();
+	private static ArrayList<double[]> paramsListMultiPeak = new ArrayList<double[]>();
+	private static ArrayList<double[]> yListMultiPeak = new ArrayList<double[]>();
+
 	private static int[] x;
-	private static ArrayList<double[]> paramsListDoublePeak;
-	private static ArrayList<double[]> yListDoublePeak;
-
-	public SpeedTest()
+	static
 	{
-		// TODO - the data generation could be static in the Gaussian2DFunctionTest since 
-		// all gaussian data generation should be similar
+		x = new int[blockWidth * blockWidth];
+		for (int i = 0; i < x.length; i++)
+			x[i] = i;
+	}
 
-		rand = new Random(30051977);
-
-		if (paramsListSinglePeak == null)
+	private static synchronized void ensureDataSingle(int size)
+	{
+		if (paramsListSinglePeak.size() < size)
 		{
-			paramsListSinglePeak = new ArrayList<double[]>(MAX_ITER);
-			yListSinglePeak = new ArrayList<double[]>(MAX_ITER);
-			x = createData(1, MAX_ITER, paramsListSinglePeak, yListSinglePeak);
-			paramsListDoublePeak = new ArrayList<double[]>(MAX_ITER);
-			yListDoublePeak = new ArrayList<double[]>(MAX_ITER);
-			x = createData(2, MAX_ITER, paramsListDoublePeak, yListDoublePeak);
+			createData(1, size, paramsListSinglePeak, yListSinglePeak);
+		}
+	}
+
+	private static synchronized void ensureDataMulti(int size)
+	{
+		if (paramsListMultiPeak.size() < size)
+		{
+			createData(2, size, paramsListMultiPeak, yListMultiPeak);
 		}
 	}
 
@@ -153,89 +159,98 @@ public class SpeedTest
 	}
 
 	@Test
-	public void freeCircularComputesSameAsEllipticalDoublePeak()
+	public void freeCircularComputesSameAsEllipticalMultiPeak()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
 	@Test
-	public void freeCircularFasterThanEllipticalDoublePeak()
+	public void freeCircularFasterThanEllipticalMultiPeak()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
+		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_FREE_CIRCLE, GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
 	@Test
-	public void circularComputesSameAsFreeCircularDoublePeak()
+	public void circularComputesSameAsFreeCircularMultiPeak()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
 	@Test
-	public void circularFasterThanFreeCircularDoublePeak()
+	public void circularFasterThanFreeCircularMultiPeak()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_CIRCLE, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
 	@Test
-	public void fixedComputesSameAsFreeCircularDoublePeak()
+	public void fixedComputesSameAsFreeCircularMultiPeak()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
 	@Test
-	public void fixedFasterThanFreeCircularDoublePeak()
+	public void fixedFasterThanFreeCircularMultiPeak()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
+		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_FIXED, GaussianFunctionFactory.FIT_FREE_CIRCLE);
 	}
 
 	@Test
-	public void freeCircularComputesSameAsEllipticalDoublePeakNB()
+	public void freeCircularComputesSameAsEllipticalMultiPeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
-	public void freeCircularFasterThanEllipticalDoublePeakNB()
+	public void freeCircularFasterThanEllipticalMultiPeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
+		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
 	@Test
-	public void circularComputesSameAsFreeCircularDoublePeakNB()
+	public void circularComputesSameAsFreeCircularMultiPeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
-	public void circularFasterThanFreeCircularDoublePeakNB()
+	public void circularFasterThanFreeCircularMultiPeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
+		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
-	public void fixedComputesSameAsFreeCircularDoublePeakNB()
+	public void fixedComputesSameAsFreeCircularMultiPeakNB()
 	{
-		f1ComputesSameAsf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+		f1ComputesSameAsf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
-	public void fixedFasterThanFreeCircularDoublePeakNB()
+	public void fixedFasterThanFreeCircularMultiPeakNB()
 	{
-		f1FasterThanf2(Double, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
+		f1FasterThanf2(Multi, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED,
 				GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	void f1ComputesSameAsf2(int npeaks, int flags1, int flags2)
 	{
 		DoubleEquality eq = new DoubleEquality(1e-2, 1e-10);
-		int iter = 2000;
-		ArrayList<double[]> paramsList2 = (npeaks == 1) ? copyList(paramsListSinglePeak, iter)
-				: copyList(paramsListDoublePeak, iter);
+		int iter = 50;
+		ArrayList<double[]> paramsList2;
+		if (npeaks == 1)
+		{
+			ensureDataSingle(iter);
+			paramsList2 = copyList(paramsListSinglePeak, iter);
+		}
+		else
+		{
+			ensureDataMulti(iter);
+			paramsList2 = copyList(paramsListMultiPeak, iter);
+		}
 
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags1, null);
 		Gaussian2DFunction f2 = GaussianFunctionFactory.create2D(1, blockWidth, blockWidth, flags2, null);
@@ -281,9 +296,20 @@ public class SpeedTest
 
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
-		TestSettings.assumeMediumComplexity();
+		//TestSettings.assumeMediumComplexity();
 
-		ArrayList<double[]> paramsList2 = (npeaks == 1) ? paramsListSinglePeak : paramsListDoublePeak;
+		int iter = 10000;
+		ArrayList<double[]> paramsList2;
+		if (npeaks == 1)
+		{
+			ensureDataSingle(iter);
+			paramsList2 = paramsListSinglePeak;
+		}
+		else
+		{
+			ensureDataMulti(iter);
+			paramsList2 = paramsListMultiPeak;
+		}
 
 		// Use the full list of parameters to build the functions
 		Gaussian2DFunction f1 = GaussianFunctionFactory.create2D(npeaks, blockWidth, blockWidth, flags1, null);
@@ -338,7 +364,7 @@ public class SpeedTest
 	 *            set on output
 	 * @return
 	 */
-	private double[] doubleCreateGaussianData(int npeaks, double[] params)
+	private static double[] doubleCreateGaussianData(int npeaks, double[] params)
 	{
 		int n = blockWidth * blockWidth;
 
@@ -379,11 +405,8 @@ public class SpeedTest
 		return y;
 	}
 
-	protected int[] createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
+	protected static void createData(int npeaks, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)
 	{
-		int[] x = new int[blockWidth * blockWidth];
-		for (int i = 0; i < x.length; i++)
-			x[i] = i;
 		for (int i = 0; i < iter; i++)
 		{
 			double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK * npeaks];
@@ -391,7 +414,6 @@ public class SpeedTest
 			paramsList.add(params);
 			yList.add(y);
 		}
-		return x;
 	}
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList, int iter)

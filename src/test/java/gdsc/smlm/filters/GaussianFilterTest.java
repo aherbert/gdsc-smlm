@@ -239,7 +239,7 @@ public class GaussianFilterTest
 
 	private void filter1IsSameAsFilter2(GFilter f1, GFilter f2, boolean weighted, double tolerance)
 	{
-		Random rand = new Random(-30051976);
+		RandomGenerator rand = TestSettings.getRandomGenerator();
 		float[] data = createData(rand, size, size);
 		float[] w = null;
 		if (weighted)

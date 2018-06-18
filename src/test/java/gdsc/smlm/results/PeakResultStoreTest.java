@@ -162,6 +162,21 @@ public class PeakResultStoreTest
 		store.addArray(Arrays.copyOf(list, size));
 		assertEquals(list, size, store);
 
+		// Can add store
+		size = 0;
+		store.clear();
+		for (int i = 0; i < 10; i++)
+		{
+			result = create(r);
+			list[size++] = result;
+		}
+		PeakResultStore store2 = store.copy();
+		store2.addArray(Arrays.copyOf(list, size));
+		// Ensure the store is not at full capacity
+		store2.remove(list[--size]);
+		store.addStore(store2);
+		assertEquals(list, size, store);
+		
 		// Can copy
 		PeakResultStore copy = store.copy();
 		Assert.assertNotEquals(copy, store);
