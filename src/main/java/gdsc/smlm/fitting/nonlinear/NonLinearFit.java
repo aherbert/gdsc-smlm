@@ -347,7 +347,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 		if (aDev != null)
 		{
-			if (!computeDeviations(aDev))
+			if (!computeDeviations(n, y, aDev))
 				return FitStatus.SINGULAR_NON_LINEAR_SOLUTION;
 		}
 
@@ -365,12 +365,14 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Compute the parameter deviations using the covariance matrix of the solution
+	 * 
+	 * @param n
 	 *
 	 * @param aDev
 	 *            the a dev
 	 * @return true, if successful
 	 */
-	private boolean computeDeviations(double[] aDev)
+	private boolean computeDeviations(int n, double[] y, double[] aDev)
 	{
 		if (isMLE())
 		{
@@ -378,7 +380,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 			// Compute and invert a matrix related to the Poisson log-likelihood.
 			// This assumes this does achieve the maximum likelihood estimate for a 
 			// Poisson process.
-			double[][] I = calculator.fisherInformationMatrix(lastY.length, null, func);
+			double[][] I = calculator.fisherInformationMatrix(n, null, func);
 			if (calculator.isNaNGradients())
 				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 
@@ -389,7 +391,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		}
 		else
 		{
-			double[] covar = calculator.variance(lastY.length, null, func);
+			double[] covar = calculator.variance(n, null, func);
 			if (covar != null)
 			{
 				setDeviations(aDev, covar);
@@ -605,6 +607,8 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	@Override
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
+		calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), isMLE());
+		
 		if (isMLE())
 		{
 			return super.computeDeviations(y, a, aDev);
