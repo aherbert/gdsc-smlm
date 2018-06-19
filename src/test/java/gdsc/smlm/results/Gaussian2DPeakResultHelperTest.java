@@ -41,6 +41,8 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public class Gaussian2DPeakResultHelperTest
 {
@@ -53,11 +55,18 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void canCalculateMaximumLikelihoodVariance()
 	{
+		int min = Gaussian2DPeakResultHelper.POINTS;
+		int max = min;
+		if (TestSettings.allow(TestComplexity.HIGH))
+		{
+			min = 3;
+			max = 20;
+		}
 		for (double a : test_a)
 			for (double s : test_s)
 				for (double N : test_N)
 					for (double b2 : test_b2)
-						for (int points = 3; points <= 20; points++)
+						for (int points = min; points <= max; points++)
 						{
 							Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, true, points);
 						}
@@ -66,6 +75,8 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void lowerIntegrationPointsApproximateMaximumLikelihoodVariance()
 	{
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+
 		double[] sum = new double[maxPoints + 1];
 		int count = 0;
 		for (double a : test_a)
@@ -84,7 +95,7 @@ public class Gaussian2DPeakResultHelperTest
 							{
 								String msg = String.format("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s,
 										N, b2, points, e, o, error);
-								Assert.assertTrue(msg, false);
+								Assert.fail(msg);
 							}
 						}
 					}
@@ -98,6 +109,8 @@ public class Gaussian2DPeakResultHelperTest
 	@Test
 	public void runSpeedTest()
 	{
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+
 		// Test with realistic parameters
 
 		// Warm-up

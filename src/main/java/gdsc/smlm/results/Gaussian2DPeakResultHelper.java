@@ -61,6 +61,14 @@ public class Gaussian2DPeakResultHelper
 	public static final double R_2D_50 = inverseCumulative2D(0.5);
 	private static final double P05 = 0.5 / (Math.PI * Maths.pow2(R_2D_50));
 
+	/**
+	 * The default points to use for maximum likelihood precision computation, see
+	 * {@link #getMLVarianceX(double, double, double, double, boolean, int)}
+	 * <p>
+	 * Testing shows that 10 integration points is the fastest for realistic input parameters. 
+	 */
+	public static final int POINTS = 10;
+
 	private static class BaseGaussian2DPeakResultCalculator implements Gaussian2DPeakResultCalculator
 	{
 		final static double twoPi = 2 * Math.PI;
@@ -919,8 +927,7 @@ public class Gaussian2DPeakResultHelper
 	 */
 	public static double getMLVarianceX(double a, double s, double N, double b2, boolean emCCD)
 	{
-		// The class JUnit test shows that 10 integration points is the fastest for realistic input parameters.
-		return getMLVarianceX(a, s, N, b2, emCCD, 10);
+		return getMLVarianceX(a, s, N, b2, emCCD, POINTS);
 	}
 
 	/**
