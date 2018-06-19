@@ -598,18 +598,18 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 			if ((displayFlags & DISPLAY_REPLACE) != 0)
 			{
 				// Replace the data
-				for (int i = nValues; i-- > 0;)
+				for (int i = 0; i < nValues; i++)
 					data[indices[i]] = values[i];
 			}
 			else if ((displayFlags & DISPLAY_MAX) != 0)
 			{
-				for (int i = nValues; i-- > 0;)
+				for (int i = 0; i < nValues; i++)
 					data[indices[i]] = max(data[indices[i]], values[i]);
 			}
 			else
 			{
 				// Add the data
-				for (int i = nValues; i-- > 0;)
+				for (int i = 0; i < nValues; i++)
 					data[indices[i]] += values[i];
 			}
 		}
