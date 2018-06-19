@@ -39,6 +39,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class Gaussian2DPeakResultHelperTest
@@ -255,7 +256,7 @@ public class Gaussian2DPeakResultHelperTest
 
 	private static void assertEquals(double e, double o)
 	{
-		TestSettings.assertEquals(e, o, 1e-10);
+		TestAssert.assertEquals(e, o, 1e-10);
 	}
 
 	@Test

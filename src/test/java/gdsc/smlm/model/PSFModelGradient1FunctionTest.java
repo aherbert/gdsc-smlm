@@ -32,7 +32,7 @@ import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
-import gdsc.test.TestSettings;
+import gdsc.test.TestAssert;
 
 public class PSFModelGradient1FunctionTest
 {
@@ -110,8 +110,8 @@ public class PSFModelGradient1FunctionTest
 
 						for (int ii = 0; ii < ve.length; ii++)
 						{
-							TestSettings.assertEquals(ve[ii], vo[ii], 1e-8);
-							TestSettings.assertArrayEquals(ge[ii], go[ii], 1e-8);
+							TestAssert.assertEquals(ve[ii], vo[ii], 1e-8);
+							TestAssert.assertArrayEquals(ge[ii], go[ii], 1e-8);
 						}
 					}
 				}

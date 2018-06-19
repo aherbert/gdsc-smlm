@@ -26,6 +26,7 @@ package gdsc.smlm.function;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class PoissonGammaGaussianFisherInformationTest
@@ -226,8 +227,8 @@ public class PoissonGammaGaussianFisherInformationTest
 				double upper = PoissonFisherInformation.getPoissonI(u);
 				double alpha = I / upper;
 				TestSettings.debug("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
-				Assert.assertTrue(I < upper);
-				Assert.assertTrue(alpha > 0);
+				TestAssert.assertTrue(I < upper, "Fisher information (%s) is not below upper limit: %s", I, upper);
+				Assert.assertTrue("Alpha is not above zero", alpha > 0);
 			}
 	}
 }

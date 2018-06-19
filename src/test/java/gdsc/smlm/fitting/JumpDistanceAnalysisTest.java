@@ -41,6 +41,7 @@ import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class JumpDistanceAnalysisTest
@@ -384,8 +385,8 @@ public class JumpDistanceAnalysisTest
 		try
 		{
 			Assert.assertEquals("Failed to fit n", d.length, fitD.length);
-			TestSettings.assertArrayEquals("Failed to fit d", d, fitD, deltaD);
-			TestSettings.assertArrayEquals("Failed to fit f", f, fitF, deltaF);
+			TestAssert.assertArrayEquals("Failed to fit d", d, fitD, deltaD);
+			TestAssert.assertArrayEquals("Failed to fit f", f, fitF, deltaF);
 		}
 		catch (AssertionError e)
 		{

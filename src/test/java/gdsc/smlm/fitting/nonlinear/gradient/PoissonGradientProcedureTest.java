@@ -42,6 +42,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
@@ -113,12 +114,12 @@ public class PoissonGradientProcedureTest
 			double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
 			// Not exactly the same ...
 			double[] al = p.getLinear();
-			TestSettings.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al,
+			TestAssert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al,
 					new DenseMatrix64F(m).data, 1e-10);
 
 			double[][] am = p.getMatrix();
 			for (int j = 0; j < nparams; j++)
-				TestSettings.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], m[j], 1e-10);
+				TestAssert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], m[j], 1e-10);
 		}
 	}
 

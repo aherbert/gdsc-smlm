@@ -148,7 +148,7 @@ public class MedianFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -236,7 +236,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockMedianNxNInternal [%dx%d] %d => blockMedian3x3Internal %d = %.2fx\n",
 							width, height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
@@ -298,7 +298,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"float blockMedian3x3Internal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
@@ -382,7 +382,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					System.out.printf(
 							"float rollingMedianNxNInternal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
@@ -471,7 +471,7 @@ public class MedianFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float blockMedianNxN [%dx%d] @ %d : %d => blockMedianNxNInternal %d = %.2fx\n", width,
 								height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -539,7 +539,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					if (debug)
 						System.out.printf("float blockMedianNxN [%dx%d] @ %d : %d => rollingMedianNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -608,7 +608,7 @@ public class MedianFilterTest extends AbstractFilterTest
 						System.out.printf(
 								"float rollingMedianNxN [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
-					//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
+					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
@@ -696,7 +696,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockMedianNxN [%dx%d] %d => blockMedian3x3 %d = %.2fx\n", width, height,
 							time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "float blockMedianNxN %d => blockMedian3x3 %d = %.2fx\n",
@@ -779,7 +779,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float rollingMedianNxN [%dx%d] %d => rollingMedian3x3 %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		rollingBlockTime, time), rollingBlockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
@@ -840,7 +840,7 @@ public class MedianFilterTest extends AbstractFilterTest
 				if (debug)
 					System.out.printf("float blockMedian3x3 [%dx%d] %d => rollingMedian3x3 %d = %.2fx\n", width, height,
 							time, fastTime, speedUpFactor(time, fastTime));
-				//if (TestSettings.ASSERT_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
+				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
