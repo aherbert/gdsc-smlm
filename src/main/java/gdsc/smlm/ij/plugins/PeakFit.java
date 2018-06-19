@@ -1155,7 +1155,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			@Override
 			public void saveCalibration(Calibration calibration)
 			{
-				fitConfig.mergeCalibration(calibration);
+				fitConfig.setCalibration(calibration);
 			}
 		});
 	}
@@ -1197,7 +1197,7 @@ public class PeakFit implements PlugInFilter, ItemListener
 			@Override
 			public void saveCalibration(Calibration calibration)
 			{
-				calibrationWriter.mergeCalibration(calibration);
+				calibrationWriter.setCalibration(calibration);
 			}
 		});
 	}
