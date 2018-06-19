@@ -26,19 +26,20 @@ package gdsc.smlm.utils;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 
 public class ConvolutionTest
 {
-	int sizeLoops = 10;
-	int sLoops = 8;
+	int sizeLoops = 8;
+	int sLoops = 6;
 
 	static
 	{
@@ -70,6 +71,7 @@ public class ConvolutionTest
 				{
 					double error = Math.abs(r1[k] * 1e-6);
 					Assert.assertEquals(r1[k], r1b[k], error);
+					error = Math.abs(r1[k] * 1e-5);
 					Assert.assertEquals(r1[k], r2[k], error);
 					Assert.assertEquals(r1[k], r2b[k], error);
 				}
@@ -109,6 +111,7 @@ public class ConvolutionTest
 					double error = Math.abs(e1[k] * 1e-6);
 					Assert.assertEquals(e1[k], r1[0][k], error);
 					Assert.assertEquals(e2[k], r1[1][k], error);
+					error = Math.abs(e1[k] * 1e-5);
 					Assert.assertEquals(e1[k], r2[0][k], error);
 					Assert.assertEquals(e2[k], r2[1][k], error);
 				}
@@ -122,7 +125,7 @@ public class ConvolutionTest
 	@Test
 	public void doSpeedTest()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
@@ -168,7 +171,7 @@ public class ConvolutionTest
 	@Test
 	public void doDoubleSpeedTest()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		int size = 10;
@@ -215,7 +218,7 @@ public class ConvolutionTest
 	@Test
 	public void doSingleVsDoubleSpeedTest()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -267,7 +270,7 @@ public class ConvolutionTest
 	@Test
 	public void doSingleVsDoubleFFTSpeedTest()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int i = 0; i < sizeLoops / 2; i++)
@@ -458,6 +461,8 @@ public class ConvolutionTest
 	{
 		RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
+		int sizeLoops = 4;
+		int sLoops = 2;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
@@ -501,6 +506,8 @@ public class ConvolutionTest
 	{
 		RandomGenerator random = TestSettings.getRandomGenerator();
 		int size = 10;
+		int sizeLoops = 4;
+		int sLoops = 2;
 		for (int i = 0; i < sizeLoops; i++)
 		{
 			double s = 0.5;
@@ -552,7 +559,7 @@ public class ConvolutionTest
 	@Test
 	public void doScaledSpeedTest()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
 		int size = 10;
 		for (int scale = 4; scale <= 8; scale *= 2)
