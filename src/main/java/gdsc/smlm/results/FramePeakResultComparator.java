@@ -42,20 +42,6 @@ public class FramePeakResultComparator implements Comparator<PeakResult>
 	public int compare(PeakResult o1, PeakResult o2)
 	{
 		// Sort by frame
-		return compare(o1.getFrame(), o2.getFrame());
-	}
-
-	/**
-	 * Compare the integers. Copied from Java 1.7.
-	 *
-	 * @param x
-	 *            the x
-	 * @param y
-	 *            the y
-	 * @return the comparison
-	 */
-	private static int compare(int x, int y)
-	{
-		return (x < y) ? -1 : ((x == y) ? 0 : 1);
+		return Integer.compare(o1.getFrame(), o2.getFrame());
 	}
 }
