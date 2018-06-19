@@ -137,9 +137,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	@Override
 	public int compareTo(FluorophoreSequenceModel o)
 	{
-		final double s1 = getStartTime();
-		final double s2 = o.getStartTime();
-		return (s1 < s2) ? -1 : (s1 == s2) ? 0 : 1;
+		return Double.compare(getStartTime(), o.getStartTime());
 	}
 
 	/**

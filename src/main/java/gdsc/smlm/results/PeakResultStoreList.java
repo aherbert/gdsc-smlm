@@ -27,6 +27,8 @@ import java.util.Comparator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import gdsc.smlm.results.sort.FrameIdPeakResultComparator;
+
 /**
  * Stores peak results with list access.
  */
@@ -67,7 +69,10 @@ public interface PeakResultStoreList extends PeakResultStore
 	/**
 	 * Sort the results.
 	 */
-	public void sort();
+	default public void sort()
+	{
+		sort(FrameIdPeakResultComparator.INSTANCE);
+	}
 
 	/**
 	 * Sort the results.

@@ -903,7 +903,7 @@ public class DriftCalculator implements PlugIn
 				if (x > minx && x < maxx)
 				{
 					if (y > miny && y < maxy)
-						list.add(new Spot(r.getFrame(), x, y, r.getSignal()));
+						list.add(new Spot(r.getFrame(), x, y, r.getIntensity()));
 				}
 			}
 		});
@@ -1341,7 +1341,7 @@ public class DriftCalculator implements PlugIn
 					nextBlock = new ArrayList<Localisation>();
 				blocks.add(nextBlock);
 			}
-			nextBlock.add(new Localisation(r.getFrame(), r.getXPosition(), r.getYPosition(), r.getSignal()));
+			nextBlock.add(new Localisation(r.getFrame(), r.getXPosition(), r.getYPosition(), r.getIntensity()));
 		}
 	}
 
@@ -1842,13 +1842,9 @@ public class DriftCalculator implements PlugIn
 			if (this.t == that.t)
 			{
 				// ... then signal
-				if (this.s > that.s)
-					return -1;
-				if (this.s < that.s)
-					return 1;
-				return 0;
+				return Double.compare(that.s, this.s);
 			}
-			return this.t - that.t;
+			return (this.t < that.t) ? -1 : 1;
 		}
 	}
 

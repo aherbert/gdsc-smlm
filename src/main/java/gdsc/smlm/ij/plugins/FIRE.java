@@ -988,7 +988,7 @@ public class FIRE implements PlugIn
 		@Override
 		public float getSignal(PeakResult p)
 		{
-			return p.getSignal();
+			return p.getIntensity();
 		}
 	}
 

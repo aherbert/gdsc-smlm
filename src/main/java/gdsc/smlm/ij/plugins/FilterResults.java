@@ -181,7 +181,7 @@ public class FilterResults implements PlugIn
 				if (minDrift > drift)
 					minDrift = drift;
 
-				final float signal = result.getSignal();
+				final float signal = result.getIntensity();
 				if (maxSignal < signal)
 					maxSignal = signal;
 				if (minSignal > signal)
@@ -228,7 +228,7 @@ public class FilterResults implements PlugIn
 	{
 		if (result.getNoise() <= 0)
 			return 0;
-		return result.getSignal() / result.getNoise();
+		return result.getIntensity() / result.getNoise();
 	}
 
 	/**

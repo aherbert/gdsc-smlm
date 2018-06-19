@@ -229,7 +229,7 @@ public class CMOSAnalysis implements PlugIn
 		@Override
 		public int compareTo(SubDir o)
 		{
-			return exposureTime - o.exposureTime;
+			return Integer.compare(exposureTime, o.exposureTime);
 		}
 	}
 

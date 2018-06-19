@@ -352,7 +352,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		if (Math.abs(peak.getXShift()) > offsetx || Math.abs(peak.getYShift()) > offsety)
 			return false;
 
-		if (peak.getSignal() < signalThreshold)
+		if (peak.getIntensity() < signalThreshold)
 			return false;
 
 		if (zEnabled && (peak.getZPosition() < minZ || peak.getZPosition() > maxZ))

@@ -21,17 +21,19 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package gdsc.smlm.results;
+package gdsc.smlm.results.sort;
 
 import java.util.Comparator;
 
+import gdsc.smlm.results.PeakResult;
+
 /**
- * Compares the results by Id
+ * Compares the results by frame, end frame and then intensity descending
  */
-public class IdPeakResultComparator implements Comparator<PeakResult>
+public class FrameEndFrameIntensityPeakResultComparator implements Comparator<PeakResult>
 {
 	/** An instance of the comparator */
-	public static final IdPeakResultComparator INSTANCE = new IdPeakResultComparator();
+	public static final FrameEndFrameIntensityPeakResultComparator INSTANCE = new FrameEndFrameIntensityPeakResultComparator();
 
 	/*
 	 * (non-Javadoc)
@@ -41,13 +43,18 @@ public class IdPeakResultComparator implements Comparator<PeakResult>
 	@Override
 	public int compare(PeakResult o1, PeakResult o2)
 	{
-		int id1 = o1.getId();
-		int id2 = o2.getId();
-		if (id1 < id2)
+		int f1 = o1.getFrame();
+		int f2 = o2.getFrame();
+		if (f1 < f2)
 			return -1;
-		if (id1 == id2)
-			// Sort by frame
-			return Integer.compare(o1.getFrame(), o2.getFrame());
-		return 1;
+		if (f1 > f2)
+			return 1;
+		f1 = o1.getEndFrame();
+		f2 = o2.getEndFrame();
+		if (f1 < f2)
+			return -1;
+		if (f1 > f2)
+			return 1;
+		return Float.compare(o2.getIntensity(), o1.getIntensity());
 	}
 }

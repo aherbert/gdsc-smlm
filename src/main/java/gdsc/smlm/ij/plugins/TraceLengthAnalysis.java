@@ -41,11 +41,11 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.fitting.JumpDistanceAnalysis;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import gdsc.smlm.results.IdPeakResultComparator;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.PrecisionResultProcedure;
+import gdsc.smlm.results.sort.IdFramePeakResultComparator;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
@@ -143,7 +143,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 		// Analyse the track lengths
 		results = results.copy();
-		results.sort(IdPeakResultComparator.INSTANCE);
+		results.sort(IdFramePeakResultComparator.INSTANCE);
 		// Ensure the first result triggers an id change
 		lastid = results.getFirst().getId() - 1;
 		results.forEach(this);
@@ -211,7 +211,7 @@ public class TraceLengthAnalysis implements PlugIn, DialogListener, PeakResultPr
 
 		// Sort by ID
 		PeakResult[] list = results.toArray();
-		Arrays.sort(list, new IdPeakResultComparator());
+		Arrays.sort(list, new IdFramePeakResultComparator());
 
 		createResults(results, "Fixed", 0, _index, list);
 		createResults(results, "Moving", _index, d.length, list);

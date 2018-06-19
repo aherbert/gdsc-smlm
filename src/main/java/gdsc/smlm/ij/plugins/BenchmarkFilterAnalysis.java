@@ -335,7 +335,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		public double getSignalFactor()
 		{
-			return BenchmarkSpotFit.getSignalFactor(peakResult.getSignal(), peak.getSignal());
+			return BenchmarkSpotFit.getSignalFactor(peakResult.getSignal(), peak.getIntensity());
 		}
 	}
 
@@ -606,7 +606,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 							if (score != 0)
 							{
 								final double signalFactor = BenchmarkSpotFit.getSignalFactor(peak.getSignal(),
-										actual[j].getSignal());
+										actual[j].getIntensity());
 								if (signalScore != null)
 								{
 									score *= signalScore.score(Math.abs(signalFactor));
@@ -2623,7 +2623,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 						d += c.d;
 						sf += c.getSignalFactor();
 						rmsd += c.d * c.d;
-						regression.addData(c.peakResult.getSignal(), c.peak.getSignal());
+						regression.addData(c.peakResult.getSignal(), c.peak.getIntensity());
 					}
 					scored += assignments.length;
 				}
@@ -6155,11 +6155,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 		@Override
 		public int compareTo(NamedPlot o)
 		{
-			if (score > o.score)
-				return -1;
-			if (score < o.score)
-				return 1;
-			return 0;
+			return Double.compare(o.score, score);
 		}
 	}
 

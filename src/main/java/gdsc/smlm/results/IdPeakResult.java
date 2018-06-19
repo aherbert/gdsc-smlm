@@ -122,25 +122,4 @@ public class IdPeakResult extends PeakResult
 	{
 		return id;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResult#compareTo(gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public int compareTo(PeakResult o)
-	{
-		// Sort by peak number: Ascending
-		if (getFrame() < o.getFrame())
-			return -1;
-		if (getFrame() > o.getFrame())
-			return 1;
-		// Sort by ID height: Ascending
-		if (getId() > o.getId())
-			return -1;
-		if (getId() < o.getId())
-			return 1;
-		return 0;
-	}
 }

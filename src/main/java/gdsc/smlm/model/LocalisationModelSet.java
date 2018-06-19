@@ -101,7 +101,7 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet>
 	@Override
 	public int compareTo(LocalisationModelSet o)
 	{
-		return time - o.time;
+		return Integer.compare(time, o.time);
 	}
 
 	/**

@@ -322,7 +322,7 @@ public class ResultsManagerTest
 			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
 
 			Assert.assertEquals("Background mismatch @ " + i, p1.getBackground(), p2.getBackground(), delta);
-			Assert.assertEquals("Signal mismatch @ " + i, p1.getSignal(), p2.getSignal(), delta);
+			Assert.assertEquals("Signal mismatch @ " + i, p1.getIntensity(), p2.getIntensity(), delta);
 			Assert.assertEquals("XPosition mismatch @ " + i, p1.getXPosition(), p2.getXPosition(), delta);
 			Assert.assertEquals("YPosition mismatch @ " + i, p1.getYPosition(), p2.getYPosition(), delta);
 			Assert.assertEquals("ZPosition mismatch @ " + i, p1.getZPosition(), p2.getZPosition(), delta);

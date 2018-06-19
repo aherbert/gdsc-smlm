@@ -854,10 +854,11 @@ public class MultiPathFilter implements Cloneable
 		@Override
 		public int compareTo(ResultRank o)
 		{
-			final int result = o.count - count;
-			if (result != 0)
-				return result;
-			return rank - o.rank;
+			if (o.count < count)
+				return -1;
+			if (o.count > count)
+				return 1;
+			return Integer.compare(rank, o.rank);
 		}
 	}
 

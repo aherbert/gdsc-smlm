@@ -185,7 +185,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	protected PeakStatus getStatus(PeakResult result)
 	{
 		// Check weak thresholds
-		if (result.getSignal() < weakSignalThreshold)
+		if (result.getIntensity() < weakSignalThreshold)
 			return PeakStatus.REJECT;
 		final float snr = result.getSNR();
 		if (snr < weakSnr)
@@ -200,7 +200,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 			return PeakStatus.REJECT;
 
 		// Check the strict thresholds
-		if (result.getSignal() < strictSignalThreshold)
+		if (result.getIntensity() < strictSignalThreshold)
 			return PeakStatus.CANDIDATE;
 		if (snr < strictSnr)
 			return PeakStatus.CANDIDATE;

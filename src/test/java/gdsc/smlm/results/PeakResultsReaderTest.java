@@ -804,7 +804,7 @@ public class PeakResultsReaderTest
 			{
 				Assert.assertEquals("X @ " + i, p1.getXPosition(), p2.getXPosition(), delta);
 				Assert.assertEquals("Y @ " + i, p1.getYPosition(), p2.getYPosition(), delta);
-				Assert.assertEquals("Signal @ " + i, p1.getSignal(), p2.getSignal(), delta);
+				Assert.assertEquals("Signal @ " + i, p1.getIntensity(), p2.getIntensity(), delta);
 				continue;
 			}
 

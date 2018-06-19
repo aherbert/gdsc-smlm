@@ -57,7 +57,7 @@ public class SignalFilter extends DirectFilter implements IMultiFilter
 	@Override
 	public boolean accept(PeakResult peak)
 	{
-		return peak.getSignal() >= signalThreshold;
+		return peak.getIntensity() >= signalThreshold;
 	}
 
 	@Override

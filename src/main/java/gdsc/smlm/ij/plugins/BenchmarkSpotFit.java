@@ -811,7 +811,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 										final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
 										// Assume the simulation is in photons
 										double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
-												p3.peakResult.getSignal());
+												p3.peakResult.getIntensity());
 										score *= signalScore.score(Math.abs(sf));
 
 										if (score == 0)
@@ -886,7 +886,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener
 								{
 									// This is a fitted candidate
 
-									final double a = p3.peakResult.getSignal(); // Should be in photons
+									final double a = p3.peakResult.getIntensity(); // Should be in photons
 									final double p = point.result.getSignal();
 
 									match[matchCount++] = new FitMatch(point, d, p3.peakResult.getZPosition(), p, a);

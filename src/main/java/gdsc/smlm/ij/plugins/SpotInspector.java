@@ -424,7 +424,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			case 3: // Signal
-				score = (r.getSignal());
+				score = (r.getIntensity());
 				break;
 			case 2: // Amplitude
 				score = hp.h[i];
@@ -434,7 +434,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				negative = true;
 				break;
 			default: // SNR
-				score = r.getSignal() / r.getNoise();
+				score = r.getIntensity() / r.getNoise();
 		}
 		return new float[] { (negative) ? -score : score, score };
 	}
@@ -498,11 +498,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		public int compareTo(PeakResultRank o)
 		{
 			// High is better
-			if (score > o.score)
-				return -1;
-			if (score < o.score)
-				return 1;
-			return 0;
+			return Double.compare(o.score, score);
 		}
 	}
 

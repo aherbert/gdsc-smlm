@@ -383,7 +383,7 @@ public class TraceMolecules implements PlugIn
 			public void execute(PeakResult p)
 			{
 				points.add(ClusterPoint.newTimeClusterPoint(counter.getAndIncrement(), p.getXPosition(),
-						p.getYPosition(), p.getSignal(), p.getFrame(), p.getEndFrame()));
+						p.getYPosition(), p.getIntensity(), p.getFrame(), p.getEndFrame()));
 			}
 		});
 		return points;

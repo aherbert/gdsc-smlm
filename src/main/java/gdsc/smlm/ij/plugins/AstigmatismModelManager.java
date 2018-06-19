@@ -729,7 +729,7 @@ public class AstigmatismModelManager implements PlugIn
 				z[i] = peak.getFrame() * umPerSlice;
 				x[i] = (peak.getXPosition() - cx);
 				y[i] = (peak.getYPosition() - cy);
-				I[i] = peak.getSignal();
+				I[i] = peak.getIntensity();
 			}
 		});
 

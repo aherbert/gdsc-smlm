@@ -28,7 +28,7 @@ import java.util.Arrays;
 /**
  * Specifies a peak fitting result
  */
-public class PeakResult implements Comparable<PeakResult>, Cloneable
+public class PeakResult implements Cloneable
 {
 	/** Index of the background in the parameters array */
 	public static final int BACKGROUND = 0;
@@ -178,31 +178,6 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 		return new float[] { background, intensity, x, y, z };
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(PeakResult o)
-	{
-		// Sort by peak number: Ascending
-		if (frame < o.frame)
-			return -1;
-		if (frame > o.frame)
-			return 1;
-		
-		// Sort by peak height: Descending
-		
-		// This does not detect NaN so use Float.compare
-		//		if (params[INTENSITY] > o.params[INTENSITY])
-		//			return -1;
-		//		if (params[INTENSITY] < o.params[INTENSITY])
-		//			return 1;
-		//		return 0;
-		return Float.compare(o.params[INTENSITY], params[INTENSITY]);		
-	}
-
 	/**
 	 * Utility function to check for equality.
 	 *
@@ -300,11 +275,11 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 	}
 
 	/**
-	 * Get the signal strength
+	 * Get the intensity
 	 * 
-	 * @return The signal of the first peak
+	 * @return The intensity of the first peak
 	 */
-	public float getSignal()
+	public float getIntensity()
 	{
 		return params[INTENSITY];
 	}

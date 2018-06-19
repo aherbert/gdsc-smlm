@@ -138,31 +138,4 @@ public class ExtendedPeakResult extends IdPeakResult
 		// Validate the current end frame
 		setEndFrame(endFrame);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gdsc.smlm.results.PeakResult#compareTo(gdsc.smlm.results.PeakResult)
-	 */
-	@Override
-	public int compareTo(PeakResult o)
-	{
-		// Sort by peak number: Ascending
-		if (getFrame() == o.getFrame())
-		{
-			// Sort by peak end number: Ascending
-			if (endFrame == o.getEndFrame())
-			{
-				// Sort by peak height: Descending
-				if (getSignal() > o.getSignal())
-					return -1;
-				if (getSignal() < o.getSignal())
-					return 1;
-				// Finally by Id
-				return getId() - o.getId();
-			}
-			return endFrame - o.getEndFrame();
-		}
-		return getFrame() - o.getFrame();
-	}
 }

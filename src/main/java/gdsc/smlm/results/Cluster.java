@@ -88,7 +88,7 @@ public class Cluster implements Comparable<Cluster>
 					final float[] weights = new float[results.size()];
 					for (int i = 0; i < results.size(); i++)
 					{
-						weights[i] = Math.abs(results.get(i).getSignal());
+						weights[i] = Math.abs(results.get(i).getIntensity());
 					}
 					// Normalise weights?
 					return getCentroid(results, weights);
@@ -201,7 +201,7 @@ public class Cluster implements Comparable<Cluster>
 		for (int i = 0; i < results.size(); i++)
 		{
 			PeakResult result = results.get(i);
-			photons[i++] = Math.abs(result.getSignal());
+			photons[i++] = Math.abs(result.getIntensity());
 		}
 
 		double sumNi = 0;
@@ -293,7 +293,7 @@ public class Cluster implements Comparable<Cluster>
 		for (int i = 0; i < results.size(); i++)
 		{
 			PeakResult result = results.get(i);
-			sum += result.getSignal();
+			sum += result.getIntensity();
 		}
 		return sum;
 	}
@@ -325,7 +325,7 @@ public class Cluster implements Comparable<Cluster>
 	public int compareTo(Cluster that)
 	{
 		// Sort by ID ascending
-		return this.id - that.id;
+		return Integer.compare(this.id, that.id);
 	}
 
 	/**

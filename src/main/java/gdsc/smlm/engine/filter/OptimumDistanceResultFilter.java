@@ -81,7 +81,7 @@ public class OptimumDistanceResultFilter extends ResultFilter
 				if (dx * dx + dy * dy < d2)
 				{
 					// Then filter by signal strength
-					float s = r.getSignal();
+					float s = r.getIntensity();
 					if (s < bestSignal[i])
 						continue;
 					bestFitResults[i] = fitResult;

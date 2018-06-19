@@ -270,7 +270,7 @@ public class MALKFilePeakResults extends FilePeakResults
 
 		StringBuilder sb = new StringBuilder(100);
 
-		addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getSignal());
+		addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getIntensity());
 
 		writeResult(1, sb.toString());
 	}
@@ -292,7 +292,7 @@ public class MALKFilePeakResults extends FilePeakResults
 		for (PeakResult result : results)
 		{
 			// Add the standard data
-			addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getSignal());
+			addStandardData(sb, result.getXPosition(), result.getYPosition(), result.getFrame(), result.getIntensity());
 
 			// Flush the output to allow for very large input lists
 			if (++count >= 20)
@@ -415,7 +415,11 @@ public class MALKFilePeakResults extends FilePeakResults
 		{
 			// Sort by slice number
 			// (Note: peak height is already done in the run(...) method)
-			return slice - o.slice;
+			if (slice < o.slice)
+				return -1;
+			if (slice > o.slice)
+				return 1;
+			return 0;
 		}
 	}
 }

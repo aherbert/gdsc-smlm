@@ -41,12 +41,12 @@ import gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.results.AttributePeakResult;
-import gdsc.smlm.results.IdPeakResultComparator;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.procedures.PeakResultProcedure;
 import gdsc.smlm.results.procedures.XYRResultProcedure;
+import gdsc.smlm.results.sort.IdFramePeakResultComparator;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.gui.ExtendedGenericDialog;
@@ -211,7 +211,7 @@ public class TraceExporter implements PlugIn
 		});
 
 		// Sort by ID then time
-		results.sort(IdPeakResultComparator.INSTANCE);
+		results.sort(IdFramePeakResultComparator.INSTANCE);
 
 		// Split traces with big jumps
 		results = splitTraces(results);
@@ -245,7 +245,7 @@ public class TraceExporter implements PlugIn
 					return remove.contains(t.getId());
 				}
 			});
-			results.sort(IdPeakResultComparator.INSTANCE);
+			results.sort(IdFramePeakResultComparator.INSTANCE);
 		}
 
 		if (wobble > 0)

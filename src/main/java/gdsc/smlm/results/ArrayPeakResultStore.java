@@ -443,17 +443,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#sort()
-	 */
-	@Override
-	public void sort()
-	{
-		Arrays.sort(results, 0, size);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
 	 */
 	@Override

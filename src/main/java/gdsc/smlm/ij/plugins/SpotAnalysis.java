@@ -147,7 +147,7 @@ public class SpotAnalysis extends PlugInFrame
 		{
 			if (o == null)
 				throw new NullPointerException();
-			return frame - o.frame;
+			return Integer.compare(frame, o.frame);
 		}
 
 		/*
@@ -1196,7 +1196,7 @@ public class SpotAnalysis extends PlugInFrame
 				for (int k = 0; k < traceResult.trace.size(); k++)
 				{
 					PeakResult r = traceResult.trace.get(k);
-					writeLine(files[4], String.format("%d %f", r.getFrame(), r.getSignal()));
+					writeLine(files[4], String.format("%d %f", r.getFrame(), r.getIntensity()));
 				}
 			}
 		}

@@ -401,11 +401,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		@Override
 		public int compareTo(ScoredSpot o)
 		{
-			if (spot.intensity > o.spot.intensity)
-				return -1;
-			if (spot.intensity < o.spot.intensity)
-				return 1;
-			return 0;
+			return Double.compare(o.spot.intensity, spot.intensity);
 		}
 
 		/**
@@ -546,7 +542,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						if (overlapAnalysis == null)
 						{
 							double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-							params[Gaussian2DFunction.SIGNAL] = actual[i].peakResult.getSignal();
+							params[Gaussian2DFunction.SIGNAL] = actual[i].peakResult.getIntensity();
 							params[Gaussian2DFunction.X_POSITION] = cx;
 							params[Gaussian2DFunction.Y_POSITION] = cy;
 							params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sa[i];
@@ -555,7 +551,7 @@ public class BenchmarkSpotFilter implements PlugIn
 						}
 
 						// Accumulate the function for j
-						allParams[offset + Gaussian2DFunction.SIGNAL] = actual[j].peakResult.getSignal();
+						allParams[offset + Gaussian2DFunction.SIGNAL] = actual[j].peakResult.getIntensity();
 						allParams[offset + Gaussian2DFunction.X_POSITION] = actual[j].peakResult.getXPosition();
 						allParams[offset + Gaussian2DFunction.Y_POSITION] = actual[j].peakResult.getYPosition();
 						allParams[offset +

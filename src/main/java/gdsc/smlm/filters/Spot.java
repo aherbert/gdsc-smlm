@@ -101,11 +101,7 @@ public class Spot implements Comparable<Spot>, Cloneable
 	@Override
 	public int compareTo(Spot o)
 	{
-		if (score > o.score)
-			return -1;
-		if (score < o.score)
-			return 1;
-		return 0;
+		return Double.compare(o.score, score);
 	}
 
 	/*

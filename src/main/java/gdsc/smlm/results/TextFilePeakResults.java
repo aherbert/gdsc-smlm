@@ -621,7 +621,11 @@ public class TextFilePeakResults extends SMLMFilePeakResults
 		{
 			// Sort by slice number
 			// (Note: peak height is already done in the run(...) method)
-			return slice - o.slice;
+			if (slice < o.slice)
+				return -1;
+			if (slice > o.slice)
+				return 1;
+			return 0;
 		}
 	}
 

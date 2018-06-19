@@ -206,13 +206,9 @@ public class LocalisationModel implements Comparable<LocalisationModel>
 	{
 		if (time == o.time)
 		{
-			if (intensity > o.intensity)
-				return -1;
-			if (intensity < o.intensity)
-				return 1;
-			return 0;
+			return Double.compare(o.intensity, intensity);
 		}
-		return time - o.time;
+		return (time < o.time) ? -1 : 1;
 	}
 
 	/**

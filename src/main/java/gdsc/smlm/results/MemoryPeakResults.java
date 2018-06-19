@@ -968,7 +968,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	{
 		for (int i = 0, size = size(); i < size; i++)
 		{
-			if (getf(i).getSignal() > 0)
+			if (getf(i).getIntensity() > 0)
 				return true;
 		}
 		return false;
@@ -1356,7 +1356,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getf(i);
-			procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(),
+			procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(), r.getYPosition(),
 					r.getZPosition());
 		}
 	}
@@ -1374,7 +1374,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (isEmpty())
 			return;
 		final PeakResult r = getf(0);
-		procedure.executeBIXYZ(r.getBackground(), r.getSignal(), r.getXPosition(), r.getYPosition(), r.getZPosition());
+		procedure.executeBIXYZ(r.getBackground(), r.getIntensity(), r.getXPosition(), r.getYPosition(), r.getZPosition());
 	}
 
 	/**
@@ -1423,7 +1423,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		for (int i = 0, size = size(); i < size; i++)
 		{
 			final PeakResult r = getf(i);
-			procedure.executeI(r.getSignal());
+			procedure.executeI(r.getIntensity());
 		}
 	}
 
@@ -1440,7 +1440,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		if (isEmpty())
 			return;
 		final PeakResult r = getf(0);
-		procedure.executeI(r.getSignal());
+		procedure.executeI(r.getIntensity());
 	}
 
 	/**
@@ -1526,7 +1526,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			//@formatter:off
 			procedure.executeBIR(
 					ic.convert(r.getBackground()), 
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					r);
 			//@formatter:on
 		}
@@ -1560,7 +1560,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			//@formatter:off
 			procedure.executeBIXY(
 					ic.convert(r.getBackground()), 
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()));
 			//@formatter:on
@@ -1595,7 +1595,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			//@formatter:off
 			procedure.executeBIXYZ(
 					ic.convert(r.getBackground()), 
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()), 
 					dc.convert(r.getZPosition()));
@@ -1644,7 +1644,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 			//@formatter:off
 			procedure.executeH(
-					(float)(ic.convert((double)r.getSignal()) / (twoPi * sx * sy)));
+					(float)(ic.convert((double)r.getIntensity()) / (twoPi * sx * sy)));
 			//@formatter:on
 		}
 	}
@@ -1673,7 +1673,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeI(
-					ic.convert(r.getSignal()));
+					ic.convert(r.getIntensity()));
 			//@formatter:on
 		}
 	}
@@ -1705,7 +1705,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeIXY(
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()));
 			//@formatter:on
@@ -1739,7 +1739,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeIXYR(
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					r);
@@ -1774,7 +1774,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeIXYZ(
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					dc.convert(r.getZPosition()));
@@ -1809,7 +1809,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeIXYZR(
-					ic.convert(r.getSignal()), 
+					ic.convert(r.getIntensity()), 
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					dc.convert(r.getZPosition()),

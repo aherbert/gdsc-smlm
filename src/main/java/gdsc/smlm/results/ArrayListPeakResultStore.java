@@ -285,17 +285,6 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see gdsc.smlm.results.PeakResultStoreList#sort()
-	 */
-	@Override
-	public void sort()
-	{
-		Collections.sort(results);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see gdsc.smlm.results.PeakResultStoreList#sort(java.util.Comparator)
 	 */
 	@Override

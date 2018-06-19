@@ -945,11 +945,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 		@Override
 		public int compareTo(ScoredResult o)
 		{
-			if (score < o.score)
-				return 1;
-			if (score > o.score)
-				return -1;
-			return 0;
+			return Double.compare(o.score, score);
 		}
 	}
 

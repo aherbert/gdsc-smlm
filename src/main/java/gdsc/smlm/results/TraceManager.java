@@ -1722,7 +1722,7 @@ public class TraceManager
 				{
 					if (l.distance2(endLocalisations[i]) < dThresh2)
 					{
-						float signal = peakResults[endLocalisations[i].id].getSignal();
+						float signal = peakResults[endLocalisations[i].id].getIntensity();
 						if (maxSignal < signal)
 						{
 							maxSignal = signal;
@@ -1736,7 +1736,7 @@ public class TraceManager
 				{
 					if (l.distance2(localisations[i]) < dThresh2)
 					{
-						float signal = peakResults[localisations[i].id].getSignal();
+						float signal = peakResults[localisations[i].id].getIntensity();
 						if (maxSignal < signal)
 						{
 							maxSignal = signal;

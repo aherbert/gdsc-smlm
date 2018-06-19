@@ -21,9 +21,11 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package gdsc.smlm.results;
+package gdsc.smlm.results.sort;
 
 import java.util.Comparator;
+
+import gdsc.smlm.results.PeakResult;
 
 /**
  * Compares the results by frame
@@ -41,7 +43,6 @@ public class FramePeakResultComparator implements Comparator<PeakResult>
 	@Override
 	public int compare(PeakResult o1, PeakResult o2)
 	{
-		// Sort by frame
 		return Integer.compare(o1.getFrame(), o2.getFrame());
 	}
 }

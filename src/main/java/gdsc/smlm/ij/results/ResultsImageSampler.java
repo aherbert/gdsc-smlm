@@ -563,7 +563,7 @@ public class ResultsImageSampler
 					sb.append(Utils.rounded(ox[i] * nmPerPixel)).append(' ');
 					sb.append(Utils.rounded(oy[i] * nmPerPixel)).append(' ');
 					sb.append(Utils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
-					sb.append(Utils.rounded(p.getSignal())).append('\n');
+					sb.append(Utils.rounded(p.getIntensity())).append('\n');
 				}
 				PointRoi roi = new PointRoi(ox, oy, size);
 				roi.setPosition(position);

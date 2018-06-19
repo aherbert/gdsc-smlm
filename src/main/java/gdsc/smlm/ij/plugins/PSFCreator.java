@@ -2006,7 +2006,7 @@ public class PSFCreator implements PlugInFilter
 
 				// Remove bad fits where the width/signal is above the expected
 				final float w = FastMath.max(wp.wx[i], wp.wy[i]);
-				if (peak.getSignal() > maxSignal || w > maxWidth)
+				if (peak.getIntensity() > maxSignal || w > maxWidth)
 					return;
 
 				i = counterOK.getAndIncrement();

@@ -301,11 +301,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		@Override
 		public int compareTo(DoubletBonus that)
 		{
-			if (this.residuals < that.residuals)
-				return -1;
-			if (this.residuals > that.residuals)
-				return 1;
-			return 0;
+			return Double.compare(this.residuals, that.residuals);
 		}
 
 		public void setScore(boolean useMax)
@@ -340,7 +336,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			//if (this.result.spot.intensity < that.result.spot.intensity)
 			//	return 1;
 			//return 0;
-			return this.result.spotIndex - that.result.spotIndex;
+			return Integer.compare(this.result.spotIndex, that.result.spotIndex);
 		}
 	}
 
@@ -1328,7 +1324,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			if (signalScore != null)
 			{
 				PeakResultPoint p = (PeakResultPoint) coord;
-				double s1 = p.peakResult.getSignal();
+				double s1 = p.peakResult.getIntensity();
 				double s2;
 				switch (id)
 				{
