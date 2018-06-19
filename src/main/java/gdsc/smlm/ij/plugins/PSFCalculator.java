@@ -34,6 +34,8 @@ import org.apache.commons.math3.util.FastMath;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
+import gdsc.smlm.data.config.PSFProtos.PSFType;
+import gdsc.smlm.engine.FitConfiguration;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.SettingsManager;
@@ -80,11 +82,14 @@ public class PSFCalculator implements PlugIn, DialogListener
 		double sd = calculate(settings, false);
 		if (sd < 0)
 			return;
+		
+		SettingsManager.writeSettings(this.settings);
 
 		FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
-		config.getFitConfiguration().setInitialPeakStdDev((float) sd);
-		config.getFitConfiguration().setInitialAngle(0);
-		config.getFitConfiguration().setNmPerPixel(getPixelPitch());
+		FitConfiguration fitConfig = config.getFitConfiguration(); 
+		fitConfig.setNmPerPixel(getPixelPitch());
+		fitConfig.setPSFType(PSFType.ONE_AXIS_GAUSSIAN_2D);
+		fitConfig.setInitialPeakStdDev(sd);
 		SettingsManager.writeSettings(config, 0);
 	}
 
