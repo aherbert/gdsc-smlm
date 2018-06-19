@@ -26,6 +26,8 @@ package gdsc.smlm.function;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestSettings;
+
 public class PoissonGammaGaussianFisherInformationTest
 {
 	@Test
@@ -223,7 +225,7 @@ public class PoissonGammaGaussianFisherInformationTest
 				double I = f.getPoissonGammaGaussianI(u);
 				double upper = PoissonFisherInformation.getPoissonI(u);
 				double alpha = I / upper;
-				System.out.printf("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
+				TestSettings.debug("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s\n", f.m, f.s, u, I, upper, alpha);
 				Assert.assertTrue(I < upper);
 				Assert.assertTrue(alpha > 0);
 			}

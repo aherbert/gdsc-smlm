@@ -756,16 +756,20 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		protected double getF(double pz, double az)
 		{
-			//return az * az / pz;
-
 			// Compute with respect to the ultimate limit
-			// if az > 1 : az^2 -> Infinity
-			//   if pz > 1 :  az / pz will be real
-			//   if pz < 1 then az / pz -> Infinity and this will not help
-			// if az < 1 : az^2 -> 0
-			//   if pz < 1 then dividing first will reduce the chance of computing zero.
-			//   if pz > 1, the result will tend towards zero anyway.
-			return (az / pz) * az;
+
+			// p is always below 1. 
+			// - (az / pz) * az can tend towards infinity when pz is small
+			// - (az * az) / pz can tend towards zero when az is small
+			// Note: Computing infinity will result in an infinite fisher information
+			// which is only possible for extremely low mean. Check for this.
+			final double f = (az / pz) * az;
+			if (f == Double.POSITIVE_INFINITY)
+			{
+				//System.out.printf("p=%s a=%s f=%s\n", pz, az, az * az / pz);
+				return (az * az) / pz;
+			}
+			return f;
 		}
 
 		public abstract double getSum();
