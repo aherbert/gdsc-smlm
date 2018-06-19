@@ -33,8 +33,10 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.Random;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
@@ -242,7 +244,7 @@ public class KernelFilterTest
 			}
 		}
 
-		System.out.printf("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
+		TestSettings.info("%s vs %s @ %d = %g\n", f1.getName(), f2.getName(), border, max);
 		Assert.assertTrue(max < tolerance);
 	}
 
@@ -289,6 +291,7 @@ public class KernelFilterTest
 
 	private void floatFilterIsFasterThanIJFilter(int k)
 	{
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		float[][] data = new float[10][];
@@ -299,14 +302,16 @@ public class KernelFilterTest
 		for (int border : borders)
 		{
 			TimingService ts = new TimingService();
+			ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, k, k), data, border));
 			ts.execute(new MyTimingTask(new KernelFilterWrapper(kernel, k, k), data, border));
 			ts.execute(new MyTimingTask(new ZeroKernelFilterWrapper(kernel, k, k), data, border));
-			ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, k, k), data, border));
 			int size = ts.getSize();
 			ts.repeat();
 			if (TestSettings.allow(LogLevel.INFO))
 				ts.report(size);
-			Assert.assertTrue(ts.get(-2).getMean() < ts.get(-1).getMean() * 1.1);
+			TestAssert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean(), 
+					"ZeroKernelFilter (%s) not faster than IJ Convolver (%s)", 
+					ts.get(-1).getMean() , ts.get(-3).getMean());
 		}
 	}
 

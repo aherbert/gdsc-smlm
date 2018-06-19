@@ -27,6 +27,10 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
+
 /**
  * Contains tests for the Gaussian functions in single or double precision
  * <p>
@@ -40,7 +44,6 @@ public class PrecisionTest
 	int Double = 2;
 
 	private int MAX_ITER = 200000;
-	double SPEED_UP_FACTOR = 1.1;
 
 	int maxx = 10;
 	// Use realistic values for a camera with a bias of 500
@@ -421,14 +424,14 @@ public class PrecisionTest
 			for (;;)
 			{
 				maxx *= 2;
-				System.out.printf("maxx = %d\n", maxx);
+				TestSettings.info("maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
 						1e-3);
 			}
 		}
 		catch (AssertionError e)
 		{
-			System.out.println(e.getMessage());
+			TestSettings.infoln(e.getMessage());
 			//e.printStackTrace();
 			throw e;
 		}
@@ -487,13 +490,13 @@ public class PrecisionTest
 			for (;;)
 			{
 				maxx *= 2;
-				System.out.printf("maxx = %d\n", maxx);
+				TestSettings.info("maxx = %d\n", maxx);
 				functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), 1e-3);
 			}
 		}
 		catch (AssertionError e)
 		{
-			System.out.println(e.getMessage());
+			TestSettings.infoln(e.getMessage());
 			//e.printStackTrace();
 			throw e;
 		}
@@ -565,6 +568,8 @@ public class PrecisionTest
 
 	private void singlePrecisionIsFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
 	{
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
 		float[] p1 = params1.clone();
@@ -593,9 +598,9 @@ public class PrecisionTest
 			time2 += runDoubleWithGradients(maxx, f2, p2);
 		}
 
-		System.out.printf("%sGradient %s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
-				f1.getClass().getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
-		Assert.assertTrue(time1 * SPEED_UP_FACTOR < time2);
+		TestSettings.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n",
+				(noSum) ? "No sum " : "", f1.getClass().getSimpleName(), time1, f2.getClass().getSimpleName(), time2,
+				(double) time2 / time1);
 	}
 
 	@SuppressWarnings("unused")
@@ -714,6 +719,8 @@ public class PrecisionTest
 
 	private void singlePrecisionIsFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
 	{
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
 		float[] p1 = params1.clone();
@@ -741,9 +748,8 @@ public class PrecisionTest
 			time2 += runDouble(maxx, f2, p2);
 		}
 
-		System.out.printf("%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "", f1.getClass().getSimpleName(),
-				time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
-		Assert.assertTrue(time1 * SPEED_UP_FACTOR < time2);
+		TestSettings.logSpeedTestResult(time1 < time2, "%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
+				f1.getClass().getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
 	}
 
 	@SuppressWarnings("unused")
@@ -862,10 +868,5 @@ public class PrecisionTest
 		for (int i = 0; i < f.length; i++)
 			f[i] = p[i];
 		return f;
-	}
-
-	void log(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 }
