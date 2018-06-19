@@ -191,12 +191,16 @@ public class PeakResult implements Comparable<PeakResult>, Cloneable
 			return -1;
 		if (frame > o.frame)
 			return 1;
+		
 		// Sort by peak height: Descending
-		if (params[INTENSITY] > o.params[INTENSITY])
-			return -1;
-		if (params[INTENSITY] < o.params[INTENSITY])
-			return 1;
-		return 0;
+		
+		// This does not detect NaN so use Float.compare
+		//		if (params[INTENSITY] > o.params[INTENSITY])
+		//			return -1;
+		//		if (params[INTENSITY] < o.params[INTENSITY])
+		//			return 1;
+		//		return 0;
+		return Float.compare(o.params[INTENSITY], params[INTENSITY]);		
 	}
 
 	/**
