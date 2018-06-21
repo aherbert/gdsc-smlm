@@ -32,6 +32,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
+import gdsc.test.TestAssert;
 
 public class GaussianPSFModelTest
 {
@@ -87,8 +88,8 @@ public class GaussianPSFModelTest
 							// fast approximation of the Erf(..) (the error function). The PSFModel
 							// uses the Apache commons implementation.
 							if (error > 1e-8)
-								Assert.fail(String.format("[%d] %s != %s  error = %f\n", ii, Double.toString(e[ii]),
-										Double.toString(o[ii]), error));
+								TestAssert.fail("[%d] %s != %s  error = %f\n", ii, Double.toString(e[ii]),
+										Double.toString(o[ii]), error);
 						}
 					}
 				}
@@ -148,8 +149,8 @@ public class GaussianPSFModelTest
 								double error = DoubleEquality.relativeError(g[ii][l], g2[ii][l]);
 								//System.out.printf("[%d,%d]   %g == %g    %g\n", ii, l, g[ii][l], g2[ii][l], error);
 								if (error > 5e-3)
-									Assert.fail(String.format("[%d] %s != %s  error = %f\n", ii,
-											Double.toString(g[ii][l]), Double.toString(g2[ii][l]), error));
+									TestAssert.fail("[%d] %s != %s  error = %f\n", ii, Double.toString(g[ii][l]),
+											Double.toString(g2[ii][l]), error);
 
 							}
 						}

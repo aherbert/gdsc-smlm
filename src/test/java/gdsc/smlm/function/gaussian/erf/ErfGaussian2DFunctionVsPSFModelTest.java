@@ -24,7 +24,6 @@
 package gdsc.smlm.function.gaussian.erf;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
@@ -32,6 +31,7 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.model.GaussianPSFModel;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class ErfGaussian2DFunctionVsPSFModelTest
@@ -85,8 +85,8 @@ public class ErfGaussian2DFunctionVsPSFModelTest
 				// fast approximation of the Erf(..) (the error function). The PSFModel
 				// uses the Apache commons implementation.
 				if (error > 5e-4)
-					Assert.fail(String.format("[%d] %s != %s  error = %f\n", i, Double.toString(e[i]),
-							Double.toString(o[i]), error));
+					TestAssert.fail("[%d] %s != %s  error = %f\n", i, Double.toString(e[i]), Double.toString(o[i]),
+							error);
 			}
 	}
 }

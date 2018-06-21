@@ -71,18 +71,17 @@ public class PoissonGammaFunctionTest
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, boolean pdf)
 	{
 		double p2 = cumulativeProbability(gain, mu, pdf);
-		String msg = String.format("g=%f, mu=%f, pdf=%b", gain, mu, pdf);
 
 		if (pdf)
 		{
-			Assert.assertEquals(msg, 1, p2, 0.02);
+			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
 		}
 		else
 		{
 			// This is not actually a PMF but is a PDF so requires integration.
 			// This only works when the mean is above 2 if the gain is low
 			if (mu > 2 || gain > 20)
-				Assert.assertEquals(msg, 1, p2, 0.02);
+				TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, pdf=%b", gain, mu, pdf);
 		}
 	}
 
@@ -195,7 +194,7 @@ public class PoissonGammaFunctionTest
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(msg, Math.log(p), logP, 1e-6 * Math.abs(logP));
+			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-6);
 		}
 	}
 

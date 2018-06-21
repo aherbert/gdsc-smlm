@@ -96,8 +96,7 @@ public class PoissonGaussianFunction2Test
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
 	{
 		double p2 = cumulativeProbability(gain, mu, s, usePicard);
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
-		Assert.assertEquals(msg, 1, p2, 0.02);
+		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)

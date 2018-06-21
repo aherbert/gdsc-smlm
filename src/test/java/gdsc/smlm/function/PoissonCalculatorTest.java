@@ -43,6 +43,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
@@ -211,7 +212,7 @@ public class PoissonCalculatorTest
 		System.out.printf("mu=%f, p=%f\n", f.mu, p);
 		if (test)
 		{
-			Assert.assertEquals(String.format("mu=%f", f.mu), P_LIMIT, p, 0.02);
+			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
 		}
 	}
 

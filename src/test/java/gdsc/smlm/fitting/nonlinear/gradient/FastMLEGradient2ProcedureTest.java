@@ -44,6 +44,7 @@ import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
@@ -116,15 +117,13 @@ public class FastMLEGradient2ProcedureTest
 
 		MLEGradientCalculator calc = (MLEGradientCalculator) GradientCalculatorFactory.newCalculator(nparams, true);
 
-		String name = String.format("[%d]", nparams);
-
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			FastMLEGradient2Procedure p = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			double s = p.computeLogLikelihood(paramsList.get(i));
 			double s2 = calc.logLikelihood(yList.get(i), paramsList.get(i), func);
 			// Virtually the same ...
-			Assert.assertEquals(name + " Result: Not same @ " + i, s, s2, Math.abs(s) * 1e-5);
+			TestAssert.assertEqualsRelative(s, s2, 1e-5, "[%d] Result: Not same @ %d", nparams, i);
 		}
 	}
 
@@ -346,7 +345,6 @@ public class FastMLEGradient2ProcedureTest
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
 		FastMLEGradient2Procedure p1, p2;
-		String name = String.format("[%d]", nparams);
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
@@ -355,22 +353,22 @@ public class FastMLEGradient2ProcedureTest
 
 			double ll1 = p1.computeLogLikelihood(a);
 			double ll2 = p2.computeLogLikelihood(a);
-			Assert.assertEquals(name + " LL: Not same @ " + i, ll1, ll2, 0);
+			TestAssert.assertEquals(ll1, ll2, 0, "[%d] LL: Not same @ %d", nparams, i);
 
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeFirstDerivative(a);
 			p2.computeFirstDerivative(a);
-			Assert.assertArrayEquals(name + " first derivative value: Not same @ " + i, p1.u, p2.u, 0);
-			Assert.assertArrayEquals(name + " first derivative: Not same @ " + i, p1.d1, p2.d1, 0);
+			TestAssert.assertArrayEquals(p1.u, p2.u, 0, "[%d]  first derivative value: Not same @ %d", nparams, i);
+			TestAssert.assertArrayEquals(p1.d1, p2.d1, 0, "[%d]  first derivative: Not same @ %d", nparams, i);
 
 			p1 = new FastMLEGradient2Procedure(yList.get(i), func);
 			p2 = FastMLEGradient2ProcedureFactory.createUnrolled(yList.get(i), func);
 			p1.computeSecondDerivative(a);
 			p2.computeSecondDerivative(a);
-			Assert.assertArrayEquals(name + " update value: Not same @ " + i, p1.u, p2.u, 0);
-			Assert.assertArrayEquals(name + " update: Not same d1 @ " + i, p1.d1, p2.d1, 0);
-			Assert.assertArrayEquals(name + " update: Not same d2 @ " + i, p1.d2, p2.d2, 0);
+			TestAssert.assertArrayEquals(p1.u, p2.u, 0, "[%d]  update value: Not same @ %d", nparams, i);
+			TestAssert.assertArrayEquals(p1.d1, p2.d1, 0, "[%d]  update: Not same d1 @ %d", nparams, i);
+			TestAssert.assertArrayEquals(p1.d2, p2.d2, 0, "[%d]  update: Not same d2 @ %d", nparams, i);
 		}
 	}
 

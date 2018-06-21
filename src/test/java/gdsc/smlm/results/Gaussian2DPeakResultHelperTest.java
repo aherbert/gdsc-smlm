@@ -93,9 +93,8 @@ public class Gaussian2DPeakResultHelperTest
 							sum[points] += error;
 							if (error > 1e-2)
 							{
-								String msg = String.format("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s,
-										N, b2, points, e, o, error);
-								Assert.fail(msg);
+								TestAssert.fail("a=%f, s=%f, N=%f, b2=%f, points=%d : %f != %f : %f\n", a, s, N, b2,
+										points, e, o, error);
 							}
 						}
 					}

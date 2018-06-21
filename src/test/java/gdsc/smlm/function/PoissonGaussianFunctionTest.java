@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Maths;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class PoissonGaussianFunctionTest
@@ -127,7 +128,7 @@ public class PoissonGaussianFunctionTest
 		long t2 = getTime(noise2, N, x, false);
 
 		TestSettings.info("Picard %d : Pade %d (%fx)\n", t1, t2, t1 / (double) t2);
-		Assert.assertTrue(String.format("Picard %d > Pade %d", t1, t2), t2 < t1);
+		TestAssert.assertTrue(t2 < t1, "Picard %d < Pade %d", t1, t2);
 	}
 
 	@Test
@@ -177,8 +178,7 @@ public class PoissonGaussianFunctionTest
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, final boolean usePicard)
 	{
 		double p2 = cumulativeProbability(gain, mu, s, usePicard);
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
-		Assert.assertEquals(msg, 1, p2, 0.02);
+		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private double cumulativeProbability(final double gain, final double mu, final double s, final boolean usePicard)
@@ -282,7 +282,7 @@ public class PoissonGaussianFunctionTest
 			if (p == 0)
 				continue;
 			final double logP = f.logProbability(x);
-			Assert.assertEquals(msg, Math.log(p), logP, 1e-3 * Math.abs(logP));
+			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
 		}
 	}
 

@@ -28,9 +28,9 @@ import java.util.Arrays;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class PoissonPoissonFunctionTest
@@ -80,10 +80,9 @@ public class PoissonPoissonFunctionTest
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s)
 	{
 		double p2 = cumulativeProbability(gain, mu, s);
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		// Only true with continuous distribution if the combined Poisson mean is above 4
 		if (mu + s / gain > 4)
-			Assert.assertEquals(msg, 1, p2, 0.02);
+			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private double cumulativeProbability(final double gain, final double mu, final double s)
@@ -181,7 +180,7 @@ public class PoissonPoissonFunctionTest
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(msg, Math.log(p), logP, 1e-3 * Math.abs(logP));
+			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
 		}
 	}
 }

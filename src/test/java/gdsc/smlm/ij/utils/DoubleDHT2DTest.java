@@ -34,6 +34,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestAssert;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
 
@@ -263,8 +264,7 @@ public class DoubleDHT2DTest
 		for (int i = 0; i < e.length; i++)
 			if (!DoubleEquality.almostEqualRelativeOrAbsolute(e[i], o[i], rel, abs))
 			{
-				Assert.fail(String.format("%s [%d] %g vs %g = %g", msg, i, e[i], o[i],
-						DoubleEquality.relativeError(e[i], o[i])));
+				TestAssert.fail("%s [%d] %g vs %g = %g", msg, i, e[i], o[i], DoubleEquality.relativeError(e[i], o[i]));
 			}
 	}
 

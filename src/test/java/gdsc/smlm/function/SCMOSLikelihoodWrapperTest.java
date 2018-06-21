@@ -43,6 +43,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class SCMOSLikelihoodWrapperTest
@@ -586,7 +587,7 @@ public class SCMOSLikelihoodWrapperTest
 		//System.out.printf("mu=%f, p=%f\n", mu, p);
 		if (test)
 		{
-			Assert.assertEquals(String.format("mu=%f", mu), P_LIMIT, p, 0.02);
+			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
 		}
 	}
 
@@ -706,7 +707,7 @@ public class SCMOSLikelihoodWrapperTest
 
 		if (test)
 		{
-			Assert.assertEquals(String.format("mu=%f", mu), P_LIMIT, p, 0.02);
+			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
 		}
 
 		// Check the function can compute the same total

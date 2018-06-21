@@ -28,6 +28,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.TestComplexity;
 
@@ -235,11 +236,7 @@ public class BinomialFitterTest
 				log("    " + e.getMessage() + "\n");
 			}
 		}
-		if (fail > FAILURES)
-		{
-			String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
-			Assert.fail(msg);
-		}
+		TestAssert.assertTrue(fail <= FAILURES, "Too many failures (n=%d, p=%f): %d", n, p, fail);
 	}
 
 	private void fitBinomialUsing_LSE_Or_MLE(int n, double p, boolean zeroTruncated, int minN, int maxN)

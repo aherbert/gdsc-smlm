@@ -30,6 +30,7 @@ import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 /**
@@ -82,7 +83,7 @@ public class PulseActivationAnalysisTest
 		}
 		catch (AssertionError e)
 		{
-			throw new AssertionError(String.format("channels=%d, crosstalk=%d", n, m), e);
+			TestAssert.wrapAssertionError(e, "channels=%d, crosstalk=%d", n, m);
 		}
 	}
 
@@ -164,7 +165,7 @@ public class PulseActivationAnalysisTest
 		}
 		catch (AssertionError e)
 		{
-			throw new AssertionError(String.format("channels=%d, crosstalk=%d", n, m), e);
+			TestAssert.wrapAssertionError(e, "channels=%d, crosstalk=%d", n, m);
 		}
 	}
 

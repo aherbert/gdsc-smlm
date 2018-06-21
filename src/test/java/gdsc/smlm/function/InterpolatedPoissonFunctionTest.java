@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.test.TestAssert;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings("unused")
@@ -238,7 +239,7 @@ public class InterpolatedPoissonFunctionTest
 		maxx += min;
 
 		System.out.printf("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
-		Assert.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
+		TestAssert.assertEquals(1, p, 0.02, "g=%f, mu=%f", gain, mu);
 		return new int[] { minx, maxx };
 	}
 

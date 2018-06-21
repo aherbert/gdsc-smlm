@@ -33,6 +33,7 @@ import org.junit.Test;
 import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
+import gdsc.test.TestAssert;
 
 public abstract class Gaussian2DFunctionTest
 {
@@ -625,14 +626,11 @@ public abstract class Gaussian2DFunctionTest
 									//System.out.printf("%d,%d r1=%f\n", index%maxx, index/maxx, r1);
 									sum += r1;
 									final boolean ok = eq2.almostEqualRelativeOrAbsolute(r1, r2);
-									if (!ok)
-										Assert.assertTrue(
-												String.format("%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx),
-												ok);
+									TestAssert.assertTrue(ok, "%g != %g @ [%d,%d]", r1, r2, index / maxx, index % maxx);
 								}
 
-								Assert.assertTrue(sum + " != " + signal1,
-										eq3.almostEqualRelativeOrAbsolute(sum, signal1));
+								TestAssert.assertTrue(eq3.almostEqualRelativeOrAbsolute(sum, signal1), "%s != %s", sum,
+										signal1);
 							}
 	}
 

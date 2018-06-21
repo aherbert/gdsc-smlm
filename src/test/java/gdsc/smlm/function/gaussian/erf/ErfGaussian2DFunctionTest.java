@@ -43,6 +43,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
@@ -679,8 +680,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 													{
 														System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
 																m.get(j, k));
-														Assert.fail(String.format("%d [%d,%d] %f != %f", i, j, k,
-																gradient, m.get(j, k)));
+														TestAssert.fail("%d [%d,%d] %f != %f", i, j, k, gradient,
+																m.get(j, k));
 													}
 												}
 											}
@@ -906,9 +907,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																				System.out.printf(
 																						"%d [%d,%d] %f ?= %f\n", i, j,
 																						k, gradient, m.get(j, k));
-																				Assert.fail(String.format(
-																						"%d [%d,%d] %f != %f", i, j, k,
-																						gradient, m.get(j, k)));
+																				TestAssert.fail("%d [%d,%d] %f != %f",
+																						i, j, k, gradient, m.get(j, k));
 																			}
 																		}
 																	}

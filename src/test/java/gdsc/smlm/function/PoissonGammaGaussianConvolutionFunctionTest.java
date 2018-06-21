@@ -26,7 +26,6 @@ package gdsc.smlm.function;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
@@ -60,10 +59,9 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s)
 	{
 		double p2 = cumulativeProbability(gain, mu, s);
-		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		// This only works when the mean is above 2 if the gain is low
 		if (mu > 2 || gain > 20)
-			Assert.assertEquals(msg, 1, p2, 0.02);
+			TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f", gain, mu, s);
 	}
 
 	private double cumulativeProbability(final double gain, final double mu, double s)

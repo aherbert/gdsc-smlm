@@ -37,6 +37,7 @@ import org.junit.Test;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class PoissonGammaGaussianFunctionTest
@@ -113,7 +114,7 @@ public class PoissonGammaGaussianFunctionTest
 
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
 	double[] highPhotons = { 5000 };
-	double[] lowPhotons = { 1e-2, /*1e-4,*/ 1e-6 };
+	double[] lowPhotons = { 1e-2, /* 1e-4, */ 1e-6 };
 	double[] noise = { 3, 10 }; // in counts
 	double[] lowNoise = { 0.3, 1 }; // in counts
 	double[] totalGain = { 6.5, 45 };
@@ -275,6 +276,7 @@ public class PoissonGammaGaussianFunctionTest
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF, true);
 				}
 	}
+
 	@Test
 	public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPMFAtLowNoise()
 	{
@@ -714,7 +716,7 @@ public class PoissonGammaGaussianFunctionTest
 		}
 
 		if (p < lower || p > upper)
-			Assert.fail(String.format("mu=%f, s=%f, g=%f, p=%g", mu, s, g, p));
+			TestAssert.fail("mu=%f, s=%f, g=%f, p=%g", mu, s, g, p);
 	}
 
 	private double cumulativeProbability(final double mu, final double s, final double g,
@@ -831,8 +833,7 @@ public class PoissonGammaGaussianFunctionTest
 							if (p1 < 1e-3)
 								continue;
 
-							Assert.fail(String.format("s=%g, g=%g, p=%g, x=%g: %g != %g (%g)", s, g, p, x, p1, p2,
-									relativeError));
+							TestAssert.fail("s=%g, g=%g, p=%g, x=%g: %g != %g (%g)", s, g, p, x, p1, p2, relativeError);
 						}
 						if (maxError[0] < relativeError)
 							maxError[0] = relativeError;

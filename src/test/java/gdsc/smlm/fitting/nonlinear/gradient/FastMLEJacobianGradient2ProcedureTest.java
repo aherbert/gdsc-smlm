@@ -224,7 +224,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 					//		a[k], func.getName(kk), a[kk], dd, gradient2, J.get(j, jj), ok);
 					if (!ok)
 					{
-						Assert.fail(String.format("Not same gradientJ @ [%d,%d]", j, jj));
+						TestAssert.fail("Not same gradientJ @ [%d,%d]", j, jj);
 					}
 				}
 			}

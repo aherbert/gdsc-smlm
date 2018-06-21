@@ -27,6 +27,7 @@ import org.apache.commons.math3.distribution.CustomPoissonDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestAssert;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings("unused")
@@ -176,7 +177,7 @@ public class PoissonFunctionTest
 			double v1 = Math.log(f.likelihood(x, o));
 			double v2 = f.logLikelihood(x, o);
 
-			Assert.assertEquals(String.format("g=%f, mu=%f, x=%d", gain, mu, x), v1, v2, Math.abs(v2) * 1e-8);
+			TestAssert.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
 		}
 	}
 
@@ -206,7 +207,7 @@ public class PoissonFunctionTest
 			double v1 = f.likelihood(x, o);
 			double v2 = pd.probability(x);
 
-			Assert.assertEquals(String.format("mu=%f, x=%d", mu, x), v1, v2, Math.abs(v2) * 1e-8);
+			TestAssert.assertEqualsRelative(v1, v2, 1e-8, "g=%f, mu=%f, x=%d", gain, mu, x);
 		}
 	}
 }

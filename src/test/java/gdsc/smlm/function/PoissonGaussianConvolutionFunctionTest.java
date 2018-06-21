@@ -27,10 +27,10 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.StoredDataStatistics;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
@@ -80,8 +80,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	private void cumulativeProbabilityIsOne(final double gain, final double mu, final double s, boolean computePMF)
 	{
 		double p2 = cumulativeProbability(gain, mu, s, computePMF);
-		String msg = String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
-		Assert.assertEquals(msg, 1, p2, 0.02);
+		TestAssert.assertEquals(1, p2, 0.02, "g=%f, mu=%f, s=%f, erf=%b", gain, mu, s, computePMF);
 	}
 
 	private double cumulativeProbability(final double gain, final double mu, final double s, boolean computePMF)
@@ -190,7 +189,7 @@ public class PoissonGaussianConvolutionFunctionTest
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(msg, Math.log(p), logP, 1e-3 * Math.abs(logP));
+			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
 		}
 	}
 

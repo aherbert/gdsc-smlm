@@ -37,6 +37,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class PoissonLikelihoodWrapperTest
@@ -542,7 +543,7 @@ public class PoissonLikelihoodWrapperTest
 				break;
 		}
 		TestSettings.info("mu=%f, p=%f, max=%d\n", mu, p, x);
-		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
+		TestAssert.assertEquals(1, p, 0.02, "mu=%f", mu);
 	}
 
 	@Test
@@ -570,7 +571,7 @@ public class PoissonLikelihoodWrapperTest
 		}, 0, max);
 
 		TestSettings.info("mu=%f, p=%f\n", mu, p);
-		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
+		TestAssert.assertEquals(1, p, 0.02, "mu=%f", mu);
 	}
 
 	@Test
@@ -665,7 +666,7 @@ public class PoissonLikelihoodWrapperTest
 		}
 
 		TestSettings.info("mu=%f, limit=%d, p=%f\n", mu, limit, p);
-		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
+		TestAssert.assertEquals(1, p, 0.02, "mu=%f", mu);
 
 		// Check the function can compute the same total
 		f = new PoissonLikelihoodWrapper(nlf, a, k, i, alpha);

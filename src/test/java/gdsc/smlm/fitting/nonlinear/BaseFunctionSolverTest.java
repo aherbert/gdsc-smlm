@@ -48,6 +48,7 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
@@ -269,11 +270,11 @@ public abstract class BaseFunctionSolverTest
 							for (int i = 0; i < expected.length; i++)
 							{
 								if (fp[i] < lower[i])
-									Assert.assertTrue(String.format("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i],
-											lower[i], Arrays.toString(fp), Arrays.toString(expected)), false);
+									TestAssert.fail("Fit Failed: [%d] %.2f < %.2f: %s != %s", i, fp[i], lower[i],
+											Arrays.toString(fp), Arrays.toString(expected));
 								if (fp[i] > upper[i])
-									Assert.assertTrue(String.format("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i],
-											upper[i], Arrays.toString(fp), Arrays.toString(expected)), false);
+									TestAssert.fail("Fit Failed: [%d] %.2f > %.2f: %s != %s", i, fp[i], upper[i],
+											Arrays.toString(fp), Arrays.toString(expected));
 								if (report)
 									fp[i] = expected[i] - fp[i];
 							}
@@ -316,6 +317,8 @@ public abstract class BaseFunctionSolverTest
 		int[] totalPrecision = new int[3];
 		int[] betterAccuracy = new int[3];
 		int[] totalAccuracy = new int[3];
+
+		String msg = "%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b %s";
 
 		int i1 = 0, i2 = 0;
 		for (double s : signal)
@@ -374,8 +377,8 @@ public abstract class BaseFunctionSolverTest
 					boolean diff = tt.tTest(stats[i].getValues(), stats[i + 1].getValues(), alpha);
 
 					int index = i / 2;
-					String msg = String.format("%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b", name2, name,
-							s, noiseModel, statName[index], u2, sd2, u1, sd1, stats[i].getN(), diff);
+					Object[] args = new Object[] { name2, name, s, noiseModel, statName[index], u2, sd2, u1, sd1,
+							stats[i].getN(), diff, "" };
 					if (diff)
 					{
 						// Different means. Check they are roughly the same
@@ -387,10 +390,14 @@ public abstract class BaseFunctionSolverTest
 								if (sd2 < sd1)
 								{
 									betterPrecision[index]++;
-									println(msg + " P*");
+									args[args.length - 1] = "P*";
+									TestSettings.debug(msg, args);
 								}
 								else
-									println(msg + " P");
+								{
+									args[args.length - 1] = "P";
+									TestSettings.debug(msg, args);
+								}
 								totalPrecision[index]++;
 							}
 						}
@@ -402,10 +409,14 @@ public abstract class BaseFunctionSolverTest
 							if (u2 < u1)
 							{
 								betterAccuracy[index]++;
-								println(msg + " A*");
+								args[args.length - 1] = "A*";
+								TestSettings.debug(msg, args);
 							}
 							else
-								println(msg + " A");
+							{
+								args[args.length - 1] = "A";
+								TestSettings.debug(msg, args);
+							}
 							totalAccuracy[index]++;
 						}
 					}
@@ -417,10 +428,14 @@ public abstract class BaseFunctionSolverTest
 							if (sd2 < sd1)
 							{
 								betterPrecision[index]++;
-								println(msg + " P*");
+								args[args.length - 1] = "P*";
+								TestSettings.debug(msg, args);
 							}
 							else
-								println(msg + " P");
+							{
+								args[args.length - 1] = "P";
+								TestSettings.debug(msg, args);
+							}
 							totalPrecision[index]++;
 						}
 					}
@@ -459,12 +474,7 @@ public abstract class BaseFunctionSolverTest
 		// The test may be unrealistic as the initial params are close to the actual answer.
 
 		//if (p<50)
-		//Assert.fail(String.format("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
-	}
-
-	private void println(String msg)
-	{
-		TestSettings.debug(msg);
+		//TestAssert.fail(("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
 	}
 
 	static double distance(double[] o, double[] e)
@@ -511,8 +521,8 @@ public abstract class BaseFunctionSolverTest
 		params = params.clone();
 		FitStatus status = solver.fit(data, null, params, null);
 		if (status != FitStatus.OK)
-			Assert.fail(String.format("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
-					Arrays.toString(params), Arrays.toString(expected)));
+			TestAssert.fail("Fit Failed: %s i=%d: %s != %s", status.toString(), solver.getIterations(),
+					Arrays.toString(params), Arrays.toString(expected));
 		return params;
 	}
 
@@ -653,11 +663,11 @@ public abstract class BaseFunctionSolverTest
 		double[] e = new double[a.length];
 		double[] o = new double[a.length];
 		solver1.fit(data, null, a, e);
-		//System.out.println("a="+Arrays.toString(a));
+		//System.out.TestSettings.debug("a="+Arrays.toString(a));
 		solver2.computeDeviations(data, a, o);
 
-		//System.out.println("e2="+Arrays.toString(e));
-		//System.out.println("o2="+Arrays.toString(o));
+		//System.out.TestSettings.debug("e2="+Arrays.toString(e));
+		//System.out.TestSettings.debug("o2="+Arrays.toString(o));
 		Assert.assertArrayEquals("Fit 2 peaks and deviations 2 peaks do not match", o, e, 0);
 
 		// Try again with y-fit values
@@ -665,7 +675,7 @@ public abstract class BaseFunctionSolverTest
 		double[] o1 = new double[f2.size()];
 		double[] o2 = new double[o1.length];
 		solver1.fit(data, o1, a, e);
-		//System.out.println("a="+Arrays.toString(a));
+		//System.out.TestSettings.debug("a="+Arrays.toString(a));
 		solver2.computeValue(data, o2, a);
 
 		Assert.assertArrayEquals("Fit 2 peaks with yFit and deviations 2 peaks do not match", o, e, 0);
@@ -690,8 +700,8 @@ public abstract class BaseFunctionSolverTest
 			double[] a2 = p12.clone(); // To copy the second peak
 			System.arraycopy(a, 0, a2, 0, a.length); // Add the same fitted first peak
 			solver2.computeDeviations(data, a2, o);
-			//System.out.println("e1p1=" + Arrays.toString(e));
-			//System.out.println("o2=" + Arrays.toString(o));
+			//System.out.TestSettings.debug("e1p1=" + Arrays.toString(e));
+			//System.out.TestSettings.debug("o2=" + Arrays.toString(o));
 
 			// Deviation should be lower with only 1 peak.
 			// Due to matrix inversion this may not be the case for all parameters so count.

@@ -27,12 +27,12 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.ij.results.IJImagePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class SphericalDistributionTest
@@ -78,9 +78,8 @@ public class SphericalDistributionTest
 		long time1 = getRunTime(dist);
 		dist.setUseRejectionMethod(true);
 		long time2 = getRunTime(dist);
-		String msg = String.format("Rejection = %d, Transformation = %d\n", time2, time1);
-		Assert.assertTrue("Rejection method is slower: " + msg, time1 > time2);
-		System.out.printf(msg);
+		TestAssert.assertTrue(time1 > time2, "Rejection = %d, Transformation = %d\n", time2, time1);
+		TestSettings.info("Rejection = %d, Transformation = %d\n", time2, time1);
 	}
 
 	private long getRunTime(SphericalDistribution dist)
