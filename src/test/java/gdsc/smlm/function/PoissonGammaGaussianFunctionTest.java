@@ -112,7 +112,7 @@ public class PoissonGammaGaussianFunctionTest
 		pgSum[10] = 1.001;
 	}
 
-	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
+	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100 };
 	double[] highPhotons = { 5000 };
 	double[] lowPhotons = { 1e-2, /* 1e-4, */ 1e-6 };
 	double[] noise = { 3, 10 }; // in counts
