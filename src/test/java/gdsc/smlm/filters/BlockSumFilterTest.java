@@ -57,10 +57,10 @@ public class BlockSumFilterTest extends AbstractFilterTest
 	 * @param boxSize
 	 *            the box size
 	 */
-	public static float[] sum(float[] data, int maxx, int maxy, float boxSize)
+	public static void sum(float[] data, int maxx, int maxy, float boxSize)
 	{
 		if (boxSize <= 0)
-			return data;
+			return;
 
 		int n = (int) Math.ceil(boxSize);
 		int size = 2 * n + 1;
@@ -71,34 +71,63 @@ public class BlockSumFilterTest extends AbstractFilterTest
 
 		float[] out = new float[data.length];
 
+		int[] oy = new int[size];
+		int[] ox = new int[size];
+
 		for (int y = 0; y < maxy; y++)
 		{
+			// Cache offset
+			for (int yy = 0; yy < size; yy++)
+			{
+				int yyy = y + yy - n;
+				if (yyy < 0)
+					yyy = 0;
+				else if (yyy >= maxy)
+					yyy = maxy - 1;
+				oy[yy] = yyy * maxx;
+			}
+
 			for (int x = 0; x < maxx; x++)
 			{
+				// Cache offset
+				for (int xx = 0; xx < size; xx++)
+				{
+					int xxx = x + xx - n;
+					if (xxx < 0)
+						xxx = 0;
+					else if (xxx >= maxx)
+						xxx = maxx - 1;
+					ox[xx] = xxx;
+				}
+
 				double sum = 0;
 				for (int yy = 0; yy < size; yy++)
 				{
-					int yyy = y + yy - n;
-					if (yyy < 0)
-						yyy = 0;
-					if (yyy >= maxy)
-						yyy = maxy - 1;
+					//int yyy = y + yy - n;
+					//if (yyy < 0)
+					//	yyy = 0;
+					//else if (yyy >= maxy)
+					//	yyy = maxy - 1;
+
+					final int index = oy[yy];
+					final float wy = weight[yy];
 					for (int xx = 0; xx < size; xx++)
 					{
-						int xxx = x + xx - n;
-						if (xxx < 0)
-							xxx = 0;
-						if (xxx >= maxx)
-							xxx = maxx - 1;
-						int index = yyy * maxx + xxx;
-						sum += data[index] * weight[yy] * weight[xx];
+						//int xxx = x + xx - n;
+						//if (xxx < 0)
+						//	xxx = 0;
+						//else if (xxx >= maxx)
+						//	xxx = maxx - 1;
+						//int index = yyy * maxx + xxx;
+						//sum += data[index] * weight[yy] * weight[xx];
+
+						sum += data[index + ox[xx]] * wy * weight[xx];
 					}
 				}
 				out[y * maxx + x] = (float) (sum);
 			}
 		}
 		System.arraycopy(out, 0, data, 0, out.length);
-		return data;
 	}
 
 	/**
