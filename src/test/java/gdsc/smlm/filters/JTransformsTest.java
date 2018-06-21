@@ -293,6 +293,8 @@ public class JTransformsTest
 	@Test
 	public void jTransforms2DDHTIsFasterThanFHT2()
 	{
+		TestSettings.assumeMediumComplexity();
+		
 		// Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 
 		int size = 256;
