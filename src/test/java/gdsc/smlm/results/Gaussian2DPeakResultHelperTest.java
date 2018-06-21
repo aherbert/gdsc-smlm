@@ -269,7 +269,7 @@ public class Gaussian2DPeakResultHelperTest
 
 	private static void assertEquals(double e, double o)
 	{
-		TestAssert.assertEquals(e, o, 1e-10);
+		TestAssert.assertEqualsRelative(e, o, 1e-10);
 	}
 
 	@Test

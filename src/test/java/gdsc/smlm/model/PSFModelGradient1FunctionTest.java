@@ -110,8 +110,8 @@ public class PSFModelGradient1FunctionTest
 
 						for (int ii = 0; ii < ve.length; ii++)
 						{
-							TestAssert.assertEquals(ve[ii], vo[ii], 1e-8);
-							TestAssert.assertArrayEquals(ge[ii], go[ii], 1e-8);
+							TestAssert.assertEqualsRelative(ve[ii], vo[ii], 1e-8);
+							TestAssert.assertArrayEqualsRelative(ge[ii], go[ii], 1e-8);
 						}
 					}
 				}

@@ -114,12 +114,12 @@ public class PoissonGradientProcedureTest
 			double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
 			// Not exactly the same ...
 			double[] al = p.getLinear();
-			TestAssert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, al,
+			TestAssert.assertArrayEqualsRelative(name + " Observations: Not same alpha @ " + i, al,
 					new DenseMatrix64F(m).data, 1e-10);
 
 			double[][] am = p.getMatrix();
 			for (int j = 0; j < nparams; j++)
-				TestAssert.assertArrayEquals(name + " Observations: Not same alpha @ " + i, am[j], m[j], 1e-10);
+				TestAssert.assertArrayEqualsRelative(name + " Observations: Not same alpha @ " + i, am[j], m[j], 1e-10);
 		}
 	}
 

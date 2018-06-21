@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import org.junit.Assert;
 
+import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Random;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
@@ -181,4 +183,44 @@ public class AbstractFilterTest
 	{
 		return Arrays.copyOf(data1, data1.length);
 	}
+	
+	static void floatArrayEquals(FloatEquality eq, float[] data1, float[] data2, int maxx, int maxy, float boxSize, String format,
+			Object... args)
+	{
+		// Ignore the border
+		int border = (int) Math.ceil(boxSize);
+		for (int y = border; y < maxy - border - 1; y++)
+		{
+			int index = y * maxx + border;
+			for (int x = border; x < maxx - border - 1; x++, index++)
+			{
+				if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index]))
+				{
+					String message = String.format(format, args);
+					Assert.fail(String.format("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+							FloatEquality.relativeError(data1[index], data2[index])));
+				}
+			}
+		}
+	}	
+	
+	static void intArrayEquals(int[] data1, int[] data2, int maxx, int maxy, float boxSize, String format,
+			Object... args)
+	{
+		// Ignore the border
+		int border = (int) Math.ceil(boxSize);
+		for (int y = border; y < maxy - border - 1; y++)
+		{
+			int index = y * maxx + border;
+			for (int x = border; x < maxx - border - 1; x++, index++)
+			{
+				if (data1[index] != data2[index])
+				{
+					String message = String.format(format, args);
+					Assert.fail(String.format("%s [%d,%d] %f != %f  (%g)", message, x, y, data1[index], data2[index],
+							FloatEquality.relativeError(data1[index], data2[index])));
+				}
+			}
+		}
+	}	
 }

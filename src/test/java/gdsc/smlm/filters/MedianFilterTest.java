@@ -26,10 +26,10 @@ package gdsc.smlm.filters;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
@@ -41,9 +41,16 @@ public class MedianFilterTest extends AbstractFilterTest
 	private int ITER3 = 100;
 	private int ITER = 10;
 
-	private void floatArrayEquals(String message, float[] data1, float[] data2, int boxSize)
+	private void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
 	{
-		Assert.assertArrayEquals(message, data1, data2, boxSize * boxSize * 1e-3f);
+		try
+		{
+			TestAssert.assertArrayEqualsRelative(null, data1, data2, boxSize * boxSize * 1e-3);
+		}
+		catch (AssertionError e)
+		{
+			throw new AssertionError(String.format(format, args), e);
+		}
 	}
 
 	@Test
@@ -66,8 +73,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.blockMedianNxNInternal(data1, width, height, boxSize);
 		filter.rollingMedianNxNInternal(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2,
-				boxSize);
+		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -89,7 +95,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.blockMedian3x3Internal(data1, width, height);
 		filter.rollingMedianNxNInternal(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -180,7 +186,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.blockMedian3x3Internal(data1, width, height);
 		filter.blockMedianNxNInternal(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -325,7 +331,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.rollingMedian3x3Internal(data1, width, height);
 		filter.rollingMedianNxNInternal(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -412,7 +418,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.blockMedianNxN(data1, width, height, boxSize);
 		filter.rollingMedianNxN(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		floatArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -640,7 +646,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.blockMedian3x3(data1, width, height);
 		filter.blockMedianNxN(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -723,7 +729,7 @@ public class MedianFilterTest extends AbstractFilterTest
 		filter.rollingMedian3x3(data1, width, height);
 		filter.rollingMedianNxN(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test

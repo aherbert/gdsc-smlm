@@ -333,7 +333,7 @@ public class PoissonGammaFunctionTest
 			// Test the function can be separated into the dirac and the rest
 			double dirac = PoissonGammaFunction.dirac(x);
 			double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
-			TestAssert.assertEquals(e, dirac + p0, 1e-10);
+			TestAssert.assertEqualsRelative(e, dirac + p0, 1e-10);
 
 			// For reporting
 			if (report)

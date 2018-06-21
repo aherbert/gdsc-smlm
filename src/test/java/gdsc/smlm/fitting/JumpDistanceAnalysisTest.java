@@ -385,8 +385,8 @@ public class JumpDistanceAnalysisTest
 		try
 		{
 			Assert.assertEquals("Failed to fit n", d.length, fitD.length);
-			TestAssert.assertArrayEquals("Failed to fit d", d, fitD, deltaD);
-			TestAssert.assertArrayEquals("Failed to fit f", f, fitF, deltaF);
+			TestAssert.assertArrayEqualsRelative("Failed to fit d", d, fitD, deltaD);
+			TestAssert.assertArrayEqualsRelative("Failed to fit f", f, fitF, deltaF);
 		}
 		catch (AssertionError e)
 		{

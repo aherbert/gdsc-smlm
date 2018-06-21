@@ -93,7 +93,7 @@ public abstract class WeightedFilterTest
 							float[] o = filter(data, width, height, boxSize - offset, internal, filter2);
 							try
 							{
-								TestAssert.assertArrayEquals(e, o, 1e-4f);
+								TestAssert.assertArrayEqualsRelative(e, o, 1e-4f);
 							}
 							catch (AssertionError ex)
 							{

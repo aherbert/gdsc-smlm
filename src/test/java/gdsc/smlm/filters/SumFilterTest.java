@@ -43,14 +43,28 @@ public class SumFilterTest extends AbstractFilterTest
 	private int ITER3 = 200;
 	private int ITER = 20;
 
-	private void floatArrayEquals(String message, float[] data1, float[] data2, int boxSize)
+	private void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
 	{
-		TestAssert.assertArrayEquals(message, data1, data2, 1e-5);
+		try
+		{
+			TestAssert.assertArrayEqualsRelative(null, data1, data2, 1e-5);
+		}
+		catch (AssertionError e)
+		{
+			throw new AssertionError(String.format(format, args), e);
+		}
 	}
 
-	private void intArrayEquals(String message, int[] data1, int[] data2, int boxSize)
+	private void intArrayEquals(int[] data1, int[] data2, int boxSize, String format, Object... args)
 	{
-		Assert.assertArrayEquals(message, data1, data2);
+		try
+		{
+			Assert.assertArrayEquals(null, data1, data2);
+		}
+		catch (AssertionError e)
+		{
+			throw new AssertionError(String.format(format, args), e);
+		}
 	}
 
 	private float[] floatCreateData(RandomGenerator rg, int width, int height)
@@ -95,8 +109,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternal(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2,
-				boxSize);
+		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -120,7 +133,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.stripedBlockSumNxNInternal(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -143,7 +156,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -168,8 +181,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.rollingBlockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternalTransposed(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2,
-				boxSize);
+		floatArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -399,7 +411,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.blockSumNxNInternal(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -667,7 +679,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.rollingBlockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -886,7 +898,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		floatArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -910,7 +922,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		floatArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -1275,7 +1287,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSum3x3(data1, width, height);
 		filter.blockSumNxN(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -1358,7 +1370,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.stripedBlockSum3x3(data1, width, height);
 		filter.stripedBlockSumNxN(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -1442,7 +1454,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.rollingBlockSum3x3(data1, width, height);
 		filter.rollingBlockSumNxN(data2, width, height, 1);
 
-		floatArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		floatArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -1710,8 +1722,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternal(data2, width, height, boxSize);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2,
-				boxSize);
+		intArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -1735,7 +1746,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxNInternal(data1, width, height, boxSize);
 		filter.stripedBlockSumNxNInternal(data2, width, height, boxSize);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		intArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -1758,7 +1769,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		intArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -1783,8 +1794,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.rollingBlockSumNxNInternal(data1, width, height, boxSize);
 		filter.rollingBlockSumNxNInternalTransposed(data2, width, height, boxSize);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2,
-				boxSize);
+		intArrayEquals(data1, data2, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -2014,7 +2024,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSum3x3Internal(data1, width, height);
 		filter.blockSumNxNInternal(data2, width, height, 1);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		intArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -2282,7 +2292,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.rollingBlockSum3x3Internal(data1, width, height);
 		filter.rollingBlockSumNxNInternal(data2, width, height, 1);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		intArrayEquals(data1, data2, 1, "Internal arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -2501,7 +2511,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		intArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -2525,7 +2535,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSumNxN(data1, width, height, boxSize);
 		filter.rollingBlockSumNxN(data2, width, height, boxSize);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2, 0);
+		intArrayEquals(data1, data2, boxSize, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 	}
 
 	@Test
@@ -2887,7 +2897,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.blockSum3x3(data1, width, height);
 		filter.blockSumNxN(data2, width, height, 1);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		intArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -2970,7 +2980,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.stripedBlockSum3x3(data1, width, height);
 		filter.stripedBlockSumNxN(data2, width, height, 1);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		intArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test
@@ -3054,7 +3064,7 @@ public class SumFilterTest extends AbstractFilterTest
 		filter.rollingBlockSum3x3(data1, width, height);
 		filter.rollingBlockSumNxN(data2, width, height, 1);
 
-		intArrayEquals(String.format("Arrays do not match: [%dx%d]", width, height), data1, data2, 1);
+		intArrayEquals(data1, data2, 1, "Arrays do not match: [%dx%d] @ %d", width, height, 1);
 	}
 
 	@Test

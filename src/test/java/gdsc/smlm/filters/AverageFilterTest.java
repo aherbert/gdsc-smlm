@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
@@ -102,29 +101,6 @@ public class AverageFilterTest extends AbstractFilterTest
 		System.arraycopy(out, 0, data, 0, out.length);
 	}
 
-	private void floatArrayEquals(String message, float[] data1, float[] data2, int maxx, int maxy, float boxSize)
-	{
-		FloatEquality eq = new FloatEquality(1e-5f, 1e-10f);
-		// Debug: show the images
-		//gdsc.core.ij.Utils.display("data1", new ij.process.FloatProcessor(maxx, maxy, data1));
-		//gdsc.core.ij.Utils.display("data2", new ij.process.FloatProcessor(maxx, maxy, data2));
-
-		// Ignore the border
-		int border = (int) Math.ceil(boxSize);
-		for (int y = border; y < maxy - border - 1; y++)
-		{
-			int index = y * maxx + border;
-			for (int x = border; x < maxx - border - 1; x++, index++)
-			{
-				if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index]))
-				{
-					Assert.assertTrue(String.format("%s [%d,%d] %f != %f", message, x, y, data1[index], data2[index]),
-							false);
-				}
-			}
-		}
-	}
-
 	/**
 	 * Used to test the filter methods calculate the correct result
 	 */
@@ -151,19 +127,20 @@ public class AverageFilterTest extends AbstractFilterTest
 	{
 		float[] data1 = createData(rg, width, height);
 		float[] data2 = data1.clone();
+		FloatEquality eq = new FloatEquality(5e-5f, 1e-10f);
 
 		AverageFilterTest.average(data1, width, height, boxSize);
 		if (internal)
 		{
 			filter.filterInternal(data2, width, height, boxSize);
-			floatArrayEquals(String.format("Internal arrays do not match: [%dx%d] @ %.1f", width, height, boxSize),
-					data1, data2, width, height, boxSize);
+			floatArrayEquals(eq, data1, data2, width, height, boxSize, "Internal arrays do not match: [%dx%d] @ %.1f",
+					width, height, boxSize);
 		}
 		else
 		{
 			filter.filter(data2, width, height, boxSize);
-			floatArrayEquals(String.format("Arrays do not match: [%dx%d] @ %.1f", width, height, boxSize), data1, data2,
-					width, height, 0);
+			floatArrayEquals(eq, data1, data2, width, height, 0, "Arrays do not match: [%dx%d] @ %.1f", width, height,
+					boxSize);
 		}
 	}
 

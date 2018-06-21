@@ -172,7 +172,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						TestAssert.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
@@ -197,7 +197,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						TestAssert.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
@@ -222,7 +222,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						TestAssert.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}
@@ -247,7 +247,7 @@ public class GaussianKernelTest
 						double[] e = GaussianKernel.makeGaussianKernel(s / scale, range, edgeCorrection);
 						double[] o = k.getDownscaleGaussianKernel(scale, range, edgeCorrection);
 
-						TestAssert.assertArrayEquals(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
+						TestAssert.assertArrayEqualsRelative(e, o, Maths.isPow2(scale) ? 0 : 1e-10);
 					}
 				}
 		}

@@ -24,7 +24,6 @@
 package gdsc.smlm.filters;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
@@ -87,27 +86,6 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 		System.arraycopy(out, 0, data, 0, out.length);
 	}
 
-	private void intArrayEquals(String message, int[] data1, int[] data2, int maxx, int maxy, int boxSize)
-	{
-		// Debug: show the images
-		//gdsc.core.ij.Utils.display("data1", new ij.process.FloatProcessor(maxx, maxy, data1));
-		//gdsc.core.ij.Utils.display("data2", new ij.process.FloatProcessor(maxx, maxy, data2));
-
-		// Ignore the border
-		int border = (int) Math.ceil(boxSize);
-		for (int y = border; y < maxy - border - 1; y++)
-		{
-			int index = y * maxx + border;
-			for (int x = border; x < maxx - border - 1; x++, index++)
-			{
-				if (data1[index] != data2[index])
-				{
-					Assert.fail(String.format("%s [%d,%d] %d != %d", message, x, y, data1[index], data2[index]));
-				}
-			}
-		}
-	}
-
 	/**
 	 * Used to test the filter methods calculate the correct result
 	 */
@@ -149,14 +127,13 @@ public class IntBlockSumFilterTest extends AbstractFilterTest
 		if (internal)
 		{
 			filter.filterInternal(data2, width, height, boxSize);
-			intArrayEquals(String.format("Internal arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1,
-					data2, width, height, boxSize);
+			intArrayEquals(data1, data2, width, height, boxSize, "Internal arrays do not match: [%dx%d] @ %d", width,
+					height, boxSize);
 		}
 		else
 		{
 			filter.filter(data2, width, height, boxSize);
-			intArrayEquals(String.format("Arrays do not match: [%dx%d] @ %d", width, height, boxSize), data1, data2,
-					width, height, 0);
+			intArrayEquals(data1, data2, width, height, 0, "Arrays do not match: [%dx%d] @ %d", width, height, boxSize);
 		}
 	}
 

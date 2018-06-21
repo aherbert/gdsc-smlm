@@ -198,7 +198,7 @@ public class PoissonGaussianFunction2Test
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			TestAssert.assertEquals(msg, Math.log(p), logP, 1e-3);
+			TestAssert.assertEqualsRelative(msg, Math.log(p), logP, 1e-3);
 		}
 	}
 }

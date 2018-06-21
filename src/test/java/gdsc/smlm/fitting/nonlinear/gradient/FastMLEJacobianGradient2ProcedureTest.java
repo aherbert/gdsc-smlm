@@ -120,8 +120,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 			p.computeSecondDerivative(paramsList.get(i));
 			p2.computeSecondDerivative(paramsList.get(i));
 			// Virtually the same ...
-			TestAssert.assertArrayEquals(p.d1, p2.d1, 1e-5);
-			TestAssert.assertArrayEquals(p.d2, p2.d2, 1e-5);
+			TestAssert.assertArrayEqualsRelative(p.d1, p2.d1, 1e-5);
+			TestAssert.assertArrayEqualsRelative(p.d2, p2.d2, 1e-5);
 		}
 	}
 
