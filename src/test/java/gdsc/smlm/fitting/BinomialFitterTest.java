@@ -33,7 +33,7 @@ import gdsc.test.TestSettings.TestComplexity;
 
 public class BinomialFitterTest
 {
-	int[] N = new int[] { 2, 3, 4, 6, 8 };
+	int[] N = new int[] { 2, 3, 4, 6 };
 	double[] P = new double[] { 0.3, 0.5, 0.7 };
 	int TRIALS = 10;
 	int FAILURES = (int) (0.3 * TRIALS);

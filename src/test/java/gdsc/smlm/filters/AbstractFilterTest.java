@@ -39,13 +39,22 @@ public class AbstractFilterTest
 	// TODO - The test data should be representative of the final use case
 
 	/** The primes used for the width/height of images during filter testing. */
-	static int[] primes = new int[] { 113, 97, 53, 29 };
+	static int[] primes = new int[] { 113, /* 97, 53, */ 29 };
 
-	/** The box sizes used during filter testing. */
-	static int[] boxSizes = new int[] { 15, 9, 5, 3, 2, 1 };
+	/**
+	 * The box sizes used during filter testing.
+	 * 15 is required to make the box larger than the smallest image.
+	 */
+	static int[] boxSizes = new int[] { 15, 5, 3, 2, 1 };
 
 	/** The box sizes used during filter testing for filters that can use non-integer sizes. */
-	static float[] fBoxSizes = new float[] { 15.5f, 9.5f, 5.5f, 3.5f, 2.5f, 1.5f, 0.5f };
+	static float[] fBoxSizes;
+	static
+	{
+		fBoxSizes = new float[boxSizes.length];
+		for (int i = 0; i < boxSizes.length; i++)
+			fBoxSizes[i] = boxSizes[i] - 0.5f;
+	}
 
 	/** The check internal flags [true,false]. */
 	static boolean[] checkInternal = new boolean[] { true, false };

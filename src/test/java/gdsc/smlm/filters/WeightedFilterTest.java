@@ -39,10 +39,16 @@ public abstract class WeightedFilterTest
 {
 	gdsc.core.utils.Random rand;
 
-	int[] primes = new int[] { 113, 97, 53 };
-	int[] boxSizes = new int[] { 9, 5, 3, 2, 1 };
-	float[] offsets = new float[] { 0, 0.3f, 0.6f };
-	boolean[] checkInternal = new boolean[] { true, false };
+	/** The primes used for the width/height of images during filter testing. */
+	static int[] primes = new int[] { 113, /*97, 53,*/ 29 };
+	/**
+	 * The box sizes used during filter testing.
+	 * 15 is required to make the box larger than the smallest image.
+	 */
+	static int[] boxSizes = new int[] { 15, 5, 3, 2, 1 };
+	static float[] offsets = new float[] { 0, 0.3f, 0.6f };
+	/** The check internal flags [true,false]. */
+	static boolean[] checkInternal = new boolean[] { true, false };
 
 	float[] createData(int width, int height)
 	{
@@ -67,7 +73,7 @@ public abstract class WeightedFilterTest
 		float[] offsets = getOffsets(filter1);
 		int[] boxSizes = getBoxSizes(filter1);
 
-		int[] primes = Arrays.copyOf(this.primes, this.primes.length - 1);
+		int[] primes = Arrays.copyOf(WeightedFilterTest.primes, WeightedFilterTest.primes.length - 1);
 
 		for (int width : primes)
 			for (int height : primes)
@@ -101,7 +107,7 @@ public abstract class WeightedFilterTest
 
 	private float[] getOffsets(DataFilter filter1)
 	{
-		float[] offsets = (filter1.isInterpolated) ? this.offsets : new float[1];
+		float[] offsets = (filter1.isInterpolated) ? WeightedFilterTest.offsets : new float[1];
 		return offsets;
 	}
 

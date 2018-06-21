@@ -37,6 +37,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import gdsc.test.TestSettings;
 
 public class PoissonLikelihoodWrapperTest
 {
@@ -86,6 +87,7 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitFixedComputesGradientPerDatum()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_FIXED);
 	}
 
@@ -104,30 +106,35 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitEllipticalComputesGradientPerDatum()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_ELLIPTICAL);
 	}
 
 	@Test
 	public void fitNBFixedComputesGradientPerDatum()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void fitNBCircleComputesGradientPerDatum()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
 	@Test
 	public void fitNBFreeCircleComputesGradientPerDatum()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fitNBEllipticalComputesGradientPerDatum()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradientPerDatum(GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
 	}
 
@@ -267,7 +274,7 @@ public class PoissonLikelihoodWrapperTest
 										}
 								}
 		double p = (100.0 * count) / total;
-		logf("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
+		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
 				p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
 	}
@@ -275,6 +282,7 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitFixedComputesGradient()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_FIXED);
 	}
 
@@ -293,6 +301,7 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitEllipticalComputesGradient()
 	{
+		TestSettings.assumeMediumComplexity();
 		// The elliptical function gradient evaluation is worse 
 		DoubleEquality tmp = eq;
 		eq = eqPerDatum;
@@ -303,24 +312,28 @@ public class PoissonLikelihoodWrapperTest
 	@Test
 	public void fitNBFixedComputesGradient()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
 	}
 
 	@Test
 	public void fitNBCircleComputesGradient()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
 	}
 
 	@Test
 	public void fitNBFreeCircleComputesGradient()
 	{
+		TestSettings.assumeMediumComplexity();
 		functionComputesGradient(GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
 	}
 
 	@Test
 	public void fitNBEllipticalComputesGradient()
 	{
+		TestSettings.assumeMediumComplexity();
 		// The elliptical function gradient evaluation is worse 
 		DoubleEquality tmp = eq;
 		eq = eqPerDatum;
@@ -459,7 +472,7 @@ public class PoissonLikelihoodWrapperTest
 
 								}
 		double p = (100.0 * count) / total;
-		logf("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p);
+		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
 	}
 
@@ -486,16 +499,6 @@ public class PoissonLikelihoodWrapperTest
 		return args;
 	}
 
-	void log(String message)
-	{
-		System.out.println(message);
-	}
-
-	void logf(String format, Object... args)
-	{
-		System.out.printf(format, args);
-	}
-
 	@Test
 	public void cumulativeProbabilityIsOneWithIntegerData()
 	{
@@ -520,7 +523,7 @@ public class PoissonLikelihoodWrapperTest
 			for (; x <= max; x++)
 			{
 				final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
-				System.out.printf("x=%d, p=%f\n", x, pp);
+				//System.out.printf("x=%d, p=%f\n", x, pp);
 				p += pp;
 			}
 			if (p > 1.01)
@@ -533,12 +536,12 @@ public class PoissonLikelihoodWrapperTest
 		for (;; x++)
 		{
 			final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
-			System.out.printf("x=%d, p=%f\n", x, pp);
+			//System.out.printf("x=%d, p=%f\n", x, pp);
 			p += pp;
 			if (pp / p < changeTolerance)
 				break;
 		}
-		System.out.printf("mu=%f, p=%f, max=%d\n", mu, p, x);
+		TestSettings.info("mu=%f, p=%f, max=%d\n", mu, p, x);
 		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
 	}
 
@@ -566,7 +569,7 @@ public class PoissonLikelihoodWrapperTest
 			}
 		}, 0, max);
 
-		System.out.printf("mu=%f, p=%f\n", mu, p);
+		TestSettings.info("mu=%f, p=%f\n", mu, p);
 		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
 	}
 
@@ -661,7 +664,7 @@ public class PoissonLikelihoodWrapperTest
 				break;
 		}
 
-		System.out.printf("mu=%f, limit=%d, p=%f\n", mu, limit, p);
+		TestSettings.info("mu=%f, limit=%d, p=%f\n", mu, limit, p);
 		Assert.assertEquals(String.format("mu=%f", mu), 1, p, 0.02);
 
 		// Check the function can compute the same total

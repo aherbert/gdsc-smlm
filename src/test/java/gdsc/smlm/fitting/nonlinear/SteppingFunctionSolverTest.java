@@ -218,7 +218,6 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	@Test
 	public void canFitSingleGaussianEMCCD_x_x__BTFastMLE()
 	{
-		// The BTFastMLE method can generate very big steps that make the method unstable
 		fitSingleGaussian(NO_BOUND, NO_CLAMP, BTFastMLE, NoiseModel.EMCCD);
 	}
 
@@ -255,6 +254,10 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 	@Test(expected = AssertionError.class)
 	public void cannotFitSingleGaussianEMCCD_x_x__JFastMLE()
 	{
+		// The JFastMLE method was built using a misinterpretation of the Newton
+		// method in Numerical Recipes, 2nd Ed. This test is just here to prove that.
+		TestSettings.assumeMaximumComplexity(); 
+		
 		// The JFastMLE method does not work
 		fitSingleGaussian(NO_BOUND, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
 	}
@@ -574,7 +577,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 			SteppingFunctionSolverType type2, boolean bounded, SteppingFunctionSolverClamp clamp,
 			SteppingFunctionSolverType type, NoiseModel noiseModel)
 	{
-		//org.junit.Assume.assumeTrue(false);
+		TestSettings.assumeMediumComplexity();
 		SteppingFunctionSolver solver = getSolver(clamp, type);
 		SteppingFunctionSolver solver2 = getSolver(clamp2, type2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getName(bounded, clamp, type),

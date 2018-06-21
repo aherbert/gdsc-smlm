@@ -30,12 +30,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
+import gdsc.test.TestAssert;
+import gdsc.test.TestSettings;
 
 public class PoissonGammaGaussianConvolutionFunctionTest
 {
-	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
+	static double[] gain = { 6, 30 }; // ADU/electron above 1
 	static double[] photons = PoissonGaussianFunctionTest.photons;
-	static double[] noise = { 1, 2, 4, 8, 16 }; // ADUs
+	static double[] noise = { 1, 10 }; // ADUs
 
 	@Test
 	public void cumulativeProbabilityIsOne()
@@ -130,11 +132,11 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		}
 
 		if (p < 0.98 || p > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
+			TestSettings.debug("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
 
 		// Do a formal integration
 		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
 			@Override
@@ -145,7 +147,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}
@@ -165,14 +167,14 @@ public class PoissonGammaGaussianConvolutionFunctionTest
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
+		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP,
-					1e-3 * Math.abs(logP));
+			TestAssert.assertEquals(msg, Math.log(p), logP, 1e-3);
 		}
 	}
 }

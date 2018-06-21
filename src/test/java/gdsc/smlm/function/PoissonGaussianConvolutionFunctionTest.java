@@ -32,6 +32,8 @@ import org.junit.Test;
 
 import gdsc.core.utils.StoredDataStatistics;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public class PoissonGaussianConvolutionFunctionTest
 {
@@ -145,9 +147,9 @@ public class PoissonGaussianConvolutionFunctionTest
 		if (!computePMF)
 		{
 			// Do a formal integration if the PDF
-			if (p < 0.98 || p > 1.02)
-				System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
-			UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4,
+			//if (p < 0.98 || p > 1.02)
+			//	System.out.printf("g=%f, mu=%f, s=%f p=%f\n", gain, mu, s, p);
+			UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
 					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
@@ -160,7 +162,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		}
 
 		if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}
@@ -195,7 +197,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	@Test
 	public void pdfFasterThanPMF()
 	{
-		//org.junit.Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		// Realistic CCD parameters for speed test
 		double s = 7.16;
@@ -257,7 +259,7 @@ public class PoissonGaussianConvolutionFunctionTest
 		for (int i = 0; i < 5; i++)
 			t2 += run(f2, samples, photons);
 
-		System.out.printf("cdf  %d -> pdf  %d = %f x\n", t1, t2, (double) t1 / t2);
+		TestSettings.logSpeedTestResult(t2 < t1, "cdf  %d -> pdf  %d = %f x\n", t1, t2, (double) t1 / t2);
 	}
 
 	private long run(PoissonGaussianConvolutionFunction f, double[][] samples, double[] photons)

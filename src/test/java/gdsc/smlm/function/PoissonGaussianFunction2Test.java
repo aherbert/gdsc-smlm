@@ -29,6 +29,9 @@ import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestAssert;
+import gdsc.test.TestSettings;
+
 public class PoissonGaussianFunction2Test
 {
 	double[] gain = PoissonGaussianFunctionTest.gain;
@@ -168,7 +171,7 @@ public class PoissonGaussianFunction2Test
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}
@@ -188,14 +191,14 @@ public class PoissonGaussianFunction2Test
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
+		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP,
-					1e-3 * Math.abs(logP));
+			TestAssert.assertEquals(msg, Math.log(p), logP, 1e-3);
 		}
 	}
 }

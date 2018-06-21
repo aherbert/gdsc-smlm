@@ -23,19 +23,39 @@
  */
 package gdsc.smlm.function;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestSettings;
+
 public class PoissonPoissonFunctionTest
 {
-	// No gain below 1
-	double[] gain = { 1, 2, 4, 8, 16 }; // ADU/electron
-	// No negative photons
-	double[] photons = { 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
-	double[] noise = PoissonGaussianFunctionTest.noise;
+	static double[] gain = PoissonGaussianFunctionTest.gain;
+	static double[] photons = PoissonGaussianFunctionTest.photons;
+	static
+	{
+		int c = 0;
+
+		// No gain below 1
+		c = 0;
+		for (int i = 0; i < gain.length; i++)
+			if (gain[i] >= 1)
+				gain[c++] = gain[i];
+		gain = Arrays.copyOf(gain, c);
+
+		// No negative photons
+		c = 0;
+		for (int i = 0; i < photons.length; i++)
+			if (photons[i] >= 0)
+				photons[c++] = photons[i];
+		photons = Arrays.copyOf(photons, c);
+	}
+	static double[] noise = PoissonGaussianFunctionTest.noise;
 
 	@Test
 	public void cumulativeProbabilityIsOne()
@@ -53,8 +73,7 @@ public class PoissonPoissonFunctionTest
 			for (double p : photons)
 				for (double s : noise)
 				{
-					probabilityMatchesLogProbability(g, p, s, true);
-					probabilityMatchesLogProbability(g, p, s, false);
+					probabilityMatchesLogProbability(g, p, s);
 				}
 	}
 
@@ -126,7 +145,7 @@ public class PoissonPoissonFunctionTest
 
 		// Do a formal integration
 		double p2 = 0;
-		UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+		UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 3, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 		p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 		{
 			@Override
@@ -136,13 +155,12 @@ public class PoissonPoissonFunctionTest
 			}
 		}, min, max);
 
-		if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+		TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}
 
-	private void probabilityMatchesLogProbability(final double gain, double mu, final double s, final boolean usePicard)
+	private void probabilityMatchesLogProbability(final double gain, double mu, final double s)
 	{
 		// Note: The input s parameter is pre-gain.
 		PoissonPoissonFunction f = PoissonPoissonFunction.createWithStandardDeviation(1.0 / gain, s * gain);
@@ -156,14 +174,14 @@ public class PoissonPoissonFunctionTest
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
+		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP,
-					1e-3 * Math.abs(logP));
+			Assert.assertEquals(msg, Math.log(p), logP, 1e-3 * Math.abs(logP));
 		}
 	}
 }

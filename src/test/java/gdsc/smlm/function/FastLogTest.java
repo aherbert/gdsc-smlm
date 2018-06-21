@@ -221,7 +221,7 @@ public class FastLogTest
 		float e = (float) Math.log(v);
 		float o = f.log(v);
 		float error = FloatEquality.relativeError(e, o);
-		System.out.printf("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
+		TestSettings.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
 			if (Double.isNaN(e) && Double.isNaN(o))
@@ -305,7 +305,7 @@ public class FastLogTest
 		double e = Math.log(v);
 		double o = f.log(v);
 		double error = DoubleEquality.relativeError(e, o);
-		System.out.printf("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
+		TestSettings.info("%s v=%g : %f vs %s (%g)\n", f.name, v, e, o, error);
 		if (test)
 		{
 			if (Double.isNaN(e) && Double.isNaN(o))
@@ -323,6 +323,8 @@ public class FastLogTest
 	@Test
 	public void canTestFloatError()
 	{
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		
 		// All float values is a lot so we do a representative set
 		float[] d = generateRandomFloats(1000000);
 		float[] logD = new float[d.length];
@@ -377,7 +379,7 @@ public class FastLogTest
 	@Test
 	public void canTestFloatErrorRange()
 	{
-		Assume.assumeTrue(true);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		TurboList<TestFastLog> test = new TurboList<TestFastLog>();
 		int n = 13;
@@ -549,6 +551,8 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleError()
 	{
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		
 		// All float values is a lot so we do a representative set
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
@@ -586,6 +590,8 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleErrorLog1P()
 	{
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
+		
 		// All float values is a lot so we do a representative set
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
@@ -614,7 +620,7 @@ public class FastLogTest
 	@Test
 	public void canTestDoubleErrorRange()
 	{
-		Assume.assumeTrue(true);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		RandomGenerator r = TestSettings.getRandomGenerator();
 

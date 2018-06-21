@@ -49,6 +49,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 
 /**
  * Base class for testing the function solvers
@@ -432,19 +433,16 @@ public abstract class BaseFunctionSolverTest
 		{
 			better += betterPrecision[index] + betterAccuracy[index];
 			total += totalPrecision[index] + totalAccuracy[index];
-			test(name2, name, statName[index] + " P", betterPrecision[index], totalPrecision[index],
-					printBetterDetails);
-			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], printBetterDetails);
+			test(name2, name, statName[index] + " P", betterPrecision[index], totalPrecision[index], LogLevel.DEBUG);
+			test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index], LogLevel.DEBUG);
 		}
-		test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, true);
+		test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, LogLevel.INFO);
 	}
 
-	private void test(String name2, String name, String statName, int better, int total, boolean print)
+	private void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
 	{
 		double p = (total == 0) ? 0 : 100.0 * better / total;
-		String msg = String.format("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p);
-		if (print)
-			System.out.println(msg);
+		TestSettings.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p);
 		// Do not test if we don't have many examples
 		if (total <= 10)
 		{
@@ -460,15 +458,13 @@ public abstract class BaseFunctionSolverTest
 
 		// The test may be unrealistic as the initial params are close to the actual answer.
 
-		//Assert.assertTrue(msg, p >= 50.0);
+		//if (p<50)
+		//Assert.fail(String.format("%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p));
 	}
-
-	boolean printBetterDetails = false;
 
 	private void println(String msg)
 	{
-		if (printBetterDetails)
-			System.out.println(msg);
+		TestSettings.debug(msg);
 	}
 
 	static double distance(double[] o, double[] e)

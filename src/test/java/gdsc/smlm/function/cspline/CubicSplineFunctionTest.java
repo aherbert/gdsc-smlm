@@ -71,7 +71,7 @@ public abstract class CubicSplineFunctionTest
 	protected int[] testx = new int[] { 4, 5, 6 };
 	protected int[] testy = new int[] { 4, 5, 6 };
 	protected double[] testbackground = new double[] { 0, 400 };
-	protected double[] testsignal1 = new double[] { 15, 55, 105 };
+	protected double[] testsignal1 = new double[] { 15, 105 };
 	// Pick some to fall on the node boundaries as the second order
 	// numerical gradients evaluate poorly on the node boundaries.
 	protected double[] testcx1 = new double[] { 5.3, 5.0 };
@@ -83,7 +83,7 @@ public abstract class CubicSplineFunctionTest
 	protected double[] testcz2 = new double[] { -1.9, 0.7 };
 
 	// Different widths to test for non-square function evaluation
-	protected int maxx = 10, maxy = 9;
+	protected int maxx = 8, maxy = 9;
 	protected double background = 50;
 	protected CubicSplineFunction f1;
 	protected CubicSplineFunction f1f;

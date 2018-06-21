@@ -112,9 +112,10 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	double[] photons = { 0, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
-	double[] highPhotons = { 5000, 10000 };
-	double[] lowPhotons = { 1e-2, 1e-4, 1e-6 };
-	double[] noise = { 0.3, 1, 3, 10 }; // in counts
+	double[] highPhotons = { 5000 };
+	double[] lowPhotons = { 1e-2, /*1e-4,*/ 1e-6 };
+	double[] noise = { 3, 10 }; // in counts
+	double[] lowNoise = { 0.3, 1 }; // in counts
 	double[] totalGain = { 6.5, 45 };
 
 	@Test
@@ -180,13 +181,11 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtNoiseAbove1()
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMF()
 	{
 		for (double p : photons)
 			for (double s : noise)
 			{
-				if (s <= 1)
-					continue;
 				for (double g : totalGain)
 				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF, true);
@@ -218,9 +217,8 @@ public class PoissonGammaGaussianFunctionTest
 				}
 	}
 
-	// The approximation is not meant to be used as a PMF
-	@Test(expected = AssertionError.class)
-	public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMF()
+	@Test
+	public void cumulativeProbabilityIsOneWithApproximationAtGainAbove10AsPMF()
 	{
 		for (double p : photons)
 			for (double s : noise)
@@ -257,6 +255,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPDF()
 	{
+		TestSettings.assumeHighComplexity();
 		for (double p : photons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -268,8 +267,135 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPMF()
 	{
+		TestSettings.assumeHighComplexity();
 		for (double p : photons)
 			for (double s : noise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF, true);
+				}
+	}
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPMFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PMF, true);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPDFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PMF, false);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+			{
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF, true);
+				}
+			}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPDFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF, false);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithApproximationAtGainAbove10AsPDFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION, false);
+				}
+	}
+
+	// The approximation is not meant to be used as a PMF
+	@Test(expected = AssertionError.class)
+	public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					if (g < 10)
+						continue;
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.APPROXIMATION, true);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF, false);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPMFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.SIMPSON_PDF, true);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPDFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
+				for (double g : totalGain)
+				{
+					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF, false);
+				}
+	}
+
+	@Test
+	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPMFAtLowNoise()
+	{
+		TestSettings.assumeHighComplexity();
+		for (double p : photons)
+			for (double s : lowNoise)
 				for (double g : totalGain)
 				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.LEGENDRE_GAUSS_PDF, true);
@@ -279,6 +405,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPMFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -290,6 +417,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithDiscretePMFIntegrationAsPDFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -299,13 +427,12 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtNoiseAbove1AtHighPhotons()
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 			{
-				if (s <= 1)
-					continue;
 				for (double g : totalGain)
 				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF, true);
@@ -316,6 +443,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPDFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -327,6 +455,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithApproximationAsPDFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -338,6 +467,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithApproximationAsPMFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -351,6 +481,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPDFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -362,6 +493,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithSimpsonIntegrationAsPMFAtHighPhotons()
 	{
+		TestSettings.assumeMediumComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -373,6 +505,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPDFAtHighPhotons()
 	{
+		TestSettings.assumeHighComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -384,6 +517,7 @@ public class PoissonGammaGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsOneWithLegendreGaussIntegrationAsPMFAtHighPhotons()
 	{
+		TestSettings.assumeHighComplexity();
 		for (double p : highPhotons)
 			for (double s : noise)
 				for (double g : totalGain)
@@ -415,13 +549,11 @@ public class PoissonGammaGaussianFunctionTest
 	}
 
 	@Test
-	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtNoiseAbove1AtLowPhotons()
+	public void cumulativeProbabilityIsOneWithDiscretePDFIntegrationAsPMFAtLowPhotons()
 	{
 		for (double p : lowPhotons)
 			for (double s : noise)
 			{
-				if (s <= 1)
-					continue;
 				for (double g : totalGain)
 				{
 					cumulativeProbabilityIsOne(p, s, g, ConvolutionMode.DISCRETE_PDF, true);
@@ -453,9 +585,8 @@ public class PoissonGammaGaussianFunctionTest
 				}
 	}
 
-	// The approximation is not meant to be used as a PMF
-	@Test(expected = AssertionError.class)
-	public void cumulativeProbabilityIsNotOneWithApproximationAtGainAbove10AsPMFAtLowPhotons()
+	@Test
+	public void cumulativeProbabilityIsOneWithApproximationAtGainAbove10AsPMFAtLowPhotons()
 	{
 		for (double p : lowPhotons)
 			for (double s : noise)
@@ -515,28 +646,28 @@ public class PoissonGammaGaussianFunctionTest
 	public void discretePDFCloselyMatchesPMFIntegration()
 	{
 		double[] e = closelyMatchesPMFIntegration(0.34, ConvolutionMode.DISCRETE_PDF);
-		System.out.printf("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
+		TestSettings.debug("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
 	@Test
 	public void discretePMFCloselyMatchesPMFIntegration()
 	{
 		double[] e = closelyMatchesPMFIntegration(0.22, ConvolutionMode.DISCRETE_PMF);
-		System.out.printf("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
+		TestSettings.debug("Discrete integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
 	@Test
 	public void approximationCloselyMatchesPMFIntegration()
 	{
 		double[] e = closelyMatchesPMFIntegration(0.22, ConvolutionMode.APPROXIMATION);
-		System.out.printf("Approximation max error : rel = %g : abs = %g\n", e[0], e[1]);
+		TestSettings.debug("Approximation max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
 	@Test
 	public void legedreGaussPDFMatchesPMFIntegration()
 	{
 		double[] e = closelyMatchesPMFIntegration(0.03, ConvolutionMode.LEGENDRE_GAUSS_PDF);
-		System.out.printf("Simpson integration max error : rel = %g : abs = %g\n", e[0], e[1]);
+		TestSettings.debug("Simpson integration max error : rel = %g : abs = %g\n", e[0], e[1]);
 	}
 
 	// Speed order is roughly: Approx, Simpson, Discrete PDF, Legendre, Discrete PMF
@@ -570,7 +701,7 @@ public class PoissonGammaGaussianFunctionTest
 			ConvolutionMode convolutionMode, boolean pmfMode)
 	{
 		double p = cumulativeProbability(mu, s, g, convolutionMode, pmfMode);
-		System.out.printf("%s : mu=%f, s=%f, g=%f, p=%f\n", getName(convolutionMode), mu, s, g, p);
+		TestSettings.info("%s : mu=%f, s=%f, g=%f, p=%f\n", getName(convolutionMode), mu, s, g, p);
 
 		// Poisson-Gamma convolution approximation does not sum to 1 at lower gain 
 		// so account for this during the test.
@@ -609,7 +740,7 @@ public class PoissonGammaGaussianFunctionTest
 			for (int x = min; x <= max; x++)
 			{
 				final double pp = f.likelihood(x, mu);
-				//System.out.printf("x=%d, p=%g\n", x, pp);
+				//TestSettings.debug("x=%d, p=%g\n", x, pp);
 				p += pp;
 			}
 			//if (p > 1.01)
@@ -623,7 +754,7 @@ public class PoissonGammaGaussianFunctionTest
 		{
 			min = x;
 			final double pp = f.likelihood(x, mu);
-			//System.out.printf("x=%d, p=%g\n", x, pp);
+			//TestSettings.debug("x=%d, p=%g\n", x, pp);
 			p += pp;
 			if (pp / p < changeTolerance)
 				break;
@@ -632,7 +763,7 @@ public class PoissonGammaGaussianFunctionTest
 		{
 			max = x;
 			final double pp = f.likelihood(x, mu);
-			//System.out.printf("x=%d, p=%g\n", x, pp);
+			//TestSettings.debug("x=%d, p=%g\n", x, pp);
 			p += pp;
 			if (pp / p < changeTolerance)
 				break;
@@ -652,7 +783,7 @@ public class PoissonGammaGaussianFunctionTest
 					return f.likelihood(x, mu);
 				}
 			}, min, max);
-			System.out.printf("%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g\n", getName(convolutionMode), mu, s, g,
+			TestSettings.debug("%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g\n", getName(convolutionMode), mu, s, g,
 					s, g, p, pp);
 			p = pp;
 		}
@@ -715,7 +846,7 @@ public class PoissonGammaGaussianFunctionTest
 
 	private void fasterThan(ConvolutionMode slow, ConvolutionMode fast)
 	{
-		//org.junit.Assume.assumeTrue(false);
+		TestSettings.assumeMediumComplexity();
 
 		// Realistic EM-CCD parameters for speed test
 		double s = 7.16;
@@ -775,7 +906,7 @@ public class PoissonGammaGaussianFunctionTest
 		for (int i = 0; i < 5; i++)
 			t2 += run(f2, samples, photons);
 
-		System.out.printf("%s  %d -> %s  %d = %f x\n", getName(f1), t1, getName(f2), t2, (double) t1 / t2);
+		TestSettings.info("%s  %d -> %s  %d = %f x\n", getName(f1), t1, getName(f2), t2, (double) t1 / t2);
 		Assert.assertTrue(t1 > t2);
 	}
 

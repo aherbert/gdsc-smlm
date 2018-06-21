@@ -33,6 +33,10 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
+import gdsc.test.TestAssert;
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 
 public class PoissonGammaFunctionTest
@@ -147,9 +151,9 @@ public class PoissonGammaFunctionTest
 		if (pdf)
 		{
 			// Do a formal integration
-			if (p < 0.98 || p > 1.02)
+			if (debug && (p < 0.98 || p > 1.02))
 				System.out.printf("g=%f, mu=%f, p=%f\n", gain, mu, p);
-			UnivariateIntegrator in = new SimpsonIntegrator(1e-6, 1e-6, 4,
+			UnivariateIntegrator in = new SimpsonIntegrator(1e-4, 1e-6, 4,
 					SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
 			p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction()
 			{
@@ -165,7 +169,7 @@ public class PoissonGammaFunctionTest
 		}
 
 		//if (p2 < 0.98 || p2 > 1.02)
-		System.out.printf("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
+		TestSettings.info("g=%f, mu=%f, p=%f  %f\n", gain, mu, p, p2);
 
 		return p2;
 	}
@@ -184,13 +188,14 @@ public class PoissonGammaFunctionTest
 		int max = range[1];
 		// Note: The input mu parameter is pre-gain.
 		final double e = mu;
+		String msg = String.format("g=%f, mu=%f", gain, mu);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.likelihood(x, e);
 			if (p == 0)
 				continue;
 			final double logP = f.logLikelihood(x, e);
-			Assert.assertEquals(String.format("g=%f, mu=%f", gain, mu), Math.log(p), logP, 1e-6 * Math.abs(logP));
+			Assert.assertEquals(msg, Math.log(p), logP, 1e-6 * Math.abs(logP));
 		}
 	}
 
@@ -287,7 +292,7 @@ public class PoissonGammaFunctionTest
 		}
 
 		double f = (double) fail / list.size();
-		System.out.printf("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
+		TestSettings.info("g=%g, mu=%g, failures=%g, mean=%f\n", gain, mu, f, Maths.div0(sum, fail));
 		if (approx)
 		{
 			Assert.assertTrue(f < 0.2);
@@ -299,7 +304,7 @@ public class PoissonGammaFunctionTest
 	}
 
 	@Test
-	public void canComputeC0delta()
+	public void canComputeSeparatelyAtC0()
 	{
 		TDoubleArrayList list = new TDoubleArrayList();
 		for (int exp = -12; exp < 6; exp++)
@@ -315,22 +320,33 @@ public class PoissonGammaFunctionTest
 			list.add(x / 10.0);
 		}
 		double[] p = list.toArray();
-		Arrays.sort(p);
 
+		boolean report = TestSettings.allow(LogLevel.INFO, TestComplexity.MEDIUM);
+		if (report)
+			Arrays.sort(p);
+		
 		double m = 5;
 
 		for (double x : p)
 		{
+			double e = PoissonGammaFunction.poissonGamma(0, x, m);
+			// Test the function can be separated into the dirac and the rest
 			double dirac = PoissonGammaFunction.dirac(x);
 			double p0 = PoissonGammaFunction.poissonGammaN(0, x, m);
-			double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
+			TestAssert.assertEquals(e, dirac + p0, 1e-10);
 
-			System.out.printf("p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, dirac, p0,
-					dirac / p0,
-					//gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
-					p01, p0 / p01
-			//gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
-			);
+			// For reporting
+			if (report)
+			{
+				double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
+
+				System.out.printf("p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)\n", x, dirac, p0,
+						dirac / p0,
+						//gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),
+						p01, p0 / p01
+				//gdsc.core.utils.DoubleEquality.relativeError(p0, p01)
+				);
+			}
 		}
 	}
 }

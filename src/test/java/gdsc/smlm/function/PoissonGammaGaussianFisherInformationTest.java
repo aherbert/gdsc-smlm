@@ -28,15 +28,17 @@ import org.junit.Test;
 
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 
 public class PoissonGammaGaussianFisherInformationTest
 {
 	@Test
 	public void canFindMaximumAndUpperLimit()
 	{
-		org.junit.Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.MEDIUM);
 
-		double[] M = { 20, 100, 500 };
+		double[] M = { 20, 500 };
 
 		for (double m : M)
 			canFindMaximumAndUpperLimit(m);
@@ -70,8 +72,6 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canComputeFisherInformation()
 	{
-		//org.junit.Assume.assumeTrue(false);
-
 		//canComputeFisherInformation(250, 13);
 		//double m1 = 500;
 		//double u = 350;
@@ -84,7 +84,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		//if (true)
 		//	return;
 
-		double[] M = { 20, 100, 500 };
+		double[] M = { 20, 500 };
 		double[] S = { 3, 13 };
 
 		for (double m : M)
@@ -105,8 +105,14 @@ public class PoissonGammaGaussianFisherInformationTest
 		// the class works up to mean of about 300. Above that the approximation using
 		// half the Poisson Fisher information should be used instead. 
 		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
-		for (int exp = -12; exp <= 4; exp++)
+		
+		// exp == -12 => p = 1e-6
+		// exp ==  -8 => p = 1e-4
+		// exp ==   0 => p = 1
+		// exp ==   4 => p = 100
+		for (int exp = -8; exp <= 4; exp++)
 		{
+			//System.out.println(Math.pow(10, exp * 0.5));
 			canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
 		}
 	}
@@ -125,14 +131,15 @@ public class PoissonGammaGaussianFisherInformationTest
 	@Test
 	public void canComputeAlpha()
 	{
-		org.junit.Assume.assumeTrue(false);
+		// This is a report as nothing is asserted
+		TestSettings.assume(LogLevel.INFO, TestComplexity.VERY_HIGH);
 
 		// Compute the alpha using a range of gain and standard deviation
 
 		int minm = 100;
 		int maxm = 200;
 
-		// When Poisson mean is low s does not matter as the Dirac is insignificant
+		// When Poisson mean is high s does not matter as the Dirac is insignificant
 		// and the convolution is mute. This may not be true when m is low but at higher
 		// m the function is smooth and convolution has little effect.
 		int mins = 5;
@@ -145,9 +152,10 @@ public class PoissonGammaGaussianFisherInformationTest
 
 		double upper = PoissonFisherInformation.getPoissonI(p);
 		double upper2 = PoissonFisherInformation.getPoissonI(p2);
-		double lastAlpha = 1;
 
 		for (int s = mins; s <= maxs; s++)
+		{
+			double lastAlpha = 1;
 			for (int m = minm; m <= maxm; m++)
 			{
 				PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, s);
@@ -160,12 +168,31 @@ public class PoissonGammaGaussianFisherInformationTest
 						I2, alpha, alpha2, change);
 				lastAlpha = alpha;
 			}
+		}
 	}
 
+	// Note: In practice the low mean is not used during fitting as the background photons
+	// will always contribute to each pixel. Values below 0.01 are rare.
+
+	@Test
+	public void canComputeFisherInformationWithLowMean()
+	{
+		TestSettings.assumeLowComplexity();
+		computeFisherInformationWithMean(1e-100);
+	}
+
+
+	@Test
+	public void canComputeFisherInformationWithVeryLowMean()
+	{
+		TestSettings.assumeMediumComplexity();
+		computeFisherInformationWithMean(1e-300);
+	}
+	
 	@Test
 	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
-		//org.junit.Assume.assumeTrue(false);
+		TestSettings.assumeHighComplexity();
 
 		// Lowest value where the reciprocal is not infinity.
 		double u = Double.longBitsToDouble(0x4000000000001L);
@@ -205,18 +232,10 @@ public class PoissonGammaGaussianFisherInformationTest
 
 		computeFisherInformationWithMean(u);
 	}
-
-	@Test
-	public void canComputeFisherInformationWithLowMean()
-	{
-		org.junit.Assume.assumeTrue(false);
-		double u = 1e-300;
-		computeFisherInformationWithMean(u);
-	}
-
+	
 	private void computeFisherInformationWithMean(double u)
 	{
-		double[] M = { 20, 100, 500 };
+		double[] M = { 20, 500 };
 		double[] S = { 3, 13 };
 
 		for (double m : M)

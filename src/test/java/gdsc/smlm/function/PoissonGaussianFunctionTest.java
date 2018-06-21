@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Maths;
+import gdsc.test.TestSettings;
 
 public class PoissonGaussianFunctionTest
 {
@@ -43,9 +44,9 @@ public class PoissonGaussianFunctionTest
 	// Gain has a range of 1.44 to 5.8, mean = 1.737 ADU/e-
 	// Noise variance 4 to 141 ADUs => 1.1 to 7 electrons 
 
-	static double[] gain = { 0.25, 0.5, 1, 2, 4, 8, 16 }; // ADU/electron
+	static double[] gain = { 0.25, 0.5, 1, 2, 4 }; // ADU/electron
 	static double[] photons = { -1, 0, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
-	static double[] noise = { 1, 2, 4, 8, 16 }; // electrons
+	static double[] noise = { 1, 2, 4, 8 }; // electrons
 
 	@Test
 	public void cumulativeProbabilityIsOneWithPicard()
@@ -105,6 +106,8 @@ public class PoissonGaussianFunctionTest
 	@Test
 	public void padeIsFaster()
 	{
+		TestSettings.assumeMediumComplexity();
+
 		double[] noise2 = new double[noise.length];
 		for (int i = 0; i < noise.length; i++)
 			noise2[i] = noise[i] * noise[i];
@@ -123,7 +126,7 @@ public class PoissonGaussianFunctionTest
 		long t1 = getTime(noise2, N, x, true);
 		long t2 = getTime(noise2, N, x, false);
 
-		System.out.printf("Picard %d : Pade %d (%fx)\n", t1, t2, t1 / (double) t2);
+		TestSettings.info("Picard %d : Pade %d (%fx)\n", t1, t2, t1 / (double) t2);
 		Assert.assertTrue(String.format("Picard %d > Pade %d", t1, t2), t2 < t1);
 	}
 
@@ -241,7 +244,7 @@ public class PoissonGaussianFunctionTest
 		}, min, max);
 
 		if (p2 < 0.98 || p2 > 1.02)
-			System.out.printf("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
+			TestSettings.info("g=%f, mu=%f, s=%f p=%f  %f\n", gain, mu, s, p, p2);
 
 		return p2;
 	}
@@ -272,14 +275,14 @@ public class PoissonGaussianFunctionTest
 		int[] range = getRange(gain, mu, s);
 		int min = range[0];
 		int max = range[1];
+		String msg = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
 		for (int x = min; x <= max; x++)
 		{
 			final double p = f.probability(x);
 			if (p == 0)
 				continue;
 			final double logP = f.logProbability(x);
-			Assert.assertEquals(String.format("g=%f, mu=%f, s=%f", gain, mu, s), Math.log(p), logP,
-					1e-3 * Math.abs(logP));
+			Assert.assertEquals(msg, Math.log(p), logP, 1e-3 * Math.abs(logP));
 		}
 	}
 
@@ -299,15 +302,18 @@ public class PoissonGaussianFunctionTest
 		int max = range[1];
 		final double logGain = Math.log(gain);
 		final double s2 = Maths.pow2(s);
+		String msg1 = String.format("g=%f, mu=%f, s=%f", gain, mu, s);
+		String msg2 = "logProbability " + msg1;
+		msg1 = "probability " + msg1;
 		for (int x = min; x <= max; x++)
 		{
 			double p = f.probability(x);
 			double pp = PoissonGaussianFunction.probability(x / gain, mu, s2, usePicard) / gain;
-			Assert.assertEquals(String.format("probability g=%f, mu=%f, s=%f", gain, mu, s), p, pp, 1e-10);
+			Assert.assertEquals(msg1, p, pp, 1e-10);
 
 			p = f.logProbability(x);
 			pp = PoissonGaussianFunction.logProbability(x / gain, mu, s2, usePicard) - logGain;
-			Assert.assertEquals(String.format("logProbability g=%f, mu=%f, s=%f", gain, mu, s), p, pp, 1e-10);
+			Assert.assertEquals(msg2, p, pp, 1e-10);
 		}
 	}
 }

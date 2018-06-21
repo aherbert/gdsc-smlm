@@ -40,7 +40,7 @@ public class PerPixelCameraModelTest
 {
 	static float[] bias, gain, variance, var_g2, image;
 
-	final static int w = 200, h = 300, size;
+	final static int w = 113, h = 29, size;
 	static
 	{
 		RandomGenerator r = TestSettings.getRandomGenerator();
@@ -89,13 +89,19 @@ public class PerPixelCameraModelTest
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
-					5 + rand.nextInt(5));
+			Rectangle bounds = getBounds(rand, ie);
 			check(bias, bounds, model.getBias(bounds));
 			check(gain, bounds, model.getGain(bounds));
 			check(variance, bounds, model.getVariance(bounds));
 			check(var_g2, bounds, model.getNormalisedVariance(bounds));
 		}
+	}
+
+	private Rectangle getBounds(RandomGenerator rand, ImageExtractor ie)
+	{
+		Rectangle bounds = ie.getBoxRegionBounds(5 + rand.nextInt(w - 10), 5 + rand.nextInt(h - 10),
+				2 + rand.nextInt(3));
+		return bounds;
 	}
 
 	private PerPixelCameraModel createModel(boolean initialise)
@@ -128,8 +134,7 @@ public class PerPixelCameraModelTest
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
-					5 + rand.nextInt(5));
+			Rectangle bounds = getBounds(rand, ie);
 			CameraModel model2 = model.crop(bounds, false);
 			Assert.assertEquals(model2.getBounds(), bounds);
 			check(bias, bounds, model2.getBias(bounds));
@@ -183,8 +188,7 @@ public class PerPixelCameraModelTest
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int j = 0; j < 10; j++)
 		{
-			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
-					5 + rand.nextInt(5));
+			Rectangle bounds = getBounds(rand, ie);
 			checkConversion(bounds, model);
 		}
 	}
@@ -197,8 +201,7 @@ public class PerPixelCameraModelTest
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int j = 0; j < 10; j++)
 		{
-			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
-					5 + rand.nextInt(5));
+			Rectangle bounds = getBounds(rand, ie);
 			checkConversion(bounds, model.crop(bounds, false));
 		}
 	}
@@ -264,8 +267,7 @@ public class PerPixelCameraModelTest
 		ImageExtractor ie = new ImageExtractor(bias, w, h);
 		for (int i = 0; i < 10; i++)
 		{
-			Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20), 10 + rand.nextInt(h - 20),
-					5 + rand.nextInt(5));
+			Rectangle bounds = getBounds(rand, ie);
 			float[] v = (normalised) ? model.getNormalisedVariance(bounds) : model.getVariance(bounds);
 			double e = Maths.sum(v) / v.length;
 			double o = (normalised) ? model.getMeanNormalisedVariance(bounds) : model.getMeanVariance(bounds);

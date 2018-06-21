@@ -39,6 +39,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 /**
@@ -119,8 +120,8 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 			p.computeSecondDerivative(paramsList.get(i));
 			p2.computeSecondDerivative(paramsList.get(i));
 			// Virtually the same ...
-			Assert.assertArrayEquals(p.d1, p2.d1, 1e-5);
-			Assert.assertArrayEquals(p.d2, p2.d2, 1e-5);
+			TestAssert.assertArrayEquals(p.d1, p2.d1, 1e-5);
+			TestAssert.assertArrayEquals(p.d2, p2.d2, 1e-5);
 		}
 	}
 

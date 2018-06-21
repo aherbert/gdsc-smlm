@@ -328,6 +328,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 	private void fitSingleGaussianBetterLVM(boolean bounded2, int clamping2, boolean mle2, boolean bounded,
 			int clamping, boolean mle)
 	{
+		TestSettings.assumeMediumComplexity();
 		NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
 		NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
 		canFitSingleGaussianBetter(solver, bounded, solver2, bounded2, getLVMName(bounded, clamping, mle),

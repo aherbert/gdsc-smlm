@@ -62,6 +62,8 @@ public class SphericalDistributionTest
 	@Test
 	public void rejectionMethodIsFasterThanTransformationMethod()
 	{
+		TestSettings.assumeMediumComplexity();
+		
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		double radius = 10 + rg.nextDouble() * 10;
 		SphericalDistribution dist = new SphericalDistribution(radius, rg);

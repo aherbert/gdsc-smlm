@@ -232,7 +232,7 @@ public class GradientCalculatorSpeedTest
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
 
-		int iter = 100;
+		int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		double[][] alpha = new double[nparams][nparams];
@@ -403,7 +403,7 @@ public class GradientCalculatorSpeedTest
 		int[] indices = func.gradientIndices();
 		Assert.assertEquals(nparams, indices.length);
 
-		int iter = 100;
+		int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		double[] beta = new double[nparams];
@@ -499,12 +499,13 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void gradientCalculatorComputesSameOutputWithBias()
 	{
+
 		Gaussian2DFunction func = new SingleEllipticalGaussian2DFunction(blockWidth, blockWidth);
 		int nparams = func.getNumberOfGradients();
 		GradientCalculator calc = new GradientCalculator(nparams);
 		int n = func.size();
 
-		int iter = 100;
+		int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
 		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
@@ -516,6 +517,7 @@ public class GradientCalculatorSpeedTest
 
 		// Manipulate the background
 		double defaultBackground = Background;
+		boolean report = TestSettings.allow(LogLevel.INFO);
 		try
 		{
 			Background = 1e-2;
@@ -546,16 +548,25 @@ public class GradientCalculatorSpeedTest
 
 			double[][] alpha = new double[nparams][nparams];
 			double[] beta = new double[nparams];
+			Statistics[] rel = new Statistics[nparams];
+			Statistics[] abs = new Statistics[nparams];
+			for (int i = 0; i < nparams; i++)
+			{
+				rel[i] = new Statistics();
+				abs[i] = new Statistics();
+			}
 
 			//for (int b = 1; b < 1000; b *= 2)
-			for (double b : new double[] { -500, -100, -10, -1, -0.1, 0, 0.1, 1, 10, 100, 500 })
+			//for (double b : new double[] { -500, -100, -10, -1, -0.1, 0.1, 1, 10, 100, 500 })
+			for (double b : new double[] { -10, -1, -0.1, 0.1, 1, 10 })
 			{
-				Statistics[] rel = new Statistics[nparams];
-				Statistics[] abs = new Statistics[nparams];
-				for (int i = 0; i < nparams; i++)
+				if (report)
 				{
-					rel[i] = new Statistics();
-					abs[i] = new Statistics();
+					for (int i = 0; i < nparams; i++)
+					{
+						rel[i].reset();
+						abs[i].reset();
+					}
 				}
 
 				for (int i = 0; i < paramsList.size(); i++)
@@ -578,17 +589,23 @@ public class GradientCalculatorSpeedTest
 					solver.solve(alpha, beta);
 					Assert.assertArrayEquals("X", x2, beta, 1e-10);
 
-					for (int j = 0; j < nparams; j++)
+					if (report)
 					{
-						rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
-						abs[j].add(Math.abs(x2[j] - beta[j]));
+						for (int j = 0; j < nparams; j++)
+						{
+							rel[j].add(DoubleEquality.relativeError(x2[j], beta[j]));
+							abs[j].add(Math.abs(x2[j] - beta[j]));
+						}
 					}
 				}
 
-				for (int i = 0; i < nparams; i++)
-					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
-							func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
-							abs[i].getMean(), abs[i].getStandardDeviation());
+				if (report)
+				{
+					for (int i = 0; i < nparams; i++)
+						System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
+								func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
+								abs[i].getMean(), abs[i].getStandardDeviation());
+				}
 			}
 		}
 		finally
