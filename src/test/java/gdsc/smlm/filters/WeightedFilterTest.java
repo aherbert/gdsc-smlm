@@ -25,8 +25,6 @@ package gdsc.smlm.filters;
 
 import java.util.Arrays;
 
-//import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
@@ -40,7 +38,7 @@ public abstract class WeightedFilterTest
 	gdsc.core.utils.Random rand;
 
 	/** The primes used for the width/height of images during filter testing. */
-	static int[] primes = new int[] { 113, /*97, 53,*/ 29 };
+	static int[] primes = new int[] { 113, /* 97, 53, */ 29 };
 	/**
 	 * The box sizes used during filter testing.
 	 * 15 is required to make the box larger than the smallest image.
@@ -178,7 +176,7 @@ public abstract class WeightedFilterTest
 					for (float offset : offsets)
 						for (boolean internal : checkInternal)
 						{
-							testMean(data, width, height, boxSize - offset, internal, filter, "w=?", e[ei++], 1e-2);
+							testMean(data, width, height, boxSize - offset, internal, filter, "w=?", e[ei++], 5e-2);
 						}
 			}
 	}
@@ -211,12 +209,8 @@ public abstract class WeightedFilterTest
 		double error = DoubleEquality.relativeError(u1, u2);
 		//System.out.printf("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)\n", filter.name, title,
 		//		width, height, boxSize, internal, u1, u2, error);
-		if (error > tol)
-		{
-			String msg = String.format("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,
-					width, height, boxSize, internal, u1, u2, error);
-			Assert.fail(msg);
-		}
+		TestAssert.assertTrue(error <= tol, "%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)", filter.name, title,
+				width, height, boxSize, internal, u1, u2, error);
 		return u2;
 	}
 }

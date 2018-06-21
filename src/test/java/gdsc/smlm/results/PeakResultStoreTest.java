@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.Random;
 import gdsc.smlm.results.predicates.PeakResultPredicate;
+import gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import gdsc.test.TestSettings;
 
 public class PeakResultStoreTest
@@ -88,7 +89,7 @@ public class PeakResultStoreTest
 		// Can sort
 		if (isList)
 		{
-			Arrays.sort(list, 0, size);
+			Arrays.sort(list, 0, size, FrameIdPeakResultComparator.INSTANCE);
 			storeList.sort();
 
 			for (int i = 0; i < size; i++)
