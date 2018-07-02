@@ -38,6 +38,7 @@ import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
@@ -557,12 +558,21 @@ public class EJMLLinearSolverTest
 			ts.report(size);
 
 		// Since the speed is very similar at sizes 2-5 there is nothing to reliably assert
-		// about the fastest of Cholesky/CholeskyLDLT/Direct
+		// about the fastest of Cholesky/CholeskyLDLT/Direct.
+		// Just check the PseudoInverse is slowest
 		for (int i = 1; i < size; i++)
-			Assert.assertTrue("PseudoInverse is not slowest", ts.get(-size).getMean() > ts.get(-i).getMean());
+			TestAssert.assertTrue(ts.get(-(size)).getMean() > ts.get(-i).getMean(), "%s is not slowest: %s",
+					ts.get(-(size)).getTask().getName(), ts.get(-i).getTask().getName());
+		
 		if (np > 2)
-			for (int i = 1; i < size - 1; i++)
-				Assert.assertTrue("Linear is not 2nd slowest", ts.get(-(size - 1)).getMean() > ts.get(-i).getMean());
+		{
+			// The Direct solver may not be faster at size=5
+			int i = (np == 5) ? 2 : 1;
+			int size_1 = size - 1;
+			for (; i < size_1; i++)
+				TestAssert.assertTrue(ts.get(-(size_1)).getMean() > ts.get(-i).getMean(), "%s is not 2nd slowest: %s",
+						ts.get(-(size_1)).getTask().getName(), ts.get(-i).getTask().getName());
+		}
 	}
 
 	private abstract class InversionTimingTask extends BaseTimingTask
