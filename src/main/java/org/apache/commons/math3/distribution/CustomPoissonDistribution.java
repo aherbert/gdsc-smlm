@@ -94,6 +94,22 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	/** Convergence criterion for cumulative probability. */
 	private final double epsilon;
 
+	/** The uninitialised flag. Indicates that the factors have not been computed for random sampling */
+	private boolean uninitialised;
+
+	// Pre-computed for sampling the mean 
+	private double lambda;
+	private double lambdaFractional;
+	private double logLambda;
+	private double logLambdaFactorial;
+	private long y2;
+	private double delta;
+	private double halfDelta;
+	private double twolpd;
+	private double p1;
+	private double p2;
+	private double c1;
+
 	/**
 	 * Creates a new Poisson distribution with specified mean.
 	 * <p>
@@ -179,11 +195,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	{
 		super(rng);
 
-		if (p <= 0)
-		{
-			throw new NotStrictlyPositiveException(LocalizedFormats.MEAN, p);
-		}
-		mean = p;
+		setMean(p);
 		this.epsilon = epsilon;
 		this.maxIterations = maxIterations;
 
@@ -263,6 +275,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	{
 		mean = p;
 		normal = null;
+		uninitialised = true;
 	}
 
 	/** {@inheritDoc} */
@@ -455,20 +468,9 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 		}
 		else
 		{
-			final double lambda = FastMath.floor(meanPoisson);
-			final double lambdaFractional = meanPoisson - lambda;
-			final double logLambda = FastMath.log(lambda);
-			final double logLambdaFactorial = CombinatoricsUtils.factorialLog((int) lambda);
-			final long y2 = lambdaFractional < Double.MIN_VALUE ? 0 : nextPoisson(lambdaFractional);
-			final double delta = FastMath.sqrt(lambda * FastMath.log(32 * lambda / FastMath.PI + 1));
-			final double halfDelta = delta / 2;
-			final double twolpd = 2 * lambda + delta;
-			final double a1 = FastMath.sqrt(FastMath.PI * twolpd) * FastMath.exp(1 / (8 * lambda));
-			final double a2 = (twolpd / delta) * FastMath.exp(-delta * (1 + delta) / twolpd);
-			final double aSum = a1 + a2 + 1;
-			final double p1 = a1 / aSum;
-			final double p2 = a2 / aSum;
-			final double c1 = 1 / (8 * lambda);
+			computeFactors();
+
+			y2 = lambdaFractional < Double.MIN_VALUE ? 0 : nextPoisson(lambdaFractional);
 
 			double x = 0;
 			double y = 0;
@@ -531,6 +533,27 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 				}
 			}
 			return y2 + (long) y;
+		}
+	}
+
+	private void computeFactors()
+	{
+		if (uninitialised)
+		{
+			lambda = FastMath.floor(mean);
+			lambdaFractional = mean - lambda;
+			logLambda = FastMath.log(lambda);
+			logLambdaFactorial = CombinatoricsUtils.factorialLog((int) lambda);
+			delta = FastMath.sqrt(lambda * FastMath.log(32 * lambda / FastMath.PI + 1));
+			halfDelta = delta / 2;
+			twolpd = 2 * lambda + delta;
+			double a1 = FastMath.sqrt(FastMath.PI * twolpd) * FastMath.exp(1 / (8 * lambda));
+			double a2 = (twolpd / delta) * FastMath.exp(-delta * (1 + delta) / twolpd);
+			double aSum = a1 + a2 + 1;
+			p1 = a1 / aSum;
+			p2 = a2 / aSum;
+			c1 = 1 / (8 * lambda);
+			uninitialised = false;
 		}
 	}
 }
