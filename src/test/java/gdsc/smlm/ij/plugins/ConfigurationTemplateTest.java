@@ -105,7 +105,7 @@ public class ConfigurationTemplateTest
 		{
 			if (set.contains(template.name))
 			{
-				System.out.println(test + " loaded: " + template);
+				TestSettings.info(test + " loaded: " + template);
 				continue;
 			}
 			Assert.assertTrue(test + " could not load: " + template, false);

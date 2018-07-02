@@ -433,6 +433,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	private static void loadCustomTemplate(String name, String path, String tifPath)
 	{
+		if (TextUtils.isNullOrEmpty(path))
+			return;
 		TemplateSettings.Builder builder = TemplateSettings.newBuilder();
 		File file = new File(path);
 		if (SettingsManager.fromJSON(file, builder, 0))
@@ -707,7 +709,9 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		{
 			// Update the loaded templates
 			map.put(name, template);
-			saveLoadedTemplates();
+			// If the template came from a file ensure it can be restored
+			if (file != null)
+				saveLoadedTemplates();
 		}
 		return result;
 	}
