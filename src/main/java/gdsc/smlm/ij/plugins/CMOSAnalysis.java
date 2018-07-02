@@ -961,8 +961,8 @@ public class CMOSAnalysis implements PlugIn
 				// Get the processing speed.
 				sw.stop();
 				// progress holds the number of calls to showProgress() for 
-				// processing a frame.
-				double bits = (double) bitDepth * progress * data[0].length;
+				// processing a frame (i.e. number of frames)
+				double bits = (double) bitDepth * progress * source.getWidth() * source.getHeight();
 				double seconds = sw.getNanoTime() / 1e9;
 				double bps = bits / seconds;
 				SIPrefix prefix = SIPrefix.getPrefix(bps);
