@@ -368,7 +368,7 @@ public class LSQLVMGradientProcedureTest
 			final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
 			boolean doAssert)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -430,10 +430,13 @@ public class LSQLVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.info("Standard %s = %d : Unrolled %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), time1,
-				factory2.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
-		if (doAssert)
-			Assert.assertTrue(time2 < time1);
+		TestSettings.logSpeedTestResult(time2 < time1, "%s = %d : %s %d = %d : %fx\n",
+				factory1.getClass().getSimpleName(), time1, factory2.getClass().getSimpleName(), nparams, time2,
+				(1.0 * time1) / time2);
+
+		//if (doAssert)
+		//	TestAssert.assertTrue(time2 < time1, "n=%d : %s not faster than %s", nparams,
+		//			factory2.getClass().getSimpleName(), factory1.getClass().getSimpleName());
 	}
 
 	@Test

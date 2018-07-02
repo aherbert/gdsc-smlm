@@ -278,7 +278,7 @@ public class WPoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
+		TestSettings.info("Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
 				(1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
@@ -353,8 +353,8 @@ public class WPoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
-				(1.0 * time1) / time2);
+		TestSettings.info("WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx\n", time1, nparams,
+				time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
 
@@ -441,10 +441,5 @@ public class WPoissonGradientProcedureTest
 		for (int i = 0; i < d.length; i++)
 			d2[i] = d[i];
 		return d2;
-	}
-
-	void log(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 }

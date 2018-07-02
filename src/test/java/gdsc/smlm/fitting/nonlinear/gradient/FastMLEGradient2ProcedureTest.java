@@ -444,7 +444,7 @@ public class FastMLEGradient2ProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("Standard = %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
+		TestSettings.info("Standard = %d : Unrolled %d = %d : %fx\n", time1, nparams, time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1 * 1.5);
 	}
 
@@ -651,10 +651,5 @@ public class FastMLEGradient2ProcedureTest
 		for (int i = 0; i < d.length; i++)
 			d2[i] = d[i];
 		return d2;
-	}
-
-	void log(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 }
