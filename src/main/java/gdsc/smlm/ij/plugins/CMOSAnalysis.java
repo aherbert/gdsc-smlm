@@ -46,6 +46,7 @@ import org.apache.commons.math3.stat.inference.TestUtils;
 import org.apache.commons.math3.util.MathArrays;
 
 import gdsc.core.data.IntegerType;
+import gdsc.core.data.SIPrefix;
 import gdsc.core.generics.CloseableBlockingQueue;
 import gdsc.core.ij.Utils;
 import gdsc.core.logging.TrackProgress;
@@ -890,8 +891,11 @@ public class CMOSAnalysis implements PlugIn
 
 				// Process the raw pixel data
 				long lastTime = 0;
+				int bitDepth = 0;
 				for (Object pixels = source.nextRaw(); pixels != null; pixels = source.nextRaw())
 				{
+					if (bitDepth == 0)
+						bitDepth = Utils.getBitDepth(pixels);
 					long time = System.currentTimeMillis();
 					if (time - lastTime > 150)
 					{
@@ -951,7 +955,16 @@ public class CMOSAnalysis implements PlugIn
 				data[2 * n] = moment.getFirstMoment();
 				data[2 * n + 1] = moment.getVariance();
 
-				Utils.log("Processed %d frames. Time = %s", moment.getN(), sw.toString());
+				// Get the processing speed.
+				sw.stop();
+				// progress holds the number of calls to showProgress() for 
+				// processing a frame.
+				double bits = (double) bitDepth * progress * data[0].length;
+				double seconds = sw.getNanoTime() / 1e9;
+				double bps = bits / seconds;
+				SIPrefix prefix = SIPrefix.getPrefix(bps);
+				Utils.log("Processed %d frames. Time = %s. Rate = %s %sbits/s", moment.getN(), sw.toString(),
+						Utils.rounded(prefix.convert(bps)), prefix.getName());
 
 				// Reset
 				futures.clear();
