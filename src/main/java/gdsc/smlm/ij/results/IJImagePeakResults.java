@@ -31,6 +31,7 @@ import gdsc.core.utils.SimpleLock;
 import gdsc.core.utils.TextUtils;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.results.PeakResult;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.InfinityMappedImageStack;
@@ -218,8 +219,9 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		}
 		else
 		{
-			Utils.log("ERROR: Unable to create image results '%s' due to invalid dimensions: width=%d, height=%d",
-					title, imageWidth, imageHeight);
+			if (IJ.getInstance() != null)
+				Utils.log("ERROR: Unable to create image results '%s' due to invalid dimensions: width=%d, height=%d",
+						title, imageWidth, imageHeight);
 			w = h = 1;
 		}
 
