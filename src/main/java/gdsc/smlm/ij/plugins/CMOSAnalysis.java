@@ -867,6 +867,11 @@ public class CMOSAnalysis implements PlugIn
 				progress = 0;
 				progressBar.show(0);
 
+				// Open the first frame to get the bit depth.
+				// Assume the first pixels are not empty as the source is open.
+				Object pixels = source.nextRaw();
+				int bitDepth = Utils.getBitDepth(pixels);
+
 				ArrayMoment moment;
 				if (rollingAlgorithm)
 				{
@@ -875,7 +880,7 @@ public class CMOSAnalysis implements PlugIn
 				else
 				{
 					// We assume 16-bit camera at the maximum
-					if (IntegerArrayMoment.isValid(IntegerType.UNSIGNED_16, source.getFrames()))
+					if (bitDepth <= 16 && IntegerArrayMoment.isValid(IntegerType.UNSIGNED_16, source.getFrames()))
 						moment = new IntegerArrayMoment();
 					else
 						moment = new SimpleArrayMoment();
@@ -891,11 +896,8 @@ public class CMOSAnalysis implements PlugIn
 
 				// Process the raw pixel data
 				long lastTime = 0;
-				int bitDepth = 0;
-				for (Object pixels = source.nextRaw(); pixels != null; pixels = source.nextRaw())
+				while (pixels != null)
 				{
-					if (bitDepth == 0)
-						bitDepth = Utils.getBitDepth(pixels);
 					long time = System.currentTimeMillis();
 					if (time - lastTime > 150)
 					{
@@ -908,6 +910,7 @@ public class CMOSAnalysis implements PlugIn
 						statusLine.setText("Analysing " + sd.name + " Frame " + source.getStartFrameNumber());
 					}
 					put(jobs, pixels);
+					pixels = source.nextRaw();
 				}
 				source.close();
 
