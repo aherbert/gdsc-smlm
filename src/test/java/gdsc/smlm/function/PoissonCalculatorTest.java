@@ -35,7 +35,6 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.ij.Utils;
@@ -46,6 +45,7 @@ import gdsc.test.BaseTimingTask;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
+import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 
 public class PoissonCalculatorTest
@@ -209,7 +209,7 @@ public class PoissonCalculatorTest
 
 		p = in.integrate(20000, f, min, max);
 
-		System.out.printf("mu=%f, p=%f\n", f.mu, p);
+		TestSettings.info("mu=%f, p=%f\n", f.mu, p);
 		if (test)
 		{
 			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", f.mu);
@@ -290,7 +290,7 @@ public class PoissonCalculatorTest
 
 	private void canComputeLogLikelihoodRatio(BaseNonLinearFunction nlf)
 	{
-		System.out.println(nlf.name);
+		TestSettings.info(nlf.name);
 
 		int n = maxx * maxx;
 
@@ -312,7 +312,7 @@ public class PoissonCalculatorTest
 		double mll = PoissonCalculator.maximumLogLikelihood(x);
 		double llr = -2 * (ll - mll);
 		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x);
-		System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
+		TestSettings.info("llr=%f, llr2=%f\n", llr, llr2);
 		Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-10);
 
 		double[] op = new double[x.length];
@@ -327,7 +327,8 @@ public class PoissonCalculatorTest
 		int df = n - 1;
 		ChiSquaredDistributionTable table = ChiSquaredDistributionTable.createUpperTailed(0.05, df);
 		ChiSquaredDistributionTable table2 = ChiSquaredDistributionTable.createUpperTailed(0.001, df);
-		System.out.printf("Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f\n", table.getCrititalValue(df),
+		if (TestSettings.allow(LogLevel.INFO))
+		TestSettings.info("Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f\n", table.getCrititalValue(df),
 				table.getSignificanceValue(), table2.getCrititalValue(df), table2.getSignificanceValue(),
 				ChiSquaredDistributionTable.computeQValue(24, 2),
 				ChiSquaredDistributionTable.createUpperTailed(0.05, 2).reject(24, 2),
@@ -398,7 +399,7 @@ public class PoissonCalculatorTest
 
 	private void canComputeFastLog_LogLikelihoodRatio(BaseNonLinearFunction nlf)
 	{
-		System.out.println(nlf.name);
+		TestSettings.infoln(nlf.name);
 
 		int n = maxx * maxx;
 
@@ -419,7 +420,7 @@ public class PoissonCalculatorTest
 		// Only test the LLR
 		double llr = PoissonCalculator.logLikelihoodRatio(u, x);
 		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
-		System.out.printf("llr=%f, llr2=%f\n", llr, llr2);
+		TestSettings.info("llr=%f, llr2=%f\n", llr, llr2);
 		// Approximately equal
 		Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-3);
 	}
@@ -525,7 +526,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfLogFactorialApproximation()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -550,13 +551,13 @@ public class PoissonCalculatorTest
 			o[i] = PoissonCalculator.logFactorialApproximation(x, i);
 			error[i] = DoubleEquality.relativeError(e, o[i]);
 		}
-		System.out.printf("%s! = %s : %s\n", Double.toString(x), Utils.rounded(e), Arrays.toString(error));
+		TestSettings.info("%s! = %s : %s\n", Double.toString(x), Utils.rounded(e), Arrays.toString(error));
 	}
 
 	@Test
 	public void showRelativeErrorOfFastLogLikelihood()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -579,7 +580,7 @@ public class PoissonCalculatorTest
 			double e = PoissonCalculator.logLikelihood(u, x);
 			double o = PoissonCalculator.fastLogLikelihood(u, x);
 			double error = DoubleEquality.relativeError(e, o);
-			System.out.printf("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
+			TestSettings.info("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
 					Double.toString(error));
 		}
 	}
@@ -587,7 +588,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_FastLogLikelihood()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -611,7 +612,7 @@ public class PoissonCalculatorTest
 			double e = PoissonCalculator.logLikelihood(u, x);
 			double o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
 			double error = DoubleEquality.relativeError(e, o);
-			System.out.printf("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
+			TestSettings.info("ll(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
 					Double.toString(error));
 		}
 	}
@@ -619,7 +620,7 @@ public class PoissonCalculatorTest
 	@Test
 	public void showRelativeErrorOfFastLog_LogLikelihoodRatio()
 	{
-		Assume.assumeTrue(false);
+		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
 
 		double d = 1.0;
 		for (int i = 1; i <= 100; i++)
@@ -643,7 +644,7 @@ public class PoissonCalculatorTest
 			double e = PoissonCalculator.logLikelihoodRatio(u, x);
 			double o = PoissonCalculator.logLikelihoodRatio(u, x, fastLog);
 			double error = DoubleEquality.relativeError(e, o);
-			System.out.printf("llr(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
+			TestSettings.info("llr(%s|%s) = %s : %s\n", Double.toString(x), Double.toString(u), Utils.rounded(e),
 					Double.toString(error));
 		}
 	}
@@ -668,12 +669,12 @@ public class PoissonCalculatorTest
 			PoissonCalculator pc = new PoissonCalculator(x);
 			e = PoissonCalculator.maximumLogLikelihood(x);
 			o = pc.getMaximumLogLikelihood();
-			System.out.printf("[%s] Instance MaxLL = %g vs %g (error = %g)\n", X, e, o,
+			TestSettings.info("[%s] Instance MaxLL = %g vs %g (error = %g)\n", X, e, o,
 					DoubleEquality.relativeError(e, o));
 			Assert.assertTrue("Instance Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 
 			o = PoissonCalculator.fastMaximumLogLikelihood(x);
-			System.out.printf("[%s] Fast MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			TestSettings.info("[%s] Fast MaxLL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
 			Assert.assertTrue("Fast Max LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 
 			// Generate data around the value
@@ -682,18 +683,18 @@ public class PoissonCalculatorTest
 
 			e = PoissonCalculator.logLikelihood(u, x);
 			o = pc.logLikelihood(u);
-			System.out.printf("[%s] Instance LL = %g vs %g (error = %g)\n", X, e, o,
+			TestSettings.info("[%s] Instance LL = %g vs %g (error = %g)\n", X, e, o,
 					DoubleEquality.relativeError(e, o));
 			Assert.assertTrue("Instance LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 
 			o = PoissonCalculator.fastLogLikelihood(u, x);
-			System.out.printf("[%s] Fast LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
+			TestSettings.info("[%s] Fast LL = %g vs %g (error = %g)\n", X, e, o, DoubleEquality.relativeError(e, o));
 			Assert.assertTrue("Fast LL not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 
 			e = PoissonCalculator.logLikelihoodRatio(u, x);
 			o = pc.getLogLikelihoodRatio(o);
 
-			System.out.printf("[%s] Instance LLR = %g vs %g (error = %g)\n", X, e, o,
+			TestSettings.info("[%s] Instance LLR = %g vs %g (error = %g)\n", X, e, o,
 					DoubleEquality.relativeError(e, o));
 			Assert.assertTrue("Instance LLR not equal", eq.almostEqualRelativeOrAbsolute(e, o));
 		}
@@ -834,7 +835,7 @@ public class PoissonCalculatorTest
 			}
 		}
 		double[] limits = Maths.limits(x);
-		System.out.printf("Speed test x-range: %f - %f\n", limits[0], limits[1]);
+		TestSettings.info("Speed test x-range: %f - %f\n", limits[0], limits[1]);
 
 		TimingService ts = new TimingService(5);
 		int[] loops = new int[] { 0, 1, 10 };

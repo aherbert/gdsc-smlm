@@ -304,8 +304,8 @@ public class SCMOSLikelihoodWrapperTest
 										}
 								}
 		double p = (100.0 * count) / total;
-		logf("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
-				p);
+		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
+				count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
 	}
 
@@ -503,7 +503,8 @@ public class SCMOSLikelihoodWrapperTest
 
 								}
 		double p = (100.0 * count) / total;
-		logf("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p);
+		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
+				total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
 	}
 
@@ -527,16 +528,6 @@ public class SCMOSLikelihoodWrapperTest
 	double[] createParameters(double... args)
 	{
 		return args;
-	}
-
-	void log(String message)
-	{
-		System.out.println(message);
-	}
-
-	void logf(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 
 	double P_LIMIT = 0.999999;
@@ -579,12 +570,12 @@ public class SCMOSLikelihoodWrapperTest
 				double v;
 				v = SCMOSLikelihoodWrapper.likelihood(mu, VAR, G, O, x);
 				//v = pgf.probability(x, mu);
-				//System.out.printf("x=%f, v=%f\n", x, v);
+				//TestSettings.debug("x=%f, v=%f\n", x, v);
 				return v;
 			}
 		}, min, max);
 
-		//System.out.printf("mu=%f, p=%f\n", mu, p);
+		//TestSettings.debug("mu=%f, p=%f\n", mu, p);
 		if (test)
 		{
 			TestAssert.assertEquals(P_LIMIT, p, 0.02, "mu=%f", mu);
@@ -686,7 +677,7 @@ public class SCMOSLikelihoodWrapperTest
 			{
 				maxp = pp;
 				maxi = i;
-				//System.out.printf("mu=%f, e=%f, k=%f, pp=%f\n", mu, mu * G + O, k[i], pp);
+				//TestSettings.debug("mu=%f, e=%f, k=%f, pp=%f\n", mu, mu * G + O, k[i], pp);
 			}
 			p += pp * step;
 		}
@@ -702,7 +693,7 @@ public class SCMOSLikelihoodWrapperTest
 		double mode1 = Math.floor(lambda);
 		double mode2 = Math.ceil(lambda) - 1;
 		double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
-		//System.out.printf("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
+		//TestSettings.debug("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
 		Assert.assertEquals("k-max", kmax, k[maxi], kmax * 1e-3);
 
 		if (test)
@@ -816,7 +807,7 @@ public class SCMOSLikelihoodWrapperTest
 
 	private void canComputePValue(BaseNonLinearFunction nlf)
 	{
-		System.out.println(nlf.name);
+		TestSettings.infoln(nlf.name);
 
 		int n = maxx * maxx;
 
@@ -844,7 +835,7 @@ public class SCMOSLikelihoodWrapperTest
 			op[j] = SCMOSLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
 			oll2 -= Math.log(op[j]);
 		}
-		System.out.printf("oll=%f, oll2=%f\n", oll, oll2);
+		TestSettings.info("oll=%f, oll2=%f\n", oll, oll2);
 		Assert.assertEquals("Observed Log-likelihood", oll2, oll, oll2 * 1e-10);
 
 		double min = Double.POSITIVE_INFINITY;
@@ -865,7 +856,7 @@ public class SCMOSLikelihoodWrapperTest
 			}
 			double llr2 = -2 * Math.log(product.doubleValue());
 			double q = f.computeQValue(ll);
-			System.out.printf("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
+			TestSettings.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
 					product.round(new MathContext(4)).toString(), q);
 			if (min > ll)
 			{

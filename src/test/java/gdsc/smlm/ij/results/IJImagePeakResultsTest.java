@@ -485,7 +485,7 @@ public class IJImagePeakResultsTest
 		{
 			r[i].end();
 			image[i] = getImage(r[i]);
-			System.out.printf("[%d] = %s\n", i, Arrays.toString(image[i]));
+			TestSettings.debug("[%d] = %s\n", i, Arrays.toString(image[i]));
 		}
 
 		// Test single value adds

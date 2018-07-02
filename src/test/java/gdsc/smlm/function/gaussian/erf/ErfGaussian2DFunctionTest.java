@@ -190,16 +190,23 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 											s.add(error);
 											Assert.assertTrue(gradient + " sign != " + dyda2[gradientIndex],
 													(gradient * dyda2[gradientIndex]) >= 0);
-											//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
+											//TestSettings.debug("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 											//		gradientIndex, dyda2[gradientIndex], error);
 											Assert.assertTrue(gradient + " != " + dyda2[gradientIndex],
 													eq.almostEqualRelativeOrAbsolute(gradient, dyda2[gradientIndex]));
 
 										}
 								}
-		System.out.printf("functionComputesSecondTargetGradient %s %s (error %s +/- %s)\n",
-				f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesSecondTargetGradient %s %s (error %s +/- %s)\n",
+						f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
+						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	@Test
@@ -356,7 +363,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																			gradient + " sign != " +
 																					dyda2[gradientIndex],
 																			(gradient * dyda2[gradientIndex]) >= 0);
-																	//System.out.printf("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
+																	//TestSettings.debug("[%d,%d] %f == [%d] %f? (%g)\n", x, y, gradient,
 																	//		gradientIndex, dyda2[gradientIndex], error);
 																	Assert.assertTrue(
 																			gradient + " != " + dyda2[gradientIndex],
@@ -364,10 +371,17 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																					dyda2[gradientIndex]));
 																}
 														}
-		System.out.printf("functionComputesSecondTargetGradient %s [%d] %s (error %s +/- %s)\n",
-				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
-				Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesSecondTargetGradient %s [%d] %s (error %s +/- %s)\n",
+						f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
+						Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+						Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	private class FunctionTimingTask extends BaseTimingTask
@@ -678,7 +692,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 															m.get(j, k));
 													if (!ok)
 													{
-														System.out.printf("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
+														TestSettings.info("%d [%d,%d] %f ?= %f\n", i, j, k, gradient,
 																m.get(j, k));
 														TestAssert.fail("%d [%d,%d] %f != %f", i, j, k, gradient,
 																m.get(j, k));
@@ -904,7 +918,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 																							gradient, m.get(j, k));
 																			if (!ok)
 																			{
-																				System.out.printf(
+																				TestSettings.info(
 																						"%d [%d,%d] %f ?= %f\n", i, j,
 																						k, gradient, m.get(j, k));
 																				TestAssert.fail("%d [%d,%d] %f != %f",
@@ -1166,7 +1180,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		long t3 = System.nanoTime();
 		t1 = t2 - t1;
 		t2 = t3 - t2;
-		System.out.printf("computeIntegralIsFaster %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1, t2,
+		TestSettings.info("computeIntegralIsFaster %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1, t2,
 				(double) t1 / t2);
 		Assert.assertEquals(s1, s2, s1 * 1e-3);
 		Assert.assertTrue(t2 < t1);
@@ -1243,7 +1257,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		long t3 = System.nanoTime();
 		t1 = t2 - t1;
 		t2 = t3 - t2;
-		System.out.printf("computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1,
+		TestSettings.info("computeIntegralIsFasterWith2Peaks %s %d vs %d (%gx)\n", f1.getClass().getSimpleName(), t1,
 				t2, (double) t1 / t2);
 		Assert.assertEquals(s1, s2, s1 * 1e-3);
 		Assert.assertTrue(t2 < t1);

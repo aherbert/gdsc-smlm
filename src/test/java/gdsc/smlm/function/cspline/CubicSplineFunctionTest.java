@@ -189,7 +189,8 @@ public abstract class CubicSplineFunctionTest
 			return;
 
 		int[] gradientIndices = cf.gradientIndices();
-		log("Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
+		if (TestSettings.allow(LogLevel.INFO))
+			TestSettings.info("Function%d %s %s\n", npeaks, cf.getClass().getName(), Arrays.toString(gradientIndices));
 
 		Assert.assertEquals("Incorrect number of peaks", cf.getN(), npeaks);
 
@@ -343,9 +344,16 @@ public abstract class CubicSplineFunctionTest
 											eq.almostEqualRelativeOrAbsolute(gradient, dyda));
 								}
 						}
-		System.out.printf("functionComputesTargetGradient1 %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
-				CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesTargetGradient1 %s %s (error %s +/- %s)\n",
+						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	protected int findGradientIndex(CubicSplineFunction f, int targetParameter)
@@ -453,9 +461,16 @@ public abstract class CubicSplineFunctionTest
 									}
 								}
 						}
-		System.out.printf("functionComputesTargetGradient2 %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
-				CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesTargetGradient2 %s %s (error %s +/- %s)\n",
+						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	@Test
@@ -604,9 +619,16 @@ public abstract class CubicSplineFunctionTest
 															eq.almostEqualRelativeOrAbsolute(gradient, dyda));
 												}
 										}
-		System.out.printf("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)\n",
-				f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)\n",
+						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	@Test
@@ -728,9 +750,16 @@ public abstract class CubicSplineFunctionTest
 													}
 												}
 										}
-		System.out.printf("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
-				f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)\n",
+						f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
+						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	@Test
@@ -859,8 +888,10 @@ public abstract class CubicSplineFunctionTest
 		CubicSplineFunction cff = (n == 2) ? f2f : f1f;
 		ErfGaussian2DFunction gf = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(n, maxx, maxy,
 				GaussianFunctionFactory.FIT_ASTIGMATISM, zModel);
-		Gaussian2DFunction gf2 = (order < 2) ? GaussianFunctionFactory.create2D(n, maxx, maxy,
-				GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE, zModel) : null;
+		Gaussian2DFunction gf2 = (order < 2)
+				? GaussianFunctionFactory.create2D(n, maxx, maxy, GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE,
+						zModel)
+				: null;
 		TurboList<double[]> l1 = new TurboList<double[]>();
 		TurboList<double[]> l2 = new TurboList<double[]>();
 		TurboList<double[]> l3 = new TurboList<double[]>();
@@ -936,15 +967,5 @@ public abstract class CubicSplineFunctionTest
 	protected double[] createParameters(double... args)
 	{
 		return args;
-	}
-
-	protected void log(String message)
-	{
-		System.out.println(message);
-	}
-
-	protected void log(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 }

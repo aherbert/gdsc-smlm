@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 
 public class TensorTest
 {
@@ -54,10 +55,13 @@ public class TensorTest
 
 	private void print(double[] com, double[] v, double[][] vv)
 	{
-		System.out.printf("com = %s\n", java.util.Arrays.toString(com));
-		for (int i = 0; i < v.length; i++)
-			System.out.printf("[%d] %f = %s  %.2f\n", i, v[i], java.util.Arrays.toString(vv[i]),
-					180.0 * Math.atan2(vv[i][1], vv[i][0]) / Math.PI);
+		if (TestSettings.allow(LogLevel.INFO))
+		{
+			System.out.printf("com = %s\n", java.util.Arrays.toString(com));
+			for (int i = 0; i < v.length; i++)
+				System.out.printf("[%d] %f = %s  %.2f\n", i, v[i], java.util.Arrays.toString(vv[i]),
+						180.0 * Math.atan2(vv[i][1], vv[i][0]) / Math.PI);
+		}
 	}
 
 	@Test

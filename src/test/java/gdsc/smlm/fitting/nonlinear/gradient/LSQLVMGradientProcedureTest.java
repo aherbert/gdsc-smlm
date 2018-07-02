@@ -430,7 +430,7 @@ public class LSQLVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		log("Standard %s = %d : Unrolled %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), time1,
+		TestSettings.info("Standard %s = %d : Unrolled %s %d = %d : %fx\n", factory1.getClass().getSimpleName(), time1,
 				factory2.getClass().getSimpleName(), nparams, time2, (1.0 * time1) / time2);
 		if (doAssert)
 			Assert.assertTrue(time2 < time1);
@@ -528,7 +528,7 @@ public class LSQLVMGradientProcedureTest
 				for (int j = 0; j < nparams; j++)
 				{
 					if (Math.abs(beta[j]) < 1e-6)
-						System.out.printf("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
+						TestSettings.info("[%d] Tiny beta %s %g\n", i, func.getGradientParameterName(j), beta[j]);
 				}
 				// Solve
 				if (!solver.solve(p.getAlphaMatrix(), beta))
@@ -575,7 +575,7 @@ public class LSQLVMGradientProcedureTest
 				}
 
 				for (int i = 0; i < nparams; i++)
-					System.out.printf("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
+					TestSettings.info("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g\n", b,
 							func.getGradientParameterName(i), rel[i].getMean(), rel[i].getStandardDeviation(),
 							abs[i].getMean(), abs[i].getStandardDeviation());
 			}
@@ -724,10 +724,5 @@ public class LSQLVMGradientProcedureTest
 		for (int i = 0; i < d.length; i++)
 			d2[i] = d[i];
 		return d2;
-	}
-
-	void log(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 }

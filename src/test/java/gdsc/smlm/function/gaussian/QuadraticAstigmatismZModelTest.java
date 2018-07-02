@@ -27,6 +27,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 
 public class QuadraticAstigmatismZModelTest
 {
@@ -52,6 +54,7 @@ public class QuadraticAstigmatismZModelTest
 		double[] ds_dz2 = new double[2];
 		double[] ds_duz = new double[1];
 		double[] ds_dlz = new double[1];
+		boolean record = TestSettings.allow(LogLevel.INFO);
 		for (double z = -0.5; z < 0.5; z += 0.01)
 		{
 			double s0 = QuadraticAstigmatismZModel.getS(z, zDepth);
@@ -74,8 +77,9 @@ public class QuadraticAstigmatismZModelTest
 			double e2 = (ds_duz[0] - ds_dlz[0]) / (uz - lz);
 			double o2 = ds_dz2[1];
 
-			System.out.printf("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,
-					DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2));
+			if (record)
+				TestSettings.info("z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)\n", z, s0, e1, o1,
+						DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2));
 
 			//double error = DoubleEquality.relativeError(o, e);
 			if (Math.abs(z) > 0.02)

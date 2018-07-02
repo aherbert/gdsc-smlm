@@ -26,6 +26,8 @@ package gdsc.smlm.function;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestSettings;
+
 public class PoissonGaussianFisherInformationTest
 {
 	@Test
@@ -136,7 +138,7 @@ public class PoissonGaussianFisherInformationTest
 			double lower = f.getPoissonGaussianApproximationI(u);
 			double upper = PoissonFisherInformation.getPoissonI(u);
 			double alpha = I / upper;
-			System.out.printf("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, I2, lower, upper, alpha);
+			TestSettings.info("s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s\n", f.s, u, I, I2, lower, upper, alpha);
 			Assert.assertTrue(I > lower);
 			Assert.assertTrue(I < upper);
 

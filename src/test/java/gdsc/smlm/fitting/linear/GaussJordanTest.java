@@ -28,6 +28,9 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
+
 public class GaussJordanTest
 {
 	@Test
@@ -47,9 +50,12 @@ public class GaussJordanTest
 		Assert.assertTrue(result);
 		Assert.assertArrayEquals(expecteds, b, 1e-4f);
 
-		log("x = %s\n", Arrays.toString(b));
-		for (int i = 0; i < b.length; i++)
-			log("a[%d] = %s\n", i, Arrays.toString(a[i]));
+		if (TestSettings.allow(LogLevel.INFO))
+		{
+			log("x = %s\n", Arrays.toString(b));
+			for (int i = 0; i < b.length; i++)
+				log("a[%d] = %s\n", i, Arrays.toString(a[i]));
+		}
 	}
 
 	void log(String format, Object... args)

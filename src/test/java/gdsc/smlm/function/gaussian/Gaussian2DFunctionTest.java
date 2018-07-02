@@ -34,6 +34,8 @@ import gdsc.core.ij.Utils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Statistics;
 import gdsc.test.TestAssert;
+import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.LogLevel;
 
 public abstract class Gaussian2DFunctionTest
 {
@@ -152,7 +154,8 @@ public abstract class Gaussian2DFunctionTest
 			return;
 
 		int[] gradientIndices = gf.gradientIndices();
-		log("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
+		if (TestSettings.allow(LogLevel.INFO))
+			TestSettings.info("Function%d %s %s\n", npeaks, gf.getClass().getName(), Arrays.toString(gradientIndices));
 
 		Assert.assertEquals("Incorrect number of peaks", gf.getNPeaks(), npeaks);
 
@@ -202,7 +205,7 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda = new double[f1.gradientIndices().length];
 		double[] a;
 
-		boolean record = true;
+		boolean record = TestSettings.allow(LogLevel.INFO);
 
 		for (double background : testbackground)
 			// Peak 1
@@ -225,7 +228,7 @@ public abstract class Gaussian2DFunctionTest
 									if (record)
 									{
 										record = false;
-										log("%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
+										TestSettings.info("%s %d frozen to %s\n", f1.getClass().getSimpleName(), 1,
 												f.getClass().getSimpleName());
 									}
 
@@ -358,9 +361,16 @@ public abstract class Gaussian2DFunctionTest
 													eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]));
 										}
 								}
-		System.out.printf("functionComputesTargetGradient %s %s (error %s +/- %s)\n", f1.getClass().getSimpleName(),
-				Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesTargetGradient %s %s (error %s +/- %s)\n",
+						f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
+						Utils.rounded(s.getMean()), Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	protected int findGradientIndex(Gaussian2DFunction f, int targetParameter)
@@ -379,7 +389,7 @@ public abstract class Gaussian2DFunctionTest
 		double[] dyda = new double[f2.gradientIndices().length];
 		double[] a;
 
-		boolean record = true;
+		boolean record = TestSettings.allow(LogLevel.INFO);
 
 		for (double background : testbackground)
 			// Peak 1
@@ -412,7 +422,7 @@ public abstract class Gaussian2DFunctionTest
 															if (record)
 															{
 																record = false;
-																log("%s %d frozen to %s\n",
+																TestSettings.info("%s %d frozen to %s\n",
 																		f2.getClass().getSimpleName(), 2,
 																		f.getClass().getSimpleName());
 															}
@@ -579,10 +589,17 @@ public abstract class Gaussian2DFunctionTest
 																					dyda[gradientIndex]));
 																}
 														}
-		System.out.printf("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)\n",
-				f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
-				Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
-				Utils.rounded(s.getStandardDeviation()));
+		TestSettings.info(new TestSettings.MessageProvider()
+		{
+			@Override
+			public String getMessage()
+			{
+				return String.format("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)\n",
+						f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
+						Gaussian2DFunction.getName(targetParameter), Utils.rounded(s.getMean()),
+						Utils.rounded(s.getStandardDeviation()));
+			}
+		});
 	}
 
 	@Test
@@ -637,15 +654,5 @@ public abstract class Gaussian2DFunctionTest
 	protected double[] createParameters(double... args)
 	{
 		return args;
-	}
-
-	protected void log(String message)
-	{
-		System.out.println(message);
-	}
-
-	protected void log(String format, Object... args)
-	{
-		System.out.printf(format, args);
 	}
 }

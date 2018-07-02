@@ -273,7 +273,7 @@ public class GaussianFilterTest
 					max = d;
 			}
 
-			System.out.printf("%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
+			TestSettings.info("%s vs %s w=%b @ %.1f = %g\n", f1.getName(), f2.getName(), weighted, sigma, max);
 			Assert.assertTrue(max < tolerance);
 		}
 	}

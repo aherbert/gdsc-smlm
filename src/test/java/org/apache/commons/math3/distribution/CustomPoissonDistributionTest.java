@@ -31,6 +31,7 @@ import org.junit.Test;
 import gdsc.test.BaseTimingTask;
 import gdsc.test.TestSettings;
 import gdsc.test.TimingService;
+import gdsc.test.TestSettings.LogLevel;
 
 public class CustomPoissonDistributionTest
 {
@@ -146,7 +147,8 @@ public class CustomPoissonDistributionTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
@@ -160,7 +162,8 @@ public class CustomPoissonDistributionTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}
@@ -180,7 +183,8 @@ public class CustomPoissonDistributionTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report(size);
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report(size);
 
 		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
 	}

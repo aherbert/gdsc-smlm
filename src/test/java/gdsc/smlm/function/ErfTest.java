@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.BaseTimingTask;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
@@ -117,7 +118,7 @@ public class ErfTest
 				Assert.assertTrue(error < expected);
 			}
 		}
-		System.out.printf("erfx %s max error = %g\n", erf.name, max);
+		TestSettings.info("erfx %s max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -146,6 +147,8 @@ public class ErfTest
 
 	private void erfxIndistinguishableFrom1(BaseErf erf)
 	{
+		TestSettings.assume(LogLevel.INFO);
+
 		// Find switch using a binary search
 		double lower = 1;
 		double upper = 40;
@@ -215,7 +218,7 @@ public class ErfTest
 			}
 		}
 
-		System.out.printf("erfxx %s max error = %g\n", erf.name, max);
+		TestSettings.info("erfxx %s max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -254,7 +257,7 @@ public class ErfTest
 			Assert.assertTrue(error < expected);
 		}
 
-		System.out.printf("erfxx %s unit max error = %g\n", erf.name, max);
+		TestSettings.info("erfxx %s unit max error = %g\n", erf.name, max);
 	}
 
 	@Test
@@ -325,8 +328,8 @@ public class ErfTest
 		Assert.assertTrue(erf.name + " Gaussian approx integral is incorrect",
 				DoubleEquality.relativeError(sum1, sum3) < 1e-3);
 
-		System.out.printf(erf.name + " Erf approx pixel unit max error = %f\n", max);
-		System.out.printf(erf.name + " Gaussian approx pixel unit max error = %f\n", max2);
+		TestSettings.info("%s Erf approx pixel unit max error = %f\n", erf.name, max);
+		TestSettings.info("%s Gaussian approx pixel unit max error = %f\n", erf.name, max2);
 	}
 
 	private class ErfTimingTask extends BaseTimingTask
@@ -463,10 +466,10 @@ public class ErfTest
 
 			int n = steps * steps;
 			o = norm * sum / n;
-			System.out.printf("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
+			TestSettings.info("n=%d, e=%f, o=%f, error=%f\n", n, e, o, DoubleEquality.relativeError(e, o));
 		}
 
-		Assert.assertEquals(e, o, e * 1e-2);
+		TestAssert.assertEqualsRelative(e, o, 1e-2);
 	}
 
 	@Test
@@ -489,7 +492,7 @@ public class ErfTest
 			double g = (o1 - o2) / delta2;
 			double e = gdsc.smlm.function.Erf.dErf_dx(x);
 			if (!eq.almostEqualRelativeOrAbsolute(e, g))
-				Assert.assertTrue(x + " : " + e + " != " + g, false);
+				Assert.fail(x + " : " + e + " != " + g);
 		}
 	}
 
@@ -503,7 +506,7 @@ public class ErfTest
 				double f = i + d;
 				double e = Math.pow(f, 4);
 				double o = gdsc.smlm.function.Erf.pow4(f);
-				Assert.assertEquals("x=" + f, e, o, e * 1e-10);
+				TestAssert.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
 			}
 		}
 	}
@@ -518,7 +521,7 @@ public class ErfTest
 				double f = i + d;
 				double e = Math.pow(f, 16);
 				double o = gdsc.smlm.function.Erf.pow16(f);
-				Assert.assertEquals("x=" + f, e, o, e * 1e-10);
+				TestAssert.assertEqualsRelative(e, o, 1e-10, "x=%s", f);
 			}
 		}
 	}

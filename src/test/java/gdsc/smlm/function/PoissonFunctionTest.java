@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestAssert;
+import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 
 @SuppressWarnings("unused")
@@ -137,7 +138,7 @@ public class PoissonFunctionTest
 		minx += min;
 		maxx += min;
 
-		System.out.printf("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
+		TestSettings.info("g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d\n", gain, mu, o, p, minx, maxp, maxc, maxx);
 		return new int[] { minx, maxx };
 	}
 

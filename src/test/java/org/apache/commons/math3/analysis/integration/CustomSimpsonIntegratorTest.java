@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.core.utils.Maths;
+import gdsc.test.TestSettings;
 
 public class CustomSimpsonIntegratorTest
 {
@@ -143,7 +144,7 @@ public class CustomSimpsonIntegratorTest
 		double ee = simpson(f, a, b, c);
 		double o = in.integrate(Integer.MAX_VALUE, f, a, b);
 
-		System.out.printf("%s c=%d  %g-%g  e=%g  ee=%g  o=%g\n", f.getClass().getSimpleName(), c, a, b, e, ee, o);
+		TestSettings.info("%s c=%d  %g-%g  e=%g  ee=%g  o=%g\n", f.getClass().getSimpleName(), c, a, b, e, ee, o);
 
 		double delta = Math.abs(e) * 1e-6;
 		Assert.assertEquals(e, ee, delta);
