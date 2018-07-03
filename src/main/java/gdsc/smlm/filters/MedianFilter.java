@@ -23,8 +23,6 @@
  */
 package gdsc.smlm.filters;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.util.FastMath;
 
 import gdsc.core.utils.MedianWindowDLLFloat;
@@ -246,18 +244,18 @@ public class MedianFilter extends BaseFilter
 		else if (nBelow > half)
 			guess = findNthLowestNumber(belowBuf, nBelow, half);
 
-		// Debug
-		if (nAbove + nBelow == 2 * half + 1)
-		{
-			float[] values = new float[nAbove + nBelow];
-			for (int i = 0; i < nAbove; i++)
-				values[i] = aboveBuf[i];
-			for (int i = 0, j = nAbove; i < nBelow; i++, j++)
-				values[j] = belowBuf[i];
-			Arrays.sort(values);
-			if (values[half] != guess)
-				System.out.printf("Mistake: %f != %f\n", values[half], guess);
-		}
+		// Debug. This is just a check and can be removed for production code
+		//if (nAbove + nBelow == 2 * half + 1)
+		//{
+		//	float[] values = new float[nAbove + nBelow];
+		//	for (int i = 0; i < nAbove; i++)
+		//		values[i] = aboveBuf[i];
+		//	for (int i = 0, j = nAbove; i < nBelow; i++, j++)
+		//		values[j] = belowBuf[i];
+		//	java.util.Arrays.sort(values);
+		//	if (values[half] != guess)
+		//		System.out.printf("Mistake: %f != %f\n", values[half], guess);
+		//}
 
 		return guess;
 	}
