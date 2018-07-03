@@ -86,7 +86,7 @@ public class FastMathTest
 	@Test
 	public void cbrtIsFaster()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		// Q. What is a suitable range for this test? 
 		int range = 5;
@@ -107,7 +107,12 @@ public class FastMathTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report();
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean());
+		for (int k = 2; k <= 3; k++)
+		{
+			double t1 = ts.get(-1).getMean();
+			double t2 = ts.get(-k).getMean();
+			TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-k).getTask().getName(), t2,
+					ts.get(-1).getTask().getName(), t1, t2 / t1);
+		}
 	}
 }
