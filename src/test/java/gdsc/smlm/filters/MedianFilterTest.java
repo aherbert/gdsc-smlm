@@ -31,8 +31,6 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 public class MedianFilterTest extends AbstractFilterTest
 {
@@ -158,7 +156,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockMedianNxNInternal %d : %d => rollingMedianNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -481,7 +479,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockMedianNxN %d : %d => blockMedianNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -549,7 +547,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockMedianNxN %d : %d => rollingMedianNxN %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -618,7 +616,7 @@ public class MedianFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float rollingMedianNxN %d : %d => rollingMedianNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}

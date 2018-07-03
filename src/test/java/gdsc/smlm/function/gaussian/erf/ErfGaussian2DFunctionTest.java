@@ -46,7 +46,6 @@ import gdsc.test.BaseTimingTask;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
@@ -509,7 +508,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			TestSettings.logSpeedTestResult(ts.get(-i).getMean() < ts.get(-i - 3).getMean(),
 					"ERF function %d order not faster than equivalent Gaussian2DFunction: %g !< %g", i - 1,
 					ts.get(-i).getMean(), ts.get(-i - 3).getMean());
-
 		}
 	}
 
@@ -1126,7 +1124,6 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 			TestSettings.logSpeedTestResult(ts.get(-i).getMean() < ts.get(-i - 3).getMean(),
 					"forEach %d order not faster than eval(int): %g !< %g", i - 1, ts.get(-i).getMean(),
 					ts.get(-i - 3).getMean());
-
 		}
 	}
 

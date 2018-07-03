@@ -41,8 +41,6 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 public class LSQVarianceGradientProcedureTest
 {
@@ -295,7 +293,8 @@ public class LSQVarianceGradientProcedureTest
 		// Remove the timing of the function call by creating a dummy function
 		FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
 		final Gradient1Function func = (precomputed)
-				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3)) : f;
+				? OffsetGradient1Function.wrapGradient1Function(f, SimpleArrayUtils.newArray(f.size(), 0.1, 1.3))
+				: f;
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{

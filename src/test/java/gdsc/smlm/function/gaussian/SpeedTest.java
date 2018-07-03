@@ -32,8 +32,6 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector

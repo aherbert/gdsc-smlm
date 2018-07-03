@@ -28,8 +28,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 /**
  * Contains tests for the Gaussian functions in single or double precision
@@ -437,30 +435,30 @@ public class PrecisionTest
 		}
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void circularSinglePrecisionIsNotMuchFasterWithGradients()
+	@Test
+	public void circularDoublePrecisionIsFasterWithGradients()
 	{
-		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
-				false);
+		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
+				false, true);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void circularSinglePrecisionIsNotMuchFaster()
+	@Test
+	public void circularDoublePrecisionIsFaster()
 	{
-		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false);
+		isFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false, true);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void circularSinglePrecisionIsNotMuchFasterWithGradientsNoSum()
+	@Test
+	public void circularDoublePrecisionIsFasterWithGradientsNoSum()
 	{
-		singlePrecisionIsFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
-				true);
+		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
+				true, true);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void circularSinglePrecisionIsNotMuchFasterNoSum()
+	@Test
+	public void circularDoublePrecisionIsFasterNoSum()
 	{
-		singlePrecisionIsFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true);
+		isFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true, true);
 	}
 
 	@Test
@@ -502,28 +500,30 @@ public class PrecisionTest
 		}
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void fixedSinglePrecisionIsNotMuchFasterWithGradients()
+	@Test
+	public void fixedDoublePrecisionIsFasterWithGradients()
 	{
-		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
+		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false,
+				true);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void fixedSinglePrecisionIsNotMuchFaster()
+	@Test
+	public void fixedDoublePrecisionIsFaster()
 	{
-		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false);
+		isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false, true);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void fixedSinglePrecisionIsNotMuchFasterWithGradientsNoSum()
+	@Test
+	public void fixedDoublePrecisionIsFasterWithGradientsNoSum()
 	{
-		singlePrecisionIsFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
+		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true,
+				true);
 	}
 
-	@Test(expected = java.lang.AssertionError.class)
-	public void fixedSinglePrecisionIsNotMuchFasterNoSum()
+	@Test
+	public void fixedDoublePrecisionIsFasterNoSum()
 	{
-		singlePrecisionIsFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true);
+		isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true, true);
 	}
 
 	private void functionsComputeSameValue(int maxx, SinglePrecision f1, DoublePrecision f2, final double precision)
@@ -566,7 +566,8 @@ public class PrecisionTest
 		Assert.assertEquals("Different totals", t2, t1, precision);
 	}
 
-	private void singlePrecisionIsFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
+	private void isFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
+			boolean doubleFaster)
 	{
 		TestSettings.assumeSpeedTest();
 
@@ -598,9 +599,23 @@ public class PrecisionTest
 			time2 += runDoubleWithGradients(maxx, f2, p2);
 		}
 
+		Class<?> c1, c2;
+		if (doubleFaster)
+		{
+			long time = time1;
+			time1 = time2;
+			time2 = time;
+			c1 = f2.getClass();
+			c2 = f1.getClass();
+		}
+		else
+		{
+			c1 = f1.getClass();
+			c2 = f2.getClass();
+		}
+
 		TestSettings.logSpeedTestResult(time1 < time2, "%sGradient %s = %d, %s = %d => (%f)\n",
-				(noSum) ? "No sum " : "", f1.getClass().getSimpleName(), time1, f2.getClass().getSimpleName(), time2,
-				(double) time2 / time1);
+				(noSum) ? "No sum " : "", c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 
 	@SuppressWarnings("unused")
@@ -717,7 +732,8 @@ public class PrecisionTest
 		return System.nanoTime() - time;
 	}
 
-	private void singlePrecisionIsFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
+	private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
+			boolean doubleFaster)
 	{
 		TestSettings.assumeSpeedTest();
 
@@ -748,8 +764,23 @@ public class PrecisionTest
 			time2 += runDouble(maxx, f2, p2);
 		}
 
+		Class<?> c1, c2;
+		if (doubleFaster)
+		{
+			long time = time1;
+			time1 = time2;
+			time2 = time;
+			c1 = f2.getClass();
+			c2 = f1.getClass();
+		}
+		else
+		{
+			c1 = f1.getClass();
+			c2 = f2.getClass();
+		}
+
 		TestSettings.logSpeedTestResult(time1 < time2, "%s%s = %d, %s = %d => (%f)\n", (noSum) ? "No sum " : "",
-				f1.getClass().getSimpleName(), time1, f2.getClass().getSimpleName(), time2, (double) time2 / time1);
+				c1.getSimpleName(), time1, c2.getSimpleName(), time2, (double) time2 / time1);
 	}
 
 	@SuppressWarnings("unused")

@@ -32,8 +32,6 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class SumFilterTest extends AbstractFilterTest
@@ -244,7 +242,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -313,7 +311,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -382,7 +380,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -984,7 +982,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1052,7 +1050,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1121,7 +1119,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1189,7 +1187,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1258,7 +1256,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1857,7 +1855,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int blockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1926,7 +1924,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int blockSumNxNInternal %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -1995,7 +1993,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int stripedBlockSumNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -2597,7 +2595,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int blockSumNxN %d : %d => blockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -2664,7 +2662,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int blockSumNxN %d : %d => stripedBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -2732,7 +2730,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int stripedBlockSumNxN %d : %d => stripedBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -2800,7 +2798,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int blockSumNxN %d : %d => rollingBlockSumNxN %d = %.2fx\n", boxSize, boxSlowTotal, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -2868,7 +2866,7 @@ public class SumFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int rollingBlockSumNxN %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}

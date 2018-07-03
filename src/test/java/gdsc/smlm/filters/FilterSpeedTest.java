@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 public class FilterSpeedTest extends AbstractFilterTest
 {
@@ -96,7 +94,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float rollingBlockMeanNxNInternal %d : %d => rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
@@ -169,7 +167,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float blockMedianNxNInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
@@ -242,7 +240,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float rollingMedianNxNInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
@@ -315,7 +313,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float convolveInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
@@ -394,7 +392,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaFilterInternal %d : %d => rollingBlockMeanNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
@@ -474,7 +472,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaFilterInternal %d : %d => stripedBlockMeanNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 			//			Assert.assertTrue(String.format("Not faster: Block %d : %d > %d", boxSize, boxFastTotal, boxSlowTotal),
@@ -548,7 +546,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"int rollingBlockSumNxNInternal %d : %d => float rollingBlockSumNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}

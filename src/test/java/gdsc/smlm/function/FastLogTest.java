@@ -26,7 +26,6 @@ package gdsc.smlm.function;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 
 import gdsc.core.utils.BitFlags;

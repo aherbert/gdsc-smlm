@@ -30,8 +30,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class AreaAverageFilterTest extends AbstractFilterTest
@@ -102,7 +100,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageInternal %.1f : %d => areaAverageUsingSumsInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -175,7 +173,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageUsingAverages %.1f : %d => stripedBlockAverage %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
@@ -248,7 +246,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
 					"float areaAverageUsingAveragesInternal %.1f : %d => stripedBlockAverageInternal %d = %.2fx\n",
 					boxSize, boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}

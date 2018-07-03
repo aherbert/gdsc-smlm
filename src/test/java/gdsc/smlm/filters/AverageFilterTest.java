@@ -32,8 +32,6 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class AverageFilterTest extends AbstractFilterTest
@@ -288,7 +286,7 @@ public class AverageFilterTest extends AbstractFilterTest
 								boxSize, time, slow.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", fast.name,
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", fast.name,
 					boxSize, boxSlowTotal, slow.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", fast.name, slowTotal,
@@ -362,7 +360,7 @@ public class AverageFilterTest extends AbstractFilterTest
 								height, boxSize, time, slow.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestResult(boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
 					fast.name, boxSize, boxSlowTotal, slow.name, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}

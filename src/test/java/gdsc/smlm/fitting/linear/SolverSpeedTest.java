@@ -35,8 +35,6 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.test.TestSettings;
-import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 public class SolverSpeedTest
 {

@@ -47,7 +47,6 @@ import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleNBFixedGaussian2DFunction;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
-import gdsc.test.TestSettings.TestComplexity;
 
 /**
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
