@@ -160,7 +160,7 @@ public class LSQVarianceGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

@@ -228,7 +228,7 @@ public class AverageFilterTest extends AbstractFilterTest
 
 	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -302,7 +302,7 @@ public class AverageFilterTest extends AbstractFilterTest
 
 	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

@@ -302,7 +302,7 @@ public class GradientCalculatorSpeedTest
 
 	private void gradientCalculatorNIsFasterThanGradientCalculator(Gaussian2DFunction func, int nparams, boolean mle)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		// Check the function is the correct size
 		Assert.assertEquals(nparams, func.gradientIndices().length);
@@ -344,7 +344,7 @@ public class GradientCalculatorSpeedTest
 	@Test
 	public void gradientCalculatorAssumedXIsFasterThanGradientCalculator()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int iter = 10000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

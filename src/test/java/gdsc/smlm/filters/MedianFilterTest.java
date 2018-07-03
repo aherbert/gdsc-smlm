@@ -101,7 +101,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedianNxNInternalIsFasterThanBlockMedianNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -192,7 +192,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -253,7 +253,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedian3x3InternalIsFasterThanBlockMedian3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -337,7 +337,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -424,7 +424,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -493,7 +493,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedianNxNIsFasterThanBlockMedianNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -561,7 +561,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -652,7 +652,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockMedian3x3IsFasterThanBlockMedianNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -735,7 +735,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedian3x3IsFasterThanRollingMedianNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 
@@ -796,7 +796,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingMedian3x3IsFasterThanBlockMedian3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		MedianFilter filter = new MedianFilter();
 

@@ -37,7 +37,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockMeanNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		BlockSumFilter filter = new BlockSumFilter();
 		BlockMeanFilter filter2 = new BlockMeanFilter();
@@ -110,7 +110,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		MedianFilter filter2 = new MedianFilter();
@@ -183,7 +183,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanRollingMedianNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		MedianFilter filter2 = new MedianFilter();
@@ -256,7 +256,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		GaussianFilter filter2 = new GaussianFilter();
@@ -329,7 +329,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		AreaAverageFilter filter2 = new AreaAverageFilter();
@@ -408,7 +408,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		BlockMeanFilter filter1 = new BlockMeanFilter();
 		AreaAverageFilter filter2 = new AreaAverageFilter();
@@ -489,7 +489,7 @@ public class FilterSpeedTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanIntRollingBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 		BlockSumFilter filter2 = new BlockSumFilter();

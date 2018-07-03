@@ -166,7 +166,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 1000;
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
@@ -290,7 +290,7 @@ public class PoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 100;
 		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);

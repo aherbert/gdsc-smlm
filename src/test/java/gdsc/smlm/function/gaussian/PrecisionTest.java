@@ -568,7 +568,7 @@ public class PrecisionTest
 
 	private void singlePrecisionIsFasterWithGradients(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);
@@ -719,7 +719,7 @@ public class PrecisionTest
 
 	private void singlePrecisionIsFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		f1.setMaxX(maxx);
 		f2.setMaxX(maxx);

@@ -152,7 +152,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsFasterThanGaussJordanFloat()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);
@@ -184,7 +184,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanFloat()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);
@@ -223,7 +223,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearWithInversionIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);
@@ -256,7 +256,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveLinearIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);
@@ -288,7 +288,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveCholeskyIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);
@@ -321,7 +321,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveCholeskyLDLTIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);
@@ -354,7 +354,7 @@ public class SolverSpeedTest
 	@Test
 	public void solveIsFasterThanGaussJordanDouble()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int ITER = 10000;
 		ensureData(ITER);

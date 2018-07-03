@@ -232,7 +232,7 @@ public class LSQLVMGradientProcedureTest
 	private void gradientProcedureIsNotSlowerThanGradientCalculator(final int nparams,
 			final BaseLSQLVMGradientProcedureFactory factory)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 1000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -368,7 +368,7 @@ public class LSQLVMGradientProcedureTest
 			final BaseLSQLVMGradientProcedureFactory factory1, final BaseLSQLVMGradientProcedureFactory factory2,
 			boolean doAssert)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());

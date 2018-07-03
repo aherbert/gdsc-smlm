@@ -298,7 +298,7 @@ public class SpeedTest
 
 	void f1FasterThanf2(int npeaks, int flags1, int flags2)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		int iter = 10000;
 		ArrayList<double[]> paramsList2;

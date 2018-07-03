@@ -196,7 +196,7 @@ public class PoissonGaussianConvolutionFunctionTest
 	@Test
 	public void pdfFasterThanPMF()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		// Realistic CCD parameters for speed test
 		double s = 7.16;

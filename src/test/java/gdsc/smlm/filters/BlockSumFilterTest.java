@@ -386,7 +386,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 
 	private void speedTest(BlockSumDataFilter fast, BlockSumDataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -460,7 +460,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 
 	private void speedTestInternal(BlockSumDataFilter fast, BlockSumDataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 

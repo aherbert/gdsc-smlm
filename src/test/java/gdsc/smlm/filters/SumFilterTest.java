@@ -187,7 +187,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -256,7 +256,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -325,7 +325,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -417,7 +417,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -478,7 +478,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -539,7 +539,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -600,7 +600,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -685,7 +685,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -747,7 +747,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -809,7 +809,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -928,7 +928,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -996,7 +996,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1064,7 +1064,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1133,7 +1133,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1201,7 +1201,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1293,7 +1293,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1376,7 +1376,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1460,7 +1460,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1521,7 +1521,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1582,7 +1582,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1643,7 +1643,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1800,7 +1800,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1869,7 +1869,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -1938,7 +1938,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2030,7 +2030,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2091,7 +2091,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2152,7 +2152,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2213,7 +2213,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2298,7 +2298,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2360,7 +2360,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2422,7 +2422,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2541,7 +2541,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2608,7 +2608,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2675,7 +2675,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2744,7 +2744,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2811,7 +2811,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2903,7 +2903,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -2986,7 +2986,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -3070,7 +3070,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -3131,7 +3131,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -3191,7 +3191,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 
@@ -3251,7 +3251,7 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		SumFilter filter = new SumFilter();
 

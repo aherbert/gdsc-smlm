@@ -42,7 +42,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeMediumComplexity();
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 
@@ -114,7 +114,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageIsFasterThanAreaAverage()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();
@@ -187,7 +187,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest
 	@Test
 	public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal()
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 
 		AreaAverageFilter filter = new AreaAverageFilter();
 		AverageFilter filter2 = new AverageFilter();

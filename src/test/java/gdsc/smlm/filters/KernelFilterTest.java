@@ -291,7 +291,7 @@ public class KernelFilterTest
 
 	private void floatFilterIsFasterThanIJFilter(int k)
 	{
-		TestSettings.assume(LogLevel.WARN, TestComplexity.MEDIUM);
+		TestSettings.assumeSpeedTest();
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 
 		float[][] data = new float[10][];
