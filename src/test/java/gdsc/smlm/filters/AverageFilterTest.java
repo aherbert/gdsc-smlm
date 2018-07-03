@@ -32,11 +32,11 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.core.utils.FloatEquality;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class AverageFilterTest extends AbstractFilterTest
 {
-
 	private int InternalITER3 = 500;
 	private int InternalITER = 50;
 	private int ITER3 = 200;
@@ -226,7 +226,8 @@ public class AverageFilterTest extends AbstractFilterTest
 
 	private void speedTest(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		ArrayList<float[]> dataSet = getSpeedData(ITER3);
 
@@ -282,15 +283,15 @@ public class AverageFilterTest extends AbstractFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", fast.name, width, height,
-								boxSize, time, slow.name, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", slow.name, width, height,
+								boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", fast.name,
-					boxSize, boxSlowTotal, slow.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", slow.name,
+					boxSize, boxSlowTotal, fast.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", fast.name, slowTotal,
-				slow.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal,
+				fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	private void speedTestInternal(DataFilter fast, DataFilter slow)
@@ -300,7 +301,8 @@ public class AverageFilterTest extends AbstractFilterTest
 
 	private void speedTestInternal(DataFilter fast, DataFilter slow, int[] testBoxSizes)
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		ArrayList<float[]> dataSet = getSpeedData(InternalITER3);
 
@@ -356,16 +358,16 @@ public class AverageFilterTest extends AbstractFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", fast.name, width,
-								height, boxSize, time, slow.name, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", slow.name, width,
+								height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
 			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
-					fast.name, boxSize, boxSlowTotal, slow.name, boxFastTotal,
+					slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
 					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", fast.name,
-				slowTotal, slow.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name,
+				slowTotal, fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test

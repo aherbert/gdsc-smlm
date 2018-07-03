@@ -97,7 +97,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	}
 
 	@Test
-	public void floatRollingMedianNxNInternalIsFasterThanBlockMedianNxNInternal()
+	public void floatBlockMedianNxNInternalIsFasterThanRollingMedianNxNInternal()
 	{
 		TestSettings.assumeSpeedTest();
 
@@ -108,31 +108,12 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.blockMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		filter.rollingMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter.blockMedianNxNInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
+		filter.rollingMedianNxNInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
-				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
-					for (float[] data : dataSet)
-						dataSet2.add(floatClone(data));
-
-					long time = System.nanoTime();
-					for (float[] data : dataSet2)
-						filter.rollingMedianNxNInternal(data, width, height, boxSize);
-					time = System.nanoTime() - time;
-					fastTimes.add(time);
-				}
-
-		long slowTotal = 0, fastTotal = 0;
-		int index = 0;
-		for (int boxSize : boxSizes)
-		{
-			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 					for (float[] data : dataSet)
@@ -142,6 +123,25 @@ public class MedianFilterTest extends AbstractFilterTest
 					for (float[] data : dataSet2)
 						filter.blockMedianNxNInternal(data, width, height, boxSize);
 					time = System.nanoTime() - time;
+					fastTimes.add(time);
+				}
+
+		long slowTotal = 0, fastTotal = 0;
+		int index = 0;
+		for (int boxSize : boxSizes)
+		{
+			long boxSlowTotal = 0, boxFastTotal = 0;
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
+				{
+					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					for (float[] data : dataSet)
+						dataSet2.add(floatClone(data));
+
+					long time = System.nanoTime();
+					for (float[] data : dataSet2)
+						filter.rollingMedianNxNInternal(data, width, height, boxSize);
+					time = System.nanoTime() - time;
 
 					long fastTime = fastTimes.get(index++);
 					slowTotal += time;
@@ -150,18 +150,18 @@ public class MedianFilterTest extends AbstractFilterTest
 					boxFastTotal += fastTime;
 					if (debug)
 						System.out.printf(
-								"float blockMedianNxNInternal [%dx%d] @ %d : %d => rollingMedianNxNInternal %d = %.2fx\n",
+								"float rollingMedianNxNInternal [%dx%d] @ %d : %d => blockMedianNxNInternal %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
 					//		blockTime, time), blockTime < time);
 				}
 			//if (debug)
 			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
-					"float blockMedianNxNInternal %d : %d => rollingMedianNxNInternal %d = %.2fx\n", boxSize,
+					"float rollingMedianNxNInternal %d : %d => blockMedianNxNInternal %d = %.2fx\n", boxSize,
 					boxSlowTotal, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockMedianNxNInternal %d => rollingMedianNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
+				"float rollingMedianNxNInternal %d => blockMedianNxNInternal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -199,11 +199,11 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.blockMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
-		filter.blockMedian3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
+		filter.blockMedianNxNInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], 1);
+		filter.blockMedian3x3Internal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -220,8 +220,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -249,7 +249,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	}
 
 	@Test
-	public void floatRollingMedian3x3InternalIsFasterThanBlockMedian3x3Internal()
+	public void floatBlockMedian3x3InternalIsFasterThanRollingMedian3x3Internal()
 	{
 		TestSettings.assumeSpeedTest();
 
@@ -260,29 +260,11 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.rollingMedian3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
-		filter.blockMedian3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
+		filter.rollingMedian3x3Internal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
+		filter.blockMedian3x3Internal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
-			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
-				for (float[] data : dataSet)
-					dataSet2.add(floatClone(data));
-
-				long time = System.nanoTime();
-				for (float[] data : dataSet2)
-					filter.rollingMedian3x3Internal(data, width, height);
-				time = System.nanoTime() - time;
-				fastTimes.add(time);
-			}
-
-		long slowTotal = 0, fastTotal = 0;
-		int index = 0;
-		@SuppressWarnings("unused")
-		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -292,6 +274,24 @@ public class MedianFilterTest extends AbstractFilterTest
 				for (float[] data : dataSet2)
 					filter.blockMedian3x3Internal(data, width, height);
 				time = System.nanoTime() - time;
+				fastTimes.add(time);
+			}
+
+		long slowTotal = 0, fastTotal = 0;
+		int index = 0;
+		@SuppressWarnings("unused")
+		long boxSlowTotal = 0, boxFastTotal = 0;
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
+			{
+				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				for (float[] data : dataSet)
+					dataSet2.add(floatClone(data));
+
+				long time = System.nanoTime();
+				for (float[] data : dataSet2)
+					filter.rollingMedian3x3Internal(data, width, height);
+				time = System.nanoTime() - time;
 
 				long fastTime = fastTimes.get(index++);
 				slowTotal += time;
@@ -300,13 +300,13 @@ public class MedianFilterTest extends AbstractFilterTest
 				boxFastTotal += fastTime;
 				if (debug)
 					System.out.printf(
-							"float blockMedian3x3Internal [%dx%d] %d => rollingMedian3x3Internal %d = %.2fx\n", width,
+							"float rollingMedian3x3Internal [%dx%d] %d => blockMedian3x3Internal %d = %.2fx\n", width,
 							height, time, fastTime, speedUpFactor(time, fastTime));
 				//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] %d > %d", width, height,
 				//		blockTime, time), blockTime < time);
 			}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockMedian3x3Internal %d => rollingMedian3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
+				"float rollingMedian3x3Internal %d => blockMedian3x3Internal %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -344,11 +344,11 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.rollingMedian3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
-		filter.rollingMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
+		filter.rollingMedian3x3Internal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
+		filter.rollingMedianNxNInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], 1);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -365,8 +365,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -431,12 +431,12 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.blockMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		filter.blockMedianNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter.blockMedianNxNInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
+		filter.blockMedianNxN(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 					for (float[] data : dataSet)
@@ -454,8 +454,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		for (int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 					for (float[] data : dataSet)
@@ -489,7 +489,7 @@ public class MedianFilterTest extends AbstractFilterTest
 	}
 
 	@Test
-	public void floatRollingMedianNxNIsFasterThanBlockMedianNxN()
+	public void floatBlockMedianNxNIsFasterThanRollingMedianNxN()
 	{
 		TestSettings.assumeSpeedTest();
 
@@ -500,31 +500,12 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.blockMedianNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		filter.rollingMedianNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter.blockMedianNxN(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
+		filter.rollingMedianNxN(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
-				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
-					for (float[] data : dataSet)
-						dataSet2.add(floatClone(data));
-
-					long time = System.nanoTime();
-					for (float[] data : dataSet2)
-						filter.rollingMedianNxN(data, width, height, boxSize);
-					time = System.nanoTime() - time;
-					fastTimes.add(time);
-				}
-
-		long slowTotal = 0, fastTotal = 0;
-		int index = 0;
-		for (int boxSize : boxSizes)
-		{
-			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 					for (float[] data : dataSet)
@@ -534,6 +515,25 @@ public class MedianFilterTest extends AbstractFilterTest
 					for (float[] data : dataSet2)
 						filter.blockMedianNxN(data, width, height, boxSize);
 					time = System.nanoTime() - time;
+					fastTimes.add(time);
+				}
+
+		long slowTotal = 0, fastTotal = 0;
+		int index = 0;
+		for (int boxSize : boxSizes)
+		{
+			long boxSlowTotal = 0, boxFastTotal = 0;
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
+				{
+					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					for (float[] data : dataSet)
+						dataSet2.add(floatClone(data));
+
+					long time = System.nanoTime();
+					for (float[] data : dataSet2)
+						filter.rollingMedianNxN(data, width, height, boxSize);
+					time = System.nanoTime() - time;
 
 					long fastTime = fastTimes.get(index++);
 					slowTotal += time;
@@ -541,18 +541,18 @@ public class MedianFilterTest extends AbstractFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf("float blockMedianNxN [%dx%d] @ %d : %d => rollingMedianNxN %d = %.2fx\n",
+						System.out.printf("float rollingMedianNxN [%dx%d] @ %d : %d => blockMedianNxN %d = %.2fx\n",
 								width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime));
 					//if (TestAssert.assert_SPEED_TESTS) Assert.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
-					//		blockTime, time), blockTime < time);
+					//		rollingTime, time), rollingTime < time);
 				}
 			//if (debug)
 			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
-					"float blockMedianNxN %d : %d => rollingMedianNxN %d = %.2fx\n", boxSize, boxSlowTotal,
+					"float rollingMedianNxN %d : %d => blockMedianNxN %d = %.2fx\n", boxSize, boxSlowTotal,
 					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
 		TestSettings.logSpeedTestResult(fastTotal < slowTotal,
-				"float blockMedianNxN %d => rollingMedianNxN %d = %.2fx\n", slowTotal, fastTotal,
+				"float rollingMedianNxN %d => blockMedianNxN %d = %.2fx\n", slowTotal, fastTotal,
 				speedUpFactor(slowTotal, fastTotal));
 	}
 
@@ -568,12 +568,12 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.rollingMedianNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
-		filter.rollingMedianNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
+		filter.rollingMedianNxNInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
+		filter.rollingMedianNxN(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSizes[0]);
 
 		for (int boxSize : boxSizes)
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 					for (float[] data : dataSet)
@@ -591,8 +591,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		for (int boxSize : boxSizes)
 		{
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 					for (float[] data : dataSet)
@@ -659,11 +659,11 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.blockMedianNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
-		filter.blockMedian3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
+		filter.blockMedianNxN(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], 1);
+		filter.blockMedian3x3(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -680,8 +680,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -742,11 +742,11 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.rollingMedianNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
-		filter.rollingMedian3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
+		filter.rollingMedianNxN(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], 1);
+		filter.rollingMedian3x3(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -763,8 +763,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -803,11 +803,11 @@ public class MedianFilterTest extends AbstractFilterTest
 		ArrayList<Long> fastTimes = new ArrayList<Long>();
 
 		// Initialise
-		filter.rollingMedian3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
-		filter.blockMedian3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
+		filter.rollingMedian3x3(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
+		filter.blockMedian3x3(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0]);
 
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)
@@ -824,8 +824,8 @@ public class MedianFilterTest extends AbstractFilterTest
 		int index = 0;
 		@SuppressWarnings("unused")
 		long boxSlowTotal = 0, boxFastTotal = 0;
-		for (int width : primes)
-			for (int height : primes)
+		for (int width : speedPrimes)
+			for (int height : speedPrimes)
 			{
 				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
 				for (float[] data : dataSet)

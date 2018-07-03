@@ -293,8 +293,8 @@ public class JTransformsTest
 	@Test
 	public void jTransforms2DDHTIsFasterThanFHT2()
 	{
-		TestSettings.assumeMediumComplexity();
-		
+		TestSettings.assumeSpeedTest();
+
 		// Test the forward DHT of data. and reverse transform or the pre-computed correlation.
 
 		int size = 256;
@@ -340,6 +340,12 @@ public class JTransformsTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report();
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		
+		double t1 = ts.get(-1).getMean();
+		double t2 = ts.get(-2).getMean();
+		TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-2).getTask().getName(), t2,
+				ts.get(-1).getTask().getName(), t1, t2 / t1);
+
 	}
 }

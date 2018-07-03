@@ -315,7 +315,7 @@ public class GaussianFilterTest
 	@Test
 	public void floatFilterIsFasterThanDoubleFilter()
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 
@@ -338,7 +338,12 @@ public class GaussianFilterTest
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
 		{
 			for (int k = 1; k < n; k++)
-				Assert.assertTrue(ts.get(j).getMean() < ts.get(j + k).getMean() * 1.1);
+			{
+				double t1 = ts.get(j).getMean();
+				double t2 = ts.get(j + k).getMean();
+				TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
+						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
+			}
 		}
 	}
 
@@ -368,7 +373,12 @@ public class GaussianFilterTest
 		for (int i = 0, j = size; i < sigmas.length; i++, j += n)
 		{
 			for (int k = 1; k < n; k++)
-				Assert.assertTrue(ts.get(j).getMean() < ts.get(j + k).getMean() * 1.1);
+			{
+				double t1 = ts.get(j).getMean();
+				double t2 = ts.get(j + k).getMean();
+				TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(j + k).getTask().getName(),
+						t2, ts.get(j).getTask().getName(), t1, t2 / t1);
+			}
 		}
 	}
 

@@ -32,6 +32,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
+import gdsc.test.TestSettings.TestComplexity;
 
 @SuppressWarnings("deprecation")
 public class SumFilterTest extends AbstractFilterTest
@@ -185,7 +186,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -254,7 +256,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -323,7 +326,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -415,7 +419,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -476,7 +481,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -537,7 +543,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -598,7 +605,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -683,7 +691,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -745,7 +754,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -807,7 +817,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -926,7 +937,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -994,7 +1006,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1062,7 +1075,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1131,7 +1145,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1199,7 +1214,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1291,7 +1307,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1374,7 +1391,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1458,7 +1476,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1519,7 +1538,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1580,7 +1600,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1641,7 +1662,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void floatRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1798,7 +1820,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1867,7 +1890,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSumNxNInternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -1936,7 +1960,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2028,7 +2053,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3InternalIsFasterThanBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2089,7 +2115,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2150,7 +2177,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanBlockSum3x3Internal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2211,7 +2239,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanStripedBlockSum3x3Internal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2296,7 +2325,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3InternalIsFasterThanRollingBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2358,7 +2388,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3InternalIsFasterThanStripedBlockSumNxNInternal()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2420,7 +2451,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNInternalIsFasterThanRollingBlockSumNxNInternalTransposed()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2539,7 +2571,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSumInternalNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2606,7 +2639,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2673,7 +2707,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSumInternalNxNIsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2742,7 +2777,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumNxNIsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2809,7 +2845,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSumInternalNxNIsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2901,7 +2938,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intBlockSum3x3IsFasterThanBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -2984,7 +3022,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanStripedBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -3068,7 +3107,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanRollingBlockSumNxN()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -3129,7 +3169,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -3189,7 +3230,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intStripedBlockSum3x3IsFasterThanBlockSum3x3()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 
@@ -3249,7 +3291,8 @@ public class SumFilterTest extends AbstractFilterTest
 	@Test
 	public void intRollingBlockSum3x3IsFasterThanStripedBlockSum3x3()
 	{
-		TestSettings.assumeSpeedTest();
+		// These test a deprecated filter
+		TestSettings.assumeSpeedTest(TestComplexity.VERY_HIGH);
 
 		SumFilter filter = new SumFilter();
 

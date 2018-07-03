@@ -400,15 +400,15 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		// Initialise
 		for (float boxSize : boxSizes)
 		{
-			fast.filter(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
-			slow.filter(dataSet.get(0).clone(), primes[0], primes[0], boxSize);
+			fast.filter(dataSet.get(0).clone(), speedPrimes[0], speedPrimes[0], boxSize);
+			slow.filter(dataSet.get(0).clone(), speedPrimes[0], speedPrimes[0], boxSize);
 		}
 
 		for (float boxSize : boxSizes)
 		{
 			int iter = (boxSize == 1) ? ITER3 : ITER;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					dataSet = getSpeedData(iter);
 
@@ -426,8 +426,8 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		{
 			int iter = (boxSize == 1) ? ITER3 : ITER;
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					dataSet = getSpeedData(iter);
 
@@ -442,15 +442,16 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", fast.name, width, height,
-								boxSize, time, slow.name, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", slow.name, width, height,
+								boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n", fast.name,
-					boxSize, boxSlowTotal, slow.name, boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "%s %.1f : %d => %s %d = %.2fx\n",
+					slow.name, boxSize, boxSlowTotal, fast.name, boxFastTotal,
+					speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", fast.name, slowTotal,
-				slow.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "%s %d => %s %d = %.2fx\n", slow.name, slowTotal,
+				fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	private void speedTestInternal(BlockMeanDataFilter fast, BlockMeanDataFilter slow)
@@ -474,15 +475,15 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		// Initialise
 		for (float boxSize : boxSizes)
 		{
-			fast.filterInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSize);
-			slow.filterInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSize);
+			fast.filterInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSize);
+			slow.filterInternal(floatClone(dataSet.get(0)), speedPrimes[0], speedPrimes[0], boxSize);
 		}
 
 		for (float boxSize : boxSizes)
 		{
 			int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					dataSet = getSpeedData(iter);
 
@@ -500,8 +501,8 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 		{
 			int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
 			long boxSlowTotal = 0, boxFastTotal = 0;
-			for (int width : primes)
-				for (int height : primes)
+			for (int width : speedPrimes)
+				for (int height : speedPrimes)
 				{
 					dataSet = getSpeedData(iter);
 
@@ -516,16 +517,16 @@ public class BlockMeanFilterTest extends AbstractFilterTest
 					boxSlowTotal += time;
 					boxFastTotal += fastTime;
 					if (debug)
-						System.out.printf("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", fast.name, width,
-								height, boxSize, time, slow.name, fastTime, speedUpFactor(time, fastTime));
+						System.out.printf("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx\n", slow.name, width,
+								height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime));
 				}
 			//if (debug)
-			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal, "Internal %s %.1f : %d => %s %d = %.2fx\n",
-					fast.name, boxSize, boxSlowTotal, slow.name, boxFastTotal,
-					speedUpFactor(boxSlowTotal, boxFastTotal));
+			TestSettings.logSpeedTestStageResult(boxFastTotal < boxSlowTotal,
+					"Internal %s %.1f : %d => %s %d = %.2fx\n", slow.name, boxSize, boxSlowTotal, fast.name,
+					boxFastTotal, speedUpFactor(boxSlowTotal, boxFastTotal));
 		}
-		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", fast.name,
-				slowTotal, slow.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
+		TestSettings.logSpeedTestResult(fastTotal < slowTotal, "Internal %s %d => %s %d = %.2fx\n", slow.name,
+				slowTotal, fast.name, fastTotal, speedUpFactor(slowTotal, fastTotal));
 	}
 
 	@Test

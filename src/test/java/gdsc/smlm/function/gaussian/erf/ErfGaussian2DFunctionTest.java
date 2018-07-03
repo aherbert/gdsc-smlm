@@ -505,9 +505,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		for (int i = 1; i <= 2; i++)
 		{
-			TestSettings.logSpeedTestResult(ts.get(-i).getMean() < ts.get(-i - 3).getMean(),
-					"ERF function %d order not faster than equivalent Gaussian2DFunction: %g !< %g", i - 1,
-					ts.get(-i).getMean(), ts.get(-i - 3).getMean());
+			double t1 = ts.get(-i).getMean();
+			double t2 = ts.get(-i - 3).getMean();
+			TestSettings.logSpeedTestResult(t1 < t2,
+					"ERF function %d  %s  vs equivalent Gaussian2DFunction  %s : %.2fx\n", i - 1, t1, t2, t2 / t1);
 		}
 	}
 
@@ -1117,13 +1118,15 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 
 		int size = ts.getSize();
 		ts.repeat(size);
-		ts.report();
+		if (TestSettings.allow(LogLevel.INFO))
+			ts.report();
 
 		for (int i = 1; i <= 3; i++)
 		{
-			TestSettings.logSpeedTestResult(ts.get(-i).getMean() < ts.get(-i - 3).getMean(),
-					"forEach %d order not faster than eval(int): %g !< %g", i - 1, ts.get(-i).getMean(),
-					ts.get(-i - 3).getMean());
+			double t1 = ts.get(-i).getMean();
+			double t2 = ts.get(-i - 3).getMean();
+			TestSettings.logSpeedTestResult(t1 < t2,
+					"forEach %d  order  %s  vs eval(int)  %s : %.2fx\n", i - 1, t1, t2, t2 / t1);
 		}
 	}
 

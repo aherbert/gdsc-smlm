@@ -43,6 +43,9 @@ public class AbstractFilterTest
 	/** The primes used for the width/height of images during filter testing. */
 	static int[] primes = new int[] { 113, /* 97, 53, */ 29 };
 
+	/** The primes used for the width/height of images during speed testing. */
+	static int[] speedPrimes = new int[] { 113 };
+	
 	/**
 	 * The box sizes used during filter testing.
 	 * 15 is required to make the box larger than the smallest image.
