@@ -1511,4 +1511,14 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 	{
 		this.uncalibrated = uncalibrated;
 	}
+
+	/**
+	 * Gets the title.
+	 *
+	 * @return the title
+	 */
+	public String getTitle()
+	{
+		return title;
+	}
 }
