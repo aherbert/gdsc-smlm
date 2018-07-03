@@ -1038,7 +1038,7 @@ public class FIRE implements PlugIn
 		IJImagePeakResults image2 = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
 				equalised, "IP2", bounds, 1, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
 		image2.setDisplayImage(false);
-		image1.setUncalibrated(true);
+		image2.setUncalibrated(true);
 		image2.begin();
 
 		final float minx = (float) dataBounds.getX();
@@ -1107,7 +1107,7 @@ public class FIRE implements PlugIn
 			// Truncate last block
 			blocks[block.getCount()] = Arrays.copyOf(blocks[block.getCount()], i.getCount());
 
-			final int[] indices = SimpleArrayUtils.newArray(nBlocks, 0, 1);
+			final int[] indices = SimpleArrayUtils.newArray(block.getCount() + 1, 0, 1);
 			if (randomSplit)
 				MathArrays.shuffle(indices);
 
