@@ -30,7 +30,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.utils.Random;
+import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.test.TestSettings;
+import gnu.trove.list.array.TIntArrayList;
 
 public class TraceManagerTest
 {
@@ -69,20 +72,21 @@ public class TraceManagerTest
 	public void canTraceMultiplePulseWithFixedCoords()
 	{
 		RandomGenerator rand = TestSettings.getRandomGenerator();
-		int maxOffTime = 5;
 
 		float[] params = createParams(rand);
 		Trace trace = new Trace();
+		int t = 0;
 		for (int i = 0; i < 5; i++)
 		{
-			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 		}
+		t++;
 		for (int i = 0; i < 5; i++)
 		{
-			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
-		runTracing(0, maxOffTime + 1, trace);
+		runTracing(0, 2, trace);
 	}
 
 	@Test
@@ -90,22 +94,23 @@ public class TraceManagerTest
 	{
 		RandomGenerator rand = TestSettings.getRandomGenerator();
 		float distance = 0.5f;
-		int maxOffTime = 5;
 
 		float[] params = createParams(rand);
 		Trace trace = new Trace();
+		int t = 0;
 		for (int i = 0; i < 5; i++)
 		{
 			move(rand, params, distance);
-			trace.add(new PeakResult(i, 0, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 		}
+		t++;
 		for (int i = 0; i < 5; i++)
 		{
 			move(rand, params, distance);
-			trace.add(new PeakResult(i + maxOffTime, 0, 0, 0, 0, 0, 0, params, null));
+			trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
 		}
 
-		runTracing(distance, maxOffTime + 1, trace);
+		runTracing(distance, 2, trace);
 	}
 
 	private void runTracing(double d, int t, Trace... expected)
@@ -134,17 +139,13 @@ public class TraceManagerTest
 	@Test
 	public void canTraceMultipleFluorophoresWithMovingCoords()
 	{
-		// This test can fail if the moving fluorophores paths intersect:
-		// Possibly change to use a fixed seed that is ok
-		simulate(TestSettings.getRandomGenerator(), 1000, 1, 5, 2, 0.5f);
+		simulateMoving(TestSettings.getRandomGenerator(), 1000, 1, 5, 2);
 	}
 
 	@Test
 	public void canTraceMultiplePulsingFluorophoresWithMovingCoords()
 	{
-		// This test can fail if the moving fluorophores paths intersect:
-		// Possibly change to use a fixed seed that is ok
-		simulate(TestSettings.getRandomGenerator(), 100, 5, 5, 10, 0.5f);
+		simulateMoving(TestSettings.getRandomGenerator(), 100, 5, 5, 10);
 	}
 
 	private void simulate(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime, int maxOffTime,
@@ -172,6 +173,56 @@ public class TraceManagerTest
 
 		double d = (distance > 0) ? Math.sqrt(2.05 * distance * distance) : 0;
 		runTracing(d, maxOffTime + 1, expected);
+	}
+
+	private void simulateMoving(RandomGenerator rand, int molecules, int maxPulses, int maxOnTime, int maxOffTime)
+	{
+		// When the molecules are moving their paths may intersect.
+		// Thus each molecule is allocated a 2x2 square to move within
+		// with a 2 pixel border (i.e. a 4x4 square per molecule) ensuring
+		// no overlap at the clustering distance of sqrt(2)
+		int n = (int) Math.sqrt(molecules);
+
+		TIntArrayList list = new TIntArrayList(molecules);
+		for (int y = 0; list.size() < molecules; y += 4)
+		{
+			for (int x = 0; x < n && list.size() < molecules; x += 4)
+			{
+				list.add(y * n + x);
+			}
+		}
+		int[] positions = list.toArray();
+		Random.shuffle(positions, rand);
+
+		// Offsets for movement around the 2x2 region
+		int[][] offsets = new int[][] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 }, };
+
+		Trace[] expected = new Trace[molecules];
+		for (int j = 0; j < expected.length; j++)
+		{
+			int x = positions[j] % n;
+			int y = positions[j] / n;
+			float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(0, 1, x, y, 0, 1);
+			int t = 1 + rand.nextInt(200);
+			Trace trace = new Trace();
+			int pulses = 1 + rand.nextInt(maxPulses);
+			for (int p = 0; p < pulses; p++)
+			{
+				int length = 1 + rand.nextInt(maxOnTime);
+				for (int i = 0; i < length; i++)
+				{
+					int[] offset = offsets[rand.nextInt(4)];
+					params[Gaussian2DFunction.X_POSITION] = x + offset[0];
+					params[Gaussian2DFunction.Y_POSITION] = y + offset[1];
+					trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+				}
+				t += 1 + rand.nextInt(maxOffTime);
+			}
+			expected[j] = trace;
+		}
+
+		// distance should be bigger than sqrt(2) but less than 2
+		runTracing(1.5, maxOffTime + 1, expected);
 	}
 
 	private static float[] createParams(RandomGenerator rand)
