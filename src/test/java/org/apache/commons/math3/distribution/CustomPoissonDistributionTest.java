@@ -150,7 +150,11 @@ public class CustomPoissonDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		double t1 = ts.get(-1).getMean();
+		double t2 = ts.get(-2).getMean();
+		TestSettings.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
+				t1, t2 / t1);
 	}
 
 	@Test
@@ -165,7 +169,11 @@ public class CustomPoissonDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		double t1 = ts.get(-1).getMean();
+		double t2 = ts.get(-2).getMean();
+		TestSettings.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
+				t1, t2 / t1);
 	}
 
 	@Test
@@ -186,6 +194,10 @@ public class CustomPoissonDistributionTest
 		if (TestSettings.allow(LogLevel.INFO))
 			ts.report(size);
 
-		Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
+		double t1 = ts.get(-1).getMean();
+		double t2 = ts.get(-2).getMean();
+		TestSettings.logSpeedTestResult(t1 < t2, "RandomDataGenerator  %s  vs CustomPoissonDistribution  %s : %.2f", t2,
+				t1, t2 / t1);
 	}
 }
