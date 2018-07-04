@@ -40,6 +40,7 @@ import gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
 public class UnivariateLikelihoodFisherInformationCalculatorTest
@@ -152,8 +153,8 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 			// Get the limits by inverting the Fisher information
 			double[] crlb = I.crlb();
 
-			Assert.assertEquals(var, crlb[2], var * 1e-2);
-			Assert.assertEquals(var, crlb[3], var * 1e-2);
+			TestAssert.assertEqualsRelative(var, crlb[2], 5e-2);
+			TestAssert.assertEqualsRelative(var, crlb[3], 5e-2);
 		}
 	}
 
@@ -207,6 +208,6 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest
 		FisherInformationMatrix I = calc.compute(params);
 		double[] o = I.getMatrix().data;
 
-		Assert.assertArrayEquals(e, o, 1e-6);
+		TestAssert.assertArrayEqualsRelative(e, o, 1e-6);
 	}
 }
