@@ -66,10 +66,10 @@ public class PoissonCalculatorTest
 				double e = pd.probability(x);
 				double o = PoissonCalculator.likelihood(u, x);
 				if (e > 1e-100)
-					Assert.assertEquals(e, o, e * 1e-10);
+					TestAssert.assertEqualsRelative(e, o, 1e-10);
 				e = pd.logProbability(x);
 				o = PoissonCalculator.logLikelihood(u, x);
-				Assert.assertEquals(e, o, Math.abs(e) * 1e-10);
+				TestAssert.assertEqualsRelative(e, o, 1e-10);
 			}
 		}
 	}
@@ -85,10 +85,10 @@ public class PoissonCalculatorTest
 				double e = pd.probability(x);
 				double o = PoissonCalculator.fastLikelihood(u, x);
 				if (e > 1e-100)
-					Assert.assertEquals(e, o, e * 1e-4);
+					TestAssert.assertEqualsRelative(e, o, 1e-4);
 				e = pd.logProbability(x);
 				o = PoissonCalculator.fastLogLikelihood(u, x);
-				Assert.assertEquals(e, o, Math.abs(e) * 1e-4);
+				TestAssert.assertEqualsRelative(e, o, 1e-4);
 			}
 		}
 	}
@@ -105,10 +105,10 @@ public class PoissonCalculatorTest
 				double e = pd.probability(x);
 				double o = PoissonCalculator.fastLikelihood(u, x, fastLog);
 				if (e > 1e-100)
-					Assert.assertEquals(e, o, e * 1e-4);
+					TestAssert.assertEqualsRelative(e, o, 1e-4);
 				e = pd.logProbability(x);
 				o = PoissonCalculator.fastLogLikelihood(u, x, fastLog);
-				Assert.assertEquals(e, o, Math.abs(e) * 1e-4);
+				TestAssert.assertEqualsRelative(e, o, 1e-4);
 			}
 		}
 	}
@@ -313,7 +313,7 @@ public class PoissonCalculatorTest
 		double llr = -2 * (ll - mll);
 		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x);
 		TestSettings.info("llr=%f, llr2=%f\n", llr, llr2);
-		Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-10);
+		TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, llr * 1e-10);
 
 		double[] op = new double[x.length];
 		for (int i = 0; i < n; i++)
@@ -328,13 +328,13 @@ public class PoissonCalculatorTest
 		ChiSquaredDistributionTable table = ChiSquaredDistributionTable.createUpperTailed(0.05, df);
 		ChiSquaredDistributionTable table2 = ChiSquaredDistributionTable.createUpperTailed(0.001, df);
 		if (TestSettings.allow(LogLevel.INFO))
-		TestSettings.info("Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f\n", table.getCrititalValue(df),
-				table.getSignificanceValue(), table2.getCrititalValue(df), table2.getSignificanceValue(),
-				ChiSquaredDistributionTable.computeQValue(24, 2),
-				ChiSquaredDistributionTable.createUpperTailed(0.05, 2).reject(24, 2),
-				ChiSquaredDistributionTable.getChiSquared(1e-6, 2)
+			TestSettings.info("Chi2 = %f (q=%.3f), %f (q=%.3f)  %f %b  %f\n", table.getCrititalValue(df),
+					table.getSignificanceValue(), table2.getCrititalValue(df), table2.getSignificanceValue(),
+					ChiSquaredDistributionTable.computeQValue(24, 2),
+					ChiSquaredDistributionTable.createUpperTailed(0.05, 2).reject(24, 2),
+					ChiSquaredDistributionTable.getChiSquared(1e-6, 2)
 
-		);
+			);
 		for (int i = 5; i <= 15; i++)
 		{
 			a[0] = (double) i / 10;
@@ -370,8 +370,8 @@ public class PoissonCalculatorTest
 			// too small to store in a double.
 			if (product.doubleValue() > 0)
 			{
-				Assert.assertEquals("Log-likelihood", ll, ll2, Math.abs(ll2) * 1e-10);
-				Assert.assertEquals("Log-likelihood ratio", llr, llr2, Math.abs(llr) * 1e-10);
+				TestAssert.assertEqualsRelative("Log-likelihood", ll, ll2, Math.abs(ll2) * 1e-10);
+				TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, Math.abs(llr) * 1e-10);
 			}
 		}
 
@@ -422,7 +422,7 @@ public class PoissonCalculatorTest
 		double llr2 = PoissonCalculator.logLikelihoodRatio(u, x, FastLogFactory.getFastLog());
 		TestSettings.info("llr=%f, llr2=%f\n", llr, llr2);
 		// Approximately equal
-		Assert.assertEquals("Log-likelihood ratio", llr, llr2, llr * 1e-3);
+		TestAssert.assertEqualsRelative("Log-likelihood ratio", llr, llr2, 5e-3);
 	}
 
 	@Test
@@ -519,8 +519,7 @@ public class PoissonCalculatorTest
 
 		//System.out.printf("llr=%f (%g), llr2=%f (%g)\n", llra, PoissonCalculator.computePValue(llra, 1), llrb,
 		//		PoissonCalculator.computePValue(llrb, 1));
-		Assert.assertNotEquals("Log-likelihood ratio", llra, llrb, llra * 1e-10);
-
+		TestAssert.assertNotEqualsRelative("Log-likelihood ratio", llra, llrb, 1e-10);
 	}
 
 	@Test
