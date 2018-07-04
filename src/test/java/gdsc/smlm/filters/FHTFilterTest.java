@@ -30,6 +30,7 @@ import org.junit.Test;
 import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.filters.FHTFilter.Operation;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -127,9 +128,21 @@ public class FHTFilterTest
 		ff.filter(input1, size, size);
 
 		// There may be differences due to the use of the JTransforms library
-		float error = (operation == Operation.DECONVOLUTION) ? 1e-2f : 1e-4f;
-		for (int i = 0; i < e.length; i++)
-			Assert.assertEquals(e[i], input1[i], Math.abs(e[i] * error));
+		double error = (operation == Operation.DECONVOLUTION) ? 5e-3 : 1e-4;
+
+		// This tests everything and can fail easily depending on the random generator 
+		// due to edge artifacts.
+		//TestAssert.assertArrayEqualsRelative(e, input1, error);
+
+		// This tests the centre to ignore edge differences
+		int min = size / 4;
+		int max = size - min;
+		for (int y = min; y < max; y++)
+			for (int x = min; x < max; x++)
+			{
+				int i = y * size + x;
+				TestAssert.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", x, y);
+			}
 	}
 
 	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
