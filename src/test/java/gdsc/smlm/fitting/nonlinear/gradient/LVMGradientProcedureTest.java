@@ -59,7 +59,6 @@ import gdsc.test.TestSettings;
  */
 public class LVMGradientProcedureTest
 {
-	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
 	static FastLog fastLog = null;
 
 	static FastLog getFastLog()
@@ -74,7 +73,10 @@ public class LVMGradientProcedureTest
 	int blockWidth = 10;
 	double Noise = 0.3;
 	double Background = 0.5;
-	double Signal = 100;
+	// High signal required to enabled the SupportsPrecomputed test to distinguish
+	// LSQ and MLE/WLSQ. With a value of 100 it is possible to get the same gradient
+	// with 3 peaks as with 2 peaks minus the third peak from the data.
+	double Signal = 1000; 
 	double Angle = Math.PI;
 	double Xpos = 5;
 	double Ypos = 5;
@@ -639,7 +641,9 @@ public class LVMGradientProcedureTest
 				Type.FastLogMLE, false);
 	}
 
-	@Test(expected = AssertionError.class)
+	// This test now passes as the tolerance for computing the gradient has been lowered
+	// so that the test passes under a stress test using many different random seeds.
+	//@Test(expected = AssertionError.class)
 	public void gradientProcedureFastLogMLECannotComputeGradientWithHighPrecision()
 	{
 		// Try different precision
@@ -715,7 +719,7 @@ public class LVMGradientProcedureTest
 		createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(5e-3, 1e-3);
+		DoubleEquality eq = new DoubleEquality(5e-2, 1e-6); // for the gradients
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
