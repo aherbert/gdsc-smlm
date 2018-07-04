@@ -82,17 +82,20 @@ public class SCMOSLikelihoodWrapperTest
 	private double[] testbackground, testsignal1, testangle1, testcx1, testcy1, testcz1;
 	private double[][] testw1;
 
-	private int maxx = 10;
+	private static int maxx = 10;
 
 	// Simulate per pixel noise
-	private float VAR = 57.9f;
-	private float G = 2.2f;
-	private float G_SD = 0.2f;
-	private float O = 100f;
+	private static float VAR = 57.9f;
+	private static float G = 2.2f;
+	private static float G_SD = 0.2f;
+	private static float O = 100f;
 
-	private float[] var, g, o, sd;
+	private static float[] var;
+	private static float[] g;
+	private static float[] o;
+	private static float[] sd;
 
-	public SCMOSLikelihoodWrapperTest()
+	static
 	{
 		int n = maxx * maxx;
 		var = new float[n];
@@ -670,8 +673,8 @@ public class SCMOSLikelihoodWrapperTest
 			double nll2 = f.computeLikelihood(gradient, i);
 			double nll3 = SCMOSLikelihoodWrapper.negativeLogLikelihood(mu, var[i], g[i], o[i], k[i]);
 			total += nll;
-			Assert.assertEquals("computeLikelihood @" + i, nll3, nll, nll * 1e-10);
-			Assert.assertEquals("computeLikelihood+gradient @" + i, nll3, nll2, nll * 1e-10);
+			TestAssert.assertEqualsRelative("computeLikelihood @" + i, nll3, nll, 1e-10);
+			TestAssert.assertEqualsRelative("computeLikelihood+gradient @" + i, nll3, nll2, 1e-10);
 			double pp = FastMath.exp(-nll);
 			if (maxp < pp)
 			{
@@ -694,7 +697,7 @@ public class SCMOSLikelihoodWrapperTest
 		double mode2 = Math.ceil(lambda) - 1;
 		double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
 		//TestSettings.debug("mu=%f, p=%f, maxp=%f @ %f  (expected=%f  %f)\n", mu, p, maxp, k[maxi], kmax, kmax - k[maxi]);
-		Assert.assertEquals("k-max", kmax, k[maxi], kmax * 1e-3);
+		TestAssert.assertEqualsRelative("k-max", kmax, k[maxi], 1e-3);
 
 		if (test)
 		{
@@ -702,19 +705,18 @@ public class SCMOSLikelihoodWrapperTest
 		}
 
 		// Check the function can compute the same total
-		double delta = total * 1e-10;
 		double sum, sum2;
 		sum = f.computeLikelihood();
 		sum2 = f.computeLikelihood(gradient);
-		Assert.assertEquals("computeLikelihood", total, sum, delta);
-		Assert.assertEquals("computeLikelihood with gradient", total, sum2, delta);
+		TestAssert.assertEqualsRelative("computeLikelihood", total, sum, 1e-10);
+		TestAssert.assertEqualsRelative("computeLikelihood with gradient", total, sum2, 1e-10);
 
 		// Check the function can compute the same total after duplication
 		f = f.build(nlf, a);
 		sum = f.computeLikelihood();
 		sum2 = f.computeLikelihood(gradient);
-		Assert.assertEquals("computeLikelihood", total, sum, delta);
-		Assert.assertEquals("computeLikelihood with gradient", total, sum2, delta);
+		TestAssert.assertEqualsRelative("computeLikelihood", total, sum, 1e-10);
+		TestAssert.assertEqualsRelative("computeLikelihood with gradient", total, sum2, 1e-10);
 	}
 
 	private float[] newArray(int n, float val)
@@ -836,7 +838,7 @@ public class SCMOSLikelihoodWrapperTest
 			oll2 -= Math.log(op[j]);
 		}
 		TestSettings.info("oll=%f, oll2=%f\n", oll, oll2);
-		Assert.assertEquals("Observed Log-likelihood", oll2, oll, oll2 * 1e-10);
+		TestAssert.assertEqualsRelative("Observed Log-likelihood", oll2, oll, 1e-10);
 
 		double min = Double.POSITIVE_INFINITY;
 		double mina = 0;
@@ -867,9 +869,11 @@ public class SCMOSLikelihoodWrapperTest
 			// Only value if the product could be computed. Low ratios cause it to becomes 
 			// too small to store in a double.
 			if (product.doubleValue() > 0)
-				Assert.assertEquals("Log-likelihood", llr, llr2, llr * 1e-10);
+				TestAssert.assertEqualsRelative("Log-likelihood", llr, llr2, 1e-10);
 		}
 
-		Assert.assertEquals("min", 1, mina, 0);
+		// Allow a tolerance as the random data may alter the p-value computation.
+		// 0.11 should allow it to be 1 increment either side of the answer.
+		Assert.assertEquals("min", 1, mina, 0.11);
 	}
 }
