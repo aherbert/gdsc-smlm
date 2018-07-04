@@ -128,7 +128,7 @@ public class FHTFilterTest
 		ff.filter(input1, size, size);
 
 		// There may be differences due to the use of the JTransforms library
-		double error = (operation == Operation.DECONVOLUTION) ? 5e-3 : 1e-4;
+		double error = (operation == Operation.DECONVOLUTION) ? 5e-2 : 1e-4;
 
 		// This tests everything and can fail easily depending on the random generator 
 		// due to edge artifacts.

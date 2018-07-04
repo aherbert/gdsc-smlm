@@ -67,7 +67,7 @@ public abstract class BaseFunctionSolverTest
 			//100, 200, 400, 800 
 		};
 	//@formatter:on
-	static double[] shift = { -1, 0, 1 }; // Applied (+/-) to the x/y position
+	static double[] shift = { -0.5, 0, 0.5 }; // Applied (+/-) to the x/y position
 	static double[] factor = { 0.9, 1, 1.1 }; // Applied (*) to the width
 	static int size = 11;
 	static
@@ -245,8 +245,8 @@ public abstract class BaseFunctionSolverTest
 		for (double s : signal)
 		{
 			double[] expected = createParams(1, s, 0, 0, 1);
-			double[] lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8);
-			double[] upper = createParams(3, s * 2, 0.2, 0.2, 1.2);
+			double[] lower = createParams(0, s * 0.5, -0.3, -0.3, 0.8);
+			double[] upper = createParams(3, s * 2, 0.3, 0.3, 1.2);
 			if (applyBounds)
 				solver.setBounds(lower, upper);
 			if (report)
@@ -332,8 +332,8 @@ public abstract class BaseFunctionSolverTest
 			double[] lower = null, upper = null;
 			if (applyBounds || applyBounds2)
 			{
-				lower = createParams(0, s * 0.5, -0.2, -0.2, 0.8);
-				upper = createParams(3, s * 2, 0.2, 0.2, 1.2);
+				lower = createParams(0, s * 0.5, -0.3, -0.3, 0.8);
+				upper = createParams(3, s * 2, 0.3, 0.3, 1.2);
 			}
 			if (applyBounds)
 				solver.setBounds(lower, upper);

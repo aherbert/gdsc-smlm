@@ -540,7 +540,7 @@ public class LVMGradientProcedureTest
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final Type type,
 			final boolean precomputed)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -614,9 +614,8 @@ public class LVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.info("%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", type, precomputed, time1,
-				nparams, time2, (1.0 * time1) / time2);
-		Assert.assertTrue(time2 < time1);
+		TestSettings.logSpeedTestResult(time2 < time1, "%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n",
+				type, precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
 	@Test
@@ -845,7 +844,7 @@ public class LVMGradientProcedureTest
 		final double[] b = new double[f12.size()];
 
 		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-4, 1e-6);
+		DoubleEquality eq = new DoubleEquality(1e-4, 1e-6);
 		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-6); // for the gradients
 		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
@@ -854,6 +853,8 @@ public class LVMGradientProcedureTest
 		{
 			final double[] y = yList.get(i);
 			double[] a3peaks = paramsList.get(i);
+			//System.out.printf("[%d] a=%s\n", i, Arrays.toString(a3peaks));
+
 			double[] a2peaks = Arrays.copyOf(a3peaks, 1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK);
 			double[] a2peaks2 = a2peaks.clone();
 			for (int j = 1; j < a1peaks.length; j++)
@@ -883,12 +884,13 @@ public class LVMGradientProcedureTest
 				}
 			});
 
-			// These should be the same
 			LVMGradientProcedure p123 = LVMGradientProcedureFactory.create(y, f123, type, fastLog);
+
+			/////////////////////////////////////
+			// These should be the same
+			/////////////////////////////////////
 			LVMGradientProcedure p12b3 = LVMGradientProcedureFactory.create(y,
 					OffsetGradient1Function.wrapGradient1Function(f12, b), type, fastLog);
-			// This may be different
-			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
 
 			// Check they are the same
 			p123.gradient(a3peaks);
@@ -901,11 +903,21 @@ public class LVMGradientProcedureTest
 
 			//System.out.printf("MLE=%b [%d] p12b3  %f  %f\n", type.isMLE(), i, p123.value, s);
 
-			TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(p123.value, s), "p12b3 Not same value @ %d", i);
-			TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, p123.beta), "p12b3 Not same gradient @ %d", i);
+			if (!eq.almostEqualRelativeOrAbsolute(p123.value, s))
+				TestAssert.fail("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
+						DoubleEquality.relativeError(p123.value, s), p123.value, s);
+			if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
+				TestAssert.fail("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+						DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
+						Arrays.toString(p123.beta));
 			for (int j = 0; j < alpha.length; j++)
-				TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]), "p12b3 Not same alpha @ %d",
-						j);
+			{
+				//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
+				if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
+					TestAssert.fail("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
+							DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
+							Arrays.toString(m123[j]));
+			}
 
 			// Check actual gradients are correct
 			if (checkGradients)
@@ -931,11 +943,16 @@ public class LVMGradientProcedureTest
 					//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 					//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 					//		DoubleEquality.relativeError(gradient, beta[j]));
-					TestAssert.assertTrue(eq2.almostEqualRelativeOrAbsolute(beta[j], gradient),
-							"Not same gradient @ %d: %s != %s (error=%s)", j, beta[j], gradient,
-							DoubleEquality.relativeError(beta[j], gradient));
+					if (!eq2.almostEqualRelativeOrAbsolute(beta[j], gradient))
+						TestAssert.fail("Not same gradient @ %d: %s != %s (error=%s)", j, beta[j], gradient,
+								DoubleEquality.relativeError(beta[j], gradient));
 				}
 			}
+
+			/////////////////////////////////////
+			// This may be different
+			/////////////////////////////////////
+			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
 
 			// Check these may be different
 			p12m3.gradient(a2peaks);
@@ -947,25 +964,39 @@ public class LVMGradientProcedureTest
 
 			if (type != Type.LSQ)
 			{
-				TestAssert.assertFalse(eq.almostEqualRelativeOrAbsolute(p123.value, s),
-						"p12b3 Same value @ %d: %s == %s", i, p123.value, s);
-				TestAssert.assertFalse(eq.almostEqualRelativeOrAbsolute(beta, p123.beta), "p12b3 Same gradient @ %d",
-						i);
+				if (eq.almostEqualRelativeOrAbsolute(p123.value, s))
+					TestAssert.fail("p12b3 Same value @ %d (error=%s) : %s == %s", i,
+							DoubleEquality.relativeError(p123.value, s), p123.value, s);
+				if (eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
+					TestAssert.fail("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
+							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
+							Arrays.toString(p123.beta));
 				for (int j = 0; j < alpha.length; j++)
 				{
 					//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
-					TestAssert.assertFalse(eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]),
-							"p12b3 Same alpha @ %d,%d: %s == %s", i, j, alpha[j], m123[j]);
+					if (eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
+						TestAssert.fail("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
+								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
+								Arrays.toString(m123[j]));
 				}
 			}
 			else
 			{
-				TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(p123.value, s), "p12b3 Not same value @ %d", i);
-				TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, p123.beta), "p12b3 Not same gradient @ %d",
-						i);
+				if (!eq.almostEqualRelativeOrAbsolute(p123.value, s))
+					TestAssert.fail("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
+							DoubleEquality.relativeError(p123.value, s), p123.value, s);
+				if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta))
+					TestAssert.fail("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
+							Arrays.toString(p123.beta));
 				for (int j = 0; j < alpha.length; j++)
-					TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]),
-							"p12b3 Not same alpha @ %d", j);
+				{
+					//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
+					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
+						TestAssert.fail("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
+								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
+								Arrays.toString(m123[j]));
+				}
 			}
 
 			// Check actual gradients are correct
@@ -995,7 +1026,7 @@ public class LVMGradientProcedureTest
 				TestAssert.assertTrue(eq2.almostEqualRelativeOrAbsolute(beta[j], gradient),
 						"Not same gradient @ %d: %s != %s (error=%s)", j, beta[j], gradient,
 						DoubleEquality.relativeError(beta[j], gradient));
-				
+
 			}
 		}
 	}
