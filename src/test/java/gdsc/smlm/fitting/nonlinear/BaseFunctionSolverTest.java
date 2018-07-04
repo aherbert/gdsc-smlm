@@ -48,6 +48,7 @@ import gdsc.smlm.function.StandardValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
+import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
@@ -67,17 +68,20 @@ public abstract class BaseFunctionSolverTest
 		};
 	//@formatter:on
 	static double[] shift = { -1, 0, 1 }; // Applied (+/-) to the x/y position
-	static double[] factor = { 0.7, 1, 1.3 }; // Applied (*) to the width
+	static double[] factor = { 0.9, 1, 1.1 }; // Applied (*) to the width
 	static int size = 11;
 	static
 	{
 		// Keep SNR reasonable. This should be an "easy" test since the bounds 
-		// for a correct answer are strict
-		double minSNR = 100;
-		params[Gaussian2DFunction.BACKGROUND] = signal[0] / minSNR;
+		// for a correct answer are strict.
+		double minSNR = 10;
+		double sd = 1.3;
+		double mean = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal[0], sd, sd);
+		// snr = mean/background => background = mean/snr
+		params[Gaussian2DFunction.BACKGROUND] = mean / minSNR;
 		params[Gaussian2DFunction.X_POSITION] = size / 2;
 		params[Gaussian2DFunction.Y_POSITION] = size / 2;
-		params[Gaussian2DFunction.X_SD] = 1.4;
+		params[Gaussian2DFunction.X_SD] = sd;
 	}
 	static double[] defaultClampValues;
 	static
@@ -222,6 +226,7 @@ public abstract class BaseFunctionSolverTest
 		// We are not interested in high noise CCD so this is commented out
 		//canFitSingleGaussian(solver, applyBounds, NoiseModel.CCD);
 		canFitSingleGaussian(solver, applyBounds, NoiseModel.EMCCD);
+		canFitSingleGaussian(solver, applyBounds, NoiseModel.SCMOS);
 	}
 
 	void canFitSingleGaussian(FunctionSolver solver, boolean applyBounds, NoiseModel noiseModel)
@@ -284,7 +289,7 @@ public abstract class BaseFunctionSolverTest
 						}
 			// Report
 			if (report)
-				System.out.printf("%s %s %f : CRLB = %s, Devaitions = %s\n", solver.getClass().getSimpleName(),
+				System.out.printf("%s %s %f : CRLB = %s, Deviations = %s\n", solver.getClass().getSimpleName(),
 						noiseModel, s, Arrays.toString(crlb), Arrays.toString(m.getStandardDeviation()));
 		}
 	}
@@ -318,7 +323,7 @@ public abstract class BaseFunctionSolverTest
 		int[] betterAccuracy = new int[3];
 		int[] totalAccuracy = new int[3];
 
-		String msg = "%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b %s";
+		String msg = "%s vs %s : %.1f (%s) %s %f +/- %f vs %f +/- %f  (N=%d) %b %s\n";
 
 		int i1 = 0, i2 = 0;
 		for (double s : signal)
@@ -457,7 +462,7 @@ public abstract class BaseFunctionSolverTest
 	private void test(String name2, String name, String statName, int better, int total, LogLevel logLevel)
 	{
 		double p = (total == 0) ? 0 : 100.0 * better / total;
-		TestSettings.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)", name2, name, statName, better, total, p);
+		TestSettings.log(logLevel, "%s vs %s : %s %d / %d  (%.1f)\n", name2, name, statName, better, total, p);
 		// Do not test if we don't have many examples
 		if (total <= 10)
 		{
@@ -553,20 +558,18 @@ public abstract class BaseFunctionSolverTest
 	 */
 	static double[] drawGaussian(double[] params, double[] noise, NoiseModel noiseModel, RandomGenerator rg)
 	{
-		double[] data = new double[size * size];
 		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
-		f.initialise(params);
-
+		double[] data = f.computeValues(params);
+		
 		// Poisson noise
+		CustomPoissonDistribution pd = new CustomPoissonDistribution(rg, 1);
 		for (int i = 0; i < data.length; i++)
 		{
-			CustomPoissonDistribution dist = new CustomPoissonDistribution(rg, 1);
-			double e = f.eval(i);
-			if (e > 0)
+			if (data[i] > 0)
 			{
-				dist.setMeanUnsafe(e);
-				data[i] = dist.sample();
+				pd.setMeanUnsafe(data[i]);
+				data[i] = pd.sample();
 			}
 		}
 
@@ -577,15 +580,15 @@ public abstract class BaseFunctionSolverTest
 			// Since the call random.nextGamma(...) creates a Gamma distribution 
 			// which pre-calculates factors only using the scale parameter we 
 			// create a custom gamma distribution where the shape can be set as a property.
-			CustomGammaDistribution dist = new CustomGammaDistribution(rg, 1, emGain);
+			CustomGammaDistribution gd = new CustomGammaDistribution(rg, 1, emGain);
 
 			for (int i = 0; i < data.length; i++)
 			{
 				if (data[i] > 0)
 				{
-					dist.setShapeUnsafe(data[i]);
+					gd.setShapeUnsafe(data[i]);
 					// The sample will amplify the signal so we remap to the original scale
-					data[i] = dist.sample() / emGain;
+					data[i] = gd.sample() / emGain;
 				}
 			}
 		}
