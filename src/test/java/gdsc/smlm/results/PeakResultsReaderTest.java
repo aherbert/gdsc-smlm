@@ -807,7 +807,7 @@ public class PeakResultsReaderTest
 		Assert.assertNotNull("Input results are null", actualResults);
 		Assert.assertEquals("Size differ", expectedResults.size(), actualResults.size());
 
-		final float delta = (fileFormat == ResultsFileFormat.BINARY) ? 0 : 1e-6f;
+		final double delta = (fileFormat == ResultsFileFormat.BINARY) ? 0 : 1e-5f;
 
 		PeakResult[] expected = expectedResults.toArray();
 		PeakResult[] actual = actualResults.toArray();
@@ -832,41 +832,45 @@ public class PeakResultsReaderTest
 			PeakResult p1 = expected[i];
 			PeakResult p2 = actual[i];
 
-			Assert.assertEquals("Peak mismatch @ " + i, p1.getFrame(), p2.getFrame());
+			TestAssert.assertEquals(p1.getFrame(), p2.getFrame(), "Peak mismatch @ [%d]", i);
 
 			if (fileFormat == ResultsFileFormat.MALK)
 			{
-				Assert.assertEquals("X @ " + i, p1.getXPosition(), p2.getXPosition(), delta);
-				Assert.assertEquals("Y @ " + i, p1.getYPosition(), p2.getYPosition(), delta);
-				Assert.assertEquals("Signal @ " + i, p1.getIntensity(), p2.getIntensity(), delta);
+				TestAssert.assertEqualsRelative(p1.getXPosition(), p2.getXPosition(), delta, "X @ [%d]", i);
+				TestAssert.assertEqualsRelative(p1.getYPosition(), p2.getYPosition(), delta, "Y @ [%d]", i);
+				TestAssert.assertEqualsRelative(p1.getIntensity(), p2.getIntensity(), delta, "Signal @ " + i);
 				continue;
 			}
 
-			Assert.assertEquals("Orig X mismatch @ " + i, p1.getOrigX(), p2.getOrigX());
-			Assert.assertEquals("Orig Y mismatch @ " + i, p1.getOrigY(), p2.getOrigY());
-			Assert.assertEquals("Orig value mismatch @ " + i, p1.getOrigValue(), p2.getOrigValue(), delta);
-			Assert.assertEquals("Error mismatch @ " + i, p1.getError(), p2.getError(), 1e-6);
-			Assert.assertEquals("Noise mismatch @ " + i, p1.getNoise(), p2.getNoise(), delta);
-			Assert.assertEquals("Mean intensity mismatch @ " + i, p1.getMeanIntensity(), p2.getMeanIntensity(), delta);
-			Assert.assertNotNull("Params is null @ " + i, p2.getParameters());
-			Assert.assertArrayEquals("Params mismatch @ " + i, p1.getParameters(), p2.getParameters(), delta);
+			TestAssert.assertEquals(p1.getOrigX(), p2.getOrigX(), "Orig X mismatch @ [%d]", i);
+			TestAssert.assertEquals(p1.getOrigY(), p2.getOrigY(), "Orig Y mismatch @ [%d]", i);
+			TestAssert.assertEqualsRelative(p1.getOrigValue(), p2.getOrigValue(), delta, "Orig value mismatch @ [%d]",
+					i);
+			TestAssert.assertEqualsRelative(p1.getError(), p2.getError(), 1e-6, "Error mismatch @ [%d]", i);
+			TestAssert.assertEqualsRelative(p1.getNoise(), p2.getNoise(), delta, "Noise mismatch @ [%d]", i);
+			TestAssert.assertEqualsRelative(p1.getMeanIntensity(), p2.getMeanIntensity(), delta,
+					"Mean intensity mismatch @ [%d]", i);
+			TestAssert.assertNotNull(p2.getParameters(), "Params is null @ [%d]", i);
+			TestAssert.assertArrayEqualsRelative(p1.getParameters(), p2.getParameters(), delta,
+					"Params mismatch @ [%d]", i);
 			if (showDeviations)
 			{
 				Assert.assertNotNull(p2.getParameterDeviations());
-				Assert.assertArrayEquals("Params StdDev mismatch @ " + i, p1.getParameterDeviations(),
-						p2.getParameterDeviations(), delta);
+				TestAssert.assertArrayEqualsRelative(p1.getParameterDeviations(), p2.getParameterDeviations(), delta,
+						"Params StdDev mismatch @ [%d]", i);
 			}
 			if (showEndFrame)
 			{
-				Assert.assertEquals("End frame mismatch @ " + i, p1.getEndFrame(), p2.getEndFrame());
+				TestAssert.assertEquals(p1.getEndFrame(), p2.getEndFrame(), "End frame mismatch @ [%d]", i);
 			}
 			if (showId)
 			{
-				Assert.assertEquals("ID mismatch @ " + i, p1.getId(), p2.getId());
+				TestAssert.assertEquals(p1.getId(), p2.getId(), "ID mismatch @ [%d]", i);
 			}
 			if (showPrecision)
 			{
-				Assert.assertEquals("Precision mismatch @ " + i, p1.getPrecision(), p2.getPrecision(), delta);
+				TestAssert.assertEqualsRelative(p1.getPrecision(), p2.getPrecision(), delta,
+						"Precision mismatch @ [%d]", i);
 			}
 		}
 

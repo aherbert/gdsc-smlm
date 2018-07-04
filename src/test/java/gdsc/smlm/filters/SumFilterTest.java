@@ -26,7 +26,6 @@ package gdsc.smlm.filters;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
@@ -44,26 +43,12 @@ public class SumFilterTest extends AbstractFilterTest
 
 	private void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format, Object... args)
 	{
-		try
-		{
-			TestAssert.assertArrayEqualsRelative(null, data1, data2, 1e-5);
-		}
-		catch (AssertionError e)
-		{
-			throw new AssertionError(String.format(format, args), e);
-		}
+		TestAssert.assertArrayEqualsRelative(data1, data2, 1e-4, format, args);
 	}
 
 	private void intArrayEquals(int[] data1, int[] data2, int boxSize, String format, Object... args)
 	{
-		try
-		{
-			Assert.assertArrayEquals(null, data1, data2);
-		}
-		catch (AssertionError e)
-		{
-			throw new AssertionError(String.format(format, args), e);
-		}
+		TestAssert.assertArrayEquals(data1, data2, format, args);
 	}
 
 	private float[] floatCreateData(RandomGenerator rg, int width, int height)

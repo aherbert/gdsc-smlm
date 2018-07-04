@@ -375,7 +375,9 @@ public class PoissonCalculatorTest
 			}
 		}
 
-		Assert.assertEquals("max", 1, maxa, 0);
+		// Allow a tolerance as the random data may alter the computation.
+		// 0.11 should allow it to be 1 increment either side of the answer.
+		Assert.assertEquals("max", 1, maxa, 0.11);
 	}
 
 	@Test
