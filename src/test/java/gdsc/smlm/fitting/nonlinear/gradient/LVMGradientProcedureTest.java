@@ -614,8 +614,8 @@ public class LVMGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.info("%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", type, precomputed, time1, nparams, time2,
-				(1.0 * time1) / time2);
+		TestSettings.info("%s, Precomputed=%b : Standard = %d : Unrolled %d = %d : %fx\n", type, precomputed, time1,
+				nparams, time2, (1.0 * time1) / time2);
 		Assert.assertTrue(time2 < time1);
 	}
 
@@ -716,7 +716,7 @@ public class LVMGradientProcedureTest
 		createData(1, iter, paramsList, yList, true);
 
 		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
+		DoubleEquality eq = new DoubleEquality(5e-3, 1e-3);
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
@@ -762,7 +762,9 @@ public class LVMGradientProcedureTest
 				double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, Gaussian2DFunction.getName(k),
 				//		a[k], d, beta[j], gradient);
-				TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[j], gradient), "Not same gradient @ %d", j);
+				TestAssert.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[j], gradient),
+						"Not same gradient @ %d: %s != %s (error=%s)", j, beta[j], gradient,
+						DoubleEquality.relativeError(beta[j], gradient));
 			}
 		}
 	}
@@ -844,7 +846,7 @@ public class LVMGradientProcedureTest
 
 		double delta = 1e-4;
 		DoubleEquality eq = new DoubleEquality(5e-4, 1e-6);
-		DoubleEquality eq2 = new DoubleEquality(5e-3, 1e-6); // for the gradients
+		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-6); // for the gradients
 		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
 
@@ -929,8 +931,9 @@ public class LVMGradientProcedureTest
 					//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 					//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 					//		DoubleEquality.relativeError(gradient, beta[j]));
-					TestAssert.assertTrue(eq2.almostEqualRelativeOrAbsolute(beta[j], gradient), "Not same gradient @ %d",
-							j);
+					TestAssert.assertTrue(eq2.almostEqualRelativeOrAbsolute(beta[j], gradient),
+							"Not same gradient @ %d: %s != %s (error=%s)", j, beta[j], gradient,
+							DoubleEquality.relativeError(beta[j], gradient));
 				}
 			}
 
@@ -951,8 +954,8 @@ public class LVMGradientProcedureTest
 				for (int j = 0; j < alpha.length; j++)
 				{
 					//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
-					TestAssert.assertFalse(eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]), "p12b3 Same alpha @ %d,%d: %s == %s",
-							i, j, alpha[j], m123[j]);
+					TestAssert.assertFalse(eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]),
+							"p12b3 Same alpha @ %d,%d: %s == %s", i, j, alpha[j], m123[j]);
 				}
 			}
 			else
@@ -989,7 +992,10 @@ public class LVMGradientProcedureTest
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 				//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 				//		DoubleEquality.relativeError(gradient, beta[j]));
-				TestAssert.assertTrue(eq2.almostEqualRelativeOrAbsolute(beta[j], gradient), "Not same gradient @ %d", j);
+				TestAssert.assertTrue(eq2.almostEqualRelativeOrAbsolute(beta[j], gradient),
+						"Not same gradient @ %d: %s != %s (error=%s)", j, beta[j], gradient,
+						DoubleEquality.relativeError(beta[j], gradient));
+				
 			}
 		}
 	}
