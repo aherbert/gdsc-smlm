@@ -36,6 +36,7 @@ import gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import gdsc.test.TestAssert;
+import gdsc.test.TestCounter;
 import gdsc.test.TestSettings;
 
 public class SolverSpeedTest
@@ -71,6 +72,9 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
+		int failureLimit = TestCounter.computeFailureLimit(ITER, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit, 2);
+
 		int c = 0;
 		for (int i = 0; i < A.size(); i++)
 		{
@@ -84,8 +88,12 @@ public class SolverSpeedTest
 			//Assert.assertTrue("Different solve result @ " + i, r1 == r2);
 			if (r1 && r2)
 			{
-				TestAssert.assertArrayEqualsRelative("Different b result", b, b2, 1e-2);
-				TestAssert.assertDoubleArrayEqualsRelative("Different a result", a, a2, 1e-2);
+				failCounter.run(0, () -> {
+					TestAssert.assertArrayEqualsRelative("Different b result", b, b2, 1e-2);
+				});
+				failCounter.run(0, () -> {
+					TestAssert.assertDoubleArrayEqualsRelative("Different a result", a, a2, 1e-2);
+				});
 			}
 			else
 			{
@@ -109,6 +117,9 @@ public class SolverSpeedTest
 		GaussJordan solver = new GaussJordan();
 		EJMLLinearSolver solver2 = new EJMLLinearSolver();
 
+		int failureLimit = TestCounter.computeFailureLimit(ITER, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit);
+
 		int c = 0;
 		for (int i = 0; i < ITER; i++)
 		{
@@ -121,7 +132,9 @@ public class SolverSpeedTest
 			//Assert.assertTrue("Different solve result @ " + i, r1 == r2);
 			if (r1 && r2)
 			{
-				TestAssert.assertArrayEqualsRelative("Different b result", b, b2, 1e-2);
+				failCounter.run(() -> {
+					TestAssert.assertArrayEqualsRelative("Different b result", b, b2, 1e-2);
+				});
 			}
 			else
 			{
@@ -144,6 +157,9 @@ public class SolverSpeedTest
 
 		GaussJordan solver = new GaussJordan();
 
+		int failureLimit = TestCounter.computeFailureLimit(ITER, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit, 2);
+
 		int c = 0;
 		for (int i = 0; i < A.size(); i++)
 		{
@@ -160,8 +176,12 @@ public class SolverSpeedTest
 				double[][] a1 = new double[a.length][];
 				for (int j = a1.length; j-- > 0;)
 					a1[j] = SimpleArrayUtils.toDouble(a[j]);
-				TestAssert.assertArrayEqualsRelative("Different b result", b1, b2, 1e-2);
-				TestAssert.assertDoubleArrayEqualsRelative("Different a result", a1, a2, 1e-2);
+				failCounter.run(0, () -> {
+					TestAssert.assertArrayEqualsRelative("Different b result", b1, b2, 1e-2);
+				});
+				failCounter.run(1, () -> {
+					TestAssert.assertDoubleArrayEqualsRelative("Different a result", a1, a2, 1e-2);
+				});
 			}
 			else
 			{
