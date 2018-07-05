@@ -721,8 +721,8 @@ public class LVMGradientProcedureTest
 
 		// for the gradients
 		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-2, 1e-6);
-		
+		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
@@ -865,7 +865,7 @@ public class LVMGradientProcedureTest
 		
 		// for the gradients
 		double delta = 1e-4;
-		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-6);
+		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16);
 		
 		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
