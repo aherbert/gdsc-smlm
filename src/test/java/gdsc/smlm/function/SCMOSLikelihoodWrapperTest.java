@@ -39,12 +39,15 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.data.DataException;
+import gdsc.core.math.QuadraticUtils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
+import gnu.trove.list.array.TDoubleArrayList;
 
 public class SCMOSLikelihoodWrapperTest
 {
@@ -840,12 +843,13 @@ public class SCMOSLikelihoodWrapperTest
 		TestSettings.info("oll=%f, oll2=%f\n", oll, oll2);
 		TestAssert.assertEqualsRelative("Observed Log-likelihood", oll2, oll, 1e-10);
 
-		double min = Double.POSITIVE_INFINITY;
-		double mina = 0;
-		for (int i = 5; i <= 15; i++)
+		TDoubleArrayList list = new TDoubleArrayList();
+		int imin = 5, imax = 15;
+		for (int i = imin; i <= imax; i++)
 		{
 			a[0] = (double) i / 10;
 			double ll = f.likelihood(a);
+			list.add(ll);
 			double llr = f.computeLogLikelihoodRatio(ll);
 			BigDecimal product = new BigDecimal(1);
 			double ll2 = 0;
@@ -860,11 +864,6 @@ public class SCMOSLikelihoodWrapperTest
 			double q = f.computeQValue(ll);
 			TestSettings.info("a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f\n", a[0], ll, ll2, llr, llr2,
 					product.round(new MathContext(4)).toString(), q);
-			if (min > ll)
-			{
-				min = ll;
-				mina = a[0];
-			}
 
 			// Only value if the product could be computed. Low ratios cause it to becomes 
 			// too small to store in a double.
@@ -872,8 +871,32 @@ public class SCMOSLikelihoodWrapperTest
 				TestAssert.assertEqualsRelative("Log-likelihood", llr, llr2, 1e-10);
 		}
 
+		// Find min using quadratic fit
+		double[] data = list.toArray();
+		int i = SimpleArrayUtils.findMinIndex(data);
+		double mina = (double) (imin + i) / 10;
+		double fita = mina;
+		try
+		{
+			if (i == 0)
+				i++;
+			if (i == data.length - 1)
+				i--;
+			int i1 = i - 1;
+			int i2 = i;
+			int i3 = i + 1;
+
+			fita = QuadraticUtils.findMinMax((double) (imin + i1) / 10, data[i1], (double) (imin + i2) / 10, data[i2],
+					(double) (imin + i3) / 10, data[i3]);
+		}
+		catch (DataException e)
+		{
+			// Ignore
+		}
+
 		// Allow a tolerance as the random data may alter the p-value computation.
-		// 0.11 should allow it to be 1 increment either side of the answer.
-		Assert.assertEquals("min", 1, mina, 0.11);
+		// Should allow it to be less than 2 increment either side of the answer.
+		TestSettings.info("min fit = %g => %g\n", mina, fita);
+		Assert.assertEquals("min", 1, fita, 0.199);
 	}
 }

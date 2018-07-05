@@ -37,7 +37,9 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gdsc.core.data.DataException;
 import gdsc.core.ij.Utils;
+import gdsc.core.math.QuadraticUtils;
 import gdsc.core.utils.DoubleEquality;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
@@ -46,6 +48,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
+import gnu.trove.list.array.TDoubleArrayList;
 import gdsc.test.TimingService;
 
 public class PoissonCalculatorTest
@@ -319,9 +322,6 @@ public class PoissonCalculatorTest
 		for (int i = 0; i < n; i++)
 			op[i] = PoissonCalculator.maximumLikelihood(x[i]);
 
-		double max = Double.NEGATIVE_INFINITY;
-		double maxa = 0;
-
 		//TestSettings.setLogLevel(gdsc.smlm.TestSettings.LogLevel.DEBUG);
 
 		int df = n - 1;
@@ -335,7 +335,9 @@ public class PoissonCalculatorTest
 					ChiSquaredDistributionTable.getChiSquared(1e-6, 2)
 
 			);
-		for (int i = 5; i <= 15; i++)
+		TDoubleArrayList list = new TDoubleArrayList();
+		int imin = 5, imax = 15;
+		for (int i = imin; i <= imax; i++)
 		{
 			a[0] = (double) i / 10;
 			nlf.initialise(a);
@@ -343,6 +345,7 @@ public class PoissonCalculatorTest
 				u[j] = nlf.eval(j);
 
 			ll = PoissonCalculator.logLikelihood(u, x);
+			list.add(ll);
 			llr = PoissonCalculator.logLikelihoodRatio(u, x);
 			BigDecimal product = new BigDecimal(1);
 			double ll2 = 0;
@@ -360,11 +363,6 @@ public class PoissonCalculatorTest
 					"a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f, q=%f (reject=%b @ %.3f, reject=%b @ %.3f)\n",
 					a[0], ll, ll2, llr, llr2, product.round(new MathContext(4)).toString(), p, q, table.reject(llr, df),
 					table.getSignificanceValue(), table2.reject(llr, df), table2.getSignificanceValue());
-			if (max < ll)
-			{
-				max = ll;
-				maxa = a[0];
-			}
 
 			// Only value if the product could be computed. Low ratios cause it to becomes 
 			// too small to store in a double.
@@ -375,7 +373,33 @@ public class PoissonCalculatorTest
 			}
 		}
 
-		Assert.assertEquals("max", 1, maxa, 0);
+		// Find max using quadratic fit
+		double[] data = list.toArray();
+		int i = SimpleArrayUtils.findMaxIndex(data);
+		double maxa = (double)(imin+i)/10;
+		double fita = maxa;
+		try
+		{
+			if (i == 0)
+				i++;
+			if (i == data.length - 1)
+				i--;
+			int i1 = i - 1;
+			int i2 = i;
+			int i3 = i + 1;
+
+			fita = QuadraticUtils.findMinMax((double) (imin + i1) / 10, data[i1], (double) (imin + i2) / 10, data[i2],
+					(double) (imin + i3) / 10, data[i3]);
+		}
+		catch (DataException e)
+		{
+			// Ignore
+		}
+
+		// Allow a tolerance as the random data may alter the p-value computation.
+		// Should allow it to be less than 2 increment either side of the answer.
+		TestSettings.info("max fit = %g => %g\n", maxa, fita);
+		Assert.assertEquals("max", 1, fita, 0.199);
 	}
 
 	@Test
