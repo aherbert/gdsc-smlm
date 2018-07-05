@@ -1003,9 +1003,8 @@ public class LVMGradientProcedureTest
 					TestAssert.fail("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
-				
-				// Note: To test the matrix is different we 
-				// need to find 1 different column.
+
+				// Note: Test the matrix is different by finding 1 different column
 				int dj = -1;
 				for (int j = 0; j < alpha.length; j++)
 				{
