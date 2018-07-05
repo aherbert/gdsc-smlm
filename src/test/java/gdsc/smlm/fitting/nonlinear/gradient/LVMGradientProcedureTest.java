@@ -862,11 +862,11 @@ public class LVMGradientProcedureTest
 		final double[] b = new double[f12.size()];
 
 		DoubleEquality eq = new DoubleEquality(1e-8, 1e-16); // for checking strict equivalence
-		
+
 		// for the gradients
 		double delta = 1e-4;
 		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16);
-		
+
 		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
 
@@ -986,7 +986,7 @@ public class LVMGradientProcedureTest
 
 			// Check these may be different.
 			// Sometimes they are not different.
-			
+
 			p12m3.gradient(a2peaks);
 			s = p12m3.value;
 			System.arraycopy(p12m3.beta, 0, beta, 0, p12m3.beta.length);
@@ -1003,13 +1003,35 @@ public class LVMGradientProcedureTest
 					TestAssert.fail("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
+				
+				// Note: To test the matrix is different we 
+				// need to find 1 different column.
+				int dj = -1;
 				for (int j = 0; j < alpha.length; j++)
 				{
 					//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
-					if (eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
-						TestAssert.fail("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
-								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
-								Arrays.toString(m123[j]));
+					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
+					{
+						dj = j; // Different column
+						break;
+					}
+				}
+				if (dj == -1)
+				{
+					// Find biggest error for reporting. This helps set the test tolerance.
+					double error = 0;
+					dj = -1;
+					for (int j = 0; j < alpha.length; j++)
+					{
+						double e = DoubleEquality.relativeError(alpha[j], m123[j]);
+						if (error <= e)
+						{
+							error = e;
+							dj = j;
+						}
+					}
+					TestAssert.fail("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, dj, error,
+							Arrays.toString(alpha[dj]), Arrays.toString(m123[dj]));
 				}
 			}
 			else
