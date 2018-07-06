@@ -478,8 +478,9 @@ public class FastMLEGradient2ProcedureTest
 
 		createData(1, iter, paramsList, yList, true);
 
-		double delta = 1e-5;
-		DoubleEquality eq = new DoubleEquality(1e-4, 1e-3);
+		// for the gradients
+		double delta = 1e-4;
+		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{

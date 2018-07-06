@@ -41,6 +41,8 @@ import gdsc.smlm.function.Gradient1Function;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestAssert;
+import gdsc.test.TestCounter;
 import gdsc.test.TestSettings;
 
 /**
@@ -456,11 +458,17 @@ public class LSQLVMGradientProcedureTest
 
 		createData(1, iter, paramsList, yList, true);
 
-		double delta = 1e-3;
-		DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
+		// for the gradients
+		double delta = 1e-4;
+		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+
+		// Must compute most of the time
+		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
+			final int ii = i;
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
@@ -470,6 +478,7 @@ public class LSQLVMGradientProcedureTest
 			double[] beta = p.beta.clone();
 			for (int j = 0; j < nparams; j++)
 			{
+				final int jj = j;
 				int k = indices[j];
 				double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
 				a2[k] = a[k] + d;
@@ -487,7 +496,12 @@ public class LSQLVMGradientProcedureTest
 				double gradient = (s1 - s2) / (2 * d);
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, func.getName(k), a[k], d, beta[j],
 				//		gradient);
-				Assert.assertTrue("Not same gradient @ " + j, eq.almostEqualRelativeOrAbsolute(beta[j], gradient));
+				failCounter.run(j, () -> {
+					return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
+				}, () -> {
+					TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+							DoubleEquality.relativeError(beta[jj], gradient));
+				});
 			}
 		}
 	}

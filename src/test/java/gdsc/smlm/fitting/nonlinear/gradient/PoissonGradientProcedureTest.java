@@ -103,8 +103,6 @@ public class PoissonGradientProcedureTest
 
 		GradientCalculator calc = GradientCalculatorFactory.newCalculator(nparams, false);
 
-		String name = String.format("[%d]", nparams);
-
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			PoissonGradientProcedure p = PoissonGradientProcedureFactory.create(func);
@@ -112,12 +110,13 @@ public class PoissonGradientProcedureTest
 			double[][] m = calc.fisherInformationMatrix(n, paramsList.get(i), func);
 			// Not exactly the same ...
 			double[] al = p.getLinear();
-			TestAssert.assertArrayEqualsRelative(name + " Observations: Not same alpha @ " + i, al,
-					new DenseMatrix64F(m).data, 1e-10);
+			TestAssert.assertArrayEqualsRelative(al, new DenseMatrix64F(m).data, 1e-10,
+					"[%d] Observations: Not same alphaLinear @ %d", nparams, i);
 
 			double[][] am = p.getMatrix();
 			for (int j = 0; j < nparams; j++)
-				TestAssert.assertArrayEqualsRelative(name + " Observations: Not same alpha @ " + i, am[j], m[j], 1e-10);
+				TestAssert.assertArrayEqualsRelative(am[j], m[j], 1e-10, 
+						"[%d] Observations: Not same alphaMatrix @ %d,%d", nparams, i, j);
 		}
 	}
 
@@ -349,8 +348,8 @@ public class PoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
-				(1.0 * time1) / time2);
+		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
+				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 		//Assert.assertTrue(time2 < time1);
 	}
 
