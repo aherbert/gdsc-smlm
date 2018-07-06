@@ -212,7 +212,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 	{
 		float[] data1 = data.clone();
 		float[] data2 = data.clone();
-		FloatEquality eq = new FloatEquality(2e-4f, 1e-10f);
+		FloatEquality eq = new FloatEquality(1e-3f, 1e-10f);
 
 		sum(data1, width, height, boxSize);
 		if (internal)
@@ -234,7 +234,7 @@ public class BlockSumFilterTest extends AbstractFilterTest
 	{
 		float[] data1 = data.clone();
 		float[] data2 = data.clone();
-		FloatEquality eq = new FloatEquality(2e-4f, 1e-10f);
+		FloatEquality eq = new FloatEquality(1e-3f, 1e-10f);
 
 		weightedSum(data1, w, width, height, boxSize);
 
