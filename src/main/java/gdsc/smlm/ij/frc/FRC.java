@@ -51,8 +51,7 @@ import ij.process.ImageProcessor;
  */
 public class FRC
 {
-
-	/** The jtransforms. */
+	/** Flag indicating if the JTransforms library is available. */
 	private static boolean JTRANSFORMS;
 	static
 	{
@@ -76,37 +75,36 @@ public class FRC
 	 */
 	public enum ThresholdMethod
 	{
-
-		/** The fixed 1 over 7. */
+		/** The fixed level threshold using 1 over 7. */
 		//@formatter:off
 		FIXED_1_OVER_7{ @Override
 		public String getName() { return "Fixed 1/7"; }}, 
 		
-		/** The half bit. */
+		/** The half bit threshold. */
 		HALF_BIT{ @Override
 		public String getName() { return "Half-bit"; }}, 
 		
-		/** The one bit. */
+		/** The one bit threshold. */
 		ONE_BIT{ @Override
 		public String getName() { return "One-bit"; }}, 
 		
-		/** The two bit. */
+		/** The two bit threshold. */
 		TWO_BIT{ @Override
 		public String getName() { return "Two-bit"; }}, 
 		
-		/** The one sigma. */
+		/** The one sigma threshold. */
 		ONE_SIGMA{ @Override
 		public String getName() { return "One sigma"; }},
 		
-		/** The two sigma. */
+		/** The two sigma threshold. */
 		TWO_SIGMA{ @Override
 		public String getName() { return "Two sigma"; }},
 		
-		/** The three sigma. */
+		/** The three sigma threshold. */
 		THREE_SIGMA{ @Override
 		public String getName() { return "Three sigma"; }},
 		
-		/** The four sigma. */
+		/** The four sigma threshold. */
 		FOUR_SIGMA{ @Override
 		public String getName() { return "Four sigma"; }};
 		//@formatter:on
@@ -355,7 +353,6 @@ public class FRC
 	 */
 	public static class FRCCurve implements Cloneable
 	{
-
 		/** The nm per pixel for the super-resolution images. */
 		final public double nmPerPixel;
 
@@ -422,7 +419,7 @@ public class FRC
 		 */
 		public FRCCurve copy()
 		{
-			// Let the Java framework copy the primatives
+			// Let the Java framework copy the primitives
 			FRCCurve curve = this.clone();
 			// Clone the curve entries
 			curve.results = new FRCCurveResult[results.length];
@@ -582,9 +579,9 @@ public class FRC
 	private FourierMethod fourierMethod = FourierMethod.JTRANSFORMS;
 
 	/**
-	 * Gets the fourier method.
+	 * Gets the Fourier method.
 	 *
-	 * @return the fourier method
+	 * @return the Fourier method
 	 */
 	public FourierMethod getFourierMethod()
 	{
@@ -592,23 +589,23 @@ public class FRC
 	}
 
 	/**
-	 * Sets the fourier method.
+	 * Sets the Fourier method.
 	 *
 	 * @param fourierMethod
-	 *            the new fourier method
+	 *            the new Fourier method
 	 */
 	public void setFourierMethod(FourierMethod fourierMethod)
 	{
 		this.fourierMethod = fourierMethod;
 	}
 
-	/** Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
+	/** Used to track the progress within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}. */
 	private TrackProgress progress = null;
 
 	/**
 	 * Sets the track progress.
 	 * <p>
-	 * Used to track the progess within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}.
+	 * Used to track the progress within {@link #calculateFrcCurve(ImageProcessor, ImageProcessor)}.
 	 *
 	 * @param progress
 	 *            the new track progress
@@ -628,10 +625,12 @@ public class FRC
 		return progress = NullTrackProgress.createIfNull(progress);
 	}
 
-	/** The Constant THIRD. */
+	/** Constant containing the value of a third. */
 	private static final double THIRD = 1.0 / 3.0;
 
-	/** The Constant LAST_THIRD. */
+	/**
+	 * Constant containing the value of a third so that value of 2 * {@link FRC#THIRD} + {@link FRC#LAST_THIRD} == 1.
+	 */
 	private static final double LAST_THIRD = 1.0 - 2 * THIRD;
 
 	/**
@@ -851,22 +850,22 @@ public class FRC
 	}
 
 	/**
-	 * Compute.
+	 * Compute the conjugate multiple of two FFT images.
 	 *
 	 * @param conjMult
-	 *            the conj mult
+	 *            the conjugate multiplication of FFT 1 and FFT 2
 	 * @param absFFT1
-	 *            the abs FFT 1
+	 *            the absolute magnitude of FFT 1
 	 * @param absFFT2
-	 *            the abs FFT 2
+	 *            the absolute magnitude of FFT 2
 	 * @param re1
-	 *            the re 1
+	 *            the real part of FFT 1
 	 * @param im1
-	 *            the im 1
+	 *            the imaginary part of FFT 1
 	 * @param re2
-	 *            the re 2
+	 *            the real part of FFT 2
 	 * @param im2
-	 *            the im 2
+	 *            the imaginary part of FFT 2
 	 */
 	// Package level to allow JUnit test
 	static void compute(float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1, float[] re2,
@@ -879,24 +878,24 @@ public class FRC
 	}
 
 	/**
-	 * Compute mirrored.
+	 * Compute the conjugate multiple of two FFT images.
 	 *
 	 * @param size
-	 *            the size
+	 *            the size of the FFT image
 	 * @param conjMult
-	 *            the conj mult
+	 *            the conjugate multiplication of FFT 1 and FFT 2
 	 * @param absFFT1
-	 *            the abs FFT 1
+	 *            the absolute magnitude of FFT 1
 	 * @param absFFT2
-	 *            the abs FFT 2
+	 *            the absolute magnitude of FFT 2
 	 * @param re1
-	 *            the re 1
+	 *            the real part of FFT 1
 	 * @param im1
-	 *            the im 1
+	 *            the imaginary part of FFT 1
 	 * @param re2
-	 *            the re 2
+	 *            the real part of FFT 2
 	 * @param im2
-	 *            the im 2
+	 *            the imaginary part of FFT 2
 	 */
 	// Package level to allow JUnit test
 	static void computeMirrored(int size, float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1,
@@ -947,24 +946,24 @@ public class FRC
 	}
 
 	/**
-	 * Compute mirrored fast.
+	 * Compute the conjugate multiple of two FFT images.
 	 *
 	 * @param size
 	 *            the size
 	 * @param conjMult
-	 *            the conj mult
+	 *            the conjugate multiplication of FFT 1 and FFT 2
 	 * @param absFFT1
-	 *            the abs FFT 1
+	 *            the absolute magnitude of FFT 1
 	 * @param absFFT2
-	 *            the abs FFT 2
+	 *            the absolute magnitude of FFT 2
 	 * @param re1
-	 *            the re 1
+	 *            the real part of FFT 1
 	 * @param im1
-	 *            the im 1
+	 *            the imaginary part of FFT 1
 	 * @param re2
-	 *            the re 2
+	 *            the real part of FFT 2
 	 * @param im2
-	 *            the im 2
+	 *            the imaginary part of FFT 2
 	 */
 	// Package level to allow JUnit test
 	static void computeMirroredFast(int size, float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1,
@@ -1013,24 +1012,24 @@ public class FRC
 	}
 
 	/**
-	 * Compute.
+	 * Compute the conjugate multiple of two FFT images at the given index.
 	 *
 	 * @param conjMult
-	 *            the conj mult
+	 *            the conjugate multiplication of FFT 1 and FFT 2
 	 * @param absFFT1
-	 *            the abs FFT 1
+	 *            the absolute magnitude of FFT 1
 	 * @param absFFT2
-	 *            the abs FFT 2
+	 *            the absolute magnitude of FFT 2
 	 * @param re1
-	 *            the re 1
+	 *            the real part of FFT 1
 	 * @param im1
-	 *            the im 1
+	 *            the imaginary part of FFT 1
 	 * @param re2
-	 *            the re 2
+	 *            the real part of FFT 2
 	 * @param im2
-	 *            the im 2
+	 *            the imaginary part of FFT 2
 	 * @param i
-	 *            the i
+	 *            the index
 	 */
 	private static void compute(float[] conjMult, float[] absFFT1, float[] absFFT2, float[] re1, float[] im1,
 			float[] re2, float[] im2, int i)
@@ -1092,7 +1091,7 @@ public class FRC
 	 */
 	public static double getSine(double angle, double cosA)
 	{
-		final double sine = Math.sqrt(1 - (cosA * cosA)); 
+		final double sine = Math.sqrt(1 - (cosA * cosA));
 		return ((angle > Math.PI) ? -sine : sine); // Place in correct domain
 	}
 
@@ -1135,7 +1134,7 @@ public class FRC
 		return fht.getComplexTransformProcessors();
 	}
 
-	/** Max size for Fourier images. Must be a power of 2 that is smalled that Math.sqrt(Integer.MAX_VALUE) */
+	/** Max size for Fourier images. Must be a power of 2 that is smaller that Math.sqrt(Integer.MAX_VALUE) */
 	private static final int MAX_SIZE = 32768;
 
 	/**
@@ -1214,7 +1213,6 @@ public class FRC
 
 	// Cache the Tukey window function.
 	// Using methods to check the length should make it thread safe since we create an instance reference
-	/** The taper Y. */
 	// to an array of the correct length.
 	private static float[] taperX = new float[0], taperY = new float[0];
 
@@ -1312,7 +1310,7 @@ public class FRC
 		//	}
 		//}
 
-		// New optimised code. This matches ImageWindow.tukey(size, 0.25) 
+		// New optimised code. This matches gdsc.core.utils.ImageWindow.tukey(size, 0.25) 
 		final int boundary = size / 8;
 		final int middle = size / 2;
 		final double FOUR_PI_OVER_SIZE = 12.566370614359172D / (size - 1);
@@ -1397,7 +1395,7 @@ public class FRC
 	 * smoothed correlation.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param bandwidth
 	 *            the bandwidth
 	 * @param robustness
@@ -1446,7 +1444,7 @@ public class FRC
 	 * copied and updated with the smoothed correlation.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param inPlace
 	 *            Set to true to modify the correlation in place (do not create a copy)
 	 * @return A new FRC curve
@@ -1458,7 +1456,7 @@ public class FRC
 		return getSmoothedCurve(frcCurve, bandwidth, robustness, inPlace);
 	}
 
-	/** The Constant TWO_PI. */
+	/** The constant 2 * Math.PI */
 	private final static double TWO_PI = 2.0 * Math.PI;
 
 	/**
@@ -1467,7 +1465,7 @@ public class FRC
 	 * in the input FRC curve.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param thresholdMethod
 	 *            the threshold method
 	 * @return The threshold curve representing the threshold for each input spatial frequency
@@ -1589,11 +1587,10 @@ public class FRC
 
 	/**
 	 * Computes the crossing points of the FRC curve and the threshold curve. The intersections can be used to
-	 * determine
-	 * the image resolution using {@link #getCorrectIntersection(ArrayList, ThresholdMethod)}
+	 * determine the image resolution using {@link #getCorrectIntersection(ArrayList, ThresholdMethod)}
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param thresholdCurve
 	 *            the threshold curve
 	 * @param max
@@ -1747,7 +1744,7 @@ public class FRC
 	 * data.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param thresholdMethod
 	 *            the threshold method
 	 * @return The FIRE number (in pixels)
@@ -1788,7 +1785,7 @@ public class FRC
 	 * data.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param thresholdMethod
 	 *            the threshold method
 	 * @return The FIRE result (null if computation failed)
@@ -1818,7 +1815,7 @@ public class FRC
 	 * Perfect.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @return true, if successful
 	 */
 	private static boolean perfect(FRCCurve frcCurve)
@@ -1849,7 +1846,7 @@ public class FRC
 	 * curve (see Niewenhuizen, et al (2013), Nature Methods, 10, 557, Supplementary Material p.22).
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param qValue
 	 *            the q value
 	 * @param mean
@@ -1914,7 +1911,7 @@ public class FRC
 	 * size of the field of view. This is converted to nm using the pixel size of the input image.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param nmPerPixel
 	 *            the nm per pixel in the images used to compute the FRC curve
 	 * @return the q array (in nm^-1)
@@ -1937,7 +1934,7 @@ public class FRC
 	 * size of the field of view. This is optionally converted to nm using the pixel size units in the FRC curve.
 	 *
 	 * @param frcCurve
-	 *            the frc curve
+	 *            the FRC curve
 	 * @param useUnits
 	 *            Set to true to convert the pixel units to nm
 	 * @return the q array
