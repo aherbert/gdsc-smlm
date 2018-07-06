@@ -205,7 +205,7 @@ public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2Proce
 				failCounter.run(j, () -> {
 					return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
 				}, () -> {
-					TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
+					TestAssert.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
 							DoubleEquality.relativeError(gradient1, d1[j_]));
 				});
 				failCounter.run(nparams + j, () -> {

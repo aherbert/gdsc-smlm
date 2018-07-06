@@ -45,6 +45,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
 import gdsc.test.TestAssert;
+import gdsc.test.TestCounter;
 import gdsc.test.TestSettings;
 
 /**
@@ -482,8 +483,13 @@ public class FastMLEGradient2ProcedureTest
 		double delta = 1e-4;
 		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
 
+		// Must compute most of the time
+		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit, nparams);
+
 		for (int i = 0; i < paramsList.size(); i++)
 		{
+			final int ii = i;
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
@@ -494,6 +500,7 @@ public class FastMLEGradient2ProcedureTest
 			double[] d2 = p.d2.clone();
 			for (int j = 0; j < nparams; j++)
 			{
+				final int j_ = j;
 				int k = indices[j];
 				double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
 				a2[k] = a[k] + d;
@@ -510,12 +517,18 @@ public class FastMLEGradient2ProcedureTest
 				double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
 				//System.out.printf("[%d,%d] ll - %f  (%s %f+/-%f) d1 %f ?= %f : d2 %f ?= %f\n", i, k, ll, func.getName(k), a[k], d, 
 				//		gradient1, d1[j], gradient2, d2[j]);
-				Assert.assertTrue("Not same gradient1 @ " + j, eq.almostEqualRelativeOrAbsolute(gradient1, d1[j]));
-				if (!eq.almostEqualRelativeOrAbsolute(gradient2, d2[j]))
-				{
-					Assert.fail(
-							"Not same gradient2 @ " + j + " error = " + DoubleEquality.relativeError(gradient2, d2[j]));
-				}
+				failCounter.run(j, () -> {
+					return eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]);
+				}, () -> {
+					TestAssert.fail("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient1, d1[j_],
+							DoubleEquality.relativeError(gradient1, d1[j_]));
+				});
+				failCounter.run(nparams + j, () -> {
+					return eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]);
+				}, () -> {
+					TestAssert.fail("Not same gradient2 @ %d,%d: %s != %s (error=%s)", ii, j_, gradient2, d2[j_],
+							DoubleEquality.relativeError(gradient2, d2[j_]));
+				});
 			}
 		}
 	}

@@ -188,7 +188,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		}
 		catch (AssertionError e)
 		{
-			TestSettings.logFailure(e, "canFitSingleGaussianEMCCD_x_x__FastMLE");
+			TestSettings.logFailure(e);
 		}
 	}
 
@@ -420,7 +420,7 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 		}
 		catch (AssertionError e)
 		{
-			TestSettings.logFailure(e, "canFitSingleGaussianSCMOS_x_x__FastMLE");
+			TestSettings.logFailure(e);
 		}
 	}
 
