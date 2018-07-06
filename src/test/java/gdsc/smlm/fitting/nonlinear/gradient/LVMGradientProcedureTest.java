@@ -50,6 +50,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import gdsc.test.TestCounter;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
@@ -718,27 +719,21 @@ public class LVMGradientProcedureTest
 
 		createData(1, iter, paramsList, yList, true);
 
+		// for the gradients
 		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16); // for the gradients
+		DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+
 		final double[] b = (precomputed) ? new double[func.size()] : null;
 
 		final FastLog fastLog = type == Type.FastLogMLE ? getFastLog() : null;
 
-		
-		// TODO - make this more generic using lambda functions
-		// Create a class that counts failures and stores the errors.
-		// Have a method that accepts an Interface to assert something.
-		// The accumulate the fail counts and throw the first error when 
-		// a threshold is reached.
-		
-		
-		
-		// Count the number of failures for each gradient
-		int[] failures = new int[nparams];
-		AssertionError[] errors = new AssertionError[nparams];
+		// Must compute most of the time
+		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit, nparams);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
+			final int ii = i;
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
@@ -761,6 +756,7 @@ public class LVMGradientProcedureTest
 			double[] beta = p.beta.clone();
 			for (int j = 0; j < nparams; j++)
 			{
+				final int jj = j;
 				int k = indices[j];
 				//double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
 				double d = Precision.representableDelta(a[k], delta);
@@ -780,31 +776,13 @@ public class LVMGradientProcedureTest
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f\n", i, k, s, Gaussian2DFunction.getName(k),
 				//		a[k], d, beta[j], gradient);
 
-				if (!eq.almostEqualRelativeOrAbsolute(beta[j], gradient))
-				{
-					failures[j]++;
-					if (errors[j] == null)
-					{
-						try
-						{
-							TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", i, j, beta[j], gradient,
-									DoubleEquality.relativeError(beta[j], gradient));
-						}
-						catch (AssertionError e)
-						{
-							errors[j] = e;
-						}
-					}
-				}
+				failCounter.run(j, () -> {
+					return eq.almostEqualRelativeOrAbsolute(beta[jj], gradient);
+				}, () -> {
+					TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+							DoubleEquality.relativeError(beta[jj], gradient));
+				});
 			}
-		}
-
-		// Must compute most of the time
-		int threshold = (int) Math.ceil(0.1 * paramsList.size());
-		for (int j = 0; j < nparams; j++)
-		{
-			if (failures[j] > threshold)
-				throw errors[j];
 		}
 	}
 
@@ -883,20 +861,22 @@ public class LVMGradientProcedureTest
 		int[] indices = f12.gradientIndices();
 		final double[] b = new double[f12.size()];
 
+		DoubleEquality eq = new DoubleEquality(1e-8, 1e-16); // for checking strict equivalence
+
+		// for the gradients
 		double delta = 1e-4;
-		DoubleEquality eq = new DoubleEquality(1e-4, 1e-16);
-		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16); // for the gradients
+		DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16);
+
 		double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		final double[] y_b = new double[b.length];
 
 		// Count the number of failures for each gradient
-		int[] failures = new int[nparams];
-		AssertionError[] errors = new AssertionError[nparams];
-		int[] failures2 = new int[nparams];
-		AssertionError[] errors2 = new AssertionError[nparams];
+		int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit, nparams * 2);
 
 		for (int i = 0; i < paramsList.size(); i++)
 		{
+			final int ii = i;
 			final double[] y = yList.get(i);
 			double[] a3peaks = paramsList.get(i);
 			//System.out.printf("[%d] a=%s\n", i, Arrays.toString(a3peaks));
@@ -944,7 +924,7 @@ public class LVMGradientProcedureTest
 
 			p12b3.gradient(a2peaks);
 			double s = p12b3.value;
-			double[] beta = p12b3.beta.clone();
+			final double[] beta = p12b3.beta.clone();
 			double[][] alpha = p12b3.getAlphaMatrix();
 
 			//System.out.printf("MLE=%b [%d] p12b3  %f  %f\n", type.isMLE(), i, p123.value, s);
@@ -970,6 +950,7 @@ public class LVMGradientProcedureTest
 			{
 				for (int j = 0; j < nparams; j++)
 				{
+					final int jj = j;
 					int k = indices[j];
 					//double d = Precision.representableDelta(a2peaks[k], (a2peaks[k] == 0) ? 1e-3 : a2peaks[k] * delta);
 					double d = Precision.representableDelta(a2peaks[k], delta);
@@ -989,22 +970,12 @@ public class LVMGradientProcedureTest
 					//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 					//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 					//		DoubleEquality.relativeError(gradient, beta[j]));
-					if (!eq2.almostEqualRelativeOrAbsolute(beta[j], gradient))
-					{
-						failures[j]++;
-						if (errors[j] == null)
-						{
-							try
-							{
-								TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", i, j, beta[j],
-										gradient, DoubleEquality.relativeError(beta[j], gradient));
-							}
-							catch (AssertionError e)
-							{
-								errors[j] = e;
-							}
-						}
-					}
+					failCounter.run(j, () -> {
+						return eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient);
+					}, () -> {
+						TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+								DoubleEquality.relativeError(beta[jj], gradient));
+					});
 				}
 			}
 
@@ -1013,10 +984,12 @@ public class LVMGradientProcedureTest
 			/////////////////////////////////////
 			LVMGradientProcedure p12m3 = LVMGradientProcedureFactory.create(y_b, f12, type, fastLog);
 
-			// Check these may be different
+			// Check these may be different.
+			// Sometimes they are not different.
+
 			p12m3.gradient(a2peaks);
 			s = p12m3.value;
-			beta = p12m3.beta.clone();
+			System.arraycopy(p12m3.beta, 0, beta, 0, p12m3.beta.length);
 			alpha = p12m3.getAlphaMatrix();
 
 			//System.out.printf("%s [%d] p12m3  %f  %f\n", type, i, p123.value, s);
@@ -1030,13 +1003,34 @@ public class LVMGradientProcedureTest
 					TestAssert.fail("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
 							DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
 							Arrays.toString(p123.beta));
+
+				// Note: Test the matrix is different by finding 1 different column
+				int dj = -1;
 				for (int j = 0; j < alpha.length; j++)
 				{
 					//System.out.printf("%s !=\n%s\n", Arrays.toString(alpha[j]), Arrays.toString(m123[j]));
-					if (eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
-						TestAssert.fail("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, j,
-								DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
-								Arrays.toString(m123[j]));
+					if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j]))
+					{
+						dj = j; // Different column
+						break;
+					}
+				}
+				if (dj == -1)
+				{
+					// Find biggest error for reporting. This helps set the test tolerance.
+					double error = 0;
+					dj = -1;
+					for (int j = 0; j < alpha.length; j++)
+					{
+						double e = DoubleEquality.relativeError(alpha[j], m123[j]);
+						if (error <= e)
+						{
+							error = e;
+							dj = j;
+						}
+					}
+					TestAssert.fail("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i, dj, error,
+							Arrays.toString(alpha[dj]), Arrays.toString(m123[dj]));
 				}
 			}
 			else
@@ -1064,6 +1058,7 @@ public class LVMGradientProcedureTest
 
 			for (int j = 0; j < nparams; j++)
 			{
+				final int jj = j;
 				int k = indices[j];
 				//double d = Precision.representableDelta(a2peaks[k], (a2peaks[k] == 0) ? 1e-3 : a2peaks[k] * delta);
 				double d = Precision.representableDelta(a2peaks[k], delta);
@@ -1083,34 +1078,14 @@ public class LVMGradientProcedureTest
 				//System.out.printf("[%d,%d] %f  (%s %f+/-%f)  %f  ?=  %f  (%f)\n", i, k, s,
 				//		Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
 				//		DoubleEquality.relativeError(gradient, beta[j]));
-				if (!eq2.almostEqualRelativeOrAbsolute(beta[j], gradient))
-				{
-					failures2[j]++;
-					if (errors2[j] == null)
-					{
-						try
-						{
-							TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", i, j, beta[j],
-									gradient, DoubleEquality.relativeError(beta[j], gradient));
-						}
-						catch (AssertionError e)
-						{
-							errors2[j] = e;
-						}
-					}
-				}
+				failCounter.run(nparams + j, () -> {
+					return eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient);
+				}, () -> {
+					TestAssert.fail("Not same gradient @ %d,%d: %s != %s (error=%s)", ii, jj, beta[jj], gradient,
+							DoubleEquality.relativeError(beta[jj], gradient));
+				});
 			}
 		}
-		
-		// Must compute most of the time
-		int threshold = (int) Math.ceil(0.1 * paramsList.size());
-		for (int j = 0; j < nparams; j++)
-		{
-			if (failures[j] > threshold)
-				throw errors[j];
-			if (failures2[j] > threshold)
-				throw errors2[j];
-		}		
 	}
 
 	/**

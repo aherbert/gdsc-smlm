@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
+import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
@@ -67,14 +68,9 @@ public class ConvolutionTest
 				Assert.assertEquals(r1.length, r1b.length);
 				Assert.assertEquals(r1.length, r2.length);
 				Assert.assertEquals(r1.length, r2b.length);
-				for (int k = 0; k < r1.length; k++)
-				{
-					double error = Math.abs(r1[k] * 1e-6);
-					Assert.assertEquals(r1[k], r1b[k], error);
-					error = Math.abs(r1[k] * 1e-5);
-					Assert.assertEquals(r1[k], r2[k], error);
-					Assert.assertEquals(r1[k], r2b[k], error);
-				}
+
+				TestAssert.assertArrayEqualsRelative("Spatial convolution doesn't match", r1, r1b, 1e-6);
+				TestAssert.assertArrayEqualsRelative("FFT convolution doesn't match", r2, r2b, 1e-6);
 
 				s *= 2;
 			}
@@ -95,25 +91,34 @@ public class ConvolutionTest
 				double[] data1 = randomData(random, size);
 				double[] data2 = randomData(random, size);
 				double[] kernel = createKernel(s);
-				double[] e1 = Convolution.convolve(kernel, data1);
-				double[] e2 = Convolution.convolve(kernel, data2);
-				double[][] r1 = Convolution.convolve(kernel, data1, data2);
-				double[][] r2 = Convolution.convolveFFT(kernel, data1, data2);
 
-				Assert.assertEquals(r1.length, 2);
-				Assert.assertEquals(r2.length, 2);
-				Assert.assertEquals(e1.length, r1[0].length);
-				Assert.assertEquals(e2.length, r1[1].length);
-				Assert.assertEquals(r1[0].length, r2[0].length);
-				Assert.assertEquals(r1[1].length, r2[1].length);
-				for (int k = 0; k < e1.length; k++)
+				double[] e1, e2;
+				double[][] r1;
+				for (int fft = 0; fft < 2; fft++)
 				{
-					double error = Math.abs(e1[k] * 1e-6);
-					Assert.assertEquals(e1[k], r1[0][k], error);
-					Assert.assertEquals(e2[k], r1[1][k], error);
-					error = Math.abs(e1[k] * 1e-5);
-					Assert.assertEquals(e1[k], r2[0][k], error);
-					Assert.assertEquals(e2[k], r2[1][k], error);
+					if (fft == 1)
+					{
+						e1 = Convolution.convolveFFT(kernel, data1);
+						e2 = Convolution.convolveFFT(kernel, data2);
+						r1 = Convolution.convolveFFT(kernel, data1, data2);
+					}
+					else
+					{
+						e1 = Convolution.convolve(kernel, data1);
+						e2 = Convolution.convolve(kernel, data2);
+						r1 = Convolution.convolve(kernel, data1, data2);
+					}
+
+					Assert.assertEquals(r1.length, 2);
+					Assert.assertEquals(e1.length, r1[0].length);
+					Assert.assertEquals(e2.length, r1[1].length);
+
+					for (int k = 0; k < e1.length; k++)
+					{
+						// Exact match
+						Assert.assertEquals(e1[k], r1[0][k], 0);
+						Assert.assertEquals(e2[k], r1[1][k], 0);
+					}
 				}
 
 				s *= 2;

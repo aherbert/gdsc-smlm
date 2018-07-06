@@ -31,6 +31,7 @@ import gdsc.core.utils.ImageWindow;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.smlm.filters.FHTFilter.Operation;
 import gdsc.test.TestAssert;
+import gdsc.test.TestCounter;
 import gdsc.test.TestSettings;
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
@@ -137,12 +138,27 @@ public class FHTFilterTest
 		// This tests the centre to ignore edge differences
 		int min = size / 4;
 		int max = size - min;
+		int repeats = 0;
 		for (int y = min; y < max; y++)
 			for (int x = min; x < max; x++)
+				repeats++;
+
+		// Use a fail counter for a 'soft' test that detects major problems
+		int failureLimit = TestCounter.computeFailureLimit(repeats, 0.1);
+		TestCounter failCounter = new TestCounter(failureLimit);
+
+		for (int y = min; y < max; y++)
+		{
+			final int yy = y;
+			for (int x = min; x < max; x++)
 			{
+				final int xx = x;
 				int i = y * size + x;
-				TestAssert.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", x, y);
+				failCounter.run(() -> {
+					TestAssert.assertEqualsRelative(e[i], input1[i], error, "Element [%d,%d]", xx, yy);
+				});
 			}
+		}
 	}
 
 	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
