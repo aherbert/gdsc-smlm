@@ -1567,9 +1567,9 @@ public class FRC
 		// data sets"
 		// Eq. (15) = log2(SNR+1) = n-bits
 		final double snr = (FastMath.pow(2, bits) - 1) / 2;
-		final double snr1 = snr + 1;
+		final double snr_p_1 = snr + 1;
 		final double twoRootSnr = 2 * Math.sqrt(snr);
-		final double twoRootSnr1 = twoRootSnr + 1;
+		final double twoRootSnr_p_1 = twoRootSnr + 1;
 
 		// Sense check: 
 		// 1/2-bit is equation (17) from Heel:
@@ -1581,7 +1581,7 @@ public class FRC
 		{
 			// nr = number of samples in Fourier circle = 2*pi*r
 			final double sqrtNr = Math.sqrt(TWO_PI * i);
-			threshold[i] = ((snr + twoRootSnr1 / sqrtNr) / (snr1 + twoRootSnr / sqrtNr));
+			threshold[i] = ((snr + twoRootSnr_p_1 / sqrtNr) / (snr_p_1 + twoRootSnr / sqrtNr));
 		}
 	}
 
