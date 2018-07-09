@@ -32,6 +32,7 @@ import org.junit.Test;
 import gdsc.core.utils.Random;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class SpotFilterHelperTest
 {
 	private Spot[] createData(RandomGenerator rg, int width, int height, int n)

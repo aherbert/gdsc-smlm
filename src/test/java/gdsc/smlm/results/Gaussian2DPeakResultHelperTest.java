@@ -44,6 +44,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
 
+@SuppressWarnings({ "javadoc" })
 public class Gaussian2DPeakResultHelperTest
 {
 	double[] test_a = { 100, 130, 160 };

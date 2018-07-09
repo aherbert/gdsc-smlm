@@ -34,6 +34,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
+@SuppressWarnings({ "javadoc" })
 public class AbstractFilterTest
 {
 	static final boolean debug = TestSettings.allow(LogLevel.DEBUG);
@@ -45,7 +46,7 @@ public class AbstractFilterTest
 
 	/** The primes used for the width/height of images during speed testing. */
 	static int[] speedPrimes = new int[] { 113 };
-	
+
 	/**
 	 * The box sizes used during filter testing.
 	 * 15 is required to make the box larger than the smallest image.

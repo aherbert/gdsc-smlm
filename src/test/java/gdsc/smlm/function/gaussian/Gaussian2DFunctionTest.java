@@ -37,6 +37,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class Gaussian2DFunctionTest
 {
 	protected DoubleEquality eq = new DoubleEquality(1e-2, 1e-3);

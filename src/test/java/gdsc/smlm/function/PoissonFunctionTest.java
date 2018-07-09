@@ -31,7 +31,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "javadoc" })
 public class PoissonFunctionTest
 {
 	static double[] gain = { 0.25, 0.5, 0.7, 1, 1.5, 1.7, 2, 2.2, 4, 8, 16 };

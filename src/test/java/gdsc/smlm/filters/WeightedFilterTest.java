@@ -33,6 +33,7 @@ import gdsc.test.TestAssert;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class WeightedFilterTest
 {
 	gdsc.core.utils.Random rand;

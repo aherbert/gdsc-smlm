@@ -46,6 +46,7 @@ import gdsc.test.TestSettings;
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
  * for use in the LVM algorithm.
  */
+@SuppressWarnings({ "javadoc" })
 public class FastMLEJacobianGradient2ProcedureTest extends FastMLEGradient2ProcedureTest
 {
 	// Skip super-class tests ...

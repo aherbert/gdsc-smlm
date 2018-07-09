@@ -30,6 +30,7 @@ import org.junit.Test;
 import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PrecomputedFunctionTest
 {
 	@Test

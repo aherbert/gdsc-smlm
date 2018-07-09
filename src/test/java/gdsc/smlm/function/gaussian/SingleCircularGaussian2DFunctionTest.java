@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.function.gaussian;
 
+@SuppressWarnings({ "javadoc" })
 public class SingleCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
 	@Override

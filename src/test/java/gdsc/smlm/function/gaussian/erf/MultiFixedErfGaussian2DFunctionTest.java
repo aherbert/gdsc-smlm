@@ -25,6 +25,7 @@ package gdsc.smlm.function.gaussian.erf;
 
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
+@SuppressWarnings({ "javadoc" })
 public class MultiFixedErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
 	@Override

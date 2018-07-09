@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.filters;
 
+@SuppressWarnings({ "javadoc" })
 public class KernelWeightedFilterTest extends WeightedFilterTest
 {
 	@Override

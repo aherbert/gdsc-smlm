@@ -35,6 +35,7 @@ import gdsc.smlm.results.predicates.PeakResultPredicate;
 import gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PeakResultStoreTest
 {
 	int capacity = 1;

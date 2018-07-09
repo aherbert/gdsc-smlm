@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import gdsc.test.TestSettings;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "javadoc" })
 public class AreaAverageFilterTest extends AbstractFilterTest
 {
 	private int ITER = 100;

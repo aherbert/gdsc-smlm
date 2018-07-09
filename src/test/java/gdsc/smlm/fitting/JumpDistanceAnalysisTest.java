@@ -44,6 +44,7 @@ import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
 {
 	//Based on the paper: Weimann, L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J., 

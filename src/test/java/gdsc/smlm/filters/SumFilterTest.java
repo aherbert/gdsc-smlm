@@ -33,7 +33,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.TestComplexity;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "javadoc" })
 public class SumFilterTest extends AbstractFilterTest
 {
 	private int InternalITER3 = 500;

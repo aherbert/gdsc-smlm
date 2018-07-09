@@ -34,6 +34,7 @@ import gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import gdsc.core.utils.Maths;
 import gdsc.core.utils.SimpleArrayUtils;
 
+@SuppressWarnings({ "javadoc" })
 public class CubicSplineCalculatorTest
 {
 	@Test

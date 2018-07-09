@@ -31,6 +31,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFisherInformationTest
 {
 	@Test
@@ -105,7 +106,7 @@ public class PoissonGammaGaussianFisherInformationTest
 		// the class works up to mean of about 300. Above that the approximation using
 		// half the Poisson Fisher information should be used instead. 
 		// 10^2 == 100 (OK), 10^2.5 == 316 (Fail)
-		
+
 		// exp == -12 => p = 1e-6
 		// exp ==  -8 => p = 1e-4
 		// exp ==   0 => p = 1
@@ -181,14 +182,13 @@ public class PoissonGammaGaussianFisherInformationTest
 		computeFisherInformationWithMean(1e-100);
 	}
 
-
 	@Test
 	public void canComputeFisherInformationWithVeryLowMean()
 	{
 		TestSettings.assumeMediumComplexity();
 		computeFisherInformationWithMean(1e-300);
 	}
-	
+
 	@Test
 	public void canComputeFisherInformationWithLowestPossibleMean()
 	{
@@ -232,7 +232,7 @@ public class PoissonGammaGaussianFisherInformationTest
 
 		computeFisherInformationWithMean(u);
 	}
-	
+
 	private void computeFisherInformationWithMean(double u)
 	{
 		double[] M = { 20, 500 };

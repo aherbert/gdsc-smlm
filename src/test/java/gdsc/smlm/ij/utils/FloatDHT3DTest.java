@@ -38,6 +38,7 @@ import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class FloatDHT3DTest
 {
 	int size = 16;

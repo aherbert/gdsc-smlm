@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.function.cspline;
 
+@SuppressWarnings({ "javadoc" })
 public class MultiCubicSplineFunctionTest extends CubicSplineFunctionTest
 {
 	@Override

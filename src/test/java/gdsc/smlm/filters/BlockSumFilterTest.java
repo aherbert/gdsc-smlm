@@ -35,6 +35,7 @@ import gdsc.core.utils.FloatEquality;
 import gdsc.core.utils.Maths;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class BlockSumFilterTest extends AbstractFilterTest
 {
 	private int InternalITER3 = 500;

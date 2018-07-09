@@ -33,6 +33,7 @@ import gdsc.core.utils.StoredDataStatistics;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGaussianConvolutionFunctionTest
 {
 	double[] gain = PoissonGaussianFunctionTest.gain;

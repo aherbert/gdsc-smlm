@@ -29,6 +29,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class IntBlockSumFilterTest extends AbstractFilterTest
 {
 	/**

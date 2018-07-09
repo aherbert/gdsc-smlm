@@ -52,6 +52,7 @@ import gdsc.test.TestSettings.LogLevel;
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
  * for use in NonLinearFit
  */
+@SuppressWarnings({ "javadoc" })
 public class GradientCalculatorSpeedTest
 {
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);

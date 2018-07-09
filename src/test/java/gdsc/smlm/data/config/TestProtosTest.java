@@ -30,6 +30,7 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings({ "javadoc" })
 public class TestProtosTest
 {
 	@Test

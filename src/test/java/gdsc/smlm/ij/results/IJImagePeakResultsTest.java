@@ -47,6 +47,7 @@ import ij.process.ImageProcessor;
 /**
  * Test the IJImagePeakResults functionality.
  */
+@SuppressWarnings({ "javadoc" })
 public class IJImagePeakResultsTest
 {
 	//private RandomGenerator rand = TestSettings.getRandomGenerator(System.currentTimeMillis() + System.identityHashCode(this));

@@ -34,6 +34,7 @@ import org.junit.Test;
 import gdsc.core.math.interpolation.CustomTricubicFunction;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class CubicSplineDataTest
 {
 	@Test

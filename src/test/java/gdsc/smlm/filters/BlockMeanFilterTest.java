@@ -34,6 +34,7 @@ import org.junit.internal.ArrayComparisonFailure;
 import gdsc.core.utils.FloatEquality;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class BlockMeanFilterTest extends AbstractFilterTest
 {
 	private int InternalITER3 = 500;

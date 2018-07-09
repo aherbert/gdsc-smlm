@@ -35,6 +35,7 @@ import gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
+@SuppressWarnings({ "javadoc" })
 public class CalibrationReaderTest
 {
 	double nmPerPixel = 104.5;

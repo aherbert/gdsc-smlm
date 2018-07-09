@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import gdsc.smlm.results.count.Counter;
 
+@SuppressWarnings({ "javadoc" })
 public class CounterTest
 {
 	@Test

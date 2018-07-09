@@ -32,6 +32,7 @@ import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianConvolutionFunctionTest
 {
 	static double[] gain = { 6, 30 }; // ADU/electron above 1

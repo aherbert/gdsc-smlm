@@ -33,6 +33,7 @@ import org.junit.Test;
 import gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class SettingsManagerTest
 {
 	@Test

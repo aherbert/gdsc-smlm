@@ -43,6 +43,7 @@ import ij.io.FileInfo;
 import ij.io.TiffEncoder;
 import ij.measure.Calibration;
 
+@SuppressWarnings({ "javadoc" })
 public class SeriesImageSourceTest
 {
 	int w = 10, h = 5, d = 7;

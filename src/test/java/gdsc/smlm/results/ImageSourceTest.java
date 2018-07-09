@@ -36,6 +36,7 @@ import org.junit.Test;
 import gdsc.core.utils.Random;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class ImageSourceTest
 {
 	@Test

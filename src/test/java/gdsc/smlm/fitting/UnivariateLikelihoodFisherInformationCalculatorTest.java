@@ -43,6 +43,7 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class UnivariateLikelihoodFisherInformationCalculatorTest
 {
 	enum Model

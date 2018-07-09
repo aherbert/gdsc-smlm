@@ -35,6 +35,7 @@ import gdsc.smlm.results.PeakResult;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class SphericalDistributionTest
 {
 	@Test
@@ -63,7 +64,7 @@ public class SphericalDistributionTest
 	public void rejectionMethodIsFasterThanTransformationMethod()
 	{
 		TestSettings.assumeMediumComplexity();
-		
+
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		double radius = 10 + rg.nextDouble() * 10;
 		SphericalDistribution dist = new SphericalDistribution(radius, rg);

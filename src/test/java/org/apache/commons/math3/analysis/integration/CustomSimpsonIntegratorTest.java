@@ -30,6 +30,7 @@ import org.junit.Test;
 import gdsc.core.utils.Maths;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class CustomSimpsonIntegratorTest
 {
 	private interface TestUnivariateFunction extends UnivariateFunction

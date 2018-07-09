@@ -32,6 +32,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.TestComplexity;
 
+@SuppressWarnings({ "javadoc" })
 public class BinomialFitterTest
 {
 	int[] N = new int[] { 2, 3, 4, 6 };

@@ -55,6 +55,7 @@ import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class CubicSplineFunctionTest
 {
 	protected DoubleEquality eq = new DoubleEquality(1e-2, 1e-3);

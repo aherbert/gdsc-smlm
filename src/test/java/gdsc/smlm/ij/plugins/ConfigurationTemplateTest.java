@@ -46,6 +46,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class ConfigurationTemplateTest
 {
 	@Test

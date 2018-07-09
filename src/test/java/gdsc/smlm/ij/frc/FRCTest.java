@@ -41,6 +41,7 @@ import gdsc.test.TimingService;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class FRCTest
 {
 	@Test

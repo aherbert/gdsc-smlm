@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import ij.process.ImageProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class Image2DTest
 {
 	protected abstract Image2D createData(int w, int h);

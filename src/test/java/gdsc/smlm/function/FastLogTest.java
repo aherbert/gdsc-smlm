@@ -40,7 +40,7 @@ import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
 import gdsc.test.TimingService;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "javadoc" })
 public class FastLogTest
 {
 	ICSIFastLog iLog = ICSIFastLog.create(DataType.BOTH);
@@ -323,7 +323,7 @@ public class FastLogTest
 	public void canTestFloatError()
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
-		
+
 		// All float values is a lot so we do a representative set
 		float[] d = generateRandomFloats(1000000);
 		float[] logD = new float[d.length];
@@ -551,7 +551,7 @@ public class FastLogTest
 	public void canTestDoubleError()
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
-		
+
 		// All float values is a lot so we do a representative set
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;
@@ -590,7 +590,7 @@ public class FastLogTest
 	public void canTestDoubleErrorLog1P()
 	{
 		TestSettings.assume(LogLevel.INFO, TestComplexity.HIGH);
-		
+
 		// All float values is a lot so we do a representative set
 		RandomGenerator r = TestSettings.getRandomGenerator();
 		double lower = Double.MIN_VALUE, upper = Double.MAX_VALUE;

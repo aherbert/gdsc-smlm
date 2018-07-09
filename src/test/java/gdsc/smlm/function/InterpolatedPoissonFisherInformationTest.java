@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import gdsc.core.utils.DoubleEquality;
 
+@SuppressWarnings({ "javadoc" })
 public class InterpolatedPoissonFisherInformationTest
 {
 	@Test

@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.filters;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class DataFilter
 {
 	/** The name. */

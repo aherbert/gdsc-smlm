@@ -32,6 +32,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class Image3DAlignerTest
 {
 	// TODO - Make this test the StackAligner with sub-pixel accuracy and non power of 2 images

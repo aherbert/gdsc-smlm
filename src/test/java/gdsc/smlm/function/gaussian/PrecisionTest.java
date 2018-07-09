@@ -36,6 +36,7 @@ import gdsc.test.TestSettings;
  * However the precision of the single-precision functions is 1e-4 when using reasonable Gaussian parameters. This could
  * effect the convergence of optimisers/fitters if using single precision math.
  */
+@SuppressWarnings({ "javadoc" })
 public class PrecisionTest
 {
 	int Single = 1;
@@ -438,8 +439,7 @@ public class PrecisionTest
 	@Test
 	public void circularDoublePrecisionIsFasterWithGradients()
 	{
-		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
-				false, true);
+		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false, true);
 	}
 
 	@Test
@@ -451,8 +451,7 @@ public class PrecisionTest
 	@Test
 	public void circularDoublePrecisionIsFasterWithGradientsNoSum()
 	{
-		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
-				true, true);
+		isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true, true);
 	}
 
 	@Test
@@ -503,8 +502,7 @@ public class PrecisionTest
 	@Test
 	public void fixedDoublePrecisionIsFasterWithGradients()
 	{
-		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false,
-				true);
+		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false, true);
 	}
 
 	@Test
@@ -516,8 +514,7 @@ public class PrecisionTest
 	@Test
 	public void fixedDoublePrecisionIsFasterWithGradientsNoSum()
 	{
-		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true,
-				true);
+		isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true, true);
 	}
 
 	@Test
@@ -732,8 +729,7 @@ public class PrecisionTest
 		return System.nanoTime() - time;
 	}
 
-	private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum,
-			boolean doubleFaster)
+	private void isFaster(int maxx, SinglePrecision f1, DoublePrecision f2, boolean noSum, boolean doubleFaster)
 	{
 		TestSettings.assumeSpeedTest();
 

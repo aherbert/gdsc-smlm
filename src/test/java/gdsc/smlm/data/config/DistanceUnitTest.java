@@ -29,7 +29,7 @@ import org.junit.Test;
 import gdsc.core.data.utils.TypeConverter;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "javadoc" })
 public class DistanceUnitTest
 {
 	@Test

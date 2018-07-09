@@ -37,6 +37,7 @@ import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 import pl.edu.icm.jlargearrays.ConcurrencyUtils;
 
+@SuppressWarnings({ "javadoc" })
 public class ConvolutionTest
 {
 	int sizeLoops = 8;

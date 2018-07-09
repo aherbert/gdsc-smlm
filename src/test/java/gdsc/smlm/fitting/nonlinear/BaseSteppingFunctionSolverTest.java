@@ -32,6 +32,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 /**
  * Test that a stepping solver can return the same results with and without bounds.
  */
+@SuppressWarnings({ "javadoc" })
 public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverTest
 {
 	enum SteppingFunctionSolverClamp

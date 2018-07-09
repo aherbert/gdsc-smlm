@@ -55,6 +55,7 @@ import gdsc.test.TestSettings;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
+@SuppressWarnings({ "javadoc" })
 public class BlinkEstimatorTest
 {
 	private RandomGenerator rand = TestSettings

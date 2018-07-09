@@ -42,6 +42,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class LSQVarianceGradientProcedureTest
 {
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);

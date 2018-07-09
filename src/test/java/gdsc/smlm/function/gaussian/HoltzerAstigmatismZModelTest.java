@@ -30,6 +30,7 @@ import gdsc.core.utils.DoubleEquality;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
+@SuppressWarnings({ "javadoc" })
 public class HoltzerAstigmatismZModelTest
 {
 	protected DoubleEquality eq = new DoubleEquality(1e-5, 1e-7);

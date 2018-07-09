@@ -53,6 +53,7 @@ import ij.Macro;
 /**
  * Test the ResultsManager functionality to load results from file when the file has options.
  */
+@SuppressWarnings({ "javadoc" })
 public class ResultsManagerTest
 {
 	@Test

@@ -48,6 +48,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 {
 	public ErfGaussian2DFunctionTest()
@@ -1125,8 +1126,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest
 		{
 			double t1 = ts.get(-i).getMean();
 			double t2 = ts.get(-i - 3).getMean();
-			TestSettings.logSpeedTestResult(t1 < t2,
-					"forEach %d  order  %s  vs eval(int)  %s : %.2fx\n", i - 1, t1, t2, t2 / t1);
+			TestSettings.logSpeedTestResult(t1 < t2, "forEach %d  order  %s  vs eval(int)  %s : %.2fx\n", i - 1, t1, t2,
+					t2 / t1);
 		}
 	}
 

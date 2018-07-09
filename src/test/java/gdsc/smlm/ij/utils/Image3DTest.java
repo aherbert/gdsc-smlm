@@ -29,6 +29,7 @@ import org.junit.Test;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public abstract class Image3DTest
 {
 	protected abstract Image3D createData(int w, int h, int d);

@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.data.config;
 
+@SuppressWarnings({ "javadoc" })
 public class ExpectedUnit<T>
 {
 	final T u;

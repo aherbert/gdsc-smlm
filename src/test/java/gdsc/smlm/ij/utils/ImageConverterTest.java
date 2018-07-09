@@ -35,6 +35,7 @@ import gdsc.test.TestSettings;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class ImageConverterTest
 {
 	static byte[] bdata;

@@ -25,6 +25,7 @@ package gdsc.smlm.ij.utils;
 
 import gdsc.core.utils.SimpleArrayUtils;
 
+@SuppressWarnings({ "javadoc" })
 public class DoubleImage2DTest extends Image2DTest
 {
 	@Override

@@ -30,6 +30,7 @@ import gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import gdsc.smlm.data.config.PSFProtos.PSF;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
+@SuppressWarnings({ "javadoc" })
 public class PSFProtosHelperTest
 {
 	@Test

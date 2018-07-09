@@ -35,6 +35,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
+@SuppressWarnings({ "javadoc" })
 public class FunctionHelperTest
 {
 	@Test

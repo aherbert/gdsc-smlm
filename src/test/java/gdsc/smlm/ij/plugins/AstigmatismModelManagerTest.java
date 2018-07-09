@@ -32,6 +32,7 @@ import gdsc.smlm.data.config.UnitConverterFactory;
 import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.function.gaussian.AstigmatismZModel;
 
+@SuppressWarnings({ "javadoc" })
 public class AstigmatismModelManagerTest
 {
 	@Test

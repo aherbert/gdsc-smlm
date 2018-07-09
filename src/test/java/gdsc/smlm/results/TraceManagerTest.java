@@ -35,6 +35,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.test.TestSettings;
 import gnu.trove.list.array.TIntArrayList;
 
+@SuppressWarnings({ "javadoc" })
 public class TraceManagerTest
 {
 	@Test

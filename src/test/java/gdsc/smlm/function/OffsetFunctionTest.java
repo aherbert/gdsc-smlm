@@ -31,6 +31,7 @@ import gdsc.core.utils.PseudoRandomGenerator;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class OffsetFunctionTest
 {
 	@Test

@@ -51,6 +51,7 @@ import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 import gdsc.test.TimingService;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonCalculatorTest
 {
 	double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };
@@ -376,7 +377,7 @@ public class PoissonCalculatorTest
 		// Find max using quadratic fit
 		double[] data = list.toArray();
 		int i = SimpleArrayUtils.findMaxIndex(data);
-		double maxa = (double)(imin+i)/10;
+		double maxa = (double) (imin + i) / 10;
 		double fita = maxa;
 		try
 		{

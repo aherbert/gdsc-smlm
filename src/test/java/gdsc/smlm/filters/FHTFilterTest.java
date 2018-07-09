@@ -38,6 +38,7 @@ import ij.process.ByteProcessor;
 import ij.process.FHT;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class FHTFilterTest
 {
 	@Test

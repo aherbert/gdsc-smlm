@@ -28,6 +28,7 @@ import gdsc.core.utils.PseudoRandomSequence;
 import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class FakeGradientFunction
 		implements ExtendedGradient2Function, Gradient2Function, Gradient1Function, NonLinearFunction
 {

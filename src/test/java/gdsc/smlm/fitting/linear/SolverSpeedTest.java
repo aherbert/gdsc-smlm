@@ -39,6 +39,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestCounter;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class SolverSpeedTest
 {
 	private static ArrayList<float[][]> Adata = new ArrayList<float[][]>();

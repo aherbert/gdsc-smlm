@@ -26,6 +26,7 @@ package gdsc.smlm.search;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings({ "javadoc" })
 public class SearchSpaceTest
 {
 	@Test

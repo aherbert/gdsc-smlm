@@ -51,6 +51,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
 
+@SuppressWarnings({ "javadoc" })
 public class PeakResultsReaderTest
 {
 	static final boolean[] onOff = new boolean[] { true, false };

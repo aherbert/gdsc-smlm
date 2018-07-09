@@ -33,6 +33,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
+@SuppressWarnings({ "javadoc" })
 public class CustomGammaDistributionTest
 {
 	private abstract class MyTimingTask extends BaseTimingTask

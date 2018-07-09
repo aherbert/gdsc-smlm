@@ -30,6 +30,7 @@ import org.junit.Test;
 import gdsc.core.utils.Maths;
 import gdsc.test.TestAssert;
 
+@SuppressWarnings({ "javadoc" })
 public class GaussianKernelTest
 {
 	@Test

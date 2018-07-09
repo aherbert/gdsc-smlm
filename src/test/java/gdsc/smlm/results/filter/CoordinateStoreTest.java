@@ -26,6 +26,7 @@ package gdsc.smlm.results.filter;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings({ "javadoc" })
 public class CoordinateStoreTest
 {
 	// TODO - test for a crop store ...

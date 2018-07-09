@@ -26,6 +26,7 @@ package gdsc.smlm.function.gaussian.erf;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
+@SuppressWarnings({ "javadoc" })
 public class SingleAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest
 {
 	@Override

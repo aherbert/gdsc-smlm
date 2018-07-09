@@ -33,6 +33,7 @@ import gdsc.test.TestSettings;
 /**
  * Test that an LVM stepping solver can return the same results with and without bounds.
  */
+@SuppressWarnings({ "javadoc" })
 public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 {
 	// This test is a copy of the BoundedFunctionSolverTest for the LVMSteppingFunctionSolver.

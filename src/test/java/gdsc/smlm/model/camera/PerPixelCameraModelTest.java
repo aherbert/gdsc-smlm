@@ -36,6 +36,7 @@ import gdsc.core.utils.SimpleArrayUtils;
 import gdsc.test.TestSettings;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class PerPixelCameraModelTest
 {
 	static float[] bias, gain, variance, var_g2, image;

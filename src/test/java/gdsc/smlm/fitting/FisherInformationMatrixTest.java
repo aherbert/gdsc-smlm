@@ -40,6 +40,7 @@ import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class FisherInformationMatrixTest
 {
 	@Test

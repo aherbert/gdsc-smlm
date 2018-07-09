@@ -34,7 +34,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "javadoc" })
 public class InterpolatedPoissonFunctionTest
 {
 	static double[] gain = { 1, 2, 4, 8, 16 };

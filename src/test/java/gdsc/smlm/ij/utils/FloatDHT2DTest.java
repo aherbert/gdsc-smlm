@@ -38,6 +38,7 @@ import gdsc.test.TestAssert;
 import ij.process.FHT2;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class FloatDHT2DTest
 {
 	int size = 16;

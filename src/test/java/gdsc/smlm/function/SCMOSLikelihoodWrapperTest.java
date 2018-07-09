@@ -49,6 +49,7 @@ import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gnu.trove.list.array.TDoubleArrayList;
 
+@SuppressWarnings({ "javadoc" })
 public class SCMOSLikelihoodWrapperTest
 {
 	private double[] photons = { 1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10, 100, 1000 };

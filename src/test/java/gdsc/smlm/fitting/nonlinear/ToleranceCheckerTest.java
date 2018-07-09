@@ -31,6 +31,7 @@ import gdsc.core.utils.BitFlags;
 /**
  * Test the ToleranceChecker can converge as expected.
  */
+@SuppressWarnings({ "javadoc" })
 public class ToleranceCheckerTest
 {
 	double NONE = ToleranceChecker.IGNORE_TOLERANCE;

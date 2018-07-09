@@ -34,6 +34,7 @@ import gdsc.smlm.model.GaussianPSFModel;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class ErfGaussian2DFunctionVsPSFModelTest
 {
 	private int width = 10;

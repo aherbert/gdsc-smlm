@@ -54,6 +54,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
 /**
+ * @SuppressWarnings({"javadoc"})
  * Base class for testing the function solvers
  */
 public abstract class BaseFunctionSolverTest
@@ -561,7 +562,7 @@ public abstract class BaseFunctionSolverTest
 		int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
 		Gaussian2DFunction f = GaussianFunctionFactory.create2D(n, size, size, flags, null);
 		double[] data = f.computeValues(params);
-		
+
 		// Poisson noise
 		CustomPoissonDistribution pd = new CustomPoissonDistribution(rg, 1);
 		for (int i = 0; i < data.length; i++)

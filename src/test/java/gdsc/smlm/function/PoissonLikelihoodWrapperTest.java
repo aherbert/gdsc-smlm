@@ -40,6 +40,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonLikelihoodWrapperTest
 {
 	double alpha = 1 / 40.0;
@@ -275,8 +276,8 @@ public class PoissonLikelihoodWrapperTest
 										}
 								}
 		double p = (100.0 * count) / total;
-		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total,
-				p);
+		TestSettings.info("Per Datum %s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter],
+				count, total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low per datum: " + p, p > 90);
 	}
 
@@ -473,7 +474,8 @@ public class PoissonLikelihoodWrapperTest
 
 								}
 		double p = (100.0 * count) / total;
-		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p);
+		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
+				total, p);
 		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
 	}
 

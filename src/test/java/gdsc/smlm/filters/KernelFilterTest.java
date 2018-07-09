@@ -40,6 +40,7 @@ import gdsc.test.TimingService;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class KernelFilterTest
 {
 	int size = 256;
@@ -308,9 +309,9 @@ public class KernelFilterTest
 			ts.repeat();
 			if (TestSettings.allow(LogLevel.INFO))
 				ts.report(size);
-			TestAssert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean(), 
-					"ZeroKernelFilter (%s) not faster than IJ Convolver (%s)", 
-					ts.get(-1).getMean() , ts.get(-3).getMean());
+			TestAssert.assertTrue(ts.get(-1).getMean() < ts.get(-3).getMean(),
+					"ZeroKernelFilter (%s) not faster than IJ Convolver (%s)", ts.get(-1).getMean(),
+					ts.get(-3).getMean());
 		}
 	}
 

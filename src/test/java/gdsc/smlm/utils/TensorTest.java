@@ -30,6 +30,7 @@ import org.junit.Test;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 
+@SuppressWarnings({ "javadoc" })
 public class TensorTest
 {
 	@Test

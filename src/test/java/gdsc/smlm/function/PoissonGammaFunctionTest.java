@@ -39,6 +39,7 @@ import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TestSettings.TestComplexity;
 import gnu.trove.list.array.TDoubleArrayList;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGammaFunctionTest
 {
 	static double[] gain = { 6, 16, 30 }; // ADU/electron above 1
@@ -323,7 +324,7 @@ public class PoissonGammaFunctionTest
 		boolean report = TestSettings.allow(LogLevel.INFO, TestComplexity.MEDIUM);
 		if (report)
 			Arrays.sort(p);
-		
+
 		double m = 5;
 
 		for (double x : p)

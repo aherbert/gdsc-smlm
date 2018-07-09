@@ -49,6 +49,7 @@ import gdsc.test.TestSettings;
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
  * for use in the LVM algorithm.
  * <p>
+ * @SuppressWarnings({"javadoc"})
  * Note: This class is a test-bed for implementation strategies. The fastest strategy can then be used for other
  * gradient procedures.
  */

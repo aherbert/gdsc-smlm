@@ -37,6 +37,7 @@ import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import ij.ImageStack;
 
+@SuppressWarnings({ "javadoc" })
 public class DoubleDHT3DTest
 {
 	int size = 16;

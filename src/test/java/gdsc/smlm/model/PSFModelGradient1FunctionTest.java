@@ -34,6 +34,7 @@ import gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import gdsc.test.TestAssert;
 
+@SuppressWarnings({ "javadoc" })
 public class PSFModelGradient1FunctionTest
 {
 	@Test

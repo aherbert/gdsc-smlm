@@ -32,6 +32,7 @@ import org.junit.internal.ArrayComparisonFailure;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class MedianFilterTest extends AbstractFilterTest
 {
 	private int InternalITER3 = 200;

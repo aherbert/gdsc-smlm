@@ -45,6 +45,7 @@ import gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGradientProcedureTest
 {
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);
@@ -115,7 +116,7 @@ public class PoissonGradientProcedureTest
 
 			double[][] am = p.getMatrix();
 			for (int j = 0; j < nparams; j++)
-				TestAssert.assertArrayEqualsRelative(am[j], m[j], 1e-10, 
+				TestAssert.assertArrayEqualsRelative(am[j], m[j], 1e-10,
 						"[%d] Observations: Not same alphaMatrix @ %d,%d", nparams, i, j);
 		}
 	}

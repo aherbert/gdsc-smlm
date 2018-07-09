@@ -23,6 +23,7 @@
  */
 package gdsc.smlm.function;
 
+@SuppressWarnings({ "javadoc" })
 public class DummyGradientFunction implements Gradient1Function, Gradient2Function
 {
 	int n;

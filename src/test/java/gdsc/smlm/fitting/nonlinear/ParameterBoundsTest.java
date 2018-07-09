@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import gdsc.smlm.function.FakeGradientFunction;
 
+@SuppressWarnings({ "javadoc" })
 public class ParameterBoundsTest
 {
 	@Test

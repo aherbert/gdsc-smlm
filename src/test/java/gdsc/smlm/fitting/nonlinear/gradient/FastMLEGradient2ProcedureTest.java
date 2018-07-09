@@ -52,6 +52,7 @@ import gdsc.test.TestSettings;
  * Contains speed tests for the methods for calculating the Hessian and gradient vector
  * for use in the LVM algorithm.
  */
+@SuppressWarnings({ "javadoc" })
 public class FastMLEGradient2ProcedureTest
 {
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);

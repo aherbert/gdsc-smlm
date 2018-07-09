@@ -36,6 +36,7 @@ import gdsc.test.TestSettings;
 /**
  * Test that a bounded fitter can return the same results with and without bounds.
  */
+@SuppressWarnings({ "javadoc" })
 public class BoundedFunctionSolverTest extends BaseFunctionSolverTest
 {
 	// The following tests ensure that the LVM can fit data without 

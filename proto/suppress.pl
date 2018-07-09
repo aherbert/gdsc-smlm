@@ -31,6 +31,7 @@ GetOptions(
     "unchecked" => \$unchecked,
     "unused" => \$unused,
     "deprecation" => \$deprecation,
+    "javadoc" => \$javadoc,
 );
 
 die $usage if $help;
@@ -39,6 +40,7 @@ my @warning;
 push @warning, "unchecked" if ($unchecked);
 push @warning, "unused" if ($unused);
 push @warning, "deprecation" if ($deprecation);
+push @warning, "javadoc" if ($javadoc);
 
 exit(0) unless @warning;
 

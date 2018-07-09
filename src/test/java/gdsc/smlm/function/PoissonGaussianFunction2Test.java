@@ -32,6 +32,7 @@ import org.junit.Test;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunction2Test
 {
 	double[] gain = PoissonGaussianFunctionTest.gain;

@@ -38,6 +38,7 @@ import gdsc.smlm.data.config.PSFProtos.PSFType;
 import gdsc.smlm.utils.JSONUtils;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PSFProtosTest
 {
 	@Test

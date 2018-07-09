@@ -43,6 +43,7 @@ import ij.process.FHT2;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class JTransformsTest
 {
 	private FloatProcessor createProcessor(int size, int x, int y, int w, int h, RandomGenerator r)
@@ -341,7 +342,7 @@ public class JTransformsTest
 			ts.report();
 
 		//Assert.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-		
+
 		double t1 = ts.get(-1).getMean();
 		double t2 = ts.get(-2).getMean();
 		TestSettings.logSpeedTestResult(t1 < t2, "%s %s => %s %s = %.2fx\n", ts.get(-2).getTask().getName(), t2,

@@ -34,6 +34,7 @@ import gdsc.smlm.function.gaussian.AstigmatismZModel;
 import gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import gdsc.test.TestAssert;
 
+@SuppressWarnings({ "javadoc" })
 public class GaussianPSFModelTest
 {
 	@Test

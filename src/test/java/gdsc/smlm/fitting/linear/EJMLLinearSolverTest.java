@@ -43,6 +43,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
+@SuppressWarnings({ "javadoc" })
 public class EJMLLinearSolverTest
 {
 	//@formatter:off
@@ -563,7 +564,7 @@ public class EJMLLinearSolverTest
 		for (int i = 1; i < size; i++)
 			TestAssert.assertTrue(ts.get(-(size)).getMean() > ts.get(-i).getMean(), "%s is not slowest: %s",
 					ts.get(-(size)).getTask().getName(), ts.get(-i).getTask().getName());
-		
+
 		if (np > 2)
 		{
 			// The Direct solver may not be faster at size=5

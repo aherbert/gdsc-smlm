@@ -36,6 +36,7 @@ import gdsc.test.TestSettings;
 /**
  * Test the PulseActivationAnalysis unmixing functions
  */
+@SuppressWarnings({ "javadoc" })
 public class PulseActivationAnalysisTest
 {
 	@Test

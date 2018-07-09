@@ -33,6 +33,7 @@ import gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class CalibrationWriterTest
 {
 	@Test

@@ -26,6 +26,7 @@ package gdsc.smlm.results;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings({ "javadoc" })
 public class PeakResultHelperTest
 {
 	@Test

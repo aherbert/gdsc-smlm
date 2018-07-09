@@ -36,6 +36,7 @@ import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
 
+@SuppressWarnings({ "javadoc" })
 public class ErfTest
 {
 	//@formatter:off

@@ -37,6 +37,7 @@ import gdsc.test.TestSettings;
  * Contains speed tests for the fastest method for calculating the Hessian and gradient vector
  * from a Gaussian 2D Function
  */
+@SuppressWarnings({ "javadoc" })
 public class SpeedTest
 {
 	private final int Single = 1;

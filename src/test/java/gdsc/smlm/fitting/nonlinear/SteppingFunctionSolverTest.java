@@ -31,6 +31,7 @@ import gdsc.test.TestSettings;
 /**
  * Test that a stepping solver can fit a function.
  */
+@SuppressWarnings({ "javadoc" })
 public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest
 {
 	@Test

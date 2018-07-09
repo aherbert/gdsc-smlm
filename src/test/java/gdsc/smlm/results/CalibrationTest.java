@@ -25,7 +25,7 @@ package gdsc.smlm.results;
 
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "javadoc" })
 public class CalibrationTest
 {
 	double[] test_a = { 100, 130, 160 };

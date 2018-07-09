@@ -37,6 +37,7 @@ import gdsc.smlm.function.FakeGradientFunction;
 import gdsc.smlm.function.Gradient1Function;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class WPoissonGradientProcedureTest
 {
 	DoubleEquality eq = new DoubleEquality(1e-6, 1e-16);

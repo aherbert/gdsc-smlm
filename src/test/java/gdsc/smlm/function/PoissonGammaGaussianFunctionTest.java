@@ -40,6 +40,7 @@ import gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGammaGaussianFunctionTest
 {
 	// Noise is in Counts and gain is total gain.

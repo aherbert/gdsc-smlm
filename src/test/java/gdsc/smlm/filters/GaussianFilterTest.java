@@ -39,6 +39,7 @@ import gdsc.test.TimingService;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
 
+@SuppressWarnings({ "javadoc" })
 public class GaussianFilterTest
 {
 	double[] sigmas = new double[] { 12.4, 9.3, 5, 3.2, 2.1, 0.5 };

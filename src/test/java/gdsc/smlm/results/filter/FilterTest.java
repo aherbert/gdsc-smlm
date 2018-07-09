@@ -34,6 +34,7 @@ import gdsc.test.TimingResult;
 import gdsc.test.TimingService;
 import gdsc.test.TimingTask;
 
+@SuppressWarnings({ "javadoc" })
 public class FilterTest
 {
 	@Test

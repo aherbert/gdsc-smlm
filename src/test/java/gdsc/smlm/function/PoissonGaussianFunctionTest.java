@@ -33,6 +33,7 @@ import gdsc.core.utils.Maths;
 import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 
+@SuppressWarnings({ "javadoc" })
 public class PoissonGaussianFunctionTest
 {
 	// Note: Realistic gain values:
