@@ -295,7 +295,7 @@ public class WPoissonGradientProcedureTest
 
 	private void gradientProcedureIsFasterThanWLSEGradientProcedure(final int nparams)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -354,9 +354,9 @@ public class WPoissonGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.info("WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx\n", time1, nparams,
-				time2, (1.0 * time1) / time2);
-		Assert.assertTrue(time2 < time1);
+		TestSettings.logSpeedTestResult(time2 < time1,
+				"WLSQLVMGradientProcedure %d : WPoissonGradientProcedure %d = %d : %fx\n", time1, nparams, time2,
+				(1.0 * time1) / time2);
 	}
 
 	protected int[] createFakeData(int nparams, int iter, ArrayList<double[]> paramsList, ArrayList<double[]> yList)

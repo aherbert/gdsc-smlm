@@ -848,7 +848,7 @@ public class PoissonGammaGaussianFunctionTest
 
 	private void fasterThan(ConvolutionMode slow, ConvolutionMode fast)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		// Realistic EM-CCD parameters for speed test
 		double s = 7.16;
@@ -908,8 +908,8 @@ public class PoissonGammaGaussianFunctionTest
 		for (int i = 0; i < 5; i++)
 			t2 += run(f2, samples, photons);
 
-		TestSettings.info("%s  %d -> %s  %d = %f x\n", getName(f1), t1, getName(f2), t2, (double) t1 / t2);
-		Assert.assertTrue(t1 > t2);
+		TestSettings.logSpeedTestResult(t1 > t2, "%s  %d -> %s  %d = %fx\n", getName(f1), t1, getName(f2), t2,
+				(double) t1 / t2);
 	}
 
 	private long run(PoissonGammaGaussianFunction f, double[][] samples, double[] photons)

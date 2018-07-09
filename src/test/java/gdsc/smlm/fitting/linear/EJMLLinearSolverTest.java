@@ -807,7 +807,7 @@ public class EJMLLinearSolverTest
 
 	private void runInversionSpeedTest(int flags)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
@@ -878,20 +878,20 @@ public class EJMLLinearSolverTest
 		if (np <= 5)
 		{
 			for (int i = 2; i <= size; i++)
-				Assert.assertTrue("DiagonalDirect is not fastest", ts.get(-1).getMean() < ts.get(-i).getMean());
+				TestSettings.logSpeedTestResult(ts.get(-1), ts.get(-i));
 
 			if (np < 5)
 			{
 				// n < 5 Direct is fastest
 				for (int i = 3; i <= size; i++)
-					Assert.assertTrue("Direct is not 2nd fastest", ts.get(-2).getMean() < ts.get(-i).getMean());
+					TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));
 			}
 			else
 			{
 				// Cholesky should be fastest. It is marginal over CholeskyLDLT.
 				// and may not be faster than Direct at n=5 so that comparison is ignored.
 				for (int i = 4; i <= size; i++)
-					Assert.assertTrue("Cholesky is not 2nd fastest", ts.get(-3).getMean() < ts.get(-i).getMean());
+					TestSettings.logSpeedTestResult(ts.get(-3), ts.get(-i));
 			}
 		}
 		else
@@ -899,7 +899,7 @@ public class EJMLLinearSolverTest
 			// No Direct inversion possible.			
 			// Cholesky should be fastest.
 			for (int i = 2; i <= size; i++)
-				Assert.assertTrue("Cholesky is not fastest", ts.get(-1).getMean() < ts.get(-i).getMean());
+				TestSettings.logSpeedTestResult(ts.get(-2), ts.get(-i));
 		}
 	}
 

@@ -282,7 +282,7 @@ public class LSQVarianceGradientProcedureTest
 
 	private void gradientProcedureIsFasterUnrolledThanGradientProcedure(final int nparams, final boolean precomputed)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
@@ -345,9 +345,8 @@ public class LSQVarianceGradientProcedureTest
 		};
 		long time2 = t2.getTime();
 
-		TestSettings.info("Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n", precomputed, time1, nparams, time2,
-				(1.0 * time1) / time2);
-		Assert.assertTrue(time2 < time1 * 1.1); // Allow margin of error
+		TestSettings.logSpeedTestResult(time2 < time1, "Precomputed=%b : Standard %d : Unrolled %d = %d : %fx\n",
+				precomputed, time1, nparams, time2, (1.0 * time1) / time2);
 	}
 
 	@Test
