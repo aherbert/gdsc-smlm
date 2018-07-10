@@ -423,7 +423,7 @@ public class SCMOSLikelihoodWrapperTest
 			testangle1 = new double[] { 0 };
 		}
 
-		double fraction = 90;
+		double fraction = 85;
 		if (f1.evaluatesBackground())
 			functionComputesTargetGradient(f1, Gaussian2DFunction.BACKGROUND, fraction);
 		if (f1.evaluatesSignal())
@@ -500,9 +500,7 @@ public class SCMOSLikelihoodWrapperTest
 									//logf("[%s-%s]/2*%g : %g == %g\n", "" + value2, "" + value3, h, gradient,
 									//		dyda[gradientIndex]);
 									if (!ok)
-										Assert.assertTrue(
-												NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex],
-												ok);
+										TestAssert.fail(NAME[targetParameter] + ": " + gradient + " != " + dyda[gradientIndex]);
 									ok = eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex]);
 									if (ok)
 										count++;
@@ -512,7 +510,7 @@ public class SCMOSLikelihoodWrapperTest
 		double p = (100.0 * count) / total;
 		TestSettings.info("%s : %s = %d / %d (%.2f)\n", f1.getClass().getSimpleName(), NAME[targetParameter], count,
 				total, p);
-		Assert.assertTrue(NAME[targetParameter] + " fraction too low: " + p, p > threshold);
+		TestAssert.assertTrue(p > threshold, "%s fraction too low: %s", NAME[targetParameter], p);
 	}
 
 	private double[] getVariables(int[] indices, double[] a)
