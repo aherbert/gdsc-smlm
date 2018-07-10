@@ -38,7 +38,6 @@ import gdsc.smlm.function.ValueProcedure;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import gdsc.test.BaseTimingTask;
-import gdsc.test.TestAssert;
 import gdsc.test.TestSettings;
 import gdsc.test.TestSettings.LogLevel;
 import gdsc.test.TimingService;
@@ -491,7 +490,7 @@ public class EJMLLinearSolverTest
 
 	private void runSolverSpeedTest(int flags)
 	{
-		TestSettings.assumeMediumComplexity();
+		TestSettings.assumeSpeedTest();
 
 		final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
 		int n = f0.size();
@@ -562,8 +561,7 @@ public class EJMLLinearSolverTest
 		// about the fastest of Cholesky/CholeskyLDLT/Direct.
 		// Just check the PseudoInverse is slowest
 		for (int i = 1; i < size; i++)
-			TestAssert.assertTrue(ts.get(-(size)).getMean() > ts.get(-i).getMean(), "%s is not slowest: %s",
-					ts.get(-(size)).getTask().getName(), ts.get(-i).getTask().getName());
+			TestSettings.logSpeedTestResult(ts.get(-(size)), ts.get(-i));
 
 		if (np > 2)
 		{
@@ -571,8 +569,7 @@ public class EJMLLinearSolverTest
 			int i = (np == 5) ? 2 : 1;
 			int size_1 = size - 1;
 			for (; i < size_1; i++)
-				TestAssert.assertTrue(ts.get(-(size_1)).getMean() > ts.get(-i).getMean(), "%s is not 2nd slowest: %s",
-						ts.get(-(size_1)).getTask().getName(), ts.get(-i).getTask().getName());
+				TestSettings.logSpeedTestResult(ts.get(-(size_1)), ts.get(-i));
 		}
 	}
 
