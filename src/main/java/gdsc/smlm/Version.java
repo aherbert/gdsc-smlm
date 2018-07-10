@@ -34,10 +34,11 @@ import java.util.regex.Pattern;
  * <p>
  * Uses Semantic Versioning.
  * 
- * @see http://semver.org/
+ * @see <a href="http://semver.org/">http://semver.org/</a>
  */
 public class Version
 {
+	/** Constant for the string "unknown" */
 	public static final String UNKNOWN = "unknown";
 	private static String version = null;
 	private static String buildDate = null;
@@ -46,9 +47,7 @@ public class Version
 	{
 		// Locate the version file
 		Class<Version> resourceClass = Version.class;
-		InputStream propertiesStream = resourceClass.getResourceAsStream("/gdsc/smlm/Version.txt");
-
-		try
+		try (final InputStream propertiesStream = resourceClass.getResourceAsStream("/gdsc/core/Version.txt"))
 		{
 			// Read the version properties
 			Properties props = new Properties();
@@ -67,6 +66,12 @@ public class Version
 			buildDate = UNKNOWN;
 	}
 
+	/**
+	 * The main method. Output the version and build date.
+	 *
+	 * @param args
+	 *            the arguments
+	 */
 	public static void main(String[] args)
 	{
 		StringBuilder msg = new StringBuilder();
