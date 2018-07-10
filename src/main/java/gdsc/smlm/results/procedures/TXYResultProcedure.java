@@ -38,5 +38,5 @@ public interface TXYResultProcedure
 	 * @param y
 	 *            the y
 	 */
-	void executeTXY(int frame, float x, float y);
+	public void executeTXY(int frame, float x, float y);
 }

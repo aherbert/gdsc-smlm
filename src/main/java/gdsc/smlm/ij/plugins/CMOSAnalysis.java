@@ -1065,7 +1065,7 @@ public class CMOSAnalysis implements PlugIn
 				Utils.rounded(statsGain.getStandardDeviation()));
 
 		// Histogram of offset, variance and gain
-		int bins = 2 * Utils.getBinsSturges(pixelGain.length);
+		int bins = 2 * Utils.getBinsSturgesRule(pixelGain.length);
 		WindowOrganiser wo = new WindowOrganiser();
 		showHistogram("Offset (ADU)", pixelOffset, bins, statsOffset, wo);
 		showHistogram("Variance (ADU^2)", pixelVariance, bins, statsVariance, wo);

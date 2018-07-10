@@ -34,56 +34,56 @@ public interface IMultiFilter
 	 *
 	 * @return the signal
 	 */
-	double getSignal();
+	public double getSignal();
 
 	/**
 	 * Gets the Signal-to-noise ratio.
 	 *
 	 * @return the Signal-to-noise ratio (SNR)
 	 */
-	double getSNR();
+	public double getSNR();
 
 	/**
 	 * Gets the min width.
 	 *
 	 * @return the min width
 	 */
-	double getMinWidth();
+	public double getMinWidth();
 
 	/**
 	 * Gets the max width.
 	 *
 	 * @return the max width
 	 */
-	double getMaxWidth();
+	public double getMaxWidth();
 
 	/**
 	 * Gets the coordinate shift.
 	 *
 	 * @return the shift
 	 */
-	double getShift();
+	public double getShift();
 
 	/**
 	 * Gets the Euclidian shift.
 	 *
 	 * @return the Euclidian shift
 	 */
-	double getEShift();
+	public double getEShift();
 
 	/**
 	 * Gets the precision.
 	 *
 	 * @return the precision
 	 */
-	double getPrecision();
+	public double getPrecision();
 
 	/**
 	 * Gets the precision type.
 	 *
 	 * @return the precision type
 	 */
-	PrecisionType getPrecisionType();
+	public PrecisionType getPrecisionType();
 
 	/**
 	 * Gets the min allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
@@ -91,7 +91,7 @@ public interface IMultiFilter
 	 *
 	 * @return the min z depth
 	 */
-	double getMinZ();
+	public double getMinZ();
 
 	/**
 	 * Gets the max allowed z depth. Note z==0 is the focal plane. If both the min and max z depth are zero then it is
@@ -99,5 +99,5 @@ public interface IMultiFilter
 	 *
 	 * @return the max z depth
 	 */
-	double getMaxZ();
+	public double getMaxZ();
 }

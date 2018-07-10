@@ -24,7 +24,10 @@
 package gdsc.smlm.ga;
 
 /**
- * Define the genetic sequence that can evolve
+ * Define the genetic sequence that can evolve.
+ *
+ * @param <T>
+ *            the generic type
  */
 public interface Chromosome<T extends Comparable<T>>
 {
@@ -33,14 +36,14 @@ public interface Chromosome<T extends Comparable<T>>
 	 * 
 	 * @return The chromosome length
 	 */
-	int length();
+	public int length();
 
 	/**
 	 * Get the chromosome sequence
 	 * 
 	 * @return the chromosome sequence (must equal the length)
 	 */
-	double[] sequence();
+	public double[] sequence();
 
 	/**
 	 * Create a new chromosome
@@ -49,7 +52,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 *            the chromosome sequence (must equal the current length)
 	 * @return A new chromosome with the given sequence
 	 */
-	Chromosome<T> newChromosome(double[] sequence);
+	public Chromosome<T> newChromosome(double[] sequence);
 
 	/**
 	 * Get the range for mutation at each position in the sequence. This defines how far each position in the sequence
@@ -57,7 +60,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 * 
 	 * @return The range for mutation at each position in the sequence (must equal length)
 	 */
-	double[] mutationStepRange();
+	public double[] mutationStepRange();
 
 	/**
 	 * Get the lower limit at each position in the sequence. It is valid to return negative infinity for any position or
@@ -65,7 +68,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 * 
 	 * @return The lower limit for each position in the sequence (must equal length)
 	 */
-	double[] lowerLimit();
+	public double[] lowerLimit();
 
 	/**
 	 * Get the upper limit at each position in the sequence. It is valid to return positive infinity for any position or
@@ -73,7 +76,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 * 
 	 * @return The upper limit for each position in the sequence (must equal length)
 	 */
-	double[] upperLimit();
+	public double[] upperLimit();
 
 	// Note: Default implementation of the getter/setter to store the double would require using Java 8. 
 
@@ -83,7 +86,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 * @param fitness
 	 *            The fitness of the sequence
 	 */
-	void setFitness(T fitness);
+	public void setFitness(T fitness);
 
 	/**
 	 * Get the fitness
@@ -93,7 +96,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 * 
 	 * @return The fitness of the sequence
 	 */
-	T getFitness();
+	public T getFitness();
 
 	/**
 	 * Calculate the distance to another chromosome
@@ -102,7 +105,7 @@ public interface Chromosome<T extends Comparable<T>>
 	 *            the other chromosome
 	 * @return the distance (zero is a match)
 	 */
-	double distance(Chromosome<T> other);
+	public double distance(Chromosome<T> other);
 
 	/**
 	 * Calculate if equal to another chromosome
@@ -111,5 +114,5 @@ public interface Chromosome<T extends Comparable<T>>
 	 *            the other chromosome
 	 * @return true if the same
 	 */
-	boolean equals(Chromosome<T> other);
+	public boolean equals(Chromosome<T> other);
 }

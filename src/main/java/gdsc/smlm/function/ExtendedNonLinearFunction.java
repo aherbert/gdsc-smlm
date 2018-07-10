@@ -31,17 +31,19 @@ import gdsc.smlm.utils.Pair;
 public interface ExtendedNonLinearFunction extends NonLinearFunction
 {
 	/**
-	 * Compute the values of all the data points
-	 * 
+	 * Compute the values of all the data points.
+	 *
 	 * @param variables
+	 *            the variables
 	 * @return The values
 	 */
 	public double[] computeValues(double[] variables);
 
 	/**
-	 * Compute the Jacobian of the gradients of all the data points
-	 * 
+	 * Compute the Jacobian of the gradients of all the data points.
+	 *
 	 * @param variables
+	 *            the variables
 	 * @return The Jacobian
 	 */
 	public double[][] computeJacobian(double[] variables);
@@ -54,9 +56,10 @@ public interface ExtendedNonLinearFunction extends NonLinearFunction
 	public boolean canComputeValuesAndJacobian();
 
 	/**
-	 * Compute the values and the Jacobian of the gradients of all the data points
-	 * 
+	 * Compute the values and the Jacobian of the gradients of all the data points.
+	 *
 	 * @param variables
+	 *            the variables
 	 * @return The values and the Jacobian
 	 */
 	public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables);

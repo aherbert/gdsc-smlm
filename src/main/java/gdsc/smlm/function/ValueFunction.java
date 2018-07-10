@@ -34,7 +34,7 @@ public interface ValueFunction
 	 *
 	 * @return the size
 	 */
-	int size();
+	public int size();
 
 	/**
 	 * Set the predictor coefficients (a) that will be used to predict each value. Allows the function to perform
@@ -43,7 +43,7 @@ public interface ValueFunction
 	 * @param a
 	 *            An array of coefficients
 	 */
-	void initialise0(final double[] a);
+	public void initialise0(final double[] a);
 
 	/**
 	 * Applies the procedure for the valid range of the function.

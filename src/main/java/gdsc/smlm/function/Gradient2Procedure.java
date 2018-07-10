@@ -35,10 +35,10 @@ public interface Gradient2Procedure
 	 *            the value of the function
 	 * @param dy_da
 	 *            Partial first derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
+	 *            {@link GradientFunction#gradientIndices()}
 	 * @param d2y_da2
 	 *            Partial second derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
+	 *            {@link GradientFunction#gradientIndices()}
 	 */
-	void execute(double value, double[] dy_da, double[] d2y_da2);
+	public void execute(double value, double[] dy_da, double[] d2y_da2);
 }

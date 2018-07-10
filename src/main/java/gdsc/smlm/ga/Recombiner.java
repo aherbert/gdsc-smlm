@@ -29,11 +29,13 @@ package gdsc.smlm.ga;
 public interface Recombiner<T extends Comparable<T>>
 {
 	/**
-	 * Crossover the provided chromosomes to produce one or more new sequences
-	 * 
+	 * Crossover the provided chromosomes to produce one or more new sequences.
+	 *
 	 * @param chromosome1
+	 *            the chromosome 1
 	 * @param chromosome2
+	 *            the chromosome 2
 	 * @return one or more new sequences
 	 */
-	Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2);
+	public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2);
 }

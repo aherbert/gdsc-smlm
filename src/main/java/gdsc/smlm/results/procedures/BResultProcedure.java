@@ -34,5 +34,5 @@ public interface BResultProcedure
 	 * @param background
 	 *            the background
 	 */
-	void executeB(float background);
+	public void executeB(float background);
 }

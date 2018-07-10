@@ -40,5 +40,5 @@ public interface BIRResultProcedure
 	 * @param result
 	 *            the result
 	 */
-	void executeBIR(float background, float intensity, PeakResult result);
+	public void executeBIR(float background, float intensity, PeakResult result);
 }

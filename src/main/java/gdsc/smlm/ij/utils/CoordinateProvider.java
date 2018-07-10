@@ -29,10 +29,11 @@ package gdsc.smlm.ij.utils;
 public interface CoordinateProvider
 {
 	/**
-	 * Get the coordinates from the line
-	 * 
+	 * Get the coordinates from the line.
+	 *
 	 * @param line
+	 *            the line
 	 * @return The coordinates (or null)
 	 */
-	double[] getCoordinates(String line);
+	public double[] getCoordinates(String line);
 }

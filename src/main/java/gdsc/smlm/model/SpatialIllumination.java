@@ -29,12 +29,13 @@ package gdsc.smlm.model;
 public interface SpatialIllumination
 {
 	/**
-	 * Get the number of photons for the position
-	 * 
+	 * Get the number of photons for the position.
+	 *
 	 * @param xyz
+	 *            the xyz
 	 * @return The photons
 	 */
-	double getPhotons(double[] xyz);
+	public double getPhotons(double[] xyz);
 
 	/**
 	 * Get the number of photons for the position at the specified time.
@@ -42,14 +43,17 @@ public interface SpatialIllumination
 	 * The return value is an array containing the number of photons that occurred before the time frame and then the
 	 * number of photons during the time frame. This allows simulation of a pulsed illumination source where the pulse
 	 * is modelled as a zero time event.
-	 * 
+	 *
 	 * @param xyz
+	 *            the xyz
+	 * @param t
+	 *            the t
 	 * @return The photons [before,during]
 	 */
-	double[] getPulsedPhotons(double[] xyz, int t);
+	public double[] getPulsedPhotons(double[] xyz, int t);
 
 	/**
 	 * @return An estimate of the average photons per time frame
 	 */
-	double getAveragePhotons();
+	public double getAveragePhotons();
 }

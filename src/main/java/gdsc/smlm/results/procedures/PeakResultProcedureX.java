@@ -39,5 +39,5 @@ public interface PeakResultProcedureX
 	 *            the peak result
 	 * @return true, if the execution should stop
 	 */
-	boolean execute(PeakResult peakResult);
+	public boolean execute(PeakResult peakResult);
 }

@@ -34,7 +34,7 @@ public interface IMultiPathFitResults
 	/**
 	 * @return The frame containing the results
 	 */
-	int getFrame();
+	public int getFrame();
 
 	/**
 	 * Get the number of results. The {@link #getResult(int)} method should support being called with any index up to
@@ -42,7 +42,7 @@ public interface IMultiPathFitResults
 	 * 
 	 * @return The number of results
 	 */
-	int getNumberOfResults();
+	public int getNumberOfResults();
 
 	/**
 	 * Gets the result.
@@ -51,7 +51,7 @@ public interface IMultiPathFitResults
 	 *            the index
 	 * @return the result
 	 */
-	MultiPathFitResult getResult(int index);
+	public MultiPathFitResult getResult(int index);
 
 	/**
 	 * Called when the results that would be returned by {@link #getResult(int)} are no longer required
@@ -59,7 +59,7 @@ public interface IMultiPathFitResults
 	 * @param index
 	 *            the index
 	 */
-	void complete(int index);
+	public void complete(int index);
 
 	/**
 	 * The total number of candidates. This may be greater than the size of the {@link #getNumberOfResults()} if
@@ -67,7 +67,7 @@ public interface IMultiPathFitResults
 	 *
 	 * @return the total candidates
 	 */
-	int getTotalCandidates();
+	public int getTotalCandidates();
 
 	// Possible support for iteration
 	//	/**
@@ -75,12 +75,12 @@ public interface IMultiPathFitResults
 	//	 *
 	//	 * @return true, if a pass through the results is possible
 	//	 */
-	//	boolean begin();
+	//	public boolean begin();
 	//
 	//	/**
 	//	 * Called after a pass through the results. Returns a boolean indicating a repeat is possible.
 	//	 * 
 	//	 * @return true, if another pass through the results is possible
 	//	 */
-	//	boolean end();
+	//	public boolean end();
 }

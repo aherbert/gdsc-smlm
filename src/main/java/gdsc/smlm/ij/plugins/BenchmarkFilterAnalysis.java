@@ -5452,7 +5452,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		//final int bins = Math.max(10, nActual / 100);
 		//final int bins = Utils.getBinsSturges(depths.length);
-		final int bins = Utils.getBinsSqrt(depths.length);
+		final int bins = Utils.getBinsSqrtRule(depths.length);
 		double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
 		double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
@@ -5641,7 +5641,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction<FilterSc
 
 		//final int bins = Math.max(10, nActual / 100);
 		//final int bins = Utils.getBinsSturges(signal.length);
-		final int bins = Utils.getBinsSqrt(signal.length);
+		final int bins = Utils.getBinsSqrtRule(signal.length);
 		double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
 		double[][] h2 = Utils.calcHistogram(distance, limits2[0], limits2[1], bins);
 

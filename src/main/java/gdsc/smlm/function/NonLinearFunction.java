@@ -85,7 +85,9 @@ public interface NonLinearFunction extends GradientFunction
 	double evalw(final int x, final double[] w);
 
 	/**
+	 * Check if the function can compute weights.
+	 *
 	 * @return True if the {@link #eval(int, double[], double[])} can compute weights other than 1
 	 */
-	boolean canComputeWeights();
+	public boolean canComputeWeights();
 }

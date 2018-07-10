@@ -84,7 +84,7 @@ public class MultiPathFilter implements Cloneable
 		 * @param selectedResult
 		 *            the selected result
 		 */
-		void add(SelectedResult selectedResult);
+		public void add(SelectedResult selectedResult);
 
 		/**
 		 * Checks if is fit. Any candidate that has already been fit will not be stored.
@@ -93,7 +93,7 @@ public class MultiPathFilter implements Cloneable
 		 *            the candidate id
 		 * @return True if the candidate has been fit
 		 */
-		boolean isFit(int candidateId);
+		public boolean isFit(int candidateId);
 
 		/**
 		 * Checks if is valid.
@@ -104,7 +104,7 @@ public class MultiPathFilter implements Cloneable
 		 *            the candidate id
 		 * @return true, if is valid
 		 */
-		boolean isValid(int candidateId);
+		public boolean isValid(int candidateId);
 
 		/**
 		 * A result that passed the primary filter.
@@ -112,7 +112,7 @@ public class MultiPathFilter implements Cloneable
 		 * @param result
 		 *            the result
 		 */
-		void pass(PreprocessedPeakResult result);
+		public void pass(PreprocessedPeakResult result);
 
 		/**
 		 * A result that passed the minimal filter.
@@ -120,7 +120,7 @@ public class MultiPathFilter implements Cloneable
 		 * @param result
 		 *            the result
 		 */
-		void passMin(PreprocessedPeakResult result);
+		public void passMin(PreprocessedPeakResult result);
 	}
 
 	/**
@@ -333,7 +333,7 @@ public class MultiPathFilter implements Cloneable
 		 * @param uniqueId
 		 *            the unique id
 		 */
-		void add(int uniqueId);
+		public void add(int uniqueId);
 	}
 
 	/**

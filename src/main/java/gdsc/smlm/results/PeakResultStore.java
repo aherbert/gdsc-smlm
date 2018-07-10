@@ -158,7 +158,9 @@ public interface PeakResultStore
 	public PeakResult[] toArray();
 
 	/**
-	 * Copy the results
+	 * Copy the results.
+	 *
+	 * @return the copy
 	 */
 	public PeakResultStore copy();
 
@@ -167,7 +169,7 @@ public interface PeakResultStore
 	 *
 	 * @param deepCopy
 	 *            Set to true to perform a deep copy
-	 * @return the peak result store
+	 * @return the copy
 	 */
 	public PeakResultStore copy(boolean deepCopy);
 
@@ -204,12 +206,9 @@ public interface PeakResultStore
 	 * <tt>(result==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;result.equals(e))</tt>.
 	 *
 	 * @param result
-	 *            element whose presence in this list is to be tested
-	 * @return <tt>true</tt> if this list contains the specified result
-	 *
-	 * @param result
 	 *            the result
-	 * @return true, if successful
+	 * @return <tt>true</tt> if this list contains the specified result
+	 *         true, if successful
 	 */
 	public boolean contains(PeakResult result);
 }

@@ -24,7 +24,10 @@
 package gdsc.smlm.search;
 
 /**
- * Calculate the optimum point within a search space
+ * Calculate the optimum point within a search space.
+ *
+ * @param <T>
+ *            the generic type
  */
 public interface ScoreFunction<T extends Comparable<T>>
 {
@@ -36,5 +39,5 @@ public interface ScoreFunction<T extends Comparable<T>>
 	 *            the points
 	 * @return the result for the optimum of the points
 	 */
-	SearchResult<T> findOptimum(double[][] points);
+	public SearchResult<T> findOptimum(double[][] points);
 }

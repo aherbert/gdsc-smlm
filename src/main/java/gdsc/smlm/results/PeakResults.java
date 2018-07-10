@@ -193,9 +193,10 @@ public interface PeakResults
 	public void setName(String name);
 
 	/**
-	 * Copy the settings (source, bounds, configuration) from the given results
-	 * 
+	 * Copy the settings (source, bounds, configuration) from the given results.
+	 *
 	 * @param peakResults
+	 *            the peak results
 	 */
 	public void copySettings(PeakResults peakResults);
 }

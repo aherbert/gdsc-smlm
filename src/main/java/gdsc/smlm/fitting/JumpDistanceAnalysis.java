@@ -85,21 +85,23 @@ public class JumpDistanceAnalysis
 		 * 
 		 * @return The number of points to use for the curve between the minimum and maximum exclusive
 		 */
-		int getNumberOfCurvePoints();
+		public int getNumberOfCurvePoints();
 
 		/**
-		 * Called with the best fit curve using a single population
-		 * 
+		 * Called with the best fit curve using a single population.
+		 *
 		 * @param curve
+		 *            the curve
 		 */
-		void saveSinglePopulationCurve(double[][] curve);
+		public void saveSinglePopulationCurve(double[][] curve);
 
 		/**
-		 * Called with the best fit curve using a mixed population
-		 * 
+		 * Called with the best fit curve using a mixed population.
+		 *
 		 * @param curve
+		 *            the curve
 		 */
-		void saveMixedPopulationCurve(double[][] curve);
+		public void saveMixedPopulationCurve(double[][] curve);
 	}
 
 	private final Logger logger;

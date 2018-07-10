@@ -34,5 +34,5 @@ public interface TResultProcedure
 	 * @param frame
 	 *            the frame
 	 */
-	void executeT(int frame);
+	public void executeT(int frame);
 }

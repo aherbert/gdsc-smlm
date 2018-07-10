@@ -24,7 +24,10 @@
 package gdsc.smlm.search;
 
 /**
- * Calculate the score of points within a search space
+ * Calculate the score of points within a search space.
+ *
+ * @param <T>
+ *            the generic type
  */
 public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunction<T>
 {
@@ -35,7 +38,7 @@ public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunctio
 	 *            the points
 	 * @return the scores
 	 */
-	SearchResult<T>[] score(double[][] points);
+	public SearchResult<T>[] score(double[][] points);
 
 	/**
 	 * Cut the list of scores down to the given size by selecting only the best results. The input list may not be
@@ -47,5 +50,5 @@ public interface FullScoreFunction<T extends Comparable<T>> extends ScoreFunctio
 	 *            The size
 	 * @return The reduced list
 	 */
-	SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
+	public SearchResult<T>[] cut(SearchResult<T>[] scores, int size);
 }

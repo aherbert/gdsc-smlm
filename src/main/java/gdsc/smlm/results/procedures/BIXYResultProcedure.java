@@ -40,5 +40,5 @@ public interface BIXYResultProcedure
 	 * @param y
 	 *            the y
 	 */
-	void executeBIXY(float background, float intensity, float x, float y);
+	public void executeBIXY(float background, float intensity, float x, float y);
 }

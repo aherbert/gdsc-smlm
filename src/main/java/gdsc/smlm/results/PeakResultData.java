@@ -25,6 +25,9 @@ package gdsc.smlm.results;
 
 /**
  * Gets a data value from a peak result.
+ *
+ * @param <E>
+ *            the element type
  */
 public interface PeakResultData<E>
 {

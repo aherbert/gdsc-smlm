@@ -38,5 +38,5 @@ public interface PeakResultPredicate
 	 * @return {@code true} if the input argument matches the predicate,
 	 *         otherwise {@code false}
 	 */
-	boolean test(PeakResult t);
+	public boolean test(PeakResult t);
 }

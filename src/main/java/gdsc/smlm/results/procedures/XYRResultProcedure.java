@@ -40,5 +40,5 @@ public interface XYRResultProcedure
 	 * @param result
 	 *            the result
 	 */
-	void executeXYR(float x, float y, PeakResult result);
+	public void executeXYR(float x, float y, PeakResult result);
 }

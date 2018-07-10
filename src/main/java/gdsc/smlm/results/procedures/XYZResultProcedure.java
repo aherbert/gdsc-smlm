@@ -38,5 +38,5 @@ public interface XYZResultProcedure
 	 * @param z
 	 *            the z
 	 */
-	void executeXYZ(float x, float y, float z);
+	public void executeXYZ(float x, float y, float z);
 }

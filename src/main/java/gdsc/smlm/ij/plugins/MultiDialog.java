@@ -87,7 +87,7 @@ public class MultiDialog extends Dialog
 		 *
 		 * @return the size
 		 */
-		int size();
+		public int size();
 
 		/**
 		 * Gets the formatted name of the result for display in the dialog.
@@ -96,7 +96,7 @@ public class MultiDialog extends Dialog
 		 *            the result i
 		 * @return the formatted name
 		 */
-		String getFormattedName(int i);
+		public String getFormattedName(int i);
 
 		/**
 		 * Removes the formatting from the name. The plain name will be in the list returned by
@@ -106,7 +106,7 @@ public class MultiDialog extends Dialog
 		 *            the formatted name
 		 * @return the plain name string
 		 */
-		String removeFormatting(String formattedName);
+		public String removeFormatting(String formattedName);
 	}
 
 	/**

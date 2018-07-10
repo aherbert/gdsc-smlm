@@ -36,7 +36,7 @@ public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 	 * @param assignments
 	 *            The assignments
 	 */
-	void setAssignments(ResultAssignment[] assignments);
+	public void setAssignments(ResultAssignment[] assignments);
 
 	/**
 	 * Sets the ignore flag. If true then the result should be ignored from the total counts when scoring.
@@ -44,5 +44,5 @@ public interface AssignablePreprocessedPeakResult extends PreprocessedPeakResult
 	 * @param ignore
 	 *            the new ignore flag
 	 */
-	void setIgnore(boolean ignore);
+	public void setIgnore(boolean ignore);
 }

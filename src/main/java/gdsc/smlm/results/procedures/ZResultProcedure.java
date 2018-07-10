@@ -34,5 +34,5 @@ public interface ZResultProcedure
 	 * @param z
 	 *            the z
 	 */
-	void executeZ(float z);
+	public void executeZ(float z);
 }

@@ -40,5 +40,5 @@ public interface IXYZResultProcedure
 	 * @param z
 	 *            the z
 	 */
-	void executeIXYZ(float intensity, float x, float y, float z);
+	public void executeIXYZ(float intensity, float x, float y, float z);
 }

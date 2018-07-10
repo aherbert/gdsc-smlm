@@ -35,7 +35,7 @@ public interface Gradient1Procedure
 	 *            the value of the function
 	 * @param dy_da
 	 *            Partial first derivative of function with respect to each coefficient identified by
-	 *            {@link #gradientIndices()}
+	 *            {@link GradientFunction#gradientIndices()}
 	 */
-	void execute(double value, double[] dy_da);
+	public void execute(double value, double[] dy_da);
 }

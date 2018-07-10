@@ -37,34 +37,37 @@ public interface SpatialDistribution
 	 * 
 	 * @return The next position [x,y,z]
 	 */
-	double[] next();
+	public double[] next();
 
 	/**
-	 * Check if the coordinates are within the distribution bounds
-	 * 
+	 * Check if the coordinates are within the distribution bounds.
+	 *
 	 * @param xyz
+	 *            the xyz
 	 * @return True if the coordinates are within the distribution bounds
 	 */
-	boolean isWithin(double[] xyz);
+	public boolean isWithin(double[] xyz);
 
 	/**
 	 * Check if the coordinates are within the distribution bounds in the XY
 	 * dimensions. If the distribution is dependent on the Z-dimension (e.g. 3D
 	 * objects) then this can return the same as the {@link #isWithin(double[])} method.
-	 * 
+	 *
 	 * @param xyz
+	 *            the xyz
 	 * @return True if the coordinates are within the distribution bounds in the
 	 *         XY dimensions
 	 */
-	boolean isWithinXY(double[] xyz);
+	public boolean isWithinXY(double[] xyz);
 
 	/**
 	 * Initialise the distribution with a set of coordinates. This can be used before calls to
 	 * {@link #isWithin(double[])} or {@link #isWithinXY(double[])} if the implementation depends on knowing the
 	 * original
 	 * coordinate location.
-	 * 
+	 *
 	 * @param xyz
+	 *            the xyz
 	 */
-	void initialise(double[] xyz);
+	public void initialise(double[] xyz);
 }

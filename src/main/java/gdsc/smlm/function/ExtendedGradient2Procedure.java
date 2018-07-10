@@ -39,5 +39,5 @@ public interface ExtendedGradient2Procedure
 	 *            Partial second derivative of function with respect to each coefficient pair (a,b). Packed linearly
 	 *            with size n*n with n the number of coefficients.
 	 */
-	void executeExtended(double value, double[] dy_da, double[] d2y_dadb);
+	public void executeExtended(double value, double[] dy_da, double[] d2y_dadb);
 }

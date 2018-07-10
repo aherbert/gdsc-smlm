@@ -2185,8 +2185,18 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		 */
 		public void setResult(int n, double[] initialParams, double[] params, double[] paramDevs);
 
+		/**
+		 * Gets the local background.
+		 *
+		 * @return the local background
+		 */
 		public double getLocalBackground();
 
+		/**
+		 * Gets the noise.
+		 *
+		 * @return the noise
+		 */
 		public double getNoise();
 	}
 

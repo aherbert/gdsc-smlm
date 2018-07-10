@@ -42,5 +42,5 @@ public interface BIXYZResultProcedure
 	 * @param z
 	 *            the z
 	 */
-	void executeBIXYZ(float background, float intensity, float x, float y, float z);
+	public void executeBIXYZ(float background, float intensity, float x, float y, float z);
 }

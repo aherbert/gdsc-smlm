@@ -42,5 +42,5 @@ public interface PeakResultStoreCollection
 	 *
 	 * @return the collection
 	 */
-	Collection<PeakResult> getCollectionReference();
+	public Collection<PeakResult> getCollectionReference();
 }

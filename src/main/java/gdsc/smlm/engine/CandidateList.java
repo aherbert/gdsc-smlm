@@ -31,9 +31,19 @@ import java.util.Comparator;
  */
 class CandidateList
 {
+	/**
+	 * Simple interface for testing candidates
+	 */
 	public interface Predicate
 	{
-		boolean test(Candidate candidate);
+		/**
+		 * Test.
+		 *
+		 * @param candidate
+		 *            the candidate
+		 * @return true, if successful
+		 */
+		public boolean test(Candidate candidate);
 	}
 
 	private static class CandidateComparator implements Comparator<Candidate>

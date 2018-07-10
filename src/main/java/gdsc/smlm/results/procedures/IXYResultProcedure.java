@@ -38,5 +38,5 @@ public interface IXYResultProcedure
 	 * @param y
 	 *            the y
 	 */
-	void executeIXY(float intensity, float x, float y);
+	public void executeIXY(float intensity, float x, float y);
 }

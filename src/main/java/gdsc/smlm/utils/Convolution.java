@@ -49,7 +49,7 @@ public class Convolution
 		 *            the value of the convolution
 		 * @return true, if further values should be computed
 		 */
-		boolean execute(double value);
+		public boolean execute(double value);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class Convolution
 		 *            the value of the convolution of the second input
 		 * @return true, if further values should be computed
 		 */
-		boolean execute(double value1, double value2);
+		public boolean execute(double value1, double value2);
 	}
 
 	/**
