@@ -98,6 +98,11 @@ public class CircularMeanDataProcessor extends DataProcessor
 		return filter.hasWeights();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
+	 */
 	@Override
 	public float[] process(float[] data, int width, int height)
 	{
@@ -115,6 +120,8 @@ public class CircularMeanDataProcessor extends DataProcessor
 	}
 
 	/**
+	 * Gets the radius.
+	 *
 	 * @return the smoothing radius
 	 */
 	public double getRadius()

@@ -102,6 +102,11 @@ public class BlockAverageDataProcessor extends DataProcessor
 		return filter.hasWeights();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gdsc.smlm.filters.DataProcessor#process(float[], int, int)
+	 */
 	@Override
 	public float[] process(float[] data, int width, int height)
 	{
@@ -127,6 +132,8 @@ public class BlockAverageDataProcessor extends DataProcessor
 	}
 
 	/**
+	 * Gets the smooth.
+	 *
 	 * @return the smoothing width
 	 */
 	public double getSmooth()

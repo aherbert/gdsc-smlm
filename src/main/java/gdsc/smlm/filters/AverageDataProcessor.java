@@ -232,6 +232,8 @@ public class AverageDataProcessor extends DataProcessor
 	}
 
 	/**
+	 * Gets the smooth.
+	 *
 	 * @return the smoothing width
 	 */
 	public double getSmooth()
