@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,7 +68,7 @@ public class FFastLog extends FastLog
 	 * Create a new logarithm calculation instance. This will
 	 * hold the pre-calculated log values for base E
 	 * and a table size depending on a given mantissa quantization.
-	 * 
+	 *
 	 * @param n
 	 *            The number of bits to keep from the mantissa.
 	 *            Table storage = 2^(n+1) * 4 bytes, e.g. 64Kb for n=13
@@ -82,7 +82,7 @@ public class FFastLog extends FastLog
 	 * Create a new logarithm calculation instance. This will
 	 * hold the pre-calculated log values for a given base
 	 * and a table size depending on a given mantissa quantization.
-	 * 
+	 *
 	 * @param base
 	 *            the logarithm base (e.g. 2 for log duals, 10 for
 	 *            decibels calculations, Math.E for natural log)
@@ -108,9 +108,9 @@ public class FFastLog extends FastLog
 		for (int i = 0; i < size; i++)
 		{
 			// Store log2 value of a range of floating point numbers using a limited
-			// precision mantissa (m). The purpose of this code is to enumerate all 
+			// precision mantissa (m). The purpose of this code is to enumerate all
 			// possible mantissas of a float with limited precision (23-q). Note the
-			// 24 for a 23-bit mantissa comes from the fact that the mantissa 
+			// 24 for a 23-bit mantissa comes from the fact that the mantissa
 			// represents the digits of a binary number after the binary-point: .10101010101
 			// It is assumed that the digit before the point is a 1 if the exponent
 			// is non-zero. Otherwise the binary point is moved to the right of the first
@@ -128,7 +128,7 @@ public class FFastLog extends FastLog
 
 			// For a precision of n=(23-q)=6
 			// We enumerate:
-			// ( .000000 to  .111111) * 2^q (i.e. q additional zeros) 
+			// ( .000000 to  .111111) * 2^q (i.e. q additional zeros)
 			// (1.000000 to 1.111111) * 2^q
 
 			// The bit shift is performed on integer data to construct the desired mantissa
@@ -185,7 +185,7 @@ public class FFastLog extends FastLog
 		// Then the floating-point result equals the value of the mathematical
 		// expression s x m x 2^(e-150):
 		// e-127 is the unbiased exponent. 23 is the mantissa precision
-		// = s x m x 2^(e-127-23) 
+		// = s x m x 2^(e-127-23)
 
 		final int e = (bits >> 23) & 0xff;
 		// raw mantissa, conversion is done with the bit shift to reduce precision
@@ -219,7 +219,7 @@ public class FFastLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log2( x )
@@ -236,7 +236,7 @@ public class FFastLog extends FastLog
 	@Override
 	public float log(float x)
 	{
-		// Re-implement to avoid float comparisons (which will be slower than int comparisons) 
+		// Re-implement to avoid float comparisons (which will be slower than int comparisons)
 		final int bits = Float.floatToRawIntBits(x);
 		final int e = (bits >> 23) & 0xff;
 		final int m = (bits & 0x7fffff);
@@ -263,7 +263,7 @@ public class FFastLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log( x )
@@ -291,7 +291,7 @@ public class FFastLog extends FastLog
 		// Then the floating-point result equals the value of the mathematical
 		// expression s x m x 2^(e-1075):
 		// e-1023 is the unbiased exponent. 52 is the mantissa precision
-		// = s x m x 2^(e-1023-52) 
+		// = s x m x 2^(e-1023-52)
 
 		// Get the biased exponent
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
@@ -331,7 +331,7 @@ public class FFastLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog2(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log( x )
@@ -359,7 +359,7 @@ public class FFastLog extends FastLog
 		// Then the floating-point result equals the value of the mathematical
 		// expression s x m x 2^(e-1075):
 		// e-1023 is the unbiased exponent. 52 is the mantissa precision
-		// = s x m x 2^(e-1023-52) 
+		// = s x m x 2^(e-1023-52)
 
 		// Get the biased exponent
 		final int e = (int) ((bits >>> 52) & 0x7ffL);
@@ -400,7 +400,7 @@ public class FFastLog extends FastLog
 	 * <li>If the argument is positive infinity, then the result is incorrect (fastLog(Float.MAX_VALUE)).
 	 * <li>If the argument is positive zero or negative zero, then the result is negative infinity.
 	 * </ul>
-	 * 
+	 *
 	 * @param x
 	 *            the argument (must be strictly positive)
 	 * @return log( x )

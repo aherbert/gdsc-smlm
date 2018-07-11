@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -98,8 +98,8 @@ public class QuadrantAnalysis
 		// Compute quadrants
 
 		// X quadrant:
-		// .AAA.   
-		// D.A.B   
+		// .AAA.
+		// D.A.B
 		// DD.BB
 		// D.C.B
 		// .CCC.
@@ -174,8 +174,8 @@ public class QuadrantAnalysis
 		}
 
 		// X quadrant:
-		// .AAA.   
-		// D.A.B   
+		// .AAA.
+		// D.A.B
 		// DD.BB
 		// D.C.B
 		// .CCC.
@@ -267,7 +267,7 @@ public class QuadrantAnalysis
 		// This is an edge case where the shift is small.
 		if (xi1 == xi2 && yi1 == yi2)
 		{
-			// This can only happen when the shift is zero after rounding. 
+			// This can only happen when the shift is zero after rounding.
 			// If they are the same then the value (xi1,yi1) should be cx,cy
 			// and we can move along the vector.
 			x1 = cx + 0.5 + vector[0];

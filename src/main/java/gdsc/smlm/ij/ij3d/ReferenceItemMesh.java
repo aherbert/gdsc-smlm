@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -128,7 +128,7 @@ public class ReferenceItemMesh extends ItemMesh
 			duplicateIndices(objectIndices, allIndices);
 			iga.setCoordinateIndices(0, allIndices);
 
-			// Check if we need the color and normal indices 
+			// Check if we need the color and normal indices
 			if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) == 0)
 			{
 				// Duplicate the other indices
@@ -170,7 +170,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
 	@Override
@@ -190,8 +190,8 @@ public class ReferenceItemMesh extends ItemMesh
 		}
 
 		// From here on we assume the current geometry will not be null
-		// as this only happens when the original size is zero. Size has 
-		// been checked at this point to be the smaller of new and old. 
+		// as this only happens when the original size is zero. Size has
+		// been checked at this point to be the smaller of new and old.
 		GeometryArray ga = (GeometryArray) getGeometry();
 
 		points = reorder(points, indices);
@@ -278,7 +278,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -323,7 +323,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
 	@Override
@@ -368,7 +368,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
 	@Override
@@ -396,7 +396,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
 	 */
 	@Override
@@ -426,7 +426,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
 	 */
 	@Override
@@ -454,7 +454,7 @@ public class ReferenceItemMesh extends ItemMesh
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
 	 */
 	@Override

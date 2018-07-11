@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -113,7 +113,7 @@ public class PeakResultConversionHelper
 	{
 		if (intensityConverter == null)
 		{
-			intensityConverter = (calibration == null) ? new IdentityTypeConverter<IntensityUnit>(null)
+			intensityConverter = (calibration == null) ? new IdentityTypeConverter<>(null)
 					: CalibrationHelper.getIntensityConverterSafe(calibration, intensityUnit);
 		}
 		return intensityConverter;
@@ -177,7 +177,7 @@ public class PeakResultConversionHelper
 	{
 		if (distanceConverter == null)
 		{
-			distanceConverter = (calibration == null) ? new IdentityTypeConverter<DistanceUnit>(null)
+			distanceConverter = (calibration == null) ? new IdentityTypeConverter<>(null)
 					: CalibrationHelper.getDistanceConverterSafe(calibration, distanceUnit);
 		}
 		return distanceConverter;
@@ -241,7 +241,7 @@ public class PeakResultConversionHelper
 	{
 		if (angleConverter == null)
 		{
-			angleConverter = (calibration == null) ? new IdentityTypeConverter<AngleUnit>(null)
+			angleConverter = (calibration == null) ? new IdentityTypeConverter<>(null)
 					: CalibrationHelper.getAngleConverterSafe(calibration, angleUnit);
 		}
 		return angleConverter;
@@ -255,7 +255,7 @@ public class PeakResultConversionHelper
 	 */
 	public Converter[] getConverters()
 	{
-		TurboList<Converter> list = new TurboList<Converter>(5);
+		TurboList<Converter> list = new TurboList<>(5);
 
 		getIntensityConverter();
 		getDistanceConverter();
@@ -283,7 +283,7 @@ public class PeakResultConversionHelper
 							list.add(getAngleConverter());
 							break;
 						default:
-							list.add(new IdentityTypeConverter<PSFParameterUnit>(p.getUnit()));
+							list.add(new IdentityTypeConverter<>(p.getUnit()));
 					}
 				}
 			}
@@ -302,7 +302,7 @@ public class PeakResultConversionHelper
 	 */
 	public String[] getNames()
 	{
-		TurboList<String> list = new TurboList<String>(5);
+		TurboList<String> list = new TurboList<>(5);
 
 		list.add("Background");
 		list.add("Intensity");
@@ -334,7 +334,7 @@ public class PeakResultConversionHelper
 	 */
 	public String[] getUnitNames()
 	{
-		TurboList<String> list = new TurboList<String>(5);
+		TurboList<String> list = new TurboList<>(5);
 
 		getIntensityConverter();
 		getDistanceConverter();
@@ -418,7 +418,7 @@ public class PeakResultConversionHelper
 	{
 		boolean bad = false;
 
-		// The conversion is bad if the output unit is specified and either: 
+		// The conversion is bad if the output unit is specified and either:
 		// there is no converter; or the converter will output the wrong units.
 
 		//@formatter:off

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -98,7 +98,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise0(double[])
 	 */
 	@Override
@@ -142,7 +142,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise1(double[])
 	 */
 	@Override
@@ -159,7 +159,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			final double sx = zModel.getSx(tz, ds_dz);
 			dtsx_dtz[n] = ds_dz[0];
@@ -172,7 +172,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise2(double[])
 	 */
 	@Override
@@ -189,7 +189,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			final double sx = zModel.getSx2(tz, ds_dz);
 			dtsx_dtz[n] = ds_dz[0];
@@ -204,7 +204,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction#initialiseExtended2(double[])
 	 */
 	@Override
@@ -221,7 +221,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			final double ty = a[i + Gaussian2DFunction.Y_POSITION] + 0.5;
 			final double tz = a[i + Gaussian2DFunction.Z_POSITION];
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			final double sx = zModel.getSx2(tz, ds_dz);
 			dtsx_dtz[n] = ds_dz[0];
@@ -245,7 +245,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
 	 */
 	@Override
@@ -272,7 +272,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	@Override
@@ -304,12 +304,12 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 			d2uda2[a++] =
 					d2u_dtsx2[xx] * deltaEy[yy] * dtsx_dtz[n] * dtsx_dtz[n] +
 					du_dsx * d2tsx_dtz2[n] +
-					d2u_dtsy2[yy] * deltaEx[xx] * dtsy_dtz[n] * dtsy_dtz[n] + 
+					d2u_dtsy2[yy] * deltaEx[xx] * dtsy_dtz[n] * dtsy_dtz[n] +
 					du_dsy * d2tsy_dtz2[n] +
 					// Add the equivalent term we add in the circular version.
-					// Note: this is not in the Smith, et al (2010) paper but is 
+					// Note: this is not in the Smith, et al (2010) paper but is
 					// in the GraspJ source code and it works in JUnit tests.
-					2 * du_dtsx[xx] * dtsx_dtz[n] * du_dtsy[yy] * dtsy_dtz[n] / tI[n];		
+					2 * du_dtsx[xx] * dtsx_dtz[n] * du_dtsy[yy] * dtsy_dtz[n] / tI[n];
 			//@formatter:on
 		}
 		return I;
@@ -359,7 +359,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
 	@Override
@@ -395,7 +395,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
 	@Override
@@ -441,13 +441,13 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 					d2uda2[a++] = d2u_dty2[yy] * deltaEx[xx];
 					duda[a] = du_dsx * dtsx_dtz[n] + du_dsy * dtsy_dtz[n];
 					//@formatter:off
-					d2uda2[a++] = 
-							d2u_dtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] + 
+					d2uda2[a++] =
+							d2u_dtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] +
 							du_dsx * d2tsx_dtz2[n] +
-							d2u_dtsy2_by_dtsy_dtz_2[n] * deltaEx[xx] + 
+							d2u_dtsy2_by_dtsy_dtz_2[n] * deltaEx[xx] +
 							du_dsy * d2tsy_dtz2[n] +
 							// Add the equivalent term we add in the circular version.
-							// Note: this is not in the Smith, et al (2010) paper but is 
+							// Note: this is not in the Smith, et al (2010) paper but is
 							// in the GraspJ source code and it works in JUnit tests.
 							//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
 							two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * du_dtsx[xx];
@@ -460,7 +460,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
 	@Override
@@ -565,12 +565,12 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
 					// Z,Z
 					//@formatter:off
 					d2udadb[kkkk + 3] =
-							d2u_dtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] + 
+							d2u_dtsx2[xx] * deltaEy_by_dtsx_dtz_2[n] +
 							du_dsx * d2tsx_dtz2[n] +
-							d2u_dtsy2_by_dtsy_dtz_2[n] * deltaEx[xx] + 
+							d2u_dtsy2_by_dtsy_dtz_2[n] * deltaEx[xx] +
 							du_dsy * d2tsy_dtz2[n] +
 							// Add the equivalent term we add in the circular version.
-							// Note: this is not in the Smith, et al (2010) paper but is 
+							// Note: this is not in the Smith, et al (2010) paper but is
 							// in the GraspJ source code and it works in JUnit tests.
 							//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
 							two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * du_dtsx[xx];

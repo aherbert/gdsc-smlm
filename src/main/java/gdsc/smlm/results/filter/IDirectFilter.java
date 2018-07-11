@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -158,7 +158,7 @@ public interface IDirectFilter
 	 * Called before the accept method is called for PreprocessedPeakResult
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.
-	 * 
+	 *
 	 * @see #validate(PreprocessedPeakResult)
 	 */
 	public void setup();
@@ -168,7 +168,7 @@ public interface IDirectFilter
 	 * requested. Filters are asked to respect the flags defined in this class.
 	 * <p>
 	 * This should be called once to initialise the filter before processing a batch of results.
-	 * 
+	 *
 	 * @param flags
 	 *            Flags used to control the filter
 	 * @see #validate(PreprocessedPeakResult)
@@ -214,7 +214,7 @@ public interface IDirectFilter
 	 * <p>
 	 * Calls {@link #validate(PreprocessedPeakResult)} and stores the result. This can be obtained using
 	 * {@link #getResult()}.
-	 * 
+	 *
 	 * @param peak
 	 *            The peak result
 	 * @return true if the peak should be accepted
@@ -223,7 +223,7 @@ public interface IDirectFilter
 
 	/**
 	 * Filter the peak result.
-	 * 
+	 *
 	 * @param peak
 	 *            The peak result
 	 * @return zero if the peak should be accepted, otherwise set to flags indicating the field that failed validation.
@@ -232,14 +232,14 @@ public interface IDirectFilter
 
 	/**
 	 * Return the type of filter. This should be a DirectFilter.
-	 * 
+	 *
 	 * @return Should return DirectFilter
 	 */
 	public FilterType getFilterType();
 
 	/**
 	 * Return the result flag generated during the last call to {@link #accept(PreprocessedPeakResult)}.
-	 * 
+	 *
 	 * @return the validation result from the last call to {@link #accept(PreprocessedPeakResult)}
 	 */
 	public int getResult();

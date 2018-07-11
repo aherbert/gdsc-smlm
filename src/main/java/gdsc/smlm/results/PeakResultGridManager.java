@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,7 +68,7 @@ public class PeakResultGridManager
 
 	/**
 	 * Create a grid for candidates or peak results
-	 * 
+	 *
 	 * @param maxx
 	 * @param maxy
 	 * @param resolution
@@ -97,7 +97,7 @@ public class PeakResultGridManager
 
 	/**
 	 * Create a grid only of peak results. No candidates can be added to the grid.
-	 * 
+	 *
 	 * @param results
 	 * @param resolution
 	 */
@@ -127,7 +127,7 @@ public class PeakResultGridManager
 
 	/**
 	 * Add a peak to the grid. Assumes that the coordinates are within the size of the grid.
-	 * 
+	 *
 	 * @param peak
 	 */
 	public void addToGrid(PeakResult peak)
@@ -155,7 +155,7 @@ public class PeakResultGridManager
 	 * Get the neighbours in the local region (defined by the input resolution). All neighbours within the
 	 * resolution
 	 * distance will be returned, plus there may be others and so distances should be checked.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @return the neighbours

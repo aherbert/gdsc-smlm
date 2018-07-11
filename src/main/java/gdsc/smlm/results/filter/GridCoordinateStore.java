@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -64,7 +64,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 		void refresh()
 		{
-			// If this is out-of-date then clear the contents 
+			// If this is out-of-date then clear the contents
 			if (this.timestamp != GridCoordinateStore.this.timestamp)
 				clear();
 		}
@@ -236,7 +236,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#resize(int, int, int, int)
 	 */
 	@Override
@@ -257,7 +257,7 @@ public class GridCoordinateStore implements CoordinateStore
 	/**
 	 * Change the XY resolution of the store. The max dimensions are unchanged. Changing the resolution clears the
 	 * store.
-	 * 
+	 *
 	 * @param xyResolution
 	 *            The new XY resolution
 	 */
@@ -287,7 +287,7 @@ public class GridCoordinateStore implements CoordinateStore
 	 */
 	public void changeZResolution(double zResolution)
 	{
-		// This is not strictly necessary since we use a 2D grid but is 
+		// This is not strictly necessary since we use a 2D grid but is
 		// done for consistency with changeXYResolution(...).
 		clear();
 		setZResolution(zResolution);
@@ -295,7 +295,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getXYResolution()
 	 */
 	@Override
@@ -306,7 +306,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getZResolution()
 	 */
 	@Override
@@ -317,7 +317,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/**
 	 * Note: This does not check that the x,y coordinates are within the correct bounds.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#addToQueue(double, double, double)
 	 */
 	@Override
@@ -331,7 +331,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#flush()
 	 */
 	@Override
@@ -346,7 +346,7 @@ public class GridCoordinateStore implements CoordinateStore
 	/**
 	 * Note: This does not check that the x,y coordinates are within the correct bounds. Use
 	 * {@link #safeAdd(double, double)} to do a bounds check.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#add(double, double, double)
 	 */
 	@Override
@@ -380,7 +380,7 @@ public class GridCoordinateStore implements CoordinateStore
 	{
 		if (isActive)
 		{
-			// Check bounds 
+			// Check bounds
 			final int xBlock = getBlockX(x);
 			if (xBlock < 0 || xBlock >= xBlocks)
 				return;
@@ -409,7 +409,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#clear()
 	 */
 	@Override
@@ -436,7 +436,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#contains(double, double, double)
 	 */
 	@Override
@@ -516,7 +516,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#find(double, double, double)
 	 */
 	@Override
@@ -577,7 +577,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinX()
 	 */
 	@Override
@@ -588,7 +588,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getMinY()
 	 */
 	@Override
@@ -599,7 +599,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getWidth()
 	 */
 	@Override
@@ -610,7 +610,7 @@ public class GridCoordinateStore implements CoordinateStore
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.CoordinateStore#getHeight()
 	 */
 	@Override

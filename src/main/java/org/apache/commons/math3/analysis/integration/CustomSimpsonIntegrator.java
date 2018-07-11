@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 
 	/**
 	 * Build a Simpson integrator with given accuracies and iterations counts.
-	 * 
+	 *
 	 * @param relativeAccuracy
 	 *            relative accuracy of the result
 	 * @param absoluteAccuracy
@@ -86,7 +86,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 
 	/**
 	 * Build a Simpson integrator with given iteration counts.
-	 * 
+	 *
 	 * @param minimalIterationCount
 	 *            minimum number of iterations
 	 * @param maximalIterationCount
@@ -138,7 +138,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator
 		//			n = 2L;
 		//			// There is a bug in the standard CustomSimpsonIntegrator where the
 		//			// n=1 stage is computed before the n=0 stage due to inlining of the
-		//			// return. This is not valid as the n=1 stage uses the value from the 
+		//			// return. This is not valid as the n=1 stage uses the value from the
 		//			// n=0 stage.
 		//			//return (4 * qtrap.stage(this, 1) - qtrap.stage(this, 0)) / 3.0;
 		//		double s0 = qtrap.stage(this, 0);

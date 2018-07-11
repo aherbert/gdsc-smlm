@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -107,9 +107,9 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	/**
 	 * Calculates the Newton-Raphson update vector for a Poisson process. Variables are named as per the Smith, et al
 	 * (2010) paper.
-	 * 
+	 *
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient2Procedure#execute(double, double[], double[])
 	 */
 	@Override
@@ -163,9 +163,9 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 
 	/**
 	 * Variables are named as per the Smith, et al (2010) paper.
-	 * 
+	 *
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
 	@Override
@@ -207,9 +207,9 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 
 	/**
 	 * Variables are named as per the Smith, et al (2010) paper.
-	 * 
+	 *
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
 	@Override
@@ -248,7 +248,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	 * converted to the log-likelihood by subtracting {@link #computeLogXFactorialTerm()}.
 	 * <p>
 	 * This term is suitable for use in maximum likelihood routines.
-	 * 
+	 *
 	 * <pre>
 	 * pseudo ll = x * log(u) - u
 	 * </pre>
@@ -266,7 +266,7 @@ public class FastMLEGradient2Procedure implements ValueProcedure, Gradient1Proce
 	 * <pre>
 	 * ll = pseudo ll - log(x!)
 	 * </pre>
-	 * 
+	 *
 	 * @return the log X factorial term
 	 */
 	public double computeLogXFactorialTerm()

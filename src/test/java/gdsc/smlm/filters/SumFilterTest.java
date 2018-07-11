@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -178,7 +178,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -188,7 +188,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -207,7 +207,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -248,7 +248,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -258,7 +258,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -277,7 +277,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -318,7 +318,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -328,7 +328,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -347,7 +347,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -411,7 +411,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -420,7 +420,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -438,7 +438,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -473,7 +473,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -482,7 +482,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -500,7 +500,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -535,7 +535,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -544,7 +544,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -562,7 +562,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -597,7 +597,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -606,7 +606,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -624,7 +624,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -683,7 +683,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -692,7 +692,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -710,7 +710,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -746,7 +746,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -755,7 +755,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -773,7 +773,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -809,7 +809,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -819,7 +819,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -838,7 +838,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -929,7 +929,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -939,7 +939,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -958,7 +958,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -998,7 +998,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1008,7 +1008,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1027,7 +1027,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1067,7 +1067,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1077,7 +1077,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1096,7 +1096,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1137,7 +1137,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1147,7 +1147,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1166,7 +1166,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1206,7 +1206,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(floatClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1216,7 +1216,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1235,7 +1235,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+					ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (float[] data : dataSet)
 						dataSet2.add(floatClone(data));
 
@@ -1299,7 +1299,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -1308,7 +1308,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1326,7 +1326,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1383,7 +1383,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -1392,7 +1392,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1410,7 +1410,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1468,7 +1468,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxN(floatClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -1477,7 +1477,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1495,7 +1495,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1530,7 +1530,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -1539,7 +1539,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1557,7 +1557,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1592,7 +1592,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -1601,7 +1601,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1619,7 +1619,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1654,7 +1654,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<float[]> dataSet = floatCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(floatClone(dataSet.get(0)), primes[0], primes[0]);
@@ -1663,7 +1663,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1681,7 +1681,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<float[]> dataSet2 = new ArrayList<float[]>(dataSet.size());
+				ArrayList<float[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (float[] data : dataSet)
 					dataSet2.add(floatClone(data));
 
@@ -1812,7 +1812,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1822,7 +1822,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -1841,7 +1841,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -1882,7 +1882,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1892,7 +1892,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -1911,7 +1911,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -1952,7 +1952,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -1962,7 +1962,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -1981,7 +1981,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2045,7 +2045,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -2054,7 +2054,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2072,7 +2072,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2107,7 +2107,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -2116,7 +2116,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2134,7 +2134,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2169,7 +2169,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -2178,7 +2178,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2196,7 +2196,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2231,7 +2231,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -2240,7 +2240,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2258,7 +2258,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2317,7 +2317,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3Internal(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -2326,7 +2326,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2344,7 +2344,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2380,7 +2380,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -2389,7 +2389,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2407,7 +2407,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2443,7 +2443,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(InternalITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -2453,7 +2453,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2472,7 +2472,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2563,7 +2563,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -2573,7 +2573,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2592,7 +2592,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2631,7 +2631,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -2641,7 +2641,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2660,7 +2660,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2699,7 +2699,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -2709,7 +2709,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2728,7 +2728,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2769,7 +2769,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -2779,7 +2779,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2798,7 +2798,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2837,7 +2837,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxNInternal(intClone(dataSet.get(0)), primes[0], primes[0], boxSizes[0]);
@@ -2847,7 +2847,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2866,7 +2866,7 @@ public class SumFilterTest extends AbstractFilterTest
 			for (int width : primes)
 				for (int height : primes)
 				{
-					ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+					ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 					for (int[] data : dataSet)
 						dataSet2.add(intClone(data));
 
@@ -2930,7 +2930,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.blockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -2939,7 +2939,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -2957,7 +2957,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3014,7 +3014,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -3023,7 +3023,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3041,7 +3041,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3099,7 +3099,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSumNxN(intClone(dataSet.get(0)), primes[0], primes[0], 1);
@@ -3108,7 +3108,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3126,7 +3126,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3161,7 +3161,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -3170,7 +3170,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3188,7 +3188,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3222,7 +3222,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.stripedBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -3231,7 +3231,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3249,7 +3249,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3283,7 +3283,7 @@ public class SumFilterTest extends AbstractFilterTest
 
 		ArrayList<int[]> dataSet = intCreateSpeedData(ITER3);
 
-		ArrayList<Long> fastTimes = new ArrayList<Long>();
+		ArrayList<Long> fastTimes = new ArrayList<>();
 
 		// Initialise
 		filter.rollingBlockSum3x3(intClone(dataSet.get(0)), primes[0], primes[0]);
@@ -3292,7 +3292,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 
@@ -3310,7 +3310,7 @@ public class SumFilterTest extends AbstractFilterTest
 		for (int width : primes)
 			for (int height : primes)
 			{
-				ArrayList<int[]> dataSet2 = new ArrayList<int[]>(dataSet.size());
+				ArrayList<int[]> dataSet2 = new ArrayList<>(dataSet.size());
 				for (int[] data : dataSet)
 					dataSet2.add(intClone(data));
 

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -58,7 +58,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 		w = new double[n];
 
 		// From Ruisheng, et al (2017):
-		// Total noise = variance + max(di, 0) + 1 
+		// Total noise = variance + max(di, 0) + 1
 
 		if (var != null && var.length == n)
 		{
@@ -75,7 +75,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
 	@Override
@@ -86,7 +86,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 		this.value += dy * dy * w;
 
 		// Compute:
-		// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+		// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//   that is, it describes the local curvature of a function of many variables.)
 		// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -104,7 +104,7 @@ public class WLSQLVMGradientProcedure extends LSQLVMGradientProcedure
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ValueProcedure#execute(double)
 	 */
 	@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -156,7 +156,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getNumberOfParameters()
 	 */
 	@Override
@@ -167,7 +167,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
@@ -188,7 +188,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
 	 */
 	@Override
@@ -211,7 +211,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getDisabledParameterValue(int)
 	 */
 	@Override
@@ -222,7 +222,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
@@ -244,7 +244,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
 	 */
 	@Override
@@ -257,13 +257,13 @@ public abstract class HysteresisFilter extends Filter
 	@Override
 	public void setup(MemoryPeakResults peakResults)
 	{
-		ok = new HashSet<PeakResult>();
+		ok = new HashSet<>();
 
 		// Create a set of candidates and valid peaks
 		final MemoryPeakResults traceResults = new MemoryPeakResults();
 
 		// Initialise peaks to check
-		final LinkedList<PeakResult> candidates = new LinkedList<PeakResult>();
+		final LinkedList<PeakResult> candidates = new LinkedList<>();
 		peakResults.forEach(new PeakResultProcedure()
 		{
 			@Override
@@ -365,7 +365,7 @@ public abstract class HysteresisFilter extends Filter
 	/**
 	 * Find average precision of the candidates and use it for the search
 	 * distance
-	 * 
+	 *
 	 * @param peakResults
 	 * @param candidates
 	 * @return
@@ -399,7 +399,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#end()
 	 */
 	@Override
@@ -411,7 +411,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getDescription()
 	 */
 	@Override
@@ -424,7 +424,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#subsetWithFailCount()
 	 */
 	@Override
@@ -435,7 +435,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#newChromosome(double[])
 	 */
 	@Override
@@ -454,7 +454,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getChromosomeParameters()
 	 */
 	@Override
@@ -472,7 +472,7 @@ public abstract class HysteresisFilter extends Filter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#length()
 	 */
 	@Override

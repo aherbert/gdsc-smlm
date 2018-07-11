@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -115,7 +115,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 {
 	/*
 	 * Note: 21-Oct-2016
-	 * 
+	 *
 	 * This plugin may be obsolete now that the BenchmarkSpotFit and BenchmarkFilterAnalysis plugins
 	 * can handle singles, multiples and doublets together. This means that the residuals threshold can be
 	 * optimised concurrently with the fail count and the filter. It is left within the codebase in case
@@ -136,7 +136,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		config.setFailuresLimit(-1);
 		fitConfig.setSmartFilter(false);
 		fitConfig.setDisableSimpleFilter(false);
-		fitConfig.setMinPhotons(1); // Do not allow negative photons 
+		fitConfig.setMinPhotons(1); // Do not allow negative photons
 		fitConfig.setCoordinateShiftFactor(0); // Disable
 		fitConfig.setPrecisionThreshold(0);
 		fitConfig.setMinWidthFactor(0);
@@ -295,7 +295,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -325,7 +325,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -423,7 +423,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -466,7 +466,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		final Overlay o;
 		double[] region = null;
 		float[] data = null;
-		ArrayList<DoubletResult> results = new ArrayList<DoubletResult>();
+		ArrayList<DoubletResult> results = new ArrayList<>();
 		int daic = 0, dbic = 0, cic = 0;
 		RampedScore rampedScore, signalScore = null;
 
@@ -498,7 +498,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
 
 			fitting = config.getFittingWidth();
-			// Fit window is 2*fitting+1. The distance limit is thus 0.5 pixel higher than fitting. 
+			// Fit window is 2*fitting+1. The distance limit is thus 0.5 pixel higher than fitting.
 			limit = fitting + 0.5;
 			spotHistogram = new int[20];
 			resultHistogram = new int[spotHistogram.length];
@@ -512,7 +512,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -552,7 +552,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			showProgress();
 
 			Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
-			ArrayList<DoubletResult> frameResults = new ArrayList<DoubletResult>(actual.length);
+			ArrayList<DoubletResult> frameResults = new ArrayList<>(actual.length);
 
 			// Extract the data
 			final int maxx = stack.getWidth();
@@ -623,7 +623,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						//@formatter:on
 					}
 
-					// Initialise for fitting on first match 
+					// Initialise for fitting on first match
 					if (ie == null)
 					{
 						ie = new ImageExtractor(data, maxx, maxy);
@@ -636,7 +636,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 					// Count the number of candidates within the fitting window
 					// that are potential neighbours,
-					// i.e. will fit neighbours be used? 
+					// i.e. will fit neighbours be used?
 					// It does not matter if the neighbours have a match to a result
 					// or not, just that they are present for multiple peak fitting
 
@@ -683,7 +683,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						// TODO - Should we now remove these actual results from the actual[] array.
 						// This removes them from any scoring of fit results.
 						// For now leave them in as all spot candidates around them are going to be ignored
-						// so there should not be any fit results close by.					
+						// so there should not be any fit results close by.
 						ignored += n;
 						continue;
 					}
@@ -706,7 +706,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					// is fine for low density PALM data but not for high density STORM data.
 
 					// Fit the candidates (as per the FitWorker logic)
-					// (Fit even multiple since this is what the FitWorker will do) 
+					// (Fit even multiple since this is what the FitWorker will do)
 					region = ie.crop(regionBounds, region);
 
 					boolean[] amplitudeEstimate = new boolean[1];
@@ -758,7 +758,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 						QuadrantAnalysis qa = new QuadrantAnalysis();
 
-						// TODO - Also perform quadrant analysis on a new region centred around 
+						// TODO - Also perform quadrant analysis on a new region centred around
 						// the fit centre...
 
 						if (qa.quadrantAnalysis(residuals, width, height, cx, cy) && qa.computeDoubletCentres(width,
@@ -871,7 +871,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 									result.r2 = ((LSEFunctionSolver) f2).getAdjustedCoefficientOfDetermination();
 								}
 
-								// Debugging: see if the AIC or BIC ever differ								
+								// Debugging: see if the AIC or BIC ever differ
 								//if (Math.signum(result.aic1 - result.aic2) != Math.signum(result.bic1 - result.bic2))
 								//	System.out.printf("BIC difference [%d] %d,%d : %d  %f vs %f (%.2f)\n", frame,
 								//			spot.x, spot.y, n, Math.signum(result.aic1 - result.aic2),
@@ -936,8 +936,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				// This is valid for comparing the score between residuals=1 (all single) and
 				// residuals=0 (all doublets), when all spot candidates are fit.
 
-				ArrayList<ResultCoordinate> f1 = new ArrayList<ResultCoordinate>();
-				ArrayList<ResultCoordinate> f2 = new ArrayList<ResultCoordinate>();
+				ArrayList<ResultCoordinate> f1 = new ArrayList<>();
+				ArrayList<ResultCoordinate> f2 = new ArrayList<>();
 				for (DoubletResult result : frameResults)
 				{
 					if (result.good1)
@@ -965,7 +965,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 				if (f1.isEmpty())
 					return;
 
-				List<PointPair> pairs = new ArrayList<PointPair>();
+				List<PointPair> pairs = new ArrayList<>();
 				MatchCalculator.analyseResults2D(actual, f1.toArray(new ResultCoordinate[f1.size()]), matchDistance,
 						null, null, null, pairs);
 				for (PointPair pair : pairs)
@@ -979,8 +979,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 				// Note: Computing the closest match to all doublets
 				// results in a simple analysis since we are comparing all doublets against all singles.
-				// There may be a case where a actual coordinate is matched by a bad doublet but also by a 
-				// good doublet at a higher distance. However when we filter the results to remove bad doublets 
+				// There may be a case where a actual coordinate is matched by a bad doublet but also by a
+				// good doublet at a higher distance. However when we filter the results to remove bad doublets
 				// (low residuals, etc) this result is not scored even though it would also match the better doublet.
 
 				// This may not matter unless the density is high.
@@ -996,9 +996,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			else if (matching == 1)
 			{
 				// Rank doublets by the residuals score.
-				// This is valid for comparing the score between residuals=1 (all singles) 
+				// This is valid for comparing the score between residuals=1 (all singles)
 				// and the effect of altering the residuals threshold to allow more doublets.
-				// It is not a true effect as doublets with a higher residuals score may not be 
+				// It is not a true effect as doublets with a higher residuals score may not be
 				// first spot candidates that are fit.
 
 				// Rank singles by the Candidate spot
@@ -1045,8 +1045,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					}
 				}
 
-				// Rank the doublets by residuals threshold instead. 1 from the doublet 
-				// must match the spot that it matched as a single (if still available). 
+				// Rank the doublets by residuals threshold instead. 1 from the doublet
+				// must match the spot that it matched as a single (if still available).
 				// The other can match anything else...
 				Collections.sort(frameResults, new Comparator<DoubletResult>()
 				{
@@ -1179,8 +1179,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			else
 			{
 				// Matching based on spot ranking
-				ArrayList<ResultCoordinate> f1 = new ArrayList<ResultCoordinate>();
-				ArrayList<ResultCoordinate> f2 = new ArrayList<ResultCoordinate>();
+				ArrayList<ResultCoordinate> f1 = new ArrayList<>();
+				ArrayList<ResultCoordinate> f2 = new ArrayList<>();
 				for (DoubletResult result : frameResults)
 				{
 					if (result.good1)
@@ -1374,7 +1374,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					return 0;
 			}
 
-			// Do some simple validation 
+			// Do some simple validation
 
 			// Check if centre is within the region
 			final double border = FastMath.min(width, height) / 4.0;
@@ -1417,7 +1417,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 					return 0;
 			}
 
-			// Do some simple validation 
+			// Do some simple validation
 
 			final double regionSize = FastMath.max(width, height) * 0.5;
 			for (int n = 0; n < 2; n++)
@@ -1439,7 +1439,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 						params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.Y_POSITION] > height +
 								bordery)
 				{
-					// Perhaps do a check on the quadrant?					
+					// Perhaps do a check on the quadrant?
 					return 1;
 				}
 			}
@@ -1541,7 +1541,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -1691,7 +1691,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		config.setFitting(gd.getNextNumber());
 		fitConfig.setFitSolver(gd.getNextChoiceIndex());
 
-		// Avoid stupidness. Note: We are mostly ignoring the validation result and 
+		// Avoid stupidness. Note: We are mostly ignoring the validation result and
 		// checking the results for the doublets manually.
 		fitConfig.setMinPhotons(15); // Realistically we cannot fit lower than this
 		// Set the width factors to help establish bounds for bounded fitters
@@ -1788,7 +1788,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Make sure all spots are fit
 		config.setFailuresLimit(-1);
 
-		// Get the distance from the filter analysis. This ensures that we compute scores the 
+		// Get the distance from the filter analysis. This ensures that we compute scores the
 		// same as the filter analysis
 		if (BenchmarkFilterAnalysis.distanceInPixels > 0)
 		{
@@ -1799,7 +1799,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		}
 		else
 		{
-			// Use the fit analysis distance if no filter analysis has been run 
+			// Use the fit analysis distance if no filter analysis has been run
 			matchDistance = BenchmarkSpotFit.distanceInPixels;
 			lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
 			signalFactor = lowerSignalFactor = BenchmarkSpotFit.signalFactor;
@@ -1864,9 +1864,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-		List<Worker> workers = new LinkedList<Worker>();
-		List<Thread> threads = new LinkedList<Thread>();
+		final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		List<Worker> workers = new LinkedList<>();
+		List<Thread> threads = new LinkedList<>();
 		Overlay overlay = (showOverlay) ? new Overlay() : null;
 		for (int i = 0; i < nThreads; i++)
 		{
@@ -2123,7 +2123,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Now output the actual results ...
 
 		// Show histograms as cumulative to avoid problems with bin width
-		// Residuals scores 
+		// Residuals scores
 		// Iterations and evaluations where fit was OK
 
 		StoredDataStatistics[] stats = new StoredDataStatistics[NAMES2.length];
@@ -2131,13 +2131,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 			stats[i] = new StoredDataStatistics();
 
 		// For Jaccard scoring we need to count the score with no residuals threshold,
-		// i.e. Accumulate the score accepting all doublets that were fit 
+		// i.e. Accumulate the score accepting all doublets that were fit
 		double tp = 0;
 		double fp = 0;
 
 		double bestTp = 0, bestFp = 0;
 
-		ArrayList<DoubletBonus> data = new ArrayList<DoubletBonus>(results.size());
+		ArrayList<DoubletBonus> data = new ArrayList<>(results.size());
 		for (DoubletResult result : results)
 		{
 			final double score = result.getMaxScore();
@@ -2232,7 +2232,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		for (int c = 0; c < stats.length; c++)
 		{
 			double[] values = stats[c].getValues();
-			// Sorting is need for the percentile and the cumulative histogram so do it once 
+			// Sorting is need for the percentile and the cumulative histogram so do it once
 			Arrays.sort(values);
 			sb.append(Utils.rounded(stats[c].getMean())).append("+/-")
 					.append(Utils.rounded(stats[c].getStandardDeviation())).append(" (").append(stats[c].getN())
@@ -2272,7 +2272,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	/**
 	 * Compute the total number of true results that all the candidates could have fit, including singles, doublets and
 	 * multiples.
-	 * 
+	 *
 	 * @param results
 	 *            the doublet fitting results
 	 * @return the total localisation results we could have fit
@@ -2492,7 +2492,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		createResultsTable();
 
-		ArrayList<String> list = new ArrayList<String>(results.size());
+		ArrayList<String> list = new ArrayList<>(results.size());
 		int flush = 9;
 		StringBuilder sb = new StringBuilder();
 		for (DoubletResult result : results)
@@ -2631,7 +2631,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		showResults(doubletResults, analysisShowResults);
 
 		// Store the effect of fitting as a doublet
-		ArrayList<DoubletBonus> data = new ArrayList<DoubletBonus>(doubletResults.size());
+		ArrayList<DoubletBonus> data = new ArrayList<>(doubletResults.size());
 		// True positive and False positives at residuals = 0
 		double tp = 0;
 		double fp = 0;
@@ -2640,7 +2640,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		// Get filters for the single and double fits
 
-		// No coordinate shift for the doublet. We have already done simple checking of the 
+		// No coordinate shift for the doublet. We have already done simple checking of the
 		// coordinates to get the good=2 flag
 		FitConfiguration filterFitConfig2 = filterFitConfig.clone();
 		filterFitConfig2.setCoordinateShift(Integer.MAX_VALUE);
@@ -2762,7 +2762,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 							}
 							if (Math.abs(xShift) > shift || Math.abs(yShift) > shift)
 							{
-								// Check the domain is OK (the angle is in radians). 
+								// Check the domain is OK (the angle is in radians).
 								// Allow up to a 45 degree difference to show the shift is along the vector
 								if (result.a[n] > analysisDriftAngle && result.a[n] < otherDriftAngle)
 								{
@@ -2855,7 +2855,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	/**
 	 * Save PeakFit configuration template using the current benchmark settings.
-	 * 
+	 *
 	 * @param summary
 	 */
 	private void saveTemplate(String summary)
@@ -3227,7 +3227,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	@Override

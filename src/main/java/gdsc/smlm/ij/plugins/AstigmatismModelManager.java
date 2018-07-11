@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -157,7 +157,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private static List<String> createList(boolean includeNone)
 	{
-		List<String> list = new TurboList<String>();
+		List<String> list = new TurboList<>();
 		if (includeNone)
 			list.add("[None]");
 		return list;
@@ -230,7 +230,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	/**
 	 * Remove the extra information added to a name for use in dialogs
-	 * 
+	 *
 	 * @param name
 	 *            the formatted name
 	 * @return The name
@@ -269,7 +269,7 @@ public class AstigmatismModelManager implements PlugIn
 	}
 
 	//@formatter:off
-	private static String[] OPTIONS = { 
+	private static String[] OPTIONS = {
 			"Create model",
 			"Import model",
 			// All option below require models
@@ -287,7 +287,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -402,7 +402,7 @@ public class AstigmatismModelManager implements PlugIn
 
 	private static String[] getImageList()
 	{
-		TurboList<String> newImageList = new TurboList<String>();
+		TurboList<String> newImageList = new TurboList<>();
 
 		for (int id : Utils.getIDList())
 		{
@@ -719,7 +719,7 @@ public class AstigmatismModelManager implements PlugIn
 		I = new double[z.length];
 		final Counter counter = new Counter();
 
-		// We have fit the results so they will be in the preferred units 
+		// We have fit the results so they will be in the preferred units
 		results.forEach(new PeakResultProcedure()
 		{
 			@Override
@@ -988,7 +988,7 @@ public class AstigmatismModelManager implements PlugIn
 	private static double estimateD(int min, double[] z, double[] sx)
 	{
 		// w = w0 * sqrt(1 + z^2/d^2)
-		// if z==d then w = w0 * sqrt(2) 
+		// if z==d then w = w0 * sqrt(2)
 
 		double w = sx[min] * 1.414213562; // sqrt(2) the min width
 		int lower = min;
@@ -1132,7 +1132,7 @@ public class AstigmatismModelManager implements PlugIn
 						Math.sqrt(1 + pu[P_D] * (z2 + p[P_AX] * z3 + p[P_BX] * z4))-
 						Math.sqrt(1 + pl[P_D] * (z2 + p[P_AX] * z3 + p[P_BX] * z4))) / twoDelta;
 				// Analytical gradient
-				value[i][P_S0X] = Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + p[P_BX] * z4)); 
+				value[i][P_S0X] = Math.sqrt(1 + one_d2 * (z2 + p[P_AX] * z3 + p[P_BX] * z4));
 				value[i][P_AX] = p[P_S0X] * (
 						Math.sqrt(1 + one_d2 * (z2 + pu[P_AX] * z3 + p[P_BX] * z4))-
 						Math.sqrt(1 + one_d2 * (z2 + pl[P_AX] * z3 + p[P_BX] * z4))) / twoDelta;
@@ -1173,7 +1173,7 @@ public class AstigmatismModelManager implements PlugIn
 						Math.sqrt(1 + pu[P_D] * (z2 + p[P_AY] * z3 + p[P_BY] * z4))-
 						Math.sqrt(1 + pl[P_D] * (z2 + p[P_AY] * z3 + p[P_BY] * z4))) / twoDelta;
 				// Analytical gradient
-				value[j][P_S0Y] = Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + p[P_BY] * z4)); 
+				value[j][P_S0Y] = Math.sqrt(1 + one_d2 * (z2 + p[P_AY] * z3 + p[P_BY] * z4));
 				value[j][P_AY] = p[P_S0Y] * (
 						Math.sqrt(1 + one_d2 * (z2 + pu[P_AY] * z3 + p[P_BY] * z4))-
 						Math.sqrt(1 + one_d2 * (z2 + pl[P_AY] * z3 + p[P_BY] * z4))) / twoDelta;
@@ -1237,7 +1237,7 @@ public class AstigmatismModelManager implements PlugIn
 		plot.setColor(Color.BLUE);
 		plot.addPoints(z, sy1, Plot.LINE);
 
-		//double[] y = new AstigmatismVectorFunction().value(parameters);		
+		//double[] y = new AstigmatismVectorFunction().value(parameters);
 		//plot.setColor(Color.MAGENTA);
 		//plot.addPoints(fitZ, Arrays.copyOf(y, fitZ.length), Plot.BOX);
 		//plot.setColor(Color.YELLOW);
@@ -1725,7 +1725,7 @@ public class AstigmatismModelManager implements PlugIn
 				 "Note that a positive gamma puts the focal plane for the X-dimension " +
 				 "above the z-centre (positive Z) and the focal "+
 				 "plane for the Y-dimension below the z-centre (negative Z). If gamma " +
-				 "is negative then the orientation of the focal "+ 
+				 "is negative then the orientation of the focal "+
 				 "planes of X and Y are reversed."
 				//@formatter:on
 				, 80));
@@ -1746,7 +1746,7 @@ public class AstigmatismModelManager implements PlugIn
 		AstigmatismModel.Builder builder = model.toBuilder();
 		// Invert the gamma
 		builder.setGamma(-model.getGamma());
-		// Invert the constants of z^3 as these have an asymmetric effect on the curve 
+		// Invert the constants of z^3 as these have an asymmetric effect on the curve
 		builder.setAx(-model.getAx());
 		builder.setAy(-model.getAy());
 		// The constants of z^4 have a symmetric effect on the curve

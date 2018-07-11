@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -252,7 +252,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 * The Fisher information is computed using the equation of Chao, et al (2013) Nature Methods, 10, 335-338, SI Eq
 	 * S8. Note that that equation computes the noise coefficient relative to a Poisson, this computes the Fisher
 	 * information. To get the noise coefficient multiply by the input parameter.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.FisherInformation#getFisherInformation(double)
 	 */
 	@Override
@@ -266,7 +266,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Note a low Fisher information is worse as this is the amount of information
 		// carried about the parameter.
 		final double upper = 1.0 / t; // PoissonFisherInformation.getPoissonI(t);
-		// When the mean is high then the lower bound should be half the 
+		// When the mean is high then the lower bound should be half the
 		// Poisson Fisher information. Otherwise check against 0.
 		// This is not true when the gain is low.
 		//final double lower = (t > 10) ? 0.5 * upper : 0;
@@ -357,22 +357,22 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// Chao et al, Eq 4:
 		// (Poisson Binomial Gaussian convolution)
-		// P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 + 
+		// P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 +
 		//                                 sum_l=1_inf [ e^-0.5*((z-l)/s)^2 *
 		//                                 sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^(j+1) / ( j!*(l-1-j)!*(j+1)! ) ] ]
-		//                               ] 
+		//                               ]
 		// Note: dividing by (g/v)^(j+1) has been changed to multiplying by (v/g)^(j+1)
 
 		// Gradient of the Poisson Binomial Gaussian is:
-		// P'(z|v) = e^-v / (sqrt(2pi)*s) * [  
+		// P'(z|v) = e^-v / (sqrt(2pi)*s) * [
 		//                                    sum_l=1_inf [ e^-0.5*((z-l)/s)^2 *
 		//                                    sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^j / ( j!*(l-1-j)!*j!*g ) ] ]
-		//                                  ]  
+		//                                  ]
 		//           - P(z)
-		// This is because d((v/g)^(j+1)) dv = (j+1)*(v/g)^j*(1/g) 
+		// This is because d((v/g)^(j+1)) dv = (j+1)*(v/g)^j*(1/g)
 
 		// This component can be seen in Chao et al, Eq S8:
-		// FI = E    e^-2v / P(z) * [  
+		// FI = E    e^-2v / P(z) * [
 		//                            sum_l=1_inf [ e^-0.5*((z-l)/s)^2 / (sqrt(2pi)*s*g) *
 		//                            sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^j / ( j!*(l-1-j)!*j! ) ] ]
 		//                          ]^2
@@ -380,10 +380,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// This equation is:
 		// integral [  1/p(z) . a(z|v)^2 dz ] - 1
-		// Where a(z|v) is the partial gradient of the Poisson-Binomial-Gaussian with respect to v 
+		// Where a(z|v) is the partial gradient of the Poisson-Binomial-Gaussian with respect to v
 		// without the subtraction of P(z).
 
-		// Note that the partial gradient of the Poisson-Binomial-Gaussian is just the 
+		// Note that the partial gradient of the Poisson-Binomial-Gaussian is just the
 		// partial gradient of the Poisson-Binomial convolved with a Gaussian (since the Gaussian does not
 		// have a component v).
 
@@ -391,36 +391,36 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// the Poisson-Gamma convolution which can be computed efficiently using Bessel functions.
 
 		// Poisson-Gamma-Gaussian:
-		// P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 + 
+		// P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 +
 		//                                 sum_l=0_inf [ e^-0.5*((z-l)/s)^2 * e^-l/m *
 		//                                 sum_n=1_inf [ (1 / n!(n-1)!) * v^n * l^(n-1) / m^n ) ] ]
-		//                               ] 
+		//                               ]
 
-		// P'(z) = e^-v / (sqrt(2pi)*s) * [  
+		// P'(z) = e^-v / (sqrt(2pi)*s) * [
 		//                                  sum_l=0_inf [ e^-0.5*((z-l)/s)^2 * e^-l/m *
 		//                                  1/m * sum_n=0_inf [ (1 / (n!)^2) * v^n * l^n / m^n ) ] ]
-		//                                ] 
+		//                                ]
 		//           - P(z)
 
 		// Note:
 		// sum_n=0_inf [ (1 / (n!)^2) * v^n * l^n / m^n ) ] = sum_n=0_inf [ (1 / (n!)^2) * (v*l/m)^n) ]
 		//   Bessel I0 = sum_n=0_inf [ (1 / (n!)^2) * (x^2 / 4)^n
-		//   set x = 2 * sqrt(v*l/m)		
+		//   set x = 2 * sqrt(v*l/m)
 		//                                                  = I0(x)
 
-		// P'(z) = e^-v / (sqrt(2pi)*s) * [  
+		// P'(z) = e^-v / (sqrt(2pi)*s) * [
 		//                                  sum_l=0_inf [ e^-0.5*((z-l)/s)^2 * e^-l/m * 1/m * I0(x) ]
-		//                                ] 
+		//                                ]
 		//           - P(z)
 
 		// Fisher information is:
-		// FI = E  e^-2v / (P(z)) * [ sum_l=0_inf [ e^-0.5*((z-l)/s)^2 / (sqrt(2pi)*s) * 
-		//								e^-l/m * 1/m * I0(x) ] ]^2 
+		// FI = E  e^-2v / (P(z)) * [ sum_l=0_inf [ e^-0.5*((z-l)/s)^2 / (sqrt(2pi)*s) *
+		//								e^-l/m * 1/m * I0(x) ] ]^2
 		//           - 1
 		// (where the Gaussian normalisation has been moved inside the power 2 bracket)
 
-		// Note the Poisson-Gamma can be computed using the approximation defined in 
-		// Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.  
+		// Note the Poisson-Gamma can be computed using the approximation defined in
+		// Ulbrich & Isacoff (2007). Nature Methods 4, 319-321, SI equation 3.
 		// PG(l|v) = sqrt(v/(l*m)) * e^(-l/m -v) * I1(x)
 		//      x = 2*sqrt(v*l/m)
 		// The partial gradient as defined above is:
@@ -451,10 +451,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// -=-=-=-
 
-		// Note that when the Poisson mean is low then the contribution from the 
-		// Dirac delta function at 0 will be large. As the mean increases 
+		// Note that when the Poisson mean is low then the contribution from the
+		// Dirac delta function at 0 will be large. As the mean increases
 		// the Dirac will have little significance, the function is very smooth
-		// and may have a large range. Thus convolution with an extended Gaussian kernel 
+		// and may have a large range. Thus convolution with an extended Gaussian kernel
 		// may not be necessary over the full range.
 		// So the integral can be computed as [integral range1] + [integral range2]
 
@@ -467,14 +467,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			throw new IllegalStateException("Unsupported upper limit: " + upperLimit);
 
 		// Note: This method works by using the Poisson-Gamma PDF as a substitute
-		// for a Poisson-Binomial PMF. For simplicity the PDF is integrated over 
+		// for a Poisson-Binomial PMF. For simplicity the PDF is integrated over
 		// integer intervals to create a discrete PMF. This is a fair approximation
 		// of how an EM-CCD camera would work as input electrons should produce
 		// discrete output electrons.
 
 		// The exponent provides a rough idea of the size of the mean (i.e. log2(mean))
 		int exp = NumberUtils.getSignedExponent(t);
-		// As the mean reduces the Poisson distribution is more skewed 
+		// As the mean reduces the Poisson distribution is more skewed
 		// and the extent of the kernel must change. Just increase the range
 		// for the kernel for each power of 2 the number is below 1.
 		int range1 = minRange;
@@ -483,7 +483,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		if (noGaussian || s * range1 < 1)
 		{
-			// Special case. Compute E [ A^2/P ] using only the Poisson-Gamma PMF. 
+			// Special case. Compute E [ A^2/P ] using only the Poisson-Gamma PMF.
 			if (!computePMF(dirac, t, maximum, (int) Math.ceil(upperLimit)))
 				return largeApproximation(t);
 
@@ -507,7 +507,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 			throw new IllegalStateException("Unsupported upper limit: " + upperLimit);
 
 		//		// TODO:
-		//		// Set range1 using the range of the Gaussian. 
+		//		// Set range1 using the range of the Gaussian.
 		//		// This is the range around c=0 where the Dirac has a large effect.
 		//		// Set range2 using the rest of the range.
 		//		// Iteratively integrate range 1 up to a maximum kernel size.
@@ -518,18 +518,18 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		//		// The range around the Dirac delta function is computed using a full convolution
 		//		// with the Gaussian. This is iterated until convergence using more Gaussian samples.
 		//
-		//		// Range 2: 
+		//		// Range 2:
 		//		// The remaining range of the Poisson-Gamma is integrated using an integrator until the
 		//		// the Gaussian kernel is non-trivial.
 		//
-		//		// For integration to work efficiently the Gaussian scaling should be in powers of 2. 
+		//		// For integration to work efficiently the Gaussian scaling should be in powers of 2.
 		//		// Adjust the ranges appropriately so that the ranges start and end on powers of 1.
 		//		int iEndRange1 = Maths.nextPow2((int) Math.ceil(s * range1));
 		//		int iEndRange2 = iEndRange1;
 		//		if (upperLimit > iEndRange1)
 		//			iEndRange2 += Maths.nextPow2((int) Math.ceil(upperLimit - iEndRange1));
 
-		// Compute the Poisson-Gamma over the range. This is a PDF but for 
+		// Compute the Poisson-Gamma over the range. This is a PDF but for
 		// simplicity it is integrated to a discrete PMF.
 		int iEndRange = (int) Math.ceil(upperLimit);
 		if (!computePMF(dirac, t, maximum, iEndRange))
@@ -538,7 +538,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		double[] p = listP.toArray();
 		double[] a = listA.toArray();
 
-		// Find the minimum value to determine if A^2/P can be unchecked 
+		// Find the minimum value to determine if A^2/P can be unchecked
 		// for divide by zero error.
 		// The min is always at the end.
 		double minP = FastMath.min(FastMath.min(p[0], p[1]), p[p.length - 1]);
@@ -603,7 +603,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 	/**
 	 * Use an approximation as half the Poisson Fisher information when the mean is large
-	 * 
+	 *
 	 * @param t
 	 *            the mean
 	 * @return The approximate Fisher information
@@ -636,9 +636,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		// Initialise at x=0
 		G = PoissonGammaFunction.unscaledPoissonGammaPartial(0, t, m, dG_dp);
 
-		// At x=0 integrate from 0 to 0.5 without the Dirac contribution 
+		// At x=0 integrate from 0 to 0.5 without the Dirac contribution
 		// (i.e. make it a a smooth function for integration).
-		// Note the Dirac contribution for the unscaled function is 1. 
+		// Note the Dirac contribution for the unscaled function is 1.
 		double diracContirbution = 1;
 		G -= diracContirbution;
 		G = add(t, G, dG_dp, 0, 0.25, 0.5);
@@ -646,7 +646,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
 		// The next x value after the max
 		int maxx = (int) Math.ceil(max[0]);
-		// Threshold for switch to single point sampling 
+		// Threshold for switch to single point sampling
 		double threshold = max[1] * 0.5;
 
 		// For the start of the range integrate from x-0.5 to x+0.5
@@ -684,8 +684,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		}
 
 		// The PoissonGammaFunction can switch to an approximation
-		// of the Bessel functions and the totals may not be correct. 
-		// Ensure the the sum of P and A are both 1 as this is required 
+		// of the Bessel functions and the totals may not be correct.
+		// Ensure the the sum of P and A are both 1 as this is required
 		// for the integration to work.
 		// This will be a factor when the mean is large. If the sums are nearly 1
 		// then this will have little effect so do it anyway.
@@ -758,7 +758,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		{
 			// Compute with respect to the ultimate limit
 
-			// p is always below 1. 
+			// p is always below 1.
 			// - (az / pz) * az can tend towards infinity when pz is small
 			// - (az * az) / pz can tend towards zero when az is small
 			// Note: Computing infinity will result in an infinite fisher information
@@ -896,15 +896,15 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		boolean unchecked = g[0] * minP > 0;
 		//System.out.printf("t=%g  unchecked=%b\n", lastT, unchecked);
 
-		// If zeros can occur then the convolution could be reduced but the ends of 
+		// If zeros can occur then the convolution could be reduced but the ends of
 		// the distribution p that can be removed are unknown without convolution.
 		// So the resulting convolution output is checked for zero.
 
 		//@formatter:off
-		IntegrationProcedure ip = (use38) 
-				? (unchecked) ? new UncheckedSimpson38IntegrationProcedure() 
-						      : new Simpson38IntegrationProcedure() 
-				: (unchecked) ? new UncheckedSimpsonIntegrationProcedure()   
+		IntegrationProcedure ip = (use38)
+				? (unchecked) ? new UncheckedSimpson38IntegrationProcedure()
+						      : new Simpson38IntegrationProcedure()
+				: (unchecked) ? new UncheckedSimpsonIntegrationProcedure()
 						      : new SimpsonIntegrationProcedure();
 		//@formatter:on
 
@@ -1212,7 +1212,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 	 * This method is used to determine the maximum of the function.
 	 * The integral of A should equal 1. The range can be determined using a fraction of the maximum, or integrating
 	 * until the sum is 1.
-	 * 
+	 *
 	 * @param t
 	 *            the Poisson mean
 	 * @param rel
@@ -1254,7 +1254,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 		};
 
 		// Determine the extent of the function: A^2/P
-		// Without convolution this will have a maximum that is above, and 
+		// Without convolution this will have a maximum that is above, and
 		// converges to [Poisson mean * amplification].
 		double mean = t * m;
 

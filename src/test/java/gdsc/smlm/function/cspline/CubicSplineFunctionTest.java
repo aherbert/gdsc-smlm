@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -310,10 +310,10 @@ public abstract class CubicSplineFunctionTest
 
 							//System.out.println(java.util.Arrays.toString(a));
 
-							// Evaluate all gradients 
+							// Evaluate all gradients
 							p2.getValues(f1, a);
 
-							// Numerically solve gradient. 
+							// Numerically solve gradient.
 							// Calculate the step size h to be an exact numerical representation
 							final double xx = a[targetParameter];
 
@@ -424,10 +424,10 @@ public abstract class CubicSplineFunctionTest
 							if (!test)
 								continue;
 
-							// Evaluate all gradients 
+							// Evaluate all gradients
 							p2.getValues(f1, a);
 
-							// Numerically solve gradient. 
+							// Numerically solve gradient.
 							// Calculate the step size h to be an exact numerical representation
 							final double xx = a[targetParameter];
 
@@ -584,10 +584,10 @@ public abstract class CubicSplineFunctionTest
 
 											//System.out.println(java.util.Arrays.toString(a));
 
-											// Evaluate all gradients 
+											// Evaluate all gradients
 											p2.getValues(f2, a);
 
-											// Numerically solve gradient. 
+											// Numerically solve gradient.
 											// Calculate the step size h to be an exact numerical representation
 											final double xx = a[targetParameter];
 
@@ -712,10 +712,10 @@ public abstract class CubicSplineFunctionTest
 											if (!test)
 												continue;
 
-											// Evaluate all gradients 
+											// Evaluate all gradients
 											p2.getValues(f2, a);
 
-											// Numerically solve gradient. 
+											// Numerically solve gradient.
 											// Calculate the step size h to be an exact numerical representation
 											final double xx = a[targetParameter];
 
@@ -893,9 +893,9 @@ public abstract class CubicSplineFunctionTest
 				? GaussianFunctionFactory.create2D(n, maxx, maxy, GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE,
 						zModel)
 				: null;
-		TurboList<double[]> l1 = new TurboList<double[]>();
-		TurboList<double[]> l2 = new TurboList<double[]>();
-		TurboList<double[]> l3 = new TurboList<double[]>();
+		TurboList<double[]> l1 = new TurboList<>();
+		TurboList<double[]> l2 = new TurboList<>();
+		TurboList<double[]> l3 = new TurboList<>();
 		double[] a = new double[1 + n * CubicSplineFunction.PARAMETERS_PER_PEAK];
 		double[] b = new double[1 + n * Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		double[] bb = null;

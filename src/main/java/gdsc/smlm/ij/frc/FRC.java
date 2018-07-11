@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -45,7 +45,7 @@ import ij.process.ImageProcessor;
  * Adapted by Alex Herbert from the FIRE (Fourier Image REsolution) plugin produced as part of the paper:<br>
  * Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy. Nature Methods, 10, 557<br>
  * http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
- * 
+ *
  * @author Alex Herbert
  * @author Bernd Rieger, b.rieger@tudelft.nl
  */
@@ -78,32 +78,32 @@ public class FRC
 		/** The fixed level threshold using 1 over 7. */
 		//@formatter:off
 		FIXED_1_OVER_7{ @Override
-		public String getName() { return "Fixed 1/7"; }}, 
-		
+		public String getName() { return "Fixed 1/7"; }},
+
 		/** The half bit threshold. */
 		HALF_BIT{ @Override
-		public String getName() { return "Half-bit"; }}, 
-		
+		public String getName() { return "Half-bit"; }},
+
 		/** The one bit threshold. */
 		ONE_BIT{ @Override
-		public String getName() { return "One-bit"; }}, 
-		
+		public String getName() { return "One-bit"; }},
+
 		/** The two bit threshold. */
 		TWO_BIT{ @Override
-		public String getName() { return "Two-bit"; }}, 
-		
+		public String getName() { return "Two-bit"; }},
+
 		/** The one sigma threshold. */
 		ONE_SIGMA{ @Override
 		public String getName() { return "One sigma"; }},
-		
+
 		/** The two sigma threshold. */
 		TWO_SIGMA{ @Override
 		public String getName() { return "Two sigma"; }},
-		
+
 		/** The three sigma threshold. */
 		THREE_SIGMA{ @Override
 		public String getName() { return "Three sigma"; }},
-		
+
 		/** The four sigma threshold. */
 		FOUR_SIGMA{ @Override
 		public String getName() { return "Four sigma"; }};
@@ -111,7 +111,7 @@ public class FRC
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Enum#toString()
 		 */
 		@Override
@@ -135,23 +135,23 @@ public class FRC
 	{
 		//@formatter:off
 		/**
-		 * Compute using all pixels from radius n (inclusive) to n+1 (exclusive) assigned to ring n. 
-		 * This does not require interpolation. 
+		 * Compute using all pixels from radius n (inclusive) to n+1 (exclusive) assigned to ring n.
+		 * This does not require interpolation.
 		 */
 		RADIAL_SUM{ @Override
 		public String getName() { return "Radial Sum"; }},
 		/**
-		 * Compute using sampled points on a circle circumference of radius n for each ring. 
+		 * Compute using sampled points on a circle circumference of radius n for each ring.
 		 * Values are computed using interpolation of the surrounding pixels. The number of points
 		 * on the circumference can be controlled using the perimeter sampling factor.
 		 */
 		INTERPOLATED_CIRCLE{ @Override
-		public String getName() { return "Interpolated Circle"; }}; 
+		public String getName() { return "Interpolated Circle"; }};
 		//@formatter:on
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Enum#toString()
 		 */
 		@Override
@@ -177,15 +177,15 @@ public class FRC
 		/** Use the JTransforms Java library. */
 		JTRANSFORMS{ @Override
 		public String getName() { return "JTransforms"; }},
-		
+
 		/** Use ImageJ's Fast Hartley Transform. */
 		FHT{ @Override
-		public String getName() { return "FHT"; }}; 
+		public String getName() { return "FHT"; }};
 		//@formatter:on
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Enum#toString()
 		 */
 		@Override
@@ -331,7 +331,7 @@ public class FRC
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#clone()
 		 */
 		@Override
@@ -430,7 +430,7 @@ public class FRC
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#clone()
 		 */
 		@Override
@@ -563,7 +563,7 @@ public class FRC
 	 * <p>
 	 * Note in the case of using interpolated pixels on the perimeter the Fourier image is 2-fold radially symmetric and
 	 * so the calculation can use only half the circle for speed.
-	 * 
+	 *
 	 * @param
 	 * 		   samplingMethod
 	 *            the new sampling method
@@ -759,7 +759,7 @@ public class FRC
 
 		final int centre = size / 2;
 
-		// In-line for speed 
+		// In-line for speed
 		float[] conjMult = new float[re1.length];
 		float[] absFFT1 = new float[re1.length];
 		float[] absFFT2 = new float[re1.length];
@@ -970,7 +970,7 @@ public class FRC
 			float[] im1, float[] re2, float[] im2)
 	{
 		// The same as computeMirrored but ignores the pixels that are not a mirror since
-		// these are not used in the FRC calculation. 
+		// these are not used in the FRC calculation.
 
 		// Note: Since this is symmetric around the centre we could compute half of it.
 		// This is non-trivial since the centre is greater than half of the image, i.e.
@@ -1152,7 +1152,7 @@ public class FRC
 			throw new IllegalArgumentException("x must be greater or equal 1");
 		if ((x & (x - 1)) == 0)
 		{
-			return x; // x is already a power-of-two number 
+			return x; // x is already a power-of-two number
 		}
 		x |= (x >>> 1);
 		x |= (x >>> 2);
@@ -1310,7 +1310,7 @@ public class FRC
 		//	}
 		//}
 
-		// New optimised code. This matches gdsc.core.utils.ImageWindow.tukey(size, 0.25) 
+		// New optimised code. This matches gdsc.core.utils.ImageWindow.tukey(size, 0.25)
 		final int boundary = size / 8;
 		final int middle = size / 2;
 		final double FOUR_PI_OVER_SIZE = 12.566370614359172D / (size - 1);
@@ -1474,17 +1474,17 @@ public class FRC
 	{
 		double[] threshold = new double[frcCurve.getSize()];
 
-		// ADH: 
-		// Half-Bit and 3 Sigma are explained in Supp section 5.4. However this is based on 
-		// Heel, et al (2005) which gives a better explanation so I have updated using their 
+		// ADH:
+		// Half-Bit and 3 Sigma are explained in Supp section 5.4. However this is based on
+		// Heel, et al (2005) which gives a better explanation so I have updated using their
 		// equations.
-		// Equation S.84 has an error compared to equation (13) in Heel. In fact equation (17) 
+		// Equation S.84 has an error compared to equation (13) in Heel. In fact equation (17)
 		// from Heel is what should be implemented for Half-bit.
 
-		// Note: The original code used frcCurve.get(i)[2] which holds the number of samples that 
-		// were taken from the circle. This makes the curve dependent on the number of samples 
+		// Note: The original code used frcCurve.get(i)[2] which holds the number of samples that
+		// were taken from the circle. This makes the curve dependent on the number of samples
 		// taken (e.g. half-circle/full-circle with different sampling factors).
-		// To make the curve sampling independent I assume 2*pi*r samples were taken. 
+		// To make the curve sampling independent I assume 2*pi*r samples were taken.
 
 		// See: Heel, M. v. & Schatz, M. Fourier shell correlation threshold criteria. J. Struct. Bio. 151, 250–262 (2005).
 
@@ -1501,7 +1501,7 @@ public class FRC
 				Arrays.fill(threshold, 1.0 / 7.0);
 				break;
 
-			// Note: The bit curve approach unity when r==0, i.e. nr=1	
+			// Note: The bit curve approach unity when r==0, i.e. nr=1
 
 			case HALF_BIT:
 				// This is actually equation (17) from Heel:
@@ -1561,9 +1561,9 @@ public class FRC
 		// Approach unity when r -> 0:
 		threshold[0] = 1;
 
-		// Find the SNR in each half of the dataset: 
-		// "because the total reconstruction, being the sum of the two half-data 
-		// set reconstructions, will have twice the SNR value of each of the half 
+		// Find the SNR in each half of the dataset:
+		// "because the total reconstruction, being the sum of the two half-data
+		// set reconstructions, will have twice the SNR value of each of the half
 		// data sets"
 		// Eq. (15) = log2(SNR+1) = n-bits
 		final double snr = (FastMath.pow(2, bits) - 1) / 2;
@@ -1571,7 +1571,7 @@ public class FRC
 		final double twoRootSnr = 2 * Math.sqrt(snr);
 		final double twoRootSnr_p_1 = twoRootSnr + 1;
 
-		// Sense check: 
+		// Sense check:
 		// 1/2-bit is equation (17) from Heel:
 		// snr = 0.2071, twoRootSnr = 0.9102
 		// 1-bit is equation (14) from Heel:
@@ -1612,15 +1612,15 @@ public class FRC
 		{
 			// http://en.wikipedia.org/wiki/Line-line_intersection
 			//
-			//     x1,y1            x4,y4      
-			//         **        ++ 
+			//     x1,y1            x4,y4
+			//         **        ++
 			//           **    ++
 			//             **++ P(x,y)
 			//            ++ **
 			//          ++     **
 			//        ++         **
-			//    x3,y3            ** 
-			//                       x2,y2  
+			//    x3,y3            **
+			//                       x2,y2
 
 			final double y1 = frcCurve.get(i - 1).getCorrelation();
 			final double y2 = frcCurve.get(i).getCorrelation();
@@ -1703,7 +1703,7 @@ public class FRC
 			// The N-sigma curves are above 1 at close to zero spatial frequency.
 			// The bit curves are 1 at zero spatial frequency.
 			// This means that any FRC curve starting around 1 (due to smoothing)
-			// may cross the line twice. 
+			// may cross the line twice.
 			// If so the second crossing is the one that is desired.
 			default:
 				if (intersections.length == 2)
@@ -1858,7 +1858,7 @@ public class FRC
 	{
 		if (qValue <= 0)
 		{
-			// Reset the correlation 
+			// Reset the correlation
 			for (int i = 1; i < frcCurve.getSize(); i++)
 				frcCurve.get(i).setCorrelation(frcCurve.get(i).getNumerator() / frcCurve.get(i).getDenominator());
 			return;
@@ -1879,7 +1879,7 @@ public class FRC
 		// Subtract the average residual correlation from the numerator and add to the denominator
 		for (int i = 1; i < frcCurve.getSize(); i++)
 		{
-			// The numerator and denominator are computed using the radial sum. 
+			// The numerator and denominator are computed using the radial sum.
 			// Convert this to the radial mean by dividing by the number of samples.
 			int n = frcCurve.get(i).getNumberOfSamples();
 			double numerator = frcCurve.get(i).getNumerator() / n;

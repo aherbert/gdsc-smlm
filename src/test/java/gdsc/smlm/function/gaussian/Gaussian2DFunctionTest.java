@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -111,7 +111,7 @@ public abstract class Gaussian2DFunctionTest
 		}
 		else if (!f1.evaluatesSD1())
 		{
-			// No evaluation of second width needs only variation in width 0 so truncate 
+			// No evaluation of second width needs only variation in width 0 so truncate
 			testw1 = Arrays.copyOf(testw1, 2);
 			testw2 = Arrays.copyOf(testw2, 2);
 			noSecondWidth = true;
@@ -328,7 +328,7 @@ public abstract class Gaussian2DFunctionTest
 									a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
 									f1.initialise(a);
 
-									// Numerically solve gradient. 
+									// Numerically solve gradient.
 									// Calculate the step size h to be an exact numerical representation
 									final double xx = a[targetParameter];
 
@@ -551,7 +551,7 @@ public abstract class Gaussian2DFunctionTest
 
 															f2.initialise(a);
 
-															// Numerically solve gradient. 
+															// Numerically solve gradient.
 															// Calculate the step size h to be an exact numerical representation
 															final double xx = a[targetParameter];
 

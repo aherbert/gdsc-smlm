@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -146,7 +146,7 @@ public class PCPALMClusters implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -285,7 +285,7 @@ public class PCPALMClusters implements PlugIn
 	/**
 	 * Extract the results from the PCPALM molecules using the area ROI and then do clustering to obtain the histogram
 	 * of molecules per cluster.
-	 * 
+	 *
 	 * @return
 	 */
 	private HistogramData doClustering()
@@ -325,7 +325,7 @@ public class PCPALMClusters implements PlugIn
 		MemoryPeakResults results = new MemoryPeakResults(clusters.size());
 		results.setName(TITLE);
 		// Set an arbitrary calibration so that the lifetime of the results is stored in the exposure time
-		// The results will be handled as a single mega-frame containing all localisation. 
+		// The results will be handled as a single mega-frame containing all localisation.
 		results.setCalibration(CalibrationHelper.create(100, 1, PCPALMMolecules.seconds * 1000));
 		int id = 0;
 		for (Cluster c : clusters)
@@ -352,13 +352,13 @@ public class PCPALMClusters implements PlugIn
 
 	/**
 	 * Convert molecules for clustering
-	 * 
+	 *
 	 * @param molecules
 	 * @return
 	 */
 	private List<ClusterPoint> convertToPoint(ArrayList<Molecule> molecules)
 	{
-		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(molecules.size());
+		ArrayList<ClusterPoint> points = new ArrayList<>(molecules.size());
 		int id = 0;
 		for (Molecule m : molecules)
 		{
@@ -369,7 +369,7 @@ public class PCPALMClusters implements PlugIn
 
 	/**
 	 * Saves the histogram to the user selected file if the save histogram option is enabled.
-	 * 
+	 *
 	 * @param histogramData
 	 * @return
 	 */
@@ -383,7 +383,7 @@ public class PCPALMClusters implements PlugIn
 
 	/**
 	 * Saves the histogram to the selected file. Updates the filename property of the histogram object.
-	 * 
+	 *
 	 * @param histogramData
 	 * @param filename
 	 */
@@ -444,7 +444,7 @@ public class PCPALMClusters implements PlugIn
 	/**
 	 * Load the histogram from the file. Assumes the histogram is [int, float] format and creates a contiguous histogram
 	 * from zero
-	 * 
+	 *
 	 * @param filename
 	 * @return
 	 */
@@ -463,7 +463,7 @@ public class PCPALMClusters implements PlugIn
 			String line;
 			int count = 0;
 
-			ArrayList<float[]> data = new ArrayList<float[]>();
+			ArrayList<float[]> data = new ArrayList<>();
 
 			// Read the header and store the calibration if present
 			while ((line = input.readLine()) != null)
@@ -584,7 +584,7 @@ public class PCPALMClusters implements PlugIn
 	 * If the histogram is calibrated then ask the user if they wish to subtract a calibrated noise histogram.
 	 * <p>
 	 * Loads a noise histogram from a user selected file and check the units match those provided
-	 * 
+	 *
 	 * @param histogramData
 	 * @return The histogram (or null)
 	 */
@@ -614,13 +614,13 @@ public class PCPALMClusters implements PlugIn
 
 		if (IJ.isMacro())
 		{
-			// If the macro option flag is not found then the arguments do not want this to run 
+			// If the macro option flag is not found then the arguments do not want this to run
 			if (!gd.getNextBoolean())
 				return null;
 		}
 		else
 		{
-			// Ensure that the 'Yes' result is recorded for macros to detect 
+			// Ensure that the 'Yes' result is recorded for macros to detect
 			Recorder.recordOption(macroOption);
 		}
 
@@ -637,12 +637,12 @@ public class PCPALMClusters implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	public void run(ImageProcessor ip)
 	{
-		// Do nothing		
+		// Do nothing
 	}
 
 	private boolean showDialog()
@@ -775,7 +775,7 @@ public class PCPALMClusters implements PlugIn
 
 	/**
 	 * Normalise the histograms using the (frames*area). Subtract the noise from the histogram and then rescale.
-	 * 
+	 *
 	 * @param histogramData
 	 * @param noiseData
 	 * @return
@@ -795,7 +795,7 @@ public class PCPALMClusters implements PlugIn
 
 	/**
 	 * Normalise the histogram using the (frames*area)
-	 * 
+	 *
 	 * @param data
 	 * @return the normalised data
 	 */
@@ -810,7 +810,7 @@ public class PCPALMClusters implements PlugIn
 
 	/**
 	 * Fit a zero-truncated Binomial to the cumulative histogram
-	 * 
+	 *
 	 * @param histogramData
 	 * @return
 	 */
@@ -872,7 +872,7 @@ public class PCPALMClusters implements PlugIn
 		Utils.log("Fitting N from %d to %d%s", min, N, (customRange) ? " (custom-range)" : "");
 
 		// Since varying the N should be done in integer steps do this
-		// for n=1,2,3,... until the SS peaks then falls off (is worse then the best 
+		// for n=1,2,3,... until the SS peaks then falls off (is worse then the best
 		// score several times in succession)
 		BinomialFitter bf = new BinomialFitter(new IJLogger());
 		bf.setMaximumLikelihood(maximumLikelihood);

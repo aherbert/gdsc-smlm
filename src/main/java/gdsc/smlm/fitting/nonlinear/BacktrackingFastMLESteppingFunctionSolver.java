@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -96,8 +96,8 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 	// Adjustments:
 	// - Always ensure we compute the function value. This is needed to determine
 	// if the step computed a better value.
-	// - The first call to computeFitValue() computes derivatives. The value is obtained from 
-	// computePseudoLogLikelihood() 
+	// - The first call to computeFitValue() computes derivatives. The value is obtained from
+	// computePseudoLogLikelihood()
 	// - All subsequent calls to computeFitValue() only call computeValue() and implement
 	// backtracking if the value does not improve with the full Newton step.
 	// - When a suitable value is achieved then this should be returned from computeFitValue()
@@ -112,7 +112,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		isPseudoLogLikelihood = true;
 
 		// Configure maximum step length for each dimension using the bounds.
-		// This is a simple check that can prevent wild Newton Raphson steps 
+		// This is a simple check that can prevent wild Newton Raphson steps
 		// that require a lot of backtracking.
 		maximumStepLength = null;
 		if (maximumStepSize > 0)
@@ -141,8 +141,8 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		{
 			firstEvaluation = false;
 
-			// The first call to computeFitValue() computes derivatives. The value is obtained from 
-			// computePseudoLogLikelihood() 
+			// The first call to computeFitValue() computes derivatives. The value is obtained from
+			// computePseudoLogLikelihood()
 			computeGradients(a);
 
 			evaluations++;
@@ -175,7 +175,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		if (tc.getIterations() > 0)
 		{
 			// After backtracking we must compute the derivatives.
-			// Note we leave it to here (and not after the line search) so it 
+			// Note we leave it to here (and not after the line search) so it
 			// can be skipped if convergence is achieved.
 			computeGradients(aOld);
 		}
@@ -199,7 +199,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 		/**
 		 * Given an n-dimension point, the function value and gradient at that point find a new point
 		 * along the given search direction so that the function value has decreased sufficiently.
-		 * 
+		 *
 		 * @param xOld
 		 *            The old point
 		 * @param fOld
@@ -257,7 +257,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 				//}
 
 				// The search direction for the NR step is the (first derivative / -second derivative).
-				// If there are sign errors in the second derivative (it should be the same sign as the 
+				// If there are sign errors in the second derivative (it should be the same sign as the
 				// first derivative) then the step will be in the 'wrong' direction.
 				// Handle this with different options:
 				switch (lineSearchMethod)
@@ -289,7 +289,7 @@ public class BacktrackingFastMLESteppingFunctionSolver extends FastMLESteppingFu
 						break;
 
 					case PARTIAL_IGNORE:
-						// Progressively ignore any search direction that is in the opposite direction to 
+						// Progressively ignore any search direction that is in the opposite direction to
 						// the first derivative gradient. Do this in order of the magnitude of the error
 						double[] slopeComponents = new double[gradient.length];
 						for (int i = 0; i < slopeComponents.length; i++)

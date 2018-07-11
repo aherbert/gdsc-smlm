@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -176,7 +176,7 @@ public class TraceManager
 			throw new IllegalArgumentException("Results are null or empty");
 		this.results = results;
 
-		// Assign localisations. We use the native result units to avoid conversion exceptions. 
+		// Assign localisations. We use the native result units to avoid conversion exceptions.
 		localisations = new Localisation[results.size()];
 		results.forEach(new LocalisationProcedure());
 
@@ -208,7 +208,7 @@ public class TraceManager
 		});
 
 		// Create a look-up table of the starting index in each localisations array for each possible time point
-		// This allows looping over all localisations for a given t using: 
+		// This allows looping over all localisations for a given t using:
 		//   for (int i=index[t]; i<index[t+1]; i++)
 
 		int maxT = localisations[totalTraces - 1].t;
@@ -246,7 +246,7 @@ public class TraceManager
 	 * Quantitative Measurements (2012). PLoS One. 7(12): e51725. DOI: http://dx.doi.org/10.1371%2Fjournal.pone.0051725
 	 * <p>
 	 * Note: The actual traces representing molecules can be obtained by calling {@link #getTraces()}
-	 * 
+	 *
 	 * @param distanceThreshold
 	 *            The distance threshold in the native units of the results
 	 * @param timeThreshold
@@ -333,7 +333,7 @@ public class TraceManager
 
 			if (assignedToTrace > 1)
 			{
-				// Check if duplicate allocations are made. Each trace can only 
+				// Check if duplicate allocations are made. Each trace can only
 				// be allocated one localisation so in the event of a multiple
 				// allocation then only the closest spot should be allocated
 				int[] dualAllocation = new int[assignedToTrace];
@@ -365,8 +365,8 @@ public class TraceManager
 								return 0;
 							}
 						});
-						// Check for new traces (allocated in a previous loop). These have distance <0 so will 
-						// be sorted to the front. 
+						// Check for new traces (allocated in a previous loop). These have distance <0 so will
+						// be sorted to the front.
 						if (assigned[i].distance < 0)
 							continue;
 					}
@@ -430,7 +430,7 @@ public class TraceManager
 	{
 		if (filterActivationFrames)
 		{
-			// Count the number of traces that will be filtered 
+			// Count the number of traces that will be filtered
 			// (i.e. the time is not within an activation window)
 			if (outsideActivationWindow(localisations[index].t))
 				totalFiltered++;
@@ -459,7 +459,7 @@ public class TraceManager
 		{
 			if (filterActivationFrames)
 			{
-				ArrayList<Trace> traces = new ArrayList<Trace>();
+				ArrayList<Trace> traces = new ArrayList<>();
 				for (int index = 0; index < totalTraces; index++)
 				{
 					PeakResult peakResult = peakResults[localisations[index].id];
@@ -488,7 +488,7 @@ public class TraceManager
 		//	if (localisations[index].trace == 0)
 		//		System.out.printf("error @ %d\n", index);
 
-		// Since the trace numbers are allocated by processing the spots in frames, each frame can have 
+		// Since the trace numbers are allocated by processing the spots in frames, each frame can have
 		// trace number out-of-order. This occurs if re-allocation has been performed,
 		// e.g.  [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group 2.
 
@@ -559,7 +559,7 @@ public class TraceManager
 	 * Convert a list of traces into peak results. The centroid of each trace is used as the coordinates.
 	 * The standard deviation of positions from the centre is used as the width. The amplitude is the average from all
 	 * the peaks in the trace.
-	 * 
+	 *
 	 * @param traces
 	 * @return the peak results
 	 */
@@ -593,7 +593,7 @@ public class TraceManager
 	 * the peaks in the trace.
 	 * <p>
 	 * If the trace is empty it is ignored.
-	 * 
+	 *
 	 * @param traces
 	 * @return the peak results
 	 */
@@ -653,7 +653,7 @@ public class TraceManager
 				// Build standard peak data
 				peakResult.setBackground(background);
 				peakResult.setNoise((float) noise);
-				// These could be weighted, at the moment we use the first peak 
+				// These could be weighted, at the moment we use the first peak
 				peakResult.setOrigX(result.getOrigX());
 				peakResult.setOrigY(result.getOrigY());
 				peakResult.setOrigValue(result.getOrigValue());
@@ -672,7 +672,7 @@ public class TraceManager
 	 * Convert a list of traces into peak results setting the trace ID into the results.
 	 * <p>
 	 * If the trace is empty it is ignored.
-	 * 
+	 *
 	 * @param traces
 	 * @param calibration
 	 * @param b
@@ -687,7 +687,7 @@ public class TraceManager
 	 * Convert a list of traces into peak results setting the trace ID into the results.
 	 * <p>
 	 * If the trace is empty it is ignored.
-	 * 
+	 *
 	 * @param traces
 	 * @param calibration
 	 * @param newId
@@ -731,7 +731,7 @@ public class TraceManager
 	 * the peaks in the trace.
 	 * <p>
 	 * Uses the title and bounds from the constructor peak results. The title has the word 'Traced Centroids' appended.
-	 * 
+	 *
 	 * @param traces
 	 * @return the peak results
 	 */
@@ -746,7 +746,7 @@ public class TraceManager
 	 * the peaks in the trace.
 	 * <p>
 	 * Uses the title and bounds from the provided peak results. The title has the word 'Traced Centroids' appended.
-	 * 
+	 *
 	 * @param source
 	 * @param traces
 	 * @return the peak results
@@ -765,7 +765,7 @@ public class TraceManager
 	 * Convert a list of traces into peak results.
 	 * <p>
 	 * Uses the title and bounds from the constructor peak results. The title has the word 'Traced' appended.
-	 * 
+	 *
 	 * @param traces
 	 * @return the peak results
 	 */
@@ -778,7 +778,7 @@ public class TraceManager
 	 * Convert a list of traces into peak results.
 	 * <p>
 	 * Uses the title and bounds from the provided peak results. The title has the word 'Traced' appended.
-	 * 
+	 *
 	 * @param source
 	 * @param traces
 	 * @return the peak results
@@ -796,7 +796,7 @@ public class TraceManager
 	/**
 	 * From the given index, move forward to a localisation with a new start time frame. If no more frames return
 	 * the number of localisations.
-	 * 
+	 *
 	 * @param index
 	 * @return The index of the next time frame
 	 */
@@ -814,7 +814,7 @@ public class TraceManager
 	/**
 	 * From the given index, move forward to a localisation with a start time beyond the time threshold. If no more
 	 * frames return the number of localisations.
-	 * 
+	 *
 	 * @param index
 	 * @return The index of the next time frame
 	 */
@@ -831,7 +831,7 @@ public class TraceManager
 
 	/**
 	 * From the given index, move backward to the earliest localisations within the time threshold
-	 * 
+	 *
 	 * @param index
 	 * @param timeThreshold
 	 * @return The index of the earliest localisation within the time threshold
@@ -856,7 +856,7 @@ public class TraceManager
 	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
 	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
 	 * closest spot.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the spot
 	 * @param pastIndex
@@ -876,7 +876,7 @@ public class TraceManager
 	 * Find the earliest forerunner spot (from pastIndex to currentIndex) that is within the distance threshold of the
 	 * given spot. In the event that multiple forerunner spots from the same frame are within the distance, assign the
 	 * closest spot.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the spot
 	 * @param pastIndex
@@ -981,7 +981,7 @@ public class TraceManager
 	 * <p>
 	 * This method respects the exclusion distance. No spot can be assigned if a the next closest spot is within the
 	 * exclusion distance.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the spot
 	 * @param pastIndex
@@ -1139,7 +1139,7 @@ public class TraceManager
 	 * closest spot.
 	 * <p>
 	 * Do not assigned to the specified trace to ignore.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the spot
 	 * @param pastIndex
@@ -1166,7 +1166,7 @@ public class TraceManager
 	 * closest spot.
 	 * <p>
 	 * Do not assigned to the specified trace to ignore.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the spot
 	 * @param pastIndex
@@ -1301,7 +1301,7 @@ public class TraceManager
 	 * exclusion distance.
 	 * <p>
 	 * Do not assigned to the specified trace to ignore.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the spot
 	 * @param pastIndex
@@ -1320,9 +1320,9 @@ public class TraceManager
 		Localisation spot = localisations[index];
 
 		// Check that the next farthest spot is above the exclusion distance.
-		// Note: It is assumed that the spots to ignore have already been assigned following the 
-		// exclusion distance rules. So it should be impossible for any ignore spots to be closer than 
-		// the exclusion distance (otherwise they could not be assigned and ignored).   
+		// Note: It is assumed that the spots to ignore have already been assigned following the
+		// exclusion distance rules. So it should be impossible for any ignore spots to be closer than
+		// the exclusion distance (otherwise they could not be assigned and ignored).
 		float nextMinD = Float.POSITIVE_INFINITY;
 		int currentT;
 
@@ -1524,7 +1524,7 @@ public class TraceManager
 
 	/**
 	 * Set the interval at which the activation laser is used. These form staging points for the traces.
-	 * 
+	 *
 	 * @param activationFrameInterval
 	 *            the activationFrameInterval to set
 	 */
@@ -1545,7 +1545,7 @@ public class TraceManager
 	/**
 	 * Set the window after the activation pulse that will be used for traces. Any trace that does not start within this
 	 * window will be discarded.
-	 * 
+	 *
 	 * @param activationFrameWindow
 	 *            the activationFrameWindow to set
 	 */
@@ -1562,7 +1562,7 @@ public class TraceManager
 
 	/**
 	 * Filter the traces that start during an activation frame.
-	 * 
+	 *
 	 * @param traces
 	 * @param activationFrameInterval
 	 *            the interval at which the activation laser is used
@@ -1612,7 +1612,7 @@ public class TraceManager
 
 	/**
 	 * Set a pulse interval. Traces will only be created by joining localisations within each pulse.
-	 * 
+	 *
 	 * @param pulseInterval
 	 *            the pulse interval
 	 */
@@ -1634,7 +1634,7 @@ public class TraceManager
 	 * closer than the distance threshold but no other spots are closer than this distance exclusion
 	 * <p>
 	 * If less that the tracing distance threshold this value is ignored.
-	 * 
+	 *
 	 * @param distanceExclusion
 	 *            the distance exclusion
 	 */
@@ -1654,7 +1654,7 @@ public class TraceManager
 	/**
 	 * Return the number of traces that were filtered since the trace was first activated outside the configured
 	 * activation window.
-	 * 
+	 *
 	 * @return the total filtered from the last call of {@link #traceMolecules(double, int)}
 	 */
 	public int getTotalFiltered()
@@ -1665,7 +1665,7 @@ public class TraceManager
 	/**
 	 * Find the neighbour for each result within the given time and distance thresholds. The neighbour with the
 	 * strongest signal is selected.
-	 * 
+	 *
 	 * @param distanceThreshold
 	 *            The distance threshold in the native units of the results
 	 * @param timeThreshold
@@ -1761,7 +1761,7 @@ public class TraceManager
 
 	/**
 	 * Collect all peak results with the same ID into traces. IDs of zero are ignored.
-	 * 
+	 *
 	 * @param results
 	 * @return The traces
 	 */
@@ -1781,7 +1781,7 @@ public class TraceManager
 
 		if (max < 10000)
 		{
-			// Small set of IDs so just use an array look-up table			
+			// Small set of IDs so just use an array look-up table
 			Trace[] traces = new Trace[max + 1];
 			for (PeakResult result : list)
 			{
@@ -1807,7 +1807,7 @@ public class TraceManager
 		else
 		{
 			// Use a map when the size is potentially large
-			TIntObjectHashMap<Trace> map = new TIntObjectHashMap<Trace>();
+			TIntObjectHashMap<Trace> map = new TIntObjectHashMap<>();
 			Trace next = new Trace();
 			for (PeakResult result : list)
 			{

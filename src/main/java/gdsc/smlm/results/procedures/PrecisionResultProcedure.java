@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -31,11 +31,11 @@ import gdsc.smlm.results.MemoryPeakResults;
  * Contains functionality to obtain the localisation precision for results.
  */
 //@formatter:off
-public class PrecisionResultProcedure extends AbstractResultProcedure implements 
-	StoredPrecisionProcedure, 
-	LSEPrecisionProcedure, 
-	LSEPrecisionBProcedure, 
-	MLEPrecisionProcedure, 
+public class PrecisionResultProcedure extends AbstractResultProcedure implements
+	StoredPrecisionProcedure,
+	LSEPrecisionProcedure,
+	LSEPrecisionBProcedure,
+	MLEPrecisionProcedure,
 	MLEPrecisionBProcedure
 //@formatter:on
 {
@@ -113,7 +113,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.procedures.StoredPrecisionProcedure#executeStoredPrecision(double)
 	 */
 	@Override
@@ -124,7 +124,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/**
 	 * Gets the precision assuming a Gaussian 2D PSF and a Least Squares Estimator and a local noise estimate.
-	 * 
+	 *
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -137,7 +137,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.procedures.LSEPrecisionProcedure#executeLSEPrecision(double)
 	 */
 	@Override
@@ -148,7 +148,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/**
 	 * Gets the precision assuming a Gaussian 2D PSF and a Least Squares Estimator and a local background estimate.
-	 * 
+	 *
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -161,7 +161,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.procedures.LSEPrecisionBProcedure#executeLSEPrecisionB(double)
 	 */
 	@Override
@@ -172,7 +172,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/**
 	 * Gets the precision assuming a Gaussian 2D PSF and a Maximum Likelihood Estimator and a local noise estimate.
-	 * 
+	 *
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -185,7 +185,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.procedures.MLEPrecisionProcedure#executeMLEPrecision(double)
 	 */
 	@Override
@@ -196,7 +196,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/**
 	 * Gets the precision assuming a Gaussian 2D PSF and a Maximum Likelihood Estimator and a local background estimate.
-	 * 
+	 *
 	 * @throws DataException
 	 *             if conversion to the required units for precision is not possible
 	 */
@@ -209,7 +209,7 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.procedures.MLEPrecisionBProcedure#executeMLEPrecisionB(double)
 	 */
 	@Override

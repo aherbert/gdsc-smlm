@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,7 +60,7 @@ import gdsc.smlm.tsf.TSFProtos.ThetaUnits;
  * To satisfy the format the calibration must be set including the amplification (electrons/count) and camera bias. The
  * bias is removed from the background. If amplification is not strictly positive then the calibration gain will be
  * written to the TSF 'electron conversion factor' field.
- * 
+ *
  * @author Alex Herbert
  */
 public class TSFPeakResultsWriter extends AbstractPeakResults
@@ -89,7 +89,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.AbstractPeakResults#begin()
 	 */
 	@Override
@@ -168,7 +168,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	@Override
@@ -179,7 +179,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -415,7 +415,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#size()
 	 */
 	@Override
@@ -430,7 +430,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 	private static IntensityUnits[] intensityUnitsMap;
 	static
 	{
-		// These should have 1:1 mapping. We can extends the TSF proto if necessary.		
+		// These should have 1:1 mapping. We can extends the TSF proto if necessary.
 		cameraTypeMap = new CameraType[gdsc.smlm.data.config.CalibrationProtos.CameraType.values().length];
 		cameraTypeMap[gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD.ordinal()] = CameraType.CCD;
 		cameraTypeMap[gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD.ordinal()] = CameraType.EMCCD;
@@ -449,7 +449,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.PeakResults#end()
 	 */
 	@Override
@@ -459,7 +459,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 		long offset = 0;
 		try
 		{
-			// The offset is the amount to skip forward after reading the int 
+			// The offset is the amount to skip forward after reading the int
 			// magic number (4 bytes) and long offset (8 bytes)
 			//out.flush();
 			offset = out.getChannel().position() - 12;
@@ -593,7 +593,7 @@ public class TSFPeakResultsWriter extends AbstractPeakResults
 
 		// Note: it would be good to be able to use the ability to write to any output stream. However
 		// the TSF format requires a seek at the end of writing to record the offset. seek() is not
-		// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input). 
+		// supported by OutputStream. It is supported by: RandomAccessFile, RandomAccessStream (for input).
 
 		// Write the offset to the SpotList message into the offset position
 		RandomAccessFile f = null;

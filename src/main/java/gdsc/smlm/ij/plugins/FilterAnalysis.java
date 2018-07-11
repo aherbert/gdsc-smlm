@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -133,7 +133,7 @@ public class FilterAnalysis implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -296,7 +296,7 @@ public class FilterAnalysis implements PlugIn
 				return resultsList;
 		}
 
-		List<MemoryPeakResults> resultsList = new LinkedList<MemoryPeakResults>();
+		List<MemoryPeakResults> resultsList = new LinkedList<>();
 		File[] fileList = (new File(inputDirectory)).listFiles(new FilenameFilter()
 		{
 			@Override
@@ -486,7 +486,7 @@ public class FilterAnalysis implements PlugIn
 	private List<FilterSet> createFilters()
 	{
 		IJ.showStatus("Creating filters ...");
-		List<FilterSet> filterSets = new LinkedList<FilterSet>();
+		List<FilterSet> filterSets = new LinkedList<>();
 		addSNRFilters(filterSets);
 		addPrecisionFilters(filterSets);
 		addTraceFilters(filterSets);
@@ -503,7 +503,7 @@ public class FilterAnalysis implements PlugIn
 		for (double w = minWidth; w <= maxWidth; w += incWidth)
 		{
 			WidthFilter wf = new WidthFilter((float) w);
-			List<Filter> filters = new LinkedList<Filter>();
+			List<Filter> filters = new LinkedList<>();
 			for (int snr = minSnr; snr <= maxSnr; snr++)
 			{
 				filters.add(new AndFilter(wf, new SNRFilter(snr)));
@@ -516,7 +516,7 @@ public class FilterAnalysis implements PlugIn
 	{
 		if (!precisionFilter)
 			return;
-		List<Filter> filters = new LinkedList<Filter>();
+		List<Filter> filters = new LinkedList<>();
 		for (int p = minPrecision; p <= maxPrecision; p++)
 		{
 			filters.add(new PrecisionFilter(p));
@@ -531,7 +531,7 @@ public class FilterAnalysis implements PlugIn
 		for (double d = minDistance; d <= maxDistance; d += incDistance)
 		{
 			SNRFilter snr = new SNRFilter(maxSnr);
-			List<Filter> filters = new LinkedList<Filter>();
+			List<Filter> filters = new LinkedList<>();
 			for (int t = minTime; t <= maxTime; t += incTime)
 			{
 				filters.add(new OrFilter(snr, new TraceFilter(d, t)));
@@ -549,7 +549,7 @@ public class FilterAnalysis implements PlugIn
 			WidthFilter wf = new WidthFilter((float) w);
 			for (int snrGap = minSnrGap; snrGap <= maxSnrGap; snrGap += incSnrGap)
 			{
-				List<Filter> filters = new LinkedList<Filter>();
+				List<Filter> filters = new LinkedList<>();
 				for (int snr = minSnr; snr <= maxSnr; snr++)
 				{
 					filters.add(new AndFilter(wf, new SNRHysteresisFilter(2, 0, 1, 0, snr, snrGap)));
@@ -565,7 +565,7 @@ public class FilterAnalysis implements PlugIn
 			return;
 		for (int precisionGap = minPrecisionGap; precisionGap <= maxPrecisionGap; precisionGap += incPrecisionGap)
 		{
-			List<Filter> filters = new LinkedList<Filter>();
+			List<Filter> filters = new LinkedList<>();
 			for (int precision = minPrecision; precision <= maxPrecision; precision++)
 			{
 				filters.add(new PrecisionHysteresisFilter(2, 0, 1, 0, precision, precisionGap));
@@ -585,16 +585,16 @@ public class FilterAnalysis implements PlugIn
 	 * <p>
 	 * For each filter set a plot is shown of the Jaccard score verses the filter value, thus filters should be provided
 	 * in ascending numerical order otherwise they are sorted.
-	 * 
+	 *
 	 * @param resultsList
 	 * @param filterSets
 	 */
 	public void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets)
 	{
 		createResultsWindow();
-		plots = new ArrayList<NamedPlot>(plotTopN);
-		bestFilter = new HashMap<String, FilterScore>();
-		bestFilterOrder = new LinkedList<String>();
+		plots = new ArrayList<>(plotTopN);
+		bestFilter = new HashMap<>();
+		bestFilterOrder = new LinkedList<>();
 
 		IJ.showStatus("Analysing filters ...");
 		int total = countFilters(filterSets);

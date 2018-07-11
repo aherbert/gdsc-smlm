@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -98,7 +98,7 @@ public class PeakResultTableModel extends AbstractTableModel
 	private boolean showId = false;
 	private boolean showZ = false;
 
-	// Used for the columns 
+	// Used for the columns
 	private Rounder rounder;
 	private PeakResultData<?>[] values;
 	private String[] names;
@@ -252,8 +252,8 @@ public class PeakResultTableModel extends AbstractTableModel
 
 		// Organise the data columns.
 		// This is done as per the IJTablePeakResults for consistency
-		TurboList<PeakResultData<?>> valuesList = new TurboList<PeakResultData<?>>();
-		TurboList<String> namesList = new TurboList<String>();
+		TurboList<PeakResultData<?>> valuesList = new TurboList<>();
+		TurboList<String> namesList = new TurboList<>();
 
 		if (rowCounter = tableSettings.getShowRowCounter())
 		{
@@ -386,7 +386,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.swing.table.TableModel#getRowCount()
 	 */
 	@Override
@@ -397,7 +397,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
 	 */
 	@Override
@@ -408,7 +408,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
 	 */
 	@Override
@@ -419,7 +419,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
 	@Override
@@ -430,7 +430,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
 	@Override
@@ -506,7 +506,7 @@ public class PeakResultTableModel extends AbstractTableModel
 
 	/**
 	 * Adds the results. Duplicates can be avoided using the check for duplicates property.
-	 * 
+	 *
 	 * @param source
 	 *            the source
 	 * @param peakResults

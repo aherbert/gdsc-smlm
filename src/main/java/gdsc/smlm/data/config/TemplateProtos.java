@@ -278,7 +278,8 @@ public final class TemplateProtos {
       return gdsc.smlm.data.config.TemplateProtos.internal_static_gdsc_smlm_data_config_TemplateSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.TemplateProtos.internal_static_gdsc_smlm_data_config_TemplateSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -295,7 +296,8 @@ public final class TemplateProtos {
      *
      * <code>repeated string notes = 1;</code>
      */
-    public com.google.protobuf.ProtocolStringList
+    @Override
+	public com.google.protobuf.ProtocolStringList
         getNotesList() {
       return notes_;
     }
@@ -306,7 +308,8 @@ public final class TemplateProtos {
      *
      * <code>repeated string notes = 1;</code>
      */
-    public int getNotesCount() {
+    @Override
+	public int getNotesCount() {
       return notes_.size();
     }
     /**
@@ -316,7 +319,8 @@ public final class TemplateProtos {
      *
      * <code>repeated string notes = 1;</code>
      */
-    public java.lang.String getNotes(int index) {
+    @Override
+	public java.lang.String getNotes(int index) {
       return notes_.get(index);
     }
     /**
@@ -326,7 +330,8 @@ public final class TemplateProtos {
      *
      * <code>repeated string notes = 1;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getNotesBytes(int index) {
       return notes_.getByteString(index);
     }
@@ -340,7 +345,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
      */
-    public boolean hasCalibration() {
+    @Override
+	public boolean hasCalibration() {
       return calibration_ != null;
     }
     /**
@@ -350,7 +356,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
       return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
     }
     /**
@@ -360,7 +367,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
      */
-    public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
       return getCalibration();
     }
 
@@ -373,7 +381,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
-    public boolean hasFitEngineSettings() {
+    @Override
+	public boolean hasFitEngineSettings() {
       return fitEngineSettings_ != null;
     }
     /**
@@ -383,7 +392,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
       return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
     }
     /**
@@ -393,7 +403,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
       return getFitEngineSettings();
     }
 
@@ -406,7 +417,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
      */
-    public boolean hasResultsSettings() {
+    @Override
+	public boolean hasResultsSettings() {
       return resultsSettings_ != null;
     }
     /**
@@ -416,7 +428,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
      */
-    public gdsc.smlm.data.config.ResultsProtos.ResultsSettings getResultsSettings() {
+    @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsSettings getResultsSettings() {
       return resultsSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance() : resultsSettings_;
     }
     /**
@@ -426,7 +439,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
      */
-    public gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder getResultsSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder getResultsSettingsOrBuilder() {
       return getResultsSettings();
     }
 
@@ -439,7 +453,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
      */
-    public boolean hasPsf() {
+    @Override
+	public boolean hasPsf() {
       return psf_ != null;
     }
     /**
@@ -449,7 +464,8 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
      */
-    public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
+    @Override
+	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
       return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
     }
     /**
@@ -459,12 +475,14 @@ public final class TemplateProtos {
      *
      * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
      */
-    public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
       return getPsf();
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -473,7 +491,8 @@ public final class TemplateProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       for (int i = 0; i < notes_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, notes_.getRaw(i));
@@ -492,7 +511,8 @@ public final class TemplateProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -664,14 +684,16 @@ public final class TemplateProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.TemplateProtos.TemplateSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -698,7 +720,8 @@ public final class TemplateProtos {
         return gdsc.smlm.data.config.TemplateProtos.internal_static_gdsc_smlm_data_config_TemplateSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.TemplateProtos.internal_static_gdsc_smlm_data_config_TemplateSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -720,7 +743,8 @@ public final class TemplateProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         notes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -751,16 +775,19 @@ public final class TemplateProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.TemplateProtos.internal_static_gdsc_smlm_data_config_TemplateSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.TemplateProtos.TemplateSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.TemplateProtos.TemplateSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.TemplateProtos.TemplateSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.TemplateProtos.TemplateSettings build() {
+      @Override
+	public gdsc.smlm.data.config.TemplateProtos.TemplateSettings build() {
         gdsc.smlm.data.config.TemplateProtos.TemplateSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -768,7 +795,8 @@ public final class TemplateProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.TemplateProtos.TemplateSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.TemplateProtos.TemplateSettings buildPartial() {
         gdsc.smlm.data.config.TemplateProtos.TemplateSettings result = new gdsc.smlm.data.config.TemplateProtos.TemplateSettings(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -802,33 +830,40 @@ public final class TemplateProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.TemplateProtos.TemplateSettings) {
           return mergeFrom((gdsc.smlm.data.config.TemplateProtos.TemplateSettings)other);
         } else {
@@ -865,11 +900,13 @@ public final class TemplateProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -902,7 +939,8 @@ public final class TemplateProtos {
        *
        * <code>repeated string notes = 1;</code>
        */
-      public com.google.protobuf.ProtocolStringList
+      @Override
+	public com.google.protobuf.ProtocolStringList
           getNotesList() {
         return notes_.getUnmodifiableView();
       }
@@ -913,7 +951,8 @@ public final class TemplateProtos {
        *
        * <code>repeated string notes = 1;</code>
        */
-      public int getNotesCount() {
+      @Override
+	public int getNotesCount() {
         return notes_.size();
       }
       /**
@@ -923,7 +962,8 @@ public final class TemplateProtos {
        *
        * <code>repeated string notes = 1;</code>
        */
-      public java.lang.String getNotes(int index) {
+      @Override
+	public java.lang.String getNotes(int index) {
         return notes_.get(index);
       }
       /**
@@ -933,7 +973,8 @@ public final class TemplateProtos {
        *
        * <code>repeated string notes = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getNotesBytes(int index) {
         return notes_.getByteString(index);
       }
@@ -1028,7 +1069,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
        */
-      public boolean hasCalibration() {
+      @Override
+	public boolean hasCalibration() {
         return calibrationBuilder_ != null || calibration_ != null;
       }
       /**
@@ -1038,7 +1080,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.Calibration getCalibration() {
         if (calibrationBuilder_ == null) {
           return calibration_ == null ? gdsc.smlm.data.config.CalibrationProtos.Calibration.getDefaultInstance() : calibration_;
         } else {
@@ -1131,7 +1174,7 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
        */
       public gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder getCalibrationBuilder() {
-        
+
         onChanged();
         return getCalibrationFieldBuilder().getBuilder();
       }
@@ -1142,7 +1185,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
        */
-      public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder getCalibrationOrBuilder() {
         if (calibrationBuilder_ != null) {
           return calibrationBuilder_.getMessageOrBuilder();
         } else {
@@ -1158,11 +1202,10 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.Calibration calibration = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder> 
+          gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>
           getCalibrationFieldBuilder() {
         if (calibrationBuilder_ == null) {
-          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.CalibrationProtos.Calibration, gdsc.smlm.data.config.CalibrationProtos.Calibration.Builder, gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder>(
+          calibrationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getCalibration(),
                   getParentForChildren(),
                   isClean());
@@ -1181,7 +1224,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
-      public boolean hasFitEngineSettings() {
+      @Override
+	public boolean hasFitEngineSettings() {
         return fitEngineSettingsBuilder_ != null || fitEngineSettings_ != null;
       }
       /**
@@ -1191,7 +1235,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getFitEngineSettings() {
         if (fitEngineSettingsBuilder_ == null) {
           return fitEngineSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance() : fitEngineSettings_;
         } else {
@@ -1284,7 +1329,7 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder getFitEngineSettingsBuilder() {
-        
+
         onChanged();
         return getFitEngineSettingsFieldBuilder().getBuilder();
       }
@@ -1295,7 +1340,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder getFitEngineSettingsOrBuilder() {
         if (fitEngineSettingsBuilder_ != null) {
           return fitEngineSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -1311,11 +1357,10 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.FitEngineSettings fit_engine_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder>
           getFitEngineSettingsFieldBuilder() {
         if (fitEngineSettingsBuilder_ == null) {
-          fitEngineSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.FitEngineSettings, gdsc.smlm.data.config.FitProtos.FitEngineSettings.Builder, gdsc.smlm.data.config.FitProtos.FitEngineSettingsOrBuilder>(
+          fitEngineSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFitEngineSettings(),
                   getParentForChildren(),
                   isClean());
@@ -1334,7 +1379,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
        */
-      public boolean hasResultsSettings() {
+      @Override
+	public boolean hasResultsSettings() {
         return resultsSettingsBuilder_ != null || resultsSettings_ != null;
       }
       /**
@@ -1344,7 +1390,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
        */
-      public gdsc.smlm.data.config.ResultsProtos.ResultsSettings getResultsSettings() {
+      @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsSettings getResultsSettings() {
         if (resultsSettingsBuilder_ == null) {
           return resultsSettings_ == null ? gdsc.smlm.data.config.ResultsProtos.ResultsSettings.getDefaultInstance() : resultsSettings_;
         } else {
@@ -1437,7 +1484,7 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
        */
       public gdsc.smlm.data.config.ResultsProtos.ResultsSettings.Builder getResultsSettingsBuilder() {
-        
+
         onChanged();
         return getResultsSettingsFieldBuilder().getBuilder();
       }
@@ -1448,7 +1495,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
        */
-      public gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder getResultsSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder getResultsSettingsOrBuilder() {
         if (resultsSettingsBuilder_ != null) {
           return resultsSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -1464,11 +1512,10 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.ResultsSettings results_settings = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.ResultsProtos.ResultsSettings, gdsc.smlm.data.config.ResultsProtos.ResultsSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder> 
+          gdsc.smlm.data.config.ResultsProtos.ResultsSettings, gdsc.smlm.data.config.ResultsProtos.ResultsSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder>
           getResultsSettingsFieldBuilder() {
         if (resultsSettingsBuilder_ == null) {
-          resultsSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.ResultsProtos.ResultsSettings, gdsc.smlm.data.config.ResultsProtos.ResultsSettings.Builder, gdsc.smlm.data.config.ResultsProtos.ResultsSettingsOrBuilder>(
+          resultsSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getResultsSettings(),
                   getParentForChildren(),
                   isClean());
@@ -1487,7 +1534,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
        */
-      public boolean hasPsf() {
+      @Override
+	public boolean hasPsf() {
         return psfBuilder_ != null || psf_ != null;
       }
       /**
@@ -1497,7 +1545,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
        */
-      public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
+      @Override
+	public gdsc.smlm.data.config.PSFProtos.PSF getPsf() {
         if (psfBuilder_ == null) {
           return psf_ == null ? gdsc.smlm.data.config.PSFProtos.PSF.getDefaultInstance() : psf_;
         } else {
@@ -1590,7 +1639,7 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
        */
       public gdsc.smlm.data.config.PSFProtos.PSF.Builder getPsfBuilder() {
-        
+
         onChanged();
         return getPsfFieldBuilder().getBuilder();
       }
@@ -1601,7 +1650,8 @@ public final class TemplateProtos {
        *
        * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
        */
-      public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.PSFProtos.PSFOrBuilder getPsfOrBuilder() {
         if (psfBuilder_ != null) {
           return psfBuilder_.getMessageOrBuilder();
         } else {
@@ -1617,11 +1667,10 @@ public final class TemplateProtos {
        * <code>.gdsc.smlm.data.config.PSF psf = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder> 
+          gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder>
           getPsfFieldBuilder() {
         if (psfBuilder_ == null) {
-          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.PSFProtos.PSF, gdsc.smlm.data.config.PSFProtos.PSF.Builder, gdsc.smlm.data.config.PSFProtos.PSFOrBuilder>(
+          psfBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getPsf(),
                   getParentForChildren(),
                   isClean());
@@ -1629,12 +1678,14 @@ public final class TemplateProtos {
         }
         return psfBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1655,7 +1706,8 @@ public final class TemplateProtos {
 
     private static final com.google.protobuf.Parser<TemplateSettings>
         PARSER = new com.google.protobuf.AbstractParser<TemplateSettings>() {
-      public TemplateSettings parsePartialFrom(
+      @Override
+	public TemplateSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1672,7 +1724,8 @@ public final class TemplateProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.TemplateProtos.TemplateSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.TemplateProtos.TemplateSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1680,7 +1733,7 @@ public final class TemplateProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_TemplateSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_TemplateSettings_fieldAccessorTable;
 
@@ -1705,7 +1758,8 @@ public final class TemplateProtos {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

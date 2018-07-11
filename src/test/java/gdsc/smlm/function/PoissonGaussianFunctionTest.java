@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,14 +37,14 @@ import gdsc.test.TestSettings;
 public class PoissonGaussianFunctionTest
 {
 	// Note: Realistic gain values:
-	// Photometrics EM-CCD in CCD mode: 
+	// Photometrics EM-CCD in CCD mode:
 	// Gain = 3.0, 1.5, 0.5 e-/ADU => 0.33, 0.66, 2 ADU/e-
 	// Noise = 14.3 to 5.8 electrons
-	// Note that this has a large well capacity and may not be indicative of 
+	// Note that this has a large well capacity and may not be indicative of
 	// a standard CCD
-	// sCMOS camera: 
+	// sCMOS camera:
 	// Gain has a range of 1.44 to 5.8, mean = 1.737 ADU/e-
-	// Noise variance 4 to 141 ADUs => 1.1 to 7 electrons 
+	// Noise variance 4 to 141 ADUs => 1.1 to 7 electrons
 
 	static double[] gain = { 0.25, 0.5, 1, 2, 4 }; // ADU/electron
 	static double[] photons = { -1, 0, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000 };
@@ -71,8 +71,8 @@ public class PoissonGaussianFunctionTest
 	@Test
 	public void cumulativeProbabilityIsNotOneWhenMeanIsLowAndNoiseIsLow()
 	{
-		// The cumulative probability is poor for low mean and low noise. 
-		// It can over-predict or under predict. The pattern of over/under is unknown. 
+		// The cumulative probability is poor for low mean and low noise.
+		// It can over-predict or under predict. The pattern of over/under is unknown.
 		// For example in the following:
 
 		// OVER
@@ -191,9 +191,9 @@ public class PoissonGaussianFunctionTest
 		int min = 1;
 		int max = 0;
 
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		if (mu > 0)
 		{
@@ -210,7 +210,7 @@ public class PoissonGaussianFunctionTest
 			//	Assert.fail("P > 1: " + p);
 		}
 
-		// We have most of the probability density. 
+		// We have most of the probability density.
 		// Now keep evaluating up and down until no difference
 		final double changeTolerance = 1e-6;
 		for (int x = min - 1;; x--)
@@ -252,9 +252,9 @@ public class PoissonGaussianFunctionTest
 
 	static int[] getRange(final double gain, final double mu, final double s)
 	{
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		double range = Math.max(s, Math.sqrt(mu));
 		int min = (int) Math.floor(gain * (mu - 3 * range));
@@ -269,9 +269,9 @@ public class PoissonGaussianFunctionTest
 		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s * gain);
 		f.setUsePicardApproximation(usePicard);
 
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		int[] range = getRange(gain, mu, s);
 		int min = range[0];
@@ -294,9 +294,9 @@ public class PoissonGaussianFunctionTest
 		PoissonGaussianFunction f = PoissonGaussianFunction.createWithStandardDeviation(1.0 / gain, mu, s * gain);
 		f.setUsePicardApproximation(usePicard);
 
-		// Evaluate an initial range. 
+		// Evaluate an initial range.
 		// Gaussian should have >99% within +/- s
-		// Poisson will have mean mu with a variance mu. 
+		// Poisson will have mean mu with a variance mu.
 		// At large mu it is approximately normal so use 3 sqrt(mu) for the range added to the mean
 		int[] range = getRange(gain, mu, s);
 		int min = range[0];

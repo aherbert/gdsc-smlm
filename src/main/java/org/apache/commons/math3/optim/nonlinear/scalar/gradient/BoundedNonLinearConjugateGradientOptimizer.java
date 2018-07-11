@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -517,7 +517,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 					// Return the point we reached as the minimum
 					return lastB;
 
-				// We made no valid steps. Do an inner loop reducing the step size until we find a point 
+				// We made no valid steps. Do an inner loop reducing the step size until we find a point
 				// with a valid gradient
 				for (step *= 0.1; step > Double.MIN_VALUE; step *= 0.1)
 				{
@@ -696,7 +696,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 	/**
 	 * Checks if there are lower or upper bounds that are not -Infinity or +Infinity
-	 * 
+	 *
 	 * @throws MathUnsupportedOperationException
 	 *             if invalid bounds were passed to the {@link #optimize(OptimizationData[]) optimize} method.
 	 */
@@ -717,7 +717,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 	/**
 	 * Check if the array contains anything other than value
-	 * 
+	 *
 	 * @param array
 	 * @param value
 	 * @return True if the array has another value
@@ -734,7 +734,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
 	/**
 	 * Check the point falls within the configured bounds truncating if necessary
-	 * 
+	 *
 	 * @param point
 	 */
 	private void applyBounds(double[] point)
@@ -756,7 +756,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	/**
 	 * Check if the point falls outside configured bounds truncating the gradient to zero
 	 * if it is moving further outside the bounds
-	 * 
+	 *
 	 * @param r
 	 * @param point
 	 * @return true if NaN gradients
@@ -769,7 +769,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 	/**
 	 * Check if the point falls outside configured bounds truncating the gradient to zero
 	 * if it is moving further outside the bounds (defined by the sign of the search direction)
-	 * 
+	 *
 	 * @param r
 	 * @param point
 	 * @param sign

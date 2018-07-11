@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -37,7 +37,7 @@ public class MoleculeModel
 
 	/**
 	 * Create a new molecule
-	 * 
+	 *
 	 * @param id
 	 * @param xyz
 	 *            [x,y,z]
@@ -50,7 +50,7 @@ public class MoleculeModel
 
 	/**
 	 * Create a new molecule
-	 * 
+	 *
 	 * @param id
 	 * @param x
 	 * @param y
@@ -64,7 +64,7 @@ public class MoleculeModel
 
 	/**
 	 * Create a new molecule
-	 * 
+	 *
 	 * @param mass
 	 * @param xyz
 	 *            [x,y,z]
@@ -77,7 +77,7 @@ public class MoleculeModel
 
 	/**
 	 * Create a new molecule
-	 * 
+	 *
 	 * @param mass
 	 * @param x
 	 * @param y
@@ -91,7 +91,7 @@ public class MoleculeModel
 
 	/**
 	 * Create a new molecule
-	 * 
+	 *
 	 * @param id
 	 * @param mass
 	 * @param xyz
@@ -106,7 +106,7 @@ public class MoleculeModel
 
 	/**
 	 * Create a new molecule
-	 * 
+	 *
 	 * @param id
 	 * @param mass
 	 * @param x
@@ -154,7 +154,7 @@ public class MoleculeModel
 
 	/**
 	 * Package level set method to allow renumbering
-	 * 
+	 *
 	 * @param id
 	 */
 	void setId(int id)
@@ -182,7 +182,7 @@ public class MoleculeModel
 	 * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion rate.
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
-	 * 
+	 *
 	 * @param diffusionRate
 	 *            Diffusion rate for each dimension
 	 * @param random
@@ -213,7 +213,7 @@ public class MoleculeModel
 	 * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion rate.
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
-	 * 
+	 *
 	 * @param diffusionRate
 	 *            Diffusion rate for each dimension
 	 * @param random
@@ -244,7 +244,7 @@ public class MoleculeModel
 	 * Move the molecule using a random walk with the given step size
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
-	 * 
+	 *
 	 * @param stepSize
 	 *            Step size for each dimension
 	 * @param random
@@ -271,7 +271,7 @@ public class MoleculeModel
 	 * Move the molecule using a random walk with the given step size
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
-	 * 
+	 *
 	 * @param stepSize
 	 *            Step size for each dimension
 	 * @param random
@@ -299,7 +299,7 @@ public class MoleculeModel
 	 * diffusion rate.
 	 * <p>
 	 * Note: The array provided by {@link #getCoordinates()} is updated and returned.
-	 * 
+	 *
 	 * @param diffusionRate
 	 *            Diffusion rate for 3D diffusion
 	 * @param axis
@@ -317,10 +317,10 @@ public class MoleculeModel
 			// Sample from a Gaussian - This may only be relevant for 1D diffusion
 			shift = random.nextGaussian() * diffusionRate;
 
-			// Sample from the cumulative probability distribution for the MSD. 
+			// Sample from the cumulative probability distribution for the MSD.
 			// Then get a square root to find the shift and assign a direction
 			//RandomDataGenerator r = new RandomDataGenerator(random);
-			//shift = ((random.nextDouble() < 0.5) ? 1 : -1) * Math.sqrt(r.nextExponential(diffusionRate*diffusionRate));			
+			//shift = ((random.nextDouble() < 0.5) ? 1 : -1) * Math.sqrt(r.nextExponential(diffusionRate*diffusionRate));
 
 			// Clip the movement
 			//if (shift > 5*diffusionRate)

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -123,14 +123,14 @@ public class FitProtosHelper
 	{
 		// Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
 		// a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width mismatch but
-		// the mean filter will be faster as it uses a smaller block size. The Gaussian filter has higher 
+		// the mean filter will be faster as it uses a smaller block size. The Gaussian filter has higher
 		// recall but lower precision as it identifies more spots due to the shape of the smoothing filter.
 		// The overall AUC is very similar.
 		//
 		// Note: Setting the parameter at a higher level allows the filter to work on out-of-focus spots which
 		// will have a wider PSF.
 		//
-		// *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a 
+		// *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a
 		// depth of up to 1380nm (the PSF limit).
 
 		FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();

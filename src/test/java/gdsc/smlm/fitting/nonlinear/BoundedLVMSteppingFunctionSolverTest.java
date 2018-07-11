@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -42,11 +42,11 @@ public class BoundedLVMSteppingFunctionSolverTest extends BaseSteppingFunctionSo
 	// in the SteppingFunctionSolverTest.
 	boolean runTests = false;
 
-	// The following tests ensure that the LVM can fit data without 
+	// The following tests ensure that the LVM can fit data without
 	// requiring a bias (i.e. an offset to the background).
 	// In a previous version the LVM fitter was stable only if a bias existed.
-	// The exact source of this instability is unknown as it could be due to 
-	// how the data was processed before or after fitting, or within the LVM 
+	// The exact source of this instability is unknown as it could be due to
+	// how the data was processed before or after fitting, or within the LVM
 	// fitter itself. However the process should be the same without a bias
 	// and these tests ensure that is true.
 

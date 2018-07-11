@@ -96,7 +96,8 @@ public final class TestProtos {
       return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -108,7 +109,8 @@ public final class TestProtos {
     /**
      * <code>int32 field1 = 1;</code>
      */
-    public int getField1() {
+    @Override
+	public int getField1() {
       return field1_;
     }
 
@@ -117,12 +119,14 @@ public final class TestProtos {
     /**
      * <code>bool field2 = 2;</code>
      */
-    public boolean getField2() {
+    @Override
+	public boolean getField2() {
       return field2_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -131,7 +135,8 @@ public final class TestProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (field1_ != 0) {
         output.writeInt32(1, field1_);
@@ -141,7 +146,8 @@ public final class TestProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -264,14 +270,16 @@ public final class TestProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message1 prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -294,7 +302,8 @@ public final class TestProtos {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -316,7 +325,8 @@ public final class TestProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         field1_ = 0;
 
@@ -325,16 +335,19 @@ public final class TestProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message1_descriptor;
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType() {
         return gdsc.smlm.data.config.TestProtos.Message1.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message1 build() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message1 build() {
         gdsc.smlm.data.config.TestProtos.Message1 result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -342,7 +355,8 @@ public final class TestProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message1 buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message1 buildPartial() {
         gdsc.smlm.data.config.TestProtos.Message1 result = new gdsc.smlm.data.config.TestProtos.Message1(this);
         result.field1_ = field1_;
         result.field2_ = field2_;
@@ -350,33 +364,40 @@ public final class TestProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.TestProtos.Message1) {
           return mergeFrom((gdsc.smlm.data.config.TestProtos.Message1)other);
         } else {
@@ -397,11 +418,13 @@ public final class TestProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -423,14 +446,15 @@ public final class TestProtos {
       /**
        * <code>int32 field1 = 1;</code>
        */
-      public int getField1() {
+      @Override
+	public int getField1() {
         return field1_;
       }
       /**
        * <code>int32 field1 = 1;</code>
        */
       public Builder setField1(int value) {
-        
+
         field1_ = value;
         onChanged();
         return this;
@@ -439,7 +463,7 @@ public final class TestProtos {
        * <code>int32 field1 = 1;</code>
        */
       public Builder clearField1() {
-        
+
         field1_ = 0;
         onChanged();
         return this;
@@ -449,14 +473,15 @@ public final class TestProtos {
       /**
        * <code>bool field2 = 2;</code>
        */
-      public boolean getField2() {
+      @Override
+	public boolean getField2() {
         return field2_;
       }
       /**
        * <code>bool field2 = 2;</code>
        */
       public Builder setField2(boolean value) {
-        
+
         field2_ = value;
         onChanged();
         return this;
@@ -465,17 +490,19 @@ public final class TestProtos {
        * <code>bool field2 = 2;</code>
        */
       public Builder clearField2() {
-        
+
         field2_ = false;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -496,7 +523,8 @@ public final class TestProtos {
 
     private static final com.google.protobuf.Parser<Message1>
         PARSER = new com.google.protobuf.AbstractParser<Message1>() {
-      public Message1 parsePartialFrom(
+      @Override
+	public Message1 parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -513,7 +541,8 @@ public final class TestProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.TestProtos.Message1 getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -600,7 +629,8 @@ public final class TestProtos {
       return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -612,7 +642,8 @@ public final class TestProtos {
     /**
      * <code>int32 entry1 = 1;</code>
      */
-    public int getEntry1() {
+    @Override
+	public int getEntry1() {
       return entry1_;
     }
 
@@ -621,12 +652,14 @@ public final class TestProtos {
     /**
      * <code>double entry2 = 2;</code>
      */
-    public double getEntry2() {
+    @Override
+	public double getEntry2() {
       return entry2_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -635,7 +668,8 @@ public final class TestProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (entry1_ != 0) {
         output.writeInt32(1, entry1_);
@@ -645,7 +679,8 @@ public final class TestProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -770,14 +805,16 @@ public final class TestProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message2 prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -800,7 +837,8 @@ public final class TestProtos {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -822,7 +860,8 @@ public final class TestProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         entry1_ = 0;
 
@@ -831,16 +870,19 @@ public final class TestProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message2_descriptor;
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType() {
         return gdsc.smlm.data.config.TestProtos.Message2.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message2 build() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message2 build() {
         gdsc.smlm.data.config.TestProtos.Message2 result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -848,7 +890,8 @@ public final class TestProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message2 buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message2 buildPartial() {
         gdsc.smlm.data.config.TestProtos.Message2 result = new gdsc.smlm.data.config.TestProtos.Message2(this);
         result.entry1_ = entry1_;
         result.entry2_ = entry2_;
@@ -856,33 +899,40 @@ public final class TestProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.TestProtos.Message2) {
           return mergeFrom((gdsc.smlm.data.config.TestProtos.Message2)other);
         } else {
@@ -903,11 +953,13 @@ public final class TestProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -929,14 +981,15 @@ public final class TestProtos {
       /**
        * <code>int32 entry1 = 1;</code>
        */
-      public int getEntry1() {
+      @Override
+	public int getEntry1() {
         return entry1_;
       }
       /**
        * <code>int32 entry1 = 1;</code>
        */
       public Builder setEntry1(int value) {
-        
+
         entry1_ = value;
         onChanged();
         return this;
@@ -945,7 +998,7 @@ public final class TestProtos {
        * <code>int32 entry1 = 1;</code>
        */
       public Builder clearEntry1() {
-        
+
         entry1_ = 0;
         onChanged();
         return this;
@@ -955,14 +1008,15 @@ public final class TestProtos {
       /**
        * <code>double entry2 = 2;</code>
        */
-      public double getEntry2() {
+      @Override
+	public double getEntry2() {
         return entry2_;
       }
       /**
        * <code>double entry2 = 2;</code>
        */
       public Builder setEntry2(double value) {
-        
+
         entry2_ = value;
         onChanged();
         return this;
@@ -971,17 +1025,19 @@ public final class TestProtos {
        * <code>double entry2 = 2;</code>
        */
       public Builder clearEntry2() {
-        
+
         entry2_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1002,7 +1058,8 @@ public final class TestProtos {
 
     private static final com.google.protobuf.Parser<Message2>
         PARSER = new com.google.protobuf.AbstractParser<Message2>() {
-      public Message2 parsePartialFrom(
+      @Override
+	public Message2 parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1019,7 +1076,8 @@ public final class TestProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.TestProtos.Message2 getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1106,7 +1164,8 @@ public final class TestProtos {
       return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1118,7 +1177,8 @@ public final class TestProtos {
     /**
      * <code>double field1 = 1;</code>
      */
-    public double getField1() {
+    @Override
+	public double getField1() {
       return field1_;
     }
 
@@ -1127,12 +1187,14 @@ public final class TestProtos {
     /**
      * <code>int32 field2 = 2;</code>
      */
-    public int getField2() {
+    @Override
+	public int getField2() {
       return field2_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -1141,7 +1203,8 @@ public final class TestProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (field1_ != 0D) {
         output.writeDouble(1, field1_);
@@ -1151,7 +1214,8 @@ public final class TestProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -1276,14 +1340,16 @@ public final class TestProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.TestProtos.Message3 prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -1306,7 +1372,8 @@ public final class TestProtos {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1328,7 +1395,8 @@ public final class TestProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         field1_ = 0D;
 
@@ -1337,16 +1405,19 @@ public final class TestProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.TestProtos.internal_static_gdsc_smlm_data_config_Message3_descriptor;
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType() {
         return gdsc.smlm.data.config.TestProtos.Message3.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message3 build() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message3 build() {
         gdsc.smlm.data.config.TestProtos.Message3 result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -1354,7 +1425,8 @@ public final class TestProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.TestProtos.Message3 buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.TestProtos.Message3 buildPartial() {
         gdsc.smlm.data.config.TestProtos.Message3 result = new gdsc.smlm.data.config.TestProtos.Message3(this);
         result.field1_ = field1_;
         result.field2_ = field2_;
@@ -1362,33 +1434,40 @@ public final class TestProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.TestProtos.Message3) {
           return mergeFrom((gdsc.smlm.data.config.TestProtos.Message3)other);
         } else {
@@ -1409,11 +1488,13 @@ public final class TestProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -1435,14 +1516,15 @@ public final class TestProtos {
       /**
        * <code>double field1 = 1;</code>
        */
-      public double getField1() {
+      @Override
+	public double getField1() {
         return field1_;
       }
       /**
        * <code>double field1 = 1;</code>
        */
       public Builder setField1(double value) {
-        
+
         field1_ = value;
         onChanged();
         return this;
@@ -1451,7 +1533,7 @@ public final class TestProtos {
        * <code>double field1 = 1;</code>
        */
       public Builder clearField1() {
-        
+
         field1_ = 0D;
         onChanged();
         return this;
@@ -1461,14 +1543,15 @@ public final class TestProtos {
       /**
        * <code>int32 field2 = 2;</code>
        */
-      public int getField2() {
+      @Override
+	public int getField2() {
         return field2_;
       }
       /**
        * <code>int32 field2 = 2;</code>
        */
       public Builder setField2(int value) {
-        
+
         field2_ = value;
         onChanged();
         return this;
@@ -1477,17 +1560,19 @@ public final class TestProtos {
        * <code>int32 field2 = 2;</code>
        */
       public Builder clearField2() {
-        
+
         field2_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -1508,7 +1593,8 @@ public final class TestProtos {
 
     private static final com.google.protobuf.Parser<Message3>
         PARSER = new com.google.protobuf.AbstractParser<Message3>() {
-      public Message3 parsePartialFrom(
+      @Override
+	public Message3 parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1525,7 +1611,8 @@ public final class TestProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.TestProtos.Message3 getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1533,17 +1620,17 @@ public final class TestProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Message1_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Message1_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Message2_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Message2_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_Message3_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_Message3_fieldAccessorTable;
 
@@ -1563,7 +1650,8 @@ public final class TestProtos {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

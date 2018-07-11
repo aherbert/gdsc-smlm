@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -69,7 +69,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#clone()
 	 */
 	@Override
@@ -120,7 +120,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/**
 	 * Get the string representation of the operator used to combine the two filters. This is used in the filter name.
-	 * 
+	 *
 	 * @return The operator
 	 */
 	protected abstract String getOperator();
@@ -144,7 +144,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/**
 	 * Filter the result using filter1
-	 * 
+	 *
 	 * @param peak
 	 *            The result
 	 * @return The filter result
@@ -156,7 +156,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/**
 	 * Filter the result using filter2
-	 * 
+	 *
 	 * @param peak
 	 *            The result
 	 * @return The filter result
@@ -168,7 +168,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/**
 	 * Filter the result using filter1 if it is a DirectFilter, otherwise return true
-	 * 
+	 *
 	 * @param peak
 	 *            The result
 	 * @return The filter result, or true
@@ -181,7 +181,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/**
 	 * Filter the result using filter2 if it is a DirectFilter, otherwise return true
-	 * 
+	 *
 	 * @param peak
 	 *            The result
 	 * @return The filter result, or true
@@ -194,7 +194,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#setup(gdsc.smlm.results.MemoryPeakResults)
 	 */
 	@Override
@@ -238,7 +238,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * This does mean that a combined filter can be created from
 	 * two already initialised filters and the flags returned may not
 	 * exactly recreate the state, since they are joined.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#getFilterSetupFlags()
 	 */
 	@Override
@@ -259,7 +259,7 @@ public abstract class CombinedFilter extends DirectFilter
 	 * This does mean that a combined filter can be created from
 	 * two already initialised filters and the data returned may not
 	 * exactly recreate the state, since they are joined.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#getFilterSetupData()
 	 */
 	@Override
@@ -289,7 +289,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#end()
 	 */
 	@Override
@@ -301,7 +301,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getNumericalValue()
 	 */
 	@Override
@@ -312,7 +312,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getNumericalValueName()
 	 */
 	@Override
@@ -392,7 +392,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/**
 	 * Create a new combined filter from the two input filters
-	 * 
+	 *
 	 * @param f1
 	 * @param f2
 	 * @return
@@ -401,7 +401,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#create(double[])
 	 */
 	@Override
@@ -414,7 +414,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
 	 */
 	@Override
@@ -430,7 +430,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#subsetWithFailCount()
 	 */
 	@Override
@@ -441,7 +441,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#length()
 	 */
 	@Override
@@ -452,7 +452,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#lowerLimit()
 	 */
 	@Override
@@ -477,7 +477,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
@@ -502,7 +502,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#sequence()
 	 */
 	@Override
@@ -513,7 +513,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
 	@Override
@@ -532,7 +532,7 @@ public abstract class CombinedFilter extends DirectFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getChromosomeParameters()
 	 */
 	@Override

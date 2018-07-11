@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -91,7 +91,7 @@ public class BlinkEstimator implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -191,7 +191,7 @@ public class BlinkEstimator implements PlugIn
 		Ntd = shift(Ntd);
 		td = shift(td);
 
-		// Fit curve 
+		// Fit curve
 		double[] nPoints = new double[rangeFittedPoints + 1];
 		double[][] parameters = new double[3][nPoints.length];
 		double[] r2 = new double[rangeFittedPoints + 1];
@@ -202,7 +202,7 @@ public class BlinkEstimator implements PlugIn
 			double[] p = fit(td, Ntd, (int) nPoints[n], false);
 			if (p == null)
 			{
-				// Leave as empty in the output plots 
+				// Leave as empty in the output plots
 				continue;
 			}
 			for (int i = 0; i < p.length; i++)
@@ -220,7 +220,7 @@ public class BlinkEstimator implements PlugIn
 
 	/**
 	 * Remove the first element of the array. Return the rest of the array
-	 * 
+	 *
 	 * @param d
 	 * @return
 	 */
@@ -316,7 +316,7 @@ public class BlinkEstimator implements PlugIn
 	 * Note that index 0 corresponds to a t-threshold of 1 in the tracing algorithm, i.e. adjacent frames in the
 	 * sequence. This is equivalent to a dark time of (up to) the frame acquisition rate, i.e. the molecule is not
 	 * allowed to blink.
-	 * 
+	 *
 	 * @param results
 	 * @param maxDarkTime
 	 * @param searchDistance
@@ -368,7 +368,7 @@ public class BlinkEstimator implements PlugIn
 	 * t-threshold 2 equals 1 dark frame (n ms per frame), etc. This behaviour can be changed by setting the
 	 * {@link #timeAtLowerBound} flag to false. Then the time will reflect the upper bounds of the dark time, i.e.
 	 * t-threshold 1 equals 1 dark frames (n ms per frame), t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
-	 * 
+	 *
 	 * @param Ntd
 	 * @return
 	 */
@@ -431,7 +431,7 @@ public class BlinkEstimator implements PlugIn
 	 * N = The number of photoblinking molecules in the sample<br/>
 	 * nBlink = The average number of blinks per flourophore<br/>
 	 * tOff = The off-time
-	 * 
+	 *
 	 * @param td
 	 *            The dark time
 	 * @param ntd
@@ -612,7 +612,7 @@ public class BlinkEstimator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.ij.plugins.OptimiserFunction#getWeights()
 		 */
 		@Override
@@ -698,7 +698,7 @@ public class BlinkEstimator implements PlugIn
 
 		/**
 		 * Evaluate the function
-		 * 
+		 *
 		 * @param td
 		 *            The dark time
 		 * @param N
@@ -721,7 +721,7 @@ public class BlinkEstimator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -738,7 +738,7 @@ public class BlinkEstimator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.DifferentiableMultivariateVectorFunction#jacobian()
 		 */
 		public MultivariateMatrixFunction jacobian()

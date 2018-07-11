@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -151,7 +151,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#setup(java.lang.String, ij.ImagePlus)
 	 */
 	@Override
@@ -177,7 +177,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#showDialog(ij.ImagePlus, java.lang.String,
 	 * ij.plugin.filter.PlugInFilterRunner)
 	 */
@@ -314,7 +314,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -381,7 +381,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	@Override
@@ -434,7 +434,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				filter = null;
 				this.imp.setOverlay(o);
 				throw new RuntimeException(e); // Required for ImageJ to disable the preview
-				//Utils.log("ERROR: " + e.getMessage());			
+				//Utils.log("ERROR: " + e.getMessage());
 				//return;
 			}
 			Utils.log(filter.getDescription());
@@ -444,13 +444,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 		lastFitEngineSettings = fitEngineSettings;
 		lastPSF = psf;
 
-		// Note: 
-		// Do not support origin selection when there is a width/height mismatch 
-		// as this will break the live preview with multiple pop-ups. Origin 
+		// Note:
+		// Do not support origin selection when there is a width/height mismatch
+		// as this will break the live preview with multiple pop-ups. Origin
 		// could be added to the input dialog.
-		//cameraModel = PeakFit.cropCameraModel(cameraModel, ip.getWidth(), ip.getHeight(), 0, 0, true);		
+		//cameraModel = PeakFit.cropCameraModel(cameraModel, ip.getWidth(), ip.getHeight(), 0, 0, true);
 
-		// Instead just warn if the roi cannot be extracted from the selected model 
+		// Instead just warn if the roi cannot be extracted from the selected model
 		// or there is a mismatch
 		Rectangle modelBounds = fitConfig.getCameraModel().getBounds();
 		if (modelBounds != null)
@@ -459,8 +459,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			{
 			//@formatter:off
 			Utils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
-					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
-					bounds.x, bounds.y, bounds.width, bounds.height 
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
+					bounds.x, bounds.y, bounds.width, bounds.height
 					);
 			//@formatter:on
 			}
@@ -472,7 +472,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			{
 			//@formatter:off
 			Utils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
-					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, 
+					modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
 					ip.getWidth(),  ip.getHeight()
 					);
 			//@formatter:on
@@ -541,7 +541,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 			}
 
 			// Compute assignments
-			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<FractionalAssignment>(
+			TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(
 					3 * predicted.length);
 			double matchDistance = distance * fitConfig.getInitialPeakStdDev();
 			final RampedScore score = new RampedScore(matchDistance * lowerDistance / 100, matchDistance);
@@ -553,7 +553,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 				// Centre in the middle of the pixel
 				final float x = predicted[j].getX() + 0.5f;
 				final float y = predicted[j].getY() + 0.5f;
-				// Any spots that match 
+				// Any spots that match
 				for (int i = 0; i < nActual; i++)
 				{
 					final double dx = (x - actual[i].getX());
@@ -571,7 +571,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 						if (distance == 0)
 						{
 							// In the case of a match below the distance thresholds
-							// the distance will be 0. To distinguish between candidates all below 
+							// the distance will be 0. To distinguish between candidates all below
 							// the thresholds just take the closest.
 							// We know d2 is below dmin so we subtract the delta.
 							distance -= (dmin - d2);
@@ -782,13 +782,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.ExtendedPlugInFilter#setNPasses(int)
 	 */
 	@Override
 	public void setNPasses(int nPasses)
 	{
-		// Nothing to do		
+		// Nothing to do
 	}
 
 	@Override
@@ -901,7 +901,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider#getFitConfiguration()
 	 */
 	@Override
@@ -912,7 +912,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
 	 * OptionCollectedEvent)
 	 */

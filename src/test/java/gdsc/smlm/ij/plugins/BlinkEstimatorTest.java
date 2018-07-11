@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -83,9 +83,9 @@ public class BlinkEstimatorTest
 	double[] tOn = { 1.5, 3, 8 };
 	double[] tOff = { 2.5, 5, 10 };
 
-	// If true then test against the real population statistics. 
+	// If true then test against the real population statistics.
 	// If false then test against the sampled statistics (i.e. using integer frames).
-	// Note: When false the success rate is very low so the estimation method does actually 
+	// Note: When false the success rate is very low so the estimation method does actually
 	// account for the integer frame sampling and get the population statistics.
 	boolean usePopulationStatistics = true;
 
@@ -221,7 +221,7 @@ public class BlinkEstimatorTest
 		double[] max = new double[] { 256, 256, 32 };
 		double[] min = new double[3];
 		SpatialDistribution distribution = new UniformDistribution(min, max, rand.nextInt());
-		List<CompoundMoleculeModel> compounds = new ArrayList<CompoundMoleculeModel>(1);
+		List<CompoundMoleculeModel> compounds = new ArrayList<>(1);
 		CompoundMoleculeModel c = new CompoundMoleculeModel(1, 0, 0, 0, Arrays.asList(new MoleculeModel(0, 0, 0, 0)));
 		c.setDiffusionRate(diffusionRate);
 		c.setDiffusionType(DiffusionType.RANDOM_WALK);
@@ -237,7 +237,7 @@ public class BlinkEstimatorTest
 		List<LocalisationModel> localisations = imageModel.createImage(molecules, fixedFraction, totalSteps, photons,
 				0.5, false);
 
-		//		// Remove localisations to simulate missed counts. 
+		//		// Remove localisations to simulate missed counts.
 		//		List<LocalisationModel> newLocalisations = new ArrayList<LocalisationModel>(localisations.size());
 		//		boolean[] id = new boolean[fluorophores.size() + 1];
 		//		Statistics photonStats = new Statistics();

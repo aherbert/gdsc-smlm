@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -79,7 +79,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 		alpha = Math.abs(alpha);
 		noPoisson = (mu <= 0);
 
-		// Apply gain to the mean and readout standard deviation. 
+		// Apply gain to the mean and readout standard deviation.
 		// This compresses the probability distribution by alpha. Thus we can compute the
 		// probability using a Poisson or Poisson-Gaussian mixture and then compress the
 		// output probability so the cumulative probability is 1 over the uncompressed range.
@@ -95,7 +95,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 		logAlpha = Math.log(alpha);
 		logNormalisation = ((noPoisson) ? getLogNormalisation(sigmasquared)
-				// Note that this uses the LOG_NORMALISATION (not zero) as the logProbability function 
+				// Note that this uses the LOG_NORMALISATION (not zero) as the logProbability function
 				// uses the getPseudoLikelihood function. It would be zero if the static logProbability
 				// was called.
 				: LOG_NORMALISATION) + logAlpha;
@@ -134,7 +134,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Get the probability of observation x
-	 * 
+	 *
 	 * @param x
 	 *            The observation value (after gain)
 	 * @return The probability
@@ -149,7 +149,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * <p>
 	 * Note the normalisation will be based on the mu used in the constructor of the function. So it may be wrong if the
 	 * mu was below zero on construction and is above zero now, or vice-versa.
-	 * 
+	 *
 	 * @param x
 	 *            The observation value (after gain)
 	 * @param mu
@@ -167,7 +167,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Get the log(p) of observation x
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @return The log of the probability
@@ -182,7 +182,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * <p>
 	 * Note the normalisation will be based on the mu used in the constructor of the function. So it may be wrong if the
 	 * mu was below zero on construction and is above zero now, or vice-versa.
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @param mu
@@ -200,7 +200,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Get the probability of observation x
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @param mu
@@ -234,7 +234,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Get the probability of observation x
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @param mu
@@ -256,7 +256,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Get the log(p) of observation x
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @param mu
@@ -296,7 +296,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for use as the
 	 * likelihood function in maximum likelihood estimation since all values will differ by the same constant but will
 	 * evaluate faster.
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @param mu
@@ -324,7 +324,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	 * function to 1. It differs by a constant value of -log(1 / sqrt(2 * PI)). This function is suitable for use as the
 	 * likelihood function in maximum likelihood estimation since all values will differ by the same constant but will
 	 * evaluate faster.
-	 * 
+	 *
 	 * @param x
 	 *            The observation value
 	 * @param mu
@@ -345,7 +345,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Return the initial saddle point estimated by the Pade approximation
-	 * 
+	 *
 	 * @param x
 	 * @param mu
 	 * @param sigmasquared
@@ -375,7 +375,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Return the initial saddle point estimated by the Picard approximation
-	 * 
+	 *
 	 * @param x
 	 * @param mu
 	 * @param sigmasquared
@@ -400,7 +400,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	/**
 	 * Returns the saddlepoint found by Newton iteration for a given x, mu, sigmasquared and an initial estimate of the
 	 * saddle point (found with either the Pade or Picard approach)
-	 * 
+	 *
 	 * @param x
 	 * @param mu
 	 * @param sigmasquared
@@ -443,7 +443,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 	/**
 	 * Return the saddlepoint approximation to the log of p(x,mu,sigmasquared) given the saddle point found by the
 	 * Newton iteration. Remember the sqrt(2*PI) factor has been left out.
-	 * 
+	 *
 	 * @param x
 	 * @param mu
 	 * @param sigmasquared
@@ -459,7 +459,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Return if using the Picard approximation for the initial saddle point
-	 * 
+	 *
 	 * @return True if using the Picard approximation
 	 */
 	public boolean isUsePicardApproximation()
@@ -469,7 +469,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/**
 	 * Specify whether to use the Picard approximation for the initial saddle point. The alternative is Pade.
-	 * 
+	 *
 	 * @param usePicardApproximation
 	 *            True to use the Picard approximation
 	 */
@@ -480,7 +480,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
@@ -491,7 +491,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	@Override

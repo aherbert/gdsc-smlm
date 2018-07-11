@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -44,7 +44,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param npeaks
 	 *            The number of peaks
 	 * @param maxx
@@ -61,7 +61,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#copy()
 	 */
 	@Override
@@ -89,7 +89,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.function.NonLinearFunction#initialise(double[])
 	 */
 	@Override
@@ -182,7 +182,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
 	 * <p>
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int, double[])
 	 */
 	@Override
@@ -192,7 +192,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		int apos = 0;
 		int dydapos = 0;
 
-		// First parameter is the background level 
+		// First parameter is the background level
 		double y = a[BACKGROUND];
 		dyda[dydapos++] = 1.0; // Gradient for a constant background is 1
 
@@ -263,7 +263,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 	 * Evaluates an 2-dimensional elliptical Gaussian function for multiple peaks.
 	 * <p>
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#eval(int)
 	 */
 	@Override
@@ -272,7 +272,7 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction
 		// Track the position of the parameters
 		int apos = 0;
 
-		// First parameter is the background level 
+		// First parameter is the background level
 		double y = a[BACKGROUND];
 
 		// Unpack the predictor into the dimensions

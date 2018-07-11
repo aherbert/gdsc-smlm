@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -93,7 +93,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -141,7 +141,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		}
 
 		// Rank spots
-		rankedResults = new ArrayList<PeakResultRank>(results.size());
+		rankedResults = new ArrayList<>(results.size());
 
 		// Data for the sorting
 		final PrecisionResultProcedure pp;
@@ -249,7 +249,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				yValues[spotNumber++] = recoverScore(rank.score);
 			}
 
-			// Set the min and max y-values using 1.5 x IQR 
+			// Set the min and max y-values using 1.5 x IQR
 			DescriptiveStatistics stats = new DescriptiveStatistics();
 			for (float v : yValues)
 				stats.addValue(v);
@@ -283,7 +283,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		final int size = 2 * radius + 1;
 		ImageStack spots = new ImageStack(size, size, rankedResults.size());
 
-		// To assist the extraction of data from the image source, process them in time order to allow 
+		// To assist the extraction of data from the image source, process them in time order to allow
 		// frame caching. Then set the appropriate slice in the result stack
 		Collections.sort(rankedResults, new Comparator<PeakResultRank>()
 		{
@@ -351,7 +351,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		ImagePlus imp = Utils.display(TITLE, spots);
 		imp.setRoi((PointRoi) null);
 
-		// Make bigger		
+		// Make bigger
 		for (int i = 10; i-- > 0;)
 			imp.getWindow().getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
 	}
@@ -469,7 +469,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 	/**
 	 * Get the relative change factor between f and g
-	 * 
+	 *
 	 * @param f
 	 * @param g
 	 * @return
@@ -577,7 +577,7 @@ public class SpotInspector implements PlugIn, MouseListener
 				final int maxY = y + radius + 1;
 
 				// Create ROIs
-				final ArrayList<float[]> spots = new ArrayList<float[]>();
+				final ArrayList<float[]> spots = new ArrayList<>();
 				results.forEach(DistanceUnit.PIXEL, new XYResultProcedure()
 				{
 					@Override

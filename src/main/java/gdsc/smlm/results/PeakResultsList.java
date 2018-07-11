@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -36,7 +36,7 @@ import gdsc.smlm.data.config.PSFProtos.PSF;
  */
 public class PeakResultsList extends AbstractPeakResults implements PeakResults
 {
-	private List<PeakResults> results = new ArrayList<PeakResults>();
+	private List<PeakResults> results = new ArrayList<>();
 
 	/**
 	 * Add a result format to the output. If a PeakResultsList is passed then it will be
@@ -44,7 +44,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 	 * of any input PeakResultsList since only the children will remain within this list.
 	 * <p>
 	 * Sets the settings (source and configuration) of the child to the same as this list
-	 * 
+	 *
 	 * @param peakResults
 	 */
 	public void addOutput(PeakResults peakResults)
@@ -91,7 +91,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#begin()
 	 */
 	@Override
@@ -103,7 +103,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -137,7 +137,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#size()
 	 */
 	@Override
@@ -148,7 +148,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#end()
 	 */
 	@Override
@@ -160,7 +160,7 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	@Override
@@ -188,13 +188,13 @@ public class PeakResultsList extends AbstractPeakResults implements PeakResults
 			//newList.addOutput(peakResults);
 
 			// This assumes the settings are OK, i.e. the result was added
-			// using addOutput(...). 
+			// using addOutput(...).
 			newList.results.add(SynchronizedPeakResults.create(peakResults));
 		}
 		return newList;
 	}
 
-	// Pass through all the modifications to the list objects as well as this 
+	// Pass through all the modifications to the list objects as well as this
 	// so that any new list objects can copy the settings.
 
 	@Override

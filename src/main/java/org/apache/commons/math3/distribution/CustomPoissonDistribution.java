@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -61,13 +61,13 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 {
 	/**
 	 * Default maximum number of iterations for cumulative probability calculations.
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final int DEFAULT_MAX_ITERATIONS = 10000000;
 	/**
 	 * Default convergence criterion.
-	 * 
+	 *
 	 * @since 2.1
 	 */
 	public static final double DEFAULT_EPSILON = 1e-12;
@@ -97,7 +97,7 @@ public class CustomPoissonDistribution extends AbstractIntegerDistribution
 	/** The uninitialised flag. Indicates that the factors have not been computed for random sampling */
 	private boolean uninitialised;
 
-	// Pre-computed for sampling the mean 
+	// Pre-computed for sampling the mean
 	private double lambda;
 	private double lambdaFractional;
 	private double logLambda;

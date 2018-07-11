@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	 * Pixels within border regions (width = ceil(w)) are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -95,7 +95,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float[] sum2 = data.clone();
 		sumFilter2.rollingBlockFilterInternal(sum2, maxx, maxy, n1);
 
-		// Get the average by adding the inner sum to the weighted edge pixels.  
+		// Get the average by adding the inner sum to the weighted edge pixels.
 		final double area = (2 * w + 1) * (2 * w + 1);
 
 		final float edgeWeight;
@@ -128,7 +128,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	 * Compute the block average within a 2w+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -167,7 +167,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 		final float[] sum2 = data.clone();
 		sumFilter2.rollingBlockFilter(sum2, maxx, maxy, n1);
 
-		// Get the average by adding the inner sum to the weighted edge pixels.  
+		// Get the average by adding the inner sum to the weighted edge pixels.
 		final double area = (2 * w + 1) * (2 * w + 1);
 
 		final float edgeWeight;
@@ -197,7 +197,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	 * Pixels within border regions (width = ceil(w)) are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -271,7 +271,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	 * Compute the block average within a 2w+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -336,7 +336,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -361,7 +361,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 	/**
 	 * The average for block size n and n+1 is linearly interpolated. Set this to true to use a weight of (w-n) for the
 	 * outer average. Set to false to use a weight based on the area of the edge pixels in the (2w+1) region.
-	 * 
+	 *
 	 * @param simpleInterpolation
 	 *            true for simple interpolation
 	 */
@@ -372,7 +372,7 @@ public class AreaAverageFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
 	 */
 	@Override

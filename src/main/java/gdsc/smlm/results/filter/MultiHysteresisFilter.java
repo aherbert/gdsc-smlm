@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -241,7 +241,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getNumberOfParameters()
 	 */
 	@Override
@@ -252,7 +252,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
@@ -331,7 +331,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
@@ -390,7 +390,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
 	 */
 	@Override
@@ -414,7 +414,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#create(double[])
 	 */
 	@Override
@@ -428,7 +428,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
 	 */
 	@Override
@@ -436,7 +436,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 	{
 		super.weakestParameters(parameters);
 
-		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold  
+		// Hysteresis filters require all the potential candidates, so disable hysteresis above the candidate threshold
 		setMin(parameters, 4, strictSignal - rangeSignal);
 		parameters[5] = 0;
 		setMin(parameters, 6, strictSnr - rangeSnr);
@@ -453,7 +453,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#newChromosome(double[])
 	 */
 	@Override
@@ -468,7 +468,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
@@ -482,7 +482,7 @@ public class MultiHysteresisFilter extends HysteresisFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
 	@Override

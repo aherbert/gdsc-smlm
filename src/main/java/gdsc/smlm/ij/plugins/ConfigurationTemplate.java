@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -107,7 +107,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
@@ -248,7 +248,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			Opener opener = new Opener();
 			opener.setSilentMode(true);
 
-			// The tifPath may be a system resource or it may be a file 
+			// The tifPath may be a system resource or it may be a file
 			File file = new File(tifPath);
 			if (file.exists())
 			{
@@ -284,7 +284,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	static
 	{
 		// Maintain the names in the order they are added
-		map = new LinkedHashMap<String, ConfigurationTemplate.Template>();
+		map = new LinkedHashMap<>();
 
 		createInlineTemplates();
 
@@ -294,7 +294,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	private static void createInlineTemplates()
 	{
 		// Q. What settings should be in the template?
-		inlineTemplates = new LinkedHashMap<String, ConfigurationTemplate.Template>();
+		inlineTemplates = new LinkedHashMap<>();
 
 		FitEngineConfiguration config = new FitEngineConfiguration();
 		FitConfiguration fitConfig = config.getFitConfiguration();
@@ -372,8 +372,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	private static String[] listInlineTemplates()
 	{
-		// Turn the keys into an array 
-		ArrayList<String> names = new ArrayList<String>(inlineTemplates.keySet());
+		// Turn the keys into an array
+		ArrayList<String> names = new ArrayList<>(inlineTemplates.keySet());
 		return names.toArray(new String[inlineTemplates.size()]);
 	}
 
@@ -411,7 +411,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 					if (templateResources == null)
 					{
 						TemplateResource[] list = listTemplateResources();
-						templateResources = new HashMap<String, TemplateResource>(list.length);
+						templateResources = new HashMap<>(list.length);
 						for (TemplateResource r : list)
 							templateResources.put(r.name, r);
 					}
@@ -425,7 +425,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 		if (map.size() != settings.getDefaultTemplatesCount())
 		{
-			// This occurs if we cannot reload some of the templates. 
+			// This occurs if we cannot reload some of the templates.
 			// Prevent this from happening again.
 			saveLoadedTemplates();
 		}
@@ -510,7 +510,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 			return new TemplateResource[0];
 		BufferedReader input = new BufferedReader(new InputStreamReader(templateListStream));
 		String line;
-		ArrayList<TemplateResource> list = new ArrayList<TemplateResource>();
+		ArrayList<TemplateResource> list = new ArrayList<>();
 		try
 		{
 			while ((line = input.readLine()) != null)
@@ -718,7 +718,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/**
 	 * Check if this is a custom template, i.e. not a standard GDSC SMLM template
-	 * 
+	 *
 	 * @param name
 	 *            The name of the template
 	 * @return True if a custom template
@@ -765,7 +765,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 	 */
 	public static String[] getTemplateNamesWithImage()
 	{
-		TurboList<String> templateNames = new TurboList<String>(map.size());
+		TurboList<String> templateNames = new TurboList<>(map.size());
 		for (Map.Entry<String, Template> entry : map.entrySet())
 			if (entry.getValue().hasImage())
 				templateNames.add(entry.getKey());
@@ -797,7 +797,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		{
 			return name;
 		}
-		
+
 		static TemplateOption forNumber(int i)
 		{
 			TemplateOption[] values = TemplateOption.values();
@@ -810,7 +810,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -901,7 +901,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		int count = 0;
 
 		// Keep a hash of those not loaded from inline resources
-		final HashSet<String> remaining = new HashSet<String>(selected.size());
+		final HashSet<String> remaining = new HashSet<>(selected.size());
 		for (int i = 0; i < selected.size(); i++)
 		{
 			String name = selected.get(i);
@@ -921,7 +921,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		if (!remaining.isEmpty())
 		{
 			// Build a list of resources to load
-			TurboList<TemplateResource> list = new TurboList<TemplateResource>(remaining.size());
+			TurboList<TemplateResource> list = new TurboList<>(remaining.size());
 			for (TemplateResource t : templates)
 			{
 				if (remaining.contains(t.name))
@@ -1253,7 +1253,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -1273,7 +1273,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.ImageListener#imageOpened(ij.ImagePlus)
 	 */
 	@Override
@@ -1284,7 +1284,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.ImageListener#imageClosed(ij.ImagePlus)
 	 */
 	@Override
@@ -1294,7 +1294,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
 	 */
 	@Override
@@ -1321,7 +1321,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 		templateId = templateImp.getID();
 		currentSlice = 0;
 		headings = "";
-		text = new TIntObjectHashMap<String>();
+		text = new TIntObjectHashMap<>();
 		Object info = templateImp.getProperty("Info");
 		if (info != null)
 		{

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -122,7 +122,7 @@ public class FloatDHT3D extends FloatImage3D
 
 	/**
 	 * Performs a forward transform, converting this image into the frequency domain.
-	 * 
+	 *
 	 * @throws IllegalArgumentException
 	 *             If already in the frequency domain
 	 */
@@ -421,7 +421,7 @@ public class FloatDHT3D extends FloatImage3D
 					int j = ns_m_s * nr_by_nc + nr_m_r * nc + nc_m_c;
 					double h2e = ((double) h2[i] + (double) h2[j]) / 2.0;
 					double h2o = ((double) h2[i] - (double) h2[j]) / 2.0;
-					// As per multiply but reverse the addition sign for the conjugate  
+					// As per multiply but reverse the addition sign for the conjugate
 					tmp[i] = (float) (h1[i] * h2e - h1[j] * h2o);
 				}
 			}
@@ -541,7 +541,7 @@ public class FloatDHT3D extends FloatImage3D
 	 * of this image by the specified image. Both images are assumed to be in
 	 * the frequency domain. Division in the frequency domain is equivalent
 	 * to deconvolution in the space domain.
-	 * 
+	 *
 	 * @param h2e
 	 *            the pre-initialised h2e value
 	 * @param h2o
@@ -710,14 +710,14 @@ public class FloatDHT3D extends FloatImage3D
 
 	/**
 	 * Swap octants so the power spectrum origin is at the centre of the image.
-	 * 
+	 *
 	 * <pre>
 	 * 1 +++ <=> 7 ---
 	 * 2 -++ <=> 8 +--
 	 * 3 --+ <=> 5 ++-
 	 * 4 +-+ <=> 6 -+-
 	 * </pre>
-	 * 
+	 *
 	 * Requires even dimensions.
 	 *
 	 * @throws IllegalArgumentException
@@ -731,14 +731,14 @@ public class FloatDHT3D extends FloatImage3D
 
 	/**
 	 * Swap octants of the specified image stack so the power spectrum origin is at the centre of the image.
-	 * 
+	 *
 	 * <pre>
 	 * 1 +++ <=> 7 ---
 	 * 2 -++ <=> 8 +--
 	 * 3 --+ <=> 5 ++-
 	 * 4 +-+ <=> 6 -+-
 	 * </pre>
-	 * 
+	 *
 	 * Requires even dimensions.
 	 *
 	 * @param image
@@ -773,7 +773,7 @@ public class FloatDHT3D extends FloatImage3D
 
 			//@formatter:off
 			// We swap: 0 <=> nc_2, 0 <=> nc_2
-			// 1 <=> 7 
+			// 1 <=> 7
 			swap(a, ia, a, ib, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
 			swap(a, ia, a, ib, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);
@@ -830,14 +830,14 @@ public class FloatDHT3D extends FloatImage3D
 
 	/**
 	 * Swap octants of the specified image stack so the power spectrum origin is at the centre of the image.
-	 * 
+	 *
 	 * <pre>
 	 * 1 +++ <=> 7 ---
 	 * 2 -++ <=> 8 +--
 	 * 3 --+ <=> 5 ++-
 	 * 4 +-+ <=> 6 -+-
 	 * </pre>
-	 * 
+	 *
 	 * Requires even dimensions in a 32-bit float stack.
 	 *
 	 * @param stack
@@ -869,7 +869,7 @@ public class FloatDHT3D extends FloatImage3D
 			float[] b = (float[]) stack.getPixels(1 + s + ns_2);
 			//@formatter:off
 			// We swap: 0 <=> nc_2, 0 <=> nc_2
-			// 1 <=> 7 
+			// 1 <=> 7
 			FHT2.swap(a, b, nc, nc_2,    0,    0, nr_2, nc_2, nr_2, tmp);
 			// 2 <=> 8
 			FHT2.swap(a, b, nc,    0,    0, nc_2, nr_2, nc_2, nr_2, tmp);

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -391,7 +391,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		if (isRawFit())
 		{
-			// No camera calibration so assume raw data is in photons 
+			// No camera calibration so assume raw data is in photons
 			gain = 1;
 		}
 
@@ -527,7 +527,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		updateWidthThreshold();
 		updateMinWidthThreshold();
 
-		// This depends on the width. 
+		// This depends on the width.
 		updateCoordinateShift();
 	}
 
@@ -631,19 +631,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			// Throw to ensure the filter is OK
 			throw new IllegalStateException("Unrecognised smart filter: " + xml);
-			// or 
+			// or
 			//setDirectFilter(null);
 		}
 
 		// This updates the SmartFilter flag and the SmartFilterString.
 		// Just set the filter directly
-		//setDirectFilter((DirectFilter) f);		
+		//setDirectFilter((DirectFilter) f);
 		this.directFilter = (DirectFilter) f;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -652,8 +652,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// Make a new initialised instance. This will have new settings builder objects.
 		return new FitConfiguration(getFitSettings(), getCalibration(), getPSF()).copySettings(this);
 
-		//		// This is not a complete duplicate. The settings builder objects with the 
-		//		// underlying configuration will be the same between all instances. 
+		//		// This is not a complete duplicate. The settings builder objects with the
+		//		// underlying configuration will be the same between all instances.
 		//		try
 		//		{
 		//			FitConfiguration f = (FitConfiguration) super.clone();
@@ -732,7 +732,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (gaussianFunction != null && (gaussianFunction.getNPeaks() != npeaks || gaussianFunction.getMaxX() != maxx ||
 				gaussianFunction.getMaxY() != maxy))
 		{
-			// The gaussian function cannot be reused. 
+			// The gaussian function cannot be reused.
 			// Do not call invalidate as it also invalidates the solver and we can re-use that.
 			//invalidateGaussianFunction();
 			gaussianFunction = null;
@@ -883,7 +883,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Set an estimate for the peak standard deviation used to initialise the fit for dimension 0
 	 * <p>
 	 * Setting this will update the value in {@link #getCoordinateShift()}
-	 * 
+	 *
 	 * @param initialPeakStdDev0
 	 *            An estimate for the peak standard deviation used to initialise the fit for dimension 0
 	 */
@@ -927,7 +927,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Set an estimate for the peak standard deviation used to initialise the fit for dimension 1
 	 * <p>
 	 * Setting this will update the value in {@link #getCoordinateShift()}
-	 * 
+	 *
 	 * @param initialPeakStdDev1
 	 *            An estimate for the peak standard deviation used to initialise the fit for dimension 1
 	 */
@@ -973,7 +973,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * <p>
 	 * Note: This is also true if validation is active and the precision method requires computation of the deviations
 	 * (see {@link #isFilterRequiresDeviations()}).
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#isComputeDeviations()
 	 */
 	@Override
@@ -1109,7 +1109,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * Use this to turn off fitting of the signal. This should be used with caution. The setting only applies to fixed
 	 * width fitting and can be used to benchmark position accuracy when fitting signals of known strength.
-	 * 
+	 *
 	 * @param noSignalFitting
 	 *            True if not fitting the signal
 	 */
@@ -1198,7 +1198,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Set the maximum absolute coordinate shift for a good fit. This is also set when calling
 	 * {@link #setCoordinateShiftFactor(double)} or any of the standard deviations, e.g.
 	 * {@link #setInitialPeakStdDev(double)}. If these are set then the coordinate shift will change.
-	 * 
+	 *
 	 * @param coordinateShift
 	 *            The maximum absolute coordinate shift for a good fit
 	 */
@@ -1220,7 +1220,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * Set to zero to disable.
 	 * <p>
 	 * Setting this will update the value in {@link #getCoordinateShift()}
-	 * 
+	 *
 	 * @param shiftFactor
 	 *            The maximum absolute coordinate shift for a good fit, relative to the largest peak width
 	 */
@@ -1333,7 +1333,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Set the signal strength (Signal-to-Noise Ratio, SNR) for a good fit.
-	 * 
+	 *
 	 * @param signalStrength
 	 *            The signal strength
 	 */
@@ -1364,7 +1364,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 * <p>
 	 * Note that minSignal is created appropriately from minPhotons using the
 	 * type of fitter, see {@link #isFitCameraCounts()}.
-	 * 
+	 *
 	 * @param minPhotons
 	 *            The minimum number of photons
 	 */
@@ -1594,7 +1594,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Set the image noise used to determine the Signal-to-Noise Ratio (SNR) for a good fit.
-	 * 
+	 *
 	 * @param noise
 	 *            The image noise.
 	 */
@@ -1843,7 +1843,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * Specify if the camera noise should be modelled during maximum likelihood fitting. If true then the read noise
 	 * must be set. If the EmCCD property is true then the gain must also be set.
-	 * 
+	 *
 	 * @param modelCamera
 	 *            Set to true to model the camera
 	 */
@@ -1985,7 +1985,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
-	 * 
+	 *
 	 * @return the gradientLineMinimisation True if using the gradient for line minimisation
 	 */
 	public boolean isGradientLineMinimisation()
@@ -1995,7 +1995,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * This setting applies to the conjugate gradient method of the Maximum Likelihood Estimator
-	 * 
+	 *
 	 * @param gradientLineMinimisation
 	 *            Set to true to use the gradient for line minimisation
 	 */
@@ -2090,7 +2090,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				maxIterations = -maxIterations;
 
 			boolean minimiseValue = isMinimiseValue();
-			// If the value is zero then ignore this for convergence. 
+			// If the value is zero then ignore this for convergence.
 			toleranceChecker = new ToleranceChecker(minimiseValue, getIfStrictlyPositive(getRelativeThreshold()),
 					getIfStrictlyPositive(getAbsoluteThreshold()),
 					getIfStrictlyPositive(getParameterRelativeThreshold()),
@@ -2114,7 +2114,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				return true;
 
 			case FitSolver.LVM_MLE_VALUE:
-				// Minimises the log-likelihood ratio 
+				// Minimises the log-likelihood ratio
 				return true;
 
 			case FitSolver.MLE_VALUE:
@@ -2245,7 +2245,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.Gaussian2DFitConfiguration#validateFit(int, double[], double[], double[])
 	 */
 	@Override
@@ -2263,7 +2263,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Check peak to see if the fit was sensible. Assumes a single peak.
-	 * 
+	 *
 	 * @param initialParams
 	 *            The initial peak parameters
 	 * @param params
@@ -2297,13 +2297,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		// This requires local background and noise so that validation works the same
 		// way for simple filteroing as it would for a PreprocessedPeakResult.
 
-		// TODO - Update this so it can use a callback function to get 
+		// TODO - Update this so it can use a callback function to get
 		// local background / noise.
 		// These can be cached by the FitWorker so it doesn't have to compute them again.
 
 		if (isDirectFilter())
 		{
-			// Always specify a new result and we have no local background or offset. 
+			// Always specify a new result and we have no local background or offset.
 			// Use the global noise.
 			if (peakResultValidationData != null)
 			{
@@ -2327,7 +2327,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		}
 
 		// Check if outside the fit window.
-		// TODO - Make this configurable per peak. At the moment we only use this in BenchmarkSpotFit where 
+		// TODO - Make this configurable per peak. At the moment we only use this in BenchmarkSpotFit where
 		// additional peaks will be neighbours. In the future we may want to control this better.
 		if (isRegionValidation())
 		{
@@ -2372,8 +2372,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				return setValidationResult(FitStatus.Z_MOVED, z);
 		}
 
-		// Check signal threshold. 
-		// The threshold should be set in the same units as those used during fitting. 
+		// Check signal threshold.
+		// The threshold should be set in the same units as those used during fitting.
 		final double signal = params[Gaussian2DFunction.SIGNAL + offset];
 		// Compare the signal to the desired signal strength
 		if (signal < minSignal)
@@ -2395,7 +2395,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			xsd = astigmatismZModel.getSx(z);
 			ysd = astigmatismZModel.getSy(z);
 
-			// Check widths. This may be the only filter used even if z-fitting 
+			// Check widths. This may be the only filter used even if z-fitting
 			// (i.e. a z-depth filter is not used)
 			double xFactor = xsd / initialParams[Gaussian2DFunction.X_SD + offset];
 			double yFactor = ysd / initialParams[Gaussian2DFunction.Y_SD + offset];
@@ -2627,7 +2627,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			// for an EM-CCD can be modelled as half the standard Poisson fisher information. So
 			// double the deviations for all parameters.
 
-			// Scale all 
+			// Scale all
 			for (int i = 0; i < paramsDev.length; i++)
 				paramsDev[i] *= 2;
 		}
@@ -2760,7 +2760,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			if (peakResultValidationData != null)
 			{
-				// Because this is dynamic the id must be reset. 
+				// Because this is dynamic the id must be reset.
 				// The other arguments should be identical to what is already stored.
 				peakResultValidationData.setResult(id, initialParams, params, paramsDev);
 				return (float) peakResultValidationData.getNoise();
@@ -2794,7 +2794,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		{
 			if (peakResultValidationData != null)
 			{
-				// Because this is dynamic the id must be reset. 
+				// Because this is dynamic the id must be reset.
 				// The other arguments should be identical to what is already stored.
 				peakResultValidationData.setResult(id, initialParams, params, paramsDev);
 				double localBackground = peakResultValidationData.getLocalBackground();
@@ -2930,7 +2930,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
 		 */
 		@Override
@@ -2955,7 +2955,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
 		 */
 		@Override
@@ -2966,7 +2966,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
 		 */
 		@Override
@@ -2977,7 +2977,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
 		 */
 		@Override
@@ -2988,7 +2988,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
 		 */
 		@Override
@@ -3205,14 +3205,14 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * Check if performing raw data fitting. In this mode then no camera model is available to map the data counts to
 	 * photons. The gain is assumed to be 1.
-	 * 
+	 *
 	 * @return Set to true if raw fitting
 	 */
 	public boolean isRawFit()
 	{
 		// This is only true if there is no camera calibration.
 		// Otherwise the camera details can be used to convert input data in camera counts
-		// to photo-electrons and all fitting is done assuming the signal is photo-electrons.  
+		// to photo-electrons and all fitting is done assuming the signal is photo-electrons.
 		if (calibration.getCameraTypeValue() == CameraType.CAMERA_TYPE_NA_VALUE)
 			return true;
 		return false;
@@ -3254,7 +3254,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	 */
 	public boolean requireStrictlyPositiveFunction()
 	{
-		// Only the LSE variants can fit negatives. The MLE variants all require a positive function. 
+		// Only the LSE variants can fit negatives. The MLE variants all require a positive function.
 		switch (getFitSolverValue())
 		{
 			case FitSolver.LVM_LSE_VALUE:
@@ -3293,17 +3293,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 			{
 				// We have to update the clamping.
 				// Note this code is only executed if the clamp settings have not changed
-				// (since changes to those settings invalidate the solver) and the 
+				// (since changes to those settings invalidate the solver) and the
 				// function settings have not changed (since that invalidates the function
 				// and the solver).
-				// All that is different is the number of peaks in the function. 
+				// All that is different is the number of peaks in the function.
 				if (gaussianFunction.getNPeaks() > nClampPeaks)
 					setClampValues(bounds);
 			}
 		}
 
 		// Special case where the data and estimate are in counts but
-		// the function solver requires the function to output an expected 
+		// the function solver requires the function to output an expected
 		// number of photons.
 		boolean doScaling = getFitSolverValue() == FitSolver.MLE_VALUE;
 		assert !doScaling || functionSolver instanceof MaximumLikelihoodFitter;
@@ -3510,7 +3510,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 				// sCMOS requires per-pixel bias, gain and read noise (var/gain^2)
 			case CameraType.SCMOS_VALUE:
 
-				// Handle the camera checks within getCameraModel(). This throws if the 
+				// Handle the camera checks within getCameraModel(). This throws if the
 				// camera model is invalid
 				getCameraModel();
 				break;
@@ -3594,7 +3594,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * This returns the representation of this object as a smart filter. This ignores any current smart filter and
 	 * only uses the standard filtering settings.
-	 * 
+	 *
 	 * @return the smart filter if using this object as a smart filter.
 	 */
 	public DirectFilter getDefaultSmartFilter()
@@ -3625,7 +3625,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 	/**
 	 * This returns the XML representation of this object as a smart fitler. This ignores any current smart filter and
 	 * only uses the standard filtering settings.
-	 * 
+	 *
 	 * @return the smart filter XML if using this object as a smart filter.
 	 */
 	public String getDefaultSmartFilterXML()
@@ -3684,7 +3684,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup()
 	 */
 	@Override
@@ -3695,7 +3695,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(int)
 	 */
 	@Override
@@ -3737,7 +3737,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#setup(gdsc.smlm.results.filter.FilterSetupData[])
 	 */
 	@Override
@@ -3785,7 +3785,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupFlags()
 	 */
 	@Override
@@ -3797,7 +3797,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterSetupData()
 	 */
 	@Override
@@ -3809,7 +3809,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#accept(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	@Override
@@ -3820,7 +3820,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#validate(gdsc.smlm.results.filter.PreprocessedPeakResult)
 	 */
 	@Override
@@ -3838,7 +3838,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getValidationFlags()
 	 */
 	@Override
@@ -3885,20 +3885,20 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 		if (directFilter != null)
 			return directFilter.validate(peak);
 
-		// Q. Is this necessary? Simple filtering is to support turning off 
+		// Q. Is this necessary? Simple filtering is to support turning off
 		// filtering in the validatePeak(...) method. Set a debug point to check
 		// if this is used.
 		if (isDisableSimpleFilter())
 			return 0;
 
-		// Do filtering 
+		// Do filtering
 		if (peak.getSignal() < getMinPhotons())
 			return V_PHOTONS;
 		if (peak.getSNR() < getSignalStrength())
 			return V_SNR;
 		if (widthEnabled)
 		{
-			// Handle switching to a 2 axis width filter. 
+			// Handle switching to a 2 axis width filter.
 			// Note this will ignore any flags passed to the IDirectFilter#setup methods
 			// to control the filter.
 			if (isTwoAxisGaussian2D)
@@ -3952,7 +3952,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getFilterType()
 	 */
 	@Override
@@ -3963,7 +3963,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#getResult()
 	 */
 	@Override
@@ -3974,7 +3974,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.IDirectFilter#copy()
 	 */
 	@Override
@@ -3993,7 +3993,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Set to true to clamp the parameter update to a maximum value
-	 * 
+	 *
 	 * @param useClamping
 	 *            Set to true to clamp the parameter update to a maximum value
 	 */
@@ -4013,7 +4013,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
 	/**
 	 * Set to true to update the clamp values when the parameter update direction changes
-	 * 
+	 *
 	 * @param useDynamicClamping
 	 *            Set to true to update the clamp values when the parameter update direction changes
 	 */

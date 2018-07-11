@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,7 +52,7 @@ public class GaussianFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
 	 */
 	@Override
@@ -106,7 +106,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * Pixels within border regions (defined by 3 sigma) are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -128,7 +128,7 @@ public class GaussianFilter extends BaseWeightedFilter
 
 	/**
 	 * Get the border that will be ignored for the specified Gaussian standard deviation
-	 * 
+	 *
 	 * @param sigma
 	 *            the Gaussian standard deviation
 	 * @return The border
@@ -142,7 +142,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * Compute the Gaussian convolution.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -162,7 +162,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * Compute the Gaussian convolution.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -183,7 +183,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	private void convolve(float[] data, Rectangle roi, final int maxx, final int maxy, final double sigmaX,
 			final double sigmaY, final int extraLines)
 	{
-		// If not all data points will be over-written clone the input before blurring 
+		// If not all data points will be over-written clone the input before blurring
 		float[] wdata = (extraLines != 0) ? data.clone() : data;
 
 		if (hasWeights())
@@ -215,7 +215,7 @@ public class GaussianFilter extends BaseWeightedFilter
 
 			if (extraLines != 0)
 			{
-				// Copy back to the input array so that the extra blurred lines 
+				// Copy back to the input array so that the extra blurred lines
 				// are not present.
 				NonNormaliser.INSTANCE.normalise(wdata, data, maxx, maxy, extraLines);
 			}
@@ -224,7 +224,7 @@ public class GaussianFilter extends BaseWeightedFilter
 
 	/**
 	 * Blur an image in one direction (x or y) by a Gaussian.
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param roi
@@ -328,7 +328,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	 * Input line pixel # <code>unscaled0</code> will correspond to output
 	 * line pixel # 0. <code>unscaled0</code> may be negative. Out-of-line
 	 * pixels of the input are replaced by the edge pixels.
-	 * 
+	 *
 	 * @param pixels
 	 *            input array
 	 * @param cache
@@ -523,7 +523,7 @@ public class GaussianFilter extends BaseWeightedFilter
 			pixels[p] = result;
 		}
 		for (; i < writeTo; i++, p += pointInc)
-		{ //while the sum would include pixels >= length 
+		{ //while the sum would include pixels >= length
 			float result = input[i] * kern0;
 			if (i < kRadius)
 				result += kernSum[i] * first;
@@ -624,7 +624,7 @@ public class GaussianFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -637,7 +637,7 @@ public class GaussianFilter extends BaseWeightedFilter
 	/**
 	 * Get half the width of the region smoothed by the filter for the specified standard deviation. The full region
 	 * size is 2N + 1
-	 * 
+	 *
 	 * @param sigma
 	 * @return The half width
 	 */

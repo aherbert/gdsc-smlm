@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -117,7 +117,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/**
 	 * Locate the index within the gradient indices for the specified parameter
-	 * 
+	 *
 	 * @param parameterIndex
 	 * @return the gradient index (or -1 if not present)
 	 */
@@ -201,7 +201,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		public boolean initialise(int id, double tI, double tX, double tY, double tZ, int order)
 		{
 			// Map z to a position in the spline
-			// We want 0 to be in the centre. 
+			// We want 0 to be in the centre.
 			// Note: Scale up the input parameter to the spline scale.
 			double z = cz + scale * tZ;
 
@@ -210,21 +210,21 @@ public abstract class CubicSplineFunction implements Gradient2Function
 				return false;
 			}
 
-			// Shift the scaled XY spline bounds by the target centre 
+			// Shift the scaled XY spline bounds by the target centre
 			double x1 = lx + tX;
 			double x2 = ux + tX;
 			double y1 = ly + tY;
 			double y2 = uy + tY;
 
-			// Check if it is within the region 
+			// Check if it is within the region
 			if (!(x2 > 0 && y2 > 0 && x1 < maxx && y1 < maxy))
 			{
 				return false;
 			}
 
-			// Convert the lower bounds to integer grid in the target region, 
+			// Convert the lower bounds to integer grid in the target region,
 			// i.e. we sample the region at x=0,1,2,...
-			// We want the first integer that the function overlaps, 
+			// We want the first integer that the function overlaps,
 			// i.e. can interpolate a value for so it must be above the lower bounds
 			int ix1 = (int) Math.ceil(x1);
 			int iy1 = (int) Math.ceil(y1);
@@ -255,7 +255,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			for (int i = 0, xindex = ix0; i < maxx; i++)
 			{
 				xindex += scale;
-				// Note that in theory we could interpolate if xindex==maxSx 
+				// Note that in theory we could interpolate if xindex==maxSx
 				// but this requires a new power table with (x-ix)==1 and previous xindex.
 				// For speed this situation is ignored to avoid computing additional
 				// power tables.
@@ -298,7 +298,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 		{
 			// pre-increment yindex
 			yindex += scale;
-			// Note that in theory we could interpolate if yindex==maxSy 
+			// Note that in theory we could interpolate if yindex==maxSy
 			// but this requires a new power table with (y-iy)==1 and previous yindex.
 			// For speed this situation is ignored to avoid computing additional
 			// power tables.
@@ -425,7 +425,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			{
 				final double v = computeValue1(xySplines[yxindex]);
 				// Copy the gradients into the correct position and account for the intensity.
-				// Negate the gradients as a shift of the position moves the spline the 
+				// Negate the gradients as a shift of the position moves the spline the
 				// other direction. Also scale the gradients appropriately.
 				df_da[offset] = scale2 * v;
 				df_da[offset + 1] = neg_tI_by_s3 * dfda[0];
@@ -473,7 +473,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 			{
 				final double v = computeValue2(xySplines[yxindex]);
 				// Copy the gradients into the correct position and account for the intensity.
-				// Negate the gradients as a shift of the position moves the spline the 
+				// Negate the gradients as a shift of the position moves the spline the
 				// other direction. Also scale the gradients appropriately.
 				df_da[offset] = scale2 * v;
 				df_da[offset + 1] = neg_tI_by_s3 * dfda[0];
@@ -510,7 +510,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/**
 		 * Checks if the power table is at the boundary of the cubic polynomial.
-		 * 
+		 *
 		 * @param dimension
 		 *
 		 * @return true, if is node boundary
@@ -538,7 +538,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computePowerTable(double, double, double,
 		 * int)
 		 */
@@ -581,7 +581,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue(gdsc.core.math.interpolation.
 		 * CustomTricubicFunction)
 		 */
@@ -593,7 +593,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue1(gdsc.core.math.interpolation.
 		 * CustomTricubicFunction)
 		 */
@@ -605,7 +605,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue2(gdsc.core.math.interpolation.
 		 * CustomTricubicFunction)
 		 */
@@ -617,7 +617,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#isNodeBoundary(int)
 		 */
 		@Override
@@ -647,7 +647,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computePowerTable(double, double, double,
 		 * int)
 		 */
@@ -690,7 +690,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue(gdsc.core.math.interpolation.
 		 * CustomTricubicFunction)
 		 */
@@ -702,7 +702,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue1(gdsc.core.math.interpolation.
 		 * CustomTricubicFunction)
 		 */
@@ -714,7 +714,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#computeValue2(gdsc.core.math.interpolation.
 		 * CustomTricubicFunction)
 		 */
@@ -726,7 +726,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.function.cspline.CubicSplineFunction.TargetSpline#isNodeBoundary(int)
 		 */
 		@Override
@@ -1035,7 +1035,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ValueFunction#size()
 	 */
 	@Override
@@ -1046,7 +1046,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#initialise(double[])
 	 */
 	@Override
@@ -1057,7 +1057,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
 	@Override
@@ -1068,7 +1068,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
 	@Override
@@ -1079,7 +1079,7 @@ public abstract class CubicSplineFunction implements Gradient2Function
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
 	 */
 	@Override

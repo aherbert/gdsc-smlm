@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -39,9 +39,9 @@ public class FitJob
 	{
 		//@formatter:off
 		PENDING{ @Override
-		public String getName() { return "Pending"; }}, 
+		public String getName() { return "Pending"; }},
 		IN_PROGRESS{ @Override
-		public String getName() { return "In-progress"; }}, 
+		public String getName() { return "In-progress"; }},
 		FINISHED{ @Override
 		public String getName() { return "Finished"; }};
 		//@formatter:on
@@ -68,7 +68,7 @@ public class FitJob
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-	 * 
+	 *
 	 * @param id
 	 * @param slice
 	 * @param data
@@ -93,7 +93,7 @@ public class FitJob
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-	 * 
+	 *
 	 * @param slice
 	 * @param data
 	 * @param bounds
@@ -105,7 +105,7 @@ public class FitJob
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-	 * 
+	 *
 	 * @param id
 	 * @param slice
 	 * @param data
@@ -119,7 +119,7 @@ public class FitJob
 
 	/**
 	 * Constructor with data. Exceptions are thrown if invalid bounds or data are passed
-	 * 
+	 *
 	 * @param slice
 	 * @param data
 	 * @param width
@@ -210,7 +210,7 @@ public class FitJob
 	 * <p>
 	 * This method is not implemented within this class but can be overridden if necessary to allow access to the
 	 * results from the {@link FitWorker}.
-	 * 
+	 *
 	 * @param indices
 	 */
 	public void setIndices(int[] indices)
@@ -223,7 +223,7 @@ public class FitJob
 	 * <p>
 	 * This method is not implemented within this class but can be overridden if necessary to allow access to the
 	 * results from the {@link FitWorker}.
-	 * 
+	 *
 	 * @param n
 	 * @param fitResult
 	 */
@@ -237,7 +237,7 @@ public class FitJob
 	 * <p>
 	 * This method is not implemented within this class but can be overridden if necessary to allow access to the
 	 * results from the {@link FitWorker}.
-	 * 
+	 *
 	 * @param results
 	 */
 	public void setResults(List<PeakResult> results)
@@ -249,7 +249,7 @@ public class FitJob
 	 * <p>
 	 * This method is not implemented within this class but can be overridden if necessary to allow access to the
 	 * benchmarking results from the {@link FitWorker}.
-	 * 
+	 *
 	 * @param n
 	 * @param fitResult
 	 */

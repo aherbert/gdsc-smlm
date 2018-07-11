@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -54,7 +54,7 @@ public class GaussJordan
 					}
 					else if (piv[j] > 1)
 					{
-						// This should not happen, i.e. a second pivot around a column 
+						// This should not happen, i.e. a second pivot around a column
 						return false;
 					}
 				}
@@ -130,7 +130,7 @@ public class GaussJordan
 	 * Solves (one) linear equation, a x = b, for x[n].
 	 * <p>
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(float[][] a, float[] b)
@@ -147,7 +147,7 @@ public class GaussJordan
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
 	 * <p>
 	 * piv[n], row[n], col[n] (all ints) are used for storage
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(float[][] a, float[] b, int[] piv, int[] row, int[] col)
@@ -205,7 +205,7 @@ public class GaussJordan
 					}
 					else if (piv[j] > 1)
 					{
-						// This should not happen, i.e. a second pivot around a column 
+						// This should not happen, i.e. a second pivot around a column
 						return false;
 					}
 				}
@@ -281,7 +281,7 @@ public class GaussJordan
 	 * Solves (one) linear equation, a x = b, for x[n].
 	 * <p>
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(double[][] a, double[] b)
@@ -298,7 +298,7 @@ public class GaussJordan
 	 * On input have a[n][n], b[n]. On output these replaced by a_inverse[n][n], x[n].
 	 * <p>
 	 * piv[n], row[n], col[n] (all ints) are used for storage
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(double[][] a, double[] b, int[] piv, int[] row, int[] col)

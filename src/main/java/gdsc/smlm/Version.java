@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * Show the version information contained in the gdsc/smlm/Version.txt file.
  * <p>
  * Uses Semantic Versioning.
- * 
+ *
  * @see <a href="http://semver.org/">http://semver.org/</a>
  */
 public class Version
@@ -83,7 +83,7 @@ public class Version
 
 	/**
 	 * Get the GDSC SMLM version
-	 * 
+	 *
 	 * @return The gdsc.smlm package version
 	 */
 	public static String getVersion()
@@ -93,7 +93,7 @@ public class Version
 
 	/**
 	 * Get the GDSC SMLM package build date
-	 * 
+	 *
 	 * @return The gdsc.smlm package build date
 	 */
 	public static String getBuildDate()
@@ -103,7 +103,7 @@ public class Version
 
 	/**
 	 * Get the major version
-	 * 
+	 *
 	 * @return The major version (or 0 if unknown)
 	 */
 	public static int getMajorVersion()
@@ -117,7 +117,7 @@ public class Version
 
 	/**
 	 * Get the minor version
-	 * 
+	 *
 	 * @return The minor version (or 0 if unknown)
 	 */
 	public static int getMinorVersion()
@@ -131,7 +131,7 @@ public class Version
 
 	/**
 	 * Get the patch version
-	 * 
+	 *
 	 * @return The patch version (or 0 if unknown)
 	 */
 	public static int getPatchVersion()
@@ -145,7 +145,7 @@ public class Version
 
 	/**
 	 * Get a string with the major, minor and patch versions
-	 * 
+	 *
 	 * @return Major.Minor.Patch
 	 */
 	public static String getMajorMinorPatch()

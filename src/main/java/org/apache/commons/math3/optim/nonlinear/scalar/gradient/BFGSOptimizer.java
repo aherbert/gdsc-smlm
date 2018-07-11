@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -82,7 +82,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		/**
 		 * Build an instance
-		 * 
+		 *
 		 * @param step
 		 *            The maximum step size in each dimension
 		 */
@@ -106,7 +106,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		/**
 		 * Build an instance
-		 * 
+		 *
 		 * @param tolerance
 		 *            The tolerance on the gradient
 		 */
@@ -131,7 +131,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 		/**
 		 * Build an instance
-		 * 
+		 *
 		 * @param restarts
 		 *            The restarts on the gradient
 		 */
@@ -153,7 +153,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	{
 		/**
 		 * Build an instance
-		 * 
+		 *
 		 * @param restarts
 		 *            The restarts on the gradient
 		 */
@@ -288,7 +288,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * Repeat the BFGS algorithm until it converges without roundoff error on the search direction
-	 * 
+	 *
 	 * @param checker
 	 * @param p
 	 * @param lineSearch
@@ -404,8 +404,8 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 			g = computeObjectiveGradient(p);
 			checkGradients(g, p);
 
-			// If necessary recompute the function value. 
-			// Doing this after the gradient evaluation allows the value to be cached when 
+			// If necessary recompute the function value.
+			// Doing this after the gradient evaluation allows the value to be cached when
 			// computing the objective gradient
 			fp = fret;
 
@@ -583,7 +583,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 		/**
 		 * Given an n-dimension point, the function value and gradient at that point find a new point
 		 * along the given search direction so that the function value has decreased sufficiently.
-		 * 
+		 *
 		 * @param xOld
 		 *            The old point
 		 * @param fOld
@@ -728,7 +728,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * Checks if there are lower or upper bounds that are not -Infinity or +Infinity
-	 * 
+	 *
 	 * @throws MathUnsupportedOperationException
 	 *             if invalid bounds were passed to the {@link #optimize(OptimizationData[]) optimize} method.
 	 */
@@ -788,7 +788,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * Check if the array contains anything other than value
-	 * 
+	 *
 	 * @param array
 	 * @param value
 	 * @return True if the array has another value
@@ -805,7 +805,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 
 	/**
 	 * Check the point falls within the configured bounds truncating if necessary
-	 * 
+	 *
 	 * @param point
 	 * @return true if the point was truncated
 	 */
@@ -836,7 +836,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	/**
 	 * Check if the point falls on or outside configured bounds truncating the gradient to zero
 	 * if it is moving further outside the bounds
-	 * 
+	 *
 	 * @param r
 	 * @param point
 	 */
@@ -848,7 +848,7 @@ public class BFGSOptimizer extends GradientMultivariateOptimizer
 	/**
 	 * Check if the point falls on or outside configured bounds truncating the gradient to zero
 	 * if it is moving further outside the bounds (defined by the sign of the search direction)
-	 * 
+	 *
 	 * @param r
 	 * @param point
 	 * @param sign

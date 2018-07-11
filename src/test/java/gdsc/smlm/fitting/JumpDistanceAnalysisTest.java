@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -47,16 +47,16 @@ import gdsc.test.TestSettings;
 @SuppressWarnings({ "javadoc" })
 public class JumpDistanceAnalysisTest
 {
-	//Based on the paper: Weimann, L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J., 
-	//Gay, N.J., Bryant, C.E., Klenerman, D. (2013) A Quantitative Comparison of Single-Dye 
+	//Based on the paper: Weimann, L., Ganzinger, K.A., McColl, J., Irvine, K.L., Davis, S.J.,
+	//Gay, N.J., Bryant, C.E., Klenerman, D. (2013) A Quantitative Comparison of Single-Dye
 	//Tracking Analysis Tools Using Monte Carlo Simulations. PLoS One 8, Issue 5, e64287
-	// 
+	//
 	//This paper simulated tracks using 150 particle over 30 frames with a SNR of 6. The spots
-	//were fit and then MSD or Jump Distance analysis performed. This means that each image 
+	//were fit and then MSD or Jump Distance analysis performed. This means that each image
 	//could have 150*29 jumps = 4350. They compute the fit using 750 trajectories (21750 jumps)
-	//and repeat this 10 times to get a mean fit. They indicate success if 
+	//and repeat this 10 times to get a mean fit. They indicate success if
 	//D is within 10% of the true value (the threshold for F is not explicitly stated
-	//but appears to be around 20% or less). 2 population sample used D = 0.1, 0.02. 
+	//but appears to be around 20% or less). 2 population sample used D = 0.1, 0.02.
 	//Good results were obtained when F(mobile) > 20%.
 
 	// TODO - revise this so that fitting always works and then reduce the sample size down gradually
@@ -68,12 +68,12 @@ public class JumpDistanceAnalysisTest
 	double deltaD = 0.1;
 	double deltaF = 0.2;
 	// Used for testing single populations
-	// Used for testing dual populations: 
+	// Used for testing dual populations:
 	// 15-fold, 5-fold, 3-fold difference between pairs
 	//double[] D = new double[] { 0.2, 3, 1 };
 	// 5-fold difference between pairs
 	//double[] D = new double[] { 0.2, 1 };
-	// For proteins with mass 823 and 347 kDa the  
+	// For proteins with mass 823 and 347 kDa the
 	// difference using predicted diffusion coefficients is 3:1
 	double[] D = new double[] { 3, 1 };
 	RandomGenerator random = TestSettings
@@ -504,7 +504,7 @@ public class JumpDistanceAnalysisTest
 		{
 			// As per the Weimann Plos One paper
 			error[i] = Math.abs(o[i] - e[i]) / e[i];
-			// Use the relative error from the largest value 
+			// Use the relative error from the largest value
 			//error[i] = gdsc.smlm.utils.DoubleEquality.relativeError(o[i], e[i]);
 		}
 		return error;
@@ -654,7 +654,7 @@ public class JumpDistanceAnalysisTest
 		}
 	}
 
-	static ArrayList<DataSample> samples = new ArrayList<DataSample>();
+	static ArrayList<DataSample> samples = new ArrayList<>();
 	DataSample sample = null;
 	private int repeat = 0;
 
@@ -666,7 +666,7 @@ public class JumpDistanceAnalysisTest
 
 	/**
 	 * Create random jump distances
-	 * 
+	 *
 	 * @param n
 	 *            Number of jump distances
 	 * @param d
@@ -677,7 +677,7 @@ public class JumpDistanceAnalysisTest
 	 */
 	private double[] createData(int n, double[] d, double[] f)
 	{
-		// Cache the data so that if we run a second test with 
+		// Cache the data so that if we run a second test with
 		// the same d and f we use the same data
 		sample = new DataSample(d, f);
 		int index = samples.indexOf(sample);
@@ -698,7 +698,7 @@ public class JumpDistanceAnalysisTest
 			f[i] = f2[i];
 		}
 
-		// Debug 
+		// Debug
 		//gdsc.core.utils.StoredDataStatistics stats = new gdsc.core.utils.StoredDataStatistics(data);
 		//gdsc.core.ij.Utils.showHistogram(
 		//		"MSD",

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,7 +52,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the mask image (packed in YX order)
-	 * 
+	 *
 	 * @param mask
 	 * @param width
 	 *            The width of the mask in pixels
@@ -72,7 +72,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the mask image (packed in YX order)
-	 * 
+	 *
 	 * @param mask
 	 * @param width
 	 *            The width of the mask in pixels
@@ -92,7 +92,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the mask image (packed in YX order)
-	 * 
+	 *
 	 * @param mask
 	 * @param width
 	 *            The width of the mask in pixels
@@ -128,7 +128,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the mask image (packed in YX order)
-	 * 
+	 *
 	 * @param mask
 	 * @param width
 	 *            The width of the mask in pixels
@@ -151,7 +151,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the mask image (packed in YX order)
-	 * 
+	 *
 	 * @param mask
 	 * @param width
 	 *            The width of the mask in pixels
@@ -178,7 +178,7 @@ public class MaskDistribution implements SpatialDistribution
 	 * Create a distribution from the mask image (packed in YX order)
 	 * <p>
 	 * This is a package scope constructor allowing the mask to be created with all zero pixels.
-	 * 
+	 *
 	 * @param mask
 	 * @param width
 	 *            The width of the mask in pixels
@@ -252,7 +252,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
 	@Override
@@ -271,7 +271,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
 	@Override
@@ -286,7 +286,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
 	@Override
@@ -296,7 +296,7 @@ public class MaskDistribution implements SpatialDistribution
 		int index = getIndex(xyz);
 		if (index < 0 || index >= mask.length || mask[index] == 0)
 			return false;
-		// Check if the search was initialised in a particle 
+		// Check if the search was initialised in a particle
 		if (particle == 0)
 		{
 			// No starting particle so just accept the position
@@ -318,7 +318,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
 	@Override
@@ -364,7 +364,7 @@ public class MaskDistribution implements SpatialDistribution
 		for (int i = 0; i < mask.length; i++)
 			binaryMask[i] = (mask[i] != 0);
 
-		// Find particles 
+		// Find particles
 		int particles = 0;
 		for (int i = 0; i < binaryMask.length; i++)
 		{
@@ -396,7 +396,7 @@ public class MaskDistribution implements SpatialDistribution
 			// Mark this position as part of the particle
 			mask[index1] = particle;
 
-			// Search the 8-connected neighbours 
+			// Search the 8-connected neighbours
 			final int x1 = index1 % maxx;
 			final int y1 = index1 / maxx;
 
@@ -440,7 +440,7 @@ public class MaskDistribution implements SpatialDistribution
 	/**
 	 * Returns whether the neighbour in a given direction is within the image. NOTE: it is assumed that the pixel x,y
 	 * itself is within the image! Uses class variables xlimit, ylimit: (dimensions of the image)-1
-	 * 
+	 *
 	 * @param x
 	 *            x-coordinate of the pixel that has a neighbour in the given direction
 	 * @param y
@@ -523,7 +523,7 @@ public class MaskDistribution implements SpatialDistribution
 
 	/**
 	 * The UniformDistribution to pick the sub pixel x,y coordinates and z-depth
-	 * 
+	 *
 	 * @param uniformDistribution
 	 *            the uniformDistribution to set
 	 */

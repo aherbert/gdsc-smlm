@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -100,7 +100,7 @@ import ij.process.ImageStatistics;
 
 /**
  * Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation.
- * 
+ *
  * This plugin is based on the methods described in: Mark Bates, Bo Huang, Graham T. Dempsey, Xiaowei Zhuang (2007).
  * Multicolor Super-Resolution Imaging with Photo-Switchable Fluorescent Probes. Science 317, 1749. DOI:
  * 10.1126/science.1146598.
@@ -282,7 +282,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 	private static int repeatInterval = 30;
 	private static int[] startFrame = { 1, 11, 21 };
-	// Crosstalk 
+	// Crosstalk
 	private static double[] ct = new double[6];
 	private static String[] ctNames = { "21", "31", "12", "32", "13", "23" };
 	private static final int C21 = 0;
@@ -333,7 +333,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	private static String[] MAGNIFICATION;
 	static
 	{
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<String> list = new ArrayList<>();
 		for (int i = 1; i <= 256; i *= 2)
 			list.add(Integer.toString(i));
 		MAGNIFICATION = list.toArray(new String[list.size()]);
@@ -381,7 +381,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.core.clustering.DensityCounter.Molecule#getX()
 		 */
 		@Override
@@ -392,7 +392,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.core.clustering.DensityCounter.Molecule#getY()
 		 */
 		@Override
@@ -403,7 +403,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.core.clustering.DensityCounter.Molecule#getID()
 		 */
 		@Override
@@ -420,7 +420,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -571,9 +571,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	 */
 	private void createActivations()
 	{
-		TurboList<Activation> activations = new TurboList<Activation>(traces.length);
+		TurboList<Activation> activations = new TurboList<>(traces.length);
 
-		// Activations are only counted if there are at least 
+		// Activations are only counted if there are at least
 		// n frames between localisations.
 		final int n = darkFramesForNewActivation + 1;
 
@@ -583,7 +583,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 			PeakResultStoreList points = trace.getPoints();
 
-			// Define the frame for a new activation 
+			// Define the frame for a new activation
 			int nextActivationStartFrame = Integer.MIN_VALUE;
 			Trace current = null;
 			int channel = 0;
@@ -698,17 +698,17 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 	private void runCrosstalkAnalysis()
 	{
 		// Determine the cross talk ratio.
-		// This is done by imaging only a single photo-switchable probe with the 
+		// This is done by imaging only a single photo-switchable probe with the
 		// same activation pulse imaging routine used for multi-colour imaging.
 		// Concept:
 		// A probe is meant to turn on in a frame following a pulse from a specific wavelength.
 		// Multi-wavelengths can be used with probes responding to each wavelength. However
 		// each probe may be activated by the 'wrong' wavelength. This is crosstalk.
-		// The idea is to understand how many times the probe will turn on in a 
+		// The idea is to understand how many times the probe will turn on in a
 		// frame following a pulse from the other lasers.
 
 		// To determine the crosstalk ratio we must have a single probe imaged with the full
-		// multi-wavelength pulse cycle. We then count how many times a probe activated by 
+		// multi-wavelength pulse cycle. We then count how many times a probe activated by
 		// the correct wavelength is activated by the others.
 		// Crosstalk for each wavelength is then the fraction of times molecules were activated
 		// by the 'wrong' wavelength.
@@ -719,7 +719,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		double[] crosstalk = computeCrosstalk(count, targetChannel - 1);
 
 		// Store the cross talk.
-		// Crosstalk from M into N is defined as the number of times the molecule that should be 
+		// Crosstalk from M into N is defined as the number of times the molecule that should be
 		// activated by a pulse from channel M is activated by a pulse from channel N.
 		// targetChannel = M
 		// activationChannel = N
@@ -845,7 +845,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		// This is done by direct substitution
 		double d1 = (D1 - C21 * D2) / (1 - C12 * C21);
 		double d2 = D2 - C12 * d1;
-		// Assuming D1 and D2 are positive and C12 and C21 are 
+		// Assuming D1 and D2 are positive and C12 and C21 are
 		// between 0 and 1 then we do not need to check the bounds.
 		//d1 = Maths.clip(0, D1, d1);
 		//d2 = Maths.clip(0, D2, d2);
@@ -887,7 +887,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		// D2 = d2 + C12 * d1 + C32 * d3
 		// D3 = d3 + C13 * d1 + C23 * d2
 
-		// Use matrix inversion so that: X = A^-1 * B 
+		// Use matrix inversion so that: X = A^-1 * B
 		double a = 1;
 		double b = C21;
 		double c = C31;
@@ -933,7 +933,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		x[2] = g * D1 + h * D2 + i * D3;
 
 		// Use matrix decomposition
-		//		// Note: The linear solver uses LU decomposition. 
+		//		// Note: The linear solver uses LU decomposition.
 		//		// We cannot use a faster method as the matrix A is not symmetric.
 		//		final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(3);
 		//		final DenseMatrix64F A = new DenseMatrix64F(3, 3);
@@ -1048,14 +1048,14 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		}
 	}
 
-	// Here we use a simple workflow with only one worker since the results are 
+	// Here we use a simple workflow with only one worker since the results are
 	// written straight back to this class' objects
 	private Workflow<RunSettings, Object> workflow;
 
 	private void runPulseAnalysis()
 	{
 		// Use a simple workflow with one worker
-		workflow = new Workflow<RunSettings, Object>();
+		workflow = new Workflow<>();
 		workflow.add(new WorkflowWorker<RunSettings, Object>()
 		{
 			@Override
@@ -1206,7 +1206,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.DialogListener#dialogItemChanged(ij.gui.GenericDialog, java.awt.AWTEvent)
 	 */
 	@Override
@@ -1300,7 +1300,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.gui.ExtendedGenericDialog.OptionCollectedListener#optionCollected(ij.gui.ExtendedGenericDialog.
 	 * OptionCollectedEvent)
 	 */
@@ -1356,7 +1356,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 	private synchronized void run(RunSettings runSettings)
 	{
-		// This is synchronized since it updates the class results. 
+		// This is synchronized since it updates the class results.
 		// Note: We check against the last settings and only repeat what is necessary ...
 
 		if (runSettings == null)
@@ -1368,7 +1368,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		IJ.showStatus("Analysing ...");
 
 		// Assign all activations to a channel.
-		// This is only necessary when we have more than 1 channel. If we have 1 channel then 
+		// This is only necessary when we have more than 1 channel. If we have 1 channel then
 		// no correction method is specified.
 		boolean changed = false;
 		if (runSettings.newUnmixSettings(lastRunSettings))
@@ -1385,7 +1385,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			if (runSettings.specificCorrection != Correction.NONE)
 			{
 				// Use a density counter that can put all the activations on a grid.
-				// It has a method to count the number of activations within a radius that 
+				// It has a method to count the number of activations within a radius that
 				// belong to each channel.
 
 				// Add only those with specific activations. Non-specific activations are ignored.
@@ -1641,7 +1641,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		{
 			nThreads = Prefs.getThreads();
 			executor = Executors.newFixedThreadPool(nThreads);
-			futures = new TurboList<Future<?>>(nThreads);
+			futures = new TurboList<>(nThreads);
 		}
 	}
 
@@ -1667,7 +1667,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			}
 			catch (Exception e)
 			{
-				// This should not happen. 
+				// This should not happen.
 				e.printStackTrace();
 			}
 		}
@@ -1762,7 +1762,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -1773,13 +1773,13 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 				// Observed density
 				int[] D = density[i];
 
-				// Compute the number of neighbours. 
+				// Compute the number of neighbours.
 				int neighbours = 0;
 				for (int j = 1; j <= channels; j++)
 					neighbours += D[j];
 
 				// Do not unmix if there are not enough neighbours.
-				// Note this will count the target activation so 
+				// Note this will count the target activation so
 				// use <= to ensure the neighbours is above the min.
 				if (neighbours <= runSettings.minNeighbours)
 				{
@@ -1819,11 +1819,11 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 					// p(i) = di / (d1 + d2 + ... + dn)
 					// Note this is different from computing the probability of the channel being correct.
 					// That probability is an indication of how much crosstalk has effected the observed density.
-					// This value is a simple probability using the local density in each channel. 
+					// This value is a simple probability using the local density in each channel.
 					double sum = 0;
 					for (int j = channels; j-- > 0;)
 						sum += d[j];
-					// Note that since this is a specific activation we can assume the molecule will be 
+					// Note that since this is a specific activation we can assume the molecule will be
 					// self-counted within the radius and that d will never be zero in every channel
 					for (int j = channels; j-- > 0;)
 						p[j] = d[j] / sum;
@@ -1857,7 +1857,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -1871,7 +1871,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			{
 				int c = 0;
 
-				// Assume the observed density is the true local density 
+				// Assume the observed density is the true local density
 				// (i.e. cross talk correction of specific activations is perfect)
 				int[] d = dc.count(nonSpecificActivations[i], channels);
 
@@ -2041,7 +2041,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 			MemoryPeakResults.addResults(results[c]);
 
 		// TODO:
-		// Show an image of what it looks like with no unmixing, i.e. colours allocated 
+		// Show an image of what it looks like with no unmixing, i.e. colours allocated
 		// from the frame
 
 		Utils.showStatus("Simulation complete: " + Utils.timeToString(System.currentTimeMillis() - start));
@@ -2194,7 +2194,7 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 		for (int i = 1, j = 0; i <= 30; i++)
 		{
 			if (i % 10 == 1)
-				// Skip specific activation frames 
+				// Skip specific activation frames
 				continue;
 			frames[j++] = i;
 		}
@@ -2370,9 +2370,9 @@ public class PulseActivationAnalysis implements PlugIn, DialogListener, ActionLi
 
 		//@formatter:off
 		final Rectangle2D.Double r = new Rectangle2D.Double(
-				resultsBounds.width * (double)roiBounds.x / imp.getWidth(), 
-				resultsBounds.height * (double)roiBounds.y / imp.getHeight(), 
-				resultsBounds.width * (double)roiBounds.width / imp.getWidth(), 
+				resultsBounds.width * (double)roiBounds.x / imp.getWidth(),
+				resultsBounds.height * (double)roiBounds.y / imp.getHeight(),
+				resultsBounds.width * (double)roiBounds.width / imp.getWidth(),
 				resultsBounds.height * (double)roiBounds.height / imp.getHeight());
 		//@formatter:on
 		//System.out.println(r);

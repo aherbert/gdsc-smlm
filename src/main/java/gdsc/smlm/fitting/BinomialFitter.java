@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -83,7 +83,7 @@ public class BinomialFitter
 	/**
 	 * Create a histogram from n=0 to n=N as a normalised probability.
 	 * N = p.length - 1;
-	 * 
+	 *
 	 * @param data
 	 * @param cumulative
 	 *            Build a cumulative histogram
@@ -106,7 +106,7 @@ public class BinomialFitter
 	/**
 	 * Create a histogram from n=0 to n=N as a normalised probability.
 	 * N = p.length - 1;
-	 * 
+	 *
 	 * @param data
 	 * @param cumulative
 	 *            Build a cumulative histogram
@@ -129,7 +129,7 @@ public class BinomialFitter
 	/**
 	 * Create a histogram from n=0 to n=N as a normalised probability.
 	 * N = p.length - 1;
-	 * 
+	 *
 	 * @param data
 	 * @param cumulative
 	 *            Build a cumulative histogram
@@ -172,7 +172,7 @@ public class BinomialFitter
 	 * Fit the binomial distribution (n,p) to the input data. Performs fitting assuming a fixed n value and attempts to
 	 * optimise p. All n from minN to maxN are evaluated. If maxN is zero then all possible n from minN are evaluated
 	 * until the fit is worse.
-	 * 
+	 *
 	 * @param data
 	 *            The input data (all value must be positive)
 	 * @param minN
@@ -221,7 +221,7 @@ public class BinomialFitter
 		log("Fitting cumulative " + name);
 
 		// Since varying the N should be done in integer steps do this
-		// for n=1,2,3,... until the SS peaks then falls off (is worse than the best 
+		// for n=1,2,3,... until the SS peaks then falls off (is worse than the best
 		// score several times in succession)
 		for (int n = minN; n <= N; n++)
 		{
@@ -252,7 +252,7 @@ public class BinomialFitter
 	/**
 	 * Fit the binomial distribution (n,p) to the cumulative histogram. Performs fitting assuming a fixed n value and
 	 * attempts to optimise p.
-	 * 
+	 *
 	 * @param histogram
 	 *            The input histogram
 	 * @param n
@@ -271,7 +271,7 @@ public class BinomialFitter
 	/**
 	 * Fit the binomial distribution (n,p) to the cumulative histogram. Performs fitting assuming a fixed n value and
 	 * attempts to optimise p.
-	 * 
+	 *
 	 * @param histogram
 	 *            The input histogram
 	 * @param mean
@@ -407,7 +407,7 @@ public class BinomialFitter
 
 			if (noRefit)
 			{
-				// Although we fit the log-likelihood, return the sum-of-squares to allow 
+				// Although we fit the log-likelihood, return the sum-of-squares to allow
 				// comparison across different n
 				double p = solution.getPointRef()[0];
 				double ss = 0;
@@ -515,7 +515,7 @@ public class BinomialFitter
 
 		/**
 		 * Create a new Binomial model using the input p-values
-		 * 
+		 *
 		 * @param p
 		 *            The observed p-value
 		 * @param trials
@@ -532,7 +532,7 @@ public class BinomialFitter
 
 		/**
 		 * Get the probability function for the input pValue
-		 * 
+		 *
 		 * @param pValue
 		 * @return
 		 */
@@ -541,7 +541,7 @@ public class BinomialFitter
 			BinomialDistribution dist = new BinomialDistribution(trials, pValue);
 
 			// Optionally ignore x=0 since we cannot see a zero size cluster.
-			// This is done by re-normalising the cumulative probability excluding x=0 
+			// This is done by re-normalising the cumulative probability excluding x=0
 			// to match the input curve.
 			//
 			// See Zero-truncated (zt) binomial distribution:
@@ -581,7 +581,7 @@ public class BinomialFitter
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
 		@Override
@@ -592,12 +592,12 @@ public class BinomialFitter
 			{
 				// Calculate the log-likelihood
 				double ll = 0;
-				// We cannot produce a likelihood for any n>N 
+				// We cannot produce a likelihood for any n>N
 				int limit = trials + 1; // p.length
 				for (int i = startIndex; i < limit; i++)
 				{
 					// Sum for all observations the probability of the observation.
-					// Use p[i] to indicate the frequency of this observation. 
+					// Use p[i] to indicate the frequency of this observation.
 					ll += p[i] * Math.log(p2[i]);
 				}
 				//System.out.printf("%f => %f\n", parameters[0], ll);
@@ -630,7 +630,7 @@ public class BinomialFitter
 
 			// We could ignore the first p value as it is always zero:
 			//p = Arrays.copyOfRange(p, 1, p.length);
-			// BUT then we would have to override the getP() method since this has 
+			// BUT then we would have to override the getP() method since this has
 			// an offset of 1 and assumes the index of p is X.
 
 			final int n = trials;
@@ -650,7 +650,7 @@ public class BinomialFitter
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
 		@Override
@@ -683,7 +683,7 @@ public class BinomialFitter
 			{
 				for (int k = 0; k <= n; ++k)
 				{
-					//jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) + 
+					//jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) +
 					//		nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1;
 
 					// Optimise
@@ -697,7 +697,7 @@ public class BinomialFitter
 			}
 			else
 			{
-				// Account for zero-truncated distribution 
+				// Account for zero-truncated distribution
 				jacobian[0][0] = 0;
 
 				// In the zero-truncated Binomial all values are scaled by a factor
@@ -729,7 +729,7 @@ public class BinomialFitter
 			}
 
 			//			// Compute the gradients using numerical differentiation
-			//			// Set the step h for computing the function around the desired point 
+			//			// Set the step h for computing the function around the desired point
 			//			final double h = delta * p;
 			//
 			//			// Ensure we stay within the 0-1 bounds
@@ -784,7 +784,7 @@ public class BinomialFitter
 	/**
 	 * Since fitting uses a bounded search seeded with random movements, restarting can improve the fit. Control the
 	 * number of restarts used fot fitting.
-	 * 
+	 *
 	 * @param fitRestarts
 	 *            the number of restarts for fitting
 	 */

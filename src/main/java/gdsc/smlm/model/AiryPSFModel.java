@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -174,7 +174,7 @@ public class AiryPSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
 	 */
 	@Override
@@ -198,7 +198,7 @@ public class AiryPSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
 	 */
 	@Override
@@ -221,7 +221,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Generate a scale so that at the configured zDepth the scale is sqrt(2).
-	 * 
+	 *
 	 * @param z
 	 * @return The scale
 	 */
@@ -241,7 +241,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Construct a Airy pattern on the provided data. Only evaluates the function up to the configured dark ring.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -300,7 +300,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Construct a Airy pattern on the provided data. Only evaluates the function up to the configured dark ring.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -359,7 +359,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Construct a Airy pattern on the provided data. Only evaluates the function up to the configured dark ring.
-	 * 
+	 *
 	 * @param x0range
 	 *            The maximum range in dimension 0 (width)
 	 * @param x1range
@@ -460,7 +460,7 @@ public class AiryPSFModel extends PSFModel
 
 			final double range0 = 0.5 / w0;
 			final double range1 = 0.5 / w1;
-			// Allow any point of the square pixel to be within the limit 
+			// Allow any point of the square pixel to be within the limit
 			final double pixelLimit = limit + Math.sqrt(0.5);
 			final double rescale = w0 * w1;
 
@@ -487,13 +487,13 @@ public class AiryPSFModel extends PSFModel
 		//		Math.PI * RINGS[ring] * w0 * RINGS[ring] * w1, w0, POWER[ring], integral / POWER[ring], (4 * Math.PI *
 		//				w0 * w1), clipped);
 
-		// We must normalise the integral we calculated to the correct power of the Airy pattern, 
+		// We must normalise the integral we calculated to the correct power of the Airy pattern,
 		// i.e. make the function we calculated a probability density that sums to 1.
 		if (clipped)
 		{
 			// Analysis has shown on unclipped data that the integral up to the nth ring is:
 			// integral ~ POWER[ring] * (Math.PI * 4 * w0 * w1)
-			// i.e. the full power of the Airy pattern is (Math.PI * 4 * w0 * w1) 
+			// i.e. the full power of the Airy pattern is (Math.PI * 4 * w0 * w1)
 			sum *= 1.0 / (4 * Math.PI * w0 * w1);
 		}
 		else
@@ -510,7 +510,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Calculate the intensity of the Airy pattern at the given distances by interpolation using the lookup table
-	 * 
+	 *
 	 * @param d0
 	 *            squared distance in dimension 0
 	 * @param d1
@@ -543,7 +543,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Calculate the intensity of the Airy pattern between the specified ranges using the composite Simpson's rule
-	 * 
+	 *
 	 * @param ax
 	 *            Lower limit of x
 	 * @param bx
@@ -569,7 +569,7 @@ public class AiryPSFModel extends PSFModel
 			final int N)
 	{
 		final double h = (bx - ax) / N;
-		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary 
+		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary
 		double s = integral(ax * ax, ay, by, limit, samplesPerPixel, intensity, radius, N) +
 				integral(bx * bx, ay, by, limit, samplesPerPixel, intensity, radius, N);
 		for (int n = 1; n < N; n += 2)
@@ -587,7 +587,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Calculate the intensity of the Airy pattern between the specified ranges using the composite Simpson's rule
-	 * 
+	 *
 	 * @param x2
 	 *            The squared x distance
 	 * @param ay
@@ -610,7 +610,7 @@ public class AiryPSFModel extends PSFModel
 			final double samplesPerPixel, final double[] intensity, final double[] radius, final int N)
 	{
 		final double h = (by - ay) / N;
-		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary 
+		// TODO - The upper and lower bounds can be pre-computed since they are used for each pixel boundary
 		double s = intensity(x2, ay * ay, limit, samplesPerPixel, intensity, radius) +
 				intensity(x2, by * by, limit, samplesPerPixel, intensity, radius);
 		for (int n = 1; n < N; n += 2)
@@ -670,7 +670,7 @@ public class AiryPSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
 	@Override
@@ -700,7 +700,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Set the limit of the Airy pattern, defined by the dark rings where the pattern is zero. Allowed values are 1-5.
-	 * 
+	 *
 	 * @param ring
 	 *            the ring limit for the calculated Airy pattern
 	 */
@@ -744,7 +744,7 @@ public class AiryPSFModel extends PSFModel
 	/**
 	 * Set the minimum number of samples per dimension for Simpson's integration over each pixel. Must be above 0 and is
 	 * set to the next even number.
-	 * 
+	 *
 	 * @param n
 	 *            The minimum number of samples per dimension for Simpson's integration over each pixel
 	 */
@@ -767,7 +767,7 @@ public class AiryPSFModel extends PSFModel
 	/**
 	 * Set the maximum number of samples per dimension for Simpson's integration over each pixel. Must be above 0 and is
 	 * set to the next even number.
-	 * 
+	 *
 	 * @param n
 	 *            The maximum number of samples per dimension for Simpson's integration over each pixel
 	 */
@@ -799,7 +799,7 @@ public class AiryPSFModel extends PSFModel
 
 	/**
 	 * Sample from an Airy distribution
-	 * 
+	 *
 	 * @param n
 	 *            The number of samples
 	 * @param x0
@@ -866,7 +866,7 @@ public class AiryPSFModel extends PSFModel
 			@Override
 			public double value(double x)
 			{
-				// The pattern profile is in one dimension. 
+				// The pattern profile is in one dimension.
 				// Multiply by the perimeter of a circle to convert to 2D volume then normalise by 4 pi
 				//return AiryPattern.intensity(x) * 2 * Math.PI * x / (4 * Math.PI);
 				return AiryPattern.intensity(x) * 0.5 * x;

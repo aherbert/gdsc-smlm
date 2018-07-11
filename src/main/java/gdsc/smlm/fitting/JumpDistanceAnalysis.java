@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -82,7 +82,7 @@ public class JumpDistanceAnalysis
 		/**
 		 * Get the number of points to use for the curve between the minimum and maximum exclusive. The size of the
 		 * curve arrays will be this value plus 1 (to include the maximum).
-		 * 
+		 *
 		 * @return The number of points to use for the curve between the minimum and maximum exclusive
 		 */
 		public int getNumberOfCurvePoints();
@@ -148,7 +148,7 @@ public class JumpDistanceAnalysis
 	 * D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
@@ -175,7 +175,7 @@ public class JumpDistanceAnalysis
 	 * D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The mean jump distance (in um^2)
 	 * @param jdHistogram
@@ -212,7 +212,7 @@ public class JumpDistanceAnalysis
 			}
 		}
 
-		// Fit using a mixed population model. 
+		// Fit using a mixed population model.
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
 		for (int n = Math.max(1, minN - 1); n < maxN; n++)
@@ -266,7 +266,7 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distances using a fit to a cumulative histogram with the given number of species.
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @param n
@@ -289,7 +289,7 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distance histogram using a cumulative sum with the given number of species.
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The mean jump distance (in um^2)
 	 * @param jdHistogram
@@ -318,7 +318,7 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distance histogram using a cumulative sum with the given number of species.
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
-	 * 
+	 *
 	 * @param jdHistogram
 	 *            The cumulative jump distance histogram. X-axis is um^2, Y-axis is cumulative probability. Must be
 	 *            monototic ascending.
@@ -611,8 +611,8 @@ public class JumpDistanceAnalysis
 		int belowMinD = 0;
 		for (int i = 0; i < f.length; i++)
 		{
-			// Check only one population has a diffusion coefficient below the 
-			// precision of the experiment 
+			// Check only one population has a diffusion coefficient below the
+			// precision of the experiment
 			if (d[i] < minD)
 			{
 				if (++belowMinD > 1)
@@ -659,7 +659,7 @@ public class JumpDistanceAnalysis
 	 * consecutive diffusion coefficients is below the min difference; more than one population is below min D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @return Array containing: { D (um^2), Fractions }. Can be null if no fit was made.
@@ -678,7 +678,7 @@ public class JumpDistanceAnalysis
 	 * consecutive diffusion coefficients is below the min difference; more than one population is below min D.
 	 * <p>
 	 * The number of populations must be obtained from the size of the D/fractions arrays.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @param jdHistogram
@@ -699,7 +699,7 @@ public class JumpDistanceAnalysis
 		final double estimatedD = meanJumpDistance / 4;
 		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
-		// Used for saving fitted the curve 
+		// Used for saving fitted the curve
 		if (curveLogger != null && jdHistogram == null)
 			jdHistogram = cumulativeHistogram(jumpDistances);
 
@@ -727,7 +727,7 @@ public class JumpDistanceAnalysis
 			}
 		}
 
-		// Fit using a mixed population model. 
+		// Fit using a mixed population model.
 		// Vary n from 2 to N. Stop when the fit fails or the fit is worse.
 		int bestMulti = -1;
 		for (int n = Math.max(1, minN - 1); n < maxN; n++)
@@ -793,7 +793,7 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distances using a maximum likelihood estimation with the given number of species.
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @param n
@@ -809,7 +809,7 @@ public class JumpDistanceAnalysis
 	 * Fit the jump distances using a maximum likelihood estimation with the given number of species.
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @param jdHistogram
@@ -832,7 +832,7 @@ public class JumpDistanceAnalysis
 		final double estimatedD = meanJumpDistance / 4;
 		logger.info("Estimated D = %s um^2", Maths.rounded(estimatedD, 4));
 
-		// Used for saving fitted the curve 
+		// Used for saving fitted the curve
 		if (curveLogger != null && jdHistogram == null)
 			jdHistogram = cumulativeHistogram(jumpDistances);
 
@@ -847,7 +847,7 @@ public class JumpDistanceAnalysis
 	 * | *
 	 * <p>
 	 * Results are sorted by the diffusion coefficient ascending.
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            The jump distances (in um^2)
 	 * @param estimatedD
@@ -945,7 +945,7 @@ public class JumpDistanceAnalysis
 			double[] uB = function.getUpperBounds();
 			SimpleBounds bounds = new SimpleBounds(lB, uB);
 
-			// Try a bounded CMAES optimiser since the Powell optimiser appears to be 
+			// Try a bounded CMAES optimiser since the Powell optimiser appears to be
 			// sensitive to the order of the parameters. It is not good when the fast particle
 			// is the minority fraction. Could this be due to too low an upper bound?
 
@@ -1105,7 +1105,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Format the diffusion coefficients for reporting using the calibration if present
-	 * 
+	 *
 	 * @param jumpD
 	 * @return The formatted D
 	 */
@@ -1152,7 +1152,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Sort the arrays by the size of the diffusion coefficient
-	 * 
+	 *
 	 * @param d
 	 *            The diffusion coefficient array
 	 * @param f
@@ -1423,7 +1423,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
 		@Override
@@ -1449,11 +1449,11 @@ public class JumpDistanceAnalysis
 			return l;
 		}
 
-		// This has not been tested. It could be used for LVM fitting of the p-values. However MLE 
+		// This has not been tested. It could be used for LVM fitting of the p-values. However MLE
 		// is less sensitive to outliers of p-values.
 		//		/*
 		//		 * (non-Javadoc)
-		//		 * 
+		//		 *
 		//		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		//		 */
 		//		public double[][] jacobian(double[] variables)
@@ -1518,7 +1518,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1535,7 +1535,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		 */
 		@Override
@@ -1644,7 +1644,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
 		@Override
@@ -1745,7 +1745,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1756,7 +1756,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see gdsc.smlm.fitting.JumpDistanceAnalysis.Function#jacobian(double[])
 		 */
 		@Override
@@ -1770,10 +1770,10 @@ public class JumpDistanceAnalysis
 			// Each function contributes a fraction f:
 			// f = fj / sum_j(f)
 
-			// The gradient is the sum of the individual gradients. The diffusion coefficient is only 
-			// used per component. The fraction is used in all, either with the fraction as the 
-			// numerator (A) or part of the denominator (B) 
-			// E.G. 
+			// The gradient is the sum of the individual gradients. The diffusion coefficient is only
+			// used per component. The fraction is used in all, either with the fraction as the
+			// numerator (A) or part of the denominator (B)
+			// E.G.
 			// f(A) = A / (A+B+C)
 			// Quotient rule: f = g / h => f' = (g'h - gh') / h^2
 			// f'(A) = ((A+B+C) - A) / (A+B+C)^2
@@ -1870,7 +1870,7 @@ public class JumpDistanceAnalysis
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateFunction#value(double[])
 		 */
 		@Override
@@ -2001,7 +2001,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Get the cumulative jump distance histogram given a set of jump distance values
-	 * 
+	 *
 	 * @param values
 	 *            The jump distances
 	 * @return The JD cumulative histogram as two arrays: { MSD, CumulativeProbability }
@@ -2031,7 +2031,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Gets the minimum diffusion coefficient
-	 * 
+	 *
 	 * @return the minimum diffusion coefficient
 	 */
 	public double getMinD()
@@ -2066,14 +2066,14 @@ public class JumpDistanceAnalysis
 	 * the effect of reducing the effective time that diffusion occurred in the start and end frame. The observed MSD
 	 * can
 	 * be converted to the corrected MSD by applying a factor:
-	 * 
+	 *
 	 * <pre>
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * </pre>
-	 * 
+	 *
 	 * Note this is only valid for n>=1
-	 * 
+	 *
 	 * @param n
 	 * @return
 	 */
@@ -2100,19 +2100,19 @@ public class JumpDistanceAnalysis
 	 * separation intervals. These curves were compared to the expected MSD for the simulated diffusion coefficient to
 	 * produce a correction factor curve. This was fitted for n>=1 and n<1. The observed MSD can be converted to the
 	 * corrected MSD by applying a factor:
-	 * 
+	 *
 	 * <pre>
 	 * n>=1:
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
-	 * 
+	 *
 	 * n<1:
 	 * observed = actual * (n - n*n / 3)
 	 * actual = observed / (n - n*n / 3)
 	 * </pre>
-	 * 
+	 *
 	 * Note this is valid for n>=0
-	 * 
+	 *
 	 * @param n
 	 * @return
 	 */
@@ -2133,13 +2133,13 @@ public class JumpDistanceAnalysis
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
 	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3.
-	 * 
+	 *
 	 * <pre>
 	 * corrected frames = n - 1/3
 	 * </pre>
-	 * 
+	 *
 	 * Note this is only valid for n>=1
-	 * 
+	 *
 	 * @param n
 	 * @return
 	 */
@@ -2156,14 +2156,14 @@ public class JumpDistanceAnalysis
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
 	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
-	 * 
+	 *
 	 * <pre>
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * </pre>
-	 * 
+	 *
 	 * Note this is only valid for n>=1
-	 * 
+	 *
 	 * @param msd
 	 *            The observed MSD
 	 * @param n
@@ -2183,14 +2183,14 @@ public class JumpDistanceAnalysis
 	 * start and end frame locations have condensed diffusion within the frame to a single point. This condensation has
 	 * the effect of reducing the effective time that diffusion occurred in the start and end frame and the total number
 	 * of frames should be reduced by 1/3. The observed MSD can be converted to the corrected MSD by applying a factor:
-	 * 
+	 *
 	 * <pre>
 	 * observed = actual * (n - 1/3) / n
 	 * actual = observed * n / (n - 1/3)
 	 * </pre>
-	 * 
+	 *
 	 * Note this is only valid for n>=1
-	 * 
+	 *
 	 * @param msd
 	 *            The actual MSD
 	 * @param n
@@ -2213,7 +2213,7 @@ public class JumpDistanceAnalysis
 	/**
 	 * Set the localisation error (s) of the start and end coordinates of the jump. The error is used to compute the
 	 * apparent diffusion coefficient: D* = D - s^2
-	 * 
+	 *
 	 * @param error
 	 *            The error
 	 * @param nm
@@ -2237,7 +2237,7 @@ public class JumpDistanceAnalysis
 	/**
 	 * Set to true to correct the diffusion coefficient to the apparent diffusion coefficient by compensating for the
 	 * averaging of diffusion with a time frame into a single location.
-	 * 
+	 *
 	 * @param msdCorrection
 	 *            True if correcting MSD between frames
 	 */
@@ -2256,7 +2256,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Set the number of frames between the start and end coordinates of the jump
-	 * 
+	 *
 	 * @param n
 	 *            The number of frames (must be strictly positive)
 	 */
@@ -2297,7 +2297,7 @@ public class JumpDistanceAnalysis
 
 	/**
 	 * Set the time difference between each frame. The total time is {@link #getDeltaT()} * {@link #getN()}
-	 * 
+	 *
 	 * @param deltaT
 	 *            The time difference
 	 */
@@ -2317,13 +2317,13 @@ public class JumpDistanceAnalysis
 	/**
 	 * Convert the diffusion coefficients (um^2/jump) into apparent diffusion coefficients (um^2/s) if the time and
 	 * frames are calibrated:
-	 * 
+	 *
 	 * <pre>
 	 * D* = factor * (D - s2) / (n * deltaT)
 	 * </pre>
-	 * 
+	 *
 	 * where factor is the conversion factor to increase the MSD to correct for diffusion within the frame
-	 * 
+	 *
 	 * @param d
 	 *            The fitted diffusion coefficients D (in um^2)
 	 * @return The apparent diffusion coefficients D* (in um^2/s)
@@ -2345,7 +2345,7 @@ public class JumpDistanceAnalysis
 	/**
 	 * Get the fit value. This will be the Adjusted R^2 for least squares estimation or the information criterion from
 	 * maximum likelihood estimation.
-	 * 
+	 *
 	 * @return The fit value from the last successful fit
 	 */
 	public double getFitValue()

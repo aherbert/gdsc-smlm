@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -119,8 +119,8 @@ public class GaussianFunctionFactory
 	public static final int FIT_ERF_ASTIGMATISM = FIT_BACKGROUND | FIT_Z | FIT_SIGNAL | FIT_ERF;
 
 	// -=-=-=-=-=-=-=-=-=-=-=-=-
-	// Flags for simple Gaussian functions. 
-	// These are evaluated using a single exponential at the centre of the pixel. 
+	// Flags for simple Gaussian functions.
+	// These are evaluated using a single exponential at the centre of the pixel.
 	// They support rotating the X/Y elliptical Gaussian (if X and Y are different).
 	// -=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -408,7 +408,7 @@ public class GaussianFunctionFactory
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
 		{
-			// Check for z-model 
+			// Check for z-model
 			if ((flags & FIT_Z) != 0 && zModel != null)
 			{
 				// Convert the parameters for a free-circle function
@@ -466,7 +466,7 @@ public class GaussianFunctionFactory
 		// Default to using the ERF functions if the user has not requested a simple Gaussian or angle fitting
 		if ((flags & (FIT_SIMPLE | FIT_ANGLE)) == 0)
 		{
-			// Check for z-model 
+			// Check for z-model
 			if ((flags & FIT_Z) != 0 && zModel != null)
 			{
 				// Convert the parameters for a free-circle function

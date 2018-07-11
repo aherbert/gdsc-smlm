@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -92,7 +92,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#getHeaderEnd()
 	 */
 	@Override
@@ -103,7 +103,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#getHeaderComments()
 	 */
 	@Override
@@ -138,13 +138,13 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#getFieldNames()
 	 */
 	@Override
 	protected String[] getFieldNames()
 	{
-		ArrayList<String> names = new ArrayList<String>(20);
+		ArrayList<String> names = new ArrayList<>(20);
 		if (isShowId())
 			names.add("Id");
 		names.add(peakIdColumnName);
@@ -196,7 +196,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -291,7 +291,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -371,7 +371,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#sort()
 	 */
 	@Override
@@ -379,7 +379,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	{
 		try
 		{
-			ArrayList<Result> results = new ArrayList<Result>(size);
+			ArrayList<Result> results = new ArrayList<>(size);
 
 			DataInputStream input = new DataInputStream(new FileInputStream(filename));
 
@@ -439,7 +439,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 	 * <p>
 	 * Lines are defined by the '\n' character. The input stream will read the first non-header line unless the header
 	 * is terminated by the {@value #END_HEADER} tag.
-	 * 
+	 *
 	 * @param input
 	 * @return The header
 	 * @throws IOException
@@ -530,7 +530,7 @@ public class BinaryFilePeakResults extends SMLMFilePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.FilePeakResults#isBinary()
 	 */
 	@Override

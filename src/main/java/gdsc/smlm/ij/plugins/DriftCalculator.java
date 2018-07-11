@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -175,7 +175,7 @@ public class DriftCalculator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -217,7 +217,7 @@ public class DriftCalculator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -262,7 +262,7 @@ public class DriftCalculator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -302,7 +302,7 @@ public class DriftCalculator implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -320,7 +320,7 @@ public class DriftCalculator implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -398,7 +398,7 @@ public class DriftCalculator implements PlugIn
 
 		gd.addMessage("Correct the drift in localisation results");
 		ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-		ArrayList<String> methods = new ArrayList<String>(4);
+		ArrayList<String> methods = new ArrayList<>(4);
 		methods.add(SUB_IMAGE_ALIGNMENT);
 		methods.add(DRIFT_FILE);
 		if (rois != null)
@@ -543,7 +543,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Build a list of suitable stack images
-	 * 
+	 *
 	 * @return
 	 */
 	private String[] createStackImageList()
@@ -589,7 +589,7 @@ public class DriftCalculator implements PlugIn
 		final double[] dx = drift[0];
 		final double[] dy = drift[1];
 
-		// Note: We can use the raw procedure on the results because we requested 
+		// Note: We can use the raw procedure on the results because we requested
 		// the results were in pixels
 
 		if (updateMethod == 1)
@@ -638,7 +638,7 @@ public class DriftCalculator implements PlugIn
 	 * Calculates drift using the feducial markers within ROI.
 	 * <p>
 	 * Adapted from the drift calculation method in QuickPALM.
-	 * 
+	 *
 	 * @param results
 	 * @param limits
 	 * @param rois
@@ -692,7 +692,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Update the smoothing parameter using the upper and lower limits for the number of points to use for smoothing
-	 * 
+	 *
 	 * @param data
 	 *            The data to be smoothed
 	 * @return The updated smoothing parameter
@@ -727,7 +727,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Count the number of points where the data array is not zero
-	 * 
+	 *
 	 * @param data
 	 * @return the number of points
 	 */
@@ -868,7 +868,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Build a list of the points that are within each roi
-	 * 
+	 *
 	 * @param results
 	 * @param rois
 	 * @param limits
@@ -876,7 +876,7 @@ public class DriftCalculator implements PlugIn
 	 */
 	private Spot[][] findSpots(MemoryPeakResults results, Roi[] rois, int[] limits)
 	{
-		ArrayList<Spot[]> roiSpots = new ArrayList<Spot[]>(rois.length);
+		ArrayList<Spot[]> roiSpots = new ArrayList<>(rois.length);
 		for (int i = 0; i < rois.length; i++)
 		{
 			Spot[] spots = findSpots(results, rois[i].getBounds(), limits);
@@ -888,7 +888,7 @@ public class DriftCalculator implements PlugIn
 
 	private Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, int[] limits)
 	{
-		final TurboList<Spot> list = new TurboList<Spot>(limits[1] - limits[0] + 1);
+		final TurboList<Spot> list = new TurboList<>(limits[1] - limits[0] + 1);
 		final float minx = bounds.x;
 		final float miny = bounds.y;
 		final float maxx = bounds.x + bounds.width;
@@ -911,7 +911,7 @@ public class DriftCalculator implements PlugIn
 		// For each frame pick the strongest spot
 		Collections.sort(list);
 
-		TurboList<Spot> newList = new TurboList<Spot>(list.size());
+		TurboList<Spot> newList = new TurboList<>(list.size());
 
 		int currentT = -1;
 		for (Spot spot : list)
@@ -928,7 +928,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * For each ROI calculate the sum of the spot intensity. Also compute the sum of the intensity for each time point.
-	 * 
+	 *
 	 * @param roiSpots
 	 * @param dx
 	 *            The total number of timepoints
@@ -952,7 +952,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Calculate the drift as displacement of each spot from the centre-of-mass. Update the current drift parameters.
-	 * 
+	 *
 	 * @param roiSpots
 	 * @param dx
 	 * @param dy
@@ -1041,7 +1041,7 @@ public class DriftCalculator implements PlugIn
 	/**
 	 * Normalise the data so that the points identified by non-zeros in the toProcess array have a centre of mass of
 	 * zero. The shift is calculated on a subset of the points but applied to all points.
-	 * 
+	 *
 	 * @param data
 	 * @param toProcess
 	 */
@@ -1080,7 +1080,7 @@ public class DriftCalculator implements PlugIn
 	/**
 	 * For all indices between min and max, if the data array is not zero then add the index and the values from array 1
 	 * and 2 to the output.
-	 * 
+	 *
 	 * @param data
 	 * @param minT
 	 * @param maxT
@@ -1160,7 +1160,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Saves the T,X,Y values to file for all t in the originalDriftTimePoints array which are not zero.
-	 * 
+	 *
 	 * @param originalDriftTimePoints
 	 * @param dx
 	 * @param dy
@@ -1202,7 +1202,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Calculates drift using T,X,Y records read from a file.
-	 * 
+	 *
 	 * @param limits
 	 * @return the drift { dx[], dy[] }
 	 */
@@ -1259,7 +1259,7 @@ public class DriftCalculator implements PlugIn
 	/**
 	 * Read the drift file storing the T,X,Y into the class level calculatedTimepoints, lastdx and lastdy
 	 * arrays. Ignore any records where T is outside the limits.
-	 * 
+	 *
 	 * @param limits
 	 * @return The number of records read
 	 */
@@ -1325,7 +1325,7 @@ public class DriftCalculator implements PlugIn
 
 	private class BlockPeakResultProcedure implements PeakResultProcedure
 	{
-		final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<ArrayList<Localisation>>();
+		final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<>();
 		ArrayList<Localisation> nextBlock = null;
 		final Counter counter = new Counter();
 
@@ -1338,7 +1338,7 @@ public class DriftCalculator implements PlugIn
 					counter.increment(frames);
 				// To avoid blocks without many results only create a new block if the min size has been met
 				if (nextBlock == null || nextBlock.size() >= minimimLocalisations)
-					nextBlock = new ArrayList<Localisation>();
+					nextBlock = new ArrayList<>();
 				blocks.add(nextBlock);
 			}
 			nextBlock.add(new Localisation(r.getFrame(), r.getXPosition(), r.getYPosition(), r.getIntensity()));
@@ -1347,7 +1347,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Calculates drift using images from N consecutive frames aligned to the overall image.
-	 * 
+	 *
 	 * @param results
 	 * @param limits
 	 * @param reconstructionSize
@@ -1441,7 +1441,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Create an array to show the time-point of the original calculated drift alignment
-	 * 
+	 *
 	 * @param dx
 	 *            The drift array
 	 * @param timepoints
@@ -1458,7 +1458,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Calculate the drift by aligning N consecutive frames with the overall image. Update the current drift parameters.
-	 * 
+	 *
 	 * @param blocks
 	 * @param blockT
 	 * @param bounds
@@ -1478,7 +1478,7 @@ public class DriftCalculator implements PlugIn
 		// Built an image for each block of results.
 		final ImageProcessor[] images = new ImageProcessor[blocks.size()];
 
-		List<Future<?>> futures = new LinkedList<Future<?>>();
+		List<Future<?>> futures = new LinkedList<>();
 		progressCounter = 0;
 		totalCounter = images.length * 2;
 
@@ -1510,7 +1510,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Calculate the drift of images to the reference image. Update the current drift parameters.
-	 * 
+	 *
 	 * @param imageT
 	 *            The frame number for each image
 	 * @param scale
@@ -1546,7 +1546,7 @@ public class DriftCalculator implements PlugIn
 				reference.getWidth(), reference.getHeight());
 
 		List<double[]> alignments = Collections.synchronizedList(new ArrayList<double[]>(images.length));
-		List<Future<?>> futures = new LinkedList<Future<?>>();
+		List<Future<?>> futures = new LinkedList<>();
 
 		int imagesPerThread = getImagesPerThread(images);
 		for (int i = 0; i < images.length; i += imagesPerThread)
@@ -1567,7 +1567,7 @@ public class DriftCalculator implements PlugIn
 			int t = (int) result[2];
 			if (Double.isNaN(result[0]))
 			{
-				// TODO: How to ignore bad alignments? 
+				// TODO: How to ignore bad alignments?
 				// Only do smoothing where there was an alignment?
 				originalDriftTimePoints[t] = 0;
 				tracker.log("WARNING : Unable to align image for time %d to the overall projection", t);
@@ -1634,7 +1634,7 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Get the number of images that should be processed on each thread
-	 * 
+	 *
 	 * @param images
 	 *            The list of images
 	 * @return The images per thread
@@ -1661,9 +1661,9 @@ public class DriftCalculator implements PlugIn
 
 	/**
 	 * Calculates drift using images from a reference stack aligned to the overall z-projection.
-	 * 
+	 *
 	 * @param stack
-	 * 
+	 *
 	 * @param limits
 	 * @return the drift { dx[], dy[] }
 	 */
@@ -1683,15 +1683,15 @@ public class DriftCalculator implements PlugIn
 		final ImageProcessor[] images = new ImageProcessor[stack.getSize()];
 		final FHT[] fhtImages = new FHT[stack.getSize()];
 
-		List<Future<?>> futures = new LinkedList<Future<?>>();
+		List<Future<?>> futures = new LinkedList<>();
 		progressCounter = 0;
 		totalCounter = images.length;
 
 		int imagesPerThread = getImagesPerThread(images);
 		final AlignImagesFFT aligner = new AlignImagesFFT();
 		FloatProcessor referenceIp = stack.getProcessor(1).toFloat(0, null);
-		// We do not care about the window method because this processor will not 
-		// actually be used for alignment, it is a reference for the FHT size		
+		// We do not care about the window method because this processor will not
+		// actually be used for alignment, it is a reference for the FHT size
 		aligner.init(referenceIp, WindowMethod.NONE, false);
 		for (int i = 0; i < images.length; i += imagesPerThread)
 		{
@@ -1752,7 +1752,7 @@ public class DriftCalculator implements PlugIn
 	/**
 	 * Calculate the drift of images to the reference image. If no reference is provided then produce a combined
 	 * z-projection. Update the current drift parameters.
-	 * 
+	 *
 	 * @param reference
 	 * @param images
 	 *            The images to align
@@ -1782,7 +1782,7 @@ public class DriftCalculator implements PlugIn
 			tracker.status("Constructing reference image");
 
 			// Built an image using the current drift
-			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<Future<?>> futures = new LinkedList<>();
 			totalCounter = images.length * 2;
 
 			final ImageProcessor[] blockIp = new ImageProcessor[images.length];

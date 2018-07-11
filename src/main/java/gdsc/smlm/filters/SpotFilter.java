@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -75,14 +75,14 @@ public abstract class SpotFilter implements Cloneable
 
 	/**
 	 * Get the pre-processed data produced by the find method
-	 * 
+	 *
 	 * @return The pre-processed data produced by the {@link #find(float[], float[], int, int)} method
 	 */
 	public abstract float[] getPreprocessedData();
 
 	/**
 	 * List the candidate spots in the data. The list will be in the order the candidates are found.
-	 * 
+	 *
 	 * @param data
 	 *            The data
 	 * @param width
@@ -100,7 +100,7 @@ public abstract class SpotFilter implements Cloneable
 	/**
 	 * List and then rank the candidate spots in the data. The list will be in the order defined by sorting the
 	 * candidates.
-	 * 
+	 *
 	 * @param data
 	 *            The data
 	 * @param width
@@ -122,14 +122,14 @@ public abstract class SpotFilter implements Cloneable
 	 * Return true if the intensity value of the candidate spots is absolute, i.e. is the height of the candidate
 	 * maximum using the original data scale. Otherwise the intensity is relative, for example this could be relative to
 	 * the local background.
-	 * 
+	 *
 	 * @return True if the intensity value of the candidate spots is absolute
 	 */
 	public abstract boolean isAbsoluteIntensity();
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -165,7 +165,7 @@ public abstract class SpotFilter implements Cloneable
 
 	/**
 	 * Get the width spread of data used to process each position
-	 * 
+	 *
 	 * @return The spread
 	 */
 	public abstract double getSpread();

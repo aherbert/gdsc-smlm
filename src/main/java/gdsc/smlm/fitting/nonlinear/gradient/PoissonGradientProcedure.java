@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,7 +60,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 
 	/**
 	 * Compute the Fisher information matrix
-	 * 
+	 *
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
@@ -68,21 +68,21 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
-	 * 
+	 *
 	 * Note that this is only a true Fisher information matrix if the function returns the expected value for a
 	 * Poisson process (see Smith, et al (2010)). In this case the equation reduces to:
-	 * 
+	 *
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / Yi
 	 * </pre>
-	 * 
+	 *
 	 * This expression was extended (Huang et al, (2015)) to account for Gaussian noise per observation using the
 	 * variance (vari):
-	 * 
+	 *
 	 * <pre>
 	 * Iab = sum(i) (dYi da) * (dYi db) / (Yi + vari)
 	 * </pre>
-	 * 
+	 *
 	 * Thus per-observation noise can be handled by wrapping the input function with a pre-computed gradient function
 	 * and pre-computed noise values.
 	 * <p>
@@ -91,7 +91,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 	 * <p>
 	 * See: Huang et al, (2015). Video-rate nanoscopy using sCMOS camera–specific single-molecule localization
 	 * algorithms. Nature Methods 10, 653–658.
-	 * 
+	 *
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 *
 	 * @param a
@@ -118,7 +118,7 @@ public class PoissonGradientProcedure implements Gradient1Procedure
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient1Procedure#execute(double, double[])
 	 */
 	@Override

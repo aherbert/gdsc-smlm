@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -127,7 +127,7 @@ public abstract class Image2D
 	 */
 	protected Image2D(int nc, int nr, boolean dummy)
 	{
-		// No checks as this is used internally		
+		// No checks as this is used internally
 		this.nc = nc;
 		this.nr = nr;
 	}
@@ -827,19 +827,19 @@ public abstract class Image2D
 		//y = intersect[1];
 
 		// Compute sum from rolling sum using:
-		// sum(x,y,w,d) = 
-		// + s(x+w-1,y+h-1) 
+		// sum(x,y,w,d) =
+		// + s(x+w-1,y+h-1)
 		// - s(x-1,y+h-1)
 		// - s(x+w-1,y-1)
 		// + s(x-1,y-1)
-		// Note: 
+		// Note:
 		// s(i,j) = 0 when either i,j < 0
-		// i = imax when i>imax 
-		// j = jmax when j>jmax 
+		// i = imax when i>imax
+		// j = jmax when j>jmax
 
 		int x_1 = intersect[0] - 1;
 		int y_1 = intersect[1] - 1;
-		// The intersect has already checked the bounds 
+		// The intersect has already checked the bounds
 		//int x_w_1 = Math.min(x_1 + w, nc);
 		//int y_h_1 = Math.min(y_1 + h, nr);
 		int x_w_1 = x_1 + w;
@@ -890,15 +890,15 @@ public abstract class Image2D
 			return 0;
 
 		// Compute sum from rolling sum using:
-		// sum(x,y,w,d) = 
-		// + s(x+w-1,y+h-1) 
+		// sum(x,y,w,d) =
+		// + s(x+w-1,y+h-1)
 		// - s(x-1,y+h-1)
 		// - s(x+w-1,y-1)
 		// + s(x-1,y-1)
-		// Note: 
+		// Note:
 		// s(i,j) = 0 when either i,j < 0
-		// i = imax when i>imax 
-		// j = jmax when j>jmax 
+		// i = imax when i>imax
+		// j = jmax when j>jmax
 
 		// Compute bounds assuming w,d is small and positive.
 		int x_1, y_1, x_w_1, y_h_1;

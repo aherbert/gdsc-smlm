@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -107,18 +107,18 @@ public class BenchmarkFit implements PlugIn
 
 	//@formatter:off
 	// These are assuming a Gaussian 2D PSF
-	private static final String[] NAMES = new String[] { 
-			"dB (photons)", 
-			"dSignal (photons)", 
+	private static final String[] NAMES = new String[] {
+			"dB (photons)",
+			"dSignal (photons)",
 			"dX (nm)",
-			"dY (nm)", 
-			"dZ (nm)", 
-			"dSx (nm)", 
-			"dSy (nm)", 
-			"dAngle (deg)", 
+			"dY (nm)",
+			"dZ (nm)",
+			"dSx (nm)",
+			"dSy (nm)",
+			"dAngle (deg)",
 			"Time (ms)",
-			"dActualSignal (photons)", 
-			"dSax (nm)", 
+			"dActualSignal (photons)",
+			"dSax (nm)",
 			"dSay (nm)" };
 	//@formatter:on
 	private static final int TIME = 8;
@@ -185,7 +185,7 @@ public class BenchmarkFit implements PlugIn
 	/**
 	 * Store all the results from fitting on the same benchmark dataset
 	 */
-	public static LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<BenchmarkFit.BenchmarkResult>();
+	public static LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<>();
 
 	/**
 	 * Used to allow multi-threading of the fitting method
@@ -233,7 +233,7 @@ public class BenchmarkFit implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -276,7 +276,7 @@ public class BenchmarkFit implements PlugIn
 			data = IJImageConverter.getData(stack.getPixels(frame + 1), stack.getWidth(), stack.getHeight(), region,
 					data);
 
-			// Use a camera model to pre-process the data. 
+			// Use a camera model to pre-process the data.
 			// The camera model is cropped to the correct region size.
 			if (fitConfig.isFitCameraCounts())
 			{
@@ -378,7 +378,7 @@ public class BenchmarkFit implements PlugIn
 
 		/**
 		 * Set background using the average value of the edge in the data
-		 * 
+		 *
 		 * @param data
 		 * @param maxx
 		 * @param maxy
@@ -395,7 +395,7 @@ public class BenchmarkFit implements PlugIn
 			{
 				double[] lower = null;
 				double[] upper = null;
-				// Check the bounds 
+				// Check the bounds
 				if (params[Gaussian2DFunction.BACKGROUND] < lb[Gaussian2DFunction.BACKGROUND])
 				{
 					lower = lb.clone();
@@ -525,7 +525,7 @@ public class BenchmarkFit implements PlugIn
 
 	/**
 	 * Add the results to the statistics
-	 * 
+	 *
 	 * @param stats
 	 * @param answer
 	 * @param photons
@@ -547,7 +547,7 @@ public class BenchmarkFit implements PlugIn
 
 	/**
 	 * Add the given results to the statistics
-	 * 
+	 *
 	 * @param stats
 	 * @param answer
 	 * @param photons
@@ -630,8 +630,8 @@ public class BenchmarkFit implements PlugIn
 		{
 			lastId = benchmarkParameters.id;
 			fitConfig.setInitialPeakStdDev(benchmarkParameters.s / benchmarkParameters.a);
-			// The adjusted width is only relevant when using a single point approximation 
-			// for a Gaussian over the pixel. Using the ERF function computes the actual 
+			// The adjusted width is only relevant when using a single point approximation
+			// for a Gaussian over the pixel. Using the ERF function computes the actual
 			// integral over the pixel.
 			//fitConfig.setInitialPeakStdDev(sa);
 
@@ -952,9 +952,9 @@ public class BenchmarkFit implements PlugIn
 
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-		List<Worker> workers = new LinkedList<Worker>();
-		List<Thread> threads = new LinkedList<Thread>();
+		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		List<Worker> workers = new LinkedList<>();
+		List<Thread> threads = new LinkedList<>();
 		for (int i = 0; i < nThreads; i++)
 		{
 			Worker worker = new Worker(jobs, stack, region, fitConfig, cameraModel);
@@ -1142,7 +1142,7 @@ public class BenchmarkFit implements PlugIn
 		if (startPoints != null)
 			return startPoints;
 
-		TurboList<double[]> list = new TurboList<double[]>();
+		TurboList<double[]> list = new TurboList<>();
 
 		// Set up origin with an offset
 		double[] origin = new double[3];
@@ -1206,7 +1206,7 @@ public class BenchmarkFit implements PlugIn
 
 	/**
 	 * Sum the intensity above background to estimate the signal
-	 * 
+	 *
 	 * @param data
 	 * @param b
 	 *            background
@@ -1223,7 +1223,7 @@ public class BenchmarkFit implements PlugIn
 
 	/**
 	 * Get the centre of mass of the data
-	 * 
+	 *
 	 * @param data
 	 * @param maxx
 	 * @param maxy
@@ -1320,7 +1320,7 @@ public class BenchmarkFit implements PlugIn
 		else
 			sb.append('\t');
 
-		// Convert to units of the image (ADUs and pixels)		
+		// Convert to units of the image (ADUs and pixels)
 		double[] convert = getConversionFactors();
 
 		// Store the results for fitting on this benchmark dataset
@@ -1334,7 +1334,7 @@ public class BenchmarkFit implements PlugIn
 		}
 		benchmarkResults.add(benchmarkResult);
 
-		// Now output the actual results ...		
+		// Now output the actual results ...
 		sb.append('\t');
 		final double recall = (stats[0].getN() / (double) startPoints.length) / benchmarkParameters.getMolecules();
 		sb.append(Utils.rounded(recall));
@@ -1353,7 +1353,7 @@ public class BenchmarkFit implements PlugIn
 	/**
 	 * Get the factors to convert the fitted units into calibrated photons and nm units. Set
 	 * the conversion to zero if the function does not fit the specified statistic.
-	 * 
+	 *
 	 * @return The conversion factors
 	 */
 	private double[] getConversionFactors()
@@ -1376,7 +1376,7 @@ public class BenchmarkFit implements PlugIn
 
 	private double distanceFromCentre(double x)
 	{
-		// This assumes a 
+		// This assumes a
 		x -= 0.5;
 		final int i = (int) Math.round(x);
 		x = x - i;
@@ -1455,7 +1455,7 @@ public class BenchmarkFit implements PlugIn
 			return;
 		}
 
-		// Get the number of start points valid for all the results 
+		// Get the number of start points valid for all the results
 		final int totalFrames = benchmarkParameters.frames;
 		final double numberOfStartPoints = length / totalFrames;
 
@@ -1482,7 +1482,7 @@ public class BenchmarkFit implements PlugIn
 
 			StringBuilder sb = new StringBuilder(benchmarkResult.parameters);
 
-			// Now output the actual results ...		
+			// Now output the actual results ...
 			sb.append('\t');
 			final double recall = (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall));
@@ -1491,7 +1491,7 @@ public class BenchmarkFit implements PlugIn
 			final double recall2 = (count[j++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
 			sb.append(Utils.rounded(recall2));
 
-			// Convert to units of the image (ADUs and pixels)		
+			// Convert to units of the image (ADUs and pixels)
 			final double[] convert = benchmarkResult.convert;
 
 			for (int i = 0; i < stats.length; i++)

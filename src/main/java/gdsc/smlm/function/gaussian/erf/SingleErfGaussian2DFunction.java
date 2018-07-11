@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,11 +60,11 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 
 	/**
 	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * 
+	 *
 	 * @param i
 	 *            Input predictor
 	 * @return The Gaussian value
-	 * 
+	 *
 	 * @see gdsc.fitting.function.NonLinearFunction#eval(int)
 	 */
 	@Override
@@ -79,13 +79,13 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 
 	/**
 	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * 
+	 *
 	 * @param i
 	 *            Input predictor
 	 * @param duda
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
 	 */
 	@Override
@@ -93,7 +93,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 
 	/**
 	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * 
+	 *
 	 * @param i
 	 *            Input predictor
 	 * @param duda
@@ -107,7 +107,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.ValueProcedure)
 	 */
 	@Override
@@ -139,7 +139,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
 	@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -70,7 +70,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.IJImagePeakResults#checkDisplayFlags()
 	 */
 	@Override
@@ -128,7 +128,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#isUncalibrated()
 	 */
 	@Override
@@ -140,7 +140,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#setUncalibrated(boolean)
 	 */
 	@Override
@@ -151,7 +151,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, float, float, float)
 	 */
 	@Override
@@ -164,7 +164,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(float, float, float)
 	 */
 	@Override
@@ -177,7 +177,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int[], float[], float[], float[])
 	 */
 	@Override
@@ -191,7 +191,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(float[], float[], float[])
 	 */
 	@Override
@@ -205,7 +205,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#add(int, int, int, float, double, float, float[], float[])
 	 */
 	public void add(int peak, int origX, int origY, float origValue, double error, float noise, float[] params,
@@ -265,7 +265,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 		final double width = psfParams[3];
 		final double height = psfParams[4];
 
-		// Use 0.5 offset to centre the value in the middle of each pixel 
+		// Use 0.5 offset to centre the value in the middle of each pixel
 		x -= 0.5 / scale;
 		y -= 0.5 / scale;
 
@@ -332,7 +332,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 			// Note that the Gaussian2DFitter returns the angle of the major axis (sx) relative to the x-axis.
 			// The angle is in the range -pi/2 to pi/2
 
-			// The width and height for the range to be plotted can be derived from the general parametric 
+			// The width and height for the range to be plotted can be derived from the general parametric
 			// form of the ellipse.
 			// See: http://en.wikipedia.org/wiki/Ellipse#General_parametric_form
 
@@ -359,7 +359,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.results.IJImagePeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -395,7 +395,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 	/**
 	 * Set the width of a fixed-width PSF. This is before scale adjustment so is provided in terms of the original
 	 * fitted data.
-	 * 
+	 *
 	 * @param width
 	 *            the width to set for a fixed-width Gaussian
 	 */
@@ -425,7 +425,7 @@ public class PSFImagePeakResults extends IJImagePeakResults
 
 	/**
 	 * Set to true to plot the width of the PSF using the calculated precision
-	 * 
+	 *
 	 * @param calculatedPrecision
 	 */
 	public void setCalculatedPrecision(boolean calculatedPrecision)

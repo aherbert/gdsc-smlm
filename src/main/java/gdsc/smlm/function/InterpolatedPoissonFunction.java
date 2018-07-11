@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -74,7 +74,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
@@ -103,7 +103,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 
 	/**
 	 * Return the log of the factorial for the given real number, using the gamma function
-	 * 
+	 *
 	 * @param k
 	 * @return the log factorial
 	 */
@@ -116,7 +116,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 
 	/**
 	 * Return the factorial for the given real number, using the gamma function
-	 * 
+	 *
 	 * @param k
 	 * @return the factorial
 	 */
@@ -129,7 +129,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	@Override
@@ -161,7 +161,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 	 * <p>
 	 * When evaluating using non-integer values the gradient for 0 < o/gain < 1 is incorrect. In this region there is no
 	 * definition for the factorial required for the derivative (o/gain - 1)!.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientLikelihoodFunction#likelihood(double, double, double[])
 	 */
 	@Override
@@ -177,7 +177,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 		o *= alpha;
 
 		// PMF(l,k)  = e^-l * l^k / k!
-		// PMF'(l,k) = e^-l * k*l^(k-1) / k! + -e^-l * l^k / k! 
+		// PMF'(l,k) = e^-l * k*l^(k-1) / k! + -e^-l * l^k / k!
 		//           = e^-l * l^(k-1) / (k-1)! - e^-l * l^k / k!
 		//           = PMF(l,k-1) - PMF(l,k)
 
@@ -199,7 +199,7 @@ public class InterpolatedPoissonFunction implements GradientLikelihoodFunction, 
 			{
 				// In contrast to the logFactorial(o-1)
 				// this continues to use the logGamma function even when o-1 < 1.
-				// It creates the correct gradient down to o==1. 
+				// It creates the correct gradient down to o==1.
 				ll = -e + (o - 1) * loge - Gamma.logGamma(o);
 				lk_1 = FastMath.exp(ll);
 			}

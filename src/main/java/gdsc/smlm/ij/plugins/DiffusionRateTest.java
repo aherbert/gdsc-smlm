@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -76,7 +76,7 @@ import ij.text.TextWindow;
 /**
  * Move a set of molecules and calculates the diffusion rate. Uses settings from the CreateData
  * plugin so that the diffusion should be equivalent.
- * 
+ *
  */
 public class DiffusionRateTest implements PlugIn
 {
@@ -105,7 +105,7 @@ public class DiffusionRateTest implements PlugIn
 
 		/**
 		 * Create a cluster point
-		 * 
+		 *
 		 * @param id
 		 * @param x
 		 * @param y
@@ -157,7 +157,7 @@ public class DiffusionRateTest implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -238,7 +238,7 @@ public class DiffusionRateTest implements PlugIn
 		results.setPSF(PSFHelper.create(PSFType.CUSTOM));
 		int peak = 0;
 		// Store raw coordinates
-		ArrayList<Point> points = new ArrayList<Point>(totalSteps);
+		ArrayList<Point> points = new ArrayList<>(totalSteps);
 
 		StoredData totalJumpDistances1D = new StoredData(settings.getParticles());
 		StoredData totalJumpDistances2D = new StoredData(settings.getParticles());
@@ -546,7 +546,7 @@ public class DiffusionRateTest implements PlugIn
 		DiffusionType diffusionType = CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
 		if (diffusionType == DiffusionType.GRID_WALK)
 		{
-			// In this case with a large simulation size the jumps are all 
+			// In this case with a large simulation size the jumps are all
 			// the same distance so the histogram is a single step. Check the plot
 			// range will be handled by ImageJ otherwise pad it out a bit.
 			double[] x = jdHistogram[0];
@@ -579,7 +579,7 @@ public class DiffusionRateTest implements PlugIn
 
 		// This is the Chi-squared distribution: The sum of the squares of k independent
 		// standard normal random variables with k = dimensions. It is a special case of
-		// the gamma distribution. If the normals have non-unit variance the distribution 
+		// the gamma distribution. If the normals have non-unit variance the distribution
 		// is scaled.
 		// Chi       ~ Gamma(k/2, 2)      // using the scale parameterisation of the gamma
 		// s^2 * Chi ~ Gamma(k/2, 2*s^2)
@@ -633,7 +633,7 @@ public class DiffusionRateTest implements PlugIn
 
 	/**
 	 * Add a random Gaussian XY shift using the specified precision
-	 * 
+	 *
 	 * @param xyz
 	 * @param precision
 	 * @param random
@@ -676,7 +676,7 @@ public class DiffusionRateTest implements PlugIn
 
 	/**
 	 * Get the squared distance from the origin in 2D (using XY coordinates)
-	 * 
+	 *
 	 * @param coordinates
 	 * @return
 	 */
@@ -687,7 +687,7 @@ public class DiffusionRateTest implements PlugIn
 
 	/**
 	 * Get the distance from the origin in 3D
-	 * 
+	 *
 	 * @param coordinates
 	 * @return
 	 */
@@ -794,7 +794,7 @@ public class DiffusionRateTest implements PlugIn
 		double l = 0;
 		final double[] v = new double[3];
 		final int size = 3;
-		final int dim = 3; // Normalise over a different size 
+		final int dim = 3; // Normalise over a different size
 		while (l == 0)
 		{
 			for (int i = 0; i < size; i++)
@@ -1013,7 +1013,7 @@ public class DiffusionRateTest implements PlugIn
 
 	/**
 	 * Tabulate the observed MSD for different jump distances
-	 * 
+	 *
 	 * @param points
 	 */
 	private void msdAnalysis(ArrayList<Point> points)
@@ -1048,7 +1048,7 @@ public class DiffusionRateTest implements PlugIn
 		}
 		createMsdTable((sum / count) * settings.getStepsPerSecond() / conversionFactor);
 
-		// Create a new set of points that have coordinates that 
+		// Create a new set of points that have coordinates that
 		// are the rolling average over the number of aggregate steps
 		RollingArray x = new RollingArray(aggregateSteps);
 		RollingArray y = new RollingArray(aggregateSteps);
@@ -1080,7 +1080,7 @@ public class DiffusionRateTest implements PlugIn
 		final int totalSteps = (int) Math.ceil(settings.getSeconds() * settings.getStepsPerSecond() - aggregateSteps);
 		final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
 		final int interval = Utils.getProgressInterval(limit);
-		final ArrayList<String> results = new ArrayList<String>(totalSteps);
+		final ArrayList<String> results = new ArrayList<>(totalSteps);
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
 			if (step % interval == 0)
@@ -1102,7 +1102,7 @@ public class DiffusionRateTest implements PlugIn
 					}
 					else
 					{
-						// This can be varied but the effect on the output with only 1 loop 
+						// This can be varied but the effect on the output with only 1 loop
 						// is the same if enough samples are present
 						for (int ii = 1; ii-- > 0;)
 						{
@@ -1154,7 +1154,7 @@ public class DiffusionRateTest implements PlugIn
 		sb.append(Utils.rounded(apparentD)).append('\t');
 		sb.append(Utils.rounded(1.0 / settings.getStepsPerSecond())).append('\t');
 		sb.append(myAggregateSteps).append('\t');
-		// Exposure time is the aggregated frame time 
+		// Exposure time is the aggregated frame time
 		exposureTime = myAggregateSteps / settings.getStepsPerSecond();
 		sb.append(Utils.rounded(exposureTime)).append('\t');
 		prefix = sb.toString();
@@ -1164,7 +1164,7 @@ public class DiffusionRateTest implements PlugIn
 	private String addResult(int step, double sum, int count)
 	{
 		StringBuilder sb = new StringBuilder();
-		// Exposure time is the aggregated frame time 
+		// Exposure time is the aggregated frame time
 		final double msd = (sum / count) / conversionFactor;
 		// Jump distance separation is the number of steps
 		final double t = step / settings.getStepsPerSecond();
@@ -1172,7 +1172,7 @@ public class DiffusionRateTest implements PlugIn
 		sb.append(Utils.rounded(t)).append('\t');
 		sb.append(Utils.rounded(t / exposureTime)).append('\t');
 		sb.append(count).append('\t');
-		// Not rounded to preserve precision 
+		// Not rounded to preserve precision
 		sb.append(msd).append('\t');
 		sb.append(msd / (4 * t));
 		return sb.toString();
@@ -1310,7 +1310,7 @@ public class DiffusionRateTest implements PlugIn
 		// Plot the expected function
 		// This is the Chi-squared distribution: The sum of the squares of k independent
 		// standard normal random variables with k = dimensions. It is a special case of
-		// the gamma distribution. If the normals have non-unit variance the distribution 
+		// the gamma distribution. If the normals have non-unit variance the distribution
 		// is scaled.
 		// Chi       ~ Gamma(k/2, 2)      // using the scale parameterisation of the gamma
 		// s^2 * Chi ~ Gamma(k/2, 2*s^2)

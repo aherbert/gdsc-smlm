@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -190,7 +190,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 		if (components_Width_Shift == null || this.flags != flags)
 		{
-			// Store this in case the filter is setup with different flags 
+			// Store this in case the filter is setup with different flags
 			this.flags = flags;
 
 			// Create the components we require
@@ -386,7 +386,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 		return components.validate(peak);
 
 		//		// This is the legacy support for all components together
-		//		
+		//
 		//		// Current order of filter power obtained from BenchmarkFilterAnalysis:
 		//		// Precision, Max Width, SNR, Shift, Min width
 		//
@@ -437,7 +437,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getDescription()
 	 */
 	@Override
@@ -448,7 +448,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getNumberOfParameters()
 	 */
 	@Override
@@ -459,7 +459,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterValueInternal(int)
 	 */
 	@Override
@@ -496,7 +496,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterIncrement(int)
 	 */
 	@Override
@@ -528,7 +528,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#getParameterType(int)
 	 */
 	@Override
@@ -570,7 +570,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#adjustParameter(int, double)
 	 */
 	@Override
@@ -585,7 +585,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#create(double[])
 	 */
 	@Override
@@ -597,7 +597,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#weakestParameters(double[])
 	 */
 	@Override
@@ -616,7 +616,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.DirectFilter#lowerBoundOrientation(int)
 	 */
 	@Override
@@ -629,7 +629,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 	 * Compare to the other filter, count the number of weakest parameters. If negative then this filter has more weak
 	 * parameters. If positive then this filter has less weak parameters. If the same or the number of parameters do not
 	 * match then return 0. If the other filter is null return -1.
-	 * 
+	 *
 	 * @param o
 	 *            The other filter
 	 * @return the count difference
@@ -641,13 +641,13 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 		// Count the number of weakest
 		//@formatter:off
-		return 
+		return
 			compareMin(signal, o.signal) +
     		compareMin(snr, o.snr) +
     		compareMin(minWidth, o.minWidth) +
     		compareMax(maxWidth, o.maxWidth) +
     		compareMax(shift, o.shift) +
-    		compareMax(eshift, o.eshift) + 
+    		compareMax(eshift, o.eshift) +
     		compareMax(precision, o.precision) +
     		compareMin(minZ, o.minZ) +
     		compareMax(maxZ, o.maxZ);
@@ -656,7 +656,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#upperLimit()
 	 */
 	@Override
@@ -669,7 +669,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ga.Chromosome#mutationStepRange()
 	 */
 	@Override
@@ -740,7 +740,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.Filter#initialiseState()
 	 */
 	@Override

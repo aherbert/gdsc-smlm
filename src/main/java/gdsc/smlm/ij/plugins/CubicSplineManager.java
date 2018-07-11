@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -109,7 +109,7 @@ public class CubicSplineManager implements PlugIn
 					imagePSF.getZCentre() < 0 ||
 					imagePSF.getXCentre() > splineData.getMaxX() ||
 					imagePSF.getYCentre() > splineData.getMaxY() ||
-					imagePSF.getZCentre() > splineData.getMaxZ() 
+					imagePSF.getZCentre() > splineData.getMaxZ()
 					//@formatter:on
 			)
 				throw new IllegalArgumentException("The centre is not within the function");
@@ -177,10 +177,10 @@ public class CubicSplineManager implements PlugIn
 		final Ticker ticker = Ticker.create(new IJTrackProgress(), (long) maxi * maxj * maxk, true);
 		ticker.start();
 		ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
-		TurboList<Future<?>> futures = new TurboList<Future<?>>(maxk);
+		TurboList<Future<?>> futures = new TurboList<>(maxk);
 		// Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack.
 		// Note that the function is enlarge x3 so a 4x4x4 block samples the voxel at [0,1/3,2/3,1]
-		// in each dimension. There should be a final pixel on the end of the data for the final 
+		// in each dimension. There should be a final pixel on the end of the data for the final
 		// spline node along each dimension, i.e. dimension length = n*3 + 1 with n the number of nodes.
 		for (int k = 0; k < maxk; k++)
 		{
@@ -422,7 +422,7 @@ public class CubicSplineManager implements PlugIn
 
 	private static List<String> createList(boolean includeNone)
 	{
-		List<String> list = new TurboList<String>();
+		List<String> list = new TurboList<>();
 		if (includeNone)
 			list.add("[None]");
 		return list;
@@ -464,9 +464,9 @@ public class CubicSplineManager implements PlugIn
 	}
 
 	//@formatter:off
-	private static String[] OPTIONS = { 
-			"Print all model details", 
-			"View a spline model", 
+	private static String[] OPTIONS = {
+			"Print all model details",
+			"View a spline model",
 			"Load a spline model",
 			"Load from directory",
 			"Delete a spline model",
@@ -476,7 +476,7 @@ public class CubicSplineManager implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override

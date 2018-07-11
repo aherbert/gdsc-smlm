@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -138,7 +138,7 @@ public class MeanVarianceTest implements PlugIn
 
 			title = imp.getTitle();
 
-			// Get all the pixels into a float stack. 
+			// Get all the pixels into a float stack.
 			// Look for saturated pixels that will invalidate the test.
 			final int size = imp.getStackSize();
 			slices = new float[size][];
@@ -184,7 +184,7 @@ public class MeanVarianceTest implements PlugIn
 		{
 			final int size = slices.length;
 			final int nSamples = (consecutive) ? size - 1 : ((size - 1) * size) / 2;
-			samples = new ArrayList<PairSample>(nSamples);
+			samples = new ArrayList<>(nSamples);
 
 			// Cache data
 			means = new double[size];
@@ -220,7 +220,7 @@ public class MeanVarianceTest implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -515,7 +515,7 @@ public class MeanVarianceTest implements PlugIn
 			Utils.log("  Variance = %s + %s * mean", Utils.rounded(best[0], 4), Utils.rounded(best[1], 4));
 			if (emMode)
 			{
-				// The gradient is the observed gain of the noise. 
+				// The gradient is the observed gain of the noise.
 				// In an EM-CCD there is a noise factor of 2.
 				// Q. Is this true for a correct noise factor calibration:
 				//double noiseFactor = (Read Noise EM-CCD) / (Read Noise CCD)
@@ -539,7 +539,7 @@ public class MeanVarianceTest implements PlugIn
 			}
 			else
 			{
-				// The gradient is the observed gain of the noise. 
+				// The gradient is the observed gain of the noise.
 				cameraGain = best[1];
 				// Noise is standard deviation of the bias image divided by the gain (in Count/e-)
 				final double readNoise = avBiasNoise / cameraGain;
@@ -566,7 +566,7 @@ public class MeanVarianceTest implements PlugIn
 	private List<ImageSample> getImages(SeriesOpener series)
 	{
 		final double nImages = series.getNumberOfImages();
-		List<ImageSample> images = new ArrayList<ImageSample>((int) nImages);
+		List<ImageSample> images = new ArrayList<>((int) nImages);
 		ImagePlus imp = series.nextImage();
 		int c = 0;
 		while (imp != null)
@@ -602,7 +602,7 @@ public class MeanVarianceTest implements PlugIn
 
 	private List<ImageSample> getImages()
 	{
-		List<ImageSample> images = new ArrayList<ImageSample>(1);
+		List<ImageSample> images = new ArrayList<>(1);
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp != null)
 		{

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -35,9 +35,9 @@ public class Bessel
 {
 	/**
 	 * Compute the zero th order Bessel function of the first kind.
-	 * 
+	 *
 	 * @param x
-	 * 
+	 *
 	 * @return the Bessel function J0
 	 */
 	public static double J0(final double x)
@@ -68,9 +68,9 @@ public class Bessel
 
 	/**
 	 * Compute the first order Bessel function of the first kind.
-	 * 
+	 *
 	 * @param x
-	 * 
+	 *
 	 * @return the Bessel function J1
 	 */
 	public static double J1(final double x)
@@ -103,9 +103,9 @@ public class Bessel
 	 * Compute the second order Bessel function of the first kind.
 	 * <p>
 	 * This is stable when abs(x) > n.
-	 * 
+	 *
 	 * @param x
-	 * 
+	 *
 	 * @return the Bessel function J2
 	 */
 	public static double J2(double x)
@@ -121,9 +121,9 @@ public class Bessel
 
 	/**
 	 * Compute the zero th order modified Bessel function of the first kind.
-	 * 
+	 *
 	 * @param x
-	 * 
+	 *
 	 * @return the modified Bessel function I0
 	 */
 	public static double I0(final double x)
@@ -148,9 +148,9 @@ public class Bessel
 
 	/**
 	 * Compute the first order modified Bessel function of the first kind.
-	 * 
+	 *
 	 * @param x
-	 * 
+	 *
 	 * @return the modified Bessel function I1
 	 */
 	public static double I1(final double x)

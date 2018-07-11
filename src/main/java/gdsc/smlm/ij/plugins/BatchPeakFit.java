@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -78,7 +78,7 @@ import ij.plugin.PlugIn;
  * The batch specifies the set of images to process. For each image the batch can specify a set of values for each of
  * the fitting parameters. The Peak Fit plugin is then run for each combination of parameters and the results of each
  * run saved to file.
- * 
+ *
  * @deprecated This should be updated to use JSON and methods from the Google Proto Buffers library
  */
 @Deprecated
@@ -101,7 +101,7 @@ public class BatchPeakFit implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -118,7 +118,7 @@ public class BatchPeakFit implements PlugIn
 	/**
 	 * Reads the batch configuration file. For each parameter variation, create a fitting configuration. Then run the
 	 * fit engine on each input image using each configuration.
-	 * 
+	 *
 	 * @param configurationFilename
 	 */
 	private void runBatch(String configurationFilename)
@@ -144,7 +144,7 @@ public class BatchPeakFit implements PlugIn
 			return;
 
 		// Create XML for each variation
-		ArrayList<String> xmlSettings = new ArrayList<String>();
+		ArrayList<String> xmlSettings = new ArrayList<>();
 		setParameters(settings.parameters, 0, doc, xmlSettings);
 
 		// Run all the variants on the input images
@@ -181,7 +181,7 @@ public class BatchPeakFit implements PlugIn
 	 * Modify the XML document using the specified values for the given parameter. For each value
 	 * call the method recursively for the next parameter. If there are no more parameters
 	 * then add the XML document to the xmlSettings.
-	 * 
+	 *
 	 * @param parameters
 	 *            The list of parameters
 	 * @param i
@@ -197,8 +197,8 @@ public class BatchPeakFit implements PlugIn
 		// For all the fields within Calibration, PSF, FitEngineSettings
 		// print out the field name and default value. The FitEngineSettings has to
 		// extract the FitSettings separately.
-		// The user can then set any field to a list of comma-separated values and the 
-		// plugin will produce a functional fit configuration for each combination. 
+		// The user can then set any field to a list of comma-separated values and the
+		// plugin will produce a functional fit configuration for each combination.
 		//FitSettings  s = FitSettings.getDefaultInstance();
 		//Descriptor d = s.getDescriptorForType();
 		//FieldDescriptor fd = d.findFieldByNumber(0);
@@ -418,7 +418,7 @@ public class BatchPeakFit implements PlugIn
 
 	/**
 	 * Ask for parameters
-	 * 
+	 *
 	 * @return True if not cancelled
 	 */
 	private boolean showDialog()

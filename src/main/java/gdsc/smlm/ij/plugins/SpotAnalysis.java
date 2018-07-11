@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -139,7 +139,7 @@ public class SpotAnalysis extends PlugInFrame
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -152,7 +152,7 @@ public class SpotAnalysis extends PlugInFrame
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
@@ -166,7 +166,7 @@ public class SpotAnalysis extends PlugInFrame
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#hashCode()
 		 */
 		@Override
@@ -212,7 +212,7 @@ public class SpotAnalysis extends PlugInFrame
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -282,10 +282,10 @@ public class SpotAnalysis extends PlugInFrame
 	private int currentSlice;
 	private Rectangle areaBounds;
 
-	private TreeSet<Spot> onFrames = new TreeSet<Spot>();
+	private TreeSet<Spot> onFrames = new TreeSet<>();
 	private TIntArrayList candidateFrames = new TIntArrayList();
 
-	private TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<Trace>();
+	private TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<>();
 	private int id = 0;
 	private boolean updated = false;
 	private int blurCount = 0;
@@ -293,7 +293,7 @@ public class SpotAnalysis extends PlugInFrame
 	private Object runLock = new Object();
 
 	// Stores the list of images last used in the selection options
-	private ArrayList<String> imageList = new ArrayList<String>();
+	private ArrayList<String> imageList = new ArrayList<>();
 
 	public SpotAnalysis()
 	{
@@ -365,7 +365,7 @@ public class SpotAnalysis extends PlugInFrame
 	private void fillImagesList()
 	{
 		// Find the currently open images
-		ArrayList<String> newImageList = new ArrayList<String>();
+		ArrayList<String> newImageList = new ArrayList<>();
 
 		int[] idList = WindowManager.getIDList();
 		if (idList != null)
@@ -421,7 +421,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
@@ -469,7 +469,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	@Override
@@ -479,7 +479,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.frame.PlugInFrame#windowClosing(java.awt.event.WindowEvent)
 	 */
 	@Override
@@ -491,7 +491,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.frame.PlugInFrame#close()
 	 */
 	@Override
@@ -503,7 +503,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.frame.PlugInFrame#windowActivated(java.awt.event.WindowEvent)
 	 */
 	@Override
@@ -517,7 +517,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
@@ -724,7 +724,7 @@ public class SpotAnalysis extends PlugInFrame
 			ImageStack newStack = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
 			// Multi-thread the blur stage
 			ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
-			List<Future<?>> futures = new LinkedList<Future<?>>();
+			List<Future<?>> futures = new LinkedList<>();
 
 			Utils.setShowProgress(false);
 			blurCount = 0;
@@ -1100,7 +1100,7 @@ public class SpotAnalysis extends PlugInFrame
 		results.begin();
 		MemoryPeakResults.addResults(results);
 
-		ArrayList<TraceResult> traceResults = new ArrayList<TraceResult>(resultsWindow.getTextPanel().getLineCount());
+		ArrayList<TraceResult> traceResults = new ArrayList<>(resultsWindow.getTextPanel().getLineCount());
 		for (int i = 0; i < resultsWindow.getTextPanel().getLineCount(); i++)
 		{
 			String line = resultsWindow.getTextPanel().getLine(i);
@@ -1153,7 +1153,7 @@ public class SpotAnalysis extends PlugInFrame
 		if (resultsDirectory == null)
 			return;
 
-		// Save the traces to a single file. 
+		// Save the traces to a single file.
 		// Also save the blinks and on/off times into data files for histogram analysis
 
 		BufferedWriter[] files = new BufferedWriter[5];
@@ -1365,7 +1365,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.ImageListener#imageOpened(ij.ImagePlus)
 	 */
 	@Override
@@ -1375,7 +1375,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.ImageListener#imageClosed(ij.ImagePlus)
 	 */
 	@Override
@@ -1385,7 +1385,7 @@ public class SpotAnalysis extends PlugInFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.ImageListener#imageUpdated(ij.ImagePlus)
 	 */
 	@Override

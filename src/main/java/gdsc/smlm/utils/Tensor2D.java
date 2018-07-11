@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,7 +29,7 @@ import gdsc.core.utils.Maths;
 
 /**
  * Compute the inertia tensor for a 3D object
- * 
+ *
  * @author Alex Herbert
  */
 public class Tensor2D
@@ -101,7 +101,7 @@ public class Tensor2D
 			tensor.data[1] -= summdx * dy;
 		}
 
-		// Inertia tensor is symmetric    
+		// Inertia tensor is symmetric
 		tensor.data[2] = tensor.data[1];
 
 		// Eigen decompose
@@ -113,7 +113,7 @@ public class Tensor2D
 		final double b = tensor.data[1];
 		final double c = tensor.data[2];
 		final double d = tensor.data[3];
-		final double T_2 = (a + d) / 2.0; // Trace / 2 
+		final double T_2 = (a + d) / 2.0; // Trace / 2
 		final double D = a * d - b * c; // Determinant
 		final double root_T2_4_D = Math.sqrt(T_2 * T_2 - D);
 		final double L1 = T_2 + root_T2_4_D;

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -52,10 +52,10 @@ public class SpeedTest
 
 	private static RandomGenerator rand = TestSettings.getRandomGenerator();
 
-	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<double[]>();
-	private static ArrayList<double[]> yListSinglePeak = new ArrayList<double[]>();
-	private static ArrayList<double[]> paramsListMultiPeak = new ArrayList<double[]>();
-	private static ArrayList<double[]> yListMultiPeak = new ArrayList<double[]>();
+	private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
+	private static ArrayList<double[]> yListSinglePeak = new ArrayList<>();
+	private static ArrayList<double[]> paramsListMultiPeak = new ArrayList<>();
+	private static ArrayList<double[]> yListMultiPeak = new ArrayList<>();
 
 	private static int[] x;
 	static
@@ -358,7 +358,7 @@ public class SpeedTest
 	 * Create random elliptical Gaussian data an returns the data plus an estimate of the parameters.
 	 * Only the chosen parameters are randomised and returned for a maximum of (background, amplitude, angle, xpos,
 	 * ypos, xwidth, ywidth }
-	 * 
+	 *
 	 * @param params
 	 *            set on output
 	 * @return
@@ -419,7 +419,7 @@ public class SpeedTest
 	{
 		iter = FastMath.min(iter, paramsList.size());
 
-		ArrayList<double[]> params2List = new ArrayList<double[]>(iter);
+		ArrayList<double[]> params2List = new ArrayList<>(iter);
 		for (int i = 0; i < iter; i++)
 		{
 			params2List.add(paramsList.get(i));

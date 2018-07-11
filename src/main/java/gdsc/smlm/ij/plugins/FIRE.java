@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -203,15 +203,15 @@ public class FIRE implements PlugIn
 		FIXED{ @Override
 		public String getName() { return "Fixed"; }},
 		/**
-		 * Use the precision value that is stored in the results, e.g. from loaded data. 
-		 * The values can then be used to fit the entire distribution using a Gaussian or 
-		 * sampled to construct a decay curve from which the parameters are estimated. 
+		 * Use the precision value that is stored in the results, e.g. from loaded data.
+		 * The values can then be used to fit the entire distribution using a Gaussian or
+		 * sampled to construct a decay curve from which the parameters are estimated.
 		 */
 		STORED{ @Override
 		public String getName() { return "Stored"; }},
 		/**
-		 * Calculate the precision of each localisation using the formula of Mortensen. 
-		 * The values can then be used to fit the entire distribution using a Gaussian or 
+		 * Calculate the precision of each localisation using the formula of Mortensen.
+		 * The values can then be used to fit the entire distribution using a Gaussian or
 		 * sampled to construct a decay curve from which the parameters are estimated.
 		 */
 		CALCULATE{ @Override
@@ -364,7 +364,7 @@ public class FIRE implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -465,11 +465,11 @@ public class FIRE implements PlugIn
 			}
 			else
 			{
-				// Multi-thread this ... 			
+				// Multi-thread this ...
 				int nThreads = Maths.min(repeats, getThreads());
 				ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-				TurboList<Future<?>> futures = new TurboList<Future<?>>(repeats);
-				TurboList<FIREWorker> workers = new TurboList<FIREWorker>(repeats);
+				TurboList<Future<?>> futures = new TurboList<>(repeats);
+				TurboList<FIREWorker> workers = new TurboList<>(repeats);
 				setProgress(repeats);
 				IJ.showProgress(0);
 				IJ.showStatus(TITLE + " computing ...");
@@ -490,8 +490,8 @@ public class FIRE implements PlugIn
 					}
 					catch (Exception e)
 					{
-						// This should not happen. 
-						// Ignore it and allow processing to continue (the number of neighbour samples will just be smaller).  
+						// This should not happen.
+						// Ignore it and allow processing to continue (the number of neighbour samples will just be smaller).
 						e.printStackTrace();
 					}
 				}
@@ -530,9 +530,9 @@ public class FIRE implements PlugIn
 					{
 						int index = mapper.map(i + 1);
 						//@formatter:off
-						curve.add(name, result, thresholdMethod, 
+						curve.add(name, result, thresholdMethod,
 								LUTHelper.getColour(valuesLUT, index),
-								Color.blue, 
+								Color.blue,
 								null //LUTHelper.getColour(noSmoothLUT, index)
 								);
 						//@formatter:on
@@ -556,7 +556,7 @@ public class FIRE implements PlugIn
 				{
 					//@formatter:off
 					IJ.error(TITLE,
-							"ERROR - Parallel computation out-of-memory.\n \n" + 
+							"ERROR - Parallel computation out-of-memory.\n \n" +
 					TextUtils.wrap("The number of results will be reduced. " +
 									"Please reduce the size of the Fourier image " +
 									"or change the number of threads " +
@@ -638,7 +638,7 @@ public class FIRE implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<String>();
+		List<String> titles = new LinkedList<>();
 		if (WindowManager.getWindowCount() > 0)
 		{
 			for (int imageID : WindowManager.getIDList())
@@ -789,7 +789,7 @@ public class FIRE implements PlugIn
 				Parameters.isAboveZero("Q-value", qValue);
 				Parameters.isAboveZero("Precision Mean", mean);
 				Parameters.isAboveZero("Precision Sigma", sigma);
-				// Set these for use in FIRE computation 
+				// Set these for use in FIRE computation
 				setCorrectionParameters(qValue, mean, sigma);
 			}
 		}
@@ -1431,8 +1431,8 @@ public class FIRE implements PlugIn
 
 		FRC frc = new FRC();
 		// Allow a progress tracker to be input.
-		// This should be setup for the total number of repeats. 
-		// If parallelised then do not output the text status messages as they conflict. 
+		// This should be setup for the total number of repeats.
+		// If parallelised then do not output the text status messages as they conflict.
 		frc.setTrackProgress(progress);
 		frc.setFourierMethod(fourierMethod);
 		frc.setSamplingMethod(samplingMethod);
@@ -1508,12 +1508,12 @@ public class FIRE implements PlugIn
 		double fourierImageScale = SCALE_VALUES[imageScaleIndex];
 		int imageSize = IMAGE_SIZE_VALUES[imageSizeIndex];
 
-		// Create the image and compute the numerator of FRC. 
+		// Create the image and compute the numerator of FRC.
 		// Do not use the signal so results.size() is the number of localisations.
 		IJ.showStatus("Computing FRC curve ...");
 		FireImages images = createImages(fourierImageScale, imageSize, false);
 
-		// DEBUGGING - Save the two images to disk. Load the images into the Matlab 
+		// DEBUGGING - Save the two images to disk. Load the images into the Matlab
 		// code that calculates the Q-estimation and make this plugin match the functionality.
 		//IJ.save(new ImagePlus("i1", images.ip1), "/scratch/i1.tif");
 		//IJ.save(new ImagePlus("i2", images.ip2), "/scratch/i2.tif");
@@ -1535,13 +1535,13 @@ public class FIRE implements PlugIn
 		// Note:
 		// The method implemented here is based on Matlab code provided by Bernd Rieger.
 		// The idea is to compute the spurious correlation component of the FRC Numerator
-		// using an initial estimate of distribution of the localisation precision (assumed 
-		// to be Gaussian). This component is the contribution of repeat localisations of 
+		// using an initial estimate of distribution of the localisation precision (assumed
+		// to be Gaussian). This component is the contribution of repeat localisations of
 		// the same molecule to the numerator and is modelled as an exponential decay
 		// (exp_decay). The component is scaled by the Q-value which
 		// is the average number of times a molecule is seen in addition to the first time.
 		// At large spatial frequencies the scaled component should match the numerator,
-		// i.e. at high resolution (low FIRE number) the numerator is made up of repeat 
+		// i.e. at high resolution (low FIRE number) the numerator is made up of repeat
 		// localisations of the same molecule and not actual structure in the image.
 		// The best fit is where the numerator equals the scaled component, i.e. num / (q*exp_decay) == 1.
 		// The FRC Numerator is plotted and Q can be determined by
@@ -1583,7 +1583,7 @@ public class FIRE implements PlugIn
 		double[] exp_decay;
 		if (sampleDecay)
 		{
-			// Random sample of precision values from the distribution is used to 
+			// Random sample of precision values from the distribution is used to
 			// construct the decay curve
 			int[] sample = Random.sample(10000, precision.getN(), new Well19937c());
 
@@ -1616,7 +1616,7 @@ public class FIRE implements PlugIn
 		}
 		else
 		{
-			// Note: The sigma mean and std should be in the units of super-resolution 
+			// Note: The sigma mean and std should be in the units of super-resolution
 			// pixels so scale to SR pixels
 			exp_decay = computeExpDecay(histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel, q);
 		}
@@ -1625,7 +1625,7 @@ public class FIRE implements PlugIn
 		double[] smooth;
 		if (loessSmoothing)
 		{
-			// Note: This computes the log then smooths it 
+			// Note: This computes the log then smooths it
 			double bandwidth = 0.1;
 			int robustness = 0;
 			double[] l = new double[exp_decay.length];
@@ -1650,7 +1650,7 @@ public class FIRE implements PlugIn
 		}
 		else
 		{
-			// Note: This smooths the curve before computing the log 
+			// Note: This smooths the curve before computing the log
 
 			double[] norm = new double[exp_decay.length];
 			for (int i = 0; i < norm.length; i++)
@@ -1668,11 +1668,11 @@ public class FIRE implements PlugIn
 		}
 
 		// Fit with quadratic to find the initial guess.
-		// Note: example Matlab code frc_Qcorrection7.m identifies regions of the 
-		// smoothed log curve with low derivative and only fits those. The fit is 
-		// used for the final estimate. Fitting a subset with low derivative is not 
-		// implemented here since the initial estimate is subsequently optimised 
-		// to maximise a cost function. 
+		// Note: example Matlab code frc_Qcorrection7.m identifies regions of the
+		// smoothed log curve with low derivative and only fits those. The fit is
+		// used for the final estimate. Fitting a subset with low derivative is not
+		// implemented here since the initial estimate is subsequently optimised
+		// to maximise a cost function.
 		Quadratic curve = new Quadratic();
 		SimpleCurveFitter fit = SimpleCurveFitter.create(curve, new double[2]);
 		WeightedObservedPoints points = new WeightedObservedPoints();
@@ -1708,8 +1708,8 @@ public class FIRE implements PlugIn
 			// Q - Should this be optional?
 			if (sampleDecay)
 			{
-				// If a sample of the precision was used to construct the data for the initial fit 
-				// then update the estimate using the fit result since it will be a better start point. 
+				// If a sample of the precision was used to construct the data for the initial fit
+				// then update the estimate using the fit result since it will be a better start point.
 
 				histogram.sigma = precision.getStandardDeviation();
 				// Normalise sum-of-squares to the SR pixel size
@@ -1742,12 +1742,12 @@ public class FIRE implements PlugIn
 		else
 		{
 			// Reset to theoretical curve. This is what will be used to compute the final correction.
-			// TODO - check if the Matlab code uses a sampled curve to compute the correction. 
+			// TODO - check if the Matlab code uses a sampled curve to compute the correction.
 			// If so then this should be optional.
 			if (sampleDecay)
 			{
-				// If a sample of the precision was used to construct the data for the initial fit 
-				// then update the estimate using the fit result since it will be a better start point. 
+				// If a sample of the precision was used to construct the data for the initial fit
+				// then update the estimate using the fit result since it will be a better start point.
 
 				if (precisionMethod != PrecisionMethod.FIXED)
 				{
@@ -1766,7 +1766,7 @@ public class FIRE implements PlugIn
 			// The Matlab code used random initial points for a Simplex optimiser.
 
 			// A Brent line search should be pretty deterministic so do simple repeats.
-			// However it will proceed downhill so if the initial point is wrong then 
+			// However it will proceed downhill so if the initial point is wrong then
 			// it will find a sub-optimal result.
 			UnivariateOptimizer o = new BrentOptimizer(1e-3, 1e-6);
 			Plateauness f = new Plateauness(frcnum, exp_decay, low, high);
@@ -1790,7 +1790,7 @@ public class FIRE implements PlugIn
 
 		QPlot qplot = new QPlot(frcCurve, qValue, low, high);
 
-		// Interactive dialog to estimate Q (blinking events per flourophore) using 
+		// Interactive dialog to estimate Q (blinking events per flourophore) using
 		// sliders for the mean and standard deviation of the localisation precision.
 		showQEstimationDialog(histogram, qplot, frcCurve, images.nmPerPixel);
 
@@ -1952,14 +1952,14 @@ public class FIRE implements PlugIn
 			double v = 0;
 			for (int i = 0; i < pre.length; i++)
 			{
-				// Original cost function. Note that each observation has a 
+				// Original cost function. Note that each observation has a
 				// contribution of 0 to 1.
 				double diff = (pre[i] / qValue) - 1;
 				v += 1 - FastMath.exp(-diff * diff / n2);
 
-				// Modified cost function so that the magnitude of difference over or 
-				// under 1 is penalised the same. This has a problem if FRC numerator 
-				// is negative. Also the range is unchecked so observation can have 
+				// Modified cost function so that the magnitude of difference over or
+				// under 1 is penalised the same. This has a problem if FRC numerator
+				// is negative. Also the range is unchecked so observation can have
 				// unequal contributions.
 				//double diff = Math.abs(pre[i]) / qValue;
 				//v += Math.abs(Math.log(diff));
@@ -2031,7 +2031,7 @@ public class FIRE implements PlugIn
 			double eight_pi2_s2 = 2 * four_pi2 * sigma * sigma;
 			double factor = -four_pi2 * mean * mean;
 
-			// Check 
+			// Check
 			//double[] hq2 = FRC.computeHq(q, mean, sigma);
 
 			double v = 0;
@@ -2044,7 +2044,7 @@ public class FIRE implements PlugIn
 				//if (hq != hq2[i + low])
 				//	System.out.printf("hq error: %f != %f\n", hq, hq2[i + low]);
 
-				// Original cost function. Note that each observation has a 
+				// Original cost function. Note that each observation has a
 				// contribution of 0 to 1.
 				double diff = (pre[i] / (qValue * hq)) - 1;
 				v += 1 - FastMath.exp(-diff * diff / n2);
@@ -2059,7 +2059,7 @@ public class FIRE implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<String>();
+		List<String> titles = new LinkedList<>();
 		if (WindowManager.getWindowCount() > 0)
 		{
 			for (int imageID : WindowManager.getIDList())
@@ -2211,7 +2211,7 @@ public class FIRE implements PlugIn
 			// For normalisation
 			qNorm = (1 / frcCurve.mean1 + 1 / frcCurve.mean2);
 
-			// Compute v(q) - The numerator of the FRC divided by the number of pixels 
+			// Compute v(q) - The numerator of the FRC divided by the number of pixels
 			// in the Fourier circle (2*pi*q*L)
 			vq = new double[frcCurve.getSize()];
 			for (int i = 0; i < vq.length; i++)
@@ -2230,7 +2230,7 @@ public class FIRE implements PlugIn
 			{
 				// Note the original equation given in the paper: sinc(pi*q*L)^2 is a typo.
 				// Matlab code provided by Bernd Rieger removes L to compute: sinc(pi*q)^2
-				// with q == 1/L, 2/L, ... (i.e. no unit conversion to nm). This means that 
+				// with q == 1/L, 2/L, ... (i.e. no unit conversion to nm). This means that
 				// the function will start at 1 and drop off to zero at q=L.
 
 				// sinc(pi*q)^2
@@ -2274,7 +2274,7 @@ public class FIRE implements PlugIn
 
 			for (int i = 0; i < hq.length; i++)
 			{
-				// Note: vq already has the qNorm factor applied so we do not 
+				// Note: vq already has the qNorm factor applied so we do not
 				// divide qValue by qNorm.
 				correction[i] = qValue * sinc2[i] * hq[i];
 				// This is not actually the corrected numerator since it is made absolute
@@ -2342,7 +2342,7 @@ public class FIRE implements PlugIn
 				pw2 = Utils.display(plot.getTitle(), plot, Utils.NO_TO_FRONT);
 			}
 
-			// Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio. 
+			// Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio.
 			plot = new Plot2(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
 			double xMax = qScaled[qScaled.length - 1];
 			if (qValue > 0)
@@ -2415,7 +2415,7 @@ public class FIRE implements PlugIn
 			this.precision = precision;
 
 			// Sum the area under the histogram to use for normalisation.
-			// Amplitude = volume / (sigma * sqrt(2*pi)) 
+			// Amplitude = volume / (sigma * sqrt(2*pi))
 			// Precompute the correct amplitude for a standard width Gaussian
 			double dx = (hist[0][1] - hist[0][0]);
 			standardAmplitude = precision.getN() * dx / Math.sqrt(2 * Math.PI);
@@ -2544,7 +2544,7 @@ public class FIRE implements PlugIn
 
 			if (m == null)
 			{
-				// We cannot compute a precision histogram. 
+				// We cannot compute a precision histogram.
 				// This does not matter if the user has provide a fixed input.
 				if (precisionMethod == PrecisionMethod.FIXED)
 				{
@@ -2559,7 +2559,7 @@ public class FIRE implements PlugIn
 		}
 
 		// We get here if we can compute precision.
-		// Build the histogram 
+		// Build the histogram
 		StoredDataStatistics precision = new StoredDataStatistics(results.size());
 		if (m == PrecisionMethod.STORED)
 		{
@@ -2581,7 +2581,7 @@ public class FIRE implements PlugIn
 
 		double yMin = Double.NEGATIVE_INFINITY, yMax = 0;
 
-		// Set the min and max y-values using 1.5 x IQR 
+		// Set the min and max y-values using 1.5 x IQR
 		DescriptiveStatistics stats = precision.getStatistics();
 		double lower = stats.getPercentile(25);
 		double upper = stats.getPercentile(75);
@@ -2777,7 +2777,7 @@ public class FIRE implements PlugIn
 			if (ignore)
 				return;
 
-			// This is not perfect since multiple threads may reset the same new-window flag  
+			// This is not perfect since multiple threads may reset the same new-window flag
 			if (Utils.isNewWindow())
 				wo.add(plot);
 
@@ -2903,7 +2903,7 @@ public class FIRE implements PlugIn
 		final MyWindowOrganiser wo = new MyWindowOrganiser();
 
 		// Use a simple workflow
-		Workflow<WorkSettings, Object> workflow = new Workflow<WorkSettings, Object>();
+		Workflow<WorkSettings, Object> workflow = new Workflow<>();
 
 		// Split the work to two children with a dummy initial worker
 		int previous = workflow.add(new BaseWorker(wo));
@@ -3045,7 +3045,7 @@ public class FIRE implements PlugIn
 			q = tf3.getText();
 
 			// Implement a delay to allow typing.
-			// This is also applied to the sliders which we do not want. 
+			// This is also applied to the sliders which we do not want.
 			// Ideally we would have no delay for sliders (since they are in the correct place already
 			// but a delay for typing in the text field). Unfortunately the AWTEvent raised by ImageJ
 			// for the slider is actually from the TextField so we cannot tell the difference.
@@ -3095,7 +3095,7 @@ public class FIRE implements PlugIn
 
 			if (reset)
 			{
-				// These trigger dialogItemChanged(...) so do them after we added 
+				// These trigger dialogItemChanged(...) so do them after we added
 				// work to the queue and ignore the events
 				ignore = 3;
 				tf1.setText(m);
@@ -3126,25 +3126,25 @@ public class FIRE implements PlugIn
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
-			// Ignore			
+			// Ignore
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
-			// Ignore			
+			// Ignore
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent e)
 		{
-			// Ignore			
+			// Ignore
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e)
 		{
-			// Ignore			
+			// Ignore
 		}
 	}
 

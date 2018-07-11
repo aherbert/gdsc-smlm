@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -42,7 +42,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param fitConfiguration
 	 * @throws IllegalArgumentException
 	 *             If the configuration is missing information, e.g. initial widths
@@ -119,7 +119,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 			double sx, sy, angle;
 			if (isZFitting)
 			{
-				// Use the widths at z=0. 
+				// Use the widths at z=0.
 				// These are used to determine the centre-of-mass range search.
 				sx = this.sx;
 				sy = this.sy;
@@ -158,14 +158,14 @@ public class FastGaussian2DFitter extends Gaussian2DFitter
 				}
 			}
 
-			// Set-up for estimating peak width at half maximum 
+			// Set-up for estimating peak width at half maximum
 			position[0] = (int) Math.round(xpos);
 			position[1] = (int) Math.round(ypos);
 
 			// If the position is on the integer grid then use a centre-of-mass approximation
 			if (npeaks == 1 && xpos == position[0] && ypos == position[1])
 			{
-				// Estimate using centre of mass around peak index 
+				// Estimate using centre of mass around peak index
 				// Use 2 * SD estimate to calculate the range around the index that should be considered.
 				// SD = (sx+sy)/2 => Range = sx+sy
 				final int range = Math.max(1, (int) Math.ceil(sx + sy));

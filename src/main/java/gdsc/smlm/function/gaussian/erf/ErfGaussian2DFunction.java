@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -170,7 +170,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	/**
 	 * Evaluates an 2-dimensional Gaussian function for a single peak.
-	 * 
+	 *
 	 * @param i
 	 *            Input predictor
 	 * @param duda
@@ -188,14 +188,14 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NonLinearFunction#initialise(double[])
 	 */
 	@Override
 	public void initialise(double[] a)
 	{
 		// The base Gaussian2DFunction does all the work in NonLinearFunction#initialise(double[]).
-		// The ERF Gaussian2DFunction does all the work in Gradient1Function.initialise1(double[])  
+		// The ERF Gaussian2DFunction does all the work in Gradient1Function.initialise1(double[])
 		initialise1(a);
 	}
 
@@ -236,7 +236,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 		// Note: This could be used when computing gradients:
 		// e.g. final double du_dty_tI = du_dty / tI;
 		// => final double du_dty_tI = safeDivide(du_dty, tI);
-		// Currently this is not performed as the ERF functions are used in the context 
+		// Currently this is not performed as the ERF functions are used in the context
 		// of bounded parameters so avoiding bad parameters, e.g. tI being zero.
 		return (numerator == 0) ? 0 : numerator / denominator;
 	}

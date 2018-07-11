@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -108,7 +108,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NamedFunction#getParameterName(int)
 	 */
 	@Override
@@ -252,11 +252,11 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * <p>
 	 * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
 	 * using the indices specified in the Gaussian2DFunction class.
-	 * 
+	 *
 	 * @param x
 	 *            Input predictor
 	 * @return The predicted value
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int)
 	 */
 	@Override
@@ -270,13 +270,13 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	 * <p>
 	 * The first coefficient is the Gaussian background level. The coefficients are then packed for each peak
 	 * using the indices specified in the Gaussian2DFunction class.
-	 * 
+	 *
 	 * @param x
 	 *            Input predictor
 	 * @param dyda
 	 *            Partial gradient of function with respect to each coefficient
 	 * @return The predicted value
-	 * 
+	 *
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, double[])
 	 */
 	@Override
@@ -284,7 +284,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/**
 	 * Execute the {@link #eval(int, float[])} method and set the expected variance using the noise model
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *             if the noise model is null
 	 * @see gdsc.smlm.function.NonLinearFunction#eval(int, float[], float[])
@@ -301,7 +301,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/**
 	 * Execute the {@link #eval(int)} method and set the expected variance using the noise model
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *             if the noise model is null
 	 * @see gdsc.smlm.function.NonLinearFunction#evalw(int, double[])
@@ -326,7 +326,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/**
 	 * Set the noise model used in {@link #eval(int, float[], float[])}.
-	 * 
+	 *
 	 * @param noiseModel
 	 *            the noise model to set
 	 */
@@ -337,7 +337,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.function.NonLinearFunction#canComputeWeights()
 	 */
 	@Override
@@ -349,7 +349,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 	/**
 	 * Build the index array that maps the gradient index back to the original parameter index so that:<br/>
 	 * a[indices[i]] += dy_da[i]
-	 * 
+	 *
 	 * @param nPeaks
 	 * @return The indices
 	 */
@@ -360,7 +360,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	protected static int[] createGradientIndices(int nPeaks, Gaussian2DFunction gf)
 	{
-		// Parameters are: 
+		// Parameters are:
 		// Background + n * { Signal, Shape, Xpos, Ypos, Xsd, Ysd }
 		int nparams = (gf.evaluatesBackground() ? 1 : 0) + nPeaks * gf.getGradientParametersPerPeak();
 		int[] indices = new int[nparams];
@@ -402,7 +402,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/**
 	 * Locate the index within the gradient indices for the specified parameter
-	 * 
+	 *
 	 * @param parameterIndex
 	 * @return the gradient index (or -1 if not present)
 	 */
@@ -417,7 +417,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValues(double[])
 	 */
 	@Override
@@ -452,7 +452,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeJacobian(double[])
 	 */
 	@Override
@@ -463,7 +463,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#canComputeValuesAndJacobian()
 	 */
 	@Override
@@ -474,7 +474,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedNonLinearFunction#computeValuesAndJacobian(double[])
 	 */
 	@Override
@@ -495,12 +495,12 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 				jacobian[i++] = dy_da.clone();
 			}
 		});
-		return new Pair<double[], double[][]>(values, jacobian);
+		return new Pair<>(values, jacobian);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#size()
 	 */
 	@Override
@@ -511,7 +511,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
 	@Override
@@ -522,7 +522,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.ValueProcedure)
 	 */
 	@Override
@@ -534,7 +534,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.Gradient1Procedure)
 	 */
 	@Override
@@ -550,7 +550,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ValueFunction#initialise0(double[])
 	 */
 	@Override
@@ -563,7 +563,7 @@ public abstract class Gaussian2DFunction implements ExtendedNonLinearFunction, G
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient1Function#initialise1(double[])
 	 */
 	@Override

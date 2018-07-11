@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -94,7 +94,7 @@ public class WPoissonGradientProcedureTest
 		int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
 		FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -178,7 +178,7 @@ public class WPoissonGradientProcedureTest
 		int iter = 10;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
 		createFakeParams(nparams, iter, paramsList);
 		Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -223,8 +223,8 @@ public class WPoissonGradientProcedureTest
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 
@@ -300,8 +300,8 @@ public class WPoissonGradientProcedureTest
 		final int iter = 100;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		final ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		final ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		final ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		final ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		createFakeData(nparams, iter, paramsList, yList);
 
@@ -428,7 +428,7 @@ public class WPoissonGradientProcedureTest
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<double[]>(paramsList.size());
+		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			params2List.add(copydouble(paramsList.get(i)));

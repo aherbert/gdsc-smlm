@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -242,7 +242,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			}
 		}
 
-		// Update the geometry. 
+		// Update the geometry.
 		// Do this in a method to allow sub-classes to change the geometry.
 		this.setGeometry(createGeometry(allCoords, ga));
 
@@ -456,7 +456,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			duplicateIndices(objectIndices, allIndices);
 			iga.setCoordinateIndices(0, allIndices);
 
-			// Check if we need the color and normal indices 
+			// Check if we need the color and normal indices
 			if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0)
 			{
 				if (hasNormals())
@@ -519,8 +519,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 			Class<?> clazz = sourceGA.getClass();
 			//clazz = clazz.asSubclass(clazz);
 
-			TurboList<Class<?>> paramTypes = new TurboList<Class<?>>(4);
-			TurboList<Object> paramValues = new TurboList<Object>(4);
+			TurboList<Class<?>> paramTypes = new TurboList<>(4);
+			TurboList<Object> paramValues = new TurboList<>(4);
 
 			paramTypes.add(int.class);
 			paramTypes.add(int.class);
@@ -645,7 +645,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		{
 			this.transparency = 0.0f;
 
-			// For a strange reason if this is set to NONE before the mesh is added to 
+			// For a strange reason if this is set to NONE before the mesh is added to
 			// a scene then the transparency cannot be adjusted. So set to FASTEST.
 			if (ta.isLive())
 				ta.setTransparencyMode(TransparencyAttributes.NONE);
@@ -720,7 +720,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		{
 			appearance.setPointAttributes(null);
 
-			// These are the defaults. We may need them if we want to support mesh 
+			// These are the defaults. We may need them if we want to support mesh
 			// display when the polygon mode is Line
 			PolygonAttributes polygonAttributes = appearance.getPolygonAttributes();
 			if (polygonAttributes == null)
@@ -777,7 +777,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorder(int[])
 	 */
 	@Override
@@ -789,7 +789,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.UpdatedableItemMesh#reorderFast(int[])
 	 */
 	@Override
@@ -809,8 +809,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 		}
 
 		// From here on we assume the current geometry will not be null
-		// as this only happens when the original size is zero. Size has 
-		// been checked at this point to be the smaller of new and old. 
+		// as this only happens when the original size is zero. Size has
+		// been checked at this point to be the smaller of new and old.
 		GeometryArray ga = (GeometryArray) getGeometry();
 
 		points = reorder(points, indices);
@@ -908,7 +908,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#size()
 	 */
 	@Override
@@ -919,7 +919,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#getCoordinate(int)
 	 */
 	@Override
@@ -930,7 +930,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see customnode.CustomMesh#setColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -943,7 +943,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemShape#setItemColor(org.scijava.vecmath.Color3f)
 	 */
 	@Override
@@ -990,7 +990,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.ItemMesh#setItemColor(org.scijava.vecmath.Color3f[])
 	 */
 	@Override
@@ -1047,7 +1047,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemColor4(org.scijava.vecmath.Color4f[])
 	 */
 	@Override
@@ -1075,7 +1075,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float[])
 	 */
 	@Override
@@ -1106,7 +1106,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#setItemAlpha(float)
 	 */
 	@Override
@@ -1135,7 +1135,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.ij3d.TransparentItemShape#getItemAlpha(float[])
 	 */
 	@Override
@@ -1162,7 +1162,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see customnode.CustomMesh#setShaded(boolean)
 	 */
 	@Override

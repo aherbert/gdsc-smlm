@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -73,7 +73,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @param func
 	 *            The function to fit
 	 */
@@ -84,7 +84,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @param func
 	 *            The function to fit
 	 * @param sc
@@ -97,7 +97,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @param func
 	 *            The function to fit
 	 * @param sc
@@ -130,7 +130,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	protected boolean nonLinearModel(int n, double[] y, double[] a, boolean initialStage)
 	{
 		// The NonLinearFunction evaluates a function with parameters a but only computes the gradient
-		// for m <= a.length parameters. The parameters can be accessed using the gradientIndices() method.  
+		// for m <= a.length parameters. The parameters can be accessed using the gradientIndices() method.
 
 		final int[] gradientIndices = f.gradientIndices();
 		final int m = gradientIndices.length;
@@ -154,7 +154,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 		// Solve the gradient equation A x = b:
 		// A = Hessian matrix (alpha)
-		// x = Parameter shift (output da) 
+		// x = Parameter shift (output da)
 		// b = Gradient vector (beta)
 		if (!solve(a, m))
 			return false;
@@ -223,13 +223,13 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Solve the gradient equation A x = b: *
-	 * 
+	 *
 	 * <pre>
 	 * A = Hessian matrix (alpha)
 	 * x = Parameter shift (output da)
 	 * b = Gradient vector (beta)
 	 * </pre>
-	 * 
+	 *
 	 * The Hessian and gradient parameter from the current best scoring parameter set are assumed to be in alpha and
 	 * beta. The lambda parameter is used to weight the diagonal of the Hessian.
 	 *
@@ -272,19 +272,19 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	 * On input have a[n][n], b[n]. On output b replaced by x[n].
 	 * <p>
 	 * Note: Any zero elements in b are not solved.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	protected boolean solve(double[][] a, double[] b)
 	{
 		// 04-May-2017
 		// EJMLLinearSolver was updated to use the pseudoInverse to create a solution
-		// when the matrix is singular. Thus we no longer check for zeros.		
+		// when the matrix is singular. Thus we no longer check for zeros.
 
 		// If the gradient vector is very small set to zero so that this is ignored.
 
 		// TODO - At what level should gradients be ignored (i.e. the parameter has no effect?).
-		// Note that analysis on a test dataset showed no difference in results. Those that are caught 
+		// Note that analysis on a test dataset showed no difference in results. Those that are caught
 		// for bad gradients must therefore go on to fail on peak filtering criteria. At least this
 		// gives the option of not filtering.
 		//for (int i = b.length; i-- > 0;)
@@ -292,7 +292,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		//		b[i] = 0;
 
 		// TODO
-		// Q. Do we need a better qr decomposition that uses the largest Eigen column first. 
+		// Q. Do we need a better qr decomposition that uses the largest Eigen column first.
 		// There is a version from Apache commons math.
 		// We could assess the magnitude of each value in the gradient vector and rearrange.
 
@@ -365,7 +365,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Compute the parameter deviations using the covariance matrix of the solution
-	 * 
+	 *
 	 * @param n
 	 *
 	 * @param aDev
@@ -378,13 +378,13 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		{
 			// The Hessian matrix refers to the log-likelihood ratio.
 			// Compute and invert a matrix related to the Poisson log-likelihood.
-			// This assumes this does achieve the maximum likelihood estimate for a 
+			// This assumes this does achieve the maximum likelihood estimate for a
 			// Poisson process.
 			double[][] I = calculator.fisherInformationMatrix(n, null, func);
 			if (calculator.isNaNGradients())
 				throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
 
-			// Use a dedicated solver optimised for inverting the matrix diagonal. 
+			// Use a dedicated solver optimised for inverting the matrix diagonal.
 			FisherInformationMatrix m = new FisherInformationMatrix(I);
 			setDeviations(aDev, m);
 			return true;
@@ -426,15 +426,15 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 		// Create dynamically for the parameter sizes
 		calculator = GradientCalculatorFactory.newCalculator(nparams, isMLE());
 
-		// Initialise storage. 
-		// Note that covar and da are passed to EJMLLinerSolver and so must be the correct size. 
+		// Initialise storage.
+		// Note that covar and da are passed to EJMLLinerSolver and so must be the correct size.
 		beta = new double[nparams];
 		da = new double[nparams];
 		covar = new double[nparams][nparams];
 		alpha = new double[nparams][nparams];
 		ap = new double[a.length];
 
-		// Store the { best, previous, new } sum-of-squares values 
+		// Store the { best, previous, new } sum-of-squares values
 		sumOfSquaresWorking = new double[3];
 
 		boolean copyYfit = false;
@@ -476,7 +476,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/**
 	 * Used for debugging
-	 * 
+	 *
 	 * @param format
 	 * @param o
 	 */
@@ -512,7 +512,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(gdsc.smlm.function.GradientFunction)
 	 */
 	@Override
@@ -527,7 +527,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	/**
 	 * Set the stopping criteria for the {@link #fit(int, double[], double[], double[], double[], double[], double)}
 	 * method
-	 * 
+	 *
 	 * @param sc
 	 */
 	public void setStoppingCriteria(StoppingCriteria sc)
@@ -568,7 +568,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
 	@Override
@@ -608,7 +608,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
 		calculator = GradientCalculatorFactory.newCalculator(f.getNumberOfGradients(), isMLE());
-		
+
 		if (isMLE())
 		{
 			return super.computeDeviations(y, a, aDev);
@@ -628,7 +628,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 	protected FisherInformationMatrix computeFisherInformationMatrix(double[] y, double[] a)
 	{
 		// Compute and invert a matrix related to the Poisson log-likelihood.
-		// This assumes this does achieve the maximum likelihood estimate for a 
+		// This assumes this does achieve the maximum likelihood estimate for a
 		// Poisson process.
 		double[][] I = calculator.fisherInformationMatrix(y.length, a, func);
 		if (calculator.isNaNGradients())
@@ -638,7 +638,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.LSEBaseFunctionSolver#getTotalSumOfSquares()
 	 */
 	@Override
@@ -651,7 +651,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.WLSEFunctionSolver#getChiSquared()
 	 */
 	@Override
@@ -665,7 +665,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihood()
 	 */
 	@Override
@@ -684,7 +684,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getLogLikelihoodRatio()
 	 */
 	@Override
@@ -698,7 +698,7 @@ public class NonLinearFit extends LSEBaseFunctionSolver implements MLEFunctionSo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.MLEFunctionSolver#getQ()
 	 */
 	@Override

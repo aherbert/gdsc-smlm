@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -178,7 +178,7 @@ public class ResultsImageSampler
 	private long[] no;
 	private ResultsSample[] data;
 	private int lower, upper;
-	private TurboList<ResultsSample> list = new TurboList<ResultsSample>();
+	private TurboList<ResultsSample> list = new TurboList<>();
 	private RandomGenerator r = new Well19937c();
 
 	/**
@@ -260,7 +260,7 @@ public class ResultsImageSampler
 		long empty = total - data.length;
 		if (empty == 0)
 		{
-			// All indices are used 
+			// All indices are used
 			no = new long[0];
 		}
 		else
@@ -298,7 +298,7 @@ public class ResultsImageSampler
 				TLongArrayList list = new TLongArrayList(data.length);
 				if (empty < data.length)
 				{
-					// We can pick all the indices that are missing 
+					// We can pick all the indices that are missing
 					long emptyCandidate = 0;
 					for (int i = 0; i < data.length; i++)
 					{
@@ -315,7 +315,7 @@ public class ResultsImageSampler
 				}
 				else
 				{
-					// There are many empty blocks so just sample blocks 
+					// There are many empty blocks so just sample blocks
 					// after those with localisations.
 					long emptyCandidate = 1;
 					for (int i = 0; i < data.length; i++)
@@ -343,7 +343,7 @@ public class ResultsImageSampler
 	 */
 	private void createResultSamples()
 	{
-		TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<ResultsSample>(results.size());
+		TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<>(results.size());
 		ResultsSample next = ResultsSample.create(-1);
 		for (PeakResult p : results.toArray())
 		{
@@ -399,7 +399,7 @@ public class ResultsImageSampler
 
 	/**
 	 * Convert the single index into x,y,z coords, Input array must be length >= 3.
-	 * 
+	 *
 	 * @param index
 	 * @param xyz
 	 * @return The xyz array
@@ -593,7 +593,7 @@ public class ResultsImageSampler
 
 	/**
 	 * Set the random generator for use during sampling
-	 * 
+	 *
 	 * @param r
 	 *            the random generator to set (ignored if null)
 	 */

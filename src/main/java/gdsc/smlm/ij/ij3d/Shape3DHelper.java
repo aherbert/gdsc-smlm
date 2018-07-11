@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -56,7 +56,7 @@ public class Shape3DHelper
 	public enum Rendering implements NamedObject
 	{
 		POINT { @Override
-		public String getName() { return "Point"; } 
+		public String getName() { return "Point"; }
 				@Override
 				public boolean is2D() { return true; }},
 		SQUARE { @Override
@@ -97,10 +97,10 @@ public class Shape3DHelper
 		public String getShortName()
 		{
 			return getName();
-		}		
-		
+		}
+
 		public boolean is2D() { return false; }
-		
+
 		public boolean isHighResolution() { return false; }
 
 		public static Rendering forNumber(int number)
@@ -117,7 +117,7 @@ public class Shape3DHelper
 
 	public static Shape3D createShape(Rendering rendering, int colorDepth)
 	{
-		TurboList<Point3f> points = new TurboList<Point3f>(1);
+		TurboList<Point3f> points = new TurboList<>(1);
 		points.addf(new Point3f());
 
 		GeometryArray ga;
@@ -243,12 +243,12 @@ public class Shape3DHelper
 		if (creaseAngle >= 0 && creaseAngle <= 180)
 			ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
 		ng.generateNormals(gi);
-		return new Pair<Vector3f[], int[]>(gi.getNormals(), gi.getNormalIndices());
+		return new Pair<>(gi.getNormals(), gi.getNormalIndices());
 	}
 
 	/**
 	 * Creates the object used to draw a single localisation.
-	 * 
+	 *
 	 * @param rendering
 	 *
 	 * @return the list of triangle vertices for the object
@@ -358,7 +358,7 @@ public class Shape3DHelper
 			circleY[i] = y + radius * c * ay + radius * s * by;
 			circleZ[i] = z + radius * c * az + radius * s * bz;
 		}
-		final TurboList<Point3f> list = new TurboList<Point3f>();
+		final TurboList<Point3f> list = new TurboList<>();
 		final Point3f centre = new Point3f((float) x, (float) y, (float) z);
 		for (int i = 0; i < edgePoints; ++i)
 		{
@@ -377,9 +377,9 @@ public class Shape3DHelper
 		return list;
 	}
 
-	// Note: The triangles are rendered using a right-hand coordinate system. 
+	// Note: The triangles are rendered using a right-hand coordinate system.
 	// However for 2D shapes the handedness does matter as we set back-face cull off.
-	// For polygons we check the handedness is 
+	// For polygons we check the handedness is
 	// facing away from the centre so back-face cull can be on.
 
 	private static float sqrt(double d)
@@ -479,7 +479,7 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise)
 	{
-		List<Point3f> ps = new TurboList<Point3f>();
+		List<Point3f> ps = new TurboList<>();
 		for (int i = 0; i < faces.length; i++)
 		{
 			for (int k = 0; k < 3; k++)
@@ -507,7 +507,7 @@ public class Shape3DHelper
 
 	/**
 	 * Creates the object used to outline a single localisation.
-	 * 
+	 *
 	 * @param rendering
 	 *
 	 * @return the list of triangle vertices for the object
@@ -566,12 +566,12 @@ public class Shape3DHelper
 	 */
 	private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise)
 	{
-		List<Point3f> ps = new TurboList<Point3f>();
+		List<Point3f> ps = new TurboList<>();
 		for (int i = 0; i < vertices.length; i++)
 		{
 			ps.add(new Point3f(vertices[i]));
 		}
-		// Make continuous 
+		// Make continuous
 		ps.add(new Point3f(vertices[0]));
 		if (normalise)
 			normalise(ps);
@@ -687,13 +687,13 @@ public class Shape3DHelper
 		by *= bScale;
 		bz *= bScale;
 
-		TurboList<Point3f> list = new TurboList<Point3f>();
+		TurboList<Point3f> list = new TurboList<>();
 		if (includeCenter)
 			list.add(new Point3f((float) x, (float) y, (float) z));
 		for (int i = edgePoints + 1; i-- > 0;)
 		{
 			// For consistency with the rendering of the icosahedron
-			// we rotate by a quarter turn. The icosahedron projected 
+			// we rotate by a quarter turn. The icosahedron projected
 			// flat then looks like the hexagon.
 
 			final double angle = Math.PI / 2 + (i * 2 * Math.PI) / edgePoints;
@@ -755,7 +755,7 @@ public class Shape3DHelper
 			// 2D
 			case SQUARE:
 				primitive = GeometryInfo.QUAD_ARRAY;
-				coords = new TurboList<Point3f>();
+				coords = new TurboList<>();
 				for (int i = 0; i < 4; i++)
 					coords.add(new Point3f(cubeVertices[i][0], cubeVertices[i][1], 0));
 				normalise = true;
@@ -777,7 +777,7 @@ public class Shape3DHelper
 			// 3D
 			case CUBE:
 				primitive = GeometryInfo.QUAD_ARRAY;
-				coords = new TurboList<Point3f>();
+				coords = new TurboList<>();
 				Point3f[] vertices = new Point3f[8];
 				for (int i = 0; i < 8; i++)
 					vertices[i] = new Point3f(cubeVertices[i][0], cubeVertices[i][1], cubeVertices[i][2]);
@@ -830,7 +830,7 @@ public class Shape3DHelper
 		}
 		else
 		{
-			// Generate indexes manually. 
+			// Generate indexes manually.
 			// The GeometryInfo somehow does not do this correctly for all rendering modes.
 			// E.g. the icosahedron gets extra indexes to normals that are 0,0,0.
 			Pair<Point3f[], int[]> p = createIndexedObject(coords);
@@ -881,8 +881,8 @@ public class Shape3DHelper
 	public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list)
 	{
 		// Compact the vertices to a set of vertices and faces
-		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<Point3f>(list.size(), 0.5f, -1);
-		TurboList<Point3f> vertices = new TurboList<Point3f>(list.size());
+		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
+		TurboList<Point3f> vertices = new TurboList<>(list.size());
 		TIntArrayList faces = new TIntArrayList(list.size());
 		int index = 0;
 		// Process triangles
@@ -899,7 +899,7 @@ public class Shape3DHelper
 			faces.add(value);
 		}
 
-		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+		return new Pair<>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,7 +60,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 		{
 			blinks = (sequence.length / 2) - 1;
 
-			// Ensure the sequence array is an even number in length 
+			// Ensure the sequence array is an even number in length
 			final int length = 2 * (blinks + 1);
 			if (sequence.length == length)
 				burstSequence = sequence;
@@ -82,7 +82,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 * <p>
 	 * Note that a molecule will always have a start time even if it has no blinks. This models a molecule that turns on
 	 * and then bleaches immediately.
-	 * 
+	 *
 	 * @return The start time
 	 */
 	public double getStartTime()
@@ -92,7 +92,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 
 	/**
 	 * Get the end time, i.e. when the molecule bleached.
-	 * 
+	 *
 	 * @return The end time
 	 */
 	public double getEndTime()
@@ -105,7 +105,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	public List<double[]> getBurstSequence()
 	{
-		ArrayList<double[]> data = new ArrayList<double[]>(blinks + 1);
+		ArrayList<double[]> data = new ArrayList<>(blinks + 1);
 		for (int i = 0; i <= blinks; i++)
 		{
 			data.add(new double[] { burstSequence[i * 2], burstSequence[i * 2 + 1] });
@@ -118,7 +118,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 	 */
 	public List<int[]> getSampledBurstSequence()
 	{
-		ArrayList<int[]> data = new ArrayList<int[]>(blinks + 1);
+		ArrayList<int[]> data = new ArrayList<>(blinks + 1);
 		for (int i = 0; i <= blinks; i++)
 		{
 			data.add(new int[] { (int) (burstSequence[i * 2]), (int) (burstSequence[i * 2 + 1]) });
@@ -128,7 +128,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 
 	/**
 	 * Order by time ascending
-	 * 
+	 *
 	 * @param o
 	 *            The other fluorophore
 	 * @return -1,0,1
@@ -177,7 +177,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 		if (blinks == 0)
 			return new int[] { end(burstSequence[1]) - start(burstSequence[0]) };
 
-		// Process all blinks. Join together blinks with an off-time that would not be noticed, 
+		// Process all blinks. Join together blinks with an off-time that would not be noticed,
 		// i.e. where the molecule was on in consecutive frames.
 		int[] onTimes = new int[blinks + 1];
 		int n = 0;
@@ -216,7 +216,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 		if (blinks == 0)
 			return new int[0];
 
-		// Process all blinks. Join together blinks with an off-time that would not be noticed, 
+		// Process all blinks. Join together blinks with an off-time that would not be noticed,
 		// i.e. where the molecule was on in consecutive frames.
 		int[] offTimes = new int[blinks];
 		int n = 0;
@@ -260,7 +260,7 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel implements 
 
 	/**
 	 * Scale the times using the specified factor. Allows adjusting the relative time of the sequence.
-	 * 
+	 *
 	 * @param scale
 	 */
 	public void adjustTime(double scale)

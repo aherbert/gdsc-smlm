@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -240,8 +240,8 @@ public class GradientCalculatorSpeedTest
 		double[][] alpha2 = new double[nparams][nparams];
 		double[] beta2 = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList);
 
@@ -312,8 +312,8 @@ public class GradientCalculatorSpeedTest
 		double[][] alpha = new double[nparams][nparams];
 		double[] beta = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList);
 
@@ -349,8 +349,8 @@ public class GradientCalculatorSpeedTest
 		int iter = 10000;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList);
 
@@ -409,8 +409,8 @@ public class GradientCalculatorSpeedTest
 		double[] beta = new double[nparams];
 		double[] beta2 = new double[nparams];
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
 		int[] x = createData(1, iter, paramsList, yList, true);
 
@@ -422,7 +422,7 @@ public class GradientCalculatorSpeedTest
 			double[] y = yList.get(i);
 			double[] a = paramsList.get(i);
 			double[] a2 = a.clone();
-			//double s = 
+			//double s =
 			calc.evaluate(x, y, a, beta, func);
 
 			for (int k = 0; k < nparams; k++)
@@ -508,12 +508,12 @@ public class GradientCalculatorSpeedTest
 		int iter = 50;
 		rdg = new RandomDataGenerator(TestSettings.getRandomGenerator());
 
-		ArrayList<double[]> paramsList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> yList = new ArrayList<double[]>(iter);
+		ArrayList<double[]> paramsList = new ArrayList<>(iter);
+		ArrayList<double[]> yList = new ArrayList<>(iter);
 
-		ArrayList<double[][]> alphaList = new ArrayList<double[][]>(iter);
-		ArrayList<double[]> betaList = new ArrayList<double[]>(iter);
-		ArrayList<double[]> xList = new ArrayList<double[]>(iter);
+		ArrayList<double[][]> alphaList = new ArrayList<>(iter);
+		ArrayList<double[]> betaList = new ArrayList<>(iter);
+		ArrayList<double[]> xList = new ArrayList<>(iter);
 
 		// Manipulate the background
 		double defaultBackground = Background;
@@ -747,7 +747,7 @@ public class GradientCalculatorSpeedTest
 
 	protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList)
 	{
-		ArrayList<double[]> params2List = new ArrayList<double[]>(paramsList.size());
+		ArrayList<double[]> params2List = new ArrayList<>(paramsList.size());
 		for (int i = 0; i < paramsList.size(); i++)
 		{
 			params2List.add(copydouble(paramsList.get(i)));

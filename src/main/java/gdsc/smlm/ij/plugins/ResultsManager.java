@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -102,15 +102,15 @@ public class ResultsManager implements PlugIn
 	{
 		//@formatter:off
 		FILE{ @Override
-		public String getName() { return "File"; }}, 
+		public String getName() { return "File"; }},
 		MEMORY{ @Override
-		public String getName() { return "Memory"; }}, 
+		public String getName() { return "Memory"; }},
 		MEMORY_MULTI_FRAME{ @Override
 		public String getName() { return "Memory (Multi-Frame)"; }},
 		MEMORY_SINGLE_FRAME{ @Override
 		public String getName() { return "Memory (Single-Frame)"; }},
 		MEMORY_CLUSTERED{ @Override
-		public String getName() { return "Memory (Clustered)"; }}, 
+		public String getName() { return "Memory (Clustered)"; }},
 		NONE{ @Override
 		public String getName() { return "None"; }};
 		//@formatter:on
@@ -150,7 +150,7 @@ public class ResultsManager implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -185,7 +185,7 @@ public class ResultsManager implements PlugIn
 				selected = md.getSelectedResults();
 				if (selected.isEmpty())
 					return;
-				allResults = new ArrayList<MemoryPeakResults>(selected.size());
+				allResults = new ArrayList<>(selected.size());
 				for (String name : selected)
 				{
 					MemoryPeakResults r = MemoryPeakResults.getResults(name);
@@ -870,7 +870,7 @@ public class ResultsManager implements PlugIn
 	 * <p>
 	 * If the source is a memory source then it will not be added if it is empty. If not empty then a summary of the
 	 * number of localisation is added as a message to the dialog.
-	 * 
+	 *
 	 * @param gd
 	 * @param inputOption
 	 * @param inputs
@@ -887,7 +887,7 @@ public class ResultsManager implements PlugIn
 	 * <p>
 	 * If the source is a memory source then it will not be added if it is empty. If not empty then a summary of the
 	 * number of localisation is added as a message to the dialog.
-	 * 
+	 *
 	 * @param gd
 	 * @param inputName
 	 * @param inputOption
@@ -895,7 +895,7 @@ public class ResultsManager implements PlugIn
 	 */
 	public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption, InputSource... inputs)
 	{
-		ArrayList<String> source = new ArrayList<String>(3);
+		ArrayList<String> source = new ArrayList<>(3);
 		boolean fileInput = false;
 		for (InputSource input : inputs)
 		{
@@ -913,7 +913,7 @@ public class ResultsManager implements PlugIn
 	 * Add a list of input sources to the generic dialog. The choice field will be named inputName. If the file input
 	 * option
 	 * is true then a field will be added name 'Input_file'.
-	 * 
+	 *
 	 * @param gd
 	 * @param inputName
 	 * @param inputOption
@@ -946,7 +946,7 @@ public class ResultsManager implements PlugIn
 			final JButton b = gd.getLastOptionButton();
 
 			// Add a listener to the choice to enable the file input field.
-			// Currently we hide the filename field and pack the dialog. 
+			// Currently we hide the filename field and pack the dialog.
 			// We may wish to just disable the fields and leave them there.
 			// This could be a user configured option in a global GDSC settings class.
 			if (Utils.isShowGenericDialog())
@@ -980,7 +980,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Remove the extra information added to a name for use in dialogs
-	 * 
+	 *
 	 * @param name
 	 *            the formatted name
 	 * @return The name
@@ -996,7 +996,7 @@ public class ResultsManager implements PlugIn
 	/**
 	 * Add an input source the list. If the source is a memory source then it will not be added if it is
 	 * empty. If not empty then a summary of the number of localisation is added as a message to the dialog.
-	 * 
+	 *
 	 * @param source
 	 * @param input
 	 */
@@ -1026,7 +1026,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Add a memory input source to the list
-	 * 
+	 *
 	 * @param source
 	 * @param memoryResults
 	 * @param input
@@ -1060,7 +1060,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Get the name of the results for use in dialogs
-	 * 
+	 *
 	 * @param memoryResults
 	 * @return The name
 	 */
@@ -1071,7 +1071,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Load results from memory using a name from a dialog
-	 * 
+	 *
 	 * @param name
 	 * @return The results
 	 */
@@ -1082,7 +1082,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Check for multi-frame results.
-	 * 
+	 *
 	 * @param memoryResults
 	 * @return True if at least one result spanning frames
 	 */
@@ -1100,7 +1100,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Check for any IDs above zero.
-	 * 
+	 *
 	 * @param memoryResults
 	 * @return True if any results have IDs above zero
 	 */
@@ -1118,7 +1118,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Check for all IDs above zero.
-	 * 
+	 *
 	 * @param memoryResults
 	 * @return True if all results have IDs above zero
 	 */
@@ -1136,7 +1136,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * All results must be an ExtendedPeakResult.
-	 * 
+	 *
 	 * @param memoryResults
 	 * @return True if all are an ExtendedPeakResult
 	 */
@@ -1154,7 +1154,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Gets the name of the next input source from the dialog
-	 * 
+	 *
 	 * @param gd
 	 */
 	public static String getInputSource(GenericDialog gd)
@@ -1399,7 +1399,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Check the calibration of the results exists, if not then prompt for it with a dialog
-	 * 
+	 *
 	 * @param results
 	 *            The results
 	 * @return True if OK; false if calibration dialog cancelled
@@ -1411,7 +1411,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Check the calibration of the results exists, if not then prompt for it with a dialog
-	 * 
+	 *
 	 * @param results
 	 *            The results
 	 * @param reader
@@ -1521,7 +1521,7 @@ public class ResultsManager implements PlugIn
 
 	/**
 	 * Load the results from the named input option
-	 * 
+	 *
 	 * @param inputOption
 	 * @return
 	 */

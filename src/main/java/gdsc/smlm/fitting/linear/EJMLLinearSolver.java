@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -59,7 +59,7 @@ public class EJMLLinearSolver
 		{
 			if (A.numCols <= UnrolledInverseFromMinor.MAX)
 			{
-				// Direct inversion using the determinant 
+				// Direct inversion using the determinant
 				if (A.numCols >= 2)
 				{
 					UnrolledInverseFromMinor.inv(A, A);
@@ -217,7 +217,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveLinear(DenseMatrix64F A, DenseMatrix64F B)
@@ -230,7 +230,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveCholesky(DenseMatrix64F A, DenseMatrix64F B)
@@ -243,7 +243,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveCholeskyLDLT(DenseMatrix64F A, DenseMatrix64F B)
@@ -256,7 +256,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solvePseudoInverse(DenseMatrix64F A, DenseMatrix64F B)
@@ -269,7 +269,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b by direct inversion. Works on small matrices up to size 5.
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveDirectInversion(DenseMatrix64F A, DenseMatrix64F B)
@@ -282,7 +282,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	private boolean solve(LinearSolver<DenseMatrix64F> solver, DenseMatrix64F A, DenseMatrix64F B)
@@ -307,7 +307,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * If checking the solution then A and/or B will not be modified. If no solution checking is enabled then A and/or B
 	 * could be modified.
-	 * 
+	 *
 	 * @param solver
 	 * @param A
 	 * @param B
@@ -335,7 +335,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * A and/or B will not be modified. If you do not care then use
 	 * {@link #solveUnsafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
-	 * 
+	 *
 	 * @param solver
 	 * @param A
 	 * @param B
@@ -364,7 +364,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * A and/or B may be modified. Check the solver before calling or use
 	 * {@link #solveSafe(LinearSolver, DenseMatrix64F, DenseMatrix64F, DenseMatrix64F)}
-	 * 
+	 *
 	 * @param solver
 	 * @param A
 	 * @param B
@@ -384,7 +384,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Check that the solution for x satisfies A x = b within the error tolerance
-	 * 
+	 *
 	 * @param A
 	 * @param x
 	 * @param b
@@ -408,7 +408,7 @@ public class EJMLLinearSolver
 			}
 			if (!equal.almostEqualRelativeOrAbsolute(b.data[i], bi))
 			{
-				//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi, 
+				//System.out.printf("Bad solution: %g != %g (%g = %d)\n", b.data[i], bi,
 				//		DoubleEquality.relativeError(b.data[i], bi), DoubleEquality.complement(b.data[i], bi));
 				return false;
 			}
@@ -424,19 +424,19 @@ public class EJMLLinearSolver
 	 * <p>
 	 * Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the PseudoInverse
 	 * decomposition.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(DenseMatrix64F A, DenseMatrix64F B)
 	{
 		createSolver(A.numCols);
 
-		// Speed tests show the Cholesky solver marginally outperforms the 
-		// CholeskyLDLT solver as the size increases. Note: The EJML factory 
-		// returns a Cholesky solver for symmetric positive definite matrices 
+		// Speed tests show the Cholesky solver marginally outperforms the
+		// CholeskyLDLT solver as the size increases. Note: The EJML factory
+		// returns a Cholesky solver for symmetric positive definite matrices
 		// so we use this.
 
-		// Note: Use solveSafe as we need the A and B matrix for the subsequent 
+		// Note: Use solveSafe as we need the A and B matrix for the subsequent
 		// solve attempt if failure
 
 		if (solveSafe(getCholeskySolver(), A, B, getX()))
@@ -452,7 +452,7 @@ public class EJMLLinearSolver
 		// since the PseudoInverse method is slow. We may want to try a different solver first,
 		// e.g. LinearSolver.
 
-		// No need for an explicit solveSafe this time. 
+		// No need for an explicit solveSafe this time.
 		// Use the solve() method which will include validate().
 		if (solve(getPseudoInverseSolver(), A, B, X))
 		{
@@ -481,10 +481,10 @@ public class EJMLLinearSolver
 	 * Computes the inverse of the 'A' matrix passed into the last successful solve method.
 	 * <p>
 	 * On output a[n][n] replaced by the inverse of the solved matrix a.
-	 * 
+	 *
 	 * @param A
 	 *            the matrix a
-	 * 
+	 *
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
 	 */
 	public boolean invertLastA(DenseMatrix64F A)
@@ -617,7 +617,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @return False if the matrix is singular (no solution)
 	 */
 	public boolean invertLinear(DenseMatrix64F A)
@@ -628,7 +628,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @return False if the matrix is singular (no solution)
 	 */
 	public boolean invertCholesky(DenseMatrix64F A)
@@ -639,7 +639,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @return False if the matrix is singular (no solution)
 	 */
 	public boolean invertCholeskyLDLT(DenseMatrix64F A)
@@ -650,7 +650,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @return False if the matrix is singular (no solution)
 	 */
 	public boolean invertPseudoInverse(DenseMatrix64F A)
@@ -661,7 +661,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @return False if the matrix is singular (no solution)
 	 */
 	public boolean invertDirectInversion(DenseMatrix64F A)
@@ -674,7 +674,7 @@ public class EJMLLinearSolver
 	 * Invert symmetric positive definite matrix A and returns only the diagonal.
 	 * <p>
 	 * Only supports matrix size up to 5.
-	 * 
+	 *
 	 * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
 	 */
 	public double[] invertDiagonalDirectInversion(DenseMatrix64F A)
@@ -695,10 +695,10 @@ public class EJMLLinearSolver
 	{
 		createSolver(A.numCols);
 
-		// Speed tests show the Cholesky solver marginally outperforms the 
+		// Speed tests show the Cholesky solver marginally outperforms the
 		// CholeskyLDLT solver as the size increases.
-		// The DirectInversion solver is faster when the size < 5.		
-		// Note: The EJML factory returns a Cholesky solver for symmetric 
+		// The DirectInversion solver is faster when the size < 5.
+		// Note: The EJML factory returns a Cholesky solver for symmetric
 		// positive definite matrices so we use this in preference to a CholeskyLDLT.
 
 		LinearSolver<DenseMatrix64F> primarySolver = (A.numCols < 5) ? getInversionSolver() : getCholeskySolver();
@@ -997,7 +997,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveLinear(double[][] a, double[] b)
@@ -1009,7 +1009,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveCholesky(double[][] a, double[] b)
@@ -1021,7 +1021,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveCholeskyLDLT(double[][] a, double[] b)
@@ -1033,7 +1033,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solvePseudoInverse(double[][] a, double[] b)
@@ -1045,7 +1045,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b by direct inversion. Works on small matrices up to size 5.
 	 * <p>
 	 * On output b replaced by x.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveDirectInversion(double[][] a, double[] b)
@@ -1060,7 +1060,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the PseudoInversion
 	 * decomposition.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(double[][] a, double[] b)
@@ -1073,7 +1073,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was removed (as it was
 	 * set to zero in the input matrix) then the resulting column/row index will be set to zero.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the last solve attempt failed, or inversion produces non finite values
@@ -1100,7 +1100,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the matrix is singular (no solution)
@@ -1116,7 +1116,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the matrix is singular (no solution)
@@ -1132,7 +1132,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the matrix is singular (no solution)
@@ -1148,7 +1148,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the matrix is singular (no solution)
@@ -1164,7 +1164,7 @@ public class EJMLLinearSolver
 
 	/**
 	 * Invert symmetric positive definite matrix A. On output a replaced by A^-1.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the matrix is singular (no solution)
@@ -1182,7 +1182,7 @@ public class EJMLLinearSolver
 	 * Invert symmetric positive definite matrix A and returns only the diagonal.
 	 * <p>
 	 * Only supports matrix size up to 5.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return The diagonal of A^-1 (or null if the matrix is singular (no solution) or too large)
@@ -1231,7 +1231,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveLinear(double[] a, double[] b)
@@ -1243,7 +1243,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveCholesky(double[] a, double[] b)
@@ -1255,7 +1255,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveCholeskyLDLT(double[] a, double[] b)
@@ -1267,7 +1267,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solvePseudoInverse(double[] a, double[] b)
@@ -1279,7 +1279,7 @@ public class EJMLLinearSolver
 	 * Solves (one) linear equation, a x = b by direct inversion. Works on small matrices up to size 5.
 	 * <p>
 	 * On output b replaced by x. Matrix a may be modified.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solveDirectInversion(double[] a, double[] b)
@@ -1294,7 +1294,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * Solve using the CholeskyLDLT method or, if that fails (due to a singular matrix), the PseudoInversion
 	 * decomposition.
-	 * 
+	 *
 	 * @return False if the equation is singular (no solution)
 	 */
 	public boolean solve(double[] a, double[] b)
@@ -1307,7 +1307,7 @@ public class EJMLLinearSolver
 	 * <p>
 	 * On output a[n][n] replaced by the inverse of the solved matrix a. If any column/row index was removed (as it was
 	 * set to zero in the input matrix) then the resulting column/row index will be set to zero.
-	 * 
+	 *
 	 * @param a
 	 *            the matrix a
 	 * @return False if the last solve attempt failed, or inversion produces non finite values

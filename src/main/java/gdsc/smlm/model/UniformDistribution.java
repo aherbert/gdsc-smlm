@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -73,7 +73,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/**
 	 * Create a new uniform distribution using a Halton sequence. The minimum bounds are set to zero.
-	 * 
+	 *
 	 * @param max
 	 *            The maximum bounds for the distribution
 	 */
@@ -84,7 +84,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/**
 	 * Create a new uniform distribution using a Halton sequence
-	 * 
+	 *
 	 * @param min
 	 *            The minimum bounds for the distribution
 	 * @param max
@@ -97,7 +97,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/**
 	 * Create a new uniform distribution using a Halton sequence
-	 * 
+	 *
 	 * @param min
 	 *            The minimum bounds for the distribution
 	 * @param max
@@ -118,7 +118,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/**
 	 * Create a new uniform distribution using the given vector generator
-	 * 
+	 *
 	 * @param min
 	 *            The minimum bounds for the distribution
 	 * @param max
@@ -133,7 +133,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/**
 	 * Create a new uniform distribution using a new random number generator from the factory for each dimension
-	 * 
+	 *
 	 * @param min
 	 *            The minimum bounds for the distribution
 	 * @param max
@@ -177,7 +177,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
 	@Override
@@ -191,7 +191,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/**
 	 * Return a vector with values in the unit domain ([0,1])
-	 * 
+	 *
 	 * @return the vector populated with values in the unit domain ([0,1])
 	 */
 	public double[] nextUnit()
@@ -201,7 +201,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
 	@Override
@@ -215,7 +215,7 @@ public class UniformDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
 	@Override
@@ -229,12 +229,12 @@ public class UniformDistribution implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
 	@Override
 	public void initialise(double[] xyz)
 	{
-		// Ignore		
+		// Ignore
 	}
 }

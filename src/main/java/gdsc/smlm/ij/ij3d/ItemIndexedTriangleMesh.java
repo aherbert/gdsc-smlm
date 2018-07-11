@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -68,7 +68,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	public ItemIndexedTriangleMesh(Point3f[] objectVertices, int[] objectFaces, Point3f[] points, Point3f[] sizes,
 			Color3f color, float transp)
 	{
-		// Create empty 
+		// Create empty
 		super(new Point3f[0], new int[0], color, transp);
 
 		if (sizes != null && points.length != sizes.length)
@@ -206,8 +206,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 	@Override
 	public Vector3f[] getNormals()
 	{
-		// Take advantage of the fact that the normals will all be the 
-		// same for the repeated object. This cannot be done if the 
+		// Take advantage of the fact that the normals will all be the
+		// same for the repeated object. This cannot be done if the
 		// vertices have been updated.
 		if (dirty)
 			super.getNormals();
@@ -250,7 +250,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			final int f2 = faces[i + 1];
 			final int f3 = faces[i + 2];
 
-			// Use the same order as that used to compute facet normals in 
+			// Use the same order as that used to compute facet normals in
 			// org.scijava.java3d.utils.geometry.NormalGenerator
 			v1.sub(vertices[f3], vertices[f2]);
 			v2.sub(vertices[f1], vertices[f2]);
@@ -328,7 +328,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh
 			final int f2 = faces[i + 1];
 			final int f3 = faces[i + 2];
 
-			// Use the same order as that used to compute facet normals in 
+			// Use the same order as that used to compute facet normals in
 			// org.scijava.java3d.utils.geometry.NormalGenerator
 			v1.sub(vertices[f3], vertices[f2]);
 			v2.sub(vertices[f1], vertices[f2]);

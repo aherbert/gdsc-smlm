@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,19 +10,19 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 /*
- * 
+ *
  */
 package gdsc.smlm.ij.plugins;
 
@@ -77,7 +77,7 @@ public class MultiDialog extends Dialog
 
 	/**
 	 * Interface to allow a list of any type to be shown in the MultiDialog
-	 * 
+	 *
 	 * @author Alex Herbert
 	 */
 	public interface Items
@@ -111,7 +111,7 @@ public class MultiDialog extends Dialog
 
 	/**
 	 * Base class for default implementation of the Items interface
-	 * 
+	 *
 	 * @author Alex Herbert
 	 */
 	public static abstract class BaseItems implements Items
@@ -120,7 +120,7 @@ public class MultiDialog extends Dialog
 		 * Returns the same formatted name.
 		 * <p>
 		 * {@inheritDoc}
-		 * 
+		 *
 		 * @see gdsc.smlm.ij.plugins.MultiDialog.Items#removeFormatting(java.lang.String)
 		 */
 		@Override
@@ -156,7 +156,7 @@ public class MultiDialog extends Dialog
 
 	/**
 	 * Class that allows the current results held in memory to be shown in the dialog
-	 * 
+	 *
 	 * @author Alex Herbert
 	 */
 	public static class MemoryResultsItems implements Items
@@ -311,7 +311,7 @@ public class MultiDialog extends Dialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
@@ -337,7 +337,7 @@ public class MultiDialog extends Dialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
 	 */
 	@Override
@@ -385,7 +385,7 @@ public class MultiDialog extends Dialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.KeyListener#keyReleased(java.awt.event.KeyEvent)
 	 */
 	@Override
@@ -400,7 +400,7 @@ public class MultiDialog extends Dialog
 		// Get the selected names
 		if (macro)
 		{
-			selected = new ArrayList<String>();
+			selected = new ArrayList<>();
 			String name = getValue("input");
 			while (name != null)
 			{
@@ -411,7 +411,7 @@ public class MultiDialog extends Dialog
 		else
 		{
 			final int[] listIndexes = list.getSelectedIndexes();
-			selected = new ArrayList<String>(listIndexes.length);
+			selected = new ArrayList<>(listIndexes.length);
 			if (listIndexes.length > 0)
 			{
 				for (int index : listIndexes)
@@ -443,7 +443,7 @@ public class MultiDialog extends Dialog
 
 	/**
 	 * Get a value from the macro options. Adapted from ij.gui.GenericDialog.
-	 * 
+	 *
 	 * @param label
 	 * @return The value (or null)
 	 */
@@ -465,7 +465,7 @@ public class MultiDialog extends Dialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
 	 */
 	@Override
@@ -534,7 +534,7 @@ public class MultiDialog extends Dialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
 	 */
 	@Override
@@ -545,7 +545,7 @@ public class MultiDialog extends Dialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
 	 */
 	@Override

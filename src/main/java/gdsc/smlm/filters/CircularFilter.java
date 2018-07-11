@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -43,7 +43,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.BaseWeightedFilter#newWeights()
 	 */
 	@Override
@@ -92,7 +92,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	 * Pixels within border regions (defined by 1 x radius) are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -113,7 +113,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 	/**
 	 * Get the border that will be ignored for the specified radius
-	 * 
+	 *
 	 * @param radius
 	 *            the radius
 	 * @return The border
@@ -127,7 +127,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	 * Compute the mean.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -144,7 +144,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	}
 
 	/**
-	 * 
+	 *
 	 * @param radius
 	 *            The kernel radius
 	 */
@@ -281,7 +281,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 					padRight);
 			if (y == 0)
 				for (int prevY = roiY - kHeight / 2; prevY < 0; prevY++)
-				{ //for y<0, pad with y=0 border pixels 
+				{ //for y<0, pad with y=0 border pixels
 					int prevLineInCache = cacheHeight + prevY;
 					System.arraycopy(cache, 0, cache, prevLineInCache * cacheWidth, cacheWidth);
 				}
@@ -400,7 +400,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 	/**
 	 * Get the radii where different smoothing will be applied
-	 * 
+	 *
 	 * @param max
 	 *            The maximum radii to include
 	 * @param increment
@@ -425,7 +425,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 	/**
 	 * Count the number of points in the circle mask for the given radius
-	 * 
+	 *
 	 * @param radius
 	 * @return The number of points
 	 */
@@ -448,7 +448,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 
 	/**
 	 * Get the diameter of the pixel region used
-	 * 
+	 *
 	 * @param radius
 	 * @return The diameter
 	 */
@@ -463,7 +463,7 @@ public abstract class CircularFilter extends BaseWeightedFilter
 	/**
 	 * Count the number of points in the circle mask for the given radius. Then convert it into an approximate radius
 	 * using sqrt(nPoints/pi)
-	 * 
+	 *
 	 * @param radius
 	 * @return The diameter
 	 */

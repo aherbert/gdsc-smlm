@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,7 +72,7 @@ public class CustomContentHelper
 		{
 			ip = ip.duplicate().convertToRGB();
 		}
-		// Create a stack 
+		// Create a stack
 		ImageStack stack = new ImageStack(ip.getWidth(), ip.getHeight());
 		stack.addSlice(ip);
 		stack.addSlice(ip);
@@ -105,8 +105,8 @@ public class CustomContentHelper
 	public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list)
 	{
 		// Compact the vertices to a set of vertices and faces
-		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<Point3f>(list.size(), 0.5f, -1);
-		TurboList<Point3f> vertices = new TurboList<Point3f>(list.size());
+		final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
+		TurboList<Point3f> vertices = new TurboList<>(list.size());
 		TIntArrayList faces = new TIntArrayList(list.size());
 		int index = 0;
 		// Process triangles
@@ -117,7 +117,7 @@ public class CustomContentHelper
 			index = addFace(m, vertices, faces, list.get(i + 2), index);
 		}
 
-		return new Pair<Point3f[], int[]>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+		return new Pair<>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
 	}
 
 	private static int addFace(TObjectIntHashMap<Point3f> m, TurboList<Point3f> vertices, TIntArrayList faces,

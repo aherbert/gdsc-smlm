@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -64,8 +64,8 @@ public abstract class BaseFunctionSolverTest
 	static double[] base = { 0.8, 1, 1.2 }; // Applied (*) to the background
 	//@formatter:off
 	static double[] signal = {
-			1000, 2000, 5000, 10000 
-			//100, 200, 400, 800 
+			1000, 2000, 5000, 10000
+			//100, 200, 400, 800
 		};
 	//@formatter:on
 	static double[] shift = { -0.5, 0, 0.5 }; // Applied (+/-) to the x/y position
@@ -73,7 +73,7 @@ public abstract class BaseFunctionSolverTest
 	static int size = 11;
 	static
 	{
-		// Keep SNR reasonable. This should be an "easy" test since the bounds 
+		// Keep SNR reasonable. This should be an "easy" test since the bounds
 		// for a correct answer are strict.
 		double minSNR = 10;
 		double sd = 1.3;
@@ -89,13 +89,13 @@ public abstract class BaseFunctionSolverTest
 	{
 		defaultClampValues = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
 		// Taken from the 3D-DAO-STORM paper:
-		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical 
+		// (Babcock et al. 2012) A high-density 3D localization algorithm for stochastic optical
 		// reconstruction microscopy. Optical Nanoscopy. 2012 1:6
 		// DOI: 10.1186/2192-2853-1-6
 		// Page 3
 		// Note: It is not clear if the background/signal are in ADUs or photons. I assume photons.
 		// Note: The clamp value is the maximum permitted single step.
-		// If the desired step is equal to the maximum step then the clamped step will be half. 
+		// If the desired step is equal to the maximum step then the clamped step will be half.
 
 		// This seems big for background in photons
 		defaultClampValues[Gaussian2DFunction.BACKGROUND] = 100;
@@ -125,9 +125,9 @@ public abstract class BaseFunctionSolverTest
 	}
 
 	// Based on Huang et al (2015) sCMOS per pixel noise.
-	// Variance = Exponential (equivalent to chi-squared with k=1, i.e. 
-	// sum of the squares of 1 normal distribution). 
-	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b 
+	// Variance = Exponential (equivalent to chi-squared with k=1, i.e.
+	// sum of the squares of 1 normal distribution).
+	// We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b
 	// cumul = 1 - e^-lx (with l = 1/mean)
 	// => e^-lx = 1 - cumul
 	// => -lx = log(1-0.999)
@@ -173,7 +173,7 @@ public abstract class BaseFunctionSolverTest
 		}
 		else
 		{
-			// The rest are fixed for all pixels 
+			// The rest are fixed for all pixels
 			switch (noiseModel)
 			{
 				case CCD:
@@ -200,7 +200,7 @@ public abstract class BaseFunctionSolverTest
 
 	private static void computeSCMOSWeights(double[] weights, double[] noise)
 	{
-		// Per observation read noise. 
+		// Per observation read noise.
 		// This is generated once so create the randon generator here.
 		RandomGenerator rg = TestSettings.getRandomGenerator();
 		ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
@@ -259,7 +259,7 @@ public abstract class BaseFunctionSolverTest
 				FisherInformationMatrix f = new FisherInformationMatrix(gp.getLinear(), gp.n);
 				crlb = f.crlbSqrt();
 				// Compute the deviations.
-				// Note this is not the same as the CRLB as the fit is repeated 
+				// Note this is not the same as the CRLB as the fit is repeated
 				// against the same data.
 				// It should be repeated against different data generated with constant
 				// parameters and variable noise.
@@ -578,8 +578,8 @@ public abstract class BaseFunctionSolverTest
 		if (noiseModel == NoiseModel.EMCCD)
 		{
 			// Use a gamma distribution
-			// Since the call random.nextGamma(...) creates a Gamma distribution 
-			// which pre-calculates factors only using the scale parameter we 
+			// Since the call random.nextGamma(...) creates a Gamma distribution
+			// which pre-calculates factors only using the scale parameter we
 			// create a custom gamma distribution where the shape can be set as a property.
 			CustomGammaDistribution gd = new CustomGammaDistribution(rg, 1, emGain);
 

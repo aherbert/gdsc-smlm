@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -60,7 +60,7 @@ public abstract class PSFModel
 
 	/**
 	 * Construct a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -84,7 +84,7 @@ public abstract class PSFModel
 
 	/**
 	 * Construct a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -108,7 +108,7 @@ public abstract class PSFModel
 
 	/**
 	 * Construct a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -133,7 +133,7 @@ public abstract class PSFModel
 
 	/**
 	 * Construct a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -198,7 +198,7 @@ public abstract class PSFModel
 
 	/**
 	 * Insert the psf into the data
-	 * 
+	 *
 	 * @param data
 	 *            The input data (width*height)
 	 * @param x0min
@@ -270,7 +270,7 @@ public abstract class PSFModel
 
 	/**
 	 * Insert the psf into the data
-	 * 
+	 *
 	 * @param data
 	 *            The input data (width*height)
 	 * @param x0min
@@ -343,7 +343,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the last added PSF from the data. This can be invoked after any call to draw a
 	 * PSF into an input data array.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -356,7 +356,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the last added PSF from the data. This can be invoked after any call to draw a
 	 * PSF into an input data array.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -369,7 +369,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the PSF from the data. Can be invoked using a saved copy of the PSF previously drawn by the model obtained
 	 * from the appropriate get() methods.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -409,7 +409,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the PSF from the data. Can be invoked using a saved copy of the PSF previously drawn by the model obtained
 	 * from the appropriate get() methods.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -449,14 +449,14 @@ public abstract class PSFModel
 	/**
 	 * Produce a shallow copy of this object. This shares the pre-computed PSF data but will allow
 	 * the copy to store its own version of the most recently created PSF.
-	 * 
+	 *
 	 * @return A shallow copy of this object
 	 */
 	public abstract PSFModel copy();
 
 	/**
 	 * Sample a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -478,7 +478,7 @@ public abstract class PSFModel
 
 	/**
 	 * Sample a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -500,7 +500,7 @@ public abstract class PSFModel
 
 	/**
 	 * Sample a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -522,7 +522,7 @@ public abstract class PSFModel
 
 	/**
 	 * Sample a PSF function on the provided data.
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -544,7 +544,7 @@ public abstract class PSFModel
 
 	/**
 	 * Insert a set of sampled XY positions into the data
-	 * 
+	 *
 	 * @param data
 	 *            The data
 	 * @param width
@@ -590,7 +590,7 @@ public abstract class PSFModel
 
 	/**
 	 * Insert a set of sampled XY positions into the data
-	 * 
+	 *
 	 * @param data
 	 *            The data
 	 * @param width
@@ -637,7 +637,7 @@ public abstract class PSFModel
 	/**
 	 * Return the positions where samples were added to the data. The size of the array should equal the number of
 	 * samples added by a sample(...) method.
-	 * 
+	 *
 	 * @return The positions in the data where samples where added
 	 */
 	public int[] getSamplePositions()
@@ -648,7 +648,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the last added PSF from the data. This can be invoked after any call to sample a
 	 * PSF into an input data array.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -661,7 +661,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the last added PSF from the data. This can be invoked after any call to sample a
 	 * PSF into an input data array.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -674,7 +674,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the PSF from the data. Can be invoked using a saved copy of the PSF previously drawn by the model obtained
 	 * from the appropriate get() methods.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -695,7 +695,7 @@ public abstract class PSFModel
 	/**
 	 * Remove the PSF from the data. Can be invoked using a saved copy of the PSF previously drawn by the model obtained
 	 * from the appropriate get() methods.
-	 * 
+	 *
 	 * @param data
 	 * @param width
 	 * @param height
@@ -715,7 +715,7 @@ public abstract class PSFModel
 
 	/**
 	 * Set the random generator used for the random data generator to create data
-	 * 
+	 *
 	 * @param randomGenerator
 	 */
 	public void setRandomGenerator(RandomGenerator randomGenerator)
@@ -727,7 +727,7 @@ public abstract class PSFModel
 
 	/**
 	 * Set the random data generator used to create data
-	 * 
+	 *
 	 * @param randomGenerator
 	 */
 	public void setRandomGenerator(RandomDataGenerator randomDataGenerator)

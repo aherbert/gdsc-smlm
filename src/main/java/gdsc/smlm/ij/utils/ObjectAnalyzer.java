@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -105,7 +105,7 @@ public class ObjectAnalyzer
 		for (int i = 0; i < maskImage.length; i++)
 			maskImage[i] = ip.get(i);
 
-		// Perform a search for objects. 
+		// Perform a search for objects.
 		// Expand any non-zero pixel value into all 8-connected pixels of the same value.
 		objectMask = new int[maskImage.length];
 		maxObject = 0;
@@ -234,7 +234,7 @@ public class ObjectAnalyzer
 	/**
 	 * returns whether the neighbour in a given direction is within the image. NOTE: it is assumed that the pixel x,y
 	 * itself is within the image! Uses class variables xlimit, ylimit: (dimensions of the image)-1
-	 * 
+	 *
 	 * @param x
 	 *            x-coordinate of the pixel that has a neighbour in the given direction
 	 * @param y
@@ -289,7 +289,7 @@ public class ObjectAnalyzer
 	/**
 	 * Get the centre-of-mass and pixel count of each object. Data is stored indexed by the object value so processing
 	 * of results should start from 1.
-	 * 
+	 *
 	 * @return The centre-of-mass of each object (plus the pixel count) [object][cx,cy,n]
 	 */
 	public double[][] getObjectCentres()

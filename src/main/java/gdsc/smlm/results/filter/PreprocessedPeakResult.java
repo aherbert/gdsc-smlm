@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,7 @@ public interface PreprocessedPeakResult
 {
 	/**
 	 * Get the frame containing the result
-	 * 
+	 *
 	 * @return The frame
 	 */
 	public int getFrame();
@@ -54,14 +54,14 @@ public interface PreprocessedPeakResult
 
 	/**
 	 * Return the candidate Id of this result (i.e. the candidate used to identify this position for fitting)
-	 * 
+	 *
 	 * @return the candidate Id (-1 for no candidate)
 	 */
 	public int getCandidateId();
 
 	/**
 	 * Get the signal strength (i.e. the volume under the Gaussian peak, amplitude * 2 * pi * sx * sy)
-	 * 
+	 *
 	 * @return The signal (in photons)
 	 */
 	public float getSignal();
@@ -71,7 +71,7 @@ public interface PreprocessedPeakResult
 	 * <p>
 	 * This requires a knowledge of the PSF used to create the result. It could be the peak signal in the PSF or the
 	 * average signal over a range of the PSF, e.g. the area covered from the maxima to half-maxima for spots.
-	 * 
+	 *
 	 * @return The mean signal (in photons)
 	 */
 	public float getMeanSignal();
@@ -81,7 +81,7 @@ public interface PreprocessedPeakResult
 	 * background. Ideally the standard deviation of the background is computed in the region around the centre.
 	 * <p>
 	 * The default implementation is {@link #getMeanSignal()} / {@link #getNoise()}.
-	 * 
+	 *
 	 * @return The SNR
 	 */
 	public default float getSNR()
@@ -91,21 +91,21 @@ public interface PreprocessedPeakResult
 
 	/**
 	 * Get the background noise
-	 * 
+	 *
 	 * @return The noise (in photons)
 	 */
 	public float getNoise();
 
 	/**
 	 * The localisation variance using the noise estimate for the data to approximate the local noise
-	 * 
+	 *
 	 * @return The location variance in nm
 	 */
 	public double getLocationVariance();
 
 	/**
 	 * The localisation variance using the local background estimate for the local noise
-	 * 
+	 *
 	 * @return The location variance in nm
 	 */
 	public double getLocationVariance2();
@@ -114,7 +114,7 @@ public interface PreprocessedPeakResult
 	 * The localisation variance using the fitted parameter variance. This is computed using the Cramér-Rao lower bound
 	 * (CRLB) on the variance of the estimators. The variance for the fitted X and Y position is averaged to produce a
 	 * localisation precision.
-	 * 
+	 *
 	 * @return The location variance in nm
 	 */
 	public double getLocationVarianceCRLB();
@@ -131,7 +131,7 @@ public interface PreprocessedPeakResult
 
 	/**
 	 * Get the amplitude. Amplitude = Signal / (2*pi*sd0*sd1).
-	 * 
+	 *
 	 * @return The amplitude
 	 */
 	public float getAmplitude();
@@ -159,7 +159,7 @@ public interface PreprocessedPeakResult
 	/**
 	 * Return the squared shift between the initial and the final x-position, i.e. how much the position moved during
 	 * fitting, relative to the initial peak SD
-	 * 
+	 *
 	 * @return The relative x position shift squared
 	 */
 	public float getXRelativeShift2();
@@ -167,7 +167,7 @@ public interface PreprocessedPeakResult
 	/**
 	 * Return the squared shift between the initial and the final y-position, i.e. how much the position moved during
 	 * fitting, relative to the initial peak SD.
-	 * 
+	 *
 	 * @return The relative y position shift squared
 	 */
 	public float getYRelativeShift2();
@@ -185,7 +185,7 @@ public interface PreprocessedPeakResult
 	/**
 	 * Return the ratio between the initial and the final x-dimension standard deviation, i.e. how much the width
 	 * changed during fitting
-	 * 
+	 *
 	 * @return The x-dimension width factor
 	 */
 	public float getXSDFactor();
@@ -193,14 +193,14 @@ public interface PreprocessedPeakResult
 	/**
 	 * Return the ratio between the initial and the final y-dimension standard deviation, i.e. how much the width
 	 * changed during fitting
-	 * 
+	 *
 	 * @return The y-dimension width factor
 	 */
 	public float getYSDFactor();
 
 	/**
 	 * Return true if this is a result that has previously been fitted.
-	 * 
+	 *
 	 * @return True if this result is an existing fit result
 	 */
 	public boolean isExistingResult();
@@ -208,7 +208,7 @@ public interface PreprocessedPeakResult
 	/**
 	 * Return true if this is a new result. It is expected that this can then be classified for use in
 	 * scoring analysis. The {@link #getAssignments(int)} method can then be called to return the assignments.
-	 * 
+	 *
 	 * @return True if this result is a new fit result
 	 */
 	public boolean isNewResult();
@@ -218,7 +218,7 @@ public interface PreprocessedPeakResult
 	 * <p>
 	 * The assignments should all have the same predicted Id. The actual Id should be a value starting from 0 and
 	 * incrementing for each actual result in the frame that is scored.
-	 * 
+	 *
 	 * @param predictedId
 	 *            The predicted Id
 	 * @return The assignments
@@ -235,7 +235,7 @@ public interface PreprocessedPeakResult
 
 	/**
 	 * Convert this to the parameters for a Gaussian2DFunction
-	 * 
+	 *
 	 * @return the parameters
 	 */
 	public double[] toGaussian2DParameters();

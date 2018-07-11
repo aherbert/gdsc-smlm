@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 	 * {@inheritDoc}
 	 * <p>
 	 * This is a PMF.
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LikelihoodFunction#likelihood(double, double)
 	 */
 	@Override
@@ -92,7 +92,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 		if (expand)
 		{
 			// The PMF was expanded so either 1 or 0 values fall in this range
-			// When rounding an equality at the upper edge should be assigned 
+			// When rounding an equality at the upper edge should be assigned
 			// to the next interval.
 			if (imin >= max)
 				return 0;
@@ -105,7 +105,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 			// The PMF was contracted so 1 or more values fall in this range
 
 			int imax = (int) Math.floor(max);
-			// When rounding an equality at the upper edge should be assigned 
+			// When rounding an equality at the upper edge should be assigned
 			// to the next interval.
 			if (imax == max)
 				imax--;
@@ -129,7 +129,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 
 	/**
 	 * Return the log of the factorial for the given real number, using the gamma function
-	 * 
+	 *
 	 * @param k
 	 * @return the log factorial
 	 */
@@ -142,7 +142,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 
 	/**
 	 * Return the factorial for the given real number, using the gamma function
-	 * 
+	 *
 	 * @param k
 	 * @return the factorial
 	 */
@@ -155,7 +155,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.LogLikelihoodFunction#logLikelihood(double, double)
 	 */
 	@Override

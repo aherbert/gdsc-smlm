@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,7 +72,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	/**
 	 * Create a new BasePreprocessedPeakResult.
 	 * <p>
-	 * Note: The candidate Id is usually the spot that was used to initiate the fit process. 
+	 * Note: The candidate Id is usually the spot that was used to initiate the fit process.
 	 * However if neighbour spots were present then the candidate Id should be that of the neighbour.
 	 *
 	 * @param frame The frame
@@ -117,7 +117,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 			double variance,
 			double variance2,
 			double varianceCRLB,
-			ResultType resultType			
+			ResultType resultType
 			)
 	{
 		//@formatter:on
@@ -312,7 +312,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	/**
 	 * Returns a new array and so is thread-safe (unless another thread updates the assignments concurrently). It should
 	 * be thread safe for use in scoring of the result using a multi-path filter.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getAssignments(int)
 	 */
 	@Override
@@ -320,7 +320,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 	{
 		if (assignments == null || assignments.length == 0)
 			return null;
-		// Create a new set of assignments. Since this will be new and all other members are final the class is thread-safe.  
+		// Create a new set of assignments. Since this will be new and all other members are final the class is thread-safe.
 		final FractionalAssignment[] out = new FractionalAssignment[assignments.length];
 		for (int i = 0; i < out.length; i++)
 			out[i] = assignments[i].toFractionalAssignment(predictedId, this);
@@ -339,7 +339,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setAssignments(gdsc.smlm.results.filter.
 	 * ResultAssignment[])
 	 */
@@ -351,7 +351,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#ignore()
 	 */
 	@Override
@@ -362,7 +362,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.AssignablePreprocessedPeakResult#setIgnore(boolean)
 	 */
 	@Override
@@ -373,7 +373,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/**
 	 * Convert this to the parameters for a Gaussian2DFunction
-	 * 
+	 *
 	 * @return the parameters
 	 */
 	@Override
@@ -393,7 +393,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#getValidationResult()
 	 */
 	@Override
@@ -404,7 +404,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#setValidationResult(int)
 	 */
 	@Override
@@ -415,7 +415,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.filter.PreprocessedPeakResult#isNotDuplicate()
 	 */
 	@Override

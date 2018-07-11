@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -69,7 +69,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise0(double[])
 	 */
 	@Override
@@ -107,7 +107,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise1(double[])
 	 */
 	@Override
@@ -121,7 +121,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double tz = a[Gaussian2DFunction.Z_POSITION];
 
-		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// We can pre-compute part of the derivatives for position and sd in arrays
 		// since the Gaussian is XY separable
 		final double[] ds_dz = new double[1];
 		final double sx = zModel.getSx(tz, ds_dz);
@@ -134,7 +134,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction#initialise2(double[])
 	 */
 	@Override
@@ -148,7 +148,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double tz = a[Gaussian2DFunction.Z_POSITION];
 
-		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// We can pre-compute part of the derivatives for position and sd in arrays
 		// since the Gaussian is XY separable
 		final double[] ds_dz = new double[2];
 		final double sx = zModel.getSx2(tz, ds_dz);
@@ -172,7 +172,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double tz = a[Gaussian2DFunction.Z_POSITION];
 
-		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// We can pre-compute part of the derivatives for position and sd in arrays
 		// since the Gaussian is XY separable
 		final double[] ds_dz = new double[2];
 		final double sx = zModel.getSx2(tz, ds_dz);
@@ -192,7 +192,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
 	 */
 	@Override
@@ -215,7 +215,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	@Override
@@ -243,12 +243,12 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 		d2uda2[4] =
 				d2u_dtsx2[x] * deltaEy[y] * dtsx_dtz * dtsx_dtz +
 				du_dsx * d2tsx_dtz2 +
-				d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz * dtsy_dtz + 
+				d2u_dtsy2[y] * deltaEx[x] * dtsy_dtz * dtsy_dtz +
 				du_dsy * d2tsy_dtz2 +
 				// Add the equivalent term we add in the circular version.
-				// Note: this is not in the Smith, et al (2010) paper but is 
+				// Note: this is not in the Smith, et al (2010) paper but is
 				// in the GraspJ source code and it works in JUnit tests.
-				2 * du_dtsx[x] * dtsx_dtz * du_dtsy[y] * dtsy_dtz / tI;		
+				2 * du_dtsx[x] * dtsx_dtz * du_dtsy[y] * dtsy_dtz / tI;
 		//@formatter:on
 
 		return tB + tI * duda[1];
@@ -298,7 +298,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
 	@Override
@@ -309,7 +309,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
 	@Override
@@ -320,7 +320,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
 	@Override
@@ -347,7 +347,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
 	@Override
@@ -387,10 +387,10 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 						d2u_dtsy2_by_dtsy_dtz_2 * deltaEx[x] +
 						du_dsy * d2tsy_dtz2 +
 						// Add the equivalent term we add in the circular version.
-						// Note: this is not in the Smith, et al (2010) paper but is 
+						// Note: this is not in the Smith, et al (2010) paper but is
 						// in the GraspJ source code and it works in JUnit tests.
 						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
-						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
+						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x];
 				//@formatter:on
 
 				procedure.execute(tB + tI * duda[1], duda, d2uda2);
@@ -400,7 +400,7 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
 	@Override
@@ -482,10 +482,10 @@ public class SingleAstigmatismErfGaussian2DFunction extends SingleFreeCircularEr
 						d2u_dtsy2_by_dtsy_dtz_2 * deltaEx[x] +
 						du_dsy * d2tsy_dtz2 +
 						// Add the equivalent term we add in the circular version.
-						// Note: this is not in the Smith, et al (2010) paper but is 
+						// Note: this is not in the Smith, et al (2010) paper but is
 						// in the GraspJ source code and it works in JUnit tests.
 						//2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
-						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x]; 
+						two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * du_dtsx[x];
 				//@formatter:on
 
 				procedure.executeExtended(tB + tI * duda[1], duda, d2udadb);

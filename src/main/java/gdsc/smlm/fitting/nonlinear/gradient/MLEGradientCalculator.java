@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,11 +53,11 @@ public class MLEGradientCalculator extends GradientCalculator
 
 	/**
 	 * Note: if the function returns a negative value then it is set to zero
-	 * 
+	 *
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[],
 	 *      double[][], double[], gdsc.smlm.function.NonLinearFunction)
 	 */
@@ -78,10 +78,10 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores any function value below zero. This could lead to a 
+			// effectively ignores any function value below zero. This could lead to a
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this we heavily 
-			// penalise the chisq value. 
+			// function to produce 0 for all evaluations. To cope with this we heavily
+			// penalise the chisq value.
 			// Optimally the function should be bounded to always produce a positive number.
 			final double fi = func.eval(i, dfi_da);
 
@@ -113,17 +113,17 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
 	/**
 	 * Note: if the function returns a negative value then it is set to zero
-	 * 
+	 *
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[],
 	 *      double[][], double[], gdsc.smlm.function.NonLinearFunction, boolean[])
 	 */
@@ -153,10 +153,10 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this we heavily 
-			// penalise the chisq value. 
+			// function to produce 0 for all evaluations. To cope with this we heavily
+			// penalise the chisq value.
 			// Optimally the function should be bounded to always produce a positive number.
 			final double fi = func.eval(i, dfi_da);
 
@@ -184,7 +184,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
@@ -192,7 +192,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int[], double[], double[], double[],
 	 *      gdsc.smlm.function.NonLinearFunction)
 	 */
@@ -212,10 +212,10 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a
 				// situation where the best chisq value can be achieved by setting the output
-				// function to produce 0 for all evaluations. To cope with this we heavily 
-				// penalise the chisq value. 
+				// function to produce 0 for all evaluations. To cope with this we heavily
+				// penalise the chisq value.
 				// Optimally the function should be bounded to always produce a positive number.
 				final double fi = func.eval(i);
 
@@ -244,10 +244,10 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a
 				// situation where the best chisq value can be achieved by setting the output
-				// function to produce 0 for all evaluations. To cope with this we heavily 
-				// penalise the chisq value. 
+				// function to produce 0 for all evaluations. To cope with this we heavily
+				// penalise the chisq value.
 				// Optimally the function should be bounded to always produce a positive number.
 				final double fi = func.eval(i);
 				yFit[i] = fi;
@@ -270,7 +270,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 		}
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		return chisq * 2;
 	}
 
@@ -278,7 +278,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[][],
 	 *      double[], gdsc.smlm.function.NonLinearFunction)
 	 */
@@ -299,10 +299,10 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this we heavily 
-			// penalise the chisq value. 
+			// function to produce 0 for all evaluations. To cope with this we heavily
+			// penalise the chisq value.
 			// Optimally the function should be bounded to always produce a positive number.
 			final double fi = func.eval(i, dfi_da);
 
@@ -342,7 +342,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
@@ -350,7 +350,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @param y
 	 *            Data to fit (must be strictly positive Poisson data)
 	 * @return The MLE chi-squared value
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[][],
 	 *      double[], gdsc.smlm.function.NonLinearFunction, boolean[])
 	 */
@@ -380,10 +380,10 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this we heavily 
-			// penalise the chisq value. 
+			// function to produce 0 for all evaluations. To cope with this we heavily
+			// penalise the chisq value.
 			// Optimally the function should be bounded to always produce a positive number.
 			final double fi = func.eval(i, dfi_da);
 
@@ -419,7 +419,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		symmetric(alpha);
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		return checkGradients(alpha, beta, nparams, chisq * 2);
 	}
 
@@ -437,7 +437,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * @param func
 	 *            the func
 	 * @return The MLE chi-squared value
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator#findLinearised(int, double[], double[], double[],
 	 *      gdsc.smlm.function.NonLinearFunction)
 	 */
@@ -457,10 +457,10 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a
 				// situation where the best chisq value can be achieved by setting the output
-				// function to produce 0 for all evaluations. To cope with this we heavily 
-				// penalise the chisq value. 
+				// function to produce 0 for all evaluations. To cope with this we heavily
+				// penalise the chisq value.
 				// Optimally the function should be bounded to always produce a positive number.
 				final double fi = func.eval(i);
 
@@ -489,10 +489,10 @@ public class MLEGradientCalculator extends GradientCalculator
 				final double xi = y[i];
 
 				// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-				// effectively ignores the function value below zero. This could lead to a 
+				// effectively ignores the function value below zero. This could lead to a
 				// situation where the best chisq value can be achieved by setting the output
-				// function to produce 0 for all evaluations. To cope with this we heavily 
-				// penalise the chisq value. 
+				// function to produce 0 for all evaluations. To cope with this we heavily
+				// penalise the chisq value.
 				// Optimally the function should be bounded to always produce a positive number.
 				final double fi = func.eval(i);
 				yFit[i] = fi;
@@ -515,7 +515,7 @@ public class MLEGradientCalculator extends GradientCalculator
 			}
 		}
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		return chisq * 2;
 	}
 
@@ -562,7 +562,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		// Compute:
 		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -628,7 +628,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		// Compute:
 		// Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+		// alpha - the Hessian matrix (the square matrix of second-order partial derivatives of a function;
 		//         that is, it describes the local curvature of a function of many variables.)
 		// beta  - the gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -661,7 +661,7 @@ public class MLEGradientCalculator extends GradientCalculator
 	 * parameters.
 	 * <p>
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param y
@@ -692,10 +692,10 @@ public class MLEGradientCalculator extends GradientCalculator
 			final double xi = y[i];
 
 			// The code provided in Laurence & Chromy (2010) Nature Methods 7, 338-339, SI
-			// effectively ignores the function value below zero. This could lead to a 
+			// effectively ignores the function value below zero. This could lead to a
 			// situation where the best chisq value can be achieved by setting the output
-			// function to produce 0 for all evaluations. To cope with this we heavily 
-			// penalise the chisq value. 
+			// function to produce 0 for all evaluations. To cope with this we heavily
+			// penalise the chisq value.
 			// Optimally the function should be bounded to always produce a positive number.
 			final double fi = func.eval(i, dfi_da);
 
@@ -736,7 +736,7 @@ public class MLEGradientCalculator extends GradientCalculator
 
 		checkGradients(df_da, nparams);
 
-		// Move the factor of 2 to the end		
+		// Move the factor of 2 to the end
 		for (int j = 0; j < nparams; j++)
 			df_da[j] *= 2;
 		return chisq * 2;

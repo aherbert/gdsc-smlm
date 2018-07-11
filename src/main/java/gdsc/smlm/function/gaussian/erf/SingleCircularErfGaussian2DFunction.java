@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -98,7 +98,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double s = abs(a[Gaussian2DFunction.X_SD]);
 
-		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// We can pre-compute part of the derivatives for position and sd in arrays
 		// since the Gaussian is XY separable
 		final double one_sSqrt2 = ONE_OVER_ROOT2 / s;
 		final double one_2ss = 0.5 / (s * s);
@@ -119,7 +119,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double s = abs(a[Gaussian2DFunction.X_SD]);
 
-		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// We can pre-compute part of the derivatives for position and sd in arrays
 		// since the Gaussian is XY separable
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
 		final double ss = s * s;
@@ -147,7 +147,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		final double ty = a[Gaussian2DFunction.Y_POSITION] + 0.5;
 		final double s = abs(a[Gaussian2DFunction.X_SD]);
 
-		// We can pre-compute part of the derivatives for position and sd in arrays 
+		// We can pre-compute part of the derivatives for position and sd in arrays
 		// since the Gaussian is XY separable
 		final double one_sSqrt2pi = ONE_OVER_ROOT2PI / s;
 		final double ss = s * s;
@@ -166,7 +166,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[])
 	 */
 	@Override
@@ -189,7 +189,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.SingleErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	@Override
@@ -213,8 +213,8 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 		// Working  example of this in GraspJ source code:
 		// https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/psfmodel_derivatives_sigma.cl
 		//@formatter:off
-		d2uda2[4] = d2u_dtsx2[x] * deltaEy[y] + 
-				    d2u_dtsy2[y] * deltaEx[x] + 
+		d2uda2[4] = d2u_dtsx2[x] * deltaEy[y] +
+				    d2u_dtsy2[y] * deltaEx[x] +
 				    2 * du_dtsx[x] * du_dtsy[y] / tI;
 		//@formatter:on
 
@@ -265,7 +265,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.fitting.function.NonLinearFunction#gradientIndices()
 	 */
 	@Override
@@ -276,7 +276,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#getNumberOfGradients()
 	 */
 	@Override
@@ -287,7 +287,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
 	@Override
@@ -314,7 +314,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient2Procedure)
 	 */
 	@Override
@@ -340,8 +340,8 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				d2uda2[2] = d2u_dtx2[x] * deltaEy;
 				d2uda2[3] = d2u_dty2 * deltaEx[x];
 				//@formatter:off
-				d2uda2[4] = d2u_dtsx2[x] * deltaEy + 
-					        d2u_dtsy2 * deltaEx[x] + 
+				d2uda2[4] = d2u_dtsx2[x] * deltaEy +
+					        d2u_dtsy2 * deltaEx[x] +
 					        du_dtsx[x] * two_du_dtsy_tI;
 				//@formatter:on
 				procedure.execute(tB + tI * duda[1], duda, d2uda2);
@@ -351,7 +351,7 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
 	@Override
@@ -419,8 +419,8 @@ public class SingleCircularErfGaussian2DFunction extends SingleFreeCircularErfGa
 				d2udadb[23] = d2udadb[19];
 				// X SD,X SD
 				//@formatter:off
-				d2udadb[24] = d2u_dtsx2[x] * deltaEy + 
-         				      d2u_dtsy2 * deltaEx[x] + 
+				d2udadb[24] = d2u_dtsx2[x] * deltaEy +
+         				      d2u_dtsy2 * deltaEx[x] +
          				      du_dtsx[x] * two_du_dtsy_tI;
 				//@formatter:on
 

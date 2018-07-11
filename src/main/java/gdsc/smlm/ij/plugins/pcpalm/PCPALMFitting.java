@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -140,7 +140,7 @@ public class PCPALMFitting implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -181,7 +181,7 @@ public class PCPALMFitting implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.filter.PlugInFilter#run(ij.process.ImageProcessor)
 	 */
 	public void run(ImageProcessor ip)
@@ -305,7 +305,7 @@ public class PCPALMFitting implements PlugIn
 		}
 
 		// Fill the results list with analysis results from PCPALM Analysis
-		ArrayList<CorrelationResult> results = new ArrayList<CorrelationResult>();
+		ArrayList<CorrelationResult> results = new ArrayList<>();
 		if (!selectAnalysisResults(results))
 			return false;
 
@@ -359,11 +359,11 @@ public class PCPALMFitting implements PlugIn
 		}
 
 		// Remove bad results from the dataset.
-		ArrayList<CorrelationResult> newResults = new ArrayList<CorrelationResult>(results.size());
+		ArrayList<CorrelationResult> newResults = new ArrayList<>(results.size());
 		for (int i = 0; i < results.size(); i++)
 		{
 			CorrelationResult r = results.get(i);
-			// If the PC-PALM Analysis has been done on too few molecules then the g(r) curve will be bad 
+			// If the PC-PALM Analysis has been done on too few molecules then the g(r) curve will be bad
 			if (r.n < 10)
 			{
 				header();
@@ -459,7 +459,7 @@ public class PCPALMFitting implements PlugIn
 			spatialDomain = results.get(0).spatialDomain;
 		}
 
-		ArrayList<String> titles = new ArrayList<String>();
+		ArrayList<String> titles = new ArrayList<>();
 		for (CorrelationResult r : PCPALMAnalysis.results)
 		{
 			if (alreadySelected(results, r) ||
@@ -481,7 +481,7 @@ public class PCPALMFitting implements PlugIn
 
 	/**
 	 * Log a message to the IJ log window
-	 * 
+	 *
 	 * @param format
 	 * @param args
 	 */
@@ -534,14 +534,14 @@ public class PCPALMFitting implements PlugIn
 
 		createResultsTable();
 
-		// Get the protein density in nm^2. 
+		// Get the protein density in nm^2.
 		peakDensity /= 1e6;
 
 		// Use the blinking rate estimate to estimate the density
 		// (factors in the over-counting of the same molecules)
 		double proteinDensity = peakDensity / blinkingRate;
 
-		ArrayList<double[]> curves = new ArrayList<double[]>();
+		ArrayList<double[]> curves = new ArrayList<>();
 
 		// Fit the g(r) curve for r>0 to equation 2
 		Color color = Color.red;
@@ -646,7 +646,7 @@ public class PCPALMFitting implements PlugIn
 			{
 				gr[0][i] = r.gr[0][i]; // All scales should be the same so over-write is OK
 
-				// Note that sometimes the analysis generates values that are very bad (e.g. if too 
+				// Note that sometimes the analysis generates values that are very bad (e.g. if too
 				// few points were analysed). Perhaps we should exclude outliers for each distance interval.
 
 				// NaN values can be generated so ignore them
@@ -725,7 +725,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Load a correlation curve from file. Will set the global gr, peakDensity and spatialDomain variables. If the data
 	 * fails to be loaded then the method will return false.
-	 * 
+	 *
 	 * @return True if loaded
 	 */
 	private boolean loadCorrelationCurve()
@@ -768,7 +768,7 @@ public class PCPALMFitting implements PlugIn
 				{
 					if (match.group(1).equals(HEADER_SPATIAL_DOMAIN))
 					{
-						// Do not use Boolean.parseBoolean because this will not fail if the field is 
+						// Do not use Boolean.parseBoolean because this will not fail if the field is
 						// neither true/false - it only return true for a match to true
 						spatialDomainSet = true;
 						if (match.group(2).equalsIgnoreCase("true"))
@@ -806,7 +806,7 @@ public class PCPALMFitting implements PlugIn
 			}
 
 			// Read the data: gr[0][i], gr[1][i], gr[2][i]
-			ArrayList<double[]> data = new ArrayList<double[]>();
+			ArrayList<double[]> data = new ArrayList<>();
 			while (line != null)
 			{
 				if (line.length() == 0)
@@ -896,7 +896,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Fits the correlation curve with r>0 to the random model using the estimated density and precision. Parameters
 	 * must be fit within a tolerance of the starting values.
-	 * 
+	 *
 	 * @param gr
 	 * @param sigmaS
 	 *            The estimated precision
@@ -988,11 +988,11 @@ public class PCPALMFitting implements PlugIn
 		if (valid1)
 		{
 			// ---------
-			// TODO - My data does not comply with this criteria. 
-			// This could be due to the PC-PALM Molecule code limiting the nmPerPixel to fit the images in memory 
+			// TODO - My data does not comply with this criteria.
+			// This could be due to the PC-PALM Molecule code limiting the nmPerPixel to fit the images in memory
 			// thus removing correlations at small r.
-			// It could also be due to the nature of the random simulations being 3D not 2D membranes 
-			// as per the PC-PALM paper. 
+			// It could also be due to the nature of the random simulations being 3D not 2D membranes
+			// as per the PC-PALM paper.
 			// ---------
 			// Evaluate g(r)protein where:
 			// g(r)peaks = g(r)protein + g(r)stoch
@@ -1005,7 +1005,7 @@ public class PCPALMFitting implements PlugIn
 			//SummaryStatistics stats = new SummaryStatistics();
 			for (int i = 0; i < gr_peaks.length; i++)
 			{
-				// Only evaluate above the fitted average precision 
+				// Only evaluate above the fitted average precision
 				if (gr_[i] < fitSigmaS)
 					continue;
 
@@ -1042,7 +1042,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Fits the correlation curve with r>0 to the clustered model using the estimated density and precision. Parameters
 	 * must be fit within a tolerance of the starting values.
-	 * 
+	 *
 	 * @param gr
 	 * @param sigmaS
 	 *            The estimated precision
@@ -1093,7 +1093,7 @@ public class PCPALMFitting implements PlugIn
 		parameters = constrainedSolution.getPointRef();
 		evaluations = boundedEvaluations;
 
-		// Refit using a LVM  
+		// Refit using a LVM
 		if (useLSE)
 		{
 			log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
@@ -1341,7 +1341,7 @@ public class PCPALMFitting implements PlugIn
 	/**
 	 * Fits the correlation curve with r>0 to the clustered model using the estimated density and precision. Parameters
 	 * must be fit within a tolerance of the starting values.
-	 * 
+	 *
 	 * @param gr
 	 * @param sigmaS
 	 *            The estimated precision
@@ -1387,7 +1387,7 @@ public class PCPALMFitting implements PlugIn
 		double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
 		double[] lB = new double[] { initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0 };
 		// The amplitude and range should not extend beyond the limits of the g(r) curve.
-		// TODO - Find out the expected range for the alpha parameter.  
+		// TODO - Find out the expected range for the alpha parameter.
 		double[] uB = new double[] { initialSolution[0] * limit, initialSolution[1] * limit, Maths.max(x),
 				Maths.max(gr[1]), Maths.max(x) * 2 };
 		log("Fitting %s using a bounded search: %s < precision < %s & %s < density < %s", emulsionModel.getName(),
@@ -1402,7 +1402,7 @@ public class PCPALMFitting implements PlugIn
 		parameters = constrainedSolution.getPointRef();
 		evaluations = boundedEvaluations;
 
-		// Refit using a LVM  
+		// Refit using a LVM
 		if (useLSE)
 		{
 			log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
@@ -1532,7 +1532,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param parameters
@@ -1544,7 +1544,7 @@ public class PCPALMFitting implements PlugIn
 		/**
 		 * Evaluate the jacobian of the correlation function for all data points (see
 		 * {@link #addData(double[], double[])})
-		 * 
+		 *
 		 * @param parameters
 		 * @return The jacobian
 		 */
@@ -1553,7 +1553,7 @@ public class PCPALMFitting implements PlugIn
 		/**
 		 * Get the value of the function for all data points corresponding to the last call to
 		 * {@link #jacobian(double[])}
-		 * 
+		 *
 		 * @return The corresponding value
 		 */
 		public abstract double[] getValue();
@@ -1663,7 +1663,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param sigma
@@ -1679,7 +1679,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param parameters
@@ -1694,7 +1694,7 @@ public class PCPALMFitting implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1774,7 +1774,7 @@ public class PCPALMFitting implements PlugIn
 				final double d = -r / range;
 				final double e = FastMath.exp(d);
 
-				// value  = a * c + 
+				// value  = a * c +
 				//          amplitude * e + 1
 				lastValue[i] = a * c + amplitude * e + 1;
 
@@ -1804,10 +1804,10 @@ public class PCPALMFitting implements PlugIn
 			//double[][] jacobian2 = jacobian2(variables);
 			//for (int i = 0; i < jacobian.length; i++)
 			//{
-			//	System.out.printf("dSigma = %g : %g = %g. dDensity = %g : %g = %g. dRange = %g : %g = %g. dAmplitude = %g : %g = %g\n", 
-			//			jacobian[i][0], jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]), 
-			//			jacobian[i][1], jacobian2[i][1], DoubleEquality.relativeError(jacobian[i][1], jacobian2[i][1]), 
-			//			jacobian[i][2], jacobian2[i][2], DoubleEquality.relativeError(jacobian[i][2], jacobian2[i][2]), 
+			//	System.out.printf("dSigma = %g : %g = %g. dDensity = %g : %g = %g. dRange = %g : %g = %g. dAmplitude = %g : %g = %g\n",
+			//			jacobian[i][0], jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]),
+			//			jacobian[i][1], jacobian2[i][1], DoubleEquality.relativeError(jacobian[i][1], jacobian2[i][1]),
+			//			jacobian[i][2], jacobian2[i][2], DoubleEquality.relativeError(jacobian[i][2], jacobian2[i][2]),
 			//			jacobian[i][3], jacobian2[i][3], DoubleEquality.relativeError(jacobian[i][3], jacobian2[i][3])
 			//			);
 			//}
@@ -1845,7 +1845,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param sigma
@@ -1869,7 +1869,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param parameters
@@ -1893,7 +1893,7 @@ public class PCPALMFitting implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1943,7 +1943,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Check if the variable match those last used for computation of the value
-		 * 
+		 *
 		 * @param parameters
 		 * @return True if the variables are the same
 		 */
@@ -2099,7 +2099,7 @@ public class PCPALMFitting implements PlugIn
 				final double f = 0.5 * Math.PI * r / range;
 				final double g = Math.cos(f);
 
-				// value  = a * c + 
+				// value  = a * c +
 				//          amplitude * e * g + 1
 				lastValue[i] = a * c + amplitude * e * g + 1;
 
@@ -2129,7 +2129,7 @@ public class PCPALMFitting implements PlugIn
 				// value' = amplitude * e' * g
 				// e = FastMath.exp(d)
 				// e' = d' * FastMath.exp(d)     [ Chain rule ]
-				// e' = d' * e               
+				// e' = d' * e
 				jacobian[i][4] = amplitude * (-1 * d / alpha) * e * g;
 			}
 
@@ -2138,9 +2138,9 @@ public class PCPALMFitting implements PlugIn
 			//for (int i = 0; i < jacobian.length; i++)
 			//{
 			//	System.out.printf("dSigma = %g : %g = %g. dDensity = %g : %g = %g. dRange = %g : %g = %g. dAmplitude = %g : %g = %g. dAlpha = %g : %g = %g\n",
-			//					jacobian[i][0], jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]), 
-			//					jacobian[i][1], jacobian2[i][1], DoubleEquality.relativeError(jacobian[i][1], jacobian2[i][1]),								
-			//					jacobian[i][2], jacobian2[i][2], DoubleEquality.relativeError(jacobian[i][2], jacobian2[i][2]), 
+			//					jacobian[i][0], jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]),
+			//					jacobian[i][1], jacobian2[i][1], DoubleEquality.relativeError(jacobian[i][1], jacobian2[i][1]),
+			//					jacobian[i][2], jacobian2[i][2], DoubleEquality.relativeError(jacobian[i][2], jacobian2[i][2]),
 			//					jacobian[i][3],	jacobian2[i][3], DoubleEquality.relativeError(jacobian[i][3], jacobian2[i][3]),
 			//					jacobian[i][4], jacobian2[i][4], DoubleEquality.relativeError(jacobian[i][4], jacobian2[i][4]));
 			//}
@@ -2179,7 +2179,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param sigma
@@ -2205,7 +2205,7 @@ public class PCPALMFitting implements PlugIn
 
 		/**
 		 * Evaluate the correlation function
-		 * 
+		 *
 		 * @param r
 		 *            The correlation radius
 		 * @param parameters
@@ -2226,7 +2226,7 @@ public class PCPALMFitting implements PlugIn
 	{
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override

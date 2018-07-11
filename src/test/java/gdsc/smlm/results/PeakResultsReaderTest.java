@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -256,7 +256,7 @@ public class PeakResultsReaderTest
 
 	// -=-=-=-=-
 
-	// Note: For MALK we cannot do all the tests as the format only contains X,Y,T,I 
+	// Note: For MALK we cannot do all the tests as the format only contains X,Y,T,I
 
 	@Test
 	public void writeMALKMatchesRead()
@@ -284,7 +284,7 @@ public class PeakResultsReaderTest
 
 	// -=-=-=-=-
 
-	// Note: For TSF we cannot specify as binary because the widths are converted into a 
+	// Note: For TSF we cannot specify as binary because the widths are converted into a
 	// different format and then back again.
 
 	@Test
@@ -704,7 +704,7 @@ public class PeakResultsReaderTest
 
 		//		System.out.println(out.getCalibration());
 		//		System.out.println(out.getPSF().toString());
-		//		
+		//
 		//		System.out.println(TextFormat.shortDebugString(out.getCalibration()));
 		//
 		//		try

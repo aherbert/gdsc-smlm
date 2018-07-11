@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -66,7 +66,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise0(double[])
 	 */
 	@Override
@@ -108,7 +108,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.Gaussian2DFunction#initialise1(double[])
 	 */
 	@Override
@@ -125,7 +125,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
 			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			createFirstOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, tx, tsx);
 			createFirstOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, ty, tsy);
@@ -134,7 +134,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient2Function#initialise2(double[])
 	 */
 	@Override
@@ -151,7 +151,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
 			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			createSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, tx, tsx);
 			createSecondOrderTables(n, maxy, tI[n], deltaEy, du_dty, du_dtsy, d2u_dty2, d2u_dtsy2, ty, tsy);
@@ -160,7 +160,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction#initialiseExtended2(double[])
 	 */
 	@Override
@@ -177,7 +177,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 			final double tsx = abs(a[i + Gaussian2DFunction.X_SD]);
 			final double tsy = abs(a[i + Gaussian2DFunction.Y_SD]);
 
-			// We can pre-compute part of the derivatives for position and sd in arrays 
+			// We can pre-compute part of the derivatives for position and sd in arrays
 			// since the Gaussian is XY separable
 			createExSecondOrderTables(n, maxx, tI[n], deltaEx, du_dtx, du_dtsx, d2u_dtx2, d2u_dtsx2, d2deltaEx_dtsxdx,
 					tx, tsx);
@@ -375,7 +375,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		// If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
 		// This code sets the first pixel at (0,0).
 
-		// All computations for pixel k (=(x,y)) that require the exponential can use x,y indices for the 
+		// All computations for pixel k (=(x,y)) that require the exponential can use x,y indices for the
 		// lower boundary value and x+1,y+1 indices for the upper value.
 
 		// Working example of this in GraspJ source code:
@@ -505,7 +505,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 		// If x=u then the Erf will be evaluated at x-u+0.5 - x-u-0.5 => integral from -0.5 to 0.5.
 		// This code sets the first pixel at (0,0).
 
-		// All computations for pixel k (=(x,y)) that require the exponential can use x,y indices for the 
+		// All computations for pixel k (=(x,y)) that require the exponential can use x,y indices for the
 		// lower boundary value and x+1,y+1 indices for the upper value.
 
 		// Working example of this in GraspJ source code:
@@ -552,7 +552,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[])
 	 */
 	@Override
@@ -580,7 +580,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.gaussian.erf.MultiErfGaussian2DFunction#eval(int, double[], double[])
 	 */
 	@Override
@@ -656,7 +656,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.GradientFunction#forEach(gdsc.smlm.function.GradientFunction.Gradient1Procedure)
 	 */
 	@Override
@@ -710,7 +710,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.Gradient2Function#forEach(gdsc.smlm.function.Gradient2Procedure)
 	 */
 	@Override
@@ -744,7 +744,7 @@ public class MultiFreeCircularErfGaussian2DFunction extends MultiErfGaussian2DFu
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.function.ExtendedGradient2Function#forEach(gdsc.smlm.function.ExtendedGradient2Procedure)
 	 */
 	@Override

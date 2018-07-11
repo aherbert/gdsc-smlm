@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -58,7 +58,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the stack of mask images (packed in YX order)
-	 * 
+	 *
 	 * @param masks
 	 * @param width
 	 *            The width of the mask in pixels
@@ -78,7 +78,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the stack of mask images (packed in YX order)
-	 * 
+	 *
 	 * @param masks
 	 * @param width
 	 *            The width of the mask in pixels
@@ -101,7 +101,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/**
 	 * Create a distribution from the stack of mask images (packed in YX order)
-	 * 
+	 *
 	 * @param masks
 	 * @param width
 	 *            The width of the mask in pixels
@@ -178,7 +178,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#next()
 	 */
 	@Override
@@ -209,7 +209,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithin(double[])
 	 */
 	@Override
@@ -218,7 +218,7 @@ public class MaskDistribution3D implements SpatialDistribution
 		int index = getIndex(xyz);
 		if (index < 0 || index >= mask.length || mask[index] == 0)
 			return false;
-		// Check if the search was initialised in a particle 
+		// Check if the search was initialised in a particle
 		if (particle == 0)
 		{
 			// No starting particle so just accept the position
@@ -230,7 +230,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#isWithinXY(double[])
 	 */
 	@Override
@@ -260,7 +260,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.SpatialDistribution#initialise(double[])
 	 */
 	@Override
@@ -315,7 +315,7 @@ public class MaskDistribution3D implements SpatialDistribution
 		for (int i = 0; i < mask.length; i++)
 			binaryMask[i] = (mask[i] != 0);
 
-		// Find particles 
+		// Find particles
 		int particles = 0;
 		for (int i = 0; i < binaryMask.length; i++)
 		{
@@ -325,7 +325,7 @@ public class MaskDistribution3D implements SpatialDistribution
 			}
 		}
 
-		//// Debug 
+		//// Debug
 		//ImageStack stack = new ImageStack(maxx, maxy, maxz);
 		//for (int i=0, index=0; i<maxz; i++)
 		//{
@@ -342,7 +342,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/**
 	 * Return the single index associated with the x,y,z coordinates
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -355,7 +355,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/**
 	 * Convert the single index into x,y,z coords, Input array must be length >= 3.
-	 * 
+	 *
 	 * @param index
 	 * @param xyz
 	 * @return The xyz array
@@ -398,7 +398,7 @@ public class MaskDistribution3D implements SpatialDistribution
 			final boolean isInnerXY = (y1 != 0 && y1 != ylimit) && (x1 != 0 && x1 != xlimit);
 			final boolean isInnerXYZ = (zlimit == 0) ? isInnerXY : isInnerXY && (z1 != 0 && z1 != zlimit);
 
-			// Search the neighbours 
+			// Search the neighbours
 			for (int d = 26; d-- > 0;)
 			{
 				if (isInnerXYZ || (isInnerXY && isWithinZ(z1, d)) || isWithinXYZ(x1, y1, z1, d))
@@ -421,7 +421,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	/**
 	 * returns whether the neighbour in a given direction is within the image. NOTE: it is assumed that the pixel x,y,z
 	 * itself is within the image! Uses class variables xlimit, ylimit, zlimit: (dimensions of the image)-1
-	 * 
+	 *
 	 * @param x
 	 *            x-coordinate of the pixel that has a neighbour in the given direction
 	 * @param y
@@ -495,7 +495,7 @@ public class MaskDistribution3D implements SpatialDistribution
 	/**
 	 * returns whether the neighbour in a given direction is within the image. NOTE: it is assumed that the pixel z
 	 * itself is within the image! Uses class variables zlimit: (dimensions of the image)-1
-	 * 
+	 *
 	 * @param z
 	 *            z-coordinate of the pixel that has a neighbour in the given direction
 	 * @param direction
@@ -572,7 +572,7 @@ public class MaskDistribution3D implements SpatialDistribution
 
 	/**
 	 * The UniformDistribution to pick the sub pixel x,y coordinates and slice z-depth
-	 * 
+	 *
 	 * @param uniformDistribution
 	 *            the uniformDistribution to set
 	 */

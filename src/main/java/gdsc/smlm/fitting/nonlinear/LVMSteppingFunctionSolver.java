@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -46,12 +46,12 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	// beta  = Gradient vector
 	// We want to solve: A x = b to find the update x
 
-	// Current best alpha and beta 
+	// Current best alpha and beta
 	protected double[] alpha, beta;
-	// Working alpha and beta 
+	// Working alpha and beta
 	protected double[] walpha, wbeta;
 
-	// TODO - Determine what a good solution tolerance would be. 
+	// TODO - Determine what a good solution tolerance would be.
 	// We may not need to be that strict to accept the solution.
 
 	public static final double DEFAULT_MAX_RELATIVE_ERROR = 1e-3;
@@ -255,7 +255,7 @@ public abstract class LVMSteppingFunctionSolver extends SteppingFunctionSolver
 	@Override
 	protected double[] prepareFunctionValue(double[] y, double[] a)
 	{
-		// Ensure the gradient procedure is created 
+		// Ensure the gradient procedure is created
 		y = prepareY(y);
 		gradientProcedure = createGradientProcedure(y);
 		return y;

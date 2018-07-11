@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -81,7 +81,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -188,8 +188,8 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 		TextFilePeakResults fileResults = createFilePeakResults(results2);
 
-		List<PointPair> allMatches = new LinkedList<PointPair>();
-		List<PointPair> pairs = (requirePairs) ? new LinkedList<PointPair>() : null;
+		List<PointPair> allMatches = new LinkedList<>();
+		List<PointPair> pairs = (requirePairs) ? new LinkedList<>() : null;
 
 		double maxDistance = dThreshold + increments * delta;
 
@@ -209,11 +209,11 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			List<Coordinate> TP = null;
 			List<Coordinate> FP = null;
 			List<Coordinate> FN = null;
-			List<PointPair> matches = new LinkedList<PointPair>();
+			List<PointPair> matches = new LinkedList<>();
 			if (requirePairs)
 			{
-				FP = new LinkedList<Coordinate>();
-				FN = new LinkedList<Coordinate>();
+				FP = new LinkedList<>();
+				FN = new LinkedList<>();
 			}
 
 			MatchCalculator.analyseResults2D(actual, predicted, maxDistance, TP, FP, FN, matches);
@@ -233,7 +233,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 			}
 			if (fileResults != null)
 			{
-				// Matches are marked in the original value with 1 for true, 0 for false 
+				// Matches are marked in the original value with 1 for true, 0 for false
 				for (PointPair pair : matches)
 				{
 					PeakResult p = ((PeakResultPoint) pair.getPoint2()).peakResult;
@@ -323,7 +323,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				int c = 0;
 				final int total = pairs.size();
 				final int step = Utils.getProgressInterval(total);
-				final ArrayList<String> list = new ArrayList<String>(total);
+				final ArrayList<String> list = new ArrayList<>(total);
 				boolean flush = true;
 				for (PointPair pair : pairs)
 				{
@@ -410,7 +410,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 							matchId2.add(((PeakResultPoint) pair.getPoint2()).peakResult.getId());
 					}
 				}
-				// Only the actual points are checked for Ids. For example these could be from the 
+				// Only the actual points are checked for Ids. For example these could be from the
 				// Create Data plugin with actual fluorophore Ids.
 				// => Only the recall will be valid: tp / (tp + fn)
 				if (doIdAnalysis1)
@@ -453,7 +453,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/**
 	 * Build a map between the peak id (time point) and a list of coordinates
-	 * 
+	 *
 	 * @param results
 	 * @return
 	 */
@@ -464,7 +464,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/**
 	 * Build a map between the peak id (time point) and a list of coordinates
-	 * 
+	 *
 	 * @param results
 	 * @param integerCoordinates
 	 *            True if the values should be rounded down to integers
@@ -473,18 +473,18 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
 			final boolean integerCoordinates)
 	{
-		TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<ArrayList<Coordinate>>();
+		TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<>();
 		if (results.size() > 0)
 		{
-			// Do not use HashMap directly to build the coords object since there 
-			// will be many calls to getEntry(). Instead sort the results and use 
+			// Do not use HashMap directly to build the coords object since there
+			// will be many calls to getEntry(). Instead sort the results and use
 			// a new list for each time point
 			results.sort();
 			final int minT = results.getFirstFrame();
 			final int maxT = results.getLastFrame();
 
 			// Create lists
-			final ArrayList<ArrayList<Coordinate>> tmpCoords = new ArrayList<ArrayList<Coordinate>>(maxT - minT + 1);
+			final ArrayList<ArrayList<Coordinate>> tmpCoords = new ArrayList<>(maxT - minT + 1);
 			for (int t = minT; t <= maxT; t++)
 			{
 				tmpCoords.add(new ArrayList<Coordinate>());
@@ -525,7 +525,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/**
 	 * Merge the time points from each map into a single sorted list of unique time points
-	 * 
+	 *
 	 * @param actualCoordinates
 	 * @param predictedCoordinates
 	 * @return a list of time points
@@ -556,7 +556,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/**
 	 * Return an array of coordinates for the given time point. Returns an empty array if there are no coordinates.
-	 * 
+	 *
 	 * @param coords
 	 * @param t
 	 * @return
@@ -576,7 +576,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/**
 	 * Merge the time points from the two sets into a single sorted list of unique time points
-	 * 
+	 *
 	 * @param actualPoints
 	 * @param predictedPoints
 	 * @return
@@ -690,7 +690,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.utils.CoordinateProvider#getCoordinates(java.lang.String)
 	 */
 	@Override

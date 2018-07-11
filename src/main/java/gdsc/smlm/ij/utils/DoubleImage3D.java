@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -65,7 +65,7 @@ public class DoubleImage3D extends Image3D
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.utils.Image3D#createData(int)
 	 */
 	@Override
@@ -136,14 +136,14 @@ public class DoubleImage3D extends Image3D
 	 */
 	protected DoubleImage3D(int nc, int nr, int ns, int nr_by_nc, double[] data)
 	{
-		// No checks as this is used internally		
+		// No checks as this is used internally
 		super(nc, nr, ns, nr_by_nc);
 		this.data = data;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.utils.Image3D#copy()
 	 */
 	@Override
@@ -164,7 +164,7 @@ public class DoubleImage3D extends Image3D
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.utils.Image3D#getDataLength()
 	 */
 	@Override
@@ -175,7 +175,7 @@ public class DoubleImage3D extends Image3D
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.ij.utils.Image3D#crop(int, int, int, int, int, int)
 	 */
 	@Override

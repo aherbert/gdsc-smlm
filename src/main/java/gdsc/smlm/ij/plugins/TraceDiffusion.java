@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -148,12 +148,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	// Used for the macro extensions
 	private static double[][] jumpDistanceParameters = null;
 
-	// Used for the multiMode option 
+	// Used for the multiMode option
 	private static ArrayList<String> selected;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -170,7 +170,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			return;
 		}
 
-		ArrayList<MemoryPeakResults> allResults = new ArrayList<MemoryPeakResults>();
+		ArrayList<MemoryPeakResults> allResults = new ArrayList<>();
 
 		// Option to pick multiple input datasets together using a list box.
 		if ("multi".equals(arg))
@@ -196,7 +196,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Analyse the traces
 		// -=-=-
 
-		// Only show the second dialog if we have traces. 
+		// Only show the second dialog if we have traces.
 		// This still allows a zero entry in the results table.
 		if (traces.length > 0)
 			if (!showDialog())
@@ -229,11 +229,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			// Get the localisation error (4s^2) in um^2
 			final double error = (settings.getPrecisionCorrection()) ? 4 * precision * precision / 1e6 : 0;
-			// Pre-calculate MSD correction factors. This accounts for the fact that the distance moved 
-			// in the start/end frames is reduced due to the averaging of the particle location over the 
+			// Pre-calculate MSD correction factors. This accounts for the fact that the distance moved
+			// in the start/end frames is reduced due to the averaging of the particle location over the
 			// entire frame into a single point. The true MSD may be restored by applying a factor.
-			// Note: These are used for the calculation of the diffusion coefficients per molecule and 
-			// the MSD passed to the Jump Distance analysis. However the error is not included in the 
+			// Note: These are used for the calculation of the diffusion coefficients per molecule and
+			// the MSD passed to the Jump Distance analysis. However the error is not included in the
 			// jump distance analysis so will be subtracted from the fitted D coefficients later.
 			final double[] factors;
 			if (settings.getMsdCorrection())
@@ -253,7 +253,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				stats[i] = new Statistics();
 
 			ArrayList<double[]> distances = (saveTraceDistances || displayTraceLength)
-					? new ArrayList<double[]>(traces.length) : null;
+					? new ArrayList<>(traces.length) : null;
 
 			// Store all the jump distances at the specified interval
 			StoredDataStatistics jumpDistances = new StoredDataStatistics();
@@ -354,7 +354,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 					sumT += sumTime[t];
 				}
 
-				// Calculate the average displacement for the trace (do not simply use the largest 
+				// Calculate the average displacement for the trace (do not simply use the largest
 				// time separation since this will miss moving molecules that end up at the origin)
 
 				msdPerMoleculeAllVsAll.add(px2ToUm2PerSecond * sumD / sumT);
@@ -508,7 +508,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	/**
 	 * Calculate the average precision of localisation in the traces
-	 * 
+	 *
 	 * @param traces
 	 * @param multi
 	 */
@@ -566,7 +566,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * coefficient from two-dimensional distance analysis.
 	 * <p>
 	 * See Uphoff, et al, 2013. Single-molecule DNA repair in live bacteria, PNAS 110, 8063-8068
-	 * 
+	 *
 	 * @param msdPerMoleculeAdjacent
 	 * @return The D per molecule
 	 */
@@ -792,7 +792,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	/**
 	 * Filter traces that are not the minimum length
-	 * 
+	 *
 	 * @param name
 	 * @param traces
 	 * @param minimumTraceLength
@@ -1010,7 +1010,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	/**
 	 * Check the results have a calibrated exposure time and pixel pitch. If not then show a dialog to collect the
 	 * calibration.
-	 * 
+	 *
 	 * @param results
 	 * @return True if calibrated
 	 */
@@ -1077,7 +1077,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double distanceThreshold = c.convertBack(settings.getDistanceThreshold());
 		double distanceExclusion = c.convertBack(settings.getDistanceExclusion());
 
-		ArrayList<Trace> allTraces = new ArrayList<Trace>();
+		ArrayList<Trace> allTraces = new ArrayList<>();
 		additionalDatasets = -1;
 		for (MemoryPeakResults r : allResults)
 		{
@@ -1087,7 +1087,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 			// Run the tracing
 			manager.setTracker(new IJTrackProgress());
-			// convert from 
+			// convert from
 			manager.setDistanceExclusion(distanceExclusion);
 			manager.traceMolecules(distanceThreshold, 1);
 			Trace[] traces = manager.getTraces();
@@ -1274,7 +1274,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * Fit the MSD using a linear fit that must pass through 0,0.
 	 * <p>
 	 * Update the plot by adding the fit line.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param title
@@ -1464,10 +1464,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				// Try fixed precision fitting. Is the gradient correct?
 				// Revisit all the equations to see if they are wrong.
 				// Try adding the x[0] datapoint using the precision.
-				// Change the formula to not be linear at x[0] and to just fit the precision, i.e. the intercept2 = 4 * s * s - gradient / 3 is wrong as the 
+				// Change the formula to not be linear at x[0] and to just fit the precision, i.e. the intercept2 = 4 * s * s - gradient / 3 is wrong as the
 				// equation is not linear below n=1.
 
-				// Incorporate the exposure time into the gradient to allow comparison to other fits 
+				// Incorporate the exposure time into the gradient to allow comparison to other fits
 				gradient /= exposureTime;
 
 				if (ic2 < ic || debugFitting)
@@ -1512,7 +1512,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	/**
 	 * Check the distance used for tracing covers enough of the cumulative mean-squared distance distribution
-	 * 
+	 *
 	 * @param d
 	 */
 	private void checkTraceDistance(double d)
@@ -1567,7 +1567,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1652,7 +1652,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1741,7 +1741,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.apache.commons.math3.analysis.MultivariateVectorFunction#value(double[])
 		 */
 		@Override
@@ -1789,7 +1789,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * Fit the jump distance histogram.
 	 * <p>
 	 * Update the plot by adding the fit line(s).
-	 * 
+	 *
 	 * @param jumpDistances
 	 *            (in um^2)
 	 * @param jdHistogram
@@ -1800,8 +1800,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		final double msd = jumpDistances.getMean();
 		final double meanDistance = Math.sqrt(msd) * 1e3;
 		// TODO:
-		// Q. Should the beta be expressed using the mean-distance or MSD? 
-		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on 
+		// Q. Should the beta be expressed using the mean-distance or MSD?
+		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on
 		// jump distance length
 		beta = meanDistance / precision;
 		// Set the minimum diffusion coefficient using the precision:
@@ -1891,7 +1891,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * Macro extension function.
 	 * <p>
 	 * Get the number of fitted species from the last call to fit the jump distances.
-	 * 
+	 *
 	 * @param args
 	 *            0: Double[1] - output the number of species
 	 * @return Empty string
@@ -1912,7 +1912,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * Macro extension function.
 	 * <p>
 	 * Get the diffusion coefficient for the requested species from the last call to fit the jump distances.
-	 * 
+	 *
 	 * @param args
 	 *            0: Double[1] - input the index of the species; 1: Double[1] - output the coefficient
 	 * @return Empty string
@@ -1934,7 +1934,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * Macro extension function.
 	 * <p>
 	 * Get the population fraction for the requested species from the last call to fit the jump distances.
-	 * 
+	 *
 	 * @param args
 	 *            0: Double[1] - input the index of the species; 1: Double[1] - output the population fraction
 	 * @return Empty string
@@ -1957,7 +1957,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	 * <p>
 	 * Get the diffusion coefficient and population fraction for the requested species from the last call to fit the
 	 * jump distances.
-	 * 
+	 *
 	 * @param args
 	 *            0: Double[1] - input the index of the species; 1: Double[1] - output the coefficient; 1: Double[1] -
 	 *            output the population fraction

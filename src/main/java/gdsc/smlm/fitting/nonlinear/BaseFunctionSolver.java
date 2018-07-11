@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -83,7 +83,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getType()
 	 */
 	@Override
@@ -94,7 +94,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#fit(double[], double[], double[], double[])
 	 */
 	@Override
@@ -138,7 +138,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#evaluate(double[], double[], double[])
 	 */
 	@Override
@@ -166,13 +166,13 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#computeDeviations(double[], double[], double[])
 	 */
 	@Override
 	public boolean computeDeviations(double[] y, double[] a, double[] aDev)
 	{
-		// Use a dedicated solver optimised for inverting the matrix diagonal. 
+		// Use a dedicated solver optimised for inverting the matrix diagonal.
 		final FisherInformationMatrix m = computeFisherInformationMatrix(y, a);
 
 		setDeviations(aDev, m);
@@ -283,7 +283,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedParameters()
 	 */
 	@Override
@@ -294,7 +294,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getNumberOfFittedPoints()
 	 */
 	@Override
@@ -305,7 +305,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getIterations()
 	 */
 	@Override
@@ -316,7 +316,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getEvaluations()
 	 */
 	@Override
@@ -344,7 +344,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#isBounded()
 	 */
 	@Override
@@ -355,7 +355,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#isConstrained()
 	 */
 	@Override
@@ -366,7 +366,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#isWeighted()
 	 */
 	@Override
@@ -377,14 +377,14 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#isStrictlyPositiveFunction()
 	 */
 	@Override
 	public boolean isStrictlyPositiveFunction()
 	{
-		// Provide a default implementation based on the type. 
-		// This can be overridden if the solver can handle negative function data.		
+		// Provide a default implementation based on the type.
+		// This can be overridden if the solver can handle negative function data.
 		switch (type)
 		{
 			case LSE:
@@ -405,7 +405,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
 	@Override
@@ -415,7 +415,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#setConstraints(double[], double[])
 	 */
 	@Override
@@ -425,7 +425,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#setWeights(double[])
 	 */
 	@Override
@@ -435,7 +435,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getValue()
 	 */
 	@Override
@@ -469,7 +469,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#getName(int)
 	 */
 	@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -168,7 +168,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	// Cache batch results
 	private static Settings batchSettings = null;
-	private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<BatchResult[]>();
+	private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<>();
 
 	private static int id = 1;
 
@@ -365,7 +365,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		/**
 		 * Get the score
-		 * 
+		 *
 		 * @return The score
 		 */
 		double getScore()
@@ -380,9 +380,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		 */
 		public double antiScore()
 		{
-			// The use of partial scoring mimicks using multiple distance 
-			// thresholds and taking an average of scores. 
-			// For a single experiment at a single distance threshold a spot can 
+			// The use of partial scoring mimicks using multiple distance
+			// thresholds and taking an average of scores.
+			// For a single experiment at a single distance threshold a spot can
 			// match 0, 1 or more actual results. This would be:
 			// 0  = TP=0 ,FP=1
 			// 1  = TP=1 ,FP=0
@@ -395,7 +395,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
@@ -465,12 +465,12 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			this.jobs = jobs;
 			this.originalCoordinates = originalCoordinates;
-			this.coordinates = new TIntObjectHashMap<PSFSpot[]>();
+			this.coordinates = new TIntObjectHashMap<>();
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -516,7 +516,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (actual.length == 0)
 				return;
 
-			// Here we approximate the PSF as a Gaussian adjusted for square pixels.			
+			// Here we approximate the PSF as a Gaussian adjusted for square pixels.
 
 			// Determine spots (1) that have an overlap with other spots (2).
 			// In practice this will be any spot within 2SD1 + 2SD2.
@@ -584,7 +584,7 @@ public class BenchmarkSpotFilter implements PlugIn
 					actual[i].backgroundOffset = (float) overlapAnalysis.getWeightedbackground();
 
 					// This is not currently used.
-					// Computation of this would depend on how a filter is estimating the signal. 
+					// Computation of this would depend on how a filter is estimating the signal.
 					// The offset should be computed with the same method to create a 'fair' signal offset.
 					//actual[i].intensityOffset = ?
 				}
@@ -646,7 +646,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			this.jobs = jobs;
 			this.stack = stack;
 			this.spotFilter = spotFilter.clone();
-			this.results = new TIntObjectHashMap<FilterResult>();
+			this.results = new TIntObjectHashMap<>();
 			this.background = background;
 
 			// Do not assume that cloning will preserve the weights
@@ -658,7 +658,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -821,7 +821,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				// This is used to raise the spot intensity when computing the signal factor.
 
 				// Compute assignments
-				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<FractionalAssignment>(
+				TurboList<FractionalAssignment> fractionalAssignments = new TurboList<>(
 						predicted.length * 3);
 
 				final double dmin = matchDistance * matchDistance;
@@ -830,7 +830,7 @@ public class BenchmarkSpotFilter implements PlugIn
 				{
 					final float x = predicted[j].getX();
 					final float y = predicted[j].getY();
-					// Any spots that match 
+					// Any spots that match
 					for (int i = 0; i < nActual; i++)
 					{
 						final double dx = (x - actual[i].getX());
@@ -860,7 +860,7 @@ public class BenchmarkSpotFilter implements PlugIn
 							if (distance == 0)
 							{
 								// In the case of a match below the distance and signal factor thresholds
-								// the distance will be 0. To distinguish between candidates all below 
+								// the distance will be 0. To distinguish between candidates all below
 								// the thresholds just take the closest.
 								// We know d2 is below dmin so we subtract the delta.
 								distance -= (dmin - d2);
@@ -976,20 +976,20 @@ public class BenchmarkSpotFilter implements PlugIn
 					}
 				}
 
-				// Compute the FP. 
+				// Compute the FP.
 				// Note: The TP score is the match score multiplied by the weight of the actual spot.
-				// Although a predicted point can accumulate more than its weight for TP matches (due 
-				// to multiple matching and the fuzzy border), no predicted point can score less than 
-				// its weight. This means: 
+				// Although a predicted point can accumulate more than its weight for TP matches (due
+				// to multiple matching and the fuzzy border), no predicted point can score less than
+				// its weight. This means:
 				// TP + FN = nActual
 				// TP + FP >= nPredicted (due to fuzzy border)
 				//
-				// Note: This score scenario is the same as if using a hard border exclusion and 
+				// Note: This score scenario is the same as if using a hard border exclusion and
 				// multi-matching where TP can be above 1 but FP is not.
 				//
 				// This does mean that a spot in the border that matches a result in the image
 				// can have a high TP score and very low FP score. Hopefully this has little effect
-				// in practice.				
+				// in practice.
 
 				fp = spotsLength;
 				for (int j = 0; j < predictedScore.length; j++)
@@ -1001,7 +1001,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 				result = new FractionClassificationResult(tp, fp, 0, actualLength - tp);
 
-				// Store the number of fails (negatives) before each positive 
+				// Store the number of fails (negatives) before each positive
 				for (int i = 0; i < spots.length; i++)
 				{
 					if (scoredSpots[i] == null)
@@ -1087,7 +1087,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -1127,7 +1127,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			if (results.getCalibrationReader().getIntensityUnit() != IntensityUnit.PHOTON)
 				throw new ConfigurationException("Require results in photon units");
 
-			// This plugin is heavily reliant on the results being represented as a 
+			// This plugin is heavily reliant on the results being represented as a
 			// Gaussian2D function.
 			int flags = Gaussian2DPeakResultHelper.AMPLITUDE | Gaussian2DPeakResultHelper.PIXEL_AMPLITUDE;
 			calculator = Gaussian2DPeakResultHelper.create(results.getPSF(), results.getCalibration(), flags);
@@ -1177,7 +1177,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			setupProgress(imp.getImageStackSize() * searchParam.length *
 					(mParam.length + gParam.length + cParam.length + medParam.length), "Frame");
 
-			ArrayList<BatchResult[]> batchResults = new ArrayList<BatchResult[]>(cachedBatchResults.size());
+			ArrayList<BatchResult[]> batchResults = new ArrayList<>(cachedBatchResults.size());
 			double param2 = 0;
 			if (differenceFilter && differenceSmooth > 0)
 			{
@@ -1257,7 +1257,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			showFP = gd.getNextBoolean();
 			showFN = gd.getNextBoolean();
 
-			// Plot charts			
+			// Plot charts
 			for (int i = 0; i < batchPlot.length; i++)
 				plot(i, batchResults);
 
@@ -1359,7 +1359,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private BenchmarkFilterResult analyse(ArrayList<BatchResult[]> batchResults)
 	{
 		// Support z-score of AUC and Max. Jaccard combined.
-		// For this wee need the statistics of the population of scores. 
+		// For this wee need the statistics of the population of scores.
 		double[][] stats = getStats(batchResults);
 
 		double max = 0;
@@ -1397,7 +1397,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 
 			// Note: All batch runs use absolute distances for search and filter smoothing parameters.
-			// The border parameter is already set as relative/absolute. 
+			// The border parameter is already set as relative/absolute.
 			if (filterRelativeDistances)
 			{
 				final double hwhmMax = config.getHWHMMax();
@@ -1490,7 +1490,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private BatchResult[] run(DataFilterMethod dataFilter, double[] param, int search, double param2)
 	{
 		progressPrefix = new BatchResult(null, dataFilter, 0, search, param2).getName();
-		TurboList<BatchResult> result = new TurboList<BatchResult>();
+		TurboList<BatchResult> result = new TurboList<>();
 
 		// Note: All batch runs use absolute distances for filter smoothing parameters
 
@@ -1513,7 +1513,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			}
 			catch (IllegalArgumentException e)
 			{
-				// This can occur during batch processing when the param2 argument is smaller than param 
+				// This can occur during batch processing when the param2 argument is smaller than param
 				break;
 			}
 		}
@@ -1545,7 +1545,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			gd.addCheckbox("Gaussian", batchGaussian);
 			gd.addCheckbox("Circular", batchCircular);
 			gd.addCheckbox("Median", batchMedian);
-			// For difference filters we set the smoothing for the second filter 
+			// For difference filters we set the smoothing for the second filter
 			// using only one distance
 			gd.addMessage("Difference filter settings:");
 			gd.addCheckbox("Difference_filter", differenceFilter);
@@ -1597,7 +1597,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (gd.wasCanceled())
 			return false;
 
-		// Here we use PSF stored in the results if supported (i.e. a Gaussian). 
+		// Here we use PSF stored in the results if supported (i.e. a Gaussian).
 		// The results are likely to come from the CreateData simulation.
 		PSF psf = results.getPSF();
 		if (PSFHelper.isGaussian2D(psf))
@@ -1667,7 +1667,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			// Clear the cached results if the setting changed
 			Settings settings = new Settings(simulationParameters.id, filterRelativeDistances,
-					//search, maxSearch, // Ignore search distance for smart caching 
+					//search, maxSearch, // Ignore search distance for smart caching
 					border, scoreRelativeDistances, sAnalysisBorder, hardBorder, matchingMethod, upperDistance,
 					lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
 			if (!settings.equals(batchSettings))
@@ -1767,7 +1767,7 @@ public class BenchmarkSpotFilter implements PlugIn
 			// The Worker adds a pixel offset for the spot coordinates.
 			TIntObjectHashMap<ArrayList<Coordinate>> coordinates = ResultsMatchCalculator.getCoordinates(results,
 					false);
-			actualCoordinates = new TIntObjectHashMap<PSFSpot[]>();
+			actualCoordinates = new TIntObjectHashMap<>();
 			lastId = simulationParameters.id;
 			//lastRelativeDistances = relativeDistances;
 
@@ -1775,14 +1775,14 @@ public class BenchmarkSpotFilter implements PlugIn
 			final int total = totalProgress;
 			final String prefix = progressPrefix;
 
-			// Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude effect 
+			// Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude effect
 			// for each spot...
 			IJ.showStatus("Computing PSF overlap ...");
 
 			final int nThreads = Prefs.getThreads();
-			final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-			List<OverlapWorker> workers = new LinkedList<OverlapWorker>();
-			List<Thread> threads = new LinkedList<Thread>();
+			final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+			List<OverlapWorker> workers = new LinkedList<>();
+			List<Thread> threads = new LinkedList<>();
 			for (int i = 0; i < nThreads; i++)
 			{
 				OverlapWorker worker = new OverlapWorker(jobs, coordinates);
@@ -1851,7 +1851,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		{
 			if (Float.isNaN(resultsBackground))
 			{
-				// To allow the signal factor to be computed we need to lower the image by the background so 
+				// To allow the signal factor to be computed we need to lower the image by the background so
 				// that the intensities correspond to the results amplitude.
 				// Just assume the simulation background is uniform.
 				StandardResultProcedure s = new StandardResultProcedure(results, IntensityUnit.PHOTON);
@@ -1872,9 +1872,9 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Create a pool of workers
 		final int nThreads = Prefs.getThreads();
-		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<Integer>(nThreads * 2);
-		List<Worker> workers = new TurboList<Worker>(nThreads);
-		List<Thread> threads = new TurboList<Thread>(nThreads);
+		BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		List<Worker> workers = new TurboList<>(nThreads);
+		List<Thread> threads = new TurboList<>(nThreads);
 		for (int i = 0; i < nThreads; i++)
 		{
 			Worker worker = new Worker(jobs, stack, spotFilter, background);
@@ -1950,7 +1950,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	/**
 	 * Add all the true-positives to memory as a new results set
-	 * 
+	 *
 	 * @param filterResults
 	 */
 	void addSpotsToMemory(TIntObjectHashMap<FilterResult> filterResults)
@@ -2051,18 +2051,18 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		BenchmarkFilterResult filterResult = new BenchmarkFilterResult(filterResults, config, spotFilter);
 
-		// Note: 
+		// Note:
 		// Although we can compute the TP/FP score as each additional spot is added
 		// using the RankedScoreCalculator this is not applicable to the PeakFit method.
 		// The method relies on all spot candidates being present in order to make a
 		// decision to fit the candidate as a multiple. So scoring the filter candidates using
 		// for example the top 10 may get a better score than if all candidates were scored
-		// and the scores accumulated for the top 10, it is not how the algorithm will use the 
-		// candidate set. I.e. It does not use the top 10, then top 20 to refine the fit, etc. 
+		// and the scores accumulated for the top 10, it is not how the algorithm will use the
+		// candidate set. I.e. It does not use the top 10, then top 20 to refine the fit, etc.
 		// (the method is not iterative) .
 		// We require an assessment of how a subset of the scored candidates
 		// in ranked order contributes to the overall score, i.e. are the candidates ranked
-		// in the correct order, those most contributing to the match to the underlying data 
+		// in the correct order, those most contributing to the match to the underlying data
 		// should be higher up and those least contributing will be at the end.
 
 		// TODO We could add some smart filtering of candidates before ranking. This would
@@ -2073,7 +2073,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		// Create the overall match score
 		final double[] total = new double[3];
-		final ArrayList<ScoredSpot> allSpots = new ArrayList<BenchmarkSpotFilter.ScoredSpot>();
+		final ArrayList<ScoredSpot> allSpots = new ArrayList<>();
 		filterResults.forEachValue(new TObjectProcedure<FilterResult>()
 		{
 			@Override

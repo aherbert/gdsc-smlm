@@ -64,7 +64,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor. 
+     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor.
      * </pre>
      *
      * <code>FAST_MLE = 4;</code>
@@ -73,7 +73,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation. 
+     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation.
      * </pre>
      *
      * <code>BACKTRACKING_FAST_MLE = 5;</code>
@@ -122,7 +122,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor. 
+     * Uses a Newton-Raphson update step for fast convergence close to the optimum. The algorithm is unstable when the initial parameter estimate is poor.
      * </pre>
      *
      * <code>FAST_MLE = 4;</code>
@@ -131,7 +131,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
-     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation. 
+     * Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation.
      * </pre>
      *
      * <code>BACKTRACKING_FAST_MLE = 5;</code>
@@ -139,7 +139,8 @@ public final class FitProtos {
     public static final int BACKTRACKING_FAST_MLE_VALUE = 5;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -174,16 +175,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         FitSolver> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<FitSolver>() {
-            public FitSolver findValueByNumber(int number) {
+            @Override
+			public FitSolver findValueByNumber(int number) {
               return FitSolver.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -373,7 +377,8 @@ public final class FitProtos {
     public static final int BFGS_VALUE = 7;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -410,16 +415,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         SearchMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<SearchMethod>() {
-            public SearchMethod findValueByNumber(int number) {
+            @Override
+			public SearchMethod findValueByNumber(int number) {
               return SearchMethod.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -463,7 +471,7 @@ public final class FitProtos {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * Do nothing to handle the incorrect orientation. The default solver action is taken. 
+     * Do nothing to handle the incorrect orientation. The default solver action is taken.
      * This may cause the search to take an invalid move or it may error.
      * </pre>
      *
@@ -480,7 +488,7 @@ public final class FitProtos {
     IGNORE(1),
     /**
      * <pre>
-     * Progressively ignore any search direction that is in the opposite direction to the 
+     * Progressively ignore any search direction that is in the opposite direction to the
      * first derivative gradient. Do this in order of the magnitude of the error.
      * </pre>
      *
@@ -492,7 +500,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Do nothing to handle the incorrect orientation. The default solver action is taken. 
+     * Do nothing to handle the incorrect orientation. The default solver action is taken.
      * This may cause the search to take an invalid move or it may error.
      * </pre>
      *
@@ -509,7 +517,7 @@ public final class FitProtos {
     public static final int IGNORE_VALUE = 1;
     /**
      * <pre>
-     * Progressively ignore any search direction that is in the opposite direction to the 
+     * Progressively ignore any search direction that is in the opposite direction to the
      * first derivative gradient. Do this in order of the magnitude of the error.
      * </pre>
      *
@@ -518,7 +526,8 @@ public final class FitProtos {
     public static final int PARTIAL_IGNORE_VALUE = 2;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -550,16 +559,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         LineSearchMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<LineSearchMethod>() {
-            public LineSearchMethod findValueByNumber(int number) {
+            @Override
+			public LineSearchMethod findValueByNumber(int number) {
               return LineSearchMethod.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -602,8 +614,8 @@ public final class FitProtos {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * Not available. The results may have been loaded from a source where the precision was computed 
-     * using another method, or the results may have no precision. 
+     * Not available. The results may have been loaded from a source where the precision was computed
+     * using another method, or the results may have no precision.
      * </pre>
      *
      * <code>PRECISION_METHOD_NA = 0;</code>
@@ -612,7 +624,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-     * The background noise component (b2) is computed using the variance of the fit region. 
+     * The background noise component (b2) is computed using the variance of the fit region.
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
@@ -629,7 +641,7 @@ public final class FitProtos {
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
-     * for least squares or maximum likelihood estimators.     
+     * for least squares or maximum likelihood estimators.
      * </pre>
      *
      * <code>MORTENSEN_LOCAL_BACKGROUND = 2;</code>
@@ -637,14 +649,14 @@ public final class FitProtos {
     MORTENSEN_LOCAL_BACKGROUND(2),
     /**
      * <pre>
-     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
-     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
+     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
      * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
-     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
+     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS
      * camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
      * Note that this formula is good when the number of photons is high. Due to the approximation
-     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
-     * Fisher information is poor when the number of photons is low, leading to an approximation 
+     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the
+     * Fisher information is poor when the number of photons is low, leading to an approximation
      * of the true CRLB of a Poisson-Gaussian distribution.
      * This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
      * for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
@@ -659,8 +671,8 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Not available. The results may have been loaded from a source where the precision was computed 
-     * using another method, or the results may have no precision. 
+     * Not available. The results may have been loaded from a source where the precision was computed
+     * using another method, or the results may have no precision.
      * </pre>
      *
      * <code>PRECISION_METHOD_NA = 0;</code>
@@ -669,7 +681,7 @@ public final class FitProtos {
     /**
      * <pre>
      * Estimate using the formula of Mortensen, et al (2010) Nature Methods 7, 377-383.
-     * The background noise component (b2) is computed using the variance of the fit region. 
+     * The background noise component (b2) is computed using the variance of the fit region.
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
@@ -686,7 +698,7 @@ public final class FitProtos {
      * Note that computation of precision using this formula is relevant only for (EM-)CCD cameras
      * with a single Gaussian 2D PSF in the region. The formula is exact if the data is a 2D Gaussian
      * but can be used to approximate localisation precision on any spot-type PSF. There are formulas
-     * for least squares or maximum likelihood estimators.     
+     * for least squares or maximum likelihood estimators.
      * </pre>
      *
      * <code>MORTENSEN_LOCAL_BACKGROUND = 2;</code>
@@ -694,14 +706,14 @@ public final class FitProtos {
     public static final int MORTENSEN_LOCAL_BACKGROUND_VALUE = 2;
     /**
      * <pre>
-     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of 
-     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum 
+     * Compute the Cramér-Rao lower bound (CRLB) assuming a Poisson process. This uses the method of
+     * Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum
      * uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9. It has been extended
-     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS 
+     * to a per-pixel noise component in Huang et al, (2015). Video-rate nanoscopy using sCMOS
      * camera–specific single-molecule localization algorithms. Nature Methods 10, 653–658.
      * Note that this formula is good when the number of photons is high. Due to the approximation
-     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the 
-     * Fisher information is poor when the number of photons is low, leading to an approximation 
+     * of Gaussian noise as a Poisson distribution the likelihood function used to generate the
+     * Fisher information is poor when the number of photons is low, leading to an approximation
      * of the true CRLB of a Poisson-Gaussian distribution.
      * This method is suitable for a CCD or sCMOS camera. The Poisson noise model is less suitable
      * for an EMCCD camera (since the EM component modelled by a Gamma distribution is neglected)
@@ -713,7 +725,8 @@ public final class FitProtos {
     public static final int POISSON_CRLB_VALUE = 3;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -746,16 +759,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         PrecisionMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<PrecisionMethod>() {
-            public PrecisionMethod findValueByNumber(int number) {
+            @Override
+			public PrecisionMethod findValueByNumber(int number) {
               return PrecisionMethod.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -849,7 +865,8 @@ public final class FitProtos {
     public static final int JURY_VALUE = 2;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -881,16 +898,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         DataFilterType> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<DataFilterType>() {
-            public DataFilterType findValueByNumber(int number) {
+            @Override
+			public DataFilterType findValueByNumber(int number) {
               return DataFilterType.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -1016,7 +1036,8 @@ public final class FitProtos {
     public static final int MEDIAN_VALUE = 4;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -1050,16 +1071,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         DataFilterMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<DataFilterMethod>() {
-            public DataFilterMethod findValueByNumber(int number) {
+            @Override
+			public DataFilterMethod findValueByNumber(int number) {
               return DataFilterMethod.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -1233,7 +1257,8 @@ public final class FitProtos {
     public static final int QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES_VALUE = 7;
 
 
-    public final int getNumber() {
+    @Override
+	public final int getNumber() {
       if (this == UNRECOGNIZED) {
         throw new java.lang.IllegalArgumentException(
             "Can't get the number of an unknown enum value.");
@@ -1270,16 +1295,19 @@ public final class FitProtos {
     private static final com.google.protobuf.Internal.EnumLiteMap<
         NoiseEstimatorMethod> internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<NoiseEstimatorMethod>() {
-            public NoiseEstimatorMethod findValueByNumber(int number) {
+            @Override
+			public NoiseEstimatorMethod findValueByNumber(int number) {
               return NoiseEstimatorMethod.forNumber(number);
             }
           };
 
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
+    @Override
+	public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
@@ -1370,8 +1398,8 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The maximum/fixed iterations to use during fitting. 
-     * If not using fixed iterations then fitting will fail if this limit is reached. 
+     * The maximum/fixed iterations to use during fitting.
+     * If not using fixed iterations then fitting will fail if this limit is reached.
      * </pre>
      *
      * <code>int32 max_iterations = 6;</code>
@@ -1442,7 +1470,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to use the function gradient during line minimisation, i.e. find the 
+     * Set to true to use the function gradient during line minimisation, i.e. find the
      * parameters where the gradient is zero. The default is the to minimise the function value.
      * </pre>
      *
@@ -1452,7 +1480,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+     * Set to true to model the camera noise in the configurable maximum likelihood estimator.
      * </pre>
      *
      * <code>bool model_camera = 14;</code>
@@ -1679,7 +1707,7 @@ public final class FitProtos {
             }
             case 145: {
               if (!((mutable_bitField0_ & 0x00020000) == 0x00020000)) {
-                clampValues_ = new java.util.ArrayList<java.lang.Double>();
+                clampValues_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00020000;
               }
               clampValues_.add(input.readDouble());
@@ -1689,7 +1717,7 @@ public final class FitProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00020000) == 0x00020000) && input.getBytesUntilLimit() > 0) {
-                clampValues_ = new java.util.ArrayList<java.lang.Double>();
+                clampValues_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00020000;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -1723,7 +1751,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1740,7 +1769,8 @@ public final class FitProtos {
      *
      * <code>bool fixed_psf = 1;</code>
      */
-    public boolean getFixedPsf() {
+    @Override
+	public boolean getFixedPsf() {
       return fixedPsf_;
     }
 
@@ -1753,7 +1783,8 @@ public final class FitProtos {
      *
      * <code>bool disable_background_fitting = 2;</code>
      */
-    public boolean getDisableBackgroundFitting() {
+    @Override
+	public boolean getDisableBackgroundFitting() {
       return disableBackgroundFitting_;
     }
 
@@ -1766,7 +1797,8 @@ public final class FitProtos {
      *
      * <code>bool disable_signal_fitting = 3;</code>
      */
-    public boolean getDisableSignalFitting() {
+    @Override
+	public boolean getDisableSignalFitting() {
       return disableSignalFitting_;
     }
 
@@ -1779,7 +1811,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
-    public int getFitSolverValue() {
+    @Override
+	public int getFitSolverValue() {
       return fitSolver_;
     }
     /**
@@ -1789,7 +1822,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
       gdsc.smlm.data.config.FitProtos.FitSolver result = gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
       return result == null ? gdsc.smlm.data.config.FitProtos.FitSolver.UNRECOGNIZED : result;
     }
@@ -1803,7 +1837,8 @@ public final class FitProtos {
      *
      * <code>bool fixed_iterations = 5;</code>
      */
-    public boolean getFixedIterations() {
+    @Override
+	public boolean getFixedIterations() {
       return fixedIterations_;
     }
 
@@ -1811,13 +1846,14 @@ public final class FitProtos {
     private int maxIterations_;
     /**
      * <pre>
-     * The maximum/fixed iterations to use during fitting. 
-     * If not using fixed iterations then fitting will fail if this limit is reached. 
+     * The maximum/fixed iterations to use during fitting.
+     * If not using fixed iterations then fitting will fail if this limit is reached.
      * </pre>
      *
      * <code>int32 max_iterations = 6;</code>
      */
-    public int getMaxIterations() {
+    @Override
+	public int getMaxIterations() {
       return maxIterations_;
     }
 
@@ -1830,7 +1866,8 @@ public final class FitProtos {
      *
      * <code>double relative_threshold = 7;</code>
      */
-    public double getRelativeThreshold() {
+    @Override
+	public double getRelativeThreshold() {
       return relativeThreshold_;
     }
 
@@ -1843,7 +1880,8 @@ public final class FitProtos {
      *
      * <code>double absolute_threshold = 8;</code>
      */
-    public double getAbsoluteThreshold() {
+    @Override
+	public double getAbsoluteThreshold() {
       return absoluteThreshold_;
     }
 
@@ -1856,7 +1894,8 @@ public final class FitProtos {
      *
      * <code>double parameter_relative_threshold = 9;</code>
      */
-    public double getParameterRelativeThreshold() {
+    @Override
+	public double getParameterRelativeThreshold() {
       return parameterRelativeThreshold_;
     }
 
@@ -1869,7 +1908,8 @@ public final class FitProtos {
      *
      * <code>double parameter_absolute_threshold = 10;</code>
      */
-    public double getParameterAbsoluteThreshold() {
+    @Override
+	public double getParameterAbsoluteThreshold() {
       return parameterAbsoluteThreshold_;
     }
 
@@ -1882,7 +1922,8 @@ public final class FitProtos {
      *
      * <code>double lambda = 11;</code>
      */
-    public double getLambda() {
+    @Override
+	public double getLambda() {
       return lambda_;
     }
 
@@ -1895,7 +1936,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
-    public int getSearchMethodValue() {
+    @Override
+	public int getSearchMethodValue() {
       return searchMethod_;
     }
     /**
@@ -1905,7 +1947,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
       gdsc.smlm.data.config.FitProtos.SearchMethod result = gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.SearchMethod.UNRECOGNIZED : result;
     }
@@ -1914,13 +1957,14 @@ public final class FitProtos {
     private boolean gradientLineMinimisation_;
     /**
      * <pre>
-     * Set to true to use the function gradient during line minimisation, i.e. find the 
+     * Set to true to use the function gradient during line minimisation, i.e. find the
      * parameters where the gradient is zero. The default is the to minimise the function value.
      * </pre>
      *
      * <code>bool gradient_line_minimisation = 13;</code>
      */
-    public boolean getGradientLineMinimisation() {
+    @Override
+	public boolean getGradientLineMinimisation() {
       return gradientLineMinimisation_;
     }
 
@@ -1928,12 +1972,13 @@ public final class FitProtos {
     private boolean modelCamera_;
     /**
      * <pre>
-     * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+     * Set to true to model the camera noise in the configurable maximum likelihood estimator.
      * </pre>
      *
      * <code>bool model_camera = 14;</code>
      */
-    public boolean getModelCamera() {
+    @Override
+	public boolean getModelCamera() {
       return modelCamera_;
     }
 
@@ -1946,7 +1991,8 @@ public final class FitProtos {
      *
      * <code>int32 max_function_evaluations = 15;</code>
      */
-    public int getMaxFunctionEvaluations() {
+    @Override
+	public int getMaxFunctionEvaluations() {
       return maxFunctionEvaluations_;
     }
 
@@ -1959,7 +2005,8 @@ public final class FitProtos {
      *
      * <code>bool use_clamping = 16;</code>
      */
-    public boolean getUseClamping() {
+    @Override
+	public boolean getUseClamping() {
       return useClamping_;
     }
 
@@ -1972,7 +2019,8 @@ public final class FitProtos {
      *
      * <code>bool use_dynamic_clamping = 17;</code>
      */
-    public boolean getUseDynamicClamping() {
+    @Override
+	public boolean getUseDynamicClamping() {
       return useDynamicClamping_;
     }
 
@@ -1985,7 +2033,8 @@ public final class FitProtos {
      *
      * <code>repeated double clamp_values = 18;</code>
      */
-    public java.util.List<java.lang.Double>
+    @Override
+	public java.util.List<java.lang.Double>
         getClampValuesList() {
       return clampValues_;
     }
@@ -1996,7 +2045,8 @@ public final class FitProtos {
      *
      * <code>repeated double clamp_values = 18;</code>
      */
-    public int getClampValuesCount() {
+    @Override
+	public int getClampValuesCount() {
       return clampValues_.size();
     }
     /**
@@ -2006,7 +2056,8 @@ public final class FitProtos {
      *
      * <code>repeated double clamp_values = 18;</code>
      */
-    public double getClampValues(int index) {
+    @Override
+	public double getClampValues(int index) {
       return clampValues_.get(index);
     }
     private int clampValuesMemoizedSerializedSize = -1;
@@ -2020,7 +2071,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
      */
-    public int getLineSearchMethodValue() {
+    @Override
+	public int getLineSearchMethodValue() {
       return lineSearchMethod_;
     }
     /**
@@ -2030,13 +2082,15 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
       gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -2045,7 +2099,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
       if (fixedPsf_ != false) {
@@ -2111,7 +2166,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -2398,14 +2454,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.FitSolverSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -2432,7 +2490,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2454,7 +2513,8 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         fixedPsf_ = false;
 
@@ -2497,16 +2557,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitSolverSettings build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettings build() {
         gdsc.smlm.data.config.FitProtos.FitSolverSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -2514,7 +2577,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitSolverSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettings buildPartial() {
         gdsc.smlm.data.config.FitProtos.FitSolverSettings result = new gdsc.smlm.data.config.FitProtos.FitSolverSettings(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -2546,33 +2610,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.FitSolverSettings) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.FitSolverSettings)other);
         } else {
@@ -2651,11 +2722,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -2682,7 +2755,8 @@ public final class FitProtos {
        *
        * <code>bool fixed_psf = 1;</code>
        */
-      public boolean getFixedPsf() {
+      @Override
+	public boolean getFixedPsf() {
         return fixedPsf_;
       }
       /**
@@ -2693,7 +2767,7 @@ public final class FitProtos {
        * <code>bool fixed_psf = 1;</code>
        */
       public Builder setFixedPsf(boolean value) {
-        
+
         fixedPsf_ = value;
         onChanged();
         return this;
@@ -2706,7 +2780,7 @@ public final class FitProtos {
        * <code>bool fixed_psf = 1;</code>
        */
       public Builder clearFixedPsf() {
-        
+
         fixedPsf_ = false;
         onChanged();
         return this;
@@ -2720,7 +2794,8 @@ public final class FitProtos {
        *
        * <code>bool disable_background_fitting = 2;</code>
        */
-      public boolean getDisableBackgroundFitting() {
+      @Override
+	public boolean getDisableBackgroundFitting() {
         return disableBackgroundFitting_;
       }
       /**
@@ -2731,7 +2806,7 @@ public final class FitProtos {
        * <code>bool disable_background_fitting = 2;</code>
        */
       public Builder setDisableBackgroundFitting(boolean value) {
-        
+
         disableBackgroundFitting_ = value;
         onChanged();
         return this;
@@ -2744,7 +2819,7 @@ public final class FitProtos {
        * <code>bool disable_background_fitting = 2;</code>
        */
       public Builder clearDisableBackgroundFitting() {
-        
+
         disableBackgroundFitting_ = false;
         onChanged();
         return this;
@@ -2758,7 +2833,8 @@ public final class FitProtos {
        *
        * <code>bool disable_signal_fitting = 3;</code>
        */
-      public boolean getDisableSignalFitting() {
+      @Override
+	public boolean getDisableSignalFitting() {
         return disableSignalFitting_;
       }
       /**
@@ -2769,7 +2845,7 @@ public final class FitProtos {
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public Builder setDisableSignalFitting(boolean value) {
-        
+
         disableSignalFitting_ = value;
         onChanged();
         return this;
@@ -2782,7 +2858,7 @@ public final class FitProtos {
        * <code>bool disable_signal_fitting = 3;</code>
        */
       public Builder clearDisableSignalFitting() {
-        
+
         disableSignalFitting_ = false;
         onChanged();
         return this;
@@ -2796,7 +2872,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
-      public int getFitSolverValue() {
+      @Override
+	public int getFitSolverValue() {
         return fitSolver_;
       }
       /**
@@ -2818,7 +2895,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolver getFitSolver() {
         gdsc.smlm.data.config.FitProtos.FitSolver result = gdsc.smlm.data.config.FitProtos.FitSolver.valueOf(fitSolver_);
         return result == null ? gdsc.smlm.data.config.FitProtos.FitSolver.UNRECOGNIZED : result;
       }
@@ -2833,7 +2911,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         fitSolver_ = value.getNumber();
         onChanged();
         return this;
@@ -2846,7 +2924,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FitSolver fit_solver = 4;</code>
        */
       public Builder clearFitSolver() {
-        
+
         fitSolver_ = 0;
         onChanged();
         return this;
@@ -2860,7 +2938,8 @@ public final class FitProtos {
        *
        * <code>bool fixed_iterations = 5;</code>
        */
-      public boolean getFixedIterations() {
+      @Override
+	public boolean getFixedIterations() {
         return fixedIterations_;
       }
       /**
@@ -2871,7 +2950,7 @@ public final class FitProtos {
        * <code>bool fixed_iterations = 5;</code>
        */
       public Builder setFixedIterations(boolean value) {
-        
+
         fixedIterations_ = value;
         onChanged();
         return this;
@@ -2884,7 +2963,7 @@ public final class FitProtos {
        * <code>bool fixed_iterations = 5;</code>
        */
       public Builder clearFixedIterations() {
-        
+
         fixedIterations_ = false;
         onChanged();
         return this;
@@ -2893,39 +2972,40 @@ public final class FitProtos {
       private int maxIterations_ ;
       /**
        * <pre>
-       * The maximum/fixed iterations to use during fitting. 
-       * If not using fixed iterations then fitting will fail if this limit is reached. 
+       * The maximum/fixed iterations to use during fitting.
+       * If not using fixed iterations then fitting will fail if this limit is reached.
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
        */
-      public int getMaxIterations() {
+      @Override
+	public int getMaxIterations() {
         return maxIterations_;
       }
       /**
        * <pre>
-       * The maximum/fixed iterations to use during fitting. 
-       * If not using fixed iterations then fitting will fail if this limit is reached. 
+       * The maximum/fixed iterations to use during fitting.
+       * If not using fixed iterations then fitting will fail if this limit is reached.
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
        */
       public Builder setMaxIterations(int value) {
-        
+
         maxIterations_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The maximum/fixed iterations to use during fitting. 
-       * If not using fixed iterations then fitting will fail if this limit is reached. 
+       * The maximum/fixed iterations to use during fitting.
+       * If not using fixed iterations then fitting will fail if this limit is reached.
        * </pre>
        *
        * <code>int32 max_iterations = 6;</code>
        */
       public Builder clearMaxIterations() {
-        
+
         maxIterations_ = 0;
         onChanged();
         return this;
@@ -2939,7 +3019,8 @@ public final class FitProtos {
        *
        * <code>double relative_threshold = 7;</code>
        */
-      public double getRelativeThreshold() {
+      @Override
+	public double getRelativeThreshold() {
         return relativeThreshold_;
       }
       /**
@@ -2950,7 +3031,7 @@ public final class FitProtos {
        * <code>double relative_threshold = 7;</code>
        */
       public Builder setRelativeThreshold(double value) {
-        
+
         relativeThreshold_ = value;
         onChanged();
         return this;
@@ -2963,7 +3044,7 @@ public final class FitProtos {
        * <code>double relative_threshold = 7;</code>
        */
       public Builder clearRelativeThreshold() {
-        
+
         relativeThreshold_ = 0D;
         onChanged();
         return this;
@@ -2977,7 +3058,8 @@ public final class FitProtos {
        *
        * <code>double absolute_threshold = 8;</code>
        */
-      public double getAbsoluteThreshold() {
+      @Override
+	public double getAbsoluteThreshold() {
         return absoluteThreshold_;
       }
       /**
@@ -2988,7 +3070,7 @@ public final class FitProtos {
        * <code>double absolute_threshold = 8;</code>
        */
       public Builder setAbsoluteThreshold(double value) {
-        
+
         absoluteThreshold_ = value;
         onChanged();
         return this;
@@ -3001,7 +3083,7 @@ public final class FitProtos {
        * <code>double absolute_threshold = 8;</code>
        */
       public Builder clearAbsoluteThreshold() {
-        
+
         absoluteThreshold_ = 0D;
         onChanged();
         return this;
@@ -3015,7 +3097,8 @@ public final class FitProtos {
        *
        * <code>double parameter_relative_threshold = 9;</code>
        */
-      public double getParameterRelativeThreshold() {
+      @Override
+	public double getParameterRelativeThreshold() {
         return parameterRelativeThreshold_;
       }
       /**
@@ -3026,7 +3109,7 @@ public final class FitProtos {
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public Builder setParameterRelativeThreshold(double value) {
-        
+
         parameterRelativeThreshold_ = value;
         onChanged();
         return this;
@@ -3039,7 +3122,7 @@ public final class FitProtos {
        * <code>double parameter_relative_threshold = 9;</code>
        */
       public Builder clearParameterRelativeThreshold() {
-        
+
         parameterRelativeThreshold_ = 0D;
         onChanged();
         return this;
@@ -3053,7 +3136,8 @@ public final class FitProtos {
        *
        * <code>double parameter_absolute_threshold = 10;</code>
        */
-      public double getParameterAbsoluteThreshold() {
+      @Override
+	public double getParameterAbsoluteThreshold() {
         return parameterAbsoluteThreshold_;
       }
       /**
@@ -3064,7 +3148,7 @@ public final class FitProtos {
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public Builder setParameterAbsoluteThreshold(double value) {
-        
+
         parameterAbsoluteThreshold_ = value;
         onChanged();
         return this;
@@ -3077,7 +3161,7 @@ public final class FitProtos {
        * <code>double parameter_absolute_threshold = 10;</code>
        */
       public Builder clearParameterAbsoluteThreshold() {
-        
+
         parameterAbsoluteThreshold_ = 0D;
         onChanged();
         return this;
@@ -3091,7 +3175,8 @@ public final class FitProtos {
        *
        * <code>double lambda = 11;</code>
        */
-      public double getLambda() {
+      @Override
+	public double getLambda() {
         return lambda_;
       }
       /**
@@ -3102,7 +3187,7 @@ public final class FitProtos {
        * <code>double lambda = 11;</code>
        */
       public Builder setLambda(double value) {
-        
+
         lambda_ = value;
         onChanged();
         return this;
@@ -3115,7 +3200,7 @@ public final class FitProtos {
        * <code>double lambda = 11;</code>
        */
       public Builder clearLambda() {
-        
+
         lambda_ = 0D;
         onChanged();
         return this;
@@ -3129,7 +3214,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
-      public int getSearchMethodValue() {
+      @Override
+	public int getSearchMethodValue() {
         return searchMethod_;
       }
       /**
@@ -3151,7 +3237,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.SearchMethod getSearchMethod() {
         gdsc.smlm.data.config.FitProtos.SearchMethod result = gdsc.smlm.data.config.FitProtos.SearchMethod.valueOf(searchMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.SearchMethod.UNRECOGNIZED : result;
       }
@@ -3166,7 +3253,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         searchMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -3179,7 +3266,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.SearchMethod search_method = 12;</code>
        */
       public Builder clearSearchMethod() {
-        
+
         searchMethod_ = 0;
         onChanged();
         return this;
@@ -3188,39 +3275,40 @@ public final class FitProtos {
       private boolean gradientLineMinimisation_ ;
       /**
        * <pre>
-       * Set to true to use the function gradient during line minimisation, i.e. find the 
+       * Set to true to use the function gradient during line minimisation, i.e. find the
        * parameters where the gradient is zero. The default is the to minimise the function value.
        * </pre>
        *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
-      public boolean getGradientLineMinimisation() {
+      @Override
+	public boolean getGradientLineMinimisation() {
         return gradientLineMinimisation_;
       }
       /**
        * <pre>
-       * Set to true to use the function gradient during line minimisation, i.e. find the 
+       * Set to true to use the function gradient during line minimisation, i.e. find the
        * parameters where the gradient is zero. The default is the to minimise the function value.
        * </pre>
        *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public Builder setGradientLineMinimisation(boolean value) {
-        
+
         gradientLineMinimisation_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to use the function gradient during line minimisation, i.e. find the 
+       * Set to true to use the function gradient during line minimisation, i.e. find the
        * parameters where the gradient is zero. The default is the to minimise the function value.
        * </pre>
        *
        * <code>bool gradient_line_minimisation = 13;</code>
        */
       public Builder clearGradientLineMinimisation() {
-        
+
         gradientLineMinimisation_ = false;
         onChanged();
         return this;
@@ -3229,36 +3317,37 @@ public final class FitProtos {
       private boolean modelCamera_ ;
       /**
        * <pre>
-       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator.
        * </pre>
        *
        * <code>bool model_camera = 14;</code>
        */
-      public boolean getModelCamera() {
+      @Override
+	public boolean getModelCamera() {
         return modelCamera_;
       }
       /**
        * <pre>
-       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator.
        * </pre>
        *
        * <code>bool model_camera = 14;</code>
        */
       public Builder setModelCamera(boolean value) {
-        
+
         modelCamera_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to model the camera noise in the configurable maximum likelihood estimator. 
+       * Set to true to model the camera noise in the configurable maximum likelihood estimator.
        * </pre>
        *
        * <code>bool model_camera = 14;</code>
        */
       public Builder clearModelCamera() {
-        
+
         modelCamera_ = false;
         onChanged();
         return this;
@@ -3272,7 +3361,8 @@ public final class FitProtos {
        *
        * <code>int32 max_function_evaluations = 15;</code>
        */
-      public int getMaxFunctionEvaluations() {
+      @Override
+	public int getMaxFunctionEvaluations() {
         return maxFunctionEvaluations_;
       }
       /**
@@ -3283,7 +3373,7 @@ public final class FitProtos {
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public Builder setMaxFunctionEvaluations(int value) {
-        
+
         maxFunctionEvaluations_ = value;
         onChanged();
         return this;
@@ -3296,7 +3386,7 @@ public final class FitProtos {
        * <code>int32 max_function_evaluations = 15;</code>
        */
       public Builder clearMaxFunctionEvaluations() {
-        
+
         maxFunctionEvaluations_ = 0;
         onChanged();
         return this;
@@ -3310,7 +3400,8 @@ public final class FitProtos {
        *
        * <code>bool use_clamping = 16;</code>
        */
-      public boolean getUseClamping() {
+      @Override
+	public boolean getUseClamping() {
         return useClamping_;
       }
       /**
@@ -3321,7 +3412,7 @@ public final class FitProtos {
        * <code>bool use_clamping = 16;</code>
        */
       public Builder setUseClamping(boolean value) {
-        
+
         useClamping_ = value;
         onChanged();
         return this;
@@ -3334,7 +3425,7 @@ public final class FitProtos {
        * <code>bool use_clamping = 16;</code>
        */
       public Builder clearUseClamping() {
-        
+
         useClamping_ = false;
         onChanged();
         return this;
@@ -3348,7 +3439,8 @@ public final class FitProtos {
        *
        * <code>bool use_dynamic_clamping = 17;</code>
        */
-      public boolean getUseDynamicClamping() {
+      @Override
+	public boolean getUseDynamicClamping() {
         return useDynamicClamping_;
       }
       /**
@@ -3359,7 +3451,7 @@ public final class FitProtos {
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public Builder setUseDynamicClamping(boolean value) {
-        
+
         useDynamicClamping_ = value;
         onChanged();
         return this;
@@ -3372,7 +3464,7 @@ public final class FitProtos {
        * <code>bool use_dynamic_clamping = 17;</code>
        */
       public Builder clearUseDynamicClamping() {
-        
+
         useDynamicClamping_ = false;
         onChanged();
         return this;
@@ -3381,7 +3473,7 @@ public final class FitProtos {
       private java.util.List<java.lang.Double> clampValues_ = java.util.Collections.emptyList();
       private void ensureClampValuesIsMutable() {
         if (!((bitField0_ & 0x00020000) == 0x00020000)) {
-          clampValues_ = new java.util.ArrayList<java.lang.Double>(clampValues_);
+          clampValues_ = new java.util.ArrayList<>(clampValues_);
           bitField0_ |= 0x00020000;
          }
       }
@@ -3392,7 +3484,8 @@ public final class FitProtos {
        *
        * <code>repeated double clamp_values = 18;</code>
        */
-      public java.util.List<java.lang.Double>
+      @Override
+	public java.util.List<java.lang.Double>
           getClampValuesList() {
         return java.util.Collections.unmodifiableList(clampValues_);
       }
@@ -3403,7 +3496,8 @@ public final class FitProtos {
        *
        * <code>repeated double clamp_values = 18;</code>
        */
-      public int getClampValuesCount() {
+      @Override
+	public int getClampValuesCount() {
         return clampValues_.size();
       }
       /**
@@ -3413,7 +3507,8 @@ public final class FitProtos {
        *
        * <code>repeated double clamp_values = 18;</code>
        */
-      public double getClampValues(int index) {
+      @Override
+	public double getClampValues(int index) {
         return clampValues_.get(index);
       }
       /**
@@ -3480,7 +3575,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
-      public int getLineSearchMethodValue() {
+      @Override
+	public int getLineSearchMethodValue() {
         return lineSearchMethod_;
       }
       /**
@@ -3502,7 +3598,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.LineSearchMethod getLineSearchMethod() {
         gdsc.smlm.data.config.FitProtos.LineSearchMethod result = gdsc.smlm.data.config.FitProtos.LineSearchMethod.valueOf(lineSearchMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.LineSearchMethod.UNRECOGNIZED : result;
       }
@@ -3517,7 +3614,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         lineSearchMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -3530,17 +3627,19 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.LineSearchMethod line_search_method = 19;</code>
        */
       public Builder clearLineSearchMethod() {
-        
+
         lineSearchMethod_ = 0;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -3561,7 +3660,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FitSolverSettings>
         PARSER = new com.google.protobuf.AbstractParser<FitSolverSettings>() {
-      public FitSolverSettings parsePartialFrom(
+      @Override
+	public FitSolverSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -3578,7 +3678,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3846,7 +3947,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -3862,7 +3964,8 @@ public final class FitProtos {
      *
      * <code>double shift_factor = 1;</code>
      */
-    public double getShiftFactor() {
+    @Override
+	public double getShiftFactor() {
       return shiftFactor_;
     }
 
@@ -3875,7 +3978,8 @@ public final class FitProtos {
      *
      * <code>double signal_strength = 2;</code>
      */
-    public double getSignalStrength() {
+    @Override
+	public double getSignalStrength() {
       return signalStrength_;
     }
 
@@ -3888,7 +3992,8 @@ public final class FitProtos {
      *
      * <code>double min_photons = 3;</code>
      */
-    public double getMinPhotons() {
+    @Override
+	public double getMinPhotons() {
       return minPhotons_;
     }
 
@@ -3901,7 +4006,8 @@ public final class FitProtos {
      *
      * <code>double precision_threshold = 4;</code>
      */
-    public double getPrecisionThreshold() {
+    @Override
+	public double getPrecisionThreshold() {
       return precisionThreshold_;
     }
 
@@ -3914,7 +4020,8 @@ public final class FitProtos {
      *
      * <code>double min_width_factor = 6;</code>
      */
-    public double getMinWidthFactor() {
+    @Override
+	public double getMinWidthFactor() {
       return minWidthFactor_;
     }
 
@@ -3927,7 +4034,8 @@ public final class FitProtos {
      *
      * <code>double max_width_factor = 7;</code>
      */
-    public double getMaxWidthFactor() {
+    @Override
+	public double getMaxWidthFactor() {
       return maxWidthFactor_;
     }
 
@@ -3940,7 +4048,8 @@ public final class FitProtos {
      *
      * <code>bool disable_simple_filter = 8;</code>
      */
-    public boolean getDisableSimpleFilter() {
+    @Override
+	public boolean getDisableSimpleFilter() {
       return disableSimpleFilter_;
     }
 
@@ -3953,7 +4062,8 @@ public final class FitProtos {
      *
      * <code>bool smart_filter = 9;</code>
      */
-    public boolean getSmartFilter() {
+    @Override
+	public boolean getSmartFilter() {
       return smartFilter_;
     }
 
@@ -3966,12 +4076,13 @@ public final class FitProtos {
      *
      * <code>string smart_filter_string = 10;</code>
      */
-    public java.lang.String getSmartFilterString() {
+    @Override
+	public java.lang.String getSmartFilterString() {
       java.lang.Object ref = smartFilterString_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
+        com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         smartFilterString_ = s;
@@ -3985,11 +4096,12 @@ public final class FitProtos {
      *
      * <code>string smart_filter_string = 10;</code>
      */
-    public com.google.protobuf.ByteString
+    @Override
+	public com.google.protobuf.ByteString
         getSmartFilterStringBytes() {
       java.lang.Object ref = smartFilterString_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         smartFilterString_ = b;
@@ -4008,7 +4120,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
      */
-    public int getPrecisionMethodValue() {
+    @Override
+	public int getPrecisionMethodValue() {
       return precisionMethod_;
     }
     /**
@@ -4018,7 +4131,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
       gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
     }
@@ -4032,7 +4146,8 @@ public final class FitProtos {
      *
      * <code>double min_z = 12;</code>
      */
-    public double getMinZ() {
+    @Override
+	public double getMinZ() {
       return minZ_;
     }
 
@@ -4045,12 +4160,14 @@ public final class FitProtos {
      *
      * <code>double max_z = 13;</code>
      */
-    public double getMaxZ() {
+    @Override
+	public double getMaxZ() {
       return maxZ_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -4059,7 +4176,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (shiftFactor_ != 0D) {
         output.writeDouble(1, shiftFactor_);
@@ -4099,7 +4217,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -4325,14 +4444,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.FilterSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -4359,7 +4480,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -4381,7 +4503,8 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         shiftFactor_ = 0D;
 
@@ -4410,16 +4533,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.FilterSettings build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettings build() {
         gdsc.smlm.data.config.FitProtos.FilterSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -4427,7 +4553,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FilterSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettings buildPartial() {
         gdsc.smlm.data.config.FitProtos.FilterSettings result = new gdsc.smlm.data.config.FitProtos.FilterSettings(this);
         result.shiftFactor_ = shiftFactor_;
         result.signalStrength_ = signalStrength_;
@@ -4445,33 +4572,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.FilterSettings) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.FilterSettings)other);
         } else {
@@ -4523,11 +4657,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -4553,7 +4689,8 @@ public final class FitProtos {
        *
        * <code>double shift_factor = 1;</code>
        */
-      public double getShiftFactor() {
+      @Override
+	public double getShiftFactor() {
         return shiftFactor_;
       }
       /**
@@ -4564,7 +4701,7 @@ public final class FitProtos {
        * <code>double shift_factor = 1;</code>
        */
       public Builder setShiftFactor(double value) {
-        
+
         shiftFactor_ = value;
         onChanged();
         return this;
@@ -4577,7 +4714,7 @@ public final class FitProtos {
        * <code>double shift_factor = 1;</code>
        */
       public Builder clearShiftFactor() {
-        
+
         shiftFactor_ = 0D;
         onChanged();
         return this;
@@ -4591,7 +4728,8 @@ public final class FitProtos {
        *
        * <code>double signal_strength = 2;</code>
        */
-      public double getSignalStrength() {
+      @Override
+	public double getSignalStrength() {
         return signalStrength_;
       }
       /**
@@ -4602,7 +4740,7 @@ public final class FitProtos {
        * <code>double signal_strength = 2;</code>
        */
       public Builder setSignalStrength(double value) {
-        
+
         signalStrength_ = value;
         onChanged();
         return this;
@@ -4615,7 +4753,7 @@ public final class FitProtos {
        * <code>double signal_strength = 2;</code>
        */
       public Builder clearSignalStrength() {
-        
+
         signalStrength_ = 0D;
         onChanged();
         return this;
@@ -4629,7 +4767,8 @@ public final class FitProtos {
        *
        * <code>double min_photons = 3;</code>
        */
-      public double getMinPhotons() {
+      @Override
+	public double getMinPhotons() {
         return minPhotons_;
       }
       /**
@@ -4640,7 +4779,7 @@ public final class FitProtos {
        * <code>double min_photons = 3;</code>
        */
       public Builder setMinPhotons(double value) {
-        
+
         minPhotons_ = value;
         onChanged();
         return this;
@@ -4653,7 +4792,7 @@ public final class FitProtos {
        * <code>double min_photons = 3;</code>
        */
       public Builder clearMinPhotons() {
-        
+
         minPhotons_ = 0D;
         onChanged();
         return this;
@@ -4667,7 +4806,8 @@ public final class FitProtos {
        *
        * <code>double precision_threshold = 4;</code>
        */
-      public double getPrecisionThreshold() {
+      @Override
+	public double getPrecisionThreshold() {
         return precisionThreshold_;
       }
       /**
@@ -4678,7 +4818,7 @@ public final class FitProtos {
        * <code>double precision_threshold = 4;</code>
        */
       public Builder setPrecisionThreshold(double value) {
-        
+
         precisionThreshold_ = value;
         onChanged();
         return this;
@@ -4691,7 +4831,7 @@ public final class FitProtos {
        * <code>double precision_threshold = 4;</code>
        */
       public Builder clearPrecisionThreshold() {
-        
+
         precisionThreshold_ = 0D;
         onChanged();
         return this;
@@ -4705,7 +4845,8 @@ public final class FitProtos {
        *
        * <code>double min_width_factor = 6;</code>
        */
-      public double getMinWidthFactor() {
+      @Override
+	public double getMinWidthFactor() {
         return minWidthFactor_;
       }
       /**
@@ -4716,7 +4857,7 @@ public final class FitProtos {
        * <code>double min_width_factor = 6;</code>
        */
       public Builder setMinWidthFactor(double value) {
-        
+
         minWidthFactor_ = value;
         onChanged();
         return this;
@@ -4729,7 +4870,7 @@ public final class FitProtos {
        * <code>double min_width_factor = 6;</code>
        */
       public Builder clearMinWidthFactor() {
-        
+
         minWidthFactor_ = 0D;
         onChanged();
         return this;
@@ -4743,7 +4884,8 @@ public final class FitProtos {
        *
        * <code>double max_width_factor = 7;</code>
        */
-      public double getMaxWidthFactor() {
+      @Override
+	public double getMaxWidthFactor() {
         return maxWidthFactor_;
       }
       /**
@@ -4754,7 +4896,7 @@ public final class FitProtos {
        * <code>double max_width_factor = 7;</code>
        */
       public Builder setMaxWidthFactor(double value) {
-        
+
         maxWidthFactor_ = value;
         onChanged();
         return this;
@@ -4767,7 +4909,7 @@ public final class FitProtos {
        * <code>double max_width_factor = 7;</code>
        */
       public Builder clearMaxWidthFactor() {
-        
+
         maxWidthFactor_ = 0D;
         onChanged();
         return this;
@@ -4781,7 +4923,8 @@ public final class FitProtos {
        *
        * <code>bool disable_simple_filter = 8;</code>
        */
-      public boolean getDisableSimpleFilter() {
+      @Override
+	public boolean getDisableSimpleFilter() {
         return disableSimpleFilter_;
       }
       /**
@@ -4792,7 +4935,7 @@ public final class FitProtos {
        * <code>bool disable_simple_filter = 8;</code>
        */
       public Builder setDisableSimpleFilter(boolean value) {
-        
+
         disableSimpleFilter_ = value;
         onChanged();
         return this;
@@ -4805,7 +4948,7 @@ public final class FitProtos {
        * <code>bool disable_simple_filter = 8;</code>
        */
       public Builder clearDisableSimpleFilter() {
-        
+
         disableSimpleFilter_ = false;
         onChanged();
         return this;
@@ -4819,7 +4962,8 @@ public final class FitProtos {
        *
        * <code>bool smart_filter = 9;</code>
        */
-      public boolean getSmartFilter() {
+      @Override
+	public boolean getSmartFilter() {
         return smartFilter_;
       }
       /**
@@ -4830,7 +4974,7 @@ public final class FitProtos {
        * <code>bool smart_filter = 9;</code>
        */
       public Builder setSmartFilter(boolean value) {
-        
+
         smartFilter_ = value;
         onChanged();
         return this;
@@ -4843,7 +4987,7 @@ public final class FitProtos {
        * <code>bool smart_filter = 9;</code>
        */
       public Builder clearSmartFilter() {
-        
+
         smartFilter_ = false;
         onChanged();
         return this;
@@ -4857,7 +5001,8 @@ public final class FitProtos {
        *
        * <code>string smart_filter_string = 10;</code>
        */
-      public java.lang.String getSmartFilterString() {
+      @Override
+	public java.lang.String getSmartFilterString() {
         java.lang.Object ref = smartFilterString_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -4876,11 +5021,12 @@ public final class FitProtos {
        *
        * <code>string smart_filter_string = 10;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+	public com.google.protobuf.ByteString
           getSmartFilterStringBytes() {
         java.lang.Object ref = smartFilterString_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString b =
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           smartFilterString_ = b;
@@ -4901,7 +5047,7 @@ public final class FitProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  
+
         smartFilterString_ = value;
         onChanged();
         return this;
@@ -4914,7 +5060,7 @@ public final class FitProtos {
        * <code>string smart_filter_string = 10;</code>
        */
       public Builder clearSmartFilterString() {
-        
+
         smartFilterString_ = getDefaultInstance().getSmartFilterString();
         onChanged();
         return this;
@@ -4932,7 +5078,7 @@ public final class FitProtos {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
+
         smartFilterString_ = value;
         onChanged();
         return this;
@@ -4946,7 +5092,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
-      public int getPrecisionMethodValue() {
+      @Override
+	public int getPrecisionMethodValue() {
         return precisionMethod_;
       }
       /**
@@ -4968,7 +5115,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.PrecisionMethod getPrecisionMethod() {
         gdsc.smlm.data.config.FitProtos.PrecisionMethod result = gdsc.smlm.data.config.FitProtos.PrecisionMethod.valueOf(precisionMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.PrecisionMethod.UNRECOGNIZED : result;
       }
@@ -4983,7 +5131,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         precisionMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -4996,7 +5144,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.PrecisionMethod precision_method = 11;</code>
        */
       public Builder clearPrecisionMethod() {
-        
+
         precisionMethod_ = 0;
         onChanged();
         return this;
@@ -5010,7 +5158,8 @@ public final class FitProtos {
        *
        * <code>double min_z = 12;</code>
        */
-      public double getMinZ() {
+      @Override
+	public double getMinZ() {
         return minZ_;
       }
       /**
@@ -5021,7 +5170,7 @@ public final class FitProtos {
        * <code>double min_z = 12;</code>
        */
       public Builder setMinZ(double value) {
-        
+
         minZ_ = value;
         onChanged();
         return this;
@@ -5034,7 +5183,7 @@ public final class FitProtos {
        * <code>double min_z = 12;</code>
        */
       public Builder clearMinZ() {
-        
+
         minZ_ = 0D;
         onChanged();
         return this;
@@ -5048,7 +5197,8 @@ public final class FitProtos {
        *
        * <code>double max_z = 13;</code>
        */
-      public double getMaxZ() {
+      @Override
+	public double getMaxZ() {
         return maxZ_;
       }
       /**
@@ -5059,7 +5209,7 @@ public final class FitProtos {
        * <code>double max_z = 13;</code>
        */
       public Builder setMaxZ(double value) {
-        
+
         maxZ_ = value;
         onChanged();
         return this;
@@ -5072,17 +5222,19 @@ public final class FitProtos {
        * <code>double max_z = 13;</code>
        */
       public Builder clearMaxZ() {
-        
+
         maxZ_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -5103,7 +5255,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FilterSettings>
         PARSER = new com.google.protobuf.AbstractParser<FilterSettings>() {
-      public FilterSettings parsePartialFrom(
+      @Override
+	public FilterSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -5120,7 +5273,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -5182,7 +5336,7 @@ public final class FitProtos {
   }
   /**
    * <pre>
-   * Define the settings for fitting. These settings are used to fit a PSF to an 
+   * Define the settings for fitting. These settings are used to fit a PSF to an
    * extracted region from the input data and validate the fit.
    * </pre>
    *
@@ -5266,7 +5420,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -5282,7 +5437,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
-    public boolean hasFitSolverSettings() {
+    @Override
+	public boolean hasFitSolverSettings() {
       return fitSolverSettings_ != null;
     }
     /**
@@ -5292,7 +5448,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
       return fitSolverSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
     }
     /**
@@ -5302,7 +5459,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
       return getFitSolverSettings();
     }
 
@@ -5315,7 +5473,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
-    public boolean hasFilterSettings() {
+    @Override
+	public boolean hasFilterSettings() {
       return filterSettings_ != null;
     }
     /**
@@ -5325,7 +5484,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
       return filterSettings_ == null ? gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
     }
     /**
@@ -5335,12 +5495,14 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
       return getFilterSettings();
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -5349,7 +5511,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (fitSolverSettings_ != null) {
         output.writeMessage(1, getFitSolverSettings());
@@ -5359,7 +5522,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -5491,14 +5655,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.FitSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -5511,7 +5677,7 @@ public final class FitProtos {
     }
     /**
      * <pre>
-     * Define the settings for fitting. These settings are used to fit a PSF to an 
+     * Define the settings for fitting. These settings are used to fit a PSF to an
      * extracted region from the input data and validate the fit.
      * </pre>
      *
@@ -5526,7 +5692,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -5548,7 +5715,8 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         if (fitSolverSettingsBuilder_ == null) {
           fitSolverSettings_ = null;
@@ -5565,16 +5733,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitSettings build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettings build() {
         gdsc.smlm.data.config.FitProtos.FitSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -5582,7 +5753,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettings buildPartial() {
         gdsc.smlm.data.config.FitProtos.FitSettings result = new gdsc.smlm.data.config.FitProtos.FitSettings(this);
         if (fitSolverSettingsBuilder_ == null) {
           result.fitSolverSettings_ = fitSolverSettings_;
@@ -5598,33 +5770,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.FitSettings) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.FitSettings)other);
         } else {
@@ -5645,11 +5824,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -5677,7 +5858,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
-      public boolean hasFitSolverSettings() {
+      @Override
+	public boolean hasFitSolverSettings() {
         return fitSolverSettingsBuilder_ != null || fitSolverSettings_ != null;
       }
       /**
@@ -5687,7 +5869,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettings getFitSolverSettings() {
         if (fitSolverSettingsBuilder_ == null) {
           return fitSolverSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSolverSettings.getDefaultInstance() : fitSolverSettings_;
         } else {
@@ -5780,7 +5963,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder getFitSolverSettingsBuilder() {
-        
+
         onChanged();
         return getFitSolverSettingsFieldBuilder().getBuilder();
       }
@@ -5791,7 +5974,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder getFitSolverSettingsOrBuilder() {
         if (fitSolverSettingsBuilder_ != null) {
           return fitSolverSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -5807,11 +5991,10 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FitSolverSettings fit_solver_settings = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.FitSolverSettings, gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder, gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.FitSolverSettings, gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder, gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder>
           getFitSolverSettingsFieldBuilder() {
         if (fitSolverSettingsBuilder_ == null) {
-          fitSolverSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.FitSolverSettings, gdsc.smlm.data.config.FitProtos.FitSolverSettings.Builder, gdsc.smlm.data.config.FitProtos.FitSolverSettingsOrBuilder>(
+          fitSolverSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFitSolverSettings(),
                   getParentForChildren(),
                   isClean());
@@ -5830,7 +6013,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
-      public boolean hasFilterSettings() {
+      @Override
+	public boolean hasFilterSettings() {
         return filterSettingsBuilder_ != null || filterSettings_ != null;
       }
       /**
@@ -5840,7 +6024,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettings getFilterSettings() {
         if (filterSettingsBuilder_ == null) {
           return filterSettings_ == null ? gdsc.smlm.data.config.FitProtos.FilterSettings.getDefaultInstance() : filterSettings_;
         } else {
@@ -5933,7 +6118,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FilterSettings.Builder getFilterSettingsBuilder() {
-        
+
         onChanged();
         return getFilterSettingsFieldBuilder().getBuilder();
       }
@@ -5944,7 +6129,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder getFilterSettingsOrBuilder() {
         if (filterSettingsBuilder_ != null) {
           return filterSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -5960,11 +6146,10 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FilterSettings filter_settings = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.FilterSettings, gdsc.smlm.data.config.FitProtos.FilterSettings.Builder, gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.FilterSettings, gdsc.smlm.data.config.FitProtos.FilterSettings.Builder, gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder>
           getFilterSettingsFieldBuilder() {
         if (filterSettingsBuilder_ == null) {
-          filterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.FilterSettings, gdsc.smlm.data.config.FitProtos.FilterSettings.Builder, gdsc.smlm.data.config.FitProtos.FilterSettingsOrBuilder>(
+          filterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFilterSettings(),
                   getParentForChildren(),
                   isClean());
@@ -5972,12 +6157,14 @@ public final class FitProtos {
         }
         return filterSettingsBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -5998,7 +6185,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FitSettings>
         PARSER = new com.google.protobuf.AbstractParser<FitSettings>() {
-      public FitSettings parsePartialFrom(
+      @Override
+	public FitSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -6015,7 +6203,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6036,7 +6225,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * Set to true to use the absolute value. The default is relative to the PSF width. 
+     * Set to true to use the absolute value. The default is relative to the PSF width.
      * </pre>
      *
      * <code>bool absolute = 2;</code>
@@ -6114,7 +6303,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -6130,7 +6320,8 @@ public final class FitProtos {
      *
      * <code>double value = 1;</code>
      */
-    public double getValue() {
+    @Override
+	public double getValue() {
       return value_;
     }
 
@@ -6138,17 +6329,19 @@ public final class FitProtos {
     private boolean absolute_;
     /**
      * <pre>
-     * Set to true to use the absolute value. The default is relative to the PSF width. 
+     * Set to true to use the absolute value. The default is relative to the PSF width.
      * </pre>
      *
      * <code>bool absolute = 2;</code>
      */
-    public boolean getAbsolute() {
+    @Override
+	public boolean getAbsolute() {
       return absolute_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -6157,7 +6350,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (value_ != 0D) {
         output.writeDouble(1, value_);
@@ -6167,7 +6361,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -6293,14 +6488,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.RelativeParameter prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -6327,7 +6524,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -6349,7 +6547,8 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         value_ = 0D;
 
@@ -6358,16 +6557,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter build() {
         gdsc.smlm.data.config.FitProtos.RelativeParameter result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -6375,7 +6577,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter buildPartial() {
         gdsc.smlm.data.config.FitProtos.RelativeParameter result = new gdsc.smlm.data.config.FitProtos.RelativeParameter(this);
         result.value_ = value_;
         result.absolute_ = absolute_;
@@ -6383,33 +6586,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.RelativeParameter) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.RelativeParameter)other);
         } else {
@@ -6430,11 +6640,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -6460,7 +6672,8 @@ public final class FitProtos {
        *
        * <code>double value = 1;</code>
        */
-      public double getValue() {
+      @Override
+	public double getValue() {
         return value_;
       }
       /**
@@ -6471,7 +6684,7 @@ public final class FitProtos {
        * <code>double value = 1;</code>
        */
       public Builder setValue(double value) {
-        
+
         value_ = value;
         onChanged();
         return this;
@@ -6484,7 +6697,7 @@ public final class FitProtos {
        * <code>double value = 1;</code>
        */
       public Builder clearValue() {
-        
+
         value_ = 0D;
         onChanged();
         return this;
@@ -6493,46 +6706,49 @@ public final class FitProtos {
       private boolean absolute_ ;
       /**
        * <pre>
-       * Set to true to use the absolute value. The default is relative to the PSF width. 
+       * Set to true to use the absolute value. The default is relative to the PSF width.
        * </pre>
        *
        * <code>bool absolute = 2;</code>
        */
-      public boolean getAbsolute() {
+      @Override
+	public boolean getAbsolute() {
         return absolute_;
       }
       /**
        * <pre>
-       * Set to true to use the absolute value. The default is relative to the PSF width. 
+       * Set to true to use the absolute value. The default is relative to the PSF width.
        * </pre>
        *
        * <code>bool absolute = 2;</code>
        */
       public Builder setAbsolute(boolean value) {
-        
+
         absolute_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Set to true to use the absolute value. The default is relative to the PSF width. 
+       * Set to true to use the absolute value. The default is relative to the PSF width.
        * </pre>
        *
        * <code>bool absolute = 2;</code>
        */
       public Builder clearAbsolute() {
-        
+
         absolute_ = false;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -6553,7 +6769,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<RelativeParameter>
         PARSER = new com.google.protobuf.AbstractParser<RelativeParameter>() {
-      public RelativeParameter parsePartialFrom(
+      @Override
+	public RelativeParameter parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -6570,7 +6787,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6605,7 +6823,7 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter> 
+    java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter>
         getParametersList();
     /**
      * <pre>
@@ -6633,7 +6851,7 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
         getParametersOrBuilderList();
     /**
      * <pre>
@@ -6699,7 +6917,7 @@ public final class FitProtos {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                parameters_ = new java.util.ArrayList<gdsc.smlm.data.config.FitProtos.RelativeParameter>();
+                parameters_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               parameters_.add(
@@ -6725,7 +6943,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -6742,7 +6961,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    public int getDataFilterMethodValue() {
+    @Override
+	public int getDataFilterMethodValue() {
       return dataFilterMethod_;
     }
     /**
@@ -6752,7 +6972,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
       gdsc.smlm.data.config.FitProtos.DataFilterMethod result = gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterMethod.UNRECOGNIZED : result;
     }
@@ -6767,7 +6988,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
       return parameters_;
     }
     /**
@@ -6778,7 +7000,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
         getParametersOrBuilderList() {
       return parameters_;
     }
@@ -6790,7 +7013,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    public int getParametersCount() {
+    @Override
+	public int getParametersCount() {
       return parameters_.size();
     }
     /**
@@ -6801,7 +7025,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
       return parameters_.get(index);
     }
     /**
@@ -6812,13 +7037,15 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
         int index) {
       return parameters_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -6827,7 +7054,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (dataFilterMethod_ != gdsc.smlm.data.config.FitProtos.DataFilterMethod.MEAN.getNumber()) {
         output.writeEnum(1, dataFilterMethod_);
@@ -6837,7 +7065,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -6960,14 +7189,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.DataFilter prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -6994,7 +7225,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -7017,7 +7249,8 @@ public final class FitProtos {
           getParametersFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         dataFilterMethod_ = 0;
 
@@ -7030,16 +7263,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.DataFilter.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.DataFilter build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilter build() {
         gdsc.smlm.data.config.FitProtos.DataFilter result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -7047,7 +7283,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.DataFilter buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilter buildPartial() {
         gdsc.smlm.data.config.FitProtos.DataFilter result = new gdsc.smlm.data.config.FitProtos.DataFilter(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -7066,33 +7303,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.DataFilter) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.DataFilter)other);
         } else {
@@ -7124,7 +7368,7 @@ public final class FitProtos {
               parametersBuilder_ = null;
               parameters_ = other.parameters_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              parametersBuilder_ = 
+              parametersBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getParametersFieldBuilder() : null;
             } else {
@@ -7136,11 +7380,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -7167,7 +7413,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
-      public int getDataFilterMethodValue() {
+      @Override
+	public int getDataFilterMethodValue() {
         return dataFilterMethod_;
       }
       /**
@@ -7189,7 +7436,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterMethod getDataFilterMethod() {
         gdsc.smlm.data.config.FitProtos.DataFilterMethod result = gdsc.smlm.data.config.FitProtos.DataFilterMethod.valueOf(dataFilterMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterMethod.UNRECOGNIZED : result;
       }
@@ -7204,7 +7452,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         dataFilterMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -7217,7 +7465,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.DataFilterMethod data_filter_method = 1;</code>
        */
       public Builder clearDataFilterMethod() {
-        
+
         dataFilterMethod_ = 0;
         onChanged();
         return this;
@@ -7227,7 +7475,7 @@ public final class FitProtos {
         java.util.Collections.emptyList();
       private void ensureParametersIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          parameters_ = new java.util.ArrayList<gdsc.smlm.data.config.FitProtos.RelativeParameter>(parameters_);
+          parameters_ = new java.util.ArrayList<>(parameters_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -7243,7 +7491,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter> getParametersList() {
         if (parametersBuilder_ == null) {
           return java.util.Collections.unmodifiableList(parameters_);
         } else {
@@ -7258,7 +7507,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public int getParametersCount() {
+      @Override
+	public int getParametersCount() {
         if (parametersBuilder_ == null) {
           return parameters_.size();
         } else {
@@ -7273,7 +7523,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getParameters(int index) {
         if (parametersBuilder_ == null) {
           return parameters_.get(index);
         } else {
@@ -7478,7 +7729,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getParametersOrBuilder(
           int index) {
         if (parametersBuilder_ == null) {
           return parameters_.get(index);  } else {
@@ -7493,7 +7745,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
            getParametersOrBuilderList() {
         if (parametersBuilder_ != null) {
           return parametersBuilder_.getMessageOrBuilderList();
@@ -7534,16 +7787,15 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.RelativeParameter parameters = 2;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder> 
+      public java.util.List<gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder>
            getParametersBuilderList() {
         return getParametersFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
           getParametersFieldBuilder() {
         if (parametersBuilder_ == null) {
-          parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
+          parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   parameters_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -7552,12 +7804,14 @@ public final class FitProtos {
         }
         return parametersBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -7578,7 +7832,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<DataFilter>
         PARSER = new com.google.protobuf.AbstractParser<DataFilter>() {
-      public DataFilter parsePartialFrom(
+      @Override
+	public DataFilter parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -7595,7 +7850,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilter getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -7629,7 +7885,7 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter> 
+    java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter>
         getDataFiltersList();
     /**
      * <pre>
@@ -7654,7 +7910,7 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
+    java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
         getDataFiltersOrBuilderList();
     /**
      * <pre>
@@ -7719,7 +7975,7 @@ public final class FitProtos {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                dataFilters_ = new java.util.ArrayList<gdsc.smlm.data.config.FitProtos.DataFilter>();
+                dataFilters_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               dataFilters_.add(
@@ -7745,7 +8001,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -7762,7 +8019,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
      */
-    public int getDataFilterTypeValue() {
+    @Override
+	public int getDataFilterTypeValue() {
       return dataFilterType_;
     }
     /**
@@ -7772,7 +8030,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
       gdsc.smlm.data.config.FitProtos.DataFilterType result = gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
       return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterType.UNRECOGNIZED : result;
     }
@@ -7786,7 +8045,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
+    @Override
+	public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
       return dataFilters_;
     }
     /**
@@ -7796,7 +8056,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    public java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
+    @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
         getDataFiltersOrBuilderList() {
       return dataFilters_;
     }
@@ -7807,7 +8068,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    public int getDataFiltersCount() {
+    @Override
+	public int getDataFiltersCount() {
       return dataFilters_.size();
     }
     /**
@@ -7817,7 +8079,8 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
       return dataFilters_.get(index);
     }
     /**
@@ -7827,13 +8090,15 @@ public final class FitProtos {
      *
      * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
         int index) {
       return dataFilters_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -7842,7 +8107,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (dataFilterType_ != gdsc.smlm.data.config.FitProtos.DataFilterType.SINGLE.getNumber()) {
         output.writeEnum(1, dataFilterType_);
@@ -7852,7 +8118,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -7975,14 +8242,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.DataFilterSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -8009,7 +8278,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -8032,7 +8302,8 @@ public final class FitProtos {
           getDataFiltersFieldBuilder();
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         dataFilterType_ = 0;
 
@@ -8045,16 +8316,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.DataFilterSettings build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettings build() {
         gdsc.smlm.data.config.FitProtos.DataFilterSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -8062,7 +8336,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.DataFilterSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettings buildPartial() {
         gdsc.smlm.data.config.FitProtos.DataFilterSettings result = new gdsc.smlm.data.config.FitProtos.DataFilterSettings(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -8081,33 +8356,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.DataFilterSettings) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.DataFilterSettings)other);
         } else {
@@ -8139,7 +8421,7 @@ public final class FitProtos {
               dataFiltersBuilder_ = null;
               dataFilters_ = other.dataFilters_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              dataFiltersBuilder_ = 
+              dataFiltersBuilder_ =
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataFiltersFieldBuilder() : null;
             } else {
@@ -8151,11 +8433,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -8182,7 +8466,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
-      public int getDataFilterTypeValue() {
+      @Override
+	public int getDataFilterTypeValue() {
         return dataFilterType_;
       }
       /**
@@ -8204,7 +8489,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterType getDataFilterType() {
         gdsc.smlm.data.config.FitProtos.DataFilterType result = gdsc.smlm.data.config.FitProtos.DataFilterType.valueOf(dataFilterType_);
         return result == null ? gdsc.smlm.data.config.FitProtos.DataFilterType.UNRECOGNIZED : result;
       }
@@ -8219,7 +8505,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         dataFilterType_ = value.getNumber();
         onChanged();
         return this;
@@ -8232,7 +8518,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.DataFilterType data_filter_type = 1;</code>
        */
       public Builder clearDataFilterType() {
-        
+
         dataFilterType_ = 0;
         onChanged();
         return this;
@@ -8242,7 +8528,7 @@ public final class FitProtos {
         java.util.Collections.emptyList();
       private void ensureDataFiltersIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          dataFilters_ = new java.util.ArrayList<gdsc.smlm.data.config.FitProtos.DataFilter>(dataFilters_);
+          dataFilters_ = new java.util.ArrayList<>(dataFilters_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -8257,7 +8543,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
+      @Override
+	public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter> getDataFiltersList() {
         if (dataFiltersBuilder_ == null) {
           return java.util.Collections.unmodifiableList(dataFilters_);
         } else {
@@ -8271,7 +8558,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public int getDataFiltersCount() {
+      @Override
+	public int getDataFiltersCount() {
         if (dataFiltersBuilder_ == null) {
           return dataFilters_.size();
         } else {
@@ -8285,7 +8573,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilter getDataFilters(int index) {
         if (dataFiltersBuilder_ == null) {
           return dataFilters_.get(index);
         } else {
@@ -8479,7 +8768,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder getDataFiltersOrBuilder(
           int index) {
         if (dataFiltersBuilder_ == null) {
           return dataFilters_.get(index);  } else {
@@ -8493,7 +8783,8 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
+      @Override
+	public java.util.List<? extends gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
            getDataFiltersOrBuilderList() {
         if (dataFiltersBuilder_ != null) {
           return dataFiltersBuilder_.getMessageOrBuilderList();
@@ -8531,16 +8822,15 @@ public final class FitProtos {
        *
        * <code>repeated .gdsc.smlm.data.config.DataFilter data_filters = 2;</code>
        */
-      public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter.Builder> 
+      public java.util.List<gdsc.smlm.data.config.FitProtos.DataFilter.Builder>
            getDataFiltersBuilderList() {
         return getDataFiltersFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.DataFilter, gdsc.smlm.data.config.FitProtos.DataFilter.Builder, gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.DataFilter, gdsc.smlm.data.config.FitProtos.DataFilter.Builder, gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>
           getDataFiltersFieldBuilder() {
         if (dataFiltersBuilder_ == null) {
-          dataFiltersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.DataFilter, gdsc.smlm.data.config.FitProtos.DataFilter.Builder, gdsc.smlm.data.config.FitProtos.DataFilterOrBuilder>(
+          dataFiltersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
                   dataFilters_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -8549,12 +8839,14 @@ public final class FitProtos {
         }
         return dataFiltersBuilder_;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -8575,7 +8867,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<DataFilterSettings>
         PARSER = new com.google.protobuf.AbstractParser<DataFilterSettings>() {
-      public DataFilterSettings parsePartialFrom(
+      @Override
+	public DataFilterSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -8592,7 +8885,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -8646,7 +8940,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The data filter settings 
+     * The data filter settings
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -8654,7 +8948,7 @@ public final class FitProtos {
     boolean hasDataFilterSettings();
     /**
      * <pre>
-     * The data filter settings 
+     * The data filter settings
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -8662,7 +8956,7 @@ public final class FitProtos {
     gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings();
     /**
      * <pre>
-     * The data filter settings 
+     * The data filter settings
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -8696,7 +8990,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The border to ignore at the edge of the image 
+     * The border to ignore at the edge of the image
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -8704,7 +8998,7 @@ public final class FitProtos {
     boolean hasBorder();
     /**
      * <pre>
-     * The border to ignore at the edge of the image 
+     * The border to ignore at the edge of the image
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -8712,7 +9006,7 @@ public final class FitProtos {
     gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder();
     /**
      * <pre>
-     * The border to ignore at the edge of the image 
+     * The border to ignore at the edge of the image
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -8721,7 +9015,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate 
+     * The square radius to use for fitting around each candidate
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -8729,7 +9023,7 @@ public final class FitProtos {
     boolean hasFitting();
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate 
+     * The square radius to use for fitting around each candidate
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -8737,7 +9031,7 @@ public final class FitProtos {
     gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting();
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate 
+     * The square radius to use for fitting around each candidate
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -8808,7 +9102,7 @@ public final class FitProtos {
 
     /**
      * <pre>
-     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
      * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
      * </pre>
      *
@@ -8820,7 +9114,7 @@ public final class FitProtos {
    * <pre>
    * Define the settings for the fit engine. These settings are used to identify
    * candidates in the input data, extract regions for fitting, fit using various
-   * methods (single, multiple, doublet) and select the best fit. 
+   * methods (single, multiple, doublet) and select the best fit.
    * </pre>
    *
    * Protobuf type {@code gdsc.smlm.data.config.FitEngineSettings}
@@ -8992,7 +9286,8 @@ public final class FitProtos {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -9008,7 +9303,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
-    public boolean hasFitSettings() {
+    @Override
+	public boolean hasFitSettings() {
       return fitSettings_ != null;
     }
     /**
@@ -9018,7 +9314,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
       return fitSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
     }
     /**
@@ -9028,7 +9325,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
       return getFitSettings();
     }
 
@@ -9041,7 +9339,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
-    public int getNoiseMethodValue() {
+    @Override
+	public int getNoiseMethodValue() {
       return noiseMethod_;
     }
     /**
@@ -9051,7 +9350,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
       gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
       return result == null ? gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.UNRECOGNIZED : result;
     }
@@ -9060,32 +9360,35 @@ public final class FitProtos {
     private gdsc.smlm.data.config.FitProtos.DataFilterSettings dataFilterSettings_;
     /**
      * <pre>
-     * The data filter settings 
+     * The data filter settings
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    public boolean hasDataFilterSettings() {
+    @Override
+	public boolean hasDataFilterSettings() {
       return dataFilterSettings_ != null;
     }
     /**
      * <pre>
-     * The data filter settings 
+     * The data filter settings
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
       return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
     }
     /**
      * <pre>
-     * The data filter settings 
+     * The data filter settings
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
       return getDataFilterSettings();
     }
 
@@ -9098,7 +9401,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    public boolean hasSearch() {
+    @Override
+	public boolean hasSearch() {
       return search_ != null;
     }
     /**
@@ -9108,7 +9412,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
       return search_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
     }
     /**
@@ -9118,7 +9423,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
       return getSearch();
     }
 
@@ -9126,32 +9432,35 @@ public final class FitProtos {
     private gdsc.smlm.data.config.FitProtos.RelativeParameter border_;
     /**
      * <pre>
-     * The border to ignore at the edge of the image 
+     * The border to ignore at the edge of the image
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    public boolean hasBorder() {
+    @Override
+	public boolean hasBorder() {
       return border_ != null;
     }
     /**
      * <pre>
-     * The border to ignore at the edge of the image 
+     * The border to ignore at the edge of the image
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
       return border_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
     }
     /**
      * <pre>
-     * The border to ignore at the edge of the image 
+     * The border to ignore at the edge of the image
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
       return getBorder();
     }
 
@@ -9159,32 +9468,35 @@ public final class FitProtos {
     private gdsc.smlm.data.config.FitProtos.RelativeParameter fitting_;
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate 
+     * The square radius to use for fitting around each candidate
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    public boolean hasFitting() {
+    @Override
+	public boolean hasFitting() {
       return fitting_ != null;
     }
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate 
+     * The square radius to use for fitting around each candidate
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
       return fitting_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
     }
     /**
      * <pre>
-     * The square radius to use for fitting around each candidate 
+     * The square radius to use for fitting around each candidate
      * </pre>
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
       return getFitting();
     }
 
@@ -9197,7 +9509,8 @@ public final class FitProtos {
      *
      * <code>bool include_neighbours = 7;</code>
      */
-    public boolean getIncludeNeighbours() {
+    @Override
+	public boolean getIncludeNeighbours() {
       return includeNeighbours_;
     }
 
@@ -9210,7 +9523,8 @@ public final class FitProtos {
      *
      * <code>double neighbour_height_threshold = 8;</code>
      */
-    public double getNeighbourHeightThreshold() {
+    @Override
+	public double getNeighbourHeightThreshold() {
       return neighbourHeightThreshold_;
     }
 
@@ -9223,7 +9537,8 @@ public final class FitProtos {
      *
      * <code>double residuals_threshold = 9;</code>
      */
-    public double getResidualsThreshold() {
+    @Override
+	public double getResidualsThreshold() {
       return residualsThreshold_;
     }
 
@@ -9236,7 +9551,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    public boolean hasDuplicateDistance() {
+    @Override
+	public boolean hasDuplicateDistance() {
       return duplicateDistance_ != null;
     }
     /**
@@ -9246,7 +9562,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
       return duplicateDistance_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
     }
     /**
@@ -9256,7 +9573,8 @@ public final class FitProtos {
      *
      * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
      */
-    public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
       return getDuplicateDistance();
     }
 
@@ -9270,7 +9588,8 @@ public final class FitProtos {
      *
      * <code>int32 failures_limit = 11;</code>
      */
-    public int getFailuresLimit() {
+    @Override
+	public int getFailuresLimit() {
       return failuresLimit_;
     }
 
@@ -9278,18 +9597,20 @@ public final class FitProtos {
     private double passRate_;
     /**
      * <pre>
-     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+     * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
      * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
      * </pre>
      *
      * <code>double pass_rate = 12;</code>
      */
-    public double getPassRate() {
+    @Override
+	public double getPassRate() {
       return passRate_;
     }
 
     private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
+    @Override
+	public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
@@ -9298,7 +9619,8 @@ public final class FitProtos {
       return true;
     }
 
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
+    @Override
+	public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (fitSettings_ != null) {
         output.writeMessage(1, getFitSettings());
@@ -9338,7 +9660,8 @@ public final class FitProtos {
       }
     }
 
-    public int getSerializedSize() {
+    @Override
+	public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
@@ -9579,14 +9902,16 @@ public final class FitProtos {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    @Override
+	public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
     public static Builder newBuilder(gdsc.smlm.data.config.FitProtos.FitEngineSettings prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() {
+    @Override
+	public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
     }
@@ -9601,7 +9926,7 @@ public final class FitProtos {
      * <pre>
      * Define the settings for the fit engine. These settings are used to identify
      * candidates in the input data, extract regions for fitting, fit using various
-     * methods (single, multiple, doublet) and select the best fit. 
+     * methods (single, multiple, doublet) and select the best fit.
      * </pre>
      *
      * Protobuf type {@code gdsc.smlm.data.config.FitEngineSettings}
@@ -9615,7 +9940,8 @@ public final class FitProtos {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      @Override
+	protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -9637,7 +9963,8 @@ public final class FitProtos {
                 .alwaysUseFieldBuilders) {
         }
       }
-      public Builder clear() {
+      @Override
+	public Builder clear() {
         super.clear();
         if (fitSettingsBuilder_ == null) {
           fitSettings_ = null;
@@ -9690,16 +10017,19 @@ public final class FitProtos {
         return this;
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+	public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return gdsc.smlm.data.config.FitProtos.internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
         return gdsc.smlm.data.config.FitProtos.FitEngineSettings.getDefaultInstance();
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettings build() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings build() {
         gdsc.smlm.data.config.FitProtos.FitEngineSettings result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -9707,7 +10037,8 @@ public final class FitProtos {
         return result;
       }
 
-      public gdsc.smlm.data.config.FitProtos.FitEngineSettings buildPartial() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings buildPartial() {
         gdsc.smlm.data.config.FitProtos.FitEngineSettings result = new gdsc.smlm.data.config.FitProtos.FitEngineSettings(this);
         if (fitSettingsBuilder_ == null) {
           result.fitSettings_ = fitSettings_;
@@ -9749,33 +10080,40 @@ public final class FitProtos {
         return result;
       }
 
-      public Builder clone() {
-        return (Builder) super.clone();
+      @Override
+	public Builder clone() {
+        return super.clone();
       }
-      public Builder setField(
+      @Override
+	public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
-      public Builder clearField(
+      @Override
+	public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
-      public Builder clearOneof(
+      @Override
+	public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
-      public Builder setRepeatedField(
+      @Override
+	public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
-      public Builder addRepeatedField(
+      @Override
+	public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+	public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof gdsc.smlm.data.config.FitProtos.FitEngineSettings) {
           return mergeFrom((gdsc.smlm.data.config.FitProtos.FitEngineSettings)other);
         } else {
@@ -9826,11 +10164,13 @@ public final class FitProtos {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+	public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+	public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -9858,7 +10198,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
-      public boolean hasFitSettings() {
+      @Override
+	public boolean hasFitSettings() {
         return fitSettingsBuilder_ != null || fitSettings_ != null;
       }
       /**
@@ -9868,7 +10209,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettings getFitSettings() {
         if (fitSettingsBuilder_ == null) {
           return fitSettings_ == null ? gdsc.smlm.data.config.FitProtos.FitSettings.getDefaultInstance() : fitSettings_;
         } else {
@@ -9961,7 +10303,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       public gdsc.smlm.data.config.FitProtos.FitSettings.Builder getFitSettingsBuilder() {
-        
+
         onChanged();
         return getFitSettingsFieldBuilder().getBuilder();
       }
@@ -9972,7 +10314,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder getFitSettingsOrBuilder() {
         if (fitSettingsBuilder_ != null) {
           return fitSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -9988,11 +10331,10 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.FitSettings fit_settings = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.FitSettings, gdsc.smlm.data.config.FitProtos.FitSettings.Builder, gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.FitSettings, gdsc.smlm.data.config.FitProtos.FitSettings.Builder, gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder>
           getFitSettingsFieldBuilder() {
         if (fitSettingsBuilder_ == null) {
-          fitSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.FitSettings, gdsc.smlm.data.config.FitProtos.FitSettings.Builder, gdsc.smlm.data.config.FitProtos.FitSettingsOrBuilder>(
+          fitSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFitSettings(),
                   getParentForChildren(),
                   isClean());
@@ -10009,7 +10351,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
-      public int getNoiseMethodValue() {
+      @Override
+	public int getNoiseMethodValue() {
         return noiseMethod_;
       }
       /**
@@ -10031,7 +10374,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod getNoiseMethod() {
         gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod result = gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.valueOf(noiseMethod_);
         return result == null ? gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod.UNRECOGNIZED : result;
       }
@@ -10046,7 +10390,7 @@ public final class FitProtos {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+
         noiseMethod_ = value.getNumber();
         onChanged();
         return this;
@@ -10059,7 +10403,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.NoiseEstimatorMethod noise_method = 2;</code>
        */
       public Builder clearNoiseMethod() {
-        
+
         noiseMethod_ = 0;
         onChanged();
         return this;
@@ -10070,22 +10414,24 @@ public final class FitProtos {
           gdsc.smlm.data.config.FitProtos.DataFilterSettings, gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder> dataFilterSettingsBuilder_;
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public boolean hasDataFilterSettings() {
+      @Override
+	public boolean hasDataFilterSettings() {
         return dataFilterSettingsBuilder_ != null || dataFilterSettings_ != null;
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettings getDataFilterSettings() {
         if (dataFilterSettingsBuilder_ == null) {
           return dataFilterSettings_ == null ? gdsc.smlm.data.config.FitProtos.DataFilterSettings.getDefaultInstance() : dataFilterSettings_;
         } else {
@@ -10094,7 +10440,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -10114,7 +10460,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -10132,7 +10478,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -10154,7 +10500,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
@@ -10172,24 +10518,25 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       public gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder getDataFilterSettingsBuilder() {
-        
+
         onChanged();
         return getDataFilterSettingsFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder getDataFilterSettingsOrBuilder() {
         if (dataFilterSettingsBuilder_ != null) {
           return dataFilterSettingsBuilder_.getMessageOrBuilder();
         } else {
@@ -10199,17 +10546,16 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The data filter settings 
+       * The data filter settings
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.DataFilterSettings data_filter_settings = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.DataFilterSettings, gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.DataFilterSettings, gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder>
           getDataFilterSettingsFieldBuilder() {
         if (dataFilterSettingsBuilder_ == null) {
-          dataFilterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.DataFilterSettings, gdsc.smlm.data.config.FitProtos.DataFilterSettings.Builder, gdsc.smlm.data.config.FitProtos.DataFilterSettingsOrBuilder>(
+          dataFilterSettingsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getDataFilterSettings(),
                   getParentForChildren(),
                   isClean());
@@ -10228,7 +10574,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public boolean hasSearch() {
+      @Override
+	public boolean hasSearch() {
         return searchBuilder_ != null || search_ != null;
       }
       /**
@@ -10238,7 +10585,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getSearch() {
         if (searchBuilder_ == null) {
           return search_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : search_;
         } else {
@@ -10331,7 +10679,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       public gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getSearchBuilder() {
-        
+
         onChanged();
         return getSearchFieldBuilder().getBuilder();
       }
@@ -10342,7 +10690,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getSearchOrBuilder() {
         if (searchBuilder_ != null) {
           return searchBuilder_.getMessageOrBuilder();
         } else {
@@ -10358,11 +10707,10 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.RelativeParameter search = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
           getSearchFieldBuilder() {
         if (searchBuilder_ == null) {
-          searchBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
+          searchBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getSearch(),
                   getParentForChildren(),
                   isClean());
@@ -10376,22 +10724,24 @@ public final class FitProtos {
           gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> borderBuilder_;
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public boolean hasBorder() {
+      @Override
+	public boolean hasBorder() {
         return borderBuilder_ != null || border_ != null;
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getBorder() {
         if (borderBuilder_ == null) {
           return border_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : border_;
         } else {
@@ -10400,7 +10750,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -10420,7 +10770,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -10438,7 +10788,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -10460,7 +10810,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
@@ -10478,24 +10828,25 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       public gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getBorderBuilder() {
-        
+
         onChanged();
         return getBorderFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getBorderOrBuilder() {
         if (borderBuilder_ != null) {
           return borderBuilder_.getMessageOrBuilder();
         } else {
@@ -10505,17 +10856,16 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The border to ignore at the edge of the image 
+       * The border to ignore at the edge of the image
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter border = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
           getBorderFieldBuilder() {
         if (borderBuilder_ == null) {
-          borderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
+          borderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getBorder(),
                   getParentForChildren(),
                   isClean());
@@ -10529,22 +10879,24 @@ public final class FitProtos {
           gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> fittingBuilder_;
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public boolean hasFitting() {
+      @Override
+	public boolean hasFitting() {
         return fittingBuilder_ != null || fitting_ != null;
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getFitting() {
         if (fittingBuilder_ == null) {
           return fitting_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : fitting_;
         } else {
@@ -10553,7 +10905,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -10573,7 +10925,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -10591,7 +10943,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -10613,7 +10965,7 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
@@ -10631,24 +10983,25 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       public gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getFittingBuilder() {
-        
+
         onChanged();
         return getFittingFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getFittingOrBuilder() {
         if (fittingBuilder_ != null) {
           return fittingBuilder_.getMessageOrBuilder();
         } else {
@@ -10658,17 +11011,16 @@ public final class FitProtos {
       }
       /**
        * <pre>
-       * The square radius to use for fitting around each candidate 
+       * The square radius to use for fitting around each candidate
        * </pre>
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter fitting = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
           getFittingFieldBuilder() {
         if (fittingBuilder_ == null) {
-          fittingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
+          fittingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getFitting(),
                   getParentForChildren(),
                   isClean());
@@ -10685,7 +11037,8 @@ public final class FitProtos {
        *
        * <code>bool include_neighbours = 7;</code>
        */
-      public boolean getIncludeNeighbours() {
+      @Override
+	public boolean getIncludeNeighbours() {
         return includeNeighbours_;
       }
       /**
@@ -10696,7 +11049,7 @@ public final class FitProtos {
        * <code>bool include_neighbours = 7;</code>
        */
       public Builder setIncludeNeighbours(boolean value) {
-        
+
         includeNeighbours_ = value;
         onChanged();
         return this;
@@ -10709,7 +11062,7 @@ public final class FitProtos {
        * <code>bool include_neighbours = 7;</code>
        */
       public Builder clearIncludeNeighbours() {
-        
+
         includeNeighbours_ = false;
         onChanged();
         return this;
@@ -10723,7 +11076,8 @@ public final class FitProtos {
        *
        * <code>double neighbour_height_threshold = 8;</code>
        */
-      public double getNeighbourHeightThreshold() {
+      @Override
+	public double getNeighbourHeightThreshold() {
         return neighbourHeightThreshold_;
       }
       /**
@@ -10734,7 +11088,7 @@ public final class FitProtos {
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public Builder setNeighbourHeightThreshold(double value) {
-        
+
         neighbourHeightThreshold_ = value;
         onChanged();
         return this;
@@ -10747,7 +11101,7 @@ public final class FitProtos {
        * <code>double neighbour_height_threshold = 8;</code>
        */
       public Builder clearNeighbourHeightThreshold() {
-        
+
         neighbourHeightThreshold_ = 0D;
         onChanged();
         return this;
@@ -10761,7 +11115,8 @@ public final class FitProtos {
        *
        * <code>double residuals_threshold = 9;</code>
        */
-      public double getResidualsThreshold() {
+      @Override
+	public double getResidualsThreshold() {
         return residualsThreshold_;
       }
       /**
@@ -10772,7 +11127,7 @@ public final class FitProtos {
        * <code>double residuals_threshold = 9;</code>
        */
       public Builder setResidualsThreshold(double value) {
-        
+
         residualsThreshold_ = value;
         onChanged();
         return this;
@@ -10785,7 +11140,7 @@ public final class FitProtos {
        * <code>double residuals_threshold = 9;</code>
        */
       public Builder clearResidualsThreshold() {
-        
+
         residualsThreshold_ = 0D;
         onChanged();
         return this;
@@ -10801,7 +11156,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public boolean hasDuplicateDistance() {
+      @Override
+	public boolean hasDuplicateDistance() {
         return duplicateDistanceBuilder_ != null || duplicateDistance_ != null;
       }
       /**
@@ -10811,7 +11167,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameter getDuplicateDistance() {
         if (duplicateDistanceBuilder_ == null) {
           return duplicateDistance_ == null ? gdsc.smlm.data.config.FitProtos.RelativeParameter.getDefaultInstance() : duplicateDistance_;
         } else {
@@ -10904,7 +11261,7 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       public gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder getDuplicateDistanceBuilder() {
-        
+
         onChanged();
         return getDuplicateDistanceFieldBuilder().getBuilder();
       }
@@ -10915,7 +11272,8 @@ public final class FitProtos {
        *
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
-      public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
+      @Override
+	public gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder getDuplicateDistanceOrBuilder() {
         if (duplicateDistanceBuilder_ != null) {
           return duplicateDistanceBuilder_.getMessageOrBuilder();
         } else {
@@ -10931,11 +11289,10 @@ public final class FitProtos {
        * <code>.gdsc.smlm.data.config.RelativeParameter duplicate_distance = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder> 
+          gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>
           getDuplicateDistanceFieldBuilder() {
         if (duplicateDistanceBuilder_ == null) {
-          duplicateDistanceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              gdsc.smlm.data.config.FitProtos.RelativeParameter, gdsc.smlm.data.config.FitProtos.RelativeParameter.Builder, gdsc.smlm.data.config.FitProtos.RelativeParameterOrBuilder>(
+          duplicateDistanceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
                   getDuplicateDistance(),
                   getParentForChildren(),
                   isClean());
@@ -10953,7 +11310,8 @@ public final class FitProtos {
        *
        * <code>int32 failures_limit = 11;</code>
        */
-      public int getFailuresLimit() {
+      @Override
+	public int getFailuresLimit() {
         return failuresLimit_;
       }
       /**
@@ -10965,7 +11323,7 @@ public final class FitProtos {
        * <code>int32 failures_limit = 11;</code>
        */
       public Builder setFailuresLimit(int value) {
-        
+
         failuresLimit_ = value;
         onChanged();
         return this;
@@ -10979,7 +11337,7 @@ public final class FitProtos {
        * <code>int32 failures_limit = 11;</code>
        */
       public Builder clearFailuresLimit() {
-        
+
         failuresLimit_ = 0;
         onChanged();
         return this;
@@ -10988,49 +11346,52 @@ public final class FitProtos {
       private double passRate_ ;
       /**
        * <pre>
-       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
        * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
        * </pre>
        *
        * <code>double pass_rate = 12;</code>
        */
-      public double getPassRate() {
+      @Override
+	public double getPassRate() {
         return passRate_;
       }
       /**
        * <pre>
-       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
        * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
        * </pre>
        *
        * <code>double pass_rate = 12;</code>
        */
       public Builder setPassRate(double value) {
-        
+
         passRate_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below 
+       * The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
        * this threshold then stop fitting of the remaining candidates. Set to zero to disable.
        * </pre>
        *
        * <code>double pass_rate = 12;</code>
        */
       public Builder clearPassRate() {
-        
+
         passRate_ = 0D;
         onChanged();
         return this;
       }
-      public final Builder setUnknownFields(
+      @Override
+	public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
 
-      public final Builder mergeUnknownFields(
+      @Override
+	public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return this;
       }
@@ -11051,7 +11412,8 @@ public final class FitProtos {
 
     private static final com.google.protobuf.Parser<FitEngineSettings>
         PARSER = new com.google.protobuf.AbstractParser<FitEngineSettings>() {
-      public FitEngineSettings parsePartialFrom(
+      @Override
+	public FitEngineSettings parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -11068,7 +11430,8 @@ public final class FitProtos {
       return PARSER;
     }
 
-    public gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
+    @Override
+	public gdsc.smlm.data.config.FitProtos.FitEngineSettings getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -11076,37 +11439,37 @@ public final class FitProtos {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_FitSolverSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FitSolverSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_FilterSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FilterSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_FitSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FitSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_RelativeParameter_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_RelativeParameter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_DataFilter_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_DataFilter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_DataFilterSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_DataFilterSettings_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_gdsc_smlm_data_config_FitEngineSettings_descriptor;
-  private static final 
+  private static final
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_gdsc_smlm_data_config_FitEngineSettings_fieldAccessorTable;
 
@@ -11198,7 +11561,8 @@ public final class FitProtos {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+          @Override
+		public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;

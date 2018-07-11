@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -2884,7 +2884,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * flag indicating whether this is a sequence of spot data in consecutive 
+		 * flag indicating whether this is a sequence of spot data in consecutive
 		 * time frames thought to originate from the same entity
 		 * </pre>
 		 *
@@ -2894,7 +2894,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * flag indicating whether this is a sequence of spot data in consecutive 
+		 * flag indicating whether this is a sequence of spot data in consecutive
 		 * time frames thought to originate from the same entity
 		 * </pre>
 		 *
@@ -2906,7 +2906,7 @@ public final class TSFProtos
 		 * <pre>
 		 * The electron conversion factor (camera gain), defined as
 		 * # of electrons per pixel / # of counts per pixel
-		 * The ecf can be different for different channels (which can 
+		 * The ecf can be different for different channels (which can
 		 * happen when separate cameras are used for separate channels),
 		 * therefore provide the ecf for each channel in the channel order
 		 * </pre>
@@ -2919,7 +2919,7 @@ public final class TSFProtos
 		 * <pre>
 		 * The electron conversion factor (camera gain), defined as
 		 * # of electrons per pixel / # of counts per pixel
-		 * The ecf can be different for different channels (which can 
+		 * The ecf can be different for different channels (which can
 		 * happen when separate cameras are used for separate channels),
 		 * therefore provide the ecf for each channel in the channel order
 		 * </pre>
@@ -2932,7 +2932,7 @@ public final class TSFProtos
 		 * <pre>
 		 * The electron conversion factor (camera gain), defined as
 		 * # of electrons per pixel / # of counts per pixel
-		 * The ecf can be different for different channels (which can 
+		 * The ecf can be different for different channels (which can
 		 * happen when separate cameras are used for separate channels),
 		 * therefore provide the ecf for each channel in the channel order
 		 * </pre>
@@ -2944,7 +2944,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * The quantum efficiency can be used to calculate the number
-		 * of photons that hit the sensor, rather than the number of 
+		 * of photons that hit the sensor, rather than the number of
 		 * electrons that were derived from them
 		 * Since this number is wavelength dependent, provide the QE
 		 * for each fluorophore type (in the fluorophore type order)
@@ -2958,7 +2958,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * The quantum efficiency can be used to calculate the number
-		 * of photons that hit the sensor, rather than the number of 
+		 * of photons that hit the sensor, rather than the number of
 		 * electrons that were derived from them
 		 * Since this number is wavelength dependent, provide the QE
 		 * for each fluorophore type (in the fluorophore type order)
@@ -2972,7 +2972,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * The quantum efficiency can be used to calculate the number
-		 * of photons that hit the sensor, rather than the number of 
+		 * of photons that hit the sensor, rather than the number of
 		 * electrons that were derived from them
 		 * Since this number is wavelength dependent, provide the QE
 		 * for each fluorophore type (in the fluorophore type order)
@@ -3388,7 +3388,7 @@ public final class TSFProtos
 						{
 							if (!((mutable_bitField0_ & 0x00002000) == 0x00002000))
 							{
-								fluorophoreTypes_ = new java.util.ArrayList<gdsc.smlm.tsf.TSFProtos.FluorophoreType>();
+								fluorophoreTypes_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00002000;
 							}
 							fluorophoreTypes_.add(input.readMessage(gdsc.smlm.tsf.TSFProtos.FluorophoreType.PARSER,
@@ -3415,7 +3415,7 @@ public final class TSFProtos
 						{
 							if (!((mutable_bitField0_ & 0x00080000) == 0x00080000))
 							{
-								ecf_ = new java.util.ArrayList<java.lang.Double>();
+								ecf_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00080000;
 							}
 							ecf_.add(input.readDouble());
@@ -3427,7 +3427,7 @@ public final class TSFProtos
 							int limit = input.pushLimit(length);
 							if (!((mutable_bitField0_ & 0x00080000) == 0x00080000) && input.getBytesUntilLimit() > 0)
 							{
-								ecf_ = new java.util.ArrayList<java.lang.Double>();
+								ecf_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00080000;
 							}
 							while (input.getBytesUntilLimit() > 0)
@@ -3457,7 +3457,7 @@ public final class TSFProtos
 						{
 							if (!((mutable_bitField0_ & 0x00100000) == 0x00100000))
 							{
-								qe_ = new java.util.ArrayList<java.lang.Double>();
+								qe_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00100000;
 							}
 							qe_.add(input.readDouble());
@@ -3469,7 +3469,7 @@ public final class TSFProtos
 							int limit = input.pushLimit(length);
 							if (!((mutable_bitField0_ & 0x00100000) == 0x00100000) && input.getBytesUntilLimit() > 0)
 							{
-								qe_ = new java.util.ArrayList<java.lang.Double>();
+								qe_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x00100000;
 							}
 							while (input.getBytesUntilLimit() > 0)
@@ -4225,7 +4225,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * flag indicating whether this is a sequence of spot data in consecutive 
+		 * flag indicating whether this is a sequence of spot data in consecutive
 		 * time frames thought to originate from the same entity
 		 * </pre>
 		 *
@@ -4239,7 +4239,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * flag indicating whether this is a sequence of spot data in consecutive 
+		 * flag indicating whether this is a sequence of spot data in consecutive
 		 * time frames thought to originate from the same entity
 		 * </pre>
 		 *
@@ -4258,7 +4258,7 @@ public final class TSFProtos
 		 * <pre>
 		 * The electron conversion factor (camera gain), defined as
 		 * # of electrons per pixel / # of counts per pixel
-		 * The ecf can be different for different channels (which can 
+		 * The ecf can be different for different channels (which can
 		 * happen when separate cameras are used for separate channels),
 		 * therefore provide the ecf for each channel in the channel order
 		 * </pre>
@@ -4275,7 +4275,7 @@ public final class TSFProtos
 		 * <pre>
 		 * The electron conversion factor (camera gain), defined as
 		 * # of electrons per pixel / # of counts per pixel
-		 * The ecf can be different for different channels (which can 
+		 * The ecf can be different for different channels (which can
 		 * happen when separate cameras are used for separate channels),
 		 * therefore provide the ecf for each channel in the channel order
 		 * </pre>
@@ -4292,7 +4292,7 @@ public final class TSFProtos
 		 * <pre>
 		 * The electron conversion factor (camera gain), defined as
 		 * # of electrons per pixel / # of counts per pixel
-		 * The ecf can be different for different channels (which can 
+		 * The ecf can be different for different channels (which can
 		 * happen when separate cameras are used for separate channels),
 		 * therefore provide the ecf for each channel in the channel order
 		 * </pre>
@@ -4311,7 +4311,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * The quantum efficiency can be used to calculate the number
-		 * of photons that hit the sensor, rather than the number of 
+		 * of photons that hit the sensor, rather than the number of
 		 * electrons that were derived from them
 		 * Since this number is wavelength dependent, provide the QE
 		 * for each fluorophore type (in the fluorophore type order)
@@ -4329,7 +4329,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * The quantum efficiency can be used to calculate the number
-		 * of photons that hit the sensor, rather than the number of 
+		 * of photons that hit the sensor, rather than the number of
 		 * electrons that were derived from them
 		 * Since this number is wavelength dependent, provide the QE
 		 * for each fluorophore type (in the fluorophore type order)
@@ -4347,7 +4347,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * The quantum efficiency can be used to calculate the number
-		 * of photons that hit the sensor, rather than the number of 
+		 * of photons that hit the sensor, rather than the number of
 		 * electrons that were derived from them
 		 * Since this number is wavelength dependent, provide the QE
 		 * for each fluorophore type (in the fluorophore type order)
@@ -7020,7 +7020,7 @@ public final class TSFProtos
 			{
 				if (!((bitField0_ & 0x00002000) == 0x00002000))
 				{
-					fluorophoreTypes_ = new java.util.ArrayList<gdsc.smlm.tsf.TSFProtos.FluorophoreType>(
+					fluorophoreTypes_ = new java.util.ArrayList<>(
 							fluorophoreTypes_);
 					bitField0_ |= 0x00002000;
 				}
@@ -7413,7 +7413,7 @@ public final class TSFProtos
 			{
 				if (fluorophoreTypesBuilder_ == null)
 				{
-					fluorophoreTypesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<gdsc.smlm.tsf.TSFProtos.FluorophoreType, gdsc.smlm.tsf.TSFProtos.FluorophoreType.Builder, gdsc.smlm.tsf.TSFProtos.FluorophoreTypeOrBuilder>(
+					fluorophoreTypesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<>(
 							fluorophoreTypes_, ((bitField0_ & 0x00002000) == 0x00002000), getParentForChildren(),
 							isClean());
 					fluorophoreTypes_ = null;
@@ -7655,7 +7655,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * flag indicating whether this is a sequence of spot data in consecutive 
+			 * flag indicating whether this is a sequence of spot data in consecutive
 			 * time frames thought to originate from the same entity
 			 * </pre>
 			 *
@@ -7669,7 +7669,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * flag indicating whether this is a sequence of spot data in consecutive 
+			 * flag indicating whether this is a sequence of spot data in consecutive
 			 * time frames thought to originate from the same entity
 			 * </pre>
 			 *
@@ -7683,7 +7683,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * flag indicating whether this is a sequence of spot data in consecutive 
+			 * flag indicating whether this is a sequence of spot data in consecutive
 			 * time frames thought to originate from the same entity
 			 * </pre>
 			 *
@@ -7699,7 +7699,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * flag indicating whether this is a sequence of spot data in consecutive 
+			 * flag indicating whether this is a sequence of spot data in consecutive
 			 * time frames thought to originate from the same entity
 			 * </pre>
 			 *
@@ -7719,7 +7719,7 @@ public final class TSFProtos
 			{
 				if (!((bitField0_ & 0x00080000) == 0x00080000))
 				{
-					ecf_ = new java.util.ArrayList<java.lang.Double>(ecf_);
+					ecf_ = new java.util.ArrayList<>(ecf_);
 					bitField0_ |= 0x00080000;
 				}
 			}
@@ -7728,7 +7728,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7745,7 +7745,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7762,7 +7762,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7779,7 +7779,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7798,7 +7798,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7817,7 +7817,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7836,7 +7836,7 @@ public final class TSFProtos
 			 * <pre>
 			 * The electron conversion factor (camera gain), defined as
 			 * # of electrons per pixel / # of counts per pixel
-			 * The ecf can be different for different channels (which can 
+			 * The ecf can be different for different channels (which can
 			 * happen when separate cameras are used for separate channels),
 			 * therefore provide the ecf for each channel in the channel order
 			 * </pre>
@@ -7857,7 +7857,7 @@ public final class TSFProtos
 			{
 				if (!((bitField0_ & 0x00100000) == 0x00100000))
 				{
-					qe_ = new java.util.ArrayList<java.lang.Double>(qe_);
+					qe_ = new java.util.ArrayList<>(qe_);
 					bitField0_ |= 0x00100000;
 				}
 			}
@@ -7865,7 +7865,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -7883,7 +7883,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -7901,7 +7901,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -7919,7 +7919,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -7939,7 +7939,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -7959,7 +7959,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -7979,7 +7979,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * The quantum efficiency can be used to calculate the number
-			 * of photons that hit the sensor, rather than the number of 
+			 * of photons that hit the sensor, rather than the number of
 			 * electrons that were derived from them
 			 * Since this number is wavelength dependent, provide the QE
 			 * for each fluorophore type (in the fluorophore type order)
@@ -8141,7 +8141,7 @@ public final class TSFProtos
 			{
 				if (roiBuilder_ == null)
 				{
-					roiBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<gdsc.smlm.tsf.TSFProtos.ROI, gdsc.smlm.tsf.TSFProtos.ROI.Builder, gdsc.smlm.tsf.TSFProtos.ROIOrBuilder>(
+					roiBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<>(
 							getRoi(), getParentForChildren(), isClean());
 					roi_ = null;
 				}
@@ -8872,7 +8872,7 @@ public final class TSFProtos
 		 * each localization.
 		 * The difference between molecules and clusters is that a cluster is a group
 		 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-		 * link your localizations, you're looking at a molecule, and when you're 
+		 * link your localizations, you're looking at a molecule, and when you're
 		 * thresholding on the nearest neighbor distance, it's typically a cluster.
 		 * If you are using both cluster and molecule, localizations with the same
 		 * molecule ID should have the same cluster ID.
@@ -8892,7 +8892,7 @@ public final class TSFProtos
 		 * each localization.
 		 * The difference between molecules and clusters is that a cluster is a group
 		 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-		 * link your localizations, you're looking at a molecule, and when you're 
+		 * link your localizations, you're looking at a molecule, and when you're
 		 * thresholding on the nearest neighbor distance, it's typically a cluster.
 		 * If you are using both cluster and molecule, localizations with the same
 		 * molecule ID should have the same cluster ID.
@@ -9059,7 +9059,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * xyz coordinates of the spot in location_units  
+		 * xyz coordinates of the spot in location_units
 		 * after fitting and optional correction
 		 * </pre>
 		 *
@@ -9069,7 +9069,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * xyz coordinates of the spot in location_units  
+		 * xyz coordinates of the spot in location_units
 		 * after fitting and optional correction
 		 * </pre>
 		 *
@@ -9110,7 +9110,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Use intensity_units only if different from SpotList
-		 * integrated spot density. This can either be determined from a fit or 
+		 * integrated spot density. This can either be determined from a fit or
 		 * using any other methods.  This number should be corrected for background
 		 * </pre>
 		 *
@@ -9121,7 +9121,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Use intensity_units only if different from SpotList
-		 * integrated spot density. This can either be determined from a fit or 
+		 * integrated spot density. This can either be determined from a fit or
 		 * using any other methods.  This number should be corrected for background
 		 * </pre>
 		 *
@@ -9149,7 +9149,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Background around the spot. 
+		 * Background around the spot.
 		 * This can be determined through a fit or other methods
 		 * This number should not include the camera bias, i.e. it should be linearly
 		 * proportional to the number of photons in the background
@@ -9161,7 +9161,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Background around the spot. 
+		 * Background around the spot.
 		 * This can be determined through a fit or other methods
 		 * This number should not include the camera bias, i.e. it should be linearly
 		 * proportional to the number of photons in the background
@@ -9174,7 +9174,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Peak width at half height in location units
-		 * for asymmetric peaks, calculate the width as the square root of the 
+		 * for asymmetric peaks, calculate the width as the square root of the
 		 * product of the widths of the long and short axes
 		 * </pre>
 		 *
@@ -9185,7 +9185,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Peak width at half height in location units
-		 * for asymmetric peaks, calculate the width as the square root of the 
+		 * for asymmetric peaks, calculate the width as the square root of the
 		 * product of the widths of the long and short axes
 		 * </pre>
 		 *
@@ -9195,7 +9195,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Shape of the peak: width of the long axis 
+		 * Shape of the peak: width of the long axis
 		 * divided by width of the short axis
 		 * </pre>
 		 *
@@ -9205,7 +9205,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Shape of the peak: width of the long axis 
+		 * Shape of the peak: width of the long axis
 		 * divided by width of the short axis
 		 * </pre>
 		 *
@@ -9215,7 +9215,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Rotation of asymmetric peak, only used 
+		 * Rotation of asymmetric peak, only used
 		 * when fitmode == TWOAXISANDTHETA
 		 * </pre>
 		 *
@@ -9225,7 +9225,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Rotation of asymmetric peak, only used 
+		 * Rotation of asymmetric peak, only used
 		 * when fitmode == TWOAXISANDTHETA
 		 * </pre>
 		 *
@@ -9740,7 +9740,7 @@ public final class TSFProtos
 						{
 							if (!((mutable_bitField0_ & 0x20000000) == 0x20000000))
 							{
-								paramStdDevs_ = new java.util.ArrayList<java.lang.Float>();
+								paramStdDevs_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x20000000;
 							}
 							paramStdDevs_.add(input.readFloat());
@@ -9752,7 +9752,7 @@ public final class TSFProtos
 							int limit = input.pushLimit(length);
 							if (!((mutable_bitField0_ & 0x20000000) == 0x20000000) && input.getBytesUntilLimit() > 0)
 							{
-								paramStdDevs_ = new java.util.ArrayList<java.lang.Float>();
+								paramStdDevs_ = new java.util.ArrayList<>();
 								mutable_bitField0_ |= 0x20000000;
 							}
 							while (input.getBytesUntilLimit() > 0)
@@ -9815,7 +9815,7 @@ public final class TSFProtos
 		 * each localization.
 		 * The difference between molecules and clusters is that a cluster is a group
 		 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-		 * link your localizations, you're looking at a molecule, and when you're 
+		 * link your localizations, you're looking at a molecule, and when you're
 		 * thresholding on the nearest neighbor distance, it's typically a cluster.
 		 * If you are using both cluster and molecule, localizations with the same
 		 * molecule ID should have the same cluster ID.
@@ -9839,7 +9839,7 @@ public final class TSFProtos
 		 * each localization.
 		 * The difference between molecules and clusters is that a cluster is a group
 		 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-		 * link your localizations, you're looking at a molecule, and when you're 
+		 * link your localizations, you're looking at a molecule, and when you're
 		 * thresholding on the nearest neighbor distance, it's typically a cluster.
 		 * If you are using both cluster and molecule, localizations with the same
 		 * molecule ID should have the same cluster ID.
@@ -10079,7 +10079,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * xyz coordinates of the spot in location_units  
+		 * xyz coordinates of the spot in location_units
 		 * after fitting and optional correction
 		 * </pre>
 		 *
@@ -10093,7 +10093,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * xyz coordinates of the spot in location_units  
+		 * xyz coordinates of the spot in location_units
 		 * after fitting and optional correction
 		 * </pre>
 		 *
@@ -10176,7 +10176,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Use intensity_units only if different from SpotList
-		 * integrated spot density. This can either be determined from a fit or 
+		 * integrated spot density. This can either be determined from a fit or
 		 * using any other methods.  This number should be corrected for background
 		 * </pre>
 		 *
@@ -10191,7 +10191,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Use intensity_units only if different from SpotList
-		 * integrated spot density. This can either be determined from a fit or 
+		 * integrated spot density. This can either be determined from a fit or
 		 * using any other methods.  This number should be corrected for background
 		 * </pre>
 		 *
@@ -10239,7 +10239,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Background around the spot. 
+		 * Background around the spot.
 		 * This can be determined through a fit or other methods
 		 * This number should not include the camera bias, i.e. it should be linearly
 		 * proportional to the number of photons in the background
@@ -10255,7 +10255,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Background around the spot. 
+		 * Background around the spot.
 		 * This can be determined through a fit or other methods
 		 * This number should not include the camera bias, i.e. it should be linearly
 		 * proportional to the number of photons in the background
@@ -10275,7 +10275,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Peak width at half height in location units
-		 * for asymmetric peaks, calculate the width as the square root of the 
+		 * for asymmetric peaks, calculate the width as the square root of the
 		 * product of the widths of the long and short axes
 		 * </pre>
 		 *
@@ -10290,7 +10290,7 @@ public final class TSFProtos
 		/**
 		 * <pre>
 		 * Peak width at half height in location units
-		 * for asymmetric peaks, calculate the width as the square root of the 
+		 * for asymmetric peaks, calculate the width as the square root of the
 		 * product of the widths of the long and short axes
 		 * </pre>
 		 *
@@ -10307,7 +10307,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Shape of the peak: width of the long axis 
+		 * Shape of the peak: width of the long axis
 		 * divided by width of the short axis
 		 * </pre>
 		 *
@@ -10321,7 +10321,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Shape of the peak: width of the long axis 
+		 * Shape of the peak: width of the long axis
 		 * divided by width of the short axis
 		 * </pre>
 		 *
@@ -10338,7 +10338,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Rotation of asymmetric peak, only used 
+		 * Rotation of asymmetric peak, only used
 		 * when fitmode == TWOAXISANDTHETA
 		 * </pre>
 		 *
@@ -10352,7 +10352,7 @@ public final class TSFProtos
 
 		/**
 		 * <pre>
-		 * Rotation of asymmetric peak, only used 
+		 * Rotation of asymmetric peak, only used
 		 * when fitmode == TWOAXISANDTHETA
 		 * </pre>
 		 *
@@ -12133,7 +12133,7 @@ public final class TSFProtos
 			 * each localization.
 			 * The difference between molecules and clusters is that a cluster is a group
 			 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-			 * link your localizations, you're looking at a molecule, and when you're 
+			 * link your localizations, you're looking at a molecule, and when you're
 			 * thresholding on the nearest neighbor distance, it's typically a cluster.
 			 * If you are using both cluster and molecule, localizations with the same
 			 * molecule ID should have the same cluster ID.
@@ -12157,7 +12157,7 @@ public final class TSFProtos
 			 * each localization.
 			 * The difference between molecules and clusters is that a cluster is a group
 			 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-			 * link your localizations, you're looking at a molecule, and when you're 
+			 * link your localizations, you're looking at a molecule, and when you're
 			 * thresholding on the nearest neighbor distance, it's typically a cluster.
 			 * If you are using both cluster and molecule, localizations with the same
 			 * molecule ID should have the same cluster ID.
@@ -12181,7 +12181,7 @@ public final class TSFProtos
 			 * each localization.
 			 * The difference between molecules and clusters is that a cluster is a group
 			 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-			 * link your localizations, you're looking at a molecule, and when you're 
+			 * link your localizations, you're looking at a molecule, and when you're
 			 * thresholding on the nearest neighbor distance, it's typically a cluster.
 			 * If you are using both cluster and molecule, localizations with the same
 			 * molecule ID should have the same cluster ID.
@@ -12207,7 +12207,7 @@ public final class TSFProtos
 			 * each localization.
 			 * The difference between molecules and clusters is that a cluster is a group
 			 * of physical molecules, e.g. a raft on a membrane. When you are tracking to
-			 * link your localizations, you're looking at a molecule, and when you're 
+			 * link your localizations, you're looking at a molecule, and when you're
 			 * thresholding on the nearest neighbor distance, it's typically a cluster.
 			 * If you are using both cluster and molecule, localizations with the same
 			 * molecule ID should have the same cluster ID.
@@ -12668,7 +12668,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * xyz coordinates of the spot in location_units  
+			 * xyz coordinates of the spot in location_units
 			 * after fitting and optional correction
 			 * </pre>
 			 *
@@ -12682,7 +12682,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * xyz coordinates of the spot in location_units  
+			 * xyz coordinates of the spot in location_units
 			 * after fitting and optional correction
 			 * </pre>
 			 *
@@ -12698,7 +12698,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * xyz coordinates of the spot in location_units  
+			 * xyz coordinates of the spot in location_units
 			 * after fitting and optional correction
 			 * </pre>
 			 *
@@ -12718,7 +12718,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * xyz coordinates of the spot in location_units  
+			 * xyz coordinates of the spot in location_units
 			 * after fitting and optional correction
 			 * </pre>
 			 *
@@ -12863,7 +12863,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Use intensity_units only if different from SpotList
-			 * integrated spot density. This can either be determined from a fit or 
+			 * integrated spot density. This can either be determined from a fit or
 			 * using any other methods.  This number should be corrected for background
 			 * </pre>
 			 *
@@ -12878,7 +12878,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Use intensity_units only if different from SpotList
-			 * integrated spot density. This can either be determined from a fit or 
+			 * integrated spot density. This can either be determined from a fit or
 			 * using any other methods.  This number should be corrected for background
 			 * </pre>
 			 *
@@ -12895,7 +12895,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Use intensity_units only if different from SpotList
-			 * integrated spot density. This can either be determined from a fit or 
+			 * integrated spot density. This can either be determined from a fit or
 			 * using any other methods.  This number should be corrected for background
 			 * </pre>
 			 *
@@ -12916,7 +12916,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Use intensity_units only if different from SpotList
-			 * integrated spot density. This can either be determined from a fit or 
+			 * integrated spot density. This can either be determined from a fit or
 			 * using any other methods.  This number should be corrected for background
 			 * </pre>
 			 *
@@ -12992,7 +12992,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Background around the spot. 
+			 * Background around the spot.
 			 * This can be determined through a fit or other methods
 			 * This number should not include the camera bias, i.e. it should be linearly
 			 * proportional to the number of photons in the background
@@ -13008,7 +13008,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Background around the spot. 
+			 * Background around the spot.
 			 * This can be determined through a fit or other methods
 			 * This number should not include the camera bias, i.e. it should be linearly
 			 * proportional to the number of photons in the background
@@ -13024,7 +13024,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Background around the spot. 
+			 * Background around the spot.
 			 * This can be determined through a fit or other methods
 			 * This number should not include the camera bias, i.e. it should be linearly
 			 * proportional to the number of photons in the background
@@ -13042,7 +13042,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Background around the spot. 
+			 * Background around the spot.
 			 * This can be determined through a fit or other methods
 			 * This number should not include the camera bias, i.e. it should be linearly
 			 * proportional to the number of photons in the background
@@ -13063,7 +13063,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Peak width at half height in location units
-			 * for asymmetric peaks, calculate the width as the square root of the 
+			 * for asymmetric peaks, calculate the width as the square root of the
 			 * product of the widths of the long and short axes
 			 * </pre>
 			 *
@@ -13078,7 +13078,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Peak width at half height in location units
-			 * for asymmetric peaks, calculate the width as the square root of the 
+			 * for asymmetric peaks, calculate the width as the square root of the
 			 * product of the widths of the long and short axes
 			 * </pre>
 			 *
@@ -13093,7 +13093,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Peak width at half height in location units
-			 * for asymmetric peaks, calculate the width as the square root of the 
+			 * for asymmetric peaks, calculate the width as the square root of the
 			 * product of the widths of the long and short axes
 			 * </pre>
 			 *
@@ -13110,7 +13110,7 @@ public final class TSFProtos
 			/**
 			 * <pre>
 			 * Peak width at half height in location units
-			 * for asymmetric peaks, calculate the width as the square root of the 
+			 * for asymmetric peaks, calculate the width as the square root of the
 			 * product of the widths of the long and short axes
 			 * </pre>
 			 *
@@ -13128,7 +13128,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Shape of the peak: width of the long axis 
+			 * Shape of the peak: width of the long axis
 			 * divided by width of the short axis
 			 * </pre>
 			 *
@@ -13142,7 +13142,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Shape of the peak: width of the long axis 
+			 * Shape of the peak: width of the long axis
 			 * divided by width of the short axis
 			 * </pre>
 			 *
@@ -13156,7 +13156,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Shape of the peak: width of the long axis 
+			 * Shape of the peak: width of the long axis
 			 * divided by width of the short axis
 			 * </pre>
 			 *
@@ -13172,7 +13172,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Shape of the peak: width of the long axis 
+			 * Shape of the peak: width of the long axis
 			 * divided by width of the short axis
 			 * </pre>
 			 *
@@ -13190,7 +13190,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Rotation of asymmetric peak, only used 
+			 * Rotation of asymmetric peak, only used
 			 * when fitmode == TWOAXISANDTHETA
 			 * </pre>
 			 *
@@ -13204,7 +13204,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Rotation of asymmetric peak, only used 
+			 * Rotation of asymmetric peak, only used
 			 * when fitmode == TWOAXISANDTHETA
 			 * </pre>
 			 *
@@ -13218,7 +13218,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Rotation of asymmetric peak, only used 
+			 * Rotation of asymmetric peak, only used
 			 * when fitmode == TWOAXISANDTHETA
 			 * </pre>
 			 *
@@ -13234,7 +13234,7 @@ public final class TSFProtos
 
 			/**
 			 * <pre>
-			 * Rotation of asymmetric peak, only used 
+			 * Rotation of asymmetric peak, only used
 			 * when fitmode == TWOAXISANDTHETA
 			 * </pre>
 			 *
@@ -13870,7 +13870,7 @@ public final class TSFProtos
 			{
 				if (!((bitField0_ & 0x20000000) == 0x20000000))
 				{
-					paramStdDevs_ = new java.util.ArrayList<java.lang.Float>(paramStdDevs_);
+					paramStdDevs_ = new java.util.ArrayList<>(paramStdDevs_);
 					bitField0_ |= 0x20000000;
 				}
 			}

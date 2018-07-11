@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -53,7 +53,7 @@ public class GradientCalculator
 	 * Evaluate the function and compute the sum-of-squares and the curvature matrix.
 	 * <p>
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param y
@@ -93,7 +93,7 @@ public class GradientCalculator
 				final double weight = getWeight(w[0]);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -117,7 +117,7 @@ public class GradientCalculator
 				final double dy = y[i] - func.eval(x[i], dy_da);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -149,7 +149,7 @@ public class GradientCalculator
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
 	 * <p>
 	 * Allows disabling the use of gradients. The output alpha and beta will be reduced in size by the number of indices
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param y
@@ -200,7 +200,7 @@ public class GradientCalculator
 				final double weight = getWeight(w[0]);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -224,7 +224,7 @@ public class GradientCalculator
 				final double dy = y[i] - func.eval(x[i], dy_da);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -252,7 +252,7 @@ public class GradientCalculator
 
 	/**
 	 * Evaluate the function and compute the sum-of-squares
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param y
@@ -327,7 +327,7 @@ public class GradientCalculator
 	 * If the function supports weights then these will be used to compute the SS and curvature matrix.
 	 * <p>
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
+	 *
 	 * @param n
 	 *            The number of data points
 	 * @param y
@@ -370,7 +370,7 @@ public class GradientCalculator
 				final double weight = getWeight(w[0]);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -394,7 +394,7 @@ public class GradientCalculator
 				final double dy = y[i] - func.eval(i, dy_da);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -484,7 +484,7 @@ public class GradientCalculator
 				final double weight = getWeight(w[0]);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -508,7 +508,7 @@ public class GradientCalculator
 				final double dy = y[i] - func.eval(i, dy_da);
 
 				// Compute:
-				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function; 
+				// - the scaled Hessian matrix (the square matrix of second-order partial derivatives of a function;
 				//   that is, it describes the local curvature of a function of many variables.)
 				// - the scaled gradient vector of the function's partial first derivatives with respect to the parameters
 
@@ -536,7 +536,7 @@ public class GradientCalculator
 
 	/**
 	 * Evaluate the function and compute the sum-of-squares
-	 * 
+	 *
 	 * @param n
 	 *            The number of data points
 	 * @param y
@@ -608,7 +608,7 @@ public class GradientCalculator
 	 * Get the weight factor using the computed weight
 	 * <p>
 	 * Check if the weight is below 1 and set to 1 to avoid excessive weights.
-	 * 
+	 *
 	 * @param w
 	 *            The computed weight
 	 * @return The weight factor
@@ -682,7 +682,7 @@ public class GradientCalculator
 
 	/**
 	 * Compute the Fisher's Information Matrix (I) assuming a Poisson process.
-	 * 
+	 *
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
@@ -690,19 +690,19 @@ public class GradientCalculator
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
-	 * 
+	 *
 	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
 	 * Poisson process. In this case the equation reduces to:
-	 * 
+	 *
 	 * <pre>
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
-	 * 
+	 *
 	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
 	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
-	 * 
+	 *
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param a
@@ -718,7 +718,7 @@ public class GradientCalculator
 
 	/**
 	 * Compute the Fisher's Information Matrix (I) assuming a Poisson process.
-	 * 
+	 *
 	 * <pre>
 	 * Iab = E [ ( d ln(L(x|p)) / da ) * ( d ln(L(x|p)) / db ) ]
 	 * p = parameters
@@ -726,19 +726,19 @@ public class GradientCalculator
 	 * L(x|p) = likelihood of X given p
 	 * E = expected value
 	 * </pre>
-	 * 
+	 *
 	 * Note that this is only a true Fisher information diagonal if the function returns the expected value for a
 	 * Poisson process. In this case the equation reduces to:
-	 * 
+	 *
 	 * <pre>
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
-	 * 
+	 *
 	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
 	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
-	 * 
+	 *
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
+	 *
 	 * @param n
 	 *            The number of data points
 	 * @param a
@@ -785,7 +785,7 @@ public class GradientCalculator
 	 * parameters.
 	 * <p>
 	 * A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param y
@@ -827,7 +827,7 @@ public class GradientCalculator
 		checkGradients(df_da, nparams);
 
 		// Apply a factor of -2 to compute the actual gradients:
-		// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models 
+		// See Numerical Recipes in C++, 2nd Ed. Equation 15.5.6 for Nonlinear Models
 		for (int j = 0; j < nparams; j++)
 			df_da[j] *= -2;
 
@@ -855,7 +855,7 @@ public class GradientCalculator
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param a
@@ -876,7 +876,7 @@ public class GradientCalculator
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
-	 * 
+	 *
 	 * @param n
 	 *            The number of data points
 	 * @param theta
@@ -931,7 +931,7 @@ public class GradientCalculator
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
-	 * 
+	 *
 	 * @param x
 	 *            n observations
 	 * @param a
@@ -951,7 +951,7 @@ public class GradientCalculator
 	 * Uses the Mortensen formula (Mortensen, et al (2010) Nature Methods 7, 377-383), equation 25.
 	 * <p>
 	 * The method involves inversion of a matrix and may fail.
-	 * 
+	 *
 	 * @param n
 	 *            The number of data points
 	 * @param theta

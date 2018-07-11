@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,7 +72,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * Create a new molecule
 	 * <p>
 	 * Note: molecules mass may be updated, see {@link #getMass()}
-	 * 
+	 *
 	 * @param id
 	 * @param xyz
 	 *            [x,y,z]
@@ -90,7 +90,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * Create a new molecule
 	 * <p>
 	 * Note: molecules mass may be updated, see {@link #getMass()}
-	 * 
+	 *
 	 * @param id
 	 * @param x
 	 * @param y
@@ -109,7 +109,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * Create a new molecule
 	 * <p>
 	 * Note: molecules mass may be updated, see {@link #getMass()}
-	 * 
+	 *
 	 * @param id
 	 * @param xyz
 	 *            [x,y,z]
@@ -130,7 +130,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * Create a new molecule
 	 * <p>
 	 * Note: molecules mass may be updated, see {@link #getMass()}
-	 * 
+	 *
 	 * @param id
 	 * @param x
 	 * @param y
@@ -151,7 +151,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	private void setMolecules(List<? extends MoleculeModel> molecules, boolean centre) throws IllegalArgumentException
 	{
 		if (molecules == null)
-			molecules = new ArrayList<MoleculeModel>(0);
+			molecules = new ArrayList<>(0);
 		this.molecules = molecules;
 		checkMass();
 
@@ -232,7 +232,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Rotate the molecule using a random axis and a random rotation angle. The rotation is around the centre-of-mass.
-	 * 
+	 *
 	 * @param maxAngle
 	 *            The maximum angle to rotate (in either direction) in degrees
 	 * @param random
@@ -260,7 +260,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	/**
 	 * Rotate the molecule using a specified axis and a random rotation angle. The rotation is around the
 	 * centre-of-mass.
-	 * 
+	 *
 	 * @param axis
 	 *            The axis to rotate around
 	 * @param maxAngle
@@ -284,7 +284,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	/**
 	 * Rotate the molecule using a random axis and a specified rotation angle. The rotation is around the
 	 * centre-of-mass.
-	 * 
+	 *
 	 * @param axis
 	 *            The axis to rotate around
 	 * @param maxAngle
@@ -309,7 +309,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Rotate the molecule using a specified axis and rotation angle. The rotation is around the centre-of-mass.
-	 * 
+	 *
 	 * @param angle
 	 *            The angle to rotate (in degrees)
 	 * @param axis
@@ -327,7 +327,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Rotate the molecule using a specified axis and rotation angle. The rotation is around the centre-of-mass.
-	 * 
+	 *
 	 * @param angle
 	 *            The angle to rotate (in degrees)
 	 * @param axis
@@ -366,7 +366,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Get the rotation matrix for a rotation around an axis
-	 * 
+	 *
 	 * @param axis
 	 *            axis
 	 * @param angle
@@ -440,7 +440,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Get the current coordinates of the nth molecule in the compound molecule
-	 * 
+	 *
 	 * @param n
 	 *            The requested molecule (0 <= n < {@link #getSize()})
 	 * @return The xyz coordinates
@@ -459,7 +459,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Get the current coordinates of the nth molecule in the compound molecule relative to the centre-of-mass
-	 * 
+	 *
 	 * @param n
 	 *            The requested molecule (0 <= n < {@link #getSize()})
 	 * @return The xyz coordinates
@@ -477,7 +477,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * Get the nth molecule in the compound molecule
 	 * <p>
 	 * Note that the molecule coordinates are relative the centre-of-mass of the compound
-	 * 
+	 *
 	 * @param n
 	 *            The requested molecule (0 <= n < {@link #getSize()})
 	 * @return The molecule
@@ -500,7 +500,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Set the fraction of a population that this molecule represents
-	 * 
+	 *
 	 * @param fraction
 	 *            the fraction to set
 	 */
@@ -516,7 +516,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 	 * zero. If all molecules have a mass of zero then the mass for each will be reset to one. This allows the
 	 * centre-of-mass calculation to function correctly. If a molecule is part of the compound and has no mass it will
 	 * be rotated and moved but will not contribute to the COM.
-	 * 
+	 *
 	 * @return The mass of all the molecules
 	 */
 	@Override
@@ -527,7 +527,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Scale the molecules relative coordinates by the given factor
-	 * 
+	 *
 	 * @param factor
 	 */
 	public void scale(double factor)
@@ -558,7 +558,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Get the diffusion type
-	 * 
+	 *
 	 * @return The diffusion type
 	 */
 	public DiffusionType getDiffusionType()
@@ -568,7 +568,7 @@ public class CompoundMoleculeModel extends MoleculeModel
 
 	/**
 	 * Set the diffusion type
-	 * 
+	 *
 	 * @param diffusionType
 	 *            The diffusion type
 	 */

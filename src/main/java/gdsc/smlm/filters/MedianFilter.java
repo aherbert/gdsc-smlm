@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -48,7 +48,7 @@ public class MedianFilter extends BaseFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -72,7 +72,7 @@ public class MedianFilter extends BaseFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -109,7 +109,7 @@ public class MedianFilter extends BaseFilter
 				reset();
 				add(data[index]);
 
-				// Sweep neighbourhood - 
+				// Sweep neighbourhood -
 				// No check for boundaries as this should be an internal sweep.
 				for (int offset_d : offset)
 				{
@@ -137,7 +137,7 @@ public class MedianFilter extends BaseFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -189,7 +189,7 @@ public class MedianFilter extends BaseFilter
 
 	/**
 	 * Initialise the median buffers
-	 * 
+	 *
 	 * @param size
 	 *            The total number of values to add (should be odd)
 	 * @param guess
@@ -215,7 +215,7 @@ public class MedianFilter extends BaseFilter
 
 	/**
 	 * Add a value
-	 * 
+	 *
 	 * @param v
 	 */
 	private void add(float v)
@@ -232,7 +232,7 @@ public class MedianFilter extends BaseFilter
 
 	/**
 	 * Get median of values
-	 * 
+	 *
 	 * @param half
 	 *            Half of the size of values (round to int).
 	 * @return The median
@@ -320,7 +320,7 @@ public class MedianFilter extends BaseFilter
 	 * Compute the block median within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -342,7 +342,7 @@ public class MedianFilter extends BaseFilter
 	 * Compute the block median within a 2n+1 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -386,7 +386,7 @@ public class MedianFilter extends BaseFilter
 				reset();
 				add(data[index]);
 
-				// Flag to indicate this pixels has a complete (2n+1) neighbourhood 
+				// Flag to indicate this pixels has a complete (2n+1) neighbourhood
 				boolean isInnerXY = (y >= ywidth && y < ylimit) && (x >= xwidth && x < xlimit);
 
 				// Sweep neighbourhood
@@ -428,7 +428,7 @@ public class MedianFilter extends BaseFilter
 	 * Compute the block median within a 3x3 size block around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -508,7 +508,7 @@ public class MedianFilter extends BaseFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -532,7 +532,7 @@ public class MedianFilter extends BaseFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -551,7 +551,7 @@ public class MedianFilter extends BaseFilter
 		final int length = maxx * maxy;
 		float[] newData = floatBuffer(floatDataBuffer, length);
 
-		// Hold the pointers to the image data for nY rows 
+		// Hold the pointers to the image data for nY rows
 		final int[] p = new int[blockSize];
 		// Buffer to hold the initial region
 		final float[] values = new float[blockSize * blockSize];
@@ -606,7 +606,7 @@ public class MedianFilter extends BaseFilter
 	 * are unchanged.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -671,7 +671,7 @@ public class MedianFilter extends BaseFilter
 	 * Compute the rolling median within a 2n+1 size rolling around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -693,7 +693,7 @@ public class MedianFilter extends BaseFilter
 	 * Compute the rolling median within a 2n+1 size rolling around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -713,11 +713,11 @@ public class MedianFilter extends BaseFilter
 		final int ywidth = FastMath.min(n, maxy - 1);
 		final int xlimit = maxx - xwidth - 1;
 
-		// The size of the region 
+		// The size of the region
 		final int nX = (2 * xwidth + 1);
 		final int nY = (2 * ywidth + 1);
 
-		// Hold the pointers to the image data for nY rows 
+		// Hold the pointers to the image data for nY rows
 		final int[] p = new int[nY];
 		// Buffer to hold the initial region
 		final float[] values = new float[nX * nY];
@@ -783,7 +783,7 @@ public class MedianFilter extends BaseFilter
 	 * Compute the rolling median within a 3x3 size rolling around each point.
 	 * <p>
 	 * Note: the input data is destructively modified
-	 * 
+	 *
 	 * @param data
 	 *            The input/output data (packed in YX order)
 	 * @param maxx
@@ -855,7 +855,7 @@ public class MedianFilter extends BaseFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -232,7 +232,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 		//		// Convert arrays to a single string
 		//		for (int i=0; i<args.length; i++)
 		//			if (args[i] instanceof double[])
-		//				args[i] = java.util.Arrays.toString((double[])args[i]);		
+		//				args[i] = java.util.Arrays.toString((double[])args[i]);
 		//		System.out.printf(format, args);
 	}
 
@@ -297,7 +297,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 */
 	protected void computeDeviationsAndValues(double[] aDev, double[] yFit)
 	{
-		// Use a dedicated solver optimised for inverting the matrix diagonal. 
+		// Use a dedicated solver optimised for inverting the matrix diagonal.
 		// The last Hessian matrix should be stored in the working alpha.
 		final FisherInformationMatrix m = computeFisherInformationMatrix(yFit);
 
@@ -328,7 +328,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * <p>
 	 * The base gradient function is used. If sub-classes wrap the function (e.g. with per-observation weights) then
 	 * these will be omitted.
-	 * 
+	 *
 	 * @param yFit
 	 *            the y fit values
 	 */
@@ -340,13 +340,13 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeValue(double[], double[], double[])
 	 */
 	@Override
 	protected boolean computeValue(double[] y, double[] yFit, double[] a)
 	{
-		// If the yFit array is not null then wrap the gradient function. 
+		// If the yFit array is not null then wrap the gradient function.
 		// Compute the value and the wrapper will store the values appropriately.
 		// Then reset the gradient function.
 
@@ -398,7 +398,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#computeFisherInformationMatrix(double[], double[])
 	 */
 	@Override
@@ -433,7 +433,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#isBounded()
 	 */
 	@Override
@@ -445,7 +445,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.FunctionSolver#setBounds(double[], double[])
 	 */
 	@Override
@@ -460,7 +460,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 	 * different function in the same parameter space.
 	 * <p>
 	 * Setting a new function removes the current bounds.
-	 * 
+	 *
 	 * @param f
 	 *            the new gradient function
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setGradientFunction(gdsc.smlm.function.GradientFunction)
@@ -474,7 +474,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#isWeighted()
 	 */
 	@Override
@@ -485,7 +485,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.fitting.nonlinear.BaseFunctionSolver#setWeights(double[])
 	 */
 	@Override

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -89,7 +89,7 @@ public class DensityImage implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -177,7 +177,7 @@ public class DensityImage implements PlugIn
 				return new KScoreCalculator(results, 1);
 
 			case 3:
-				// Ripley's L 
+				// Ripley's L
 				return new LScoreCalculator(results, 0);
 
 			case 4:
@@ -202,7 +202,7 @@ public class DensityImage implements PlugIn
 	{
 		/**
 		 * Get the density score for the input density counts
-		 * 
+		 *
 		 * @param density
 		 * @return
 		 */
@@ -210,7 +210,7 @@ public class DensityImage implements PlugIn
 
 		/**
 		 * Get the score threshold for filtering results using the configured filter threshold
-		 * 
+		 *
 		 * @return
 		 */
 		float getThreshold();
@@ -284,7 +284,7 @@ public class DensityImage implements PlugIn
 		public float getThreshold()
 		{
 			// Note: K(r) ~ Area
-			// Since K(r) should be equal to the area to make the filter threshold scale appropriately 
+			// Since K(r) should be equal to the area to make the filter threshold scale appropriately
 			// we adjust the threshold by the area
 			if (mode == 0)
 				return (float) filterThreshold * getRegionArea();
@@ -306,7 +306,7 @@ public class DensityImage implements PlugIn
 		{
 			// Compute a normalised variance stabilised per particle L-score.
 			// As in: Scarselli, et al.
-			// Cell type-specific β2-adrenergic receptor clusters identified using PALM 
+			// Cell type-specific β2-adrenergic receptor clusters identified using PALM
 			// microscopy are not lipid raft related, but depend on actin cytoskeleton integrity.
 			// J Biol Chem. 2012 May 11;287(20):16768-80
 			// Note:
@@ -344,14 +344,14 @@ public class DensityImage implements PlugIn
 			// Note:
 			// L(r) is proportional to radius
 			// K(r) is proportional to area
-			// To make the filtered results the same to the K(r) function we could use the 
+			// To make the filtered results the same to the K(r) function we could use the
 			// sqrt of the filterThreshold
 
 			double threshold = filterThreshold;
 			//double threshold = Math.sqrt(filterThreshold);
 
 			// Note: L(r) ~ r
-			// Since L(r) should be equal to the radius to make the filter threshold scale appropriately 
+			// Since L(r) should be equal to the radius to make the filter threshold scale appropriately
 			// we adjust the threshold by the radius
 			if (mode == 0)
 				return (float) threshold * radius;
@@ -371,7 +371,7 @@ public class DensityImage implements PlugIn
 	 * Crop the results to the ROI. Add a border using the sampling radius so that counts do not have to be approximated
 	 * (i.e. all spots around the edge of the ROI will have a complete image to sample from). The results are modified
 	 * in place.
-	 * 
+	 *
 	 * @param results
 	 * @param isWithin
 	 *            Set to true if the added border is within the original bounds (i.e. no adjustment for missing counts
@@ -385,7 +385,7 @@ public class DensityImage implements PlugIn
 			return results;
 
 		// Adjust bounds relative to input results image:
-		// Use the ROI relative to the frame the ROI is drawn on. 
+		// Use the ROI relative to the frame the ROI is drawn on.
 		// Map those fractional coordinates back to the original data bounds.
 		Rectangle bounds = results.getBounds();
 		double xscale = (double) roiImageWidth / bounds.width;
@@ -426,7 +426,7 @@ public class DensityImage implements PlugIn
 	/**
 	 * Remove any results which fall in the radius border added around the ROI. Results are modified in place and a new
 	 * density array is returned.
-	 * 
+	 *
 	 * @param results
 	 * @param density
 	 * @return
@@ -460,7 +460,7 @@ public class DensityImage implements PlugIn
 
 	/**
 	 * Output a log message of the results including the average density for localisations and the expected average.
-	 * 
+	 *
 	 * @param results
 	 * @param density
 	 * @param radius
@@ -503,7 +503,7 @@ public class DensityImage implements PlugIn
 
 	/**
 	 * Draw an image of the density for each localisation. Optionally filter results below a threshold.
-	 * 
+	 *
 	 * @param results
 	 * @param density
 	 * @param scoreCalculator
@@ -557,7 +557,7 @@ public class DensityImage implements PlugIn
 		gd.addHelp(About.HELP_URL);
 
 		// Build a list of all images with a region ROI
-		List<String> titles = new LinkedList<String>();
+		List<String> titles = new LinkedList<>();
 		if (WindowManager.getWindowCount() > 0)
 		{
 			for (int imageID : WindowManager.getIDList())
@@ -660,7 +660,7 @@ public class DensityImage implements PlugIn
 
 	/**
 	 * Compute the Ripley's L-function for user selected radii and show it on a plot.
-	 * 
+	 *
 	 * @param results
 	 */
 	private void computeRipleysPlot(MemoryPeakResults results)

@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -286,7 +286,7 @@ public class FHTFilter extends BaseFilter
 		kernelFht = new FHT2(data, maxN, true);
 
 		//kernelFht = new FHT2(data, maxN, false);
-		//kernelFht.transform();		
+		//kernelFht.transform();
 
 		if (operation == Operation.DECONVOLUTION)
 			kernelFht.initialiseFastOperations();
@@ -302,7 +302,7 @@ public class FHTFilter extends BaseFilter
 		// Note the FHT power spectrum centre is at n/2 of an even sized image.
 		// So we must insert the centre at that point. To do this we check for odd/even
 		// and offset if necessary. This allows the FHTFilter to match the correlation
-		// result from a filter in the spatial domain performed using the KernelFilter class. 
+		// result from a filter in the spatial domain performed using the KernelFilter class.
 		int diff = maxN - width;
 		return ((diff & 1) == 1) ? (diff + 1) / 2 : diff / 2;
 	}
@@ -402,7 +402,7 @@ public class FHTFilter extends BaseFilter
 			w = ImageWindow.tukeyEdge(Math.min(kw, kh), border);
 		}
 
-		// Assume that the border will only be a fraction of the image and perform 
+		// Assume that the border will only be a fraction of the image and perform
 		// selective weighting
 
 		for (int b = 0, ri = -1, rj = kernel.length; b < border; b++)
@@ -423,7 +423,7 @@ public class FHTFilter extends BaseFilter
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override

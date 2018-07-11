@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -192,7 +192,7 @@ public class PSFDrift implements PlugIn
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -252,7 +252,7 @@ public class PSFDrift implements PlugIn
 
 			if (comFitting)
 			{
-				// Get centre-of-mass estimate, then subtract the centre that will be added later 
+				// Get centre-of-mass estimate, then subtract the centre that will be added later
 				BenchmarkFit.getCentreOfMass(data, w, w, xy[xy.length - 1]);
 				xy[xy.length - 1][0] -= cx;
 				xy[xy.length - 1][1] -= cy;
@@ -403,7 +403,7 @@ public class PSFDrift implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -501,7 +501,7 @@ public class PSFDrift implements PlugIn
 			return;
 		}
 
-		// Configure the fit solver. We must wrap the settings with a 
+		// Configure the fit solver. We must wrap the settings with a
 		// FitEngineConfiguration to pass to the PeakFit method
 		FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
 		FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
@@ -568,9 +568,9 @@ public class PSFDrift implements PlugIn
 
 		// Create a pool of workers
 		int nThreads = Prefs.getThreads();
-		BlockingQueue<Job> jobs = new ArrayBlockingQueue<Job>(nThreads * 2);
-		List<Worker> workers = new LinkedList<Worker>();
-		List<Thread> threads = new LinkedList<Thread>();
+		BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+		List<Worker> workers = new LinkedList<>();
+		List<Thread> threads = new LinkedList<>();
 		for (int i = 0; i < nThreads; i++)
 		{
 			Worker worker = new Worker(jobs, psf, w, fitConfig);
@@ -580,7 +580,7 @@ public class PSFDrift implements PlugIn
 			t.start();
 		}
 
-		// Fit 
+		// Fit
 		Utils.showStatus("Fitting ...");
 		final int step = Utils.getProgressInterval(total);
 		outer: for (int z = minz, i = 0; z <= maxz; z++)
@@ -664,7 +664,7 @@ public class PSFDrift implements PlugIn
 			recall[i] = (double) statsX.getN() / (nStartPoints * gridSize2);
 		}
 
-		// Find the range from the z-centre above the recall limit 
+		// Find the range from the z-centre above the recall limit
 		int centre = 0;
 		for (int slice = startSlice, i = 0; slice <= endSlice; slice++, i++)
 		{
@@ -718,7 +718,7 @@ public class PSFDrift implements PlugIn
 			positionsToAverage = Math.abs((int) gd.getNextNumber());
 			Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
 			boolean useOldOffset = useOffset && !oldOffset.isEmpty();
-			TurboList<double[]> offset = new TurboList<double[]>();
+			TurboList<double[]> offset = new TurboList<>();
 			final double pitch = psfSettings.getPixelSize();
 			int j = 0;
 			for (int i = start, slice = startSlice; i <= end; slice++, i++)
@@ -772,7 +772,7 @@ public class PSFDrift implements PlugIn
 
 	private void addMissingOffsets(int startSlice, int endSlice, int nSlices, TurboList<double[]> offset)
 	{
-		// Add an offset for the remaining slices 
+		// Add an offset for the remaining slices
 		if (positionsToAverage > 0)
 		{
 			double cx = 0, cy = 0;
@@ -903,7 +903,7 @@ public class PSFDrift implements PlugIn
 		// 2. All points between lower and upper inclusive
 		// 3. All point from upper upwards
 
-		// Plot the main curve first 
+		// Plot the main curve first
 		addPoints(plot, shape, x, y, lower, upper, Color.blue);
 		// Then plot the others
 		addPoints(plot, shape, x, y, x[0], lower, Color.red);
@@ -999,8 +999,8 @@ public class PSFDrift implements PlugIn
 			}
 			else
 			{
-				// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at 
-				// startOffset pixels total distance 
+				// Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at
+				// startOffset pixels total distance
 				final double distance = Math.sqrt(startOffset * startOffset * 0.5);
 
 				for (int x = -1; x <= 1; x += 2)
@@ -1026,7 +1026,7 @@ public class PSFDrift implements PlugIn
 
 	public static List<String> createImageList(boolean requireFwhm)
 	{
-		List<String> titles = new LinkedList<String>();
+		List<String> titles = new LinkedList<>();
 		int[] ids = WindowManager.getIDList();
 		if (ids != null)
 		{
@@ -1170,7 +1170,7 @@ public class PSFDrift implements PlugIn
 			sw1 = Arrays.copyOf(sw1, c1);
 		}
 
-		// Smooth 
+		// Smooth
 		if (smoothing > 0)
 		{
 			LoessInterpolator loess = new LoessInterpolator(smoothing, 1);

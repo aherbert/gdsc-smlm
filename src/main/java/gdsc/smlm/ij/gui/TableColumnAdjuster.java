@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -57,7 +57,7 @@ import javax.swing.table.TableModel;
  * of the columns must fit inside the table. So if you increase one column, one
  * or more of the other columns must decrease. Because of this the resize mode
  * of RESIZE_ALL_COLUMNS will work the best.
- * 
+ *
  * @see <a
  *      href=https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/>https://tips4java.wordpress.com/2008/11/10/table-column-adjuster/</a>
  */
@@ -69,7 +69,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 	private boolean isColumnDataIncluded;
 	private boolean isOnlyAdjustLarger;
 	private boolean isDynamicAdjustment;
-	private Map<TableColumn, Integer> columnSizes = new HashMap<TableColumn, Integer>();
+	private Map<TableColumn, Integer> columnSizes = new HashMap<>();
 
 	private int maxRows = 0;
 

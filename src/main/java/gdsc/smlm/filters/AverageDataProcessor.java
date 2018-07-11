@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,7 @@ import gdsc.core.ij.Utils;
  * size is large then the smoothing switches to using an interpolation between two block sizes. This is an approximation
  * due to incorrect weighting of the corners. Note that at large sizes the corners are a fraction of the total edge
  * pixels so the difference is minor.
- * 
+ *
  * @see gdsc.smlm.filters.AreaAverageFilter
  */
 public class AverageDataProcessor extends DataProcessor
@@ -51,7 +51,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param border
 	 *            The border to ignore for maxima
 	 * @param smooth
@@ -64,7 +64,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param border
 	 *            The border to ignore for maxima
 	 * @param smooth
@@ -96,7 +96,7 @@ public class AverageDataProcessor extends DataProcessor
 	/**
 	 * Convert the smoothing parameter to the value which is used for the AreaAverageFilter.
 	 * Values below zero are set to zero.
-	 * 
+	 *
 	 * @param smooth
 	 * @return The adjusted value
 	 */
@@ -109,7 +109,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#isWeighted()
 	 */
 	@Override
@@ -120,7 +120,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#setWeights(float[], int, int)
 	 */
 	@Override
@@ -133,7 +133,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#hasWeights()
 	 */
 	@Override
@@ -159,7 +159,7 @@ public class AverageDataProcessor extends DataProcessor
 			smoothData = Arrays.copyOf(data, width * height);
 
 			// ADH 05-Jan-2017:
-			// This was changed from 1 to 0. Previously if the iSmooth was 1 then 
+			// This was changed from 1 to 0. Previously if the iSmooth was 1 then
 			// it would fall through to the striped block filter using a weight of 1.
 			// This can be done using the rolling block algorithm instead.
 			if (iSmooth > 0)
@@ -241,7 +241,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -258,7 +258,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#getName()
 	 */
 	@Override
@@ -269,7 +269,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#getParameters()
 	 */
 	@Override
@@ -282,7 +282,7 @@ public class AverageDataProcessor extends DataProcessor
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.filters.DataProcessor#getSpread()
 	 */
 	@Override

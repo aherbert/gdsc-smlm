@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -57,7 +57,7 @@ public class CreateDataSettingsHelper
 	/**
 	 * Get the amplification (Count/electron). This is equal to the EM-gain multiplied by the camera gain. If either
 	 * gain or QE are disabled then they will be ignored. An amplification of zero means no amplification is applied.
-	 * 
+	 *
 	 * @return
 	 */
 	public double getAmplification()
@@ -69,7 +69,7 @@ public class CreateDataSettingsHelper
 	 * EM-gain cannot be below 1. If so it is set to zero and disabled.
 	 * <p>
 	 * This is also zero for a non EM-CCD camera.
-	 * 
+	 *
 	 * @return the emGain
 	 */
 	public double getEmGain()
@@ -86,7 +86,7 @@ public class CreateDataSettingsHelper
 
 	/**
 	 * Camera gain cannot be below 0. If so it is set to zero and disabled.
-	 * 
+	 *
 	 * @return the cameraGain (Count/electron)
 	 */
 	public double getCameraGain()
@@ -99,7 +99,7 @@ public class CreateDataSettingsHelper
 
 	/**
 	 * QE cannot be below 0 or above 1. If so it is set to one and disabled.
-	 * 
+	 *
 	 * @return the quantumEfficiency
 	 */
 	public double getQuantumEfficiency()
@@ -132,7 +132,7 @@ public class CreateDataSettingsHelper
 	 * Get the total gain (Count/Photon). This is equal to the EM-gain multiplied by the camera gain multiplied by the
 	 * quantum efficiency. If either gain is disabled then they will be ignored. A total gain of zero means no gain is
 	 * applied.
-	 * 
+	 *
 	 * @return
 	 */
 	public double getTotalGain()
@@ -144,7 +144,7 @@ public class CreateDataSettingsHelper
 	 * Get the total gain (Count/Photon). This is equal to the EM-gain multiplied by the camera gain multiplied by the
 	 * quantum efficiency. If either gain is disabled then they will be ignored. If the total gain is not above zero
 	 * (due to invalid configuration) then 1 will be returned.
-	 * 
+	 *
 	 * @return
 	 */
 	public double getTotalGainSafe()

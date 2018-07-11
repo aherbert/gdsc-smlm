@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -80,7 +80,7 @@ import gdsc.smlm.results.procedures.ZResultProcedure;
  */
 public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 {
-	private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<String, MemoryPeakResults>();
+	private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<>();
 	private static final Runtime s_runtime = Runtime.getRuntime();
 	private static int byteSize = 0;
 	private static int byteSizeWithDeviations = 0;
@@ -91,7 +91,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	private boolean sortAfterEnd;
 
 	/////////////////////////////////////////////////////////////////
-	// START OF RESULTS STORAGE METHODS 
+	// START OF RESULTS STORAGE METHODS
 	/////////////////////////////////////////////////////////////////
 
 	/**
@@ -142,7 +142,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#size()
 	 */
 	@Override
@@ -167,9 +167,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Add all results.
 	 * <p>
 	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-	 * 
+	 *
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#addCollection(java.util.Collection)
 	 */
 	@Override
@@ -182,7 +182,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Add all results.
 	 * <p>
 	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#addAll(gdsc.smlm.results.PeakResult[])
 	 */
 	@Override
@@ -195,7 +195,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Add all results.
 	 * <p>
 	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-	 * 
+	 *
 	 * @see gdsc.smlm.results.AbstractPeakResults#addAll(gdsc.smlm.results.PeakResultStore)
 	 */
 	@Override
@@ -289,7 +289,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/////////////////////////////////////////////////////////////////
-	// END OF RESULTS STORAGE METHODS 
+	// END OF RESULTS STORAGE METHODS
 	/////////////////////////////////////////////////////////////////
 
 	/**
@@ -352,7 +352,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/////////////////////////////////////////////////////////////////
-	// START OF STATIC MEMORY STORAGE METHODS 
+	// START OF STATIC MEMORY STORAGE METHODS
 	/////////////////////////////////////////////////////////////////
 
 	/**
@@ -661,12 +661,12 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/////////////////////////////////////////////////////////////////
-	// END OF STATIC MEMORY STORAGE METHODS 
+	// END OF STATIC MEMORY STORAGE METHODS
 	/////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////
 	// START OF PeakResults interface METHODS
-	// Note: Most of the methods are in the section for 
+	// Note: Most of the methods are in the section for
 	// storage of peak results
 	/////////////////////////////////////////////////////////////////
 
@@ -675,7 +675,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * <p>
 	 * This clears the current results but does not reduce storage allocation. This can be done with
 	 * {@link #trimToSize()}.
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#begin()
 	 */
 	@Override
@@ -688,9 +688,9 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	 * Add a result.
 	 * <p>
 	 * Not synchronized. Use SynchronizedPeakResults to wrap this instance for use across threads.
-	 * 
+	 *
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see gdsc.smlm.results.PeakResults#add(int, int, int, float, double, float, float, float[], float[])
 	 */
 	@Override
@@ -702,7 +702,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#end()
 	 */
 	@Override
@@ -713,7 +713,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/////////////////////////////////////////////////////////////////
-	// END OF PeakResults interface METHODS 
+	// END OF PeakResults interface METHODS
 	/////////////////////////////////////////////////////////////////
 
 	/**
@@ -775,7 +775,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		final TypeConverter<DistanceUnit> c;
 		if (distanceUnit == null)
 		{
-			c = new IdentityTypeConverter<DistanceUnit>(null);
+			c = new IdentityTypeConverter<>(null);
 		}
 		else
 		{
@@ -803,16 +803,16 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 		// Convert the results
 		//@formatter:off
 		return new Rectangle2D.Float(
-				c.convert(minX), 
-				c.convert(minY), 
-				c.convert(maxX - minX), 
+				c.convert(minX),
+				c.convert(minY),
+				c.convert(maxX - minX),
 				c.convert(maxY - minY));
 		//@formatter:on
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.utils.fitting.results.PeakResults#isActive()
 	 */
 	@Override
@@ -1292,7 +1292,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 
 	/////////////////////////////////////////////////////////////////
 	// START OF PROCEDURE METHODS
-	// Note the converters are always created (and not cached) to 
+	// Note the converters are always created (and not cached) to
 	// support thread safety, i.e. accessing the results in different
 	// units across threads.
 	/////////////////////////////////////////////////////////////////
@@ -1525,8 +1525,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIR(
-					ic.convert(r.getBackground()), 
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getBackground()),
+					ic.convert(r.getIntensity()),
 					r);
 			//@formatter:on
 		}
@@ -1559,8 +1559,8 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIXY(
-					ic.convert(r.getBackground()), 
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getBackground()),
+					ic.convert(r.getIntensity()),
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()));
 			//@formatter:on
@@ -1594,10 +1594,10 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeBIXYZ(
-					ic.convert(r.getBackground()), 
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getBackground()),
+					ic.convert(r.getIntensity()),
 					dc.convert(r.getXPosition()),
-					dc.convert(r.getYPosition()), 
+					dc.convert(r.getYPosition()),
 					dc.convert(r.getZPosition()));
 			//@formatter:on
 		}
@@ -1705,7 +1705,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeIXY(
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getIntensity()),
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()));
 			//@formatter:on
@@ -1739,7 +1739,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeIXYR(
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getIntensity()),
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					r);
@@ -1774,7 +1774,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getf(i);
 			//@formatter:off
 			procedure.executeIXYZ(
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getIntensity()),
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					dc.convert(r.getZPosition()));
@@ -1809,7 +1809,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 			final PeakResult r = getfX(i);
 			//@formatter:off
 			procedure.executeIXYZR(
-					ic.convert(r.getIntensity()), 
+					ic.convert(r.getIntensity()),
 					dc.convert(r.getXPosition()),
 					dc.convert(r.getYPosition()),
 					dc.convert(r.getZPosition()),
@@ -2286,7 +2286,7 @@ public class MemoryPeakResults extends AbstractPeakResults implements Cloneable
 	}
 
 	/////////////////////////////////////////////////////////////////
-	// END OF PROCEDURE METHODS 
+	// END OF PROCEDURE METHODS
 	/////////////////////////////////////////////////////////////////
 
 	/**

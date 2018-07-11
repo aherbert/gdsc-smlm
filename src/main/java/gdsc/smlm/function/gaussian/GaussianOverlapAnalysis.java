@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -82,8 +82,8 @@ public class GaussianOverlapAnalysis
 		if (size < 0)
 			throw new IllegalArgumentException("Input range is too large: maxx * maxy = " + ((long) maxx) * maxy);
 		// We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
-		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss 
-		// centred in the middle of a pixel we need to adjust each centre 
+		// Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss
+		// centred in the middle of a pixel we need to adjust each centre
 		centrex = maxx * 0.5 - 0.5;
 		centrey = maxy * 0.5 - 0.5;
 	}
@@ -266,7 +266,7 @@ public class GaussianOverlapAnalysis
 	 * Get the overlap data.
 	 * <p>
 	 * Computes the sum of the central function, and the sum of the overlap
-	 * 
+	 *
 	 * @return The data [sum f1, sum overlap]
 	 */
 	public double[] getOverlapData()
@@ -310,7 +310,7 @@ public class GaussianOverlapAnalysis
 	 * <p>
 	 * The result of this function is effected by how the overlap was computed, either within the mask or within the
 	 * entire square region (see {@link #add(double[], boolean)})
-	 * 
+	 *
 	 * @return The weighted background
 	 */
 	public double getWeightedbackground()
@@ -336,7 +336,7 @@ public class GaussianOverlapAnalysis
 
 	/**
 	 * Get the probability of a standard Gaussian within the given range x, i.e. P(-x < X <= x)
-	 * 
+	 *
 	 * @param x
 	 *            (must be positive)
 	 * @return The probability (0-1)

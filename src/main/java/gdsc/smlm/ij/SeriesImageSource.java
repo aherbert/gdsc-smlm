@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -183,7 +183,7 @@ public class SeriesImageSource extends ImageSource
 						ss.seek(0);
 						this.ss = ss;
 
-						// Store if the stream contains in-memory data						
+						// Store if the stream contains in-memory data
 						this.inMemory = ss instanceof ByteArraySeekableStream;
 					}
 					catch (IOException e)
@@ -250,7 +250,7 @@ public class SeriesImageSource extends ImageSource
 						ss.seek(0);
 						this.ss = ss;
 
-						// Store if the stream contains in-memory data						
+						// Store if the stream contains in-memory data
 						this.inMemory = ss instanceof ByteArraySeekableStream;
 					}
 					catch (IOException e)
@@ -333,7 +333,7 @@ public class SeriesImageSource extends ImageSource
 
 		/**
 		 * Check the file info are all the same size and type and have just 1 image
-		 * 
+		 *
 		 * @param info
 		 * @return True if all the same size and type
 		 */
@@ -359,7 +359,7 @@ public class SeriesImageSource extends ImageSource
 
 		/**
 		 * Check the file info is the same size and type as the first file info
-		 * 
+		 *
 		 * @param info
 		 * @return True if the same size and type
 		 */
@@ -452,7 +452,7 @@ public class SeriesImageSource extends ImageSource
 			Object pixels = readPixels();
 			//.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 
-			// The reader now throws exceptions. Ignore setting the canRead flag. 
+			// The reader now throws exceptions. Ignore setting the canRead flag.
 			// The sequential series will just shutdown.
 			//if (pixels == null)
 			//{
@@ -516,8 +516,8 @@ public class SeriesImageSource extends ImageSource
 			catch (IOException e)
 			{
 				// The reader now throws exceptions. We could set the canRead flag to prevent further IO.
-				// However do not do this so that an image can be scrolled up to the point at which 
-				// it cannot be read (e.g. in the case of TIFF file truncation during sequential writing). 
+				// However do not do this so that an image can be scrolled up to the point at which
+				// it cannot be read (e.g. in the case of TIFF file truncation during sequential writing).
 				//canRead = false;
 				throw e;
 			}
@@ -638,7 +638,7 @@ public class SeriesImageSource extends ImageSource
 
 		/**
 		 * Reset for sequential reading.
-		 * 
+		 *
 		 * @throws IOException
 		 */
 		public void reset() throws IOException
@@ -701,7 +701,7 @@ public class SeriesImageSource extends ImageSource
 	{
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -716,7 +716,7 @@ public class SeriesImageSource extends ImageSource
 				{
 					final String path = images.get(currentImage);
 
-					// Check the cache to avoid a re-read. 
+					// Check the cache to avoid a re-read.
 					TiffImage image = imageData[currentImage].tiffImage;
 					if (image == null)
 					{
@@ -727,7 +727,7 @@ public class SeriesImageSource extends ImageSource
 						// Reading the info can be done by the TiffImage dynamically
 						// using a dedicated Tiff decoder.
 						// Dynamically reading will not experience a big pause when
-						// all IFDs are read on a large image (e.g. 5000 frames). This will 
+						// all IFDs are read on a large image (e.g. 5000 frames). This will
 						// allow the source to continue queueing frames for processing
 						// even on massive images.
 
@@ -751,7 +751,7 @@ public class SeriesImageSource extends ImageSource
 
 							// Reset after reading the index map
 							td.reset();
-							// This will throw if there is an error and the seekable stream 
+							// This will throw if there is an error and the seekable stream
 							// is closed in the finally block. Otherwise the method will close
 							// the stream.
 							ExtendedFileInfo[] info = td.getTiffInfo(true);
@@ -861,7 +861,7 @@ public class SeriesImageSource extends ImageSource
 	{
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -936,7 +936,7 @@ public class SeriesImageSource extends ImageSource
 	{
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -994,10 +994,10 @@ public class SeriesImageSource extends ImageSource
 					}
 					else if (image.indexMap != null)
 					{
-						// Also re-read if the image was opened using an index map as 
+						// Also re-read if the image was opened using an index map as
 						// the tiff info may be incomplete.
 						// This will always be the case
-						// for the first image as that is opened in openSource().						
+						// for the first image as that is opened in openSource().
 						final String path = images.get(currentImage);
 						trackProgress.log("Reading TIFF info %s", path);
 						image.readTiffInfo(ss);
@@ -1046,7 +1046,7 @@ public class SeriesImageSource extends ImageSource
 	{
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
@@ -1114,7 +1114,7 @@ public class SeriesImageSource extends ImageSource
 	//	{
 	//		/*
 	//		 * (non-Javadoc)
-	//		 * 
+	//		 *
 	//		 * @see java.lang.Runnable#run()
 	//		 */
 	//		public void run()
@@ -1130,7 +1130,7 @@ public class SeriesImageSource extends ImageSource
 	//					final String path = images.get(currentImage);
 	//					//System.out.println("Reading " + images.get(currentImage));
 	//
-	//					// This may contain a custom SeekableStream that wraps an in-memory RandomAccessFile 
+	//					// This may contain a custom SeekableStream that wraps an in-memory RandomAccessFile
 	//					ss = createSeekableStream(path);
 	//
 	//					if (ss != null)
@@ -1149,16 +1149,16 @@ public class SeriesImageSource extends ImageSource
 	//						{
 	//							//td.enableDebugging();
 	//							// This will close the seekable stream.
-	//							// If it is a custom in-memory object then the close call is ignored. 
+	//							// If it is a custom in-memory object then the close call is ignored.
 	//							info = td.getTiffInfo();
 	//							//if (info != null)
 	//							//{
 	//							//	System.out.println(info[0].debugInfo);
-	//							//	
-	//							//	// This contains OME TIFF metadata as serialised JSON when using 
+	//							//
+	//							//	// This contains OME TIFF metadata as serialised JSON when using
 	//							//	// MicroManager to save the TIFF
 	//							//	System.out.println(info[0].info);
-	//							//	
+	//							//
 	//							//	ij.io.FileOpener fo = new ij.io.FileOpener(info[0]);
 	//							//	java.util.Properties p = fo.decodeDescriptionString(info[0]);
 	//							//	System.out.println(p);
@@ -1190,7 +1190,7 @@ public class SeriesImageSource extends ImageSource
 	//			}
 	//			catch (InterruptedException e)
 	//			{
-	//				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+	//				// This is from the queue put method, possibly an interrupt on the queue or thread?
 	//				System.out.println(e.toString()); e.printStackTrace();
 	//			}
 	//
@@ -1202,7 +1202,7 @@ public class SeriesImageSource extends ImageSource
 	//			}
 	//			catch (InterruptedException e)
 	//			{
-	//				// This is from the queue put method, possibly an interrupt on the queue or thread? 
+	//				// This is from the queue put method, possibly an interrupt on the queue or thread?
 	//				// Q - How should this be handled?
 	//				e.printStackTrace();
 	//			}
@@ -1300,7 +1300,7 @@ public class SeriesImageSource extends ImageSource
 		}
 		catch (IOException e)
 		{
-			// This exception is not bubbled up. 
+			// This exception is not bubbled up.
 			// At the moment if we ignore this then the ImageWorker will open the file
 			// rather than process from the memory stream.
 			e.printStackTrace();
@@ -1328,7 +1328,7 @@ public class SeriesImageSource extends ImageSource
 	//
 	//		/*
 	//		 * (non-Javadoc)
-	//		 * 
+	//		 *
 	//		 * @see java.lang.Runnable#run()
 	//		 */
 	//		public void run()
@@ -1392,7 +1392,7 @@ public class SeriesImageSource extends ImageSource
 	//			}
 	//			catch (Exception e)
 	//			{
-	//				// handle appropriately 
+	//				// handle appropriately
 	//				System.out.println(id + ": " + e.toString());
 	//			}
 	//			finally
@@ -1488,7 +1488,7 @@ public class SeriesImageSource extends ImageSource
 
 	/**
 	 * Create a new image source using the given image series
-	 * 
+	 *
 	 * @param name
 	 * @param path
 	 */
@@ -1514,7 +1514,7 @@ public class SeriesImageSource extends ImageSource
 	 * Create a new image source using the directory containing the images.
 	 * <p>
 	 * The directory is opened using {@link gdsc.core.ij.SeriesOpener }
-	 * 
+	 *
 	 * @param name
 	 * @param path
 	 */
@@ -1525,7 +1525,7 @@ public class SeriesImageSource extends ImageSource
 
 	/**
 	 * Create a new image source using the paths to the images
-	 * 
+	 *
 	 * @param name
 	 * @param filenames
 	 *            the full path names of the image files
@@ -1539,7 +1539,7 @@ public class SeriesImageSource extends ImageSource
 	private boolean isTiffSeries(String[] filenames)
 	{
 		// Create this as it is needed for XStream serialisation
-		images = new ArrayList<String>();
+		images = new ArrayList<>();
 
 		for (int i = 0; i < filenames.length; i++)
 		{
@@ -1683,7 +1683,7 @@ public class SeriesImageSource extends ImageSource
 				{
 					File file = new File(path);
 
-					// Get the size of each file so we can determine if 
+					// Get the size of each file so we can determine if
 					// they can fit into memory. We only use pre-loading for
 					// sequential reading if all images fit into memory.
 					long size = getSize(file);
@@ -1706,7 +1706,7 @@ public class SeriesImageSource extends ImageSource
 					else if (nImages.numberOfImages <= 0)
 					{
 						// No TIFF images. This will break the non-sequential support
-						// using the cumulative size array so remove the image. 
+						// using the cumulative size array so remove the image.
 						continue;
 					}
 
@@ -1762,14 +1762,14 @@ public class SeriesImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#openSource()
 	 */
 	@Override
 	protected boolean openSource()
 	{
-		// We now require a tiff series. 
-		// Object deserialisation of old data may have non tiff images so check. 
+		// We now require a tiff series.
+		// Object deserialisation of old data may have non tiff images so check.
 		if (!isTiffSeries || images.isEmpty())
 			return false;
 
@@ -1777,8 +1777,8 @@ public class SeriesImageSource extends ImageSource
 		if (frames == 0)
 			return false;
 
-		// Reset if already open 
-		// (Should we support only closing the sequential reading functionality) 
+		// Reset if already open
+		// (Should we support only closing the sequential reading functionality)
 		close();
 
 		// Open the first TIFF image
@@ -1801,7 +1801,7 @@ public class SeriesImageSource extends ImageSource
 			}
 			catch (Exception e)
 			{
-				// Q. Should the problem be reported. Currently if the exception is 
+				// Q. Should the problem be reported. Currently if the exception is
 				// not bubbled up then the source is not opened.
 				if (trackProgress.isLog())
 					trackProgress.log("Failed to open: %s", ExceptionUtils.getStackTrace(e));
@@ -1812,7 +1812,7 @@ public class SeriesImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#closeSource()
 	 */
 	@Override
@@ -1826,9 +1826,9 @@ public class SeriesImageSource extends ImageSource
 
 		if (lastImage != null)
 			lastImage.close(true);
-		//image = 
+		//image =
 		lastImage = null;
-		//nextImageId = currentSlice = 
+		//nextImageId = currentSlice =
 		lastImageId = 0;
 	}
 
@@ -1862,10 +1862,10 @@ public class SeriesImageSource extends ImageSource
 	//							// Fill cache
 	//							lastImage = image;
 	//							lastImageId = next.imageId;
-	//							// The cache is used for non-sequential reading. To prevent 
-	//							// memory usage during sequential reading only cache the first 
-	//							// one as this is generated when the source is opened and it is 
-	//							// unclear if the source is to be used non-sequentially. 
+	//							// The cache is used for non-sequential reading. To prevent
+	//							// memory usage during sequential reading only cache the first
+	//							// one as this is generated when the source is opened and it is
+	//							// unclear if the source is to be used non-sequentially.
 	//							if (lastImageId == 0 && image instanceof TiffImage)
 	//								storeTiffImage(lastImageId, (TiffImage) image);
 	//							return image;
@@ -1932,7 +1932,7 @@ public class SeriesImageSource extends ImageSource
 	private synchronized void createQueue()
 	{
 		// Q. What size is optimal?
-		long bytesPerFrame = 1024 * 1024 * 2; // A typical unsigned short image 
+		long bytesPerFrame = 1024 * 1024 * 2; // A typical unsigned short image
 		// We should have successfully opened the first image and so find the pixel size
 		if (imageData != null && imageData[0] != null && imageData[0].tiffImage != null &&
 				imageData[0].tiffImage.bytesPerFrame > 0)
@@ -1941,23 +1941,23 @@ public class SeriesImageSource extends ImageSource
 		}
 		// Now create a queue to hold n images in memory
 		int n = Math.max(2, (int) Math.ceil(sequentialReadBufferLimit / (double) bytesPerFrame));
-		rawFramesQueue = new CloseableBlockingQueue<Object>(n);
+		rawFramesQueue = new CloseableBlockingQueue<>(n);
 
 		if (belowBufferLimit() && images.size() > 1)
 		{
 			// A list of images that may have been read
 			//nextImages = new NextSource[images.size()];
 
-			// For now just support a single thread for reading the 
-			// raw byte data, decoding and read the TIFF. We can control 
+			// For now just support a single thread for reading the
+			// raw byte data, decoding and read the TIFF. We can control
 			// the number of images buffered into memory.
 			final int nImages = numberOfImages;
 
-			decodeQueue = new CloseableBlockingQueue<NextSource>(nImages);
-			readQueue = new CloseableBlockingQueue<NextSource>(nImages);
+			decodeQueue = new CloseableBlockingQueue<>(nImages);
+			readQueue = new CloseableBlockingQueue<>(nImages);
 
-			workers = new ArrayList<BaseWorker>(3);
-			threads = new ArrayList<Thread>(3);
+			workers = new ArrayList<>(3);
+			threads = new ArrayList<>(3);
 			startWorker(new BufferWorker());
 			startWorker(new DecodeWorker());
 			startWorker(new ReadWorker());
@@ -1965,8 +1965,8 @@ public class SeriesImageSource extends ImageSource
 		else
 		{
 			// A single worker thread to read the series
-			workers = new ArrayList<BaseWorker>(1);
-			threads = new ArrayList<Thread>(1);
+			workers = new ArrayList<>(1);
+			threads = new ArrayList<>(1);
 			startWorker(new TIFFWorker());
 		}
 	}
@@ -2077,7 +2077,7 @@ public class SeriesImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#initialiseSequentialReading()
 	 */
 	@Override
@@ -2099,7 +2099,7 @@ public class SeriesImageSource extends ImageSource
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @throws DataException
 	 *             If there was an error duing the sequential read
 	 */
@@ -2128,7 +2128,7 @@ public class SeriesImageSource extends ImageSource
 			e.printStackTrace();
 		}
 
-		// We are here because the pixels were null so shut down sequential reading 
+		// We are here because the pixels were null so shut down sequential reading
 		rawFramesQueue.close(true);
 
 		return null;
@@ -2136,7 +2136,7 @@ public class SeriesImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#getRawFrame(int)
 	 */
 	@Override
@@ -2201,7 +2201,7 @@ public class SeriesImageSource extends ImageSource
 				}
 				catch (Exception e)
 				{
-					// Q. Should the problem be reported. Currently if the exception is 
+					// Q. Should the problem be reported. Currently if the exception is
 					// not bubbled up then the frame will be null.
 					if (trackProgress.isLog())
 						trackProgress.log("Failed to open frame %d: %s", frame, ExceptionUtils.getStackTrace(e));
@@ -2215,8 +2215,8 @@ public class SeriesImageSource extends ImageSource
 	{
 		TiffImage tiffImage = null;
 
-		// We only need the meta data for the first image. We then assume check 
-		// all other images in the series match the pixel type and width of the first. 
+		// We only need the meta data for the first image. We then assume check
+		// all other images in the series match the pixel type and width of the first.
 		boolean pixelInfoOnly = id != 0;
 
 		// Open using specialised TIFF reader for better non-sequential support
@@ -2236,7 +2236,7 @@ public class SeriesImageSource extends ImageSource
 			{
 				// We need the first IFD to define the image pixel type and width/height
 				ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, pixelInfoOnly);
-				// A byte array seekable stream will ignore the close() method so we can re-use it 
+				// A byte array seekable stream will ignore the close() method so we can re-use it
 				tiffImage = new TiffImage(indexMap, fi, (ss instanceof ByteArraySeekableStream) ? ss : null);
 			}
 			else
@@ -2247,7 +2247,7 @@ public class SeriesImageSource extends ImageSource
 				ExtendedFileInfo[] info = td.getTiffInfo(pixelInfoOnly);
 				if (info != null)
 				{
-					// A byte array seekable stream will ignore the close() method so we can re-use it 
+					// A byte array seekable stream will ignore the close() method so we can re-use it
 					tiffImage = new TiffImage(info, (ss instanceof ByteArraySeekableStream) ? ss : null);
 				}
 			}
@@ -2262,7 +2262,7 @@ public class SeriesImageSource extends ImageSource
 
 		if (tiffImage == null)
 		{
-			// Prevent reading again. Skip the storeTiffImage(...) method 
+			// Prevent reading again. Skip the storeTiffImage(...) method
 			// as that may be optional and we don't want to repeat the error.
 			imageData[id].tiffImage = new TiffImage();
 		}
@@ -2276,7 +2276,7 @@ public class SeriesImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#isValid(int)
 	 */
 	@Override
@@ -2287,7 +2287,7 @@ public class SeriesImageSource extends ImageSource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.results.ImageSource#toString()
 	 */
 	@Override
@@ -2357,7 +2357,7 @@ public class SeriesImageSource extends ImageSource
 	/**
 	 * Sets the buffer limit for sequential reading of a TIFF series. Reading will pause when the output queue is full
 	 * of images totalling this limit.
-	 * 
+	 *
 	 * @param sequentialReadBufferLimit
 	 *            the new sequential read buffer limit
 	 */

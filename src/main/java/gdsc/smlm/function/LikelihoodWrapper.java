@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -47,7 +47,7 @@ public abstract class LikelihoodWrapper
 	 * <p>
 	 * The input parameters must be the full parameters for the non-linear function. Only those parameters with gradient
 	 * indices should be passed in to the functions to obtain the value (and gradient).
-	 * 
+	 *
 	 * @param f
 	 *            The function to be used to calculated the expected values
 	 * @param a
@@ -68,7 +68,7 @@ public abstract class LikelihoodWrapper
 
 	/**
 	 * Copy the variables into the appropriate parameter positions for the NonLinearFunction
-	 * 
+	 *
 	 * @param variables
 	 */
 	protected void initialiseFunction(double[] variables)
@@ -81,7 +81,7 @@ public abstract class LikelihoodWrapper
 
 	/**
 	 * Check if the variable match those last used for computation of the value
-	 * 
+	 *
 	 * @param variables
 	 * @return True if the variables are the same
 	 */
@@ -101,7 +101,7 @@ public abstract class LikelihoodWrapper
 	 * Compute the negative log likelihood. Returns positive infinity if the likelihood is zero at any point in the
 	 * observed
 	 * values.
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @return The negative log likelihood
@@ -123,7 +123,7 @@ public abstract class LikelihoodWrapper
 	 * values.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called.
-	 * 
+	 *
 	 * @return The negative log likelihood
 	 */
 	protected abstract double computeLikelihood();
@@ -131,7 +131,7 @@ public abstract class LikelihoodWrapper
 	/**
 	 * Compute the negative log likelihood and the gradient. Returns positive infinity if the likelihood is zero
 	 * at any point in the observed values. In this case the gradient computed is invalid.
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @param gradient
@@ -152,7 +152,7 @@ public abstract class LikelihoodWrapper
 	 * at any point in the observed values. In this case the gradient computed is invalid.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called
-	 * 
+	 *
 	 * @param gradient
 	 *            The gradient (must be equal length to the variables array)
 	 * @return The negative log likelihood
@@ -168,7 +168,7 @@ public abstract class LikelihoodWrapper
 	 * Compute the negative log likelihood at observed value i. Returns positive infinity if the likelihood is zero at
 	 * the
 	 * observed value.
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @param i
@@ -187,7 +187,7 @@ public abstract class LikelihoodWrapper
 	 * observed value.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called
-	 * 
+	 *
 	 * @param i
 	 *            Observed value i
 	 * @return The negative log likelihood
@@ -197,7 +197,7 @@ public abstract class LikelihoodWrapper
 	/**
 	 * Compute the negative log likelihood and gradient of the function at observed value i. Returns positive infinity
 	 * if the likelihood is zero at the observed value. In this case the gradient computed will be invalid.
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @param gradient
@@ -219,7 +219,7 @@ public abstract class LikelihoodWrapper
 	 * if the likelihood is zero at the observed value. In this case the gradient computed will be invalid.
 	 * <p>
 	 * The wrapped NonLinearFunction will be correctly initialised before this function is called
-	 * 
+	 *
 	 * @param gradient
 	 *            The gradient (must be equal length to the variables array)
 	 * @param i
@@ -236,7 +236,7 @@ public abstract class LikelihoodWrapper
 	/**
 	 * Specify if the likelihood function can compute gradients. If false then the calls to the likelihood functions to
 	 * compute the gradient will throw a {@link gdsc.core.utils.NotImplementedException }
-	 * 
+	 *
 	 * @return True if the likelihood function can compute gradients
 	 */
 	public abstract boolean canComputeGradient();
@@ -246,14 +246,14 @@ public abstract class LikelihoodWrapper
 	 * <p>
 	 * Note that this is only a true Fisher information matrix if the function returns the expected value for a
 	 * Poisson process. In this case the equation reduces to:
-	 * 
+	 *
 	 * <pre>
 	 * Iaa = sum(i) (dYi da) * (dYi da) / Yi
 	 * </pre>
-	 * 
+	 *
 	 * See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically minimum uncertainty.
 	 * Nature Methods 7, 373-375 (supplementary note), Eq. 9.
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @return Fisher's Information Matrix (I)
@@ -297,7 +297,7 @@ public abstract class LikelihoodWrapper
 	 * inverted Fisher's Information Matrix (I).
 	 * <p>
 	 * The information matrix is inverted and the central diagonal returned.
-	 * 
+	 *
 	 * @param variables
 	 *            The variables of the function
 	 * @return CRLB (or null if inversion failed)

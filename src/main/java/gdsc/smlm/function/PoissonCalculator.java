@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -82,13 +82,13 @@ public class PoissonCalculator
 		// mll = -O(ln(x))
 
 		// The series can be written as:
-		// O(ln(x)) = 0.5 * log(2*pi*x) + 
-		//            + 1/12x 
-		//            - 1/360x^3 
-		//            + 1/1260x^5 
-		//            - 1/1680x^7 
+		// O(ln(x)) = 0.5 * log(2*pi*x) +
+		//            + 1/12x
+		//            - 1/360x^3
+		//            + 1/1260x^5
+		//            - 1/1680x^7
 		//            + ...
-		// The error in truncating the series is always of the opposite sign and at most 
+		// The error in truncating the series is always of the opposite sign and at most
 		// the same magnitude as the first omitted term.
 
 		for (int i = 0, n = x.length; i < n; i++)
@@ -107,10 +107,10 @@ public class PoissonCalculator
 				}
 				else if (x[i] <= APPROXIMATION_X)
 				{
-					// At low values of log(n!) we use the gamma function as the relative error of the 
-					// approximation is high. 
-					// Note that the logGamma function uses only 1 Math.log() call when the input is 
-					// below 2.5. Above that it uses 2 calls. So the cost for this accuracy is an extra 
+					// At low values of log(n!) we use the gamma function as the relative error of the
+					// approximation is high.
+					// Note that the logGamma function uses only 1 Math.log() call when the input is
+					// below 2.5. Above that it uses 2 calls. So the cost for this accuracy is an extra
 					// Math.log() call.
 					//final double logXFactorial = Gamma.logGamma(x[i] + 1);
 					// Note Math.log1p is faster than FastMath.log1p.
@@ -121,7 +121,7 @@ public class PoissonCalculator
 				else
 				{
 					// Approximate log(n!) using Stirling's approximation using the first 3 terms.
-					// This will have a maximum relative error of approximately 2.87e-4 
+					// This will have a maximum relative error of approximately 2.87e-4
 					final double ologx = HALF_LOG_2_PI + 0.5 * logx + ONE_OVER_12 / x[i] - ONE_OVER_360 / pow3(x[i]);
 					sumLogXFactorial += x[i] * logx - x[i] + ologx;
 					mll -= ologx;
@@ -157,7 +157,7 @@ public class PoissonCalculator
 	 *  + 1/1260x^5
 	 *  - 1/1680x^7
 	 * </pre>
-	 * 
+	 *
 	 * @param x
 	 *            the value x
 	 * @param n
@@ -205,7 +205,7 @@ public class PoissonCalculator
 	 * converted to the log-likelihood by subtracting {@link #getLogXFactorialTerm()}.
 	 * <p>
 	 * This term is suitable for use in maximum likelihood routines.
-	 * 
+	 *
 	 * <pre>
 	 * pseudo ll = x * log(u) - u
 	 * </pre>
@@ -233,7 +233,7 @@ public class PoissonCalculator
 	 * <pre>
 	 * ll = pseudo ll - log(x!)
 	 * </pre>
-	 * 
+	 *
 	 * @return the log X factorial term
 	 */
 	public double getLogXFactorialTerm()
@@ -391,7 +391,7 @@ public class PoissonCalculator
 		//		{
 		//			return Gamma.logGamma1p(x) - Math.log(x);
 		//		}
-		//		else 
+		//		else
 		if (x <= 2.5)
 		{
 			return Gamma.logGamma1p((x - 0.5) - 0.5);
@@ -461,7 +461,7 @@ public class PoissonCalculator
 		// Note: This can be rearranged:
 		// ll = x * (log(u) - log(x)) - u + x - O(ln(x))
 		// ll = x * log(u/x) - u + x - O(ln(x))
-		// However the log(x) is needed in the O(ln(x)) computation. 
+		// However the log(x) is needed in the O(ln(x)) computation.
 
 		// Use the Stirling approximation when appropriate
 		if (x <= 1)
@@ -472,9 +472,9 @@ public class PoissonCalculator
 		}
 		else if (x <= APPROXIMATION_X)
 		{
-			// At low values of log(n!) we use the gamma function as the relative error of the 
-			// approximation is high. 
-			// Note that the logGamma function uses only 1 Math.log() call when the input is 
+			// At low values of log(n!) we use the gamma function as the relative error of the
+			// approximation is high.
+			// Note that the logGamma function uses only 1 Math.log() call when the input is
 			// below 2.5. Above that it uses 2 calls so we switch to the approximation.
 			//return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
 			// Note Math.log1p is faster than FastMath.log1p.
@@ -567,7 +567,7 @@ public class PoissonCalculator
 		// Note: This can be rearranged:
 		// ll = x * (log(u) - log(x)) - u + x - O(ln(x))
 		// ll = x * log(u/x) - u + x - O(ln(x))
-		// However the log(x) is needed in the O(ln(x)) computation. 
+		// However the log(x) is needed in the O(ln(x)) computation.
 
 		// Use the Stirling approximation when appropriate
 		if (x <= 1)
@@ -578,9 +578,9 @@ public class PoissonCalculator
 		}
 		else if (x <= APPROXIMATION_X)
 		{
-			// At low values of log(n!) we use the gamma function as the relative error of the 
-			// approximation is high. 
-			// Note that the logGamma function uses only 1 Math.log() call when the input is 
+			// At low values of log(n!) we use the gamma function as the relative error of the
+			// approximation is high.
+			// Note that the logGamma function uses only 1 Math.log() call when the input is
 			// below 2.5. Above that it uses 2 calls so we switch to the approximation.
 			//return x * Math.log(u) - u - Gamma.logGamma(x[i] + 1);
 			// Note Math.log1p is faster than FastMath.log1p.
@@ -913,7 +913,7 @@ public class PoissonCalculator
 		// From https://en.wikipedia.org/wiki/Likelihood-ratio_test#Use:
 		// LLR = -2 * [ ln(likelihood for alternative model) - ln(likelihood for null model)]
 		// The model with more parameters (here alternative) will always fit at least as well—
-		// i.e., have the same or greater log-likelihood—than the model with fewer parameters 
+		// i.e., have the same or greater log-likelihood—than the model with fewer parameters
 		// (here null)
 
 		double ll = 0.0;

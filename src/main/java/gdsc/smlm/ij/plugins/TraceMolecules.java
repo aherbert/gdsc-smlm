@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -94,9 +94,9 @@ public class TraceMolecules implements PlugIn
 	{
 		//@formatter:off
 		NONE{ @Override
-		public String getName() { return "None"; }}, 
+		public String getName() { return "None"; }},
 		NEAREST_NEIGHBOUR{ @Override
-		public String getName() { return "Nearest neighbour"; }}, 
+		public String getName() { return "Nearest neighbour"; }},
 		BILINEAR{ @Override
 		public String getName() { return "Bi-linear"; }};
 		//@formatter:on
@@ -206,7 +206,7 @@ public class TraceMolecules implements PlugIn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
@@ -342,7 +342,7 @@ public class TraceMolecules implements PlugIn
 	private void limitTimeThreshold(int pulseInterval)
 	{
 		// The pulse interval is in frames.
-		// Convert the interval to the correct units. 
+		// Convert the interval to the correct units.
 
 		double limit;
 		if (settings.getTimeUnit() == TimeUnit.FRAME)
@@ -369,13 +369,13 @@ public class TraceMolecules implements PlugIn
 
 	/**
 	 * Convert a list of peak results into points for the clustering engine
-	 * 
+	 *
 	 * @param results
 	 * @return
 	 */
 	public static List<ClusterPoint> convertToClusterPoints(MemoryPeakResults results)
 	{
-		final ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>(results.size());
+		final ArrayList<ClusterPoint> points = new ArrayList<>(results.size());
 		final Counter counter = new Counter();
 		results.forEach(new PeakResultProcedure()
 		{
@@ -396,7 +396,7 @@ public class TraceMolecules implements PlugIn
 
 	/**
 	 * Convert the clusters from the clustering engine into traces composed of the original list of peak results
-	 * 
+	 *
 	 * @param results
 	 * @param clusters
 	 * @return
@@ -421,7 +421,7 @@ public class TraceMolecules implements PlugIn
 
 	/**
 	 * Sort traces by time
-	 * 
+	 *
 	 * @param traces
 	 */
 	static void sortByTime(Trace[] traces)
@@ -456,7 +456,7 @@ public class TraceMolecules implements PlugIn
 
 	private Trace[] getSingles(Trace[] traces)
 	{
-		ArrayList<Trace> result = new ArrayList<Trace>();
+		ArrayList<Trace> result = new ArrayList<>();
 		for (Trace t : traces)
 			if (t.size() == 1)
 				result.add(t);
@@ -465,7 +465,7 @@ public class TraceMolecules implements PlugIn
 
 	private Trace[] getTraces(Trace[] traces)
 	{
-		ArrayList<Trace> result = new ArrayList<Trace>();
+		ArrayList<Trace> result = new ArrayList<>();
 		for (Trace t : traces)
 			if (t.size() != 1)
 				result.add(t);
@@ -482,7 +482,7 @@ public class TraceMolecules implements PlugIn
 	 * <p>
 	 * If the id is above zero then the file open dialog title will have the id appended and the filename is searched
 	 * for .[0-9]+. and it is replaced with .id.
-	 * 
+	 *
 	 * @param sourceResults
 	 * @param traces
 	 * @param comment
@@ -971,7 +971,7 @@ public class TraceMolecules implements PlugIn
 		if (!getParameters(n, dEstimate))
 			return;
 
-		// TODO - Convert the distance threshold to use nm instead of pixels?		
+		// TODO - Convert the distance threshold to use nm instead of pixels?
 		List<double[]> results = runTracing(manager, settings.getMinDistanceThreshold(),
 				settings.getMaxDistanceThreshold(), settings.getMinTimeThreshold(), settings.getMaxTimeThreshold(),
 				settings.getOptimiserSteps());
@@ -1125,7 +1125,7 @@ public class TraceMolecules implements PlugIn
 	 * of steps. Steps are spaced using a logarithmic scale.
 	 * <p>
 	 * Returns a list of [distance,time,N traces]
-	 * 
+	 *
 	 * @param peakResults
 	 * @param minDistanceThreshold
 	 * @param maxDistanceThreshold
@@ -1146,7 +1146,7 @@ public class TraceMolecules implements PlugIn
 	 * of steps. Steps are spaced using a logarithmic scale.
 	 * <p>
 	 * Returns a list of [distance,time,N traces]
-	 * 
+	 *
 	 * @param manager
 	 * @param minDistanceThreshold
 	 * @param maxDistanceThreshold
@@ -1162,7 +1162,7 @@ public class TraceMolecules implements PlugIn
 		tThresholds = convert(getIntervals(minTimeThreshold, maxTimeThreshold, optimiserSteps));
 
 		int total = dThresholds.length * tThresholds.length;
-		ArrayList<double[]> results = new ArrayList<double[]>(total);
+		ArrayList<double[]> results = new ArrayList<>(total);
 
 		IJ.showStatus("Optimising tracing (" + total + " steps) ...");
 
@@ -1224,14 +1224,14 @@ public class TraceMolecules implements PlugIn
 		// => factor^n is in bounds [1:range+1] when n <= steps
 		final double f = Math.pow(range + 1, 1.0 / optimiserSteps);
 
-		// Set the first increment, i.e. f^1 
+		// Set the first increment, i.e. f^1
 		double x = f;
 
 		for (int i = 0; i < optimiserSteps; i++)
 		{
 			// Set the value starting from min.
 			// This is equivalent to: values[i] = min + Math.pow(f, i+1) - 1
-			// Note that the bounds is [1:range+1] and so 1 is subtracted 
+			// Note that the bounds is [1:range+1] and so 1 is subtracted
 			values[j++] = min + x - 1;
 			x *= f;
 		}
@@ -1255,12 +1255,12 @@ public class TraceMolecules implements PlugIn
 	/**
 	 * Find the contour that intersects zero on the fractional difference plot.
 	 * Find the point on the contour nearest the origin.
-	 * 
+	 *
 	 * @param results
 	 */
 	private boolean findOptimalParameters(List<double[]> results)
 	{
-		// This method only works if there are many results and if the results 
+		// This method only works if there are many results and if the results
 		// cover enough of the search space to go from above zero (i.e. not enough traces)
 		// to below zero (i.e. too many traces)
 
@@ -1268,8 +1268,8 @@ public class TraceMolecules implements PlugIn
 		int maxy = dThresholds.length;
 
 		// --------
-		// Find zero crossings using linear interpolation 
-		zeroCrossingPoints = new ArrayList<double[]>();
+		// Find zero crossings using linear interpolation
+		zeroCrossingPoints = new ArrayList<>();
 		// --------
 
 		// Pass across all time points
@@ -1391,10 +1391,10 @@ public class TraceMolecules implements PlugIn
 			IJ.log(sb.toString());
 		}
 
-		// TODO - Fit a function to the zero crossing points. I am not sure what function 
+		// TODO - Fit a function to the zero crossing points. I am not sure what function
 		// is suitable for the asymptotic curve (e.g. 1/x == x^-1), perhaps:
-		//   f(x) = a + (bx+c)^n 
-		// where 
+		//   f(x) = a + (bx+c)^n
+		// where
 		//   n < 0
 		//   a = Distance asymptote (equivalent to the distance resolution?)
 		//   b = Scaling factor
@@ -1466,7 +1466,7 @@ public class TraceMolecules implements PlugIn
 
 	/**
 	 * Build an image using the values within the results to set X,Y and value
-	 * 
+	 *
 	 * @param results
 	 */
 	private void createPlotResults(List<double[]> results)
@@ -1541,7 +1541,7 @@ public class TraceMolecules implements PlugIn
 		for (int i = 0; i < nPoints; i++)
 		{
 			double[] point = zeroCrossingPoints.get(i);
-			// Convert to pixel coordinates. 
+			// Convert to pixel coordinates.
 			xPoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
 			yPoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
 		}
@@ -1596,7 +1596,7 @@ public class TraceMolecules implements PlugIn
 
 	private int[] createLookup(double[] values, double min, int scale)
 	{
-		// To allow the lowest result to be plotted, add space at the edge 
+		// To allow the lowest result to be plotted, add space at the edge
 		// equal to the next interval
 		if (min != 0 && values.length > 1)
 		{
@@ -1831,11 +1831,11 @@ public class TraceMolecules implements PlugIn
 		//		refitResults.begin();
 		//		int threadCount = Prefs.getThreads();
 		//		PeakResults syncResults = SynchronizedPeakResults.create(refitResults, threadCount);
-		//		// No border since we know where the peaks are and we must not miss them due to truncated searching 
+		//		// No border since we know where the peaks are and we must not miss them due to truncated searching
 		//		FitEngine engine = new FitEngine(config, syncResults, threadCount, FitQueue.BLOCKING);
 		//
 		//		// Either : Only fit the centroid
-		//		// or     : Extract a bigger region, allowing all fits to run as normal and then 
+		//		// or     : Extract a bigger region, allowing all fits to run as normal and then
 		//		//          find the correct spot using Euclidian distance.
 		//
 		//		// Set up the limits
@@ -1927,7 +1927,7 @@ public class TraceMolecules implements PlugIn
 		//			{
 		//				//System.out.printf("Multiple fits performed for trace : Job Id = %d\n", id);
 		//
-		//				// Fits are recorded if (a) they succeeded and were close to the target centroid; 
+		//				// Fits are recorded if (a) they succeeded and were close to the target centroid;
 		//				// or (b) if they failed and started close to the target centroid.
 		//
 		//				// Choose the first OK result. This is all that matters for the success reporting
@@ -1939,7 +1939,7 @@ public class TraceMolecules implements PlugIn
 		//						break;
 		//					}
 		//				}
-		//				// Otherwise use the closest failure. 
+		//				// Otherwise use the closest failure.
 		//				if (fitResult == null)
 		//				{
 		//					final float[] centre = traces[id].getCentroid();

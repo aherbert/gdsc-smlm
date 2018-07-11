@@ -1,7 +1,7 @@
 /*-
  * #%L
  * Genome Damage and Stability Centre SMLM ImageJ Plugins
- * 
+ *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
  * Copyright (C) 2011 - 2018 Alex Herbert
@@ -10,12 +10,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -138,7 +138,7 @@ public class GaussianPSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#create3D(float[], int, int, double, double, double, double, boolean)
 	 */
 	@Override
@@ -166,7 +166,7 @@ public class GaussianPSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#create3D(double[], int, int, double, double, double, double, boolean)
 	 */
 	@Override
@@ -217,7 +217,7 @@ public class GaussianPSFModel extends PSFModel
 	 * Builds the pixel approximation using the Gaussian error function as described in Smith et al, (2010). Fast,
 	 * single-molecule localisation that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375
 	 * (supplementary note).
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -281,7 +281,7 @@ public class GaussianPSFModel extends PSFModel
 	 * Builds the pixel approximation using the Gaussian error function as described in Smith et al, (2010). Fast,
 	 * single-molecule localisation that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375
 	 * (supplementary note).
-	 * 
+	 *
 	 * @param data
 	 *            The data (can be null)
 	 * @param width
@@ -346,7 +346,7 @@ public class GaussianPSFModel extends PSFModel
 	 * Builds the pixel approximation using the Gaussian error function as described in Smith et al, (2010). Fast,
 	 * single-molecule localisation that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375
 	 * (supplementary note).
-	 * 
+	 *
 	 * @param x0range
 	 *            The maximum range in dimension 0 (width)
 	 * @param x1range
@@ -378,7 +378,7 @@ public class GaussianPSFModel extends PSFModel
 		final double denom0 = ONE_OVER_ROOT2 / s0;
 		final double denom1 = ONE_OVER_ROOT2 / s1;
 
-		// Note: The 0.5 factors are moved to reduce computations 
+		// Note: The 0.5 factors are moved to reduce computations
 		for (int x = 0; x <= x0range; x++)
 		{
 			//erf0[x] = 0.5 * Erf.erf((x - x0) * denom0);
@@ -455,7 +455,7 @@ public class GaussianPSFModel extends PSFModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see gdsc.smlm.model.PSFModel#copy()
 	 */
 	@Override
@@ -486,7 +486,7 @@ public class GaussianPSFModel extends PSFModel
 
 	/**
 	 * Sample from a Gaussian distribution
-	 * 
+	 *
 	 * @param n
 	 *            The number of samples
 	 * @param x0
@@ -601,7 +601,7 @@ public class GaussianPSFModel extends PSFModel
 		ErfGaussian2DFunction f = createGaussianFunction(x0range, x1range);
 		double[] p = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
 		p[Gaussian2DFunction.SIGNAL] = 1;
-		// The function computes the centre of the pixel as 0,0. 
+		// The function computes the centre of the pixel as 0,0.
 		// The PSF sets the centre as 0.5,0.5.
 		p[Gaussian2DFunction.X_POSITION] = x0 - x0min - 0.5;
 		p[Gaussian2DFunction.Y_POSITION] = x1 - x1min - 0.5;
