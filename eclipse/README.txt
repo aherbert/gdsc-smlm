@@ -23,6 +23,7 @@ Code formatting
 The Eclipse code format rules (in this directory) can be loaded using:
 
 Eclipse Preferences : Java > Code Style > Formatter
+Eclipse Preferences : Java > Code Style > Clean Up
 
 Click 'Import...' to load the provided rules.
 
